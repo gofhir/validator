@@ -1,0 +1,48 @@
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Examples (keep locally, don't push)
+examples/
+
+# Tar files
+*.tar
+*.tar.gz
+*.tgz
+
+# Build artifacts
+dist/
+
+# Temporary files
+tmp/
+*.tmp
+*.log
+
+# Go workspace (local development)
+go.work
+go.work.sum
