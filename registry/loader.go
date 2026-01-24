@@ -9,9 +9,9 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/gofhir/fhir/r4"
 	"github.com/gofhir/validator/loader"
 	"github.com/gofhir/validator/terminology"
-	"github.com/gofhir/fhir/r4"
 )
 
 // LoadStats contains statistics about package loading.
@@ -180,7 +180,7 @@ func (l *PackageLoader) LoadPackageParallel(packageDir string, workers int) (*Lo
 	}
 
 	// Filter JSON files
-	var jsonFiles []string
+	jsonFiles := make([]string, 0, len(entries))
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
 			continue
@@ -231,22 +231,22 @@ func (l *PackageLoader) loadFile(filePath string, stats *LoadStats) error {
 	var probe struct {
 		ResourceType string `json:"resourceType"`
 	}
-	if err := json.Unmarshal(data, &probe); err != nil {
-		return err
+	if unmarshalErr := json.Unmarshal(data, &probe); unmarshalErr != nil {
+		return unmarshalErr
 	}
 
 	switch probe.ResourceType {
 	case "StructureDefinition":
 		if l.profileService != nil {
 			var sd r4.StructureDefinition
-			if err := json.Unmarshal(data, &sd); err != nil {
-				return err
+			if sdErr := json.Unmarshal(data, &sd); sdErr != nil {
+				return sdErr
 			}
 			l.mu.Lock()
-			err = l.profileService.LoadR4StructureDefinition(&sd)
+			loadErr := l.profileService.LoadR4StructureDefinition(&sd)
 			l.mu.Unlock()
-			if err != nil {
-				return err
+			if loadErr != nil {
+				return loadErr
 			}
 			atomic.AddInt64(&stats.StructureDefinitions, 1)
 		}
@@ -254,14 +254,14 @@ func (l *PackageLoader) loadFile(filePath string, stats *LoadStats) error {
 	case "CodeSystem":
 		if l.termService != nil {
 			var cs r4.CodeSystem
-			if err := json.Unmarshal(data, &cs); err != nil {
-				return err
+			if csErr := json.Unmarshal(data, &cs); csErr != nil {
+				return csErr
 			}
 			l.mu.Lock()
-			err = l.termService.LoadR4CodeSystem(&cs)
+			loadErr := l.termService.LoadR4CodeSystem(&cs)
 			l.mu.Unlock()
-			if err != nil {
-				return err
+			if loadErr != nil {
+				return loadErr
 			}
 			atomic.AddInt64(&stats.CodeSystems, 1)
 		}
@@ -269,14 +269,14 @@ func (l *PackageLoader) loadFile(filePath string, stats *LoadStats) error {
 	case "ValueSet":
 		if l.termService != nil {
 			var vs r4.ValueSet
-			if err := json.Unmarshal(data, &vs); err != nil {
-				return err
+			if vsErr := json.Unmarshal(data, &vs); vsErr != nil {
+				return vsErr
 			}
 			l.mu.Lock()
-			err = l.termService.LoadR4ValueSet(&vs)
+			loadErr := l.termService.LoadR4ValueSet(&vs)
 			l.mu.Unlock()
-			if err != nil {
-				return err
+			if loadErr != nil {
+				return loadErr
 			}
 			atomic.AddInt64(&stats.ValueSets, 1)
 		}

@@ -16,10 +16,10 @@ type Cache[K comparable, V any] struct {
 	capacity int
 
 	// Metrics (lock-free using atomics)
-	hits     atomic.Uint64
-	misses   atomic.Uint64
-	evicts   atomic.Uint64
-	sets     atomic.Uint64
+	hits   atomic.Uint64
+	misses atomic.Uint64
+	evicts atomic.Uint64
+	sets   atomic.Uint64
 }
 
 // entry holds a cached value and its position in the LRU list.

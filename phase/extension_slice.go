@@ -244,7 +244,7 @@ func (r *ProfileExtensionResolver) FindMatchingSlice(
 func (r *ProfileExtensionResolver) IsExtensionAllowed(
 	info *ExtensionSlicingInfo,
 	extensionURL string,
-) (allowed bool, defined bool, severity IssueSeverityHint) {
+) (allowed, defined bool, severity IssueSeverityHint) {
 	if info == nil {
 		// No slicing defined - extension is allowed but not defined
 		return true, false, SeverityHintNone

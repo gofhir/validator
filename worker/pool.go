@@ -32,9 +32,9 @@ type Pool struct {
 	closed     atomic.Bool
 
 	// Metrics
-	jobsSubmitted  atomic.Uint64
-	jobsCompleted  atomic.Uint64
-	totalDuration  atomic.Uint64
+	jobsSubmitted atomic.Uint64
+	jobsCompleted atomic.Uint64
+	totalDuration atomic.Uint64
 }
 
 // NewPool creates a new worker pool with the specified number of workers.
@@ -156,9 +156,9 @@ func (p *Pool) CloseAndWait() *BatchResult {
 
 	return &BatchResult{
 		Results:       results,
-		TotalJobs:     int(p.jobsSubmitted.Load()),
-		CompletedJobs: int(p.jobsCompleted.Load()),
-		TotalDuration: int64(p.totalDuration.Load()),
+		TotalJobs:     int(p.jobsSubmitted.Load()),   //nolint:gosec // Safe: job counts won't overflow int
+		CompletedJobs: int(p.jobsCompleted.Load()),   //nolint:gosec // Safe: job counts won't overflow int
+		TotalDuration: int64(p.totalDuration.Load()), //nolint:gosec // Safe: duration in nanoseconds within int64 range
 	}
 }
 
@@ -192,7 +192,7 @@ func (p *Pool) worker() {
 
 		result := p.processJob(job)
 		p.jobsCompleted.Add(1)
-		p.totalDuration.Add(uint64(result.Duration))
+		p.totalDuration.Add(uint64(result.Duration)) //nolint:gosec // Safe: duration is always positive
 
 		select {
 		case <-p.ctx.Done():
@@ -237,7 +237,7 @@ func (p *Pool) averageDuration() time.Duration {
 	if completed == 0 {
 		return 0
 	}
-	return time.Duration(p.totalDuration.Load() / completed)
+	return time.Duration(p.totalDuration.Load() / completed) //nolint:gosec // Safe: nanoseconds within int64 range
 }
 
 // ErrNoValidator is returned when the pool has no validator configured.

@@ -286,29 +286,36 @@ func (s *InMemoryTerminologyService) LoadFromDirectory(dirPath string) (*LoadSta
 	return stats, nil
 }
 
-// loadCodeSystemsFromBundle loads CodeSystems from a Bundle JSON.
-func (s *InMemoryTerminologyService) loadCodeSystemsFromBundle(data []byte) (loaded, errors int64) {
-	var bundle struct {
-		ResourceType string `json:"resourceType"`
-		Entry        []struct {
-			Resource json.RawMessage `json:"resource"`
-		} `json:"entry"`
-	}
+// bundleEntry represents an entry in a FHIR Bundle.
+type bundleEntry struct {
+	Resource json.RawMessage `json:"resource"`
+}
 
-	if err := json.Unmarshal(data, &bundle); err != nil {
+// bundle represents a minimal FHIR Bundle structure.
+type bundle struct {
+	ResourceType string        `json:"resourceType"`
+	Entry        []bundleEntry `json:"entry"`
+}
+
+// resourceLoader is a function type for loading a specific resource type.
+type resourceLoader func(data json.RawMessage) error
+
+// loadResourcesFromBundle is a generic function to load resources from a Bundle JSON.
+func loadResourcesFromBundle(data []byte, targetType string, loader resourceLoader) (loaded, errors int64) {
+	var b bundle
+	if err := json.Unmarshal(data, &b); err != nil {
 		return 0, 1
 	}
 
-	if bundle.ResourceType != "Bundle" {
+	if b.ResourceType != "Bundle" {
 		return 0, 1
 	}
 
-	for _, entry := range bundle.Entry {
+	for _, entry := range b.Entry {
 		if entry.Resource == nil {
 			continue
 		}
 
-		// Check resource type
 		var probe struct {
 			ResourceType string `json:"resourceType"`
 		}
@@ -316,17 +323,11 @@ func (s *InMemoryTerminologyService) loadCodeSystemsFromBundle(data []byte) (loa
 			continue
 		}
 
-		if probe.ResourceType != "CodeSystem" {
+		if probe.ResourceType != targetType {
 			continue
 		}
 
-		var cs r4.CodeSystem
-		if err := json.Unmarshal(entry.Resource, &cs); err != nil {
-			errors++
-			continue
-		}
-
-		if err := s.LoadR4CodeSystem(&cs); err != nil {
+		if err := loader(entry.Resource); err != nil {
 			errors++
 			continue
 		}
@@ -336,52 +337,24 @@ func (s *InMemoryTerminologyService) loadCodeSystemsFromBundle(data []byte) (loa
 	return loaded, errors
 }
 
+// loadCodeSystemsFromBundle loads CodeSystems from a Bundle JSON.
+func (s *InMemoryTerminologyService) loadCodeSystemsFromBundle(data []byte) (loaded, errors int64) {
+	return loadResourcesFromBundle(data, "CodeSystem", func(raw json.RawMessage) error {
+		var cs r4.CodeSystem
+		if err := json.Unmarshal(raw, &cs); err != nil {
+			return err
+		}
+		return s.LoadR4CodeSystem(&cs)
+	})
+}
+
 // loadValueSetsFromBundle loads ValueSets from a Bundle JSON.
 func (s *InMemoryTerminologyService) loadValueSetsFromBundle(data []byte) (loaded, errors int64) {
-	var bundle struct {
-		ResourceType string `json:"resourceType"`
-		Entry        []struct {
-			Resource json.RawMessage `json:"resource"`
-		} `json:"entry"`
-	}
-
-	if err := json.Unmarshal(data, &bundle); err != nil {
-		return 0, 1
-	}
-
-	if bundle.ResourceType != "Bundle" {
-		return 0, 1
-	}
-
-	for _, entry := range bundle.Entry {
-		if entry.Resource == nil {
-			continue
-		}
-
-		// Check resource type
-		var probe struct {
-			ResourceType string `json:"resourceType"`
-		}
-		if err := json.Unmarshal(entry.Resource, &probe); err != nil {
-			continue
-		}
-
-		if probe.ResourceType != "ValueSet" {
-			continue
-		}
-
+	return loadResourcesFromBundle(data, "ValueSet", func(raw json.RawMessage) error {
 		var vs r4.ValueSet
-		if err := json.Unmarshal(entry.Resource, &vs); err != nil {
-			errors++
-			continue
+		if err := json.Unmarshal(raw, &vs); err != nil {
+			return err
 		}
-
-		if err := s.LoadR4ValueSet(&vs); err != nil {
-			errors++
-			continue
-		}
-		loaded++
-	}
-
-	return loaded, errors
+		return s.LoadR4ValueSet(&vs)
+	})
 }

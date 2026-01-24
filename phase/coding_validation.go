@@ -30,8 +30,8 @@ type CodingValidationOptions struct {
 func DefaultCodingValidationOptions(phase string) CodingValidationOptions {
 	return CodingValidationOptions{
 		ValidateDisplay:       true,
-		DisplayAsWarning:      true,  // FHIR recommends warning for display mismatch
-		ValidateCodeExistence: true,  // Warn if code doesn't exist in CodeSystem
+		DisplayAsWarning:      true, // FHIR recommends warning for display mismatch
+		ValidateCodeExistence: true, // Warn if code doesn't exist in CodeSystem
 		Phase:                 phase,
 	}
 }

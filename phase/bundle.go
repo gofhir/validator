@@ -13,14 +13,14 @@ import (
 type BundleType string
 
 const (
-	BundleTypeDocument      BundleType = "document"
-	BundleTypeMessage       BundleType = "message"
-	BundleTypeTransaction   BundleType = "transaction"
-	BundleTypeBatch         BundleType = "batch"
-	BundleTypeHistory       BundleType = "history"
-	BundleTypeSearchset     BundleType = "searchset"
-	BundleTypeCollection    BundleType = "collection"
-	BundleTypeSubscription  BundleType = "subscription-notification"
+	BundleTypeDocument     BundleType = "document"
+	BundleTypeMessage      BundleType = "message"
+	BundleTypeTransaction  BundleType = "transaction"
+	BundleTypeBatch        BundleType = "batch"
+	BundleTypeHistory      BundleType = "history"
+	BundleTypeSearchset    BundleType = "searchset"
+	BundleTypeCollection   BundleType = "collection"
+	BundleTypeSubscription BundleType = "subscription-notification"
 )
 
 // BundlePhase validates Bundle-specific constraints.
@@ -98,13 +98,13 @@ func (p *BundlePhase) Validate(ctx context.Context, pctx *pipeline.Context) []fv
 	}
 
 	// Validate fullUrl uniqueness
-	issues = append(issues, p.validateFullUrlUniqueness(entries)...)
+	issues = append(issues, p.validateFullURLUniqueness(entries)...)
 
 	return issues
 }
 
 // validateDocumentBundle validates a document bundle.
-func (p *BundlePhase) validateDocumentBundle(ctx context.Context, entries []any) []fv.Issue {
+func (p *BundlePhase) validateDocumentBundle(_ context.Context, entries []any) []fv.Issue {
 	var issues []fv.Issue
 
 	if len(entries) == 0 {
@@ -150,7 +150,7 @@ func (p *BundlePhase) validateDocumentBundle(ctx context.Context, entries []any)
 		if !ok {
 			continue
 		}
-		if _, hasFullUrl := entryMap["fullUrl"]; !hasFullUrl {
+		if _, hasFullURL := entryMap["fullUrl"]; !hasFullURL {
 			issues = append(issues, WarningIssue(
 				fv.IssueTypeRequired,
 				"Document Bundle entries should have fullUrl",
@@ -164,7 +164,7 @@ func (p *BundlePhase) validateDocumentBundle(ctx context.Context, entries []any)
 }
 
 // validateMessageBundle validates a message bundle.
-func (p *BundlePhase) validateMessageBundle(ctx context.Context, entries []any) []fv.Issue {
+func (p *BundlePhase) validateMessageBundle(_ context.Context, entries []any) []fv.Issue {
 	var issues []fv.Issue
 
 	if len(entries) == 0 {
@@ -208,7 +208,7 @@ func (p *BundlePhase) validateMessageBundle(ctx context.Context, entries []any) 
 }
 
 // validateTransactionBundle validates a transaction bundle.
-func (p *BundlePhase) validateTransactionBundle(ctx context.Context, entries []any) []fv.Issue {
+func (p *BundlePhase) validateTransactionBundle(_ context.Context, entries []any) []fv.Issue {
 	var issues []fv.Issue
 
 	for i, entry := range entries {
@@ -261,13 +261,13 @@ func (p *BundlePhase) validateTransactionBundle(ctx context.Context, entries []a
 }
 
 // validateBatchBundle validates a batch bundle.
-func (p *BundlePhase) validateBatchBundle(ctx context.Context, entries []any) []fv.Issue {
+func (p *BundlePhase) validateBatchBundle(_ context.Context, entries []any) []fv.Issue {
 	// Batch has same structure as transaction
-	return p.validateTransactionBundle(ctx, entries)
+	return p.validateTransactionBundle(context.Background(), entries)
 }
 
 // validateHistoryBundle validates a history bundle.
-func (p *BundlePhase) validateHistoryBundle(ctx context.Context, entries []any) []fv.Issue {
+func (p *BundlePhase) validateHistoryBundle(_ context.Context, entries []any) []fv.Issue {
 	var issues []fv.Issue
 
 	for i, entry := range entries {
@@ -296,7 +296,7 @@ func (p *BundlePhase) validateHistoryBundle(ctx context.Context, entries []any) 
 }
 
 // validateSearchsetBundle validates a searchset bundle.
-func (p *BundlePhase) validateSearchsetBundle(ctx context.Context, entries []any) []fv.Issue {
+func (p *BundlePhase) validateSearchsetBundle(_ context.Context, entries []any) []fv.Issue {
 	var issues []fv.Issue
 
 	for i, entry := range entries {
@@ -326,7 +326,7 @@ func (p *BundlePhase) validateSearchsetBundle(ctx context.Context, entries []any
 }
 
 // validateCollectionBundle validates a collection bundle.
-func (p *BundlePhase) validateCollectionBundle(ctx context.Context, entries []any) []fv.Issue {
+func (p *BundlePhase) validateCollectionBundle(_ context.Context, entries []any) []fv.Issue {
 	var issues []fv.Issue
 
 	// Collection bundles have minimal requirements
@@ -396,8 +396,8 @@ func (p *BundlePhase) validateRequestMethod(entry map[string]any, method, path s
 	return issues
 }
 
-// validateFullUrlUniqueness checks that fullUrls are unique.
-func (p *BundlePhase) validateFullUrlUniqueness(entries []any) []fv.Issue {
+// validateFullURLUniqueness checks that fullUrls are unique.
+func (p *BundlePhase) validateFullURLUniqueness(entries []any) []fv.Issue {
 	var issues []fv.Issue
 
 	seen := make(map[string]int)
@@ -408,34 +408,34 @@ func (p *BundlePhase) validateFullUrlUniqueness(entries []any) []fv.Issue {
 			continue
 		}
 
-		fullUrl, ok := entryMap["fullUrl"].(string)
-		if !ok || fullUrl == "" {
+		fullURL, ok := entryMap["fullUrl"].(string)
+		if !ok || fullURL == "" {
 			continue
 		}
 
 		// Skip urn:uuid: and urn:oid: as they might be intentionally duplicated
 		// in some bundle types
-		if strings.HasPrefix(fullUrl, "urn:uuid:") || strings.HasPrefix(fullUrl, "urn:oid:") {
-			if prevIdx, exists := seen[fullUrl]; exists {
+		if strings.HasPrefix(fullURL, "urn:uuid:") || strings.HasPrefix(fullURL, "urn:oid:") {
+			if prevIdx, exists := seen[fullURL]; exists {
 				issues = append(issues, WarningIssue(
 					fv.IssueTypeBusinessRule,
-					fmt.Sprintf("fullUrl '%s' is duplicated (first seen at entry[%d])", fullUrl, prevIdx),
+					fmt.Sprintf("fullUrl '%s' is duplicated (first seen at entry[%d])", fullURL, prevIdx),
 					fmt.Sprintf("Bundle.entry[%d].fullUrl", i),
 					"bundle",
 				))
 			}
 		} else {
-			if prevIdx, exists := seen[fullUrl]; exists {
+			if prevIdx, exists := seen[fullURL]; exists {
 				issues = append(issues, ErrorIssue(
 					fv.IssueTypeBusinessRule,
-					fmt.Sprintf("fullUrl '%s' must be unique (first seen at entry[%d])", fullUrl, prevIdx),
+					fmt.Sprintf("fullUrl '%s' must be unique (first seen at entry[%d])", fullURL, prevIdx),
 					fmt.Sprintf("Bundle.entry[%d].fullUrl", i),
 					"bundle",
 				))
 			}
 		}
 
-		seen[fullUrl] = i
+		seen[fullURL] = i
 	}
 
 	return issues
@@ -475,10 +475,10 @@ func (v *BundleEntryValidator) Validate() []fv.Issue {
 
 	// Check for resource
 	resource, _ := v.entry["resource"].(map[string]any)
-	fullUrl, _ := v.entry["fullUrl"].(string)
+	fullURL, _ := v.entry["fullUrl"].(string)
 
 	// Entry should have resource or fullUrl
-	if resource == nil && fullUrl == "" {
+	if resource == nil && fullURL == "" {
 		issues = append(issues, ErrorIssue(
 			fv.IssueTypeStructure,
 			"Bundle entry must have either 'resource' or 'fullUrl'",

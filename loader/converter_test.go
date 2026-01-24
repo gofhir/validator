@@ -64,15 +64,15 @@ func TestR4Converter_ConvertStructureDefinition(t *testing.T) {
 		url := "http://example.org/StructureDefinition/Test"
 		path1 := "Patient"
 		path2 := "Patient.id"
-		min := uint32(0)
-		max := "1"
+		minCard := uint32(0)
+		maxCard := "1"
 
 		sd := &r4.StructureDefinition{
 			Url: &url,
 			Snapshot: &r4.StructureDefinitionSnapshot{
 				Element: []r4.ElementDefinition{
 					{Path: &path1},
-					{Path: &path2, Min: &min, Max: &max},
+					{Path: &path2, Min: &minCard, Max: &maxCard},
 				},
 			},
 		}
@@ -94,8 +94,8 @@ func TestR4Converter_ConvertStructureDefinition(t *testing.T) {
 		if result.Snapshot[1].Min != 0 {
 			t.Errorf("Snapshot[1].Min = %d; want 0", result.Snapshot[1].Min)
 		}
-		if result.Snapshot[1].Max != max {
-			t.Errorf("Snapshot[1].Max = %q; want %q", result.Snapshot[1].Max, max)
+		if result.Snapshot[1].Max != maxCard {
+			t.Errorf("Snapshot[1].Max = %q; want %q", result.Snapshot[1].Max, maxCard)
 		}
 	})
 
@@ -269,7 +269,7 @@ func TestR4Converter_ConvertStructureDefinition(t *testing.T) {
 	t.Run("with fixed value", func(t *testing.T) {
 		url := "http://example.org/StructureDefinition/Test"
 		path := "Patient.identifier.system"
-		fixedUri := "http://example.org/identifiers"
+		fixedURI := "http://example.org/identifiers"
 
 		sd := &r4.StructureDefinition{
 			Url: &url,
@@ -277,7 +277,7 @@ func TestR4Converter_ConvertStructureDefinition(t *testing.T) {
 				Element: []r4.ElementDefinition{
 					{
 						Path:     &path,
-						FixedUri: &fixedUri,
+						FixedUri: &fixedURI,
 					},
 				},
 			},
@@ -288,8 +288,8 @@ func TestR4Converter_ConvertStructureDefinition(t *testing.T) {
 		if result.Snapshot[0].Fixed == nil {
 			t.Fatal("expected non-nil Fixed")
 		}
-		if result.Snapshot[0].Fixed != fixedUri {
-			t.Errorf("Fixed = %v; want %q", result.Snapshot[0].Fixed, fixedUri)
+		if result.Snapshot[0].Fixed != fixedURI {
+			t.Errorf("Fixed = %v; want %q", result.Snapshot[0].Fixed, fixedURI)
 		}
 	})
 

@@ -59,7 +59,7 @@ func (m *Metrics) RecordValidation(duration time.Duration, valid bool) {
 		m.validationsValid.Add(1)
 	}
 
-	ns := uint64(duration.Nanoseconds())
+	ns := uint64(duration.Nanoseconds()) //nolint:gosec // Safe: nanoseconds are always positive for valid durations
 	m.validationTimeTotal.Add(ns)
 
 	// Update min (CAS loop)
@@ -136,8 +136,8 @@ func (m *Metrics) RecordIssue(severity IssueSeverity) {
 func (m *Metrics) RecordPhase(phaseName string, duration time.Duration, issuesFound int) {
 	pm := m.getOrCreatePhaseMetrics(phaseName)
 	pm.invocations.Add(1)
-	pm.totalTime.Add(uint64(duration.Nanoseconds()))
-	pm.issuesFound.Add(uint64(issuesFound))
+	pm.totalTime.Add(uint64(duration.Nanoseconds())) //nolint:gosec // Safe: nanoseconds are always positive
+	pm.issuesFound.Add(uint64(issuesFound))          //nolint:gosec // Safe: issuesFound is a small positive integer
 }
 
 func (m *Metrics) getOrCreatePhaseMetrics(name string) *phaseMetrics {
@@ -177,21 +177,21 @@ func (m *Metrics) AverageValidationTime() time.Duration {
 		return 0
 	}
 	avgNs := m.validationTimeTotal.Load() / total
-	return time.Duration(avgNs)
+	return time.Duration(avgNs) //nolint:gosec // Safe: avgNs represents nanoseconds within int64 range
 }
 
 // MinValidationTime returns the minimum validation duration.
 func (m *Metrics) MinValidationTime() time.Duration {
-	min := m.validationTimeMin.Load()
-	if min == ^uint64(0) {
+	minVal := m.validationTimeMin.Load()
+	if minVal == ^uint64(0) {
 		return 0
 	}
-	return time.Duration(min)
+	return time.Duration(minVal) //nolint:gosec // Safe: minVal represents nanoseconds within int64 range
 }
 
 // MaxValidationTime returns the maximum validation duration.
 func (m *Metrics) MaxValidationTime() time.Duration {
-	return time.Duration(m.validationTimeMax.Load())
+	return time.Duration(m.validationTimeMax.Load()) //nolint:gosec // Safe: nanoseconds within int64 range
 }
 
 // CacheHits returns the total cache hits.
@@ -227,7 +227,7 @@ func (m *Metrics) PoolReleases() uint64 {
 
 // PoolLeaks returns potential pool leaks (acquires - releases).
 func (m *Metrics) PoolLeaks() int64 {
-	return int64(m.poolAcquires.Load()) - int64(m.poolReleases.Load())
+	return int64(m.poolAcquires.Load()) - int64(m.poolReleases.Load()) //nolint:gosec // Safe: counters won't overflow int64
 }
 
 // ErrorsTotal returns the total error issues found.
@@ -266,13 +266,13 @@ func (m *Metrics) PhaseStats(phaseName string) (PhaseStats, bool) {
 
 	var avgTime time.Duration
 	if invocations > 0 {
-		avgTime = time.Duration(totalTime / invocations)
+		avgTime = time.Duration(totalTime / invocations) //nolint:gosec // Safe: nanoseconds within int64 range
 	}
 
 	return PhaseStats{
 		Name:        phaseName,
 		Invocations: invocations,
-		TotalTime:   time.Duration(totalTime),
+		TotalTime:   time.Duration(totalTime), //nolint:gosec // Safe: nanoseconds within int64 range
 		AvgTime:     avgTime,
 		IssuesFound: pm.issuesFound.Load(),
 	}, true
@@ -289,13 +289,13 @@ func (m *Metrics) AllPhaseStats() []PhaseStats {
 
 		var avgTime time.Duration
 		if invocations > 0 {
-			avgTime = time.Duration(totalTime / invocations)
+			avgTime = time.Duration(totalTime / invocations) //nolint:gosec // Safe: nanoseconds within int64 range
 		}
 
 		stats = append(stats, PhaseStats{
 			Name:        name,
 			Invocations: invocations,
-			TotalTime:   time.Duration(totalTime),
+			TotalTime:   time.Duration(totalTime), //nolint:gosec // Safe: nanoseconds within int64 range
 			AvgTime:     avgTime,
 			IssuesFound: pm.issuesFound.Load(),
 		})
@@ -385,21 +385,21 @@ func (m *Metrics) Snapshot() Snapshot {
 func (m *Metrics) Export() map[string]interface{} {
 	s := m.Snapshot()
 	return map[string]interface{}{
-		"validations_total":       s.ValidationsTotal,
-		"validations_valid":       s.ValidationsValid,
-		"validation_rate":         s.ValidationRate,
-		"avg_validation_time_ns":  s.AvgValidationTimeNs,
-		"min_validation_time_ns":  s.MinValidationTimeNs,
-		"max_validation_time_ns":  s.MaxValidationTimeNs,
-		"cache_hits":              s.CacheHits,
-		"cache_misses":            s.CacheMisses,
-		"cache_hit_rate":          s.CacheHitRate,
-		"pool_acquires":           s.PoolAcquires,
-		"pool_releases":           s.PoolReleases,
-		"pool_leaks":              s.PoolLeaks,
-		"errors_total":            s.ErrorsTotal,
-		"warnings_total":          s.WarningsTotal,
-		"infos_total":             s.InfosTotal,
+		"validations_total":      s.ValidationsTotal,
+		"validations_valid":      s.ValidationsValid,
+		"validation_rate":        s.ValidationRate,
+		"avg_validation_time_ns": s.AvgValidationTimeNs,
+		"min_validation_time_ns": s.MinValidationTimeNs,
+		"max_validation_time_ns": s.MaxValidationTimeNs,
+		"cache_hits":             s.CacheHits,
+		"cache_misses":           s.CacheMisses,
+		"cache_hit_rate":         s.CacheHitRate,
+		"pool_acquires":          s.PoolAcquires,
+		"pool_releases":          s.PoolReleases,
+		"pool_leaks":             s.PoolLeaks,
+		"errors_total":           s.ErrorsTotal,
+		"warnings_total":         s.WarningsTotal,
+		"infos_total":            s.InfosTotal,
 	}
 }
 

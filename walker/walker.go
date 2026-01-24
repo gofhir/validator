@@ -111,11 +111,7 @@ func (tw *TypeAwareTreeWalker) walkObject(
 		}
 
 		// Create child context
-		childCtx, err := tw.createChildContext(ctx, parent, key, value)
-		if err != nil {
-			tw.releaseContext(childCtx)
-			return err
-		}
+		childCtx := tw.createChildContext(ctx, parent, key, value)
 
 		// Visit the child
 		if err := visitor(childCtx); err != nil {
@@ -212,7 +208,7 @@ func (tw *TypeAwareTreeWalker) createChildContext(
 	parent *WalkContext,
 	key string,
 	value any,
-) (*WalkContext, error) {
+) *WalkContext {
 	child := tw.acquireContext()
 	child.Node = value
 	child.Key = key
@@ -239,7 +235,7 @@ func (tw *TypeAwareTreeWalker) createChildContext(
 	}
 
 	// Resolve type for this element
-	typeName := tw.resolveElementType(elemDef, key, choiceResult)
+	typeName := tw.resolveElementType(elemDef, choiceResult)
 	child.TypeName = typeName
 
 	// Check if this is a contained/embedded resource (type = "Resource")
@@ -282,7 +278,7 @@ func (tw *TypeAwareTreeWalker) createChildContext(
 		child.TypeIndex = parent.TypeIndex
 	}
 
-	return child, nil
+	return child
 }
 
 // findElementDef finds the ElementDefinition for a key in the current type context.
@@ -295,13 +291,14 @@ func (tw *TypeAwareTreeWalker) findElementDef(parent *WalkContext, key string) *
 	// For inline types (BackboneElement, Element), use ElementPath since children
 	// are defined inline in the parent's StructureDefinition
 	var elemPath string
-	if isInlineElementType(parent.TypeName) || parent.IsArrayItem {
+	switch {
+	case isInlineElementType(parent.TypeName) || parent.IsArrayItem:
 		// Use full element path for inline types and array items
 		elemPath = parent.ElementPath + "." + key
-	} else if parent.TypeSD != nil {
+	case parent.TypeSD != nil:
 		// For complex types with their own SD, use type prefix
 		elemPath = parent.TypeSD.Type + "." + key
-	} else {
+	default:
 		elemPath = parent.ElementPath + "." + key
 	}
 
@@ -331,7 +328,6 @@ func (tw *TypeAwareTreeWalker) findElementDef(parent *WalkContext, key string) *
 // resolveElementType determines the FHIR type for an element.
 func (tw *TypeAwareTreeWalker) resolveElementType(
 	elemDef *service.ElementDefinition,
-	key string,
 	choiceResult *ChoiceTypeResult,
 ) string {
 	// If it's a choice type, use the resolved type

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gofhir/validator/service"
 	"github.com/gofhir/fhir/r4"
+	"github.com/gofhir/validator/service"
 )
 
 // InMemoryTerminologyService implements service.TerminologyService using in-memory storage.
@@ -21,25 +21,18 @@ type InMemoryTerminologyService struct {
 
 // valueSetData holds a ValueSet and its expanded codes for fast lookup.
 type valueSetData struct {
-	url           string
-	codes         map[string]map[string]codeEntry // system -> code -> entry
-	filters       []pendingFilter                 // filters to expand lazily
-	regexPatterns []regexPattern                  // compiled regex patterns for dynamic validation
-	expanded      bool                            // true if filters have been expanded
-}
-
-// regexPattern holds a compiled regex for dynamic code validation.
-type regexPattern struct {
-	system  string
-	pattern *regexp.Regexp
+	url      string
+	codes    map[string]map[string]codeEntry // system -> code -> entry
+	filters  []pendingFilter                 // filters to expand lazily
+	expanded bool                            // true if filters have been expanded
 }
 
 // codeSystemData holds a CodeSystem for code lookup.
 type codeSystemData struct {
-	url       string
-	codes     map[string]codeEntry  // code -> entry
-	parents   map[string][]string   // code -> parent codes (from subsumedBy)
-	children  map[string][]string   // code -> child codes (reverse of parents)
+	url      string
+	codes    map[string]codeEntry // code -> entry
+	parents  map[string][]string  // code -> parent codes (from subsumedBy)
+	children map[string][]string  // code -> child codes (reverse of parents)
 }
 
 // codeEntry represents a code in a ValueSet or CodeSystem.
@@ -459,7 +452,7 @@ func (s *InMemoryTerminologyService) collectDescendants(cs *codeSystemData, star
 		// Add this code if it's not abstract (doesn't start with _) or if explicitly requested
 		if includeSelf || code != startCode {
 			// Skip abstract codes (convention: start with _)
-			if len(code) == 0 || code[0] != '_' {
+			if code == "" || code[0] != '_' {
 				result = append(result, code)
 			}
 		}

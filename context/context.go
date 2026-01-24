@@ -11,8 +11,8 @@ import (
 	"github.com/gofhir/validator/loader"
 	"github.com/gofhir/validator/registry"
 	"github.com/gofhir/validator/service"
-	"github.com/gofhir/validator/terminology"
 	"github.com/gofhir/validator/specs"
+	"github.com/gofhir/validator/terminology"
 )
 
 // SpecContext holds all version-specific resources for FHIR validation.
@@ -83,7 +83,7 @@ func (sc *SpecContext) loadFromRegistry(ctx context.Context, version fv.FHIRVers
 	resolver := registry.NewResolver(client)
 
 	// Parse additional packages
-	var additionalPkgs []registry.PackageRef
+	additionalPkgs := make([]registry.PackageRef, 0, len(opts.AdditionalPackages))
 	for _, pkg := range opts.AdditionalPackages {
 		ref := parsePackageRef(pkg)
 		additionalPkgs = append(additionalPkgs, ref)
@@ -128,7 +128,7 @@ func (sc *SpecContext) loadFromRegistry(ctx context.Context, version fv.FHIRVers
 }
 
 // loadFromEmbedded loads specs from embedded files.
-func (sc *SpecContext) loadFromEmbedded(ctx context.Context, version fv.FHIRVersion, opts Options) (*SpecContext, error) {
+func (sc *SpecContext) loadFromEmbedded(_ context.Context, version fv.FHIRVersion, opts Options) (*SpecContext, error) {
 	// Convert fv.FHIRVersion to specs.FHIRVersion
 	specsVersion, err := toSpecsVersion(version)
 	if err != nil {
@@ -149,8 +149,8 @@ func (sc *SpecContext) loadFromEmbedded(ctx context.Context, version fv.FHIRVers
 	if err != nil {
 		return nil, fmt.Errorf("failed to read profiles-resources.json: %w", err)
 	}
-	if _, err := profileService.LoadFromJSON(resourcesData); err != nil {
-		return nil, fmt.Errorf("failed to load profiles-resources.json: %w", err)
+	if _, loadErr := profileService.LoadFromJSON(resourcesData); loadErr != nil {
+		return nil, fmt.Errorf("failed to load profiles-resources.json: %w", loadErr)
 	}
 
 	// Load profiles-types.json

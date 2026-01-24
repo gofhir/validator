@@ -425,7 +425,7 @@ func TestValidateBundleStreamParallel(t *testing.T) {
 	results := v.ValidateBundleStreamParallel(ctx, reader)
 
 	// Collect and verify order
-	var indices []int
+	indices := make([]int, 0, 4)
 	for result := range results {
 		if result.Error != nil {
 			t.Errorf("Entry %d error: %v", result.Index, result.Error)

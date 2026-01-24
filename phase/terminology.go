@@ -14,10 +14,10 @@ import (
 type BindingStrength string
 
 const (
-	BindingStrengthRequired    BindingStrength = "required"
-	BindingStrengthExtensible  BindingStrength = "extensible"
-	BindingStrengthPreferred   BindingStrength = "preferred"
-	BindingStrengthExample     BindingStrength = "example"
+	BindingStrengthRequired   BindingStrength = "required"
+	BindingStrengthExtensible BindingStrength = "extensible"
+	BindingStrengthPreferred  BindingStrength = "preferred"
+	BindingStrengthExample    BindingStrength = "example"
 )
 
 // TerminologyPhase validates code, Coding, and CodeableConcept values

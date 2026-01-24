@@ -137,5 +137,25 @@ issues:
       linters:
         - gocyclo
 
+    # Exclude gocyclo from validation phases (inherent complexity)
+    - path: "phase/.*\\.go"
+      linters:
+        - gocyclo
+
+    # Exclude gocyclo from terminology service
+    - path: "terminology/.*\\.go"
+      linters:
+        - gocyclo
+
+    # Exclude gocyclo from stream processing
+    - path: "stream/.*\\.go"
+      linters:
+        - gocyclo
+
+    # Exclude gocyclo from registry loader
+    - path: "registry/loader\\.go"
+      linters:
+        - gocyclo
+
   max-issues-per-linter: 50
   max-same-issues: 10

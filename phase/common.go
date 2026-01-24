@@ -9,6 +9,12 @@ import (
 	"github.com/gofhir/validator/service"
 )
 
+// Extension element key constants.
+const (
+	ExtensionKey         = "extension"
+	ModifierExtensionKey = "modifierExtension"
+)
+
 // ElementWalker provides utilities for walking FHIR resource elements.
 type ElementWalker struct {
 	resource map[string]any
@@ -106,12 +112,15 @@ func removeArrayIndices(path string) string {
 	result := make([]byte, 0, len(path))
 	inBracket := false
 	for i := 0; i < len(path); i++ {
-		if path[i] == '[' {
+		switch path[i] {
+		case '[':
 			inBracket = true
-		} else if path[i] == ']' {
+		case ']':
 			inBracket = false
-		} else if !inBracket {
-			result = append(result, path[i])
+		default:
+			if !inBracket {
+				result = append(result, path[i])
+			}
 		}
 	}
 	return string(result)
@@ -154,7 +163,7 @@ func GetMetaProfiles(resource map[string]any) []string {
 
 // IsExtensionElement returns true if the key is an extension element.
 func IsExtensionElement(key string) bool {
-	return key == "extension" || key == "modifierExtension"
+	return key == ExtensionKey || key == ModifierExtensionKey
 }
 
 // IsPrimitiveExtension returns true if this is a primitive extension (_fieldName).
@@ -216,41 +225,41 @@ func IsPrimitiveType(typeCode string) bool {
 
 // FHIRComplexTypes lists common FHIR complex types.
 var FHIRComplexTypes = map[string]bool{
-	"Address":          true,
-	"Age":              true,
-	"Annotation":       true,
-	"Attachment":       true,
-	"CodeableConcept":  true,
-	"CodeableReference": true,
-	"Coding":           true,
-	"ContactDetail":    true,
-	"ContactPoint":     true,
-	"Contributor":      true,
-	"Count":            true,
-	"DataRequirement":  true,
-	"Distance":         true,
-	"Dosage":           true,
-	"Duration":         true,
-	"Expression":       true,
-	"Extension":        true,
-	"HumanName":        true,
-	"Identifier":       true,
-	"Meta":             true,
-	"Money":            true,
-	"Narrative":        true,
+	"Address":             true,
+	"Age":                 true,
+	"Annotation":          true,
+	"Attachment":          true,
+	"CodeableConcept":     true,
+	"CodeableReference":   true,
+	"Coding":              true,
+	"ContactDetail":       true,
+	"ContactPoint":        true,
+	"Contributor":         true,
+	"Count":               true,
+	"DataRequirement":     true,
+	"Distance":            true,
+	"Dosage":              true,
+	"Duration":            true,
+	"Expression":          true,
+	"Extension":           true,
+	"HumanName":           true,
+	"Identifier":          true,
+	"Meta":                true,
+	"Money":               true,
+	"Narrative":           true,
 	"ParameterDefinition": true,
-	"Period":           true,
-	"Quantity":         true,
-	"Range":            true,
-	"Ratio":            true,
-	"RatioRange":       true,
-	"Reference":        true,
-	"RelatedArtifact":  true,
-	"SampledData":      true,
-	"Signature":        true,
-	"Timing":           true,
-	"TriggerDefinition": true,
-	"UsageContext":     true,
+	"Period":              true,
+	"Quantity":            true,
+	"Range":               true,
+	"Ratio":               true,
+	"RatioRange":          true,
+	"Reference":           true,
+	"RelatedArtifact":     true,
+	"SampledData":         true,
+	"Signature":           true,
+	"Timing":              true,
+	"TriggerDefinition":   true,
+	"UsageContext":        true,
 }
 
 // IsComplexType returns true if the type code is a FHIR complex type.
@@ -304,7 +313,7 @@ func DisplayMismatchIssue(code, providedDisplay, expectedDisplay, path, phase st
 // ValidateID validates a FHIR id value.
 // FHIR ids must match pattern: [A-Za-z0-9\-\.]{1,64}
 func ValidateID(id string) bool {
-	if len(id) == 0 || len(id) > 64 {
+	if id == "" || len(id) > 64 {
 		return false
 	}
 	for _, c := range id {

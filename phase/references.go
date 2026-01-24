@@ -238,7 +238,7 @@ func (p *ReferencesPhase) validateReferenceFormat(reference, path string) []fv.I
 
 	// Validate resource type is capitalized (basic check)
 	resourceType := parts[len(parts)-2]
-	if len(resourceType) > 0 && resourceType[0] >= 'a' && resourceType[0] <= 'z' {
+	if resourceType != "" && resourceType[0] >= 'a' && resourceType[0] <= 'z' {
 		issues = append(issues, WarningIssue(
 			fv.IssueTypeValue,
 			fmt.Sprintf("Reference resource type '%s' should be capitalized", resourceType),
@@ -341,9 +341,9 @@ func (p *ReferencesPhase) getAllowedTargetTypes(def *service.ElementDefinition) 
 
 // validateCanonicalReference validates a canonical reference.
 func (p *ReferencesPhase) validateCanonicalReference(
-	ctx context.Context,
+	_ context.Context,
 	canonical string,
-	def *service.ElementDefinition,
+	_ *service.ElementDefinition,
 	path string,
 ) []fv.Issue {
 	var issues []fv.Issue

@@ -89,7 +89,7 @@ func TestBundleValidator_ValidateStreamParallel(t *testing.T) {
 	results := validator.ValidateStreamParallel(ctx, reader)
 
 	// Collect results and verify order
-	var collected []*EntryResult
+	collected := make([]*EntryResult, 0, 4)
 	for result := range results {
 		collected = append(collected, result)
 	}
@@ -162,6 +162,7 @@ func TestBundleValidator_ContextCancellation(t *testing.T) {
 	bundle := `{"resourceType": "Bundle", "type": "collection", "entry": [` + strings.Join(entries, ",") + `]}`
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	reader := strings.NewReader(bundle)
 
 	results := validator.ValidateStream(ctx, reader)

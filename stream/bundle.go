@@ -180,8 +180,8 @@ func (v *BundleValidator) processEntry(ctx context.Context, entry map[string]any
 	}
 
 	// Extract fullUrl
-	if fullUrl, ok := entry["fullUrl"].(string); ok {
-		result.FullURL = fullUrl
+	if fullURLVal, ok := entry["fullUrl"].(string); ok {
+		result.FullURL = fullURLVal
 	}
 
 	// Extract and validate the resource

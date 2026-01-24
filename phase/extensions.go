@@ -254,11 +254,6 @@ func (p *ExtensionsPhase) validateExtensionURL(url, path string) []fv.Issue {
 		))
 	}
 
-	// Check for common HL7 extensions
-	if strings.HasPrefix(url, "http://hl7.org/fhir/StructureDefinition/") {
-		// Standard extension - could validate it exists
-	}
-
 	return issues
 }
 
@@ -490,11 +485,7 @@ func (p *ExtensionsPhase) contextMatches(contextExpr, location, resourceType, el
 	// Remove array indices from location and try again
 	// e.g., "Patient.address[0]" -> "Patient.address"
 	locationWithoutIndices := removeArrayIndices(location)
-	if contextExpr == locationWithoutIndices {
-		return true
-	}
-
-	return false
+	return contextExpr == locationWithoutIndices
 }
 
 // getElementTypeAtPath looks up the FHIR type of an element at the given path.

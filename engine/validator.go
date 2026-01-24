@@ -55,16 +55,14 @@ func New(ctx context.Context, version fv.FHIRVersion, opts ...fv.Option) (*Valid
 	}
 
 	// Build the validation pipeline
-	if err := v.buildPipeline(); err != nil {
-		return nil, fmt.Errorf("failed to build pipeline: %w", err)
-	}
+	v.buildPipeline()
 
 	return v, nil
 }
 
 // buildPipeline constructs the validation pipeline based on options.
-func (v *Validator) buildPipeline() error {
-	pipelineOpts := &pipeline.PipelineOptions{
+func (v *Validator) buildPipeline() {
+	pipelineOpts := &pipeline.Options{
 		ParallelExecution: v.options.ParallelPhases,
 		MaxErrors:         v.options.MaxErrors,
 		FailFast:          v.options.MaxErrors == 1,
@@ -76,8 +74,6 @@ func (v *Validator) buildPipeline() error {
 
 	// Add phases based on options
 	v.addPhases()
-
-	return nil
 }
 
 // addPhases adds validation phases to the pipeline based on configuration.
@@ -206,8 +202,10 @@ func (v *Validator) ValidateMap(ctx context.Context, resourceMap map[string]any)
 
 	// Fall back to base type if no profile resolved
 	if pctx.RootProfile == nil && v.profileService != nil {
-		baseProfile, _ := v.profileService.FetchStructureDefinitionByType(ctx, resourceType)
-		pctx.RootProfile = baseProfile
+		baseProfile, err := v.profileService.FetchStructureDefinitionByType(ctx, resourceType)
+		if err == nil {
+			pctx.RootProfile = baseProfile
+		}
 	}
 
 	// Run the pipeline
@@ -266,7 +264,11 @@ func (v *Validator) ValidateBatch(ctx context.Context, resources [][]byte) []*fv
 			v.workerPool <- struct{}{}
 			defer func() { <-v.workerPool }()
 
-			result, _ := v.Validate(ctx, res)
+			result, err := v.Validate(ctx, res)
+			if err != nil {
+				result = fv.AcquireResult()
+				result.AddError(fv.IssueTypeProcessing, err.Error(), "")
+			}
 			results[idx] = result
 		}(i, resource)
 	}

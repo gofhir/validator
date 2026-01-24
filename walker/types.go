@@ -1,10 +1,15 @@
 package walker
 
+// FHIR type constants for common types.
+const (
+	TypeString = "string"
+)
+
 // SystemTypeMapping maps FHIRPath system types to FHIR primitive types.
 // These are used in StructureDefinitions when defining element types
 // for primitive elements like id, string, instant, etc.
 var SystemTypeMapping = map[string]string{
-	"http://hl7.org/fhirpath/System.String":   "string",
+	"http://hl7.org/fhirpath/System.String":   TypeString,
 	"http://hl7.org/fhirpath/System.Boolean":  "boolean",
 	"http://hl7.org/fhirpath/System.Integer":  "integer",
 	"http://hl7.org/fhirpath/System.Decimal":  "decimal",
@@ -42,51 +47,51 @@ var FHIRPrimitiveTypes = map[string]bool{
 // These types have their own StructureDefinitions that need to be loaded
 // for proper validation.
 var FHIRComplexTypes = map[string]bool{
-	"Address":              true,
-	"Age":                  true,
-	"Annotation":           true,
-	"Attachment":           true,
-	"BackboneElement":      true,
-	"CodeableConcept":      true,
-	"CodeableReference":    true,
-	"Coding":               true,
-	"ContactDetail":        true,
-	"ContactPoint":         true,
-	"Contributor":          true,
-	"Count":                true,
-	"DataRequirement":      true,
-	"Distance":             true,
-	"Dosage":               true,
-	"Duration":             true,
-	"Element":              true,
-	"ElementDefinition":    true,
-	"Expression":           true,
-	"Extension":            true,
-	"HumanName":            true,
-	"Identifier":           true,
-	"MarketingStatus":      true,
-	"Meta":                 true,
-	"Money":                true,
-	"MoneyQuantity":        true,
-	"Narrative":            true,
-	"ParameterDefinition":  true,
-	"Period":               true,
-	"Population":           true,
-	"ProdCharacteristic":   true,
-	"ProductShelfLife":     true,
-	"Quantity":             true,
-	"Range":                true,
-	"Ratio":                true,
-	"RatioRange":           true,
-	"Reference":            true,
-	"RelatedArtifact":      true,
-	"SampledData":          true,
-	"Signature":            true,
-	"SimpleQuantity":       true,
-	"SubstanceAmount":      true,
-	"Timing":               true,
-	"TriggerDefinition":    true,
-	"UsageContext":         true,
+	"Address":             true,
+	"Age":                 true,
+	"Annotation":          true,
+	"Attachment":          true,
+	"BackboneElement":     true,
+	"CodeableConcept":     true,
+	"CodeableReference":   true,
+	"Coding":              true,
+	"ContactDetail":       true,
+	"ContactPoint":        true,
+	"Contributor":         true,
+	"Count":               true,
+	"DataRequirement":     true,
+	"Distance":            true,
+	"Dosage":              true,
+	"Duration":            true,
+	"Element":             true,
+	"ElementDefinition":   true,
+	"Expression":          true,
+	"Extension":           true,
+	"HumanName":           true,
+	"Identifier":          true,
+	"MarketingStatus":     true,
+	"Meta":                true,
+	"Money":               true,
+	"MoneyQuantity":       true,
+	"Narrative":           true,
+	"ParameterDefinition": true,
+	"Period":              true,
+	"Population":          true,
+	"ProdCharacteristic":  true,
+	"ProductShelfLife":    true,
+	"Quantity":            true,
+	"Range":               true,
+	"Ratio":               true,
+	"RatioRange":          true,
+	"Reference":           true,
+	"RelatedArtifact":     true,
+	"SampledData":         true,
+	"Signature":           true,
+	"SimpleQuantity":      true,
+	"SubstanceAmount":     true,
+	"Timing":              true,
+	"TriggerDefinition":   true,
+	"UsageContext":        true,
 }
 
 // ChoiceTypeSuffixes contains all valid suffixes for choice types (value[x]).
@@ -208,12 +213,12 @@ func GetGoTypeForFHIRType(fhirType string) string {
 	case "decimal":
 		return "float64"
 
-	case "string", "uri", "url", "canonical", "code", "id", "oid", "uuid",
+	case TypeString, "uri", "url", "canonical", "code", "id", "oid", "uuid",
 		"markdown", "base64Binary", "xhtml":
-		return "string"
+		return TypeString
 
 	case "date", "dateTime", "time", "instant":
-		return "string" // Date/time types are strings in JSON
+		return TypeString // Date/time types are strings in JSON
 
 	case "BackboneElement", "Element":
 		return "map[string]any"
@@ -251,7 +256,7 @@ func ValidateGoType(value any, fhirType string) bool {
 		_, ok := value.(float64)
 		return ok
 
-	case "string", "uri", "url", "canonical", "code", "id", "oid", "uuid",
+	case TypeString, "uri", "url", "canonical", "code", "id", "oid", "uuid",
 		"markdown", "base64Binary", "xhtml", "date", "dateTime", "time", "instant":
 		_, ok := value.(string)
 		return ok

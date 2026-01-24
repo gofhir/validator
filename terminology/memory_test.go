@@ -106,7 +106,7 @@ func TestInMemoryTerminologyService(t *testing.T) {
 
 		_, err := ts.ValidateCode(ctx, "", "", "")
 		if err == nil {
-			t.Error("expected error for cancelled context")
+			t.Error("expected error for canceled context")
 		}
 	})
 

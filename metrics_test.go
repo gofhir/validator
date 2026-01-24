@@ -49,11 +49,11 @@ func TestMetrics_ValidationTime(t *testing.T) {
 	if avg := m.AverageValidationTime(); avg != 0 {
 		t.Errorf("AverageValidationTime() = %v; want 0", avg)
 	}
-	if min := m.MinValidationTime(); min != 0 {
-		t.Errorf("MinValidationTime() = %v; want 0", min)
+	if minTime := m.MinValidationTime(); minTime != 0 {
+		t.Errorf("MinValidationTime() = %v; want 0", minTime)
 	}
-	if max := m.MaxValidationTime(); max != 0 {
-		t.Errorf("MaxValidationTime() = %v; want 0", max)
+	if maxTime := m.MaxValidationTime(); maxTime != 0 {
+		t.Errorf("MaxValidationTime() = %v; want 0", maxTime)
 	}
 
 	m.RecordValidation(100*time.Millisecond, true)
@@ -66,12 +66,12 @@ func TestMetrics_ValidationTime(t *testing.T) {
 		t.Errorf("AverageValidationTime() = %v; want ~%v", avg, expectedAvg)
 	}
 
-	if min := m.MinValidationTime(); min != 100*time.Millisecond {
-		t.Errorf("MinValidationTime() = %v; want %v", min, 100*time.Millisecond)
+	if minTime := m.MinValidationTime(); minTime != 100*time.Millisecond {
+		t.Errorf("MinValidationTime() = %v; want %v", minTime, 100*time.Millisecond)
 	}
 
-	if max := m.MaxValidationTime(); max != 300*time.Millisecond {
-		t.Errorf("MaxValidationTime() = %v; want %v", max, 300*time.Millisecond)
+	if maxTime := m.MaxValidationTime(); maxTime != 300*time.Millisecond {
+		t.Errorf("MaxValidationTime() = %v; want %v", maxTime, 300*time.Millisecond)
 	}
 }
 

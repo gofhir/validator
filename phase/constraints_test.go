@@ -419,7 +419,7 @@ func TestConstraintsPhase_ContextCancellation(t *testing.T) {
 	issues := p.Validate(ctx, pctx)
 
 	if len(issues) != 0 {
-		t.Errorf("Expected no issues on cancelled context, got %d", len(issues))
+		t.Errorf("Expected no issues on canceled context, got %d", len(issues))
 	}
 }
 
@@ -546,12 +546,12 @@ func TestGetContextValue(t *testing.T) {
 		resourceType string
 		expectNil    bool
 	}{
-		{"Patient", "Patient", false},           // Root
-		{"Patient.id", "Patient", false},        // Simple field
-		{"Patient.name", "Patient", false},      // Array
-		{"Patient.active", "Patient", false},    // Boolean
-		{"Patient.notexist", "Patient", true},   // Non-existent
-		{"id", "Patient", false},                // Without prefix
+		{"Patient", "Patient", false},         // Root
+		{"Patient.id", "Patient", false},      // Simple field
+		{"Patient.name", "Patient", false},    // Array
+		{"Patient.active", "Patient", false},  // Boolean
+		{"Patient.notexist", "Patient", true}, // Non-existent
+		{"id", "Patient", false},              // Without prefix
 	}
 
 	for _, tt := range tests {

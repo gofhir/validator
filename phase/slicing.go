@@ -27,12 +27,12 @@ type SliceDiscriminator struct {
 
 // SliceDefinition represents a slice within a profile.
 type SliceDefinition struct {
-	Name          string
+	Name           string
 	Discriminators []SliceDiscriminator
-	Rules         SlicingRules
-	Min           int
-	Max           string
-	Ordered       bool
+	Rules          SlicingRules
+	Min            int
+	Max            string
+	Ordered        bool
 }
 
 // SlicingPhase validates slice discriminators and cardinality.
@@ -125,8 +125,11 @@ func (p *SlicingPhase) findSlicedElements(profile *service.StructureDefinition) 
 		// Check if this is a slice of the current sliced element
 		if currentSlicePath != "" && strings.HasPrefix(elem.Path, currentSlicePath+":") {
 			// This is a slice definition
-			basePath := elem.Path[:strings.Index(elem.Path, ":")]
-			sliced[basePath] = append(sliced[basePath], elem)
+			colonIdx := strings.Index(elem.Path, ":")
+			if colonIdx > 0 { // colonIdx is always > 0 due to HasPrefix check above
+				basePath := elem.Path[:colonIdx]
+				sliced[basePath] = append(sliced[basePath], elem)
+			}
 		}
 	}
 
@@ -135,7 +138,7 @@ func (p *SlicingPhase) findSlicedElements(profile *service.StructureDefinition) 
 
 // validateSlicing validates array elements against slice definitions.
 func (p *SlicingPhase) validateSlicing(
-	ctx context.Context,
+	_ context.Context,
 	arr []any,
 	basePath string,
 	slices []*service.ElementDefinition,
@@ -148,7 +151,7 @@ func (p *SlicingPhase) validateSlicing(
 	unmatchedItems := make([]int, 0)
 
 	// Get slicing rules from the base element
-	var rules SlicingRules = SlicingRulesOpen
+	rules := SlicingRulesOpen
 	var ordered bool
 
 	// Match each array item to a slice
@@ -160,6 +163,7 @@ func (p *SlicingPhase) validateSlicing(
 
 		matched := false
 		for _, slice := range slices {
+			//nolint:gocritic // nestingReduce: break makes early-continue inappropriate
 			if p.matchesSlice(itemMap, slice, basePath) {
 				sliceName := p.getSliceName(slice.Path)
 				sliceMatches[sliceName]++
@@ -194,12 +198,12 @@ func (p *SlicingPhase) validateSlicing(
 		}
 
 		// Check maximum
-		max := parseMax(slice.Max)
-		if max > 0 && count > max {
+		maxCard := parseMax(slice.Max)
+		if maxCard > 0 && count > maxCard {
 			issues = append(issues, ErrorIssue(
 				fv.IssueTypeValue,
 				fmt.Sprintf("Slice '%s' allows maximum %d item(s), but found %d",
-					sliceName, max, count),
+					sliceName, maxCard, count),
 				basePath,
 				"slicing",
 			))
@@ -298,7 +302,7 @@ func (p *SlicingPhase) validateSliceChildPatterns(
 }
 
 // matchesSlice checks if an item matches a slice discriminator.
-func (p *SlicingPhase) matchesSlice(item map[string]any, slice *service.ElementDefinition, basePath string) bool {
+func (p *SlicingPhase) matchesSlice(item map[string]any, slice *service.ElementDefinition, _ string) bool {
 	if slice.Slicing == nil {
 		// Use fixed/pattern values as discriminators
 		return p.matchesByFixedPattern(item, slice)
@@ -525,6 +529,7 @@ func (p *SlicingPhase) validateSliceOrdering(
 
 		// Find which slice this item belongs to
 		for _, slice := range slices {
+			//nolint:gocritic // nestingReduce: break makes early-continue inappropriate
 			if p.matchesSlice(itemMap, slice, basePath) {
 				sliceName := p.getSliceName(slice.Path)
 				order := sliceOrder[sliceName]

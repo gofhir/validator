@@ -48,7 +48,7 @@ func TestPipeline_Basic(t *testing.T) {
 }
 
 func TestPipeline_Execute(t *testing.T) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: false,
 		CollectMetrics:    true,
 	})
@@ -95,7 +95,7 @@ func TestPipeline_Execute(t *testing.T) {
 }
 
 func TestPipeline_ParallelExecution(t *testing.T) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: true,
 		CollectMetrics:    true,
 	})
@@ -131,7 +131,7 @@ func TestPipeline_ParallelExecution(t *testing.T) {
 }
 
 func TestPipeline_SequentialGroups(t *testing.T) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: true,
 		CollectMetrics:    true,
 	})
@@ -173,7 +173,7 @@ func TestPipeline_SequentialGroups(t *testing.T) {
 }
 
 func TestPipeline_MaxErrors(t *testing.T) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: false,
 		MaxErrors:         2,
 		CollectMetrics:    true,
@@ -207,7 +207,7 @@ func TestPipeline_MaxErrors(t *testing.T) {
 }
 
 func TestPipeline_Cancellation(t *testing.T) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: false,
 		CollectMetrics:    true,
 	})
@@ -248,7 +248,7 @@ func TestPipeline_Cancellation(t *testing.T) {
 }
 
 func TestPipeline_PhaseTimeout(t *testing.T) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: false,
 		PhaseTimeout:      50 * time.Millisecond,
 		CollectMetrics:    true,
@@ -300,7 +300,7 @@ func TestPipeline_EnableDisable(t *testing.T) {
 }
 
 func TestPipeline_FailFast(t *testing.T) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: false,
 		FailFast:          true,
 		CollectMetrics:    true,
@@ -328,7 +328,7 @@ func TestPipeline_FailFast(t *testing.T) {
 }
 
 func TestPipeline_Metrics(t *testing.T) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: false,
 		CollectMetrics:    true,
 	})
@@ -360,7 +360,7 @@ func TestPipeline_Metrics(t *testing.T) {
 }
 
 func BenchmarkPipeline_Sequential(b *testing.B) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: false,
 		CollectMetrics:    false,
 	})
@@ -381,7 +381,7 @@ func BenchmarkPipeline_Sequential(b *testing.B) {
 }
 
 func BenchmarkPipeline_Parallel(b *testing.B) {
-	pipeline := NewPipeline(&PipelineOptions{
+	pipeline := NewPipeline(&Options{
 		ParallelExecution: true,
 		CollectMetrics:    false,
 	})

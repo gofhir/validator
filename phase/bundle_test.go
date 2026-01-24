@@ -766,7 +766,7 @@ func TestBundlePhase_ContextCancellation(t *testing.T) {
 
 	// Should return early with no issues
 	if len(issues) != 0 {
-		t.Errorf("Expected no issues on cancelled context, got %d", len(issues))
+		t.Errorf("Expected no issues on canceled context, got %d", len(issues))
 	}
 }
 

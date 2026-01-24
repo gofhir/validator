@@ -1,8 +1,8 @@
 package loader
 
 import (
-	"github.com/gofhir/validator/service"
 	"github.com/gofhir/fhir/r4"
+	"github.com/gofhir/validator/service"
 )
 
 // R4Converter converts R4 FHIR models to internal service models.
@@ -219,97 +219,116 @@ func (c *R4Converter) convertDiscriminatorType(dtype *r4.DiscriminatorType) stri
 	return string(*dtype)
 }
 
-func (c *R4Converter) convertMin(min *uint32) int {
-	if min == nil {
+func (c *R4Converter) convertMin(minVal *uint32) int {
+	if minVal == nil {
 		return 0
 	}
-	return int(*min)
+	return int(*minVal)
+}
+
+// primitiveValues holds pointers to primitive type values.
+type primitiveValues struct {
+	String    *string
+	Boolean   *bool
+	Integer   *int
+	Decimal   *float64
+	Code      *string
+	URI       *string
+	URL       *string
+	Canonical *string
+}
+
+// complexValues holds pointers to complex type values.
+type complexValues struct {
+	Coding          *r4.Coding
+	CodeableConcept *r4.CodeableConcept
+	Identifier      *r4.Identifier
+}
+
+// extractPolymorphicValue extracts a value from primitive and complex type pointers.
+func (c *R4Converter) extractPolymorphicValue(prim primitiveValues, comp complexValues) any {
+	// Check primitive types first
+	if prim.String != nil {
+		return *prim.String
+	}
+	if prim.Boolean != nil {
+		return *prim.Boolean
+	}
+	if prim.Integer != nil {
+		return *prim.Integer
+	}
+	if prim.Decimal != nil {
+		return *prim.Decimal
+	}
+	if prim.Code != nil {
+		return *prim.Code
+	}
+	if prim.URI != nil {
+		return *prim.URI
+	}
+	if prim.URL != nil {
+		return *prim.URL
+	}
+	if prim.Canonical != nil {
+		return *prim.Canonical
+	}
+
+	// Check complex types
+	if comp.Coding != nil {
+		return c.codingToMap(comp.Coding)
+	}
+	if comp.CodeableConcept != nil {
+		return c.codeableConceptToMap(comp.CodeableConcept)
+	}
+	if comp.Identifier != nil {
+		return c.identifierToMap(comp.Identifier)
+	}
+
+	return nil
 }
 
 // extractFixedValue extracts the fixed[x] value from ElementDefinition.
 // Returns nil if no fixed value is set.
 func (c *R4Converter) extractFixedValue(ed *r4.ElementDefinition) any {
-	// Check primitive types first
-	if ed.FixedString != nil {
-		return *ed.FixedString
-	}
-	if ed.FixedBoolean != nil {
-		return *ed.FixedBoolean
-	}
-	if ed.FixedInteger != nil {
-		return *ed.FixedInteger
-	}
-	if ed.FixedDecimal != nil {
-		return *ed.FixedDecimal
-	}
-	if ed.FixedCode != nil {
-		return *ed.FixedCode
-	}
-	if ed.FixedUri != nil {
-		return *ed.FixedUri
-	}
-	if ed.FixedUrl != nil {
-		return *ed.FixedUrl
-	}
-	if ed.FixedCanonical != nil {
-		return *ed.FixedCanonical
-	}
-
-	// Check complex types
-	if ed.FixedCoding != nil {
-		return c.codingToMap(ed.FixedCoding)
-	}
-	if ed.FixedCodeableConcept != nil {
-		return c.codeableConceptToMap(ed.FixedCodeableConcept)
-	}
-	if ed.FixedIdentifier != nil {
-		return c.identifierToMap(ed.FixedIdentifier)
-	}
-
-	return nil
+	return c.extractPolymorphicValue(
+		primitiveValues{
+			String:    ed.FixedString,
+			Boolean:   ed.FixedBoolean,
+			Integer:   ed.FixedInteger,
+			Decimal:   ed.FixedDecimal,
+			Code:      ed.FixedCode,
+			URI:       ed.FixedUri,
+			URL:       ed.FixedUrl,
+			Canonical: ed.FixedCanonical,
+		},
+		complexValues{
+			Coding:          ed.FixedCoding,
+			CodeableConcept: ed.FixedCodeableConcept,
+			Identifier:      ed.FixedIdentifier,
+		},
+	)
 }
 
 // extractPatternValue extracts the pattern[x] value from ElementDefinition.
 // Returns nil if no pattern value is set.
 func (c *R4Converter) extractPatternValue(ed *r4.ElementDefinition) any {
-	// Check primitive types first
-	if ed.PatternString != nil {
-		return *ed.PatternString
-	}
-	if ed.PatternBoolean != nil {
-		return *ed.PatternBoolean
-	}
-	if ed.PatternInteger != nil {
-		return *ed.PatternInteger
-	}
-	if ed.PatternDecimal != nil {
-		return *ed.PatternDecimal
-	}
-	if ed.PatternCode != nil {
-		return *ed.PatternCode
-	}
-	if ed.PatternUri != nil {
-		return *ed.PatternUri
-	}
-	if ed.PatternUrl != nil {
-		return *ed.PatternUrl
-	}
-	if ed.PatternCanonical != nil {
-		return *ed.PatternCanonical
-	}
-
-	// Check complex types
-	if ed.PatternCoding != nil {
-		return c.codingToMap(ed.PatternCoding)
-	}
-	if ed.PatternCodeableConcept != nil {
-		return c.codeableConceptToMap(ed.PatternCodeableConcept)
-	}
-	if ed.PatternIdentifier != nil {
-		return c.identifierToMap(ed.PatternIdentifier)
-	}
-
-	return nil
+	return c.extractPolymorphicValue(
+		primitiveValues{
+			String:    ed.PatternString,
+			Boolean:   ed.PatternBoolean,
+			Integer:   ed.PatternInteger,
+			Decimal:   ed.PatternDecimal,
+			Code:      ed.PatternCode,
+			URI:       ed.PatternUri,
+			URL:       ed.PatternUrl,
+			Canonical: ed.PatternCanonical,
+		},
+		complexValues{
+			Coding:          ed.PatternCoding,
+			CodeableConcept: ed.PatternCodeableConcept,
+			Identifier:      ed.PatternIdentifier,
+		},
+	)
 }
 
 // Helper functions to convert FHIR types to maps

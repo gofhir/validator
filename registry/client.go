@@ -31,6 +31,9 @@ const (
 
 	// DefaultCacheDir is the default location for cached packages.
 	DefaultCacheDir = ".fhir/packages"
+
+	// VersionLatest represents the "latest" version tag.
+	VersionLatest = "latest"
 )
 
 // Client is a FHIR Package Registry client.
@@ -96,12 +99,12 @@ func NewClient(opts ...ClientOption) *Client {
 
 // PackageInfo contains metadata about a package.
 type PackageInfo struct {
-	Name        string            `json:"name"`
-	Version     string            `json:"version"`
-	Description string            `json:"description"`
-	FHIRVersion string            `json:"fhirVersion"`
-	URL         string            `json:"url"`
-	Canonical   string            `json:"canonical"`
+	Name         string            `json:"name"`
+	Version      string            `json:"version"`
+	Description  string            `json:"description"`
+	FHIRVersion  string            `json:"fhirVersion"`
+	URL          string            `json:"url"`
+	Canonical    string            `json:"canonical"`
 	Dependencies map[string]string `json:"dependencies"`
 }
 
@@ -124,7 +127,7 @@ func (c *Client) GetPackageInfo(ctx context.Context, name, version string) (*Pac
 	// Get full package info (all versions)
 	url := fmt.Sprintf("%s/%s", c.registryURL, name)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -157,8 +160,8 @@ func (c *Client) GetPackageInfo(ctx context.Context, name, version string) (*Pac
 
 	// Resolve version
 	resolvedVersion := version
-	if version == "latest" || version == "" {
-		if latest, ok := pkgInfo.DistTags["latest"]; ok {
+	if version == VersionLatest || version == "" {
+		if latest, ok := pkgInfo.DistTags[VersionLatest]; ok {
 			resolvedVersion = latest
 		} else {
 			return nil, fmt.Errorf("no latest version found for package %s", name)
@@ -185,8 +188,8 @@ func (c *Client) GetPackageInfo(ctx context.Context, name, version string) (*Pac
 func (c *Client) DownloadPackage(ctx context.Context, name, version string) (string, error) {
 	// Resolve version if needed
 	actualVersion := version
-	if version == "latest" || version == "" {
-		info, err := c.GetPackageInfo(ctx, name, "latest")
+	if version == VersionLatest || version == "" {
+		info, err := c.GetPackageInfo(ctx, name, VersionLatest)
 		if err != nil {
 			return "", err
 		}
@@ -206,7 +209,7 @@ func (c *Client) DownloadPackage(ctx context.Context, name, version string) (str
 	}
 
 	// Download the package tarball
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, tarballURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, tarballURL, http.NoBody)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
@@ -222,7 +225,7 @@ func (c *Client) DownloadPackage(ctx context.Context, name, version string) (str
 	}
 
 	// Create cache directory
-	if err := os.MkdirAll(packageDir, 0755); err != nil {
+	if err := os.MkdirAll(packageDir, 0o755); err != nil {
 		return "", fmt.Errorf("failed to create cache directory: %w", err)
 	}
 
@@ -240,7 +243,7 @@ func (c *Client) DownloadPackage(ctx context.Context, name, version string) (str
 func (c *Client) getTarballURL(ctx context.Context, name, version string) (string, error) {
 	url := fmt.Sprintf("%s/%s", c.registryURL, name)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return "", err
 	}
@@ -288,8 +291,8 @@ func (c *Client) getTarballURL(ctx context.Context, name, version string) (strin
 // and returns the path to it.
 func (c *Client) GetPackage(ctx context.Context, name, version string) (string, error) {
 	// Resolve "latest" version
-	if version == "latest" || version == "" {
-		info, err := c.GetPackageInfo(ctx, name, "latest")
+	if version == VersionLatest || version == "" {
+		info, err := c.GetPackageInfo(ctx, name, VersionLatest)
 		if err != nil {
 			return "", err
 		}
@@ -388,28 +391,31 @@ func (c *Client) extractTarGz(r io.Reader, destDir string) error {
 		}
 
 		// Sanitize path to prevent directory traversal
-		target := filepath.Join(destDir, header.Name)
+		target := filepath.Join(destDir, header.Name) //nolint:gosec // G305: Path is validated below
 		if !strings.HasPrefix(target, filepath.Clean(destDir)+string(os.PathSeparator)) {
 			return fmt.Errorf("invalid tar path: %s", header.Name)
 		}
 
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(target, 0755); err != nil {
+			if err := os.MkdirAll(target, 0o755); err != nil {
 				return fmt.Errorf("failed to create directory: %w", err)
 			}
 		case tar.TypeReg:
 			// Ensure parent directory exists
-			if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return fmt.Errorf("failed to create parent directory: %w", err)
 			}
 
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.FileMode(header.Mode))
+			// Use 0644 for files as header.Mode may have unexpected values
+			f, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 			if err != nil {
 				return fmt.Errorf("failed to create file: %w", err)
 			}
 
-			if _, err := io.Copy(f, tr); err != nil {
+			// Limit file size to prevent decompression bombs (100MB max per file)
+			const maxFileSize = 100 * 1024 * 1024
+			if _, err := io.Copy(f, io.LimitReader(tr, maxFileSize)); err != nil {
 				f.Close()
 				return fmt.Errorf("failed to write file: %w", err)
 			}

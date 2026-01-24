@@ -15,6 +15,14 @@ import (
 	"github.com/gofhir/validator/walker"
 )
 
+// FHIR primitive type constants.
+const (
+	TypeBoolean  = "boolean"
+	TypeString   = "string"
+	TypeInstant  = "instant"
+	TypeDateTime = "dateTime"
+)
+
 // PrimitivesPhase validates FHIR primitive type formats.
 // It checks that values conform to their declared primitive type patterns.
 type PrimitivesPhase struct {
@@ -50,7 +58,11 @@ func (p *PrimitivesPhase) Validate(ctx context.Context, pctx *pipeline.Context) 
 	// Get profile for type information
 	var profile *service.StructureDefinition
 	if p.profileService != nil {
-		profile, _ = p.profileService.FetchStructureDefinitionByType(ctx, pctx.ResourceType)
+		var err error
+		profile, err = p.profileService.FetchStructureDefinitionByType(ctx, pctx.ResourceType)
+		if err != nil {
+			profile = nil
+		}
 	}
 
 	// Use TypeAwareTreeWalker for proper type context
@@ -132,7 +144,7 @@ func (p *PrimitivesPhase) validatePrimitive(typeCode string, value any) error {
 	}
 
 	switch typeCode {
-	case "boolean":
+	case TypeBoolean:
 		return validateBoolean(value)
 	case "integer":
 		return validateInteger(value)
@@ -144,7 +156,7 @@ func (p *PrimitivesPhase) validatePrimitive(typeCode string, value any) error {
 		return validatePositiveInt(value)
 	case "decimal":
 		return validateDecimal(value)
-	case "string":
+	case TypeString:
 		return validateString(value)
 	case "uri":
 		return validateURI(value)
@@ -164,11 +176,11 @@ func (p *PrimitivesPhase) validatePrimitive(typeCode string, value any) error {
 		return validateMarkdown(value)
 	case "base64Binary":
 		return validateBase64Binary(value)
-	case "instant":
+	case TypeInstant:
 		return validateInstant(value)
 	case "date":
 		return validateDate(value)
-	case "dateTime":
+	case TypeDateTime:
 		return validateDateTime(value)
 	case "time":
 		return validateTime(value)
@@ -277,7 +289,7 @@ func validateString(value any) error {
 		return fmt.Errorf("string contains invalid UTF-8")
 	}
 	// FHIR strings cannot have leading/trailing whitespace
-	if len(s) > 0 && (s[0] == ' ' || s[0] == '\t' || s[len(s)-1] == ' ' || s[len(s)-1] == '\t') {
+	if s != "" && (s[0] == ' ' || s[0] == '\t' || s[len(s)-1] == ' ' || s[len(s)-1] == '\t') {
 		return fmt.Errorf("string cannot have leading or trailing whitespace")
 	}
 	return nil
@@ -289,7 +301,7 @@ func validateURI(value any) error {
 	if !ok {
 		return fmt.Errorf("value must be a string, got %T", value)
 	}
-	if len(s) == 0 {
+	if s == "" {
 		return fmt.Errorf("uri cannot be empty")
 	}
 	// Basic URI validation - must not contain spaces
@@ -476,7 +488,7 @@ func inferTypeFromFieldName(field string) string {
 	case "url", "implicitRules":
 		return "uri"
 	case "version", "name", "title", "description", "comment", "text":
-		return "string"
+		return TypeString
 	case "status", "code", "language", "gender", "use":
 		return "code"
 	case "active", "experimental":
@@ -496,17 +508,17 @@ func inferTypeFromFieldName(field string) string {
 
 // Compiled regex patterns for validation
 var (
-	decimalRegex   = regexp.MustCompile(`^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?$`)
+	decimalRegex   = regexp.MustCompile(`^-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?$`)
 	urlRegex       = regexp.MustCompile(`^\S+$`)
 	canonicalRegex = regexp.MustCompile(`^\S+(\|\S+)?$`)
-	codeRegex      = regexp.MustCompile(`^[^\s]+(\s[^\s]+)*$`)
-	idRegex        = regexp.MustCompile(`^[A-Za-z0-9\-\.]{1,64}$`)
-	oidRegex       = regexp.MustCompile(`^urn:oid:[0-2](\.(0|[1-9][0-9]*))+$`)
+	codeRegex      = regexp.MustCompile(`^\S+(\s\S+)*$`)
+	idRegex        = regexp.MustCompile(`^[A-Za-z0-9\-.]{1,64}$`)
+	oidRegex       = regexp.MustCompile(`^urn:oid:[012](\.(0|[1-9]\d*))+$`)
 	uuidRegex      = regexp.MustCompile(`^urn:uuid:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
-	instantRegex   = regexp.MustCompile(`^([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))$`)
-	dateRegex      = regexp.MustCompile(`^([0-9]{4})(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)?$`)
-	dateTimeRegex  = regexp.MustCompile(`^([0-9]{4})(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?)?)?)?$`)
-	timeRegex      = regexp.MustCompile(`^([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?$`)
+	instantRegex   = regexp.MustCompile(`^(\d{4})-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):[0-5]\d:([0-5]\d|60)(\.\d+)?(Z|[+-]((0\d|1[0-3]):[0-5]\d|14:00))$`)
+	dateRegex      = regexp.MustCompile(`^(\d{4})(-(0[1-9]|1[012])(-(0[1-9]|[12]\d|3[01]))?)?$`)
+	dateTimeRegex  = regexp.MustCompile(`^(\d{4})(-(0[1-9]|1[012])(-(0[1-9]|[12]\d|3[01])(T([01]\d|2[0-3]):[0-5]\d:([0-5]\d|60)(\.\d+)?(Z|[+-]((0\d|1[0-3]):[0-5]\d|14:00))?)?)?)?$`)
+	timeRegex      = regexp.MustCompile(`^([01]\d|2[0-3]):[0-5]\d:([0-5]\d|60)(\.\d+)?$`)
 )
 
 // PrimitivesPhaseConfig returns the standard configuration for the primitives phase.

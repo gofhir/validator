@@ -23,14 +23,14 @@ type Pipeline struct {
 	metrics *fv.Metrics
 
 	// options holds pipeline configuration
-	options *PipelineOptions
+	options *Options
 
 	// mu protects concurrent access
 	mu sync.RWMutex
 }
 
-// PipelineOptions configures pipeline behavior.
-type PipelineOptions struct {
+// Options configures pipeline behavior.
+type Options struct {
 	// ParallelExecution enables running independent phases in parallel
 	ParallelExecution bool
 
@@ -47,9 +47,9 @@ type PipelineOptions struct {
 	FailFast bool
 }
 
-// DefaultPipelineOptions returns sensible defaults.
-func DefaultPipelineOptions() *PipelineOptions {
-	return &PipelineOptions{
+// DefaultOptions returns sensible defaults.
+func DefaultOptions() *Options {
+	return &Options{
 		ParallelExecution: true,
 		PhaseTimeout:      0, // no timeout
 		MaxErrors:         0, // unlimited
@@ -59,9 +59,9 @@ func DefaultPipelineOptions() *PipelineOptions {
 }
 
 // NewPipeline creates a new validation pipeline.
-func NewPipeline(opts *PipelineOptions) *Pipeline {
+func NewPipeline(opts *Options) *Pipeline {
 	if opts == nil {
-		opts = DefaultPipelineOptions()
+		opts = DefaultOptions()
 	}
 
 	return &Pipeline{
@@ -177,7 +177,7 @@ func (p *Pipeline) rebuildGroups() {
 	}
 
 	// Convert to ordered groups
-	var priorities []PhasePriority
+	priorities := make([]PhasePriority, 0, len(groups))
 	for priority := range groups {
 		priorities = append(priorities, priority)
 	}
@@ -225,7 +225,7 @@ func (p *Pipeline) Execute(ctx context.Context, pctx *Context) *fv.Result {
 		select {
 		case <-ctx.Done():
 			pctx.Result.AddIssue(fv.Warning(fv.IssueTypeTimeout).
-				Diagnostics("Validation cancelled: " + ctx.Err().Error()).
+				Diagnostics("Validation canceled: " + ctx.Err().Error()).
 				Build())
 			return pctx.Result
 		default:

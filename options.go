@@ -11,15 +11,15 @@ type Option func(*Options)
 // Options holds all configuration for the Validator.
 type Options struct {
 	// Validation flags
-	ValidateTerminology    bool
-	ValidateConstraints    bool
-	ValidateReferences     bool
-	ValidateExtensions     bool
+	ValidateTerminology     bool
+	ValidateConstraints     bool
+	ValidateReferences      bool
+	ValidateExtensions      bool
 	ValidateUnknownElements bool
-	ValidateMetaProfiles   bool
-	RequireProfile         bool
-	StrictMode             bool
-	ValidateQuestionnaire  bool
+	ValidateMetaProfiles    bool
+	RequireProfile          bool
+	StrictMode              bool
+	ValidateQuestionnaire   bool
 
 	// Performance
 	MaxErrors      int
@@ -142,9 +142,9 @@ func WithQuestionnaire(enable bool) Option {
 
 // WithMaxErrors sets the maximum number of errors before stopping validation.
 // Use 0 for unlimited.
-func WithMaxErrors(max int) Option {
+func WithMaxErrors(maxErrors int) Option {
 	return func(o *Options) {
-		o.MaxErrors = max
+		o.MaxErrors = maxErrors
 	}
 }
 

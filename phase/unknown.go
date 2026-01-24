@@ -138,7 +138,7 @@ func (p *UnknownElementsPhase) Validate(ctx context.Context, pctx *pipeline.Cont
 
 // upperFirst capitalizes the first letter of a string.
 func upperFirst(s string) string {
-	if len(s) == 0 {
+	if s == "" {
 		return s
 	}
 	return strings.ToUpper(s[:1]) + s[1:]
@@ -146,20 +146,20 @@ func upperFirst(s string) string {
 
 // standardElements contains element names that are allowed on all resources.
 var standardElements = map[string]bool{
-	"id":                true,
-	"meta":              true,
-	"implicitRules":     true,
-	"language":          true,
-	"text":              true,
-	"contained":         true,
-	"versionId":         true, // Meta.versionId
-	"lastUpdated":       true, // Meta.lastUpdated
-	"source":            true, // Meta.source
-	"profile":           true, // Meta.profile
-	"security":          true, // Meta.security
-	"tag":               true, // Meta.tag
-	"status":            true, // Narrative.status
-	"div":               true, // Narrative.div
+	"id":            true,
+	"meta":          true,
+	"implicitRules": true,
+	"language":      true,
+	"text":          true,
+	"contained":     true,
+	"versionId":     true, // Meta.versionId
+	"lastUpdated":   true, // Meta.lastUpdated
+	"source":        true, // Meta.source
+	"profile":       true, // Meta.profile
+	"security":      true, // Meta.security
+	"tag":           true, // Meta.tag
+	"status":        true, // Narrative.status
+	"div":           true, // Narrative.div
 }
 
 // isStandardElement returns true if the element is a standard metadata element.

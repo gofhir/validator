@@ -905,7 +905,7 @@ func TestReferencesPhase_ContextCancellation(t *testing.T) {
 	issues := p.Validate(ctx, pctx)
 
 	if len(issues) != 0 {
-		t.Errorf("Expected no issues on cancelled context, got %d", len(issues))
+		t.Errorf("Expected no issues on canceled context, got %d", len(issues))
 	}
 }
 

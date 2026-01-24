@@ -92,12 +92,12 @@ func TestStringSlicePool_Concurrent(t *testing.T) {
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
-		go func(i int) {
+		go func() {
 			defer wg.Done()
 			s := AcquireStringSlice()
 			*s = append(*s, "a", "b", "c")
 			ReleaseStringSlice(s)
-		}(i)
+		}()
 	}
 
 	wg.Wait()
@@ -109,12 +109,12 @@ func TestByteSlicePool_Concurrent(t *testing.T) {
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
-		go func(i int) {
+		go func() {
 			defer wg.Done()
 			b := AcquireByteSlice()
 			*b = append(*b, []byte("hello world")...)
 			ReleaseByteSlice(b)
-		}(i)
+		}()
 	}
 
 	wg.Wait()

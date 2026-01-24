@@ -240,7 +240,8 @@ func TestContext_GetNestedField(t *testing.T) {
 	if !ok {
 		t.Error("GetNestedField(meta.profile) should succeed")
 	}
-	if profiles, ok := v.([]any); !ok || len(profiles) != 1 {
+	profiles, isSlice := v.([]any)
+	if !isSlice || len(profiles) != 1 {
 		t.Errorf("GetNestedField(meta.profile) = %v; want [http://example.com/profile]", v)
 	}
 

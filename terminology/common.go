@@ -563,27 +563,27 @@ func (s *InMemoryTerminologyService) loadCommonCodeSystems() {
 
 	// Observation Status
 	s.addCodeSystem("http://hl7.org/fhir/observation-status", map[string]string{
-		"registered":    "Registered",
-		"preliminary":   "Preliminary",
-		"final":         "Final",
-		"amended":       "Amended",
-		"corrected":     "Corrected",
-		"cancelled":     "Cancelled",
+		"registered":       "Registered",
+		"preliminary":      "Preliminary",
+		"final":            "Final",
+		"amended":          "Amended",
+		"corrected":        "Corrected",
+		"canceled":         "Canceled",
 		"entered-in-error": "Entered in Error",
-		"unknown":       "Unknown",
+		"unknown":          "Unknown",
 	})
 
 	// Bundle Type
 	s.addCodeSystem("http://hl7.org/fhir/bundle-type", map[string]string{
-		"document":          "Document",
-		"message":           "Message",
-		"transaction":       "Transaction",
+		"document":             "Document",
+		"message":              "Message",
+		"transaction":          "Transaction",
 		"transaction-response": "Transaction Response",
-		"batch":             "Batch",
-		"batch-response":    "Batch Response",
-		"history":           "History List",
-		"searchset":         "Search Results",
-		"collection":        "Collection",
+		"batch":                "Batch",
+		"batch-response":       "Batch Response",
+		"history":              "History List",
+		"searchset":            "Search Results",
+		"collection":           "Collection",
 	})
 
 	// HTTP Verb
@@ -606,13 +606,13 @@ func (s *InMemoryTerminologyService) loadCommonCodeSystems() {
 
 	// Request Status
 	s.addCodeSystem("http://hl7.org/fhir/request-status", map[string]string{
-		"draft":          "Draft",
-		"active":         "Active",
-		"on-hold":        "On Hold",
-		"revoked":        "Revoked",
-		"completed":      "Completed",
+		"draft":            "Draft",
+		"active":           "Active",
+		"on-hold":          "On Hold",
+		"revoked":          "Revoked",
+		"completed":        "Completed",
 		"entered-in-error": "Entered in Error",
-		"unknown":        "Unknown",
+		"unknown":          "Unknown",
 	})
 
 	// Condition Clinical Status

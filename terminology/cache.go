@@ -27,7 +27,7 @@ type ShardedCache struct {
 
 // cacheShard represents a single shard of the cache.
 type cacheShard struct {
-	mu         sync.RWMutex
+	mu          sync.RWMutex
 	validations map[string]*cachedValidation
 	expansions  map[string]*cachedExpansion
 }
@@ -86,7 +86,7 @@ func NewShardedCache(config CacheConfig) *ShardedCache {
 
 	return &ShardedCache{
 		shards:    shards,
-		shardMask: uint32(shardCount - 1),
+		shardMask: uint32(shardCount - 1), //nolint:gosec // Safe: shardCount is always a small power of 2
 		ttl:       ttl,
 	}
 }

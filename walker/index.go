@@ -176,7 +176,7 @@ func (idx *ElementIndex) Paths() []string {
 
 // upperFirst capitalizes the first letter of a string.
 func upperFirst(s string) string {
-	if len(s) == 0 {
+	if s == "" {
 		return s
 	}
 	return strings.ToUpper(s[:1]) + s[1:]
@@ -184,7 +184,7 @@ func upperFirst(s string) string {
 
 // lowerFirst lowercases the first letter of a string.
 func lowerFirst(s string) string {
-	if len(s) == 0 {
+	if s == "" {
 		return s
 	}
 	return strings.ToLower(s[:1]) + s[1:]
@@ -196,11 +196,12 @@ func RemoveArrayIndices(path string) string {
 	result := make([]byte, 0, len(path))
 	inBracket := false
 	for i := 0; i < len(path); i++ {
-		if path[i] == '[' {
+		switch {
+		case path[i] == '[':
 			inBracket = true
-		} else if path[i] == ']' {
+		case path[i] == ']':
 			inBracket = false
-		} else if !inBracket {
+		case !inBracket:
 			result = append(result, path[i])
 		}
 	}

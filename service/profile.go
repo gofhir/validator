@@ -78,7 +78,6 @@ type Discriminator struct {
 	Path string
 }
 
-
 // --- Small Interfaces (Go idiom: 1-2 methods per interface) ---
 
 // StructureDefinitionFetcher fetches StructureDefinitions by URL.

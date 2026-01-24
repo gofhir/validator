@@ -116,9 +116,9 @@ func TestUnknownElementsPhase_UnknownElement(t *testing.T) {
 	pctx := &pipeline.Context{
 		ResourceType: "Patient",
 		ResourceMap: map[string]any{
-			"resourceType":  "Patient",
-			"id":            "123",
-			"unknownField":  "value", // This should trigger an error
+			"resourceType": "Patient",
+			"id":           "123",
+			"unknownField": "value", // This should trigger an error
 		},
 	}
 
@@ -251,7 +251,7 @@ func TestUnknownElementsPhase_ContextCancellation(t *testing.T) {
 	issues := p.Validate(ctx, pctx)
 
 	if len(issues) != 0 {
-		t.Errorf("Expected no issues on cancelled context, got %d", len(issues))
+		t.Errorf("Expected no issues on canceled context, got %d", len(issues))
 	}
 }
 

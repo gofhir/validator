@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gofhir/fhir/r4"
 	fv "github.com/gofhir/validator"
 	"github.com/gofhir/validator/loader"
 	"github.com/gofhir/validator/terminology"
 	"github.com/gofhir/validator/worker"
-	"github.com/gofhir/fhir/r4"
 )
 
 // Integration tests that test the full validation flow with all components
@@ -386,7 +386,7 @@ func TestIntegration_ContextCancellation(t *testing.T) {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
 
-	t.Run("cancelled context", func(t *testing.T) {
+	t.Run("canceled context", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel() // Cancel immediately
 

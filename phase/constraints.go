@@ -109,12 +109,13 @@ func (p *ConstraintsPhase) evaluateConstraint(
 	var err error
 
 	// Try well-known constraints first (faster and more reliable for standard constraints)
-	if p.wellKnown != nil && p.wellKnown.CanEvaluate(constraint.Key) {
+	switch {
+	case p.wellKnown != nil && p.wellKnown.CanEvaluate(constraint.Key):
 		satisfied, err = p.wellKnown.Evaluate(constraint.Key, contextValue)
-	} else if p.evaluator != nil {
+	case p.evaluator != nil:
 		// Fall back to FHIRPath evaluation
 		satisfied, err = p.evaluator.Evaluate(ctx, constraint.Expression, contextValue)
-	} else {
+	default:
 		// No evaluator available, skip this constraint
 		return issues
 	}
@@ -337,7 +338,7 @@ func (w *WellKnownConstraints) evaluateExt1(value any) (bool, error) {
 	hasValue := false
 
 	for key := range v {
-		if key == "extension" {
+		if key == ExtensionKey {
 			hasExtension = true
 		}
 		if len(key) > 5 && key[:5] == "value" {

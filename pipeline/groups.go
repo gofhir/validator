@@ -242,7 +242,7 @@ func groupByPriority(phases []*PhaseConfig) []*PhaseGroup {
 		byPriority[cfg.Priority] = append(byPriority[cfg.Priority], cfg)
 	}
 
-	var priorities []PhasePriority
+	priorities := make([]PhasePriority, 0, len(byPriority))
 	for p := range byPriority {
 		priorities = append(priorities, p)
 	}

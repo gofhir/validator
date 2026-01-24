@@ -99,7 +99,7 @@ func TestShardedCache_Concurrent(t *testing.T) {
 	wg.Add(numGoroutines)
 
 	for i := 0; i < numGoroutines; i++ {
-		go func(id int) {
+		go func() {
 			defer wg.Done()
 			for j := 0; j < numOperations; j++ {
 				key := MakeValidationKey("http://example.com", "code", "")
@@ -115,7 +115,7 @@ func TestShardedCache_Concurrent(t *testing.T) {
 					cache.GetValidation(key)
 				}
 			}
-		}(i)
+		}()
 	}
 
 	wg.Wait()

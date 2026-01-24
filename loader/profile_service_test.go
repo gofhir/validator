@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gofhir/validator/service"
 	"github.com/gofhir/fhir/r4"
+	"github.com/gofhir/validator/service"
 )
 
 func TestInMemoryProfileService(t *testing.T) {
@@ -131,7 +131,7 @@ func TestInMemoryProfileService(t *testing.T) {
 
 		_, err := svc.FetchStructureDefinition(ctx, "http://example.org/any")
 		if err == nil {
-			t.Error("expected error for cancelled context")
+			t.Error("expected error for canceled context")
 		}
 	})
 

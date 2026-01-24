@@ -9,17 +9,17 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gofhir/validator/service"
 	"github.com/gofhir/fhir/r4"
+	"github.com/gofhir/validator/service"
 )
 
 // InMemoryProfileService implements service.ProfileResolver using in-memory storage.
 // It stores pre-converted StructureDefinitions indexed by URL and Type.
 type InMemoryProfileService struct {
-	mu          sync.RWMutex
-	byURL       map[string]*service.StructureDefinition
-	byType      map[string]*service.StructureDefinition
-	converter   *R4Converter
+	mu        sync.RWMutex
+	byURL     map[string]*service.StructureDefinition
+	byType    map[string]*service.StructureDefinition
+	converter *R4Converter
 }
 
 // NewInMemoryProfileService creates a new in-memory profile service.

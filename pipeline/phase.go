@@ -12,7 +12,7 @@ import (
 // Phases should be:
 // - Stateless: All state should be in the Context
 // - Thread-safe: Multiple goroutines may call Validate concurrently
-// - Fast-failing: Return early if ctx is cancelled or max errors reached
+// - Fast-failing: Return early if ctx is canceled or max errors reached
 type Phase interface {
 	// Name returns the unique identifier for this phase.
 	Name() string
@@ -50,20 +50,20 @@ type PhaseID string
 
 // Standard phase identifiers.
 const (
-	PhaseIDStructure      PhaseID = "structure"
-	PhaseIDPrimitives     PhaseID = "primitives"
-	PhaseIDCardinality    PhaseID = "cardinality"
-	PhaseIDFixedPattern   PhaseID = "fixed-pattern"
-	PhaseIDSlicing        PhaseID = "slicing"
-	PhaseIDConstraints    PhaseID = "constraints"
-	PhaseIDTerminology    PhaseID = "terminology"
-	PhaseIDReferences     PhaseID = "references"
-	PhaseIDExtensions     PhaseID = "extensions"
-	PhaseIDBundle         PhaseID = "bundle"
-	PhaseIDProfile        PhaseID = "profile"
-	PhaseIDQuestionnaire  PhaseID = "questionnaire"
-	PhaseIDUnknownElems   PhaseID = "unknown-elements"
-	PhaseIDMustSupport    PhaseID = "must-support"
+	PhaseIDStructure     PhaseID = "structure"
+	PhaseIDPrimitives    PhaseID = "primitives"
+	PhaseIDCardinality   PhaseID = "cardinality"
+	PhaseIDFixedPattern  PhaseID = "fixed-pattern"
+	PhaseIDSlicing       PhaseID = "slicing"
+	PhaseIDConstraints   PhaseID = "constraints"
+	PhaseIDTerminology   PhaseID = "terminology"
+	PhaseIDReferences    PhaseID = "references"
+	PhaseIDExtensions    PhaseID = "extensions"
+	PhaseIDBundle        PhaseID = "bundle"
+	PhaseIDProfile       PhaseID = "profile"
+	PhaseIDQuestionnaire PhaseID = "questionnaire"
+	PhaseIDUnknownElems  PhaseID = "unknown-elements"
+	PhaseIDMustSupport   PhaseID = "must-support"
 )
 
 // PhasePriority defines the order in which phases should run.

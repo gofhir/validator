@@ -110,7 +110,7 @@ func (p *CardinalityPhase) validateMinCardinality(
 func (p *CardinalityPhase) parentExists(resource map[string]any, elementPath, resourceType string, elementIndex map[string]*service.ElementDefinition) bool {
 	// Remove resource type prefix
 	path := elementPath
-	if len(resourceType) > 0 && len(path) > len(resourceType)+1 {
+	if resourceType != "" && len(path) > len(resourceType)+1 {
 		if path[:len(resourceType)+1] == resourceType+"." {
 			path = path[len(resourceType)+1:]
 		}
@@ -171,7 +171,7 @@ func (p *CardinalityPhase) validateMaxCardinality(
 	ctx context.Context,
 	pctx *pipeline.Context,
 	profile *service.StructureDefinition,
-	elementIndex map[string]*service.ElementDefinition,
+	_ map[string]*service.ElementDefinition,
 ) []fv.Issue {
 	var issues []fv.Issue
 
@@ -191,12 +191,12 @@ func (p *CardinalityPhase) validateMaxCardinality(
 
 		// Check if this is an array
 		if arr, ok := value.([]any); ok {
-			max := parseMax(def.Max)
-			if max > 0 && len(arr) > max {
+			maxCard := parseMax(def.Max)
+			if maxCard > 0 && len(arr) > maxCard {
 				issues = append(issues, ErrorIssue(
 					fv.IssueTypeValue,
 					fmt.Sprintf("Element '%s' has %d items but max is %d",
-						path, len(arr), max),
+						path, len(arr), maxCard),
 					path,
 					p.Name(),
 				))
@@ -225,7 +225,7 @@ func (p *CardinalityPhase) validateMaxCardinality(
 func (p *CardinalityPhase) countElementOccurrences(resource map[string]any, elementPath, resourceType string) int {
 	// Remove resource type prefix if present
 	path := elementPath
-	if len(resourceType) > 0 && len(path) > len(resourceType)+1 {
+	if resourceType != "" && len(path) > len(resourceType)+1 {
 		if path[:len(resourceType)+1] == resourceType+"." {
 			path = path[len(resourceType)+1:]
 		}
@@ -294,11 +294,11 @@ func splitPath(path string) []string {
 
 // parseMax parses a max cardinality string.
 // Returns -1 for "*" (unlimited), or the numeric value.
-func parseMax(max string) int {
-	if max == "*" {
+func parseMax(maxStr string) int {
+	if maxStr == "*" {
 		return -1
 	}
-	n, err := strconv.Atoi(max)
+	n, err := strconv.Atoi(maxStr)
 	if err != nil {
 		return -1
 	}
