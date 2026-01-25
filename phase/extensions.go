@@ -610,43 +610,24 @@ func (p *ExtensionsPhase) getElementTypeAtPath(ctx context.Context, resourceType
 
 	// Resolve each segment of the path
 	for i, segment := range segments {
-		// Handle choice type naming (e.g., valueCodeableConcept -> value[x])
-		choiceBaseName, choiceType := p.parseChoiceTypeName(segment)
-
 		var foundType string
 		var foundPath string
 
-		if choiceType != "" {
-			// This is a choice type like "valueCodeableConcept"
-			// Look for the element definition as "value[x]"
-			lookupPath := currentBasePath + "." + choiceBaseName + "[x]"
-			for _, elem := range currentProfile.Snapshot {
-				if elem.Path == lookupPath {
-					// Verify that the choice type is valid for this element
-					for _, t := range elem.Types {
-						if strings.EqualFold(t.Code, choiceType) {
-							foundType = t.Code
-							foundPath = lookupPath
-							break
-						}
-					}
-					break
+		// First, try direct lookup
+		lookupPath := currentBasePath + "." + segment
+		for _, elem := range currentProfile.Snapshot {
+			if elem.Path == lookupPath {
+				if len(elem.Types) > 0 {
+					foundType = elem.Types[0].Code
+					foundPath = lookupPath
 				}
+				break
 			}
 		}
 
+		// If not found, check if this could be a choice type (dynamically from SD)
 		if foundType == "" {
-			// Not a choice type or not found, try direct lookup
-			lookupPath := currentBasePath + "." + segment
-			for _, elem := range currentProfile.Snapshot {
-				if elem.Path == lookupPath {
-					if len(elem.Types) > 0 {
-						foundType = elem.Types[0].Code
-						foundPath = lookupPath
-					}
-					break
-				}
-			}
+			foundType, foundPath = p.matchChoiceTypeFromProfile(currentProfile, currentBasePath, segment)
 		}
 
 		if foundType == "" {
@@ -684,33 +665,54 @@ func (p *ExtensionsPhase) getElementTypeAtPath(ctx context.Context, resourceType
 	return ""
 }
 
-// parseChoiceTypeName parses a choice type element name like "valueCodeableConcept"
-// and returns the base name ("value") and the type ("CodeableConcept").
-// If not a choice type, returns the original segment and empty string.
-func (p *ExtensionsPhase) parseChoiceTypeName(segment string) (baseName, typeName string) {
-	// Known choice type prefixes in FHIR
-	choicePrefixes := []string{
-		"value", "effective", "onset", "abatement", "occurrence",
-		"performed", "timing", "product", "medication", "item",
-		"subject", "entity", "location", "born", "age", "deceased",
-		"multipleBirth", "event", "allowed", "used", "diagnosis",
-		"procedure", "reason", "as", "additive", "doseAndRate",
-		"serviced", "characteristic", "definition", "code", "answer",
-		"initial", "pattern", "example", "minValue", "maxValue",
-		"fixed", "defaultValue",
-	}
+// matchChoiceTypeFromProfile dynamically matches a segment against choice type elements
+// in the given profile. Choice types are elements whose path ends with [x].
+// For example, if the profile has "Observation.value[x]" with types [Quantity, string, CodeableConcept],
+// and the segment is "valueQuantity", this returns ("Quantity", "Observation.value[x]").
+func (p *ExtensionsPhase) matchChoiceTypeFromProfile(
+	profile *service.StructureDefinition,
+	basePath, segment string,
+) (typeName, elementPath string) {
+	// Scan all elements in the profile looking for choice types ([x])
+	for _, elem := range profile.Snapshot {
+		// Check if this element is under our current base path and is a choice type
+		if !strings.HasPrefix(elem.Path, basePath+".") {
+			continue
+		}
+		if !strings.HasSuffix(elem.Path, "[x]") {
+			continue
+		}
 
-	for _, prefix := range choicePrefixes {
-		if strings.HasPrefix(segment, prefix) && len(segment) > len(prefix) {
-			suffix := segment[len(prefix):]
-			// Check if suffix starts with uppercase (indicating a type name)
-			if suffix != "" && suffix[0] >= 'A' && suffix[0] <= 'Z' {
-				return prefix, suffix
+		// Extract the element name (e.g., "value" from "Observation.value[x]")
+		pathWithoutBase := elem.Path[len(basePath)+1:] // e.g., "value[x]"
+		choiceBaseName := strings.TrimSuffix(pathWithoutBase, "[x]")
+
+		// Check if segment starts with this base name
+		if !strings.HasPrefix(segment, choiceBaseName) {
+			continue
+		}
+
+		// Extract the type suffix (e.g., "Quantity" from "valueQuantity")
+		typeSuffix := segment[len(choiceBaseName):]
+		if typeSuffix == "" {
+			continue
+		}
+
+		// Type suffix must start with uppercase
+		if typeSuffix[0] < 'A' || typeSuffix[0] > 'Z' {
+			continue
+		}
+
+		// Validate that this type is allowed for this choice element
+		for _, t := range elem.Types {
+			// Compare case-insensitively (FHIR types are capitalized)
+			if strings.EqualFold(t.Code, typeSuffix) {
+				return t.Code, elem.Path
 			}
 		}
 	}
 
-	return segment, ""
+	return "", ""
 }
 
 // getParentTypeWithRelativePath builds a DataType.element path for context matching.
