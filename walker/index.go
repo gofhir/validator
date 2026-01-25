@@ -278,3 +278,72 @@ func ParentPath(path string) string {
 	}
 	return path[:idx]
 }
+
+// ToFHIRPath converts a JSON-style path to FHIRPath format.
+// It adds the resourceType prefix and converts choice types to ofType() syntax.
+//
+// The conversion uses the ElementIndex to dynamically detect choice types
+// based on the StructureDefinition, rather than hardcoded patterns.
+//
+// Examples:
+//   - ToFHIRPath("Patient", "name[0].family", nil) -> "Patient.name[0].family"
+//   - ToFHIRPath("Patient", "extension[0].valueCodeableConcept.coding[1].system", index)
+//     -> "Patient.extension[0].value.ofType(CodeableConcept).coding[1].system"
+func ToFHIRPath(resourceType, path string, index *ElementIndex) string {
+	if path == "" {
+		return resourceType
+	}
+
+	// If path already has resourceType prefix, remove it for processing
+	if strings.HasPrefix(path, resourceType+".") {
+		path = path[len(resourceType)+1:]
+	}
+
+	// Split path into segments, preserving array indices
+	segments := strings.Split(path, ".")
+
+	var result strings.Builder
+	result.WriteString(resourceType)
+
+	// Track the current base path for nested choice type resolution
+	var currentBasePath strings.Builder
+	currentBasePath.WriteString(resourceType)
+
+	for _, seg := range segments {
+		// Extract base segment (without array index)
+		baseSeg := seg
+		indexSuffix := ""
+		if idx := strings.Index(seg, "["); idx != -1 {
+			baseSeg = seg[:idx]
+			indexSuffix = seg[idx:]
+		}
+
+		// Try to resolve as choice type using the index
+		choiceResult := ResolveChoiceTypeWithPrefix(baseSeg, currentBasePath.String(), index)
+
+		if choiceResult != nil && choiceResult.IsChoice {
+			// This is a choice type - convert to ofType() syntax
+			result.WriteByte('.')
+			result.WriteString(choiceResult.BaseName)
+			result.WriteString(indexSuffix)
+			result.WriteString(".ofType(")
+			result.WriteString(upperFirst(choiceResult.TypeName))
+			result.WriteByte(')')
+
+			// Update base path to include the type for further navigation
+			currentBasePath.WriteByte('.')
+			currentBasePath.WriteString(choiceResult.BaseName)
+			currentBasePath.WriteString("[x]")
+		} else {
+			// Regular segment - add as-is
+			result.WriteByte('.')
+			result.WriteString(seg)
+
+			// Update base path (without array indices for element lookup)
+			currentBasePath.WriteByte('.')
+			currentBasePath.WriteString(baseSeg)
+		}
+	}
+
+	return result.String()
+}
