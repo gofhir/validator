@@ -680,6 +680,84 @@ func (s *InMemoryTerminologyService) loadCommonCodeSystems() {
 		"http://hl7.org/fhir/ValueSet/publication-status",
 		"http://hl7.org/fhir/publication-status",
 	)
+
+	// IANA MIME Types (BCP-13) - commonly used in FHIR
+	// System: urn:ietf:bcp:13
+	// This is a subset of IANA media types commonly used in healthcare
+	s.addCodeSystem("urn:ietf:bcp:13", map[string]string{
+		// FHIR-specific MIME types
+		"application/fhir+json":   "FHIR JSON",
+		"application/fhir+xml":    "FHIR XML",
+		"application/fhir+ndjson": "FHIR NDJSON",
+		"application/fhir+turtle": "FHIR Turtle",
+
+		// Common document formats
+		"application/pdf":    "PDF Document",
+		"application/msword": "Microsoft Word",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Microsoft Word (OpenXML)",
+		"application/rtf": "Rich Text Format",
+
+		// Image formats
+		"image/jpeg":    "JPEG Image",
+		"image/png":     "PNG Image",
+		"image/gif":     "GIF Image",
+		"image/tiff":    "TIFF Image",
+		"image/bmp":     "BMP Image",
+		"image/svg+xml": "SVG Image",
+		"image/webp":    "WebP Image",
+
+		// Audio/Video formats
+		"audio/mpeg": "MP3 Audio",
+		"audio/wav":  "WAV Audio",
+		"video/mp4":  "MP4 Video",
+		"video/mpeg": "MPEG Video",
+		"video/webm": "WebM Video",
+
+		// Text formats
+		"text/plain":    "Plain Text",
+		"text/html":     "HTML",
+		"text/xml":      "XML",
+		"text/csv":      "CSV",
+		"text/rtf":      "Rich Text Format",
+		"text/markdown": "Markdown",
+
+		// Application formats
+		"application/json":         "JSON",
+		"application/xml":          "XML",
+		"application/octet-stream": "Binary Data",
+		"application/zip":          "ZIP Archive",
+		"application/gzip":         "GZIP Archive",
+
+		// Healthcare-specific formats
+		"application/hl7-v2":                       "HL7 v2.x Message",
+		"application/hl7-v2+er7":                   "HL7 v2.x ER7",
+		"application/hl7-v2+xml":                   "HL7 v2.x XML",
+		"application/hl7-cda+xml":                  "HL7 CDA",
+		"application/hl7-sda+xml":                  "HL7 SDA",
+		"application/hl7-sda+xml; variant=XDA/XDS": "HL7 SDA XDA/XDS",
+
+		// DICOM formats
+		"application/dicom":                         "DICOM",
+		"application/dicom+json":                    "DICOM JSON",
+		"application/dicom+xml":                     "DICOM XML",
+		"application/dicom; variant=DICOM WADO-RS":  "DICOM WADO-RS",
+		"application/dicom; variant=DICOM QIDO-RS":  "DICOM QIDO-RS",
+		"application/dicom; variant=DICOM STOW-RS":  "DICOM STOW-RS",
+		"application/dicom; variant=DICOM WADO-URI": "DICOM WADO-URI",
+		"application/dicom; variant=IHE IID":        "IHE IID",
+
+		// IHE profiles
+		"application/xop+xml": "XOP XML",
+		"multipart/related":   "Multipart Related",
+
+		// Other common formats
+		"application/x-www-form-urlencoded": "URL Encoded Form",
+		"multipart/form-data":               "Multipart Form Data",
+	})
+	s.addValueSetFromCodeSystem(
+		"http://hl7.org/fhir/ValueSet/mimetypes",
+		"urn:ietf:bcp:13",
+	)
 }
 
 // addCodeSystem adds a simple code system to the terminology service.

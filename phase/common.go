@@ -126,6 +126,17 @@ func removeArrayIndices(path string) string {
 	return string(result)
 }
 
+// parentPath returns the parent path by removing the last segment.
+// Example: "Patient.name.family" -> "Patient.name"
+// Returns empty string if no parent (single segment or empty).
+func parentPath(path string) string {
+	idx := strings.LastIndex(path, ".")
+	if idx < 0 {
+		return ""
+	}
+	return path[:idx]
+}
+
 // GetResourceType extracts the resourceType from a resource map.
 func GetResourceType(resource map[string]any) string {
 	if rt, ok := resource["resourceType"].(string); ok {

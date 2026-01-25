@@ -24,20 +24,21 @@ type StructureDefinition struct {
 
 // ElementDefinition represents a FHIR ElementDefinition.
 type ElementDefinition struct {
-	ID          string
-	Path        string
-	SliceName   string
-	Min         int
-	Max         string
-	Types       []TypeRef
-	Fixed       any
-	Pattern     any
-	Binding     *Binding
-	Constraints []Constraint
-	MustSupport bool
-	IsModifier  bool
-	IsSummary   bool
-	Slicing     *Slicing
+	ID               string
+	Path             string
+	SliceName        string
+	Min              int
+	Max              string
+	Types            []TypeRef
+	Fixed            any
+	Pattern          any
+	Binding          *Binding
+	Constraints      []Constraint
+	MustSupport      bool
+	IsModifier       bool
+	IsSummary        bool
+	Slicing          *Slicing
+	ContentReference string // Reference to another element definition (e.g., "#CapabilityStatement.rest.resource.operation")
 }
 
 // TypeRef represents a type reference in an ElementDefinition.
