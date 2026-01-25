@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	fv "github.com/gofhir/validator"
 	"github.com/gofhir/validator/pipeline"
 	"github.com/gofhir/validator/service"
+	"github.com/gofhir/validator/walker"
 )
 
 // CardinalityPhase validates element cardinality (min/max constraints).
@@ -222,13 +224,25 @@ func (p *CardinalityPhase) validateMaxCardinality(
 }
 
 // countElementOccurrences counts how many times an element appears.
+// For choice types (paths ending in [x]), it checks for any valid variant.
 func (p *CardinalityPhase) countElementOccurrences(resource map[string]any, elementPath, resourceType string) int {
+	// If the path is just the resource type itself (root element),
+	// return 1 since the resource exists
+	if elementPath == resourceType {
+		return 1
+	}
+
 	// Remove resource type prefix if present
 	path := elementPath
 	if resourceType != "" && len(path) > len(resourceType)+1 {
 		if path[:len(resourceType)+1] == resourceType+"." {
 			path = path[len(resourceType)+1:]
 		}
+	}
+
+	// Check if this is a choice type (ends with [x])
+	if strings.HasSuffix(path, "[x]") {
+		return p.countChoiceTypeOccurrences(resource, path)
 	}
 
 	// Navigate to the element
@@ -242,6 +256,59 @@ func (p *CardinalityPhase) countElementOccurrences(resource map[string]any, elem
 		return len(arr)
 	}
 	return 1
+}
+
+// countChoiceTypeOccurrences counts occurrences of any choice type variant.
+// For a path like "event[x]", it looks for "eventCoding", "eventUri", etc.
+func (p *CardinalityPhase) countChoiceTypeOccurrences(resource map[string]any, path string) int {
+	// Get the base name (e.g., "event" from "event[x]")
+	baseName := strings.TrimSuffix(path, "[x]")
+
+	// Handle nested paths (e.g., "medication[x]" or "component.value[x]")
+	parts := splitPath(baseName)
+	if len(parts) == 0 {
+		return 0
+	}
+
+	// Navigate to the parent element
+	var parent map[string]any
+	if len(parts) == 1 {
+		parent = resource
+	} else {
+		parentPath := strings.Join(parts[:len(parts)-1], ".")
+		parentValue := getValueAtPath(resource, parentPath)
+		if parentValue == nil {
+			return 0
+		}
+		var ok bool
+		parent, ok = parentValue.(map[string]any)
+		if !ok {
+			return 0
+		}
+	}
+
+	// Get the final element name (e.g., "event" or "value")
+	elementBase := parts[len(parts)-1]
+
+	// Look for any choice type variant in the parent
+	for key := range parent {
+		if strings.HasPrefix(key, elementBase) && len(key) > len(elementBase) {
+			// Check if this is a valid choice type suffix
+			suffix := key[len(elementBase):]
+			for _, validSuffix := range walker.ChoiceTypeSuffixes {
+				if suffix == validSuffix {
+					// Found a valid choice type variant
+					value := parent[key]
+					if arr, ok := value.([]any); ok {
+						return len(arr)
+					}
+					return 1
+				}
+			}
+		}
+	}
+
+	return 0
 }
 
 // getValueAtPath navigates to a value using dot-notation path.
