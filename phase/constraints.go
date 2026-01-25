@@ -52,8 +52,8 @@ func (p *ConstraintsPhase) Validate(ctx context.Context, pctx *pipeline.Context)
 		return issues
 	}
 
-	// Skip if no evaluator
-	if p.evaluator == nil {
+	// Skip only if no evaluator AND no well-known constraints handler
+	if p.evaluator == nil && p.wellKnown == nil {
 		return issues
 	}
 
@@ -281,7 +281,7 @@ type WellKnownConstraints struct{}
 // CanEvaluate returns true if this constraint can be evaluated without FHIRPath.
 func (w *WellKnownConstraints) CanEvaluate(key string) bool {
 	switch key {
-	case "ele-1", "ext-1":
+	case "ele-1", "ext-1", "dom-6":
 		return true
 	default:
 		return false
@@ -295,6 +295,8 @@ func (w *WellKnownConstraints) Evaluate(key string, value any) (bool, error) {
 		return w.evaluateEle1(value)
 	case "ext-1":
 		return w.evaluateExt1(value)
+	case "dom-6":
+		return w.evaluateDom6(value)
 	default:
 		return false, fmt.Errorf("unknown constraint: %s", key)
 	}
@@ -348,4 +350,37 @@ func (w *WellKnownConstraints) evaluateExt1(value any) (bool, error) {
 
 	// XOR: one or the other, not both
 	return hasExtension != hasValue, nil
+}
+
+// evaluateDom6 evaluates the dom-6 constraint.
+// dom-6: A resource should have narrative for robust management
+// Expression: text.`div`.exists()
+func (w *WellKnownConstraints) evaluateDom6(value any) (bool, error) {
+	if value == nil {
+		return false, nil
+	}
+
+	resource, ok := value.(map[string]any)
+	if !ok {
+		return false, nil
+	}
+
+	// Check if text.div exists
+	text, ok := resource["text"].(map[string]any)
+	if !ok {
+		return false, nil
+	}
+
+	// Check if div exists and is not empty
+	div, exists := text["div"]
+	if !exists {
+		return false, nil
+	}
+
+	// div should be a non-empty string
+	if divStr, ok := div.(string); ok {
+		return divStr != "", nil
+	}
+
+	return false, nil
 }

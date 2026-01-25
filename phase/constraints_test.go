@@ -252,6 +252,73 @@ func TestConstraintsPhase_ConstraintViolated_Warning(t *testing.T) {
 	}
 }
 
+func TestConstraintsPhase_Dom6_BestPractice_Warning(t *testing.T) {
+	// This test verifies that dom-6 (best practice for narrative) produces a warning
+	// when a resource doesn't have text.div
+	mockProfile := &mockProfileResolver{
+		profiles: map[string]*service.StructureDefinition{
+			"Patient": {
+				URL:  "http://hl7.org/fhir/StructureDefinition/Patient",
+				Type: "Patient",
+				Snapshot: []service.ElementDefinition{
+					{Path: "Patient", Constraints: []service.Constraint{
+						{Key: "dom-6", Severity: "warning", Expression: "text.`div`.exists()", Human: "A resource should have narrative for robust management"},
+					}},
+				},
+			},
+		},
+	}
+
+	p := NewConstraintsPhase(mockProfile, nil) // No evaluator needed, dom-6 is well-known
+	ctx := context.Background()
+
+	// Test without narrative
+	pctx := &pipeline.Context{
+		ResourceType: "Patient",
+		ResourceMap: map[string]any{
+			"resourceType": "Patient",
+			"id":           "example",
+		},
+	}
+
+	issues := p.Validate(ctx, pctx)
+
+	hasDom6Warning := false
+	for _, issue := range issues {
+		if issue.Code == fv.IssueTypeInvariant && issue.Severity == fv.SeverityWarning {
+			hasDom6Warning = true
+			if issue.Diagnostics == "" || len(issue.Expression) == 0 {
+				t.Error("dom-6 warning should have diagnostics and expression")
+			}
+		}
+	}
+
+	if !hasDom6Warning {
+		t.Error("Expected dom-6 warning for resource without narrative")
+	}
+
+	// Test WITH narrative - should not produce warning
+	pctxWithNarrative := &pipeline.Context{
+		ResourceType: "Patient",
+		ResourceMap: map[string]any{
+			"resourceType": "Patient",
+			"id":           "example",
+			"text": map[string]any{
+				"status": "generated",
+				"div":    "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient narrative</div>",
+			},
+		},
+	}
+
+	issuesWithNarrative := p.Validate(ctx, pctxWithNarrative)
+
+	for _, issue := range issuesWithNarrative {
+		if issue.Code == fv.IssueTypeInvariant && issue.Severity == fv.SeverityWarning {
+			t.Error("Should not produce dom-6 warning when narrative exists")
+		}
+	}
+}
+
 func TestConstraintsPhase_MultipleConstraints(t *testing.T) {
 	mockProfile := &mockProfileResolver{
 		profiles: map[string]*service.StructureDefinition{
@@ -612,6 +679,7 @@ func TestWellKnownConstraints_CanEvaluate(t *testing.T) {
 	}{
 		{"ele-1", true},
 		{"ext-1", true},
+		{"dom-6", true},
 		{"unknown", false},
 		{"pat-1", false},
 	}
@@ -684,6 +752,37 @@ func TestWellKnownConstraints_EvaluateExt1(t *testing.T) {
 			}
 			if result != tt.expected {
 				t.Errorf("Evaluate(ext-1, %v) = %v; want %v", tt.value, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestWellKnownConstraints_EvaluateDom6(t *testing.T) {
+	w := &WellKnownConstraints{}
+
+	tests := []struct {
+		name     string
+		value    any
+		expected bool
+	}{
+		{"nil", nil, false},
+		{"not a map", "string", false},
+		{"no text", map[string]any{"id": "123"}, false},
+		{"text without div", map[string]any{"text": map[string]any{"status": "generated"}}, false},
+		{"text with empty div", map[string]any{"text": map[string]any{"div": ""}}, false},
+		{"text with div", map[string]any{"text": map[string]any{"status": "generated", "div": "<div>Some narrative</div>"}}, true},
+		{"text with non-string div", map[string]any{"text": map[string]any{"div": 123}}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := w.Evaluate("dom-6", tt.value)
+			if err != nil {
+				t.Errorf("Evaluate(dom-6, %v) error: %v", tt.value, err)
+				return
+			}
+			if result != tt.expected {
+				t.Errorf("Evaluate(dom-6, %v) = %v; want %v", tt.value, result, tt.expected)
 			}
 		})
 	}
