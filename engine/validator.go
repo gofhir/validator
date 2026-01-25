@@ -170,14 +170,23 @@ func (v *Validator) Validate(ctx context.Context, resource []byte) (*fv.Result, 
 
 // ValidateMap validates a FHIR resource that's already been parsed to a map.
 func (v *Validator) ValidateMap(ctx context.Context, resourceMap map[string]any) (*fv.Result, error) {
+	return v.validateMapInternal(ctx, resourceMap, "")
+}
+
+// validateMapInternal validates a FHIR resource with an optional path prefix for nested resources.
+// When pathPrefix is empty, this is a root-level validation; otherwise it's a nested resource.
+func (v *Validator) validateMapInternal(ctx context.Context, resourceMap map[string]any, pathPrefix string) (*fv.Result, error) {
 	start := time.Now()
+	isRootValidation := pathPrefix == ""
 
 	// Get resource type
 	resourceType, ok := resourceMap["resourceType"].(string)
 	if !ok || resourceType == "" {
 		result := fv.AcquireResult()
-		result.AddError(fv.IssueTypeStructure, "Resource must have a 'resourceType' element", "")
-		v.metrics.RecordValidation(time.Since(start), false)
+		result.AddError(fv.IssueTypeStructure, "Resource must have a 'resourceType' element", pathPrefix)
+		if isRootValidation {
+			v.metrics.RecordValidation(time.Since(start), false)
+		}
 		return result, nil
 	}
 
@@ -215,8 +224,92 @@ func (v *Validator) ValidateMap(ctx context.Context, resourceMap map[string]any)
 	pctx.Result = nil // Don't release the result with the context
 	pipeline.ReleaseContext(pctx)
 
-	v.metrics.RecordValidation(time.Since(start), result.Valid)
+	// If this is a Bundle, validate entry resources recursively (supports nested Bundles)
+	if resourceType == "Bundle" {
+		v.validateBundleEntries(ctx, resourceMap, result, pathPrefix)
+	}
+
+	// Apply path prefix if this is a nested resource
+	if !isRootValidation {
+		v.prefixIssuePaths(result, pathPrefix)
+	}
+
+	// Only record metrics for root-level validations to avoid inflating counts
+	if isRootValidation {
+		v.metrics.RecordValidation(time.Since(start), result.Valid)
+	}
 	return result, nil
+}
+
+// validateBundleEntries validates all resources within Bundle entries.
+// parentPath is the path prefix of the parent Bundle (empty for root Bundle).
+func (v *Validator) validateBundleEntries(ctx context.Context, bundle map[string]any, result *fv.Result, parentPath string) {
+	entries, ok := bundle["entry"].([]any)
+	if !ok || len(entries) == 0 {
+		return
+	}
+
+	for i, entry := range entries {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		entryMap, ok := entry.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		resource, ok := entryMap["resource"].(map[string]any)
+		if !ok {
+			continue
+		}
+
+		// Build the path prefix for this entry's resource
+		// For root Bundle: "Bundle.entry[0].resource"
+		// For nested Bundle: "Bundle.entry[0].resource.Bundle.entry[1].resource"
+		var entryPath string
+		if parentPath == "" {
+			entryPath = fmt.Sprintf("Bundle.entry[%d].resource", i)
+		} else {
+			entryPath = fmt.Sprintf("%s.Bundle.entry[%d].resource", parentPath, i)
+		}
+
+		// Validate the entry resource
+		entryResult, err := v.validateMapInternal(ctx, resource, entryPath)
+		if err != nil {
+			result.AddError(fv.IssueTypeProcessing,
+				fmt.Sprintf("Error validating entry resource: %v", err),
+				entryPath)
+			continue
+		}
+
+		// Merge issues from entry validation into main result
+		result.AddIssues(entryResult.Issues)
+		entryResult.Release()
+	}
+}
+
+// prefixIssuePaths adds a path prefix to all issues in the result.
+// This is safe to call without locking because it's called after the pipeline
+// completes and before the result is returned to the caller.
+func (v *Validator) prefixIssuePaths(result *fv.Result, prefix string) {
+	for i := range result.Issues {
+		issue := &result.Issues[i]
+		if len(issue.Expression) == 0 {
+			issue.Expression = []string{prefix}
+		} else {
+			// Prefix each expression path
+			for j, expr := range issue.Expression {
+				if expr == "" {
+					issue.Expression[j] = prefix
+				} else {
+					issue.Expression[j] = prefix + "." + expr
+				}
+			}
+		}
+	}
 }
 
 // extractMetaProfiles extracts profile URLs from resource.meta.profile.
