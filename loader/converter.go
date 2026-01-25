@@ -59,20 +59,21 @@ func (c *R4Converter) convertElementDefinitions(elements []r4.ElementDefinition)
 // convertElementDefinition converts a single r4.ElementDefinition to service.ElementDefinition.
 func (c *R4Converter) convertElementDefinition(ed *r4.ElementDefinition) service.ElementDefinition {
 	result := service.ElementDefinition{
-		ID:          derefString(ed.Id),
-		Path:        derefString(ed.Path),
-		SliceName:   derefString(ed.SliceName),
-		Min:         c.convertMin(ed.Min),
-		Max:         derefString(ed.Max),
-		Types:       c.convertTypes(ed.Type),
-		Binding:     c.convertBinding(ed.Binding),
-		Constraints: c.convertConstraints(ed.Constraint),
-		MustSupport: derefBool(ed.MustSupport),
-		IsModifier:  derefBool(ed.IsModifier),
-		IsSummary:   derefBool(ed.IsSummary),
-		Slicing:     c.convertSlicing(ed.Slicing),
-		Fixed:       c.extractFixedValue(ed),
-		Pattern:     c.extractPatternValue(ed),
+		ID:               derefString(ed.Id),
+		Path:             derefString(ed.Path),
+		SliceName:        derefString(ed.SliceName),
+		Min:              c.convertMin(ed.Min),
+		Max:              derefString(ed.Max),
+		Types:            c.convertTypes(ed.Type),
+		Binding:          c.convertBinding(ed.Binding),
+		Constraints:      c.convertConstraints(ed.Constraint),
+		MustSupport:      derefBool(ed.MustSupport),
+		IsModifier:       derefBool(ed.IsModifier),
+		IsSummary:        derefBool(ed.IsSummary),
+		Slicing:          c.convertSlicing(ed.Slicing),
+		Fixed:            c.extractFixedValue(ed),
+		Pattern:          c.extractPatternValue(ed),
+		ContentReference: derefString(ed.ContentReference),
 	}
 	return result
 }

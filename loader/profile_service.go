@@ -50,11 +50,22 @@ func (s *InMemoryProfileService) LoadR4StructureDefinition(sd *r4.StructureDefin
 		s.byURL[converted.URL] = converted
 	}
 
-	// Index by Type (for base definitions)
-	if converted.Type != "" && converted.Kind == "resource" {
-		// Only index base definitions by type (not profiles)
-		if converted.BaseDefinition == "" || isBaseDefinition(converted.URL) {
-			s.byType[converted.Type] = converted
+	// Index by Type - only index THE base definition for each type
+	// This prevents profiles (like shareableactivitydefinition) from overwriting
+	// the base type definition (like ActivityDefinition)
+	if converted.Type != "" {
+		switch converted.Kind {
+		case "resource":
+			// Only index if this is the base definition for the type
+			// e.g., URL must be http://hl7.org/fhir/StructureDefinition/{Type}
+			if isBaseTypeDefinition(converted.URL, converted.Type) {
+				s.byType[converted.Type] = converted
+			}
+		case "complex-type", "primitive-type":
+			// Same for complex types - only the base definition
+			if isBaseTypeDefinition(converted.URL, converted.Type) {
+				s.byType[converted.Type] = converted
+			}
 		}
 	}
 
@@ -84,8 +95,9 @@ func (s *InMemoryProfileService) LoadServiceStructureDefinition(sd *service.Stru
 		s.byURL[sd.URL] = sd
 	}
 
-	if sd.Type != "" && sd.Kind == "resource" {
-		if sd.BaseDefinition == "" || isBaseDefinition(sd.URL) {
+	// Only index THE base definition for the type
+	if sd.Type != "" && (sd.Kind == "resource" || sd.Kind == "complex-type" || sd.Kind == "primitive-type") {
+		if isBaseTypeDefinition(sd.URL, sd.Type) {
 			s.byType[sd.Type] = sd
 		}
 	}
@@ -112,6 +124,9 @@ func (s *InMemoryProfileService) FetchStructureDefinition(ctx context.Context, u
 }
 
 // FetchStructureDefinitionByType implements service.StructureDefinitionByTypeFetcher.
+// It searches in the following order:
+// 1. By type name (for resources)
+// 2. By canonical URL (for complex types and profiles)
 func (s *InMemoryProfileService) FetchStructureDefinitionByType(ctx context.Context, resourceType string) (*service.StructureDefinition, error) {
 	select {
 	case <-ctx.Done():
@@ -122,11 +137,18 @@ func (s *InMemoryProfileService) FetchStructureDefinitionByType(ctx context.Cont
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	sd, ok := s.byType[resourceType]
-	if !ok {
-		return nil, fmt.Errorf("structure definition not found for type: %s", resourceType)
+	// First try by type (for resources)
+	if sd, ok := s.byType[resourceType]; ok {
+		return sd, nil
 	}
-	return sd, nil
+
+	// Fallback: try by canonical URL (for complex types like SimpleQuantity, Dosage, etc.)
+	canonicalURL := "http://hl7.org/fhir/StructureDefinition/" + resourceType
+	if sd, ok := s.byURL[canonicalURL]; ok {
+		return sd, nil
+	}
+
+	return nil, fmt.Errorf("structure definition not found for type: %s", resourceType)
 }
 
 // Count returns the number of loaded StructureDefinitions.
@@ -168,9 +190,15 @@ func (s *InMemoryProfileService) Clear() {
 	s.byType = make(map[string]*service.StructureDefinition)
 }
 
-// isBaseDefinition checks if a URL is a base FHIR definition.
-func isBaseDefinition(url string) bool {
-	return len(url) > 40 && url[:40] == "http://hl7.org/fhir/StructureDefinition/"
+// isBaseTypeDefinition checks if a URL is THE base definition for its type.
+// For example, http://hl7.org/fhir/StructureDefinition/Patient is the base for Patient,
+// but http://hl7.org/fhir/StructureDefinition/us-core-patient is a profile, not the base.
+func isBaseTypeDefinition(url, typeName string) bool {
+	if typeName == "" {
+		return false
+	}
+	expectedURL := "http://hl7.org/fhir/StructureDefinition/" + typeName
+	return url == expectedURL
 }
 
 // LoadFromFile loads StructureDefinitions from a JSON file.
