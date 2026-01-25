@@ -39,6 +39,19 @@ func BuildElementIndex(sd *service.StructureDefinition) *ElementIndex {
 
 	index := NewElementIndex(sd.Type)
 
+	// First pass: collect all contentReference mappings
+	// Map from contentReference target (e.g., "CapabilityStatement.rest.resource.operation")
+	// to the element that references it (e.g., "CapabilityStatement.rest.operation")
+	contentRefMap := make(map[string]string)
+	for i := range sd.Snapshot {
+		elem := &sd.Snapshot[i]
+		if elem.ContentReference != "" {
+			// ContentReference format is "#Path" - remove the # prefix
+			target := strings.TrimPrefix(elem.ContentReference, "#")
+			contentRefMap[target] = elem.Path
+		}
+	}
+
 	for i := range sd.Snapshot {
 		elem := &sd.Snapshot[i]
 		path := elem.Path
@@ -50,6 +63,31 @@ func BuildElementIndex(sd *service.StructureDefinition) *ElementIndex {
 		if strings.HasPrefix(path, sd.Type+".") {
 			shortPath := path[len(sd.Type)+1:]
 			index.byPath[shortPath] = elem
+		}
+
+		// Handle contentReference: create aliases for child paths
+		// For example, if CapabilityStatement.rest.operation has contentReference
+		// "#CapabilityStatement.rest.resource.operation", then children of
+		// CapabilityStatement.rest.resource.operation (like .name, .definition)
+		// should also be accessible via CapabilityStatement.rest.operation.*
+		for target, refPath := range contentRefMap {
+			if strings.HasPrefix(path, target+".") {
+				// This is a child of a contentReference target
+				// Create an alias path
+				childPart := path[len(target):]
+				aliasPath := refPath + childPart
+				if _, exists := index.byPath[aliasPath]; !exists {
+					index.byPath[aliasPath] = elem
+				}
+
+				// Also create short path alias
+				if strings.HasPrefix(aliasPath, sd.Type+".") {
+					shortAliasPath := aliasPath[len(sd.Type)+1:]
+					if _, exists := index.byPath[shortAliasPath]; !exists {
+						index.byPath[shortAliasPath] = elem
+					}
+				}
+			}
 		}
 
 		// Index choice types

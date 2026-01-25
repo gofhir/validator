@@ -3,6 +3,7 @@ package walker
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/gofhir/validator/service"
 )
@@ -166,23 +167,58 @@ func (tw *TypeAwareTreeWalker) walkArray(
 		}
 
 		// Create array item context
-		// Array items inherit the parent's type context
 		childCtx := tw.acquireContext()
 		childCtx.Node = item
 		childCtx.Key = parent.Key
 		childCtx.Path = fmt.Sprintf("%s[%d]", parent.Path, i)
 		childCtx.ElementPath = parent.ElementPath // Same element path for all items
 		childCtx.ElementDef = parent.ElementDef   // Same element def
-		childCtx.TypeSD = parent.TypeSD           // PRESERVE type SD
-		childCtx.TypeIndex = parent.TypeIndex     // PRESERVE type index
 		childCtx.Parent = parent
 		childCtx.IsArrayItem = true
 		childCtx.ArrayIndex = i
-		childCtx.ResourceType = parent.ResourceType
 		childCtx.Depth = parent.Depth + 1
-		childCtx.TypeName = parent.TypeName
 		childCtx.IsChoiceType = parent.IsChoiceType
 		childCtx.ChoiceTypeName = parent.ChoiceTypeName
+
+		// Handle contained/embedded resources (type = "Resource")
+		// Each item may be a different resource type, so resolve individually
+		if parent.TypeName == "Resource" {
+			if resourceObj, ok := item.(map[string]any); ok {
+				if actualType, ok := resourceObj["resourceType"].(string); ok && actualType != "" {
+					// Load StructureDefinition for the contained resource
+					typeSD, err := tw.resolver.ResolveType(ctx, actualType)
+					if err == nil && typeSD != nil {
+						childCtx.TypeSD = typeSD
+						childCtx.TypeIndex = BuildElementIndex(typeSD)
+						childCtx.TypeName = actualType
+						childCtx.ResourceType = actualType
+						childCtx.ElementPath = actualType
+					} else {
+						// Fallback to parent context
+						childCtx.TypeSD = parent.TypeSD
+						childCtx.TypeIndex = parent.TypeIndex
+						childCtx.TypeName = parent.TypeName
+						childCtx.ResourceType = parent.ResourceType
+					}
+				} else {
+					childCtx.TypeSD = parent.TypeSD
+					childCtx.TypeIndex = parent.TypeIndex
+					childCtx.TypeName = parent.TypeName
+					childCtx.ResourceType = parent.ResourceType
+				}
+			} else {
+				childCtx.TypeSD = parent.TypeSD
+				childCtx.TypeIndex = parent.TypeIndex
+				childCtx.TypeName = parent.TypeName
+				childCtx.ResourceType = parent.ResourceType
+			}
+		} else {
+			// Normal array items inherit parent's type context
+			childCtx.TypeSD = parent.TypeSD
+			childCtx.TypeIndex = parent.TypeIndex
+			childCtx.TypeName = parent.TypeName
+			childCtx.ResourceType = parent.ResourceType
+		}
 
 		// Visit array item
 		if err := visitor(childCtx); err != nil {
@@ -225,7 +261,16 @@ func (tw *TypeAwareTreeWalker) createChildContext(
 	child.ElementDef = elemDef
 
 	// Check for choice types
-	choiceResult := ResolveChoiceType(key, parent.TypeIndex)
+	// For inline types, calculate the relative path prefix for choice type lookup
+	// e.g., if parent.ElementPath = "Dosage.doseAndRate", prefix = "doseAndRate"
+	var choicePrefix string
+	if parent.TypeIndex != nil && isInlineElementType(parent.TypeName) {
+		rootType := parent.TypeIndex.RootType()
+		if rootType != "" && strings.HasPrefix(parent.ElementPath, rootType+".") {
+			choicePrefix = parent.ElementPath[len(rootType)+1:]
+		}
+	}
+	choiceResult := ResolveChoiceTypeWithPrefix(key, choicePrefix, parent.TypeIndex)
 	if choiceResult.IsChoice {
 		child.IsChoiceType = true
 		child.ChoiceTypeName = choiceResult.TypeName
@@ -264,9 +309,11 @@ func (tw *TypeAwareTreeWalker) createChildContext(
 		if err == nil && typeSD != nil {
 			child.TypeSD = typeSD
 			child.TypeIndex = BuildElementIndex(typeSD)
-			// Reset ElementPath to the type root for proper child lookups
-			// This ensures children like CodeableConcept.coding are found correctly
-			child.ElementPath = typeName
+			// Reset ElementPath to the SD's type for proper child lookups
+			// Use typeSD.Type because profiles (like SimpleQuantity) have
+			// elements with paths based on their base type (Quantity.value),
+			// not the profile name (SimpleQuantity.value)
+			child.ElementPath = typeSD.Type
 		} else {
 			// Keep parent's type context for unknown types
 			child.TypeSD = parent.TypeSD

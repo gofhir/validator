@@ -27,6 +27,12 @@ type ChoiceTypeResult struct {
 // ResolveChoiceType determines if a key is a choice type variant and resolves it.
 // It checks if the key matches any known type suffix and verifies the element exists.
 func ResolveChoiceType(key string, index *ElementIndex) *ChoiceTypeResult {
+	return ResolveChoiceTypeWithPrefix(key, "", index)
+}
+
+// ResolveChoiceTypeWithPrefix resolves a choice type using an optional path prefix.
+// The prefix is used to find nested choice types like "doseAndRate.dose[x]".
+func ResolveChoiceTypeWithPrefix(key, prefix string, index *ElementIndex) *ChoiceTypeResult {
 	if index == nil {
 		return resolveByTypeSuffix(key)
 	}
@@ -45,9 +51,21 @@ func ResolveChoiceType(key string, index *ElementIndex) *ChoiceTypeResult {
 		choicePath := baseName + "[x]"
 
 		// Look up the choice element definition
-		elemDef := index.GetChoiceTypeDefinition(baseName)
+		// First try with prefix (for nested choice types like doseAndRate.dose[x])
+		var elemDef *service.ElementDefinition
+		if prefix != "" {
+			prefixedBaseName := prefix + "." + baseName
+			elemDef = index.GetChoiceTypeDefinition(prefixedBaseName)
+			if elemDef == nil {
+				elemDef = index.Get(prefix + "." + choicePath)
+			}
+		}
+
+		// Fallback to direct lookup
 		if elemDef == nil {
-			// Try with full path patterns
+			elemDef = index.GetChoiceTypeDefinition(baseName)
+		}
+		if elemDef == nil {
 			elemDef = index.Get(choicePath)
 		}
 
