@@ -73,6 +73,14 @@ func (p *ExtensionsPhase) validateExtensionsRecursive(
 ) []fv.Issue {
 	var issues []fv.Issue
 
+	// Check if this object is a contained/nested resource with its own resourceType
+	// If so, switch context to that resource
+	if rt, ok := resource["resourceType"].(string); ok && rt != "" && rt != resourceType {
+		resourceType = rt
+		basePath = ""
+		profile = nil // Reset profile for nested resource
+	}
+
 	for key, value := range resource {
 		select {
 		case <-ctx.Done():
@@ -91,7 +99,9 @@ func (p *ExtensionsPhase) validateExtensionsRecursive(
 		if key == "extension" || key == "modifierExtension" {
 			isModifier := key == "modifierExtension"
 			// Top-level extensions have no parent extension URL
-			extIssues := p.validateExtensionArray(ctx, value, currentPath, isModifier, resourceType, basePath, "", profile)
+			// Use the normalized basePath (without underscore prefix for primitive extensions)
+			contextPath := normalizePrimitiveExtensionPath(basePath)
+			extIssues := p.validateExtensionArray(ctx, value, currentPath, isModifier, resourceType, contextPath, "", profile)
 			issues = append(issues, extIssues...)
 			continue
 		}
@@ -111,6 +121,35 @@ func (p *ExtensionsPhase) validateExtensionsRecursive(
 	}
 
 	return issues
+}
+
+// normalizePrimitiveExtensionPath removes underscore prefixes from primitive extension paths.
+// In FHIR JSON, "_birthDate" indicates extensions on the "birthDate" primitive element.
+// For context matching, we need to use "birthDate" not "_birthDate".
+func normalizePrimitiveExtensionPath(path string) string {
+	if path == "" {
+		return path
+	}
+
+	// Split path and normalize each segment
+	segments := strings.Split(path, ".")
+	for i, seg := range segments {
+		// Remove array indices for this check
+		baseSeg := seg
+		idxStart := strings.Index(seg, "[")
+		suffix := ""
+		if idxStart >= 0 {
+			baseSeg = seg[:idxStart]
+			suffix = seg[idxStart:]
+		}
+
+		// Remove underscore prefix from primitive extension segments
+		if strings.HasPrefix(baseSeg, "_") {
+			segments[i] = strings.TrimPrefix(baseSeg, "_") + suffix
+		}
+	}
+
+	return strings.Join(segments, ".")
 }
 
 // validateExtensionArray validates an array of extensions.
@@ -427,10 +466,14 @@ func (p *ExtensionsPhase) validateExtensionContext(
 	// Get element type at the context path
 	elementType := p.getElementTypeAtPath(ctx, resourceType, contextPath)
 
+	// Get parent type with relative path for DataType.element matching
+	// e.g., for "identifier[0].type" returns "Identifier.type"
+	parentTypeWithRelativePath := p.getParentTypeWithRelativePath(ctx, resourceType, contextPath)
+
 	// Check if context is allowed
 	allowed := false
 	for _, ctxExpr := range extDef.Context {
-		if p.contextMatches(ctxExpr, fullContext, resourceType, elementType) {
+		if p.contextMatches(ctxExpr, fullContext, resourceType, elementType, parentTypeWithRelativePath) {
 			allowed = true
 			break
 		}
@@ -451,15 +494,22 @@ func (p *ExtensionsPhase) validateExtensionContext(
 
 // contextMatches checks if a context expression matches the current location.
 // elementType is the FHIR type at the current location (e.g., "Address" for Patient.address).
-func (p *ExtensionsPhase) contextMatches(contextExpr, location, resourceType, elementType string) bool {
+// parentTypeWithRelativePath is used to match DataType.element patterns (e.g., "Identifier.type").
+func (p *ExtensionsPhase) contextMatches(contextExpr, location, resourceType, elementType, parentTypeWithRelativePath string) bool {
 	// Context expressions can be:
 	// - Resource type: "Patient"
 	// - Element path: "Patient.name"
 	// - Type name: "Address" (matches any element of that type)
+	// - DataType.element: "Identifier.type" (matches type element of any Identifier)
 	// - Wildcard: "Element"
 	// - FHIRPath: more complex expressions
 
 	if contextExpr == "Element" || contextExpr == "Resource" {
+		return true
+	}
+
+	// Check for DomainResource context (matches any resource)
+	if contextExpr == "DomainResource" {
 		return true
 	}
 
@@ -477,6 +527,19 @@ func (p *ExtensionsPhase) contextMatches(contextExpr, location, resourceType, el
 		return true
 	}
 
+	// Check if context matches DataType.element pattern
+	// e.g., context "Identifier.type" matches location "Patient.identifier[0].type"
+	// where parent type is "Identifier" and relative path is "type"
+	if parentTypeWithRelativePath != "" && contextExpr == parentTypeWithRelativePath {
+		return true
+	}
+
+	// Check if context is a prefix of parentTypeWithRelativePath
+	// e.g., context "ElementDefinition" matches "ElementDefinition.type"
+	if parentTypeWithRelativePath != "" && strings.HasPrefix(parentTypeWithRelativePath, contextExpr+".") {
+		return true
+	}
+
 	// Check if context is a prefix
 	if strings.HasPrefix(location, contextExpr+".") {
 		return true
@@ -485,12 +548,195 @@ func (p *ExtensionsPhase) contextMatches(contextExpr, location, resourceType, el
 	// Remove array indices from location and try again
 	// e.g., "Patient.address[0]" -> "Patient.address"
 	locationWithoutIndices := removeArrayIndices(location)
-	return contextExpr == locationWithoutIndices
+	if contextExpr == locationWithoutIndices {
+		return true
+	}
+
+	// Handle primitive child context pattern:
+	// When an extension context points to a primitive element (e.g., "ElementDefinition.type.code"),
+	// FHIR allows the extension to be placed on the parent complex Element type
+	// (e.g., on "ElementDefinition.type") instead of "_code".
+	// This is because Element types have native "extension" arrays, while primitive values
+	// in JSON use the underscore prefix notation for extensions.
+	if strings.Contains(contextExpr, ".") {
+		// Check if context is the parent path of what we're looking at
+		// e.g., context "ElementDefinition.type.code" should match location "ElementDefinition.type"
+		contextParent := parentPath(contextExpr)
+		if contextParent != "" {
+			if contextParent == location || contextParent == locationWithoutIndices {
+				return true
+			}
+			// Also check against parentTypeWithRelativePath for nested complex types
+			// e.g., context "ElementDefinition.type.code" should match parentTypeWithRelativePath "ElementDefinition.type"
+			if parentTypeWithRelativePath != "" && contextParent == parentTypeWithRelativePath {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 // getElementTypeAtPath looks up the FHIR type of an element at the given path.
+// It recursively resolves types through nested DataTypes and BackboneElements.
+// For example, for "code.coding[0]" in Observation:
+// 1. Observation.code has type CodeableConcept
+// 2. CodeableConcept.coding has type Coding
+// 3. Returns "Coding"
+// For BackboneElement paths like "component.valueCodeableConcept.coding":
+// 1. Observation.component has type BackboneElement (inline)
+// 2. Observation.component.value[x] includes CodeableConcept
+// 3. CodeableConcept.coding has type Coding
+// 4. Returns "Coding"
 func (p *ExtensionsPhase) getElementTypeAtPath(ctx context.Context, resourceType, elementPath string) string {
 	if elementPath == "" || p.profileService == nil {
+		return ""
+	}
+
+	// Remove array indices from path for lookup
+	// e.g., "address[0]" -> "address"
+	cleanPath := removeArrayIndices(elementPath)
+	segments := strings.Split(cleanPath, ".")
+
+	// Start with the resource type's StructureDefinition
+	rootProfile, err := p.profileService.FetchStructureDefinitionByType(ctx, resourceType)
+	if err != nil || rootProfile == nil {
+		return ""
+	}
+
+	// Track our position in the path
+	currentBasePath := resourceType
+	currentProfile := rootProfile
+
+	// Resolve each segment of the path
+	for i, segment := range segments {
+		// Handle choice type naming (e.g., valueCodeableConcept -> value[x])
+		choiceBaseName, choiceType := p.parseChoiceTypeName(segment)
+
+		var foundType string
+		var foundPath string
+
+		if choiceType != "" {
+			// This is a choice type like "valueCodeableConcept"
+			// Look for the element definition as "value[x]"
+			lookupPath := currentBasePath + "." + choiceBaseName + "[x]"
+			for _, elem := range currentProfile.Snapshot {
+				if elem.Path == lookupPath {
+					// Verify that the choice type is valid for this element
+					for _, t := range elem.Types {
+						if strings.EqualFold(t.Code, choiceType) {
+							foundType = t.Code
+							foundPath = lookupPath
+							break
+						}
+					}
+					break
+				}
+			}
+		}
+
+		if foundType == "" {
+			// Not a choice type or not found, try direct lookup
+			lookupPath := currentBasePath + "." + segment
+			for _, elem := range currentProfile.Snapshot {
+				if elem.Path == lookupPath {
+					if len(elem.Types) > 0 {
+						foundType = elem.Types[0].Code
+						foundPath = lookupPath
+					}
+					break
+				}
+			}
+		}
+
+		if foundType == "" {
+			// Element not found
+			return ""
+		}
+
+		// If this is the last segment, return the type
+		if i == len(segments)-1 {
+			return foundType
+		}
+
+		// Decide how to continue based on the found type
+		switch {
+		case foundType == "BackboneElement" || foundType == "Element":
+			// BackboneElement is inline - continue in the same profile
+			// Update the base path to include this segment
+			currentBasePath = foundPath
+			// Profile stays the same
+		case !IsPrimitiveType(foundType):
+			// Complex DataType - fetch its StructureDefinition
+			nextProfile, err := p.profileService.FetchStructureDefinitionByType(ctx, foundType)
+			if err != nil || nextProfile == nil {
+				// Can't resolve further
+				return foundType
+			}
+			currentBasePath = foundType
+			currentProfile = nextProfile
+		default:
+			// Primitive type - can't navigate deeper
+			return foundType
+		}
+	}
+
+	return ""
+}
+
+// parseChoiceTypeName parses a choice type element name like "valueCodeableConcept"
+// and returns the base name ("value") and the type ("CodeableConcept").
+// If not a choice type, returns the original segment and empty string.
+func (p *ExtensionsPhase) parseChoiceTypeName(segment string) (baseName, typeName string) {
+	// Known choice type prefixes in FHIR
+	choicePrefixes := []string{
+		"value", "effective", "onset", "abatement", "occurrence",
+		"performed", "timing", "product", "medication", "item",
+		"subject", "entity", "location", "born", "age", "deceased",
+		"multipleBirth", "event", "allowed", "used", "diagnosis",
+		"procedure", "reason", "as", "additive", "doseAndRate",
+		"serviced", "characteristic", "definition", "code", "answer",
+		"initial", "pattern", "example", "minValue", "maxValue",
+		"fixed", "defaultValue",
+	}
+
+	for _, prefix := range choicePrefixes {
+		if strings.HasPrefix(segment, prefix) && len(segment) > len(prefix) {
+			suffix := segment[len(prefix):]
+			// Check if suffix starts with uppercase (indicating a type name)
+			if suffix != "" && suffix[0] >= 'A' && suffix[0] <= 'Z' {
+				return prefix, suffix
+			}
+		}
+	}
+
+	return segment, ""
+}
+
+// getParentTypeWithRelativePath builds a DataType.element path for context matching.
+// For example, given resourceType="Patient" and contextPath="identifier[0].type",
+// it returns "Identifier.type" because identifier is of type Identifier.
+// This enables matching extension contexts like "Identifier.type".
+// Also handles primitive extension paths like "_city" -> "city".
+func (p *ExtensionsPhase) getParentTypeWithRelativePath(ctx context.Context, resourceType, contextPath string) string {
+	if contextPath == "" || p.profileService == nil {
+		return ""
+	}
+
+	// Clean path and split into segments
+	cleanPath := removeArrayIndices(contextPath)
+	segments := strings.Split(cleanPath, ".")
+
+	// Handle primitive extension paths (e.g., "_city" -> "city")
+	// The underscore prefix in FHIR JSON indicates extensions on primitive elements
+	for i, seg := range segments {
+		if strings.HasPrefix(seg, "_") {
+			segments[i] = strings.TrimPrefix(seg, "_")
+		}
+	}
+
+	if len(segments) < 2 {
+		// Need at least parent.child to match DataType.element pattern
 		return ""
 	}
 
@@ -500,21 +746,42 @@ func (p *ExtensionsPhase) getElementTypeAtPath(ctx context.Context, resourceType
 		return ""
 	}
 
-	// Remove array indices from path for lookup
-	// e.g., "address[0]" -> "address"
-	cleanPath := removeArrayIndices(elementPath)
-	fullPath := resourceType + "." + cleanPath
+	// Find the type of each segment, looking for a complex type parent
+	// We iterate from the first segment up to second-to-last
+	for i := 0; i < len(segments)-1; i++ {
+		// Build path up to segment i
+		pathToSegment := resourceType + "." + strings.Join(segments[:i+1], ".")
 
-	// Find the element in the snapshot
-	for _, elem := range profile.Snapshot {
-		if elem.Path == fullPath {
-			if len(elem.Types) > 0 {
-				return elem.Types[0].Code
+		// Find element type at this path
+		for _, elem := range profile.Snapshot {
+			if elem.Path == pathToSegment && len(elem.Types) > 0 {
+				parentType := elem.Types[0].Code
+
+				// Check if this is a concrete complex type by:
+				// 1. Not being a primitive type
+				// 2. Having its own non-abstract StructureDefinition (dynamically checked)
+				if !IsPrimitiveType(parentType) && p.hasConcreteStructureDefinition(ctx, parentType) {
+					// Build relative path from this point
+					relativePath := strings.Join(segments[i+1:], ".")
+					return parentType + "." + relativePath
+				}
 			}
 		}
 	}
 
 	return ""
+}
+
+// hasConcreteStructureDefinition checks if a type has its own non-abstract StructureDefinition.
+// This is used to dynamically determine if a type is a concrete complex type.
+// Abstract types like BackboneElement and Element are excluded because they don't
+// appear in extension context expressions - only concrete types do.
+func (p *ExtensionsPhase) hasConcreteStructureDefinition(ctx context.Context, typeName string) bool {
+	if p.profileService == nil || typeName == "" {
+		return false
+	}
+	sd, err := p.profileService.FetchStructureDefinitionByType(ctx, typeName)
+	return err == nil && sd != nil && !sd.Abstract
 }
 
 // validateExtensionValue validates the value of an extension.

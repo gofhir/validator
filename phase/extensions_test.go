@@ -673,34 +673,127 @@ func TestExtensionsPhase_ContextCancellation(t *testing.T) {
 	}
 }
 
-func TestContextMatches(t *testing.T) {
-	p := NewExtensionsPhase(nil, nil)
+func TestGetElementTypeAtPath_NestedTypes(t *testing.T) {
+	// Create mock profiles for Observation, CodeableConcept, and Coding
+	mockService := &mockProfileResolver{
+		profiles: map[string]*service.StructureDefinition{
+			"Observation": {
+				URL:  "http://hl7.org/fhir/StructureDefinition/Observation",
+				Type: "Observation",
+				Snapshot: []service.ElementDefinition{
+					{Path: "Observation"},
+					{Path: "Observation.code", Types: []service.TypeRef{{Code: "CodeableConcept"}}},
+					{Path: "Observation.value", Types: []service.TypeRef{{Code: "Quantity"}}},
+					// BackboneElement with choice type
+					{Path: "Observation.component", Types: []service.TypeRef{{Code: "BackboneElement"}}},
+					{Path: "Observation.component.value[x]", Types: []service.TypeRef{
+						{Code: "Quantity"},
+						{Code: "CodeableConcept"},
+						{Code: "string"},
+					}},
+				},
+			},
+			"CodeableConcept": {
+				URL:  "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+				Type: "CodeableConcept",
+				Snapshot: []service.ElementDefinition{
+					{Path: "CodeableConcept"},
+					{Path: "CodeableConcept.coding", Types: []service.TypeRef{{Code: "Coding"}}},
+					{Path: "CodeableConcept.text", Types: []service.TypeRef{{Code: "string"}}},
+				},
+			},
+			"Coding": {
+				URL:  "http://hl7.org/fhir/StructureDefinition/Coding",
+				Type: "Coding",
+				Snapshot: []service.ElementDefinition{
+					{Path: "Coding"},
+					{Path: "Coding.system", Types: []service.TypeRef{{Code: "uri"}}},
+					{Path: "Coding.code", Types: []service.TypeRef{{Code: "code"}}},
+					{Path: "Coding.display", Types: []service.TypeRef{{Code: "string"}}},
+				},
+			},
+			"Quantity": {
+				URL:  "http://hl7.org/fhir/StructureDefinition/Quantity",
+				Type: "Quantity",
+				Snapshot: []service.ElementDefinition{
+					{Path: "Quantity"},
+					{Path: "Quantity.value", Types: []service.TypeRef{{Code: "decimal"}}},
+				},
+			},
+		},
+	}
+
+	p := NewExtensionsPhase(mockService, nil)
+	ctx := context.Background()
 
 	tests := []struct {
 		name         string
-		contextExpr  string
-		location     string
 		resourceType string
-		elementType  string
-		expected     bool
+		elementPath  string
+		expected     string
 	}{
-		{"Element matches anything", "Element", "Patient.name", "Patient", "", true},
-		{"Resource matches anything", "Resource", "Observation.code", "Observation", "", true},
-		{"Exact resource type match", "Patient", "Patient", "Patient", "", true},
-		{"Exact path match", "Patient.name", "Patient.name", "Patient", "", true},
-		{"Prefix match", "Patient.name", "Patient.name.family", "Patient", "", true},
-		{"No match", "Observation", "Patient", "Patient", "", false},
-		{"Path no match", "Patient.identifier", "Patient.name", "Patient", "", false},
-		{"Element type match", "Address", "Patient.address[0]", "Patient", "Address", true},
-		{"Element type no match", "Address", "Patient.name", "Patient", "HumanName", false},
+		{"Direct element", "Observation", "code", "CodeableConcept"},
+		{"Nested element - coding", "Observation", "code.coding", "Coding"},
+		{"Nested element with index", "Observation", "code.coding[0]", "Coding"},
+		{"Deep nested - system", "Observation", "code.coding.system", "uri"},
+		{"Deep nested with index", "Observation", "code.coding[0].system", "uri"},
+		{"Non-existent path", "Observation", "nonexistent", ""},
+		{"Non-existent nested", "Observation", "code.nonexistent", ""},
+		{"Empty path", "Observation", "", ""},
+		// BackboneElement tests
+		{"BackboneElement direct", "Observation", "component", "BackboneElement"},
+		{"BackboneElement choice type", "Observation", "component.valueCodeableConcept", "CodeableConcept"},
+		{"BackboneElement choice type with index", "Observation", "component[0].valueCodeableConcept", "CodeableConcept"},
+		// Full path through BackboneElement to nested type
+		{"BackboneElement to nested Coding", "Observation", "component.valueCodeableConcept.coding", "Coding"},
+		{"BackboneElement to nested Coding with indices", "Observation", "component[0].valueCodeableConcept.coding[0]", "Coding"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := p.contextMatches(tt.contextExpr, tt.location, tt.resourceType, tt.elementType)
+			result := p.getElementTypeAtPath(ctx, tt.resourceType, tt.elementPath)
 			if result != tt.expected {
-				t.Errorf("contextMatches(%q, %q, %q, %q) = %v; want %v",
-					tt.contextExpr, tt.location, tt.resourceType, tt.elementType, result, tt.expected)
+				t.Errorf("getElementTypeAtPath(%q, %q) = %q; want %q",
+					tt.resourceType, tt.elementPath, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestContextMatches(t *testing.T) {
+	p := NewExtensionsPhase(nil, nil)
+
+	tests := []struct {
+		name                       string
+		contextExpr                string
+		location                   string
+		resourceType               string
+		elementType                string
+		parentTypeWithRelativePath string
+		expected                   bool
+	}{
+		{"Element matches anything", "Element", "Patient.name", "Patient", "", "", true},
+		{"Resource matches anything", "Resource", "Observation.code", "Observation", "", "", true},
+		{"DomainResource matches any resource", "DomainResource", "Patient.name", "Patient", "", "", true},
+		{"Exact resource type match", "Patient", "Patient", "Patient", "", "", true},
+		{"Exact path match", "Patient.name", "Patient.name", "Patient", "", "", true},
+		{"Prefix match", "Patient.name", "Patient.name.family", "Patient", "", "", true},
+		{"No match", "Observation", "Patient", "Patient", "", "", false},
+		{"Path no match", "Patient.identifier", "Patient.name", "Patient", "", "", false},
+		{"Element type match", "Address", "Patient.address[0]", "Patient", "Address", "", true},
+		{"Element type no match", "Address", "Patient.name", "Patient", "HumanName", "", false},
+		// DataType.element pattern tests
+		{"DataType.element match", "Identifier.type", "Patient.identifier[0].type", "Patient", "CodeableConcept", "Identifier.type", true},
+		{"DataType.element no match", "Identifier.type", "Patient.identifier[0].value", "Patient", "string", "Identifier.value", false},
+		{"Address.city match", "Address.city", "Patient.address[0]._city", "Patient", "", "Address.city", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := p.contextMatches(tt.contextExpr, tt.location, tt.resourceType, tt.elementType, tt.parentTypeWithRelativePath)
+			if result != tt.expected {
+				t.Errorf("contextMatches(%q, %q, %q, %q, %q) = %v; want %v",
+					tt.contextExpr, tt.location, tt.resourceType, tt.elementType, tt.parentTypeWithRelativePath, result, tt.expected)
 			}
 		})
 	}
