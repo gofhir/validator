@@ -321,6 +321,30 @@ func DisplayMismatchIssue(code, providedDisplay, expectedDisplay, path, phase st
 	}
 }
 
+// ExampleDomains lists RFC 2606 reserved domains for documentation.
+// These should NOT appear in real FHIR data - they indicate placeholder values
+// that developers forgot to replace.
+var ExampleDomains = []string{
+	"example.org",
+	"example.com",
+	"example.net",
+	"example.edu",
+}
+
+// IsExampleURL checks if a URL contains an RFC 2606 reserved example domain.
+// According to RFC 2606, these domains are reserved for documentation and examples.
+// Using them in real data indicates a placeholder that should have been replaced.
+// Returns true if the URL contains example.org, example.com, example.net, or example.edu.
+func IsExampleURL(url string) bool {
+	urlLower := strings.ToLower(url)
+	for _, domain := range ExampleDomains {
+		if strings.Contains(urlLower, domain) {
+			return true
+		}
+	}
+	return false
+}
+
 // ValidateID validates a FHIR id value.
 // FHIR ids must match pattern: [A-Za-z0-9\-\.]{1,64}
 func ValidateID(id string) bool {

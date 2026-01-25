@@ -899,7 +899,7 @@ func TestTerminologyPhase_DisplayMismatch(t *testing.T) {
 					{Path: "Patient.identifier"},
 					{Path: "Patient.identifier.type", Binding: &service.Binding{
 						Strength: "required",
-						ValueSet: "http://example.org/ValueSet/identifier-type",
+						ValueSet: "http://hl7.org/fhir/ValueSet/identifier-type",
 					}},
 				},
 			},
@@ -908,13 +908,13 @@ func TestTerminologyPhase_DisplayMismatch(t *testing.T) {
 
 	mockTerminology := &mockTerminologyService{
 		validCodes: map[string]map[string]bool{
-			"http://example.org/ValueSet/identifier-type": {
-				"http://example.org/cs|PPN": true,
+			"http://hl7.org/fhir/ValueSet/identifier-type": {
+				"http://terminology.hl7.org/CodeSystem/v2-0203|PPN": true,
 			},
 		},
 		displays: map[string]map[string]string{
-			"http://example.org/ValueSet/identifier-type": {
-				"http://example.org/cs|PPN": "Passport Number", // Expected display
+			"http://hl7.org/fhir/ValueSet/identifier-type": {
+				"http://terminology.hl7.org/CodeSystem/v2-0203|PPN": "Passport Number", // Expected display
 			},
 		},
 	}
@@ -932,7 +932,7 @@ func TestTerminologyPhase_DisplayMismatch(t *testing.T) {
 					"type": map[string]any{
 						"coding": []any{
 							map[string]any{
-								"system":  "http://example.org/cs",
+								"system":  "http://terminology.hl7.org/CodeSystem/v2-0203",
 								"code":    "PPN",
 								"display": "Wrong Display", // Incorrect display
 							},
@@ -980,7 +980,7 @@ func TestTerminologyPhase_DisplayMismatch_ValidCodeStillReported(t *testing.T) {
 					{Path: "Patient.identifier"},
 					{Path: "Patient.identifier.type", Binding: &service.Binding{
 						Strength: "required",
-						ValueSet: "http://example.org/ValueSet/identifier-type",
+						ValueSet: "http://hl7.org/fhir/ValueSet/identifier-type",
 					}},
 				},
 			},
@@ -989,15 +989,15 @@ func TestTerminologyPhase_DisplayMismatch_ValidCodeStillReported(t *testing.T) {
 
 	mockTerminology := &mockTerminologyService{
 		validCodes: map[string]map[string]bool{
-			"http://example.org/ValueSet/identifier-type": {
-				"http://example.org/cs|PPN": true,
-				"http://example.org/cs|RUN": true,
+			"http://hl7.org/fhir/ValueSet/identifier-type": {
+				"http://terminology.hl7.org/CodeSystem/v2-0203|PPN": true,
+				"http://terminology.hl7.org/CodeSystem/v2-0203|RUN": true,
 			},
 		},
 		displays: map[string]map[string]string{
-			"http://example.org/ValueSet/identifier-type": {
-				"http://example.org/cs|PPN": "Passport Number",
-				"http://example.org/cs|RUN": "National ID",
+			"http://hl7.org/fhir/ValueSet/identifier-type": {
+				"http://terminology.hl7.org/CodeSystem/v2-0203|PPN": "Passport Number",
+				"http://terminology.hl7.org/CodeSystem/v2-0203|RUN": "National ID",
 			},
 		},
 	}
@@ -1015,12 +1015,12 @@ func TestTerminologyPhase_DisplayMismatch_ValidCodeStillReported(t *testing.T) {
 					"type": map[string]any{
 						"coding": []any{
 							map[string]any{
-								"system":  "http://example.org/cs",
+								"system":  "http://terminology.hl7.org/CodeSystem/v2-0203",
 								"code":    "RUN",
 								"display": "National ID", // Correct
 							},
 							map[string]any{
-								"system":  "http://example.org/cs",
+								"system":  "http://terminology.hl7.org/CodeSystem/v2-0203",
 								"code":    "PPN",
 								"display": "WRONG DISPLAY", // Wrong - should generate warning
 							},

@@ -69,13 +69,30 @@ func (h *CodingValidationHelper) ValidateCoding(
 ) *CodingValidationResult {
 	result := &CodingValidationResult{Valid: true}
 
-	if h.terminologyService == nil {
-		return result
-	}
-
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 	display, _ := coding["display"].(string)
+
+	// Check for example URLs in system - these are RFC 2606 reserved domains
+	// that should not appear in real data (indicates placeholder not replaced)
+	// This check is performed even without a terminology service.
+	if system != "" && IsExampleURL(system) {
+		result.Valid = false
+		result.Issues = append(result.Issues, ErrorIssue(
+			fv.IssueTypeValue,
+			fmt.Sprintf(
+				"CodeSystem URI '%s' uses an RFC 2606 reserved example domain. "+
+					"Example domains (example.org, example.com, example.net) are reserved for documentation "+
+					"and should not be used in real FHIR data. Replace with the actual CodeSystem URI.",
+				system),
+			path+".system",
+			opts.Phase,
+		))
+	}
+
+	if h.terminologyService == nil {
+		return result
+	}
 
 	if code == "" {
 		return result
@@ -181,6 +198,7 @@ func (h *CodingValidationHelper) ValidateCodeableConcept(
 	anyValid := false
 	var errorIssues []fv.Issue
 	var warningIssues []fv.Issue
+	var criticalIssues []fv.Issue // Issues that should not be downgraded (e.g., example URLs)
 	var invalidCodes []string
 
 	for i, c := range codings {
@@ -207,11 +225,15 @@ func (h *CodingValidationHelper) ValidateCodeableConcept(
 			}
 		}
 
-		// Separate errors from warnings
+		// Separate errors from warnings, and identify critical issues
 		for _, issue := range codingResult.Issues {
-			if issue.Severity == fv.SeverityWarning || issue.Severity == fv.SeverityInformation {
+			switch {
+			case issue.Severity == fv.SeverityWarning || issue.Severity == fv.SeverityInformation:
 				warningIssues = append(warningIssues, issue)
-			} else {
+			case issue.Code == fv.IssueTypeValue && strings.Contains(issue.Diagnostics, "RFC 2606"):
+				// Critical issues like example URLs should not be downgraded
+				criticalIssues = append(criticalIssues, issue)
+			default:
 				errorIssues = append(errorIssues, issue)
 			}
 		}
@@ -219,6 +241,12 @@ func (h *CodingValidationHelper) ValidateCodeableConcept(
 
 	// Always include warnings (display mismatches, etc.)
 	result.Issues = append(result.Issues, warningIssues...)
+
+	// Critical issues are always errors regardless of binding strength
+	result.Issues = append(result.Issues, criticalIssues...)
+	if len(criticalIssues) > 0 {
+		result.Valid = false
+	}
 
 	// Handle binding validation results
 	if opts.ValueSet != "" && !anyValid && len(codings) > 0 {

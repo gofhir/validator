@@ -42,7 +42,7 @@ func (m *mockCodeValidator) ExpandValueSet(ctx context.Context, url string) (*se
 func TestCodingValidationHelper_ValidateCoding_Valid(t *testing.T) {
 	mock := &mockCodeValidator{
 		validCodes: map[string]map[string]*service.ValidateCodeResult{
-			"http://example.org/CodeSystem/test": {
+			"http://terminology.hl7.org/CodeSystem/test": {
 				"code1": {Valid: true, Display: "Code One"},
 			},
 		},
@@ -52,13 +52,13 @@ func TestCodingValidationHelper_ValidateCoding_Valid(t *testing.T) {
 	ctx := context.Background()
 
 	coding := map[string]any{
-		"system":  "http://example.org/CodeSystem/test",
+		"system":  "http://terminology.hl7.org/CodeSystem/test",
 		"code":    "code1",
 		"display": "Code One",
 	}
 
 	opts := CodingValidationOptions{
-		ValueSet:         "http://example.org/ValueSet/test",
+		ValueSet:         "http://hl7.org/fhir/ValueSet/test",
 		BindingStrength:  "required",
 		ValidateDisplay:  true,
 		DisplayAsWarning: true,
@@ -79,7 +79,7 @@ func TestCodingValidationHelper_ValidateCoding_Valid(t *testing.T) {
 func TestCodingValidationHelper_ValidateCoding_DisplayMismatch(t *testing.T) {
 	mock := &mockCodeValidator{
 		validCodes: map[string]map[string]*service.ValidateCodeResult{
-			"http://example.org/CodeSystem/test": {
+			"http://terminology.hl7.org/CodeSystem/test": {
 				"code1": {Valid: true, Display: "Code One"},
 			},
 		},
@@ -89,13 +89,13 @@ func TestCodingValidationHelper_ValidateCoding_DisplayMismatch(t *testing.T) {
 	ctx := context.Background()
 
 	coding := map[string]any{
-		"system":  "http://example.org/CodeSystem/test",
+		"system":  "http://terminology.hl7.org/CodeSystem/test",
 		"code":    "code1",
 		"display": "Wrong Display",
 	}
 
 	opts := CodingValidationOptions{
-		ValueSet:         "http://example.org/ValueSet/test",
+		ValueSet:         "http://hl7.org/fhir/ValueSet/test",
 		BindingStrength:  "required",
 		ValidateDisplay:  true,
 		DisplayAsWarning: true,
@@ -127,12 +127,12 @@ func TestCodingValidationHelper_ValidateCoding_InvalidCode(t *testing.T) {
 	ctx := context.Background()
 
 	coding := map[string]any{
-		"system": "http://example.org/CodeSystem/test",
+		"system": "http://terminology.hl7.org/CodeSystem/test",
 		"code":   "invalid_code",
 	}
 
 	opts := CodingValidationOptions{
-		ValueSet:        "http://example.org/ValueSet/test",
+		ValueSet:        "http://hl7.org/fhir/ValueSet/test",
 		BindingStrength: "required",
 		Phase:           "test",
 	}
@@ -151,7 +151,7 @@ func TestCodingValidationHelper_ValidateCoding_InvalidCode(t *testing.T) {
 func TestCodingValidationHelper_ValidateCodeableConcept_OneValid(t *testing.T) {
 	mock := &mockCodeValidator{
 		validCodes: map[string]map[string]*service.ValidateCodeResult{
-			"http://example.org/CodeSystem/test": {
+			"http://terminology.hl7.org/CodeSystem/test": {
 				"valid_code": {Valid: true, Display: "Valid Code"},
 			},
 		},
@@ -167,7 +167,7 @@ func TestCodingValidationHelper_ValidateCodeableConcept_OneValid(t *testing.T) {
 				"code":   "invalid_code",
 			},
 			map[string]any{
-				"system":  "http://example.org/CodeSystem/test",
+				"system":  "http://terminology.hl7.org/CodeSystem/test",
 				"code":    "valid_code",
 				"display": "Valid Code",
 			},
@@ -175,7 +175,7 @@ func TestCodingValidationHelper_ValidateCodeableConcept_OneValid(t *testing.T) {
 	}
 
 	opts := CodingValidationOptions{
-		ValueSet:         "http://example.org/ValueSet/test",
+		ValueSet:         "http://hl7.org/fhir/ValueSet/test",
 		BindingStrength:  "required",
 		ValidateDisplay:  true,
 		DisplayAsWarning: true,
@@ -200,18 +200,18 @@ func TestCodingValidationHelper_ValidateCodeableConcept_NoneValid(t *testing.T) 
 	cc := map[string]any{
 		"coding": []any{
 			map[string]any{
-				"system": "http://example.org/CodeSystem/test",
+				"system": "http://terminology.hl7.org/CodeSystem/test",
 				"code":   "invalid_code1",
 			},
 			map[string]any{
-				"system": "http://example.org/CodeSystem/test",
+				"system": "http://terminology.hl7.org/CodeSystem/test",
 				"code":   "invalid_code2",
 			},
 		},
 	}
 
 	opts := CodingValidationOptions{
-		ValueSet:        "http://example.org/ValueSet/test",
+		ValueSet:        "http://hl7.org/fhir/ValueSet/test",
 		BindingStrength: "required",
 		Phase:           "test",
 	}
@@ -238,7 +238,7 @@ func TestCodingValidationHelper_ValidateCodeableConcept_NoneValid(t *testing.T) 
 func TestCodingValidationHelper_ValidateCodeableConcept_DisplayMismatchReported(t *testing.T) {
 	mock := &mockCodeValidator{
 		validCodes: map[string]map[string]*service.ValidateCodeResult{
-			"http://example.org/CodeSystem/test": {
+			"http://terminology.hl7.org/CodeSystem/test": {
 				"code1": {Valid: true, Display: "Correct Display"},
 			},
 		},
@@ -250,7 +250,7 @@ func TestCodingValidationHelper_ValidateCodeableConcept_DisplayMismatchReported(
 	cc := map[string]any{
 		"coding": []any{
 			map[string]any{
-				"system":  "http://example.org/CodeSystem/test",
+				"system":  "http://terminology.hl7.org/CodeSystem/test",
 				"code":    "code1",
 				"display": "Wrong Display",
 			},
@@ -258,7 +258,7 @@ func TestCodingValidationHelper_ValidateCodeableConcept_DisplayMismatchReported(
 	}
 
 	opts := CodingValidationOptions{
-		ValueSet:         "http://example.org/ValueSet/test",
+		ValueSet:         "http://hl7.org/fhir/ValueSet/test",
 		BindingStrength:  "required",
 		ValidateDisplay:  true,
 		DisplayAsWarning: true,
@@ -314,12 +314,12 @@ func TestCodingValidationHelper_NilTerminologyService(t *testing.T) {
 	ctx := context.Background()
 
 	coding := map[string]any{
-		"system": "http://example.org/CodeSystem/test",
+		"system": "http://terminology.hl7.org/CodeSystem/test",
 		"code":   "code1",
 	}
 
 	opts := DefaultCodingValidationOptions("test")
-	opts.ValueSet = "http://example.org/ValueSet/test"
+	opts.ValueSet = "http://hl7.org/fhir/ValueSet/test"
 
 	result := helper.ValidateCoding(ctx, coding, "Test.element", opts)
 
@@ -346,5 +346,76 @@ func TestDefaultCodingValidationOptions(t *testing.T) {
 
 	if opts.ValueSet != "" {
 		t.Errorf("Expected empty ValueSet by default")
+	}
+}
+
+func TestIsExampleURL(t *testing.T) {
+	tests := []struct {
+		name     string
+		url      string
+		expected bool
+	}{
+		// RFC 2606 reserved domains - should return true
+		{"example.org", "http://example.org/CodeSystem/test", true},
+		{"example.com", "http://example.com/fhir/ValueSet", true},
+		{"example.net", "https://example.net/terminology", true},
+		{"example.edu", "http://example.edu/cs/123", true},
+		{"subdomain of example.org", "http://fhir.example.org/CodeSystem", true},
+		{"case insensitive", "http://EXAMPLE.ORG/test", true},
+		{"mixed case", "http://Example.Org/test", true},
+
+		// Real domains - should return false
+		{"hl7.org", "http://hl7.org/fhir/ValueSet/administrative-gender", false},
+		{"loinc.org", "http://loinc.org", false},
+		{"snomed.info", "http://snomed.info/sct", false},
+		{"terminology.hl7.org", "http://terminology.hl7.org/CodeSystem/v2-0203", false},
+		{"urn:oid", "urn:oid:2.16.840.1.113883.6.1", false},
+		{"empty string", "", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := IsExampleURL(tt.url)
+			if result != tt.expected {
+				t.Errorf("IsExampleURL(%q) = %v, want %v", tt.url, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestCodingValidationHelper_ExampleURLError(t *testing.T) {
+	// Even with no terminology service, example URLs should be flagged
+	helper := NewCodingValidationHelper(nil)
+	ctx := context.Background()
+
+	coding := map[string]any{
+		"system": "http://example.org/CodeSystem/species",
+		"code":   "canislf",
+	}
+
+	opts := DefaultCodingValidationOptions("test")
+
+	result := helper.ValidateCoding(ctx, coding, "Patient.animal.species.coding[0]", opts)
+
+	// Should be invalid due to example URL
+	if result.Valid {
+		t.Errorf("Expected invalid result for example URL, got valid")
+	}
+
+	if len(result.Issues) == 0 {
+		t.Errorf("Expected at least one issue for example URL")
+		return
+	}
+
+	// Check that we have an error for the example URL
+	hasExampleError := false
+	for _, issue := range result.Issues {
+		if issue.Severity == fv.SeverityError && issue.Code == fv.IssueTypeValue {
+			hasExampleError = true
+			break
+		}
+	}
+	if !hasExampleError {
+		t.Errorf("Expected error issue for example URL, got: %v", result.Issues)
 	}
 }
