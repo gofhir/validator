@@ -254,12 +254,15 @@ func (h *CodingValidationHelper) ValidateCodeableConcept(
 }
 
 // createCodeSystemIssue creates an issue when code is not found in CodeSystem (with binding).
+// This always returns a warning because an invalid code in a CodeSystem is a data quality issue
+// regardless of the binding strength. The binding strength only affects ValueSet validation.
 func (h *CodingValidationHelper) createCodeSystemIssue(code, system, path string, opts CodingValidationOptions) []fv.Issue {
-	severity := h.getSeverityForStrength(opts.BindingStrength)
+	// CodeSystem validation issues are always warnings - the code doesn't exist in the declared system
+	// This is different from ValueSet binding issues where severity depends on binding strength
 	msg := fmt.Sprintf("Code '%s' is not defined in CodeSystem '%s'. The code MUST be valid in the specified CodeSystem.", code, system)
 
 	return []fv.Issue{{
-		Severity:    severity,
+		Severity:    fv.SeverityWarning,
 		Code:        fv.IssueTypeCodeInvalid,
 		Diagnostics: msg,
 		Expression:  []string{path},

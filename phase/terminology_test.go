@@ -357,20 +357,24 @@ func TestTerminologyPhase_InvalidCode_Preferred(t *testing.T) {
 
 	issues := p.Validate(ctx, pctx)
 
-	// Preferred binding should produce information, not error or warning
+	// Preferred binding issues should not produce errors
+	// ValueSet binding issues should be information-level
+	// CodeSystem issues (code not in declared system) should be warnings
+	// per HL7 validator behavior
 	hasError := false
-	hasWarning := false
 	for _, issue := range issues {
 		if issue.Severity == fv.SeverityError {
 			hasError = true
 		}
-		if issue.Severity == fv.SeverityWarning {
-			hasWarning = true
-		}
 	}
 
-	if hasError || hasWarning {
-		t.Error("Preferred binding should only produce information-level issues")
+	if hasError {
+		t.Error("Preferred binding should not produce error-level issues")
+	}
+
+	// Verify we have at least one issue (the code is not in the ValueSet)
+	if len(issues) == 0 {
+		t.Error("Expected at least one issue for code not in preferred ValueSet")
 	}
 }
 

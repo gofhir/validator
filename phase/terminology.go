@@ -244,7 +244,21 @@ func (p *TerminologyPhase) validateBinding(
 	issues = append(issues, p.validateBindingValue(ctx, value, def, -1)...)
 
 	// Adjust severity based on binding strength
+	// Only adjust ValueSet binding issues, NOT CodeSystem validation issues
+	// CodeSystem issues (code doesn't exist in declared system) should remain as warnings
 	for i := range issues {
+		// Skip adjusting severity for CodeSystem existence issues
+		// These are identified by containing "CodeSystem" in the diagnostics
+		if strings.Contains(issues[i].Diagnostics, "not defined in CodeSystem") ||
+			strings.Contains(issues[i].Diagnostics, "CodeSystem") {
+			// CodeSystem validation issues stay as warnings
+			if issues[i].Severity == fv.SeverityInformation {
+				issues[i].Severity = fv.SeverityWarning
+			}
+			continue
+		}
+
+		// Adjust severity for ValueSet binding issues based on strength
 		if strength == BindingStrengthPreferred || strength == BindingStrengthExample {
 			issues[i].Severity = fv.SeverityInformation
 		} else if strength == BindingStrengthExtensible {
