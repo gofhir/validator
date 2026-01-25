@@ -38,84 +38,98 @@ func BuildElementIndex(sd *service.StructureDefinition) *ElementIndex {
 	}
 
 	index := NewElementIndex(sd.Type)
+	contentRefMap := index.collectContentReferences(sd.Snapshot)
 
-	// First pass: collect all contentReference mappings
-	// Map from contentReference target (e.g., "CapabilityStatement.rest.resource.operation")
-	// to the element that references it (e.g., "CapabilityStatement.rest.operation")
-	contentRefMap := make(map[string]string)
 	for i := range sd.Snapshot {
 		elem := &sd.Snapshot[i]
+		index.indexElement(elem, sd.Type, contentRefMap)
+	}
+
+	return index
+}
+
+// collectContentReferences builds a map of contentReference targets to their source paths.
+// ContentReference format is "#Path" - the # prefix is removed.
+func (idx *ElementIndex) collectContentReferences(snapshot []service.ElementDefinition) map[string]string {
+	contentRefMap := make(map[string]string)
+	for i := range snapshot {
+		elem := &snapshot[i]
 		if elem.ContentReference != "" {
-			// ContentReference format is "#Path" - remove the # prefix
 			target := strings.TrimPrefix(elem.ContentReference, "#")
 			contentRefMap[target] = elem.Path
 		}
 	}
+	return contentRefMap
+}
 
-	for i := range sd.Snapshot {
-		elem := &sd.Snapshot[i]
-		path := elem.Path
+// indexElement indexes a single element by its paths and handles special cases.
+func (idx *ElementIndex) indexElement(elem *service.ElementDefinition, sdType string, contentRefMap map[string]string) {
+	path := elem.Path
 
-		// Index by full path
-		index.byPath[path] = elem
+	// Index by full and short path
+	idx.indexByPath(elem, path, sdType)
 
-		// Also index by short path (without type prefix)
-		if strings.HasPrefix(path, sd.Type+".") {
-			shortPath := path[len(sd.Type)+1:]
-			index.byPath[shortPath] = elem
+	// Handle contentReference aliases
+	idx.indexContentRefAliases(elem, path, sdType, contentRefMap)
+
+	// Handle choice types
+	if strings.Contains(path, "[x]") {
+		idx.indexChoiceType(elem, path, sdType)
+	}
+}
+
+// indexByPath indexes an element by its full path and short path (without type prefix).
+func (idx *ElementIndex) indexByPath(elem *service.ElementDefinition, path, sdType string) {
+	idx.byPath[path] = elem
+
+	if strings.HasPrefix(path, sdType+".") {
+		shortPath := path[len(sdType)+1:]
+		idx.byPath[shortPath] = elem
+	}
+}
+
+// indexContentRefAliases creates aliases for contentReference child paths.
+func (idx *ElementIndex) indexContentRefAliases(elem *service.ElementDefinition, path, sdType string, contentRefMap map[string]string) {
+	for target, refPath := range contentRefMap {
+		if !strings.HasPrefix(path, target+".") {
+			continue
 		}
 
-		// Handle contentReference: create aliases for child paths
-		// For example, if CapabilityStatement.rest.operation has contentReference
-		// "#CapabilityStatement.rest.resource.operation", then children of
-		// CapabilityStatement.rest.resource.operation (like .name, .definition)
-		// should also be accessible via CapabilityStatement.rest.operation.*
-		for target, refPath := range contentRefMap {
-			if strings.HasPrefix(path, target+".") {
-				// This is a child of a contentReference target
-				// Create an alias path
-				childPart := path[len(target):]
-				aliasPath := refPath + childPart
-				if _, exists := index.byPath[aliasPath]; !exists {
-					index.byPath[aliasPath] = elem
-				}
-
-				// Also create short path alias
-				if strings.HasPrefix(aliasPath, sd.Type+".") {
-					shortAliasPath := aliasPath[len(sd.Type)+1:]
-					if _, exists := index.byPath[shortAliasPath]; !exists {
-						index.byPath[shortAliasPath] = elem
-					}
-				}
-			}
+		childPart := path[len(target):]
+		aliasPath := refPath + childPart
+		if _, exists := idx.byPath[aliasPath]; !exists {
+			idx.byPath[aliasPath] = elem
 		}
 
-		// Index choice types
-		if strings.Contains(path, "[x]") {
-			basePath := strings.Replace(path, "[x]", "", 1)
-			index.choiceTypes[basePath] = elem
-
-			// Also index short path version
-			if strings.HasPrefix(basePath, sd.Type+".") {
-				shortBasePath := basePath[len(sd.Type)+1:]
-				index.choiceTypes[shortBasePath] = elem
-			}
-
-			// Index all concrete choice type variants
-			for _, typeRef := range elem.Types {
-				concretePath := basePath + upperFirst(typeRef.Code)
-				index.byPath[concretePath] = elem
-
-				// Short path version
-				if strings.HasPrefix(concretePath, sd.Type+".") {
-					shortConcretePath := concretePath[len(sd.Type)+1:]
-					index.byPath[shortConcretePath] = elem
-				}
+		if strings.HasPrefix(aliasPath, sdType+".") {
+			shortAliasPath := aliasPath[len(sdType)+1:]
+			if _, exists := idx.byPath[shortAliasPath]; !exists {
+				idx.byPath[shortAliasPath] = elem
 			}
 		}
 	}
+}
 
-	return index
+// indexChoiceType indexes a choice type element and all its concrete variants.
+func (idx *ElementIndex) indexChoiceType(elem *service.ElementDefinition, path, sdType string) {
+	basePath := strings.Replace(path, "[x]", "", 1)
+	idx.choiceTypes[basePath] = elem
+
+	if strings.HasPrefix(basePath, sdType+".") {
+		shortBasePath := basePath[len(sdType)+1:]
+		idx.choiceTypes[shortBasePath] = elem
+	}
+
+	// Index all concrete choice type variants
+	for _, typeRef := range elem.Types {
+		concretePath := basePath + upperFirst(typeRef.Code)
+		idx.byPath[concretePath] = elem
+
+		if strings.HasPrefix(concretePath, sdType+".") {
+			shortConcretePath := concretePath[len(sdType)+1:]
+			idx.byPath[shortConcretePath] = elem
+		}
+	}
 }
 
 // Get returns the ElementDefinition for a path, or nil if not found.

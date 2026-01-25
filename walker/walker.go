@@ -245,24 +245,43 @@ func (tw *TypeAwareTreeWalker) createChildContext(
 	key string,
 	value any,
 ) *WalkContext {
+	child := tw.initChildContext(parent, key, value)
+
+	// Look up element definition and resolve choice types
+	elemDef := tw.findElementDef(parent, key)
+	child.ElementDef = elemDef
+
+	choiceResult := tw.resolveChoiceType(parent, key)
+	tw.applyChoiceResult(child, choiceResult)
+
+	// Resolve type for this element
+	typeName := tw.resolveElementType(elemDef, choiceResult)
+	child.TypeName = typeName
+
+	// Handle contained resources
+	typeName = tw.handleContainedResource(child, value, typeName)
+
+	// Apply type context
+	tw.applyTypeContext(ctx, child, parent, typeName)
+
+	return child
+}
+
+// initChildContext initializes a child context with basic fields.
+func (tw *TypeAwareTreeWalker) initChildContext(parent *WalkContext, key string, value any) *WalkContext {
 	child := tw.acquireContext()
 	child.Node = value
 	child.Key = key
 	child.Parent = parent
 	child.ResourceType = parent.ResourceType
 	child.Depth = parent.Depth + 1
-
-	// Build paths
 	child.Path = parent.Path + "." + key
 	child.ElementPath = parent.ElementPath + "." + key
+	return child
+}
 
-	// Look up element definition
-	elemDef := tw.findElementDef(parent, key)
-	child.ElementDef = elemDef
-
-	// Check for choice types
-	// For inline types, calculate the relative path prefix for choice type lookup
-	// e.g., if parent.ElementPath = "Dosage.doseAndRate", prefix = "doseAndRate"
+// resolveChoiceType determines if a key represents a choice type element.
+func (tw *TypeAwareTreeWalker) resolveChoiceType(parent *WalkContext, key string) *ChoiceTypeResult {
 	var choicePrefix string
 	if parent.TypeIndex != nil && isInlineElementType(parent.TypeName) {
 		rootType := parent.TypeIndex.RootType()
@@ -270,7 +289,11 @@ func (tw *TypeAwareTreeWalker) createChildContext(
 			choicePrefix = parent.ElementPath[len(rootType)+1:]
 		}
 	}
-	choiceResult := ResolveChoiceTypeWithPrefix(key, choicePrefix, parent.TypeIndex)
+	return ResolveChoiceTypeWithPrefix(key, choicePrefix, parent.TypeIndex)
+}
+
+// applyChoiceResult applies choice type resolution to a child context.
+func (tw *TypeAwareTreeWalker) applyChoiceResult(child *WalkContext, choiceResult *ChoiceTypeResult) {
 	if choiceResult.IsChoice {
 		child.IsChoiceType = true
 		child.ChoiceTypeName = choiceResult.TypeName
@@ -278,54 +301,52 @@ func (tw *TypeAwareTreeWalker) createChildContext(
 			child.ElementDef = choiceResult.ElementDef
 		}
 	}
+}
 
-	// Resolve type for this element
-	typeName := tw.resolveElementType(elemDef, choiceResult)
-	child.TypeName = typeName
-
-	// Check if this is a contained/embedded resource (type = "Resource")
-	// and the value has a resourceType - if so, use that as the actual type
-	if typeName == "Resource" {
-		if resourceObj, ok := value.(map[string]any); ok {
-			if actualResourceType, ok := resourceObj["resourceType"].(string); ok && actualResourceType != "" {
-				typeName = actualResourceType
-				child.TypeName = typeName
-				child.ResourceType = actualResourceType
-				// Reset element path for the contained resource
-				child.ElementPath = actualResourceType
-			}
-		}
+// handleContainedResource handles contained/embedded resources with type "Resource".
+func (tw *TypeAwareTreeWalker) handleContainedResource(child *WalkContext, value any, typeName string) string {
+	if typeName != "Resource" {
+		return typeName
 	}
 
-	// Determine whether to switch type context
-	// BackboneElement and Element types have their children defined inline,
-	// so we should NOT switch to their SD - keep the parent's index
+	resourceObj, ok := value.(map[string]any)
+	if !ok {
+		return typeName
+	}
+
+	actualResourceType, ok := resourceObj["resourceType"].(string)
+	if !ok || actualResourceType == "" {
+		return typeName
+	}
+
+	child.TypeName = actualResourceType
+	child.ResourceType = actualResourceType
+	child.ElementPath = actualResourceType
+	return actualResourceType
+}
+
+// applyTypeContext determines and applies the type context for a child element.
+func (tw *TypeAwareTreeWalker) applyTypeContext(ctx context.Context, child, parent *WalkContext, typeName string) {
 	shouldSwitchType := typeName != "" &&
 		!tw.resolver.IsPrimitiveType(typeName) &&
 		!isInlineElementType(typeName)
 
-	if shouldSwitchType {
-		typeSD, err := tw.resolver.ResolveType(ctx, typeName)
-		if err == nil && typeSD != nil {
-			child.TypeSD = typeSD
-			child.TypeIndex = BuildElementIndex(typeSD)
-			// Reset ElementPath to the SD's type for proper child lookups
-			// Use typeSD.Type because profiles (like SimpleQuantity) have
-			// elements with paths based on their base type (Quantity.value),
-			// not the profile name (SimpleQuantity.value)
-			child.ElementPath = typeSD.Type
-		} else {
-			// Keep parent's type context for unknown types
-			child.TypeSD = parent.TypeSD
-			child.TypeIndex = parent.TypeIndex
-		}
-	} else {
-		// Primitives, BackboneElements, and unknowns keep parent context
+	if !shouldSwitchType {
 		child.TypeSD = parent.TypeSD
 		child.TypeIndex = parent.TypeIndex
+		return
 	}
 
-	return child
+	typeSD, err := tw.resolver.ResolveType(ctx, typeName)
+	if err != nil || typeSD == nil {
+		child.TypeSD = parent.TypeSD
+		child.TypeIndex = parent.TypeIndex
+		return
+	}
+
+	child.TypeSD = typeSD
+	child.TypeIndex = BuildElementIndex(typeSD)
+	child.ElementPath = typeSD.Type
 }
 
 // findElementDef finds the ElementDefinition for a key in the current type context.
