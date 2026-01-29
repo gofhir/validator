@@ -1,0 +1,23 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "29463-7",
+        "display": "Body Weight"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "27113001",
+        "badField": "error in second coding"
+      },
+      {
+        "code": "local-code",
+        "invalidElement": true
+      }
+    ],
+    "text": "Body Weight"
+  }
+}

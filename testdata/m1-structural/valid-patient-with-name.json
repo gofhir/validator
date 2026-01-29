@@ -1,0 +1,17 @@
+{
+  "resourceType": "Patient",
+  "id": "example",
+  "active": true,
+  "name": [
+    {
+      "family": "Smith",
+      "given": ["John", "Jacob"]
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://example.org/mrn",
+      "value": "12345"
+    }
+  ]
+}

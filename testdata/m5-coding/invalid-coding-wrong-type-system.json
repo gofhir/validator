@@ -1,0 +1,10 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "coding": [{
+      "system": 12345,
+      "code": "29463-7"
+    }]
+  }
+}

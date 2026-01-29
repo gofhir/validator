@@ -1,0 +1,94 @@
+{
+  "resourceType": "Bundle",
+  "id": "invalid-uuid-formats",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient1",
+        "name": [{"family": "Test"}]
+      },
+      "request": {"method": "POST", "url": "Patient"}
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-1111-1111-1111-111111111111",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-short-uuid",
+        "status": "final",
+        "code": {"text": "test"},
+        "subject": {
+          "reference": "urn:uuid:123"
+        }
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:22222222-2222-2222-2222-222222222222",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-no-dashes",
+        "status": "final",
+        "code": {"text": "test"},
+        "subject": {
+          "reference": "urn:uuid:61ebe359bfdc46138bf2c5e300945f0a"
+        }
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:33333333-3333-3333-3333-333333333333",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-invalid-chars",
+        "status": "final",
+        "code": {"text": "test"},
+        "subject": {
+          "reference": "urn:uuid:GGGGGGGG-GGGG-GGGG-GGGG-GGGGGGGGGGGG"
+        }
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:44444444-4444-4444-4444-444444444444",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-wrong-structure",
+        "status": "final",
+        "code": {"text": "test"},
+        "subject": {
+          "reference": "urn:uuid:61ebe359-bfdc-4613-8bf2"
+        }
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:55555555-5555-5555-5555-555555555555",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-extra-segment",
+        "status": "final",
+        "code": {"text": "test"},
+        "subject": {
+          "reference": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a-extra"
+        }
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:66666666-6666-6666-6666-666666666666",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-uppercase",
+        "status": "final",
+        "code": {"text": "test"},
+        "subject": {
+          "reference": "urn:uuid:61EBE359-BFDC-4613-8BF2-C5E300945F0A"
+        }
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    }
+  ]
+}

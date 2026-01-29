@@ -1,0 +1,7 @@
+{
+  "resourceType": "Patient",
+  "extension": [{
+    "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+    "valueString": "Santiago, Chile"
+  }]
+}

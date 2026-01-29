@@ -1,0 +1,13 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "text": "Test observation"
+  },
+  "extension": [{
+    "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+    "valueAddress": {
+      "city": "Santiago"
+    }
+  }]
+}

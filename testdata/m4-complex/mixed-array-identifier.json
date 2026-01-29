@@ -1,0 +1,24 @@
+{
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://hospital.example.org",
+      "value": "12345"
+    },
+    {
+      "use": "usual",
+      "value": "67890",
+      "invalidProp": "error here"
+    },
+    {
+      "system": "http://lab.example.org",
+      "value": "LAB-001"
+    },
+    {
+      "use": "temp",
+      "unknownElement": "also error",
+      "anotherBad": 123
+    }
+  ]
+}

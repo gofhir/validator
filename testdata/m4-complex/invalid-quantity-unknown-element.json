@@ -1,0 +1,12 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "text": "Weight"
+  },
+  "valueQuantity": {
+    "value": 70.5,
+    "unit": "kg",
+    "invalidField": "should fail"
+  }
+}

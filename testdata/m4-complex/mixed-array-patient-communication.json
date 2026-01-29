@@ -1,0 +1,26 @@
+{
+  "resourceType": "Patient",
+  "communication": [
+    {
+      "language": {
+        "coding": [{"system": "urn:ietf:bcp:47", "code": "en"}],
+        "text": "English"
+      },
+      "preferred": true
+    },
+    {
+      "language": {"text": "Spanish"},
+      "badField": "should fail"
+    },
+    {
+      "language": {
+        "coding": [{"system": "urn:ietf:bcp:47", "code": "fr"}]
+      }
+    },
+    {
+      "language": {"text": "German"},
+      "unknownElement": 123,
+      "alsoInvalid": "error"
+    }
+  ]
+}

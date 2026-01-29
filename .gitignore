@@ -1,0 +1,61 @@
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+gofhir-validator
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local configuration
+.env
+.env.local
+
+# Build artifacts
+dist/
+
+# Downloaded JARs (for comparison testing)
+validator_cli.jar
+
+# Temporary files
+*.tmp
+*.log
+
+# Reports (generated)
+reports/
+
+# Claude Code artifacts (keep .claude/skills)
+.claude/projects/
+.claude/todos/
+
+# FHIR packages cache (downloaded at runtime)
+.fhir/
+
+# FHIR specification files (large, downloaded)
+*.spec.json
+fhir-spec/
+spec/
+
+# HL7 examples (large, can be downloaded separately)
+testdata/hl7-examples/

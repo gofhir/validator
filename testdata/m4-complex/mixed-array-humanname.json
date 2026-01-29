@@ -1,0 +1,23 @@
+{
+  "resourceType": "Patient",
+  "name": [
+    {
+      "use": "official",
+      "family": "Smith",
+      "given": ["John"]
+    },
+    {
+      "family": "Jones",
+      "unknownField": "should fail"
+    },
+    {
+      "use": "nickname",
+      "given": ["Johnny"]
+    },
+    {
+      "family": "Brown",
+      "badElement": "another error",
+      "alsoInvalid": true
+    }
+  ]
+}

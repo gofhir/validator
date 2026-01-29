@@ -1,0 +1,14 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "text": "Test observation"
+  },
+  "subject": {
+    "reference": "#patient-1"
+  },
+  "contained": [{
+    "resourceType": "Patient",
+    "id": "patient-1"
+  }]
+}

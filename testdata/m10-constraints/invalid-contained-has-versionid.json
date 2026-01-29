@@ -1,0 +1,15 @@
+{
+  "resourceType": "Patient",
+  "id": "123",
+  "contained": [{
+    "resourceType": "Organization",
+    "id": "org1",
+    "name": "Test Organization",
+    "meta": {
+      "versionId": "1"
+    }
+  }],
+  "managingOrganization": {
+    "reference": "#org1"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "resourceType": "Patient",
+  "id": "123",
+  "contained": [{
+    "resourceType": "Organization",
+    "id": "org1",
+    "name": "Test Organization",
+    "telecom": [{
+      "system": "invalid-system",
+      "value": "555-1234"
+    }]
+  }],
+  "managingOrganization": {
+    "reference": "#org1"
+  }
+}

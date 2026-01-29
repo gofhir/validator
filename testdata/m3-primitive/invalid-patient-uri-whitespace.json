@@ -1,0 +1,7 @@
+{
+  "resourceType": "Patient",
+  "identifier": [{
+    "system": "http://example.com/with space",
+    "value": "12345"
+  }]
+}

@@ -1,0 +1,12 @@
+{
+  "resourceType": "Patient",
+  "id": "example",
+  "active": true,
+  "unknownElement": "this should cause an error",
+  "name": [
+    {
+      "family": "Smith",
+      "badField": "this should also cause an error"
+    }
+  ]
+}

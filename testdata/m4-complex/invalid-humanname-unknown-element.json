@@ -1,0 +1,8 @@
+{
+  "resourceType": "Patient",
+  "name": [{
+    "family": "Smith",
+    "given": ["John"],
+    "foo": "unknown element in HumanName"
+  }]
+}

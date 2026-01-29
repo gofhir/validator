@@ -1,0 +1,13 @@
+{
+  "resourceType": "Patient",
+  "id": "example",
+  "active": true,
+  "birthDate": "1990-05-15",
+  "name": [
+    {
+      "family": "Smith",
+      "given": ["John", "Michael"]
+    }
+  ],
+  "gender": "male"
+}

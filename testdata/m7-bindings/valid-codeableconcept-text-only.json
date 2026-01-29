@@ -1,0 +1,6 @@
+{
+  "resourceType": "Patient",
+  "maritalStatus": {
+    "text": "Custom marital status not in standard ValueSet"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "resourceType": "Patient",
+  "communication": [
+    {
+      "preferred": true
+    }
+  ]
+}

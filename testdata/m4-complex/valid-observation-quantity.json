@@ -1,0 +1,13 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "text": "Weight"
+  },
+  "valueQuantity": {
+    "value": 70.5,
+    "unit": "kg",
+    "system": "http://unitsofmeasure.org",
+    "code": "kg"
+  }
+}

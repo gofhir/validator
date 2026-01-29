@@ -1,0 +1,11 @@
+{
+  "resourceType": "Patient",
+  "link": [
+    {
+      "other": {
+        "reference": "Patient/123"
+      },
+      "type": "seealso"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "resourceType": "Observation",
+  "status": "invalid-status",
+  "code": {"text": "Test"}
+}

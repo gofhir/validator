@@ -1,0 +1,6 @@
+{
+  "resourceType": "Observation",
+  "code": {
+    "text": "Blood pressure"
+  }
+}

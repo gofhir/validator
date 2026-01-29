@@ -1,0 +1,24 @@
+{
+  "resourceType": "Patient",
+  "link": [
+    {
+      "other": {"reference": "Patient/123"},
+      "type": "seealso"
+    },
+    {
+      "other": {"reference": "Patient/456"},
+      "type": "replaces",
+      "invalidLinkField": "should fail"
+    },
+    {
+      "other": {"reference": "RelatedPerson/789"},
+      "type": "refer"
+    },
+    {
+      "other": {"reference": "Patient/999"},
+      "type": "replaced-by",
+      "unknownElement": true,
+      "badField": "error"
+    }
+  ]
+}

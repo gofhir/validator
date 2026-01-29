@@ -1,0 +1,17 @@
+{
+  "resourceType": "Patient",
+  "identifier": [{
+    "use": "official",
+    "type": {
+      "coding": [{
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code": "MR"
+      }]
+    },
+    "system": "http://hospital.example.org",
+    "value": "12345",
+    "period": {
+      "start": "2020-01-01"
+    }
+  }]
+}

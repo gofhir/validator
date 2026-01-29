@@ -1,0 +1,8 @@
+{
+  "resourceType": "Patient",
+  "identifier": [{
+    "use": "official",
+    "system": "http://hospital.example.org",
+    "value": "12345"
+  }]
+}

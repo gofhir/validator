@@ -1,0 +1,12 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "coding": [{
+      "system": "http://loinc.org",
+      "code": "29463-7"
+    }],
+    "text": "Body Weight",
+    "unknownField": "should fail"
+  }
+}

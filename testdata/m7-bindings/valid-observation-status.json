@@ -1,0 +1,5 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "Test"}
+}

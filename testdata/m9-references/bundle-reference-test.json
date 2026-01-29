@@ -1,0 +1,55 @@
+{
+  "resourceType": "Bundle",
+  "id": "reference-test-bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient1",
+        "name": [{"family": "Test", "given": ["John"]}]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:88f151c0-a954-468a-88bd-5ae15c08e059",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs1",
+        "status": "final",
+        "code": {
+          "coding": [{"system": "http://loinc.org", "code": "15074-8", "display": "Glucose"}]
+        },
+        "subject": {
+          "reference": "urn:uuid:00000000-0000-0000-0000-000000000000"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:99f151c0-a954-468a-88bd-5ae15c08e060",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2",
+        "status": "final",
+        "code": {
+          "coding": [{"system": "http://loinc.org", "code": "15074-8", "display": "Glucose"}]
+        },
+        "subject": {
+          "reference": "http://example.org/fhir/Patient/external-patient"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    }
+  ]
+}

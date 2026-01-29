@@ -1,0 +1,10 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "text": "Test observation"
+  },
+  "subject": {
+    "reference": "https://example.org/fhir/Patient/123"
+  }
+}

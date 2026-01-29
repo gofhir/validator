@@ -1,0 +1,11 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "text": "Test observation"
+  },
+  "subject": {
+    "reference": "Patient/123",
+    "type": "Group"
+  }
+}

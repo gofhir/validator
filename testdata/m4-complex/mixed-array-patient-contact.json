@@ -1,0 +1,24 @@
+{
+  "resourceType": "Patient",
+  "contact": [
+    {
+      "relationship": [{"text": "Emergency Contact"}],
+      "name": {"family": "Smith", "given": ["Jane"]},
+      "telecom": [{"system": "phone", "value": "555-1234"}]
+    },
+    {
+      "relationship": [{"text": "Next of Kin"}],
+      "name": {"family": "Jones"},
+      "unknownContactField": "should fail"
+    },
+    {
+      "name": {"family": "Brown"},
+      "address": {"city": "Boston"}
+    },
+    {
+      "relationship": [{"text": "Spouse"}],
+      "invalidElement": true,
+      "anotherBadField": "error"
+    }
+  ]
+}

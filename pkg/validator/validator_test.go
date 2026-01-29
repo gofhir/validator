@@ -1,0 +1,354 @@
+package validator
+
+import (
+	"context"
+	"testing"
+)
+
+func TestNewValidator(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"))
+	if err != nil {
+		t.Skipf("Cannot create validator (packages may not be installed): %v", err)
+	}
+
+	if v == nil {
+		t.Fatal("New() returned nil validator")
+	}
+
+	if v.Version() != "4.0.1" {
+		t.Errorf("Version() = %q, want %q", v.Version(), "4.0.1")
+	}
+
+	if v.Registry() == nil {
+		t.Error("Registry() returned nil")
+	}
+
+	t.Logf("Validator created with %d StructureDefinitions", v.Registry().Count())
+}
+
+func TestNewValidatorDefaultVersion(t *testing.T) {
+	v, err := New() // No version specified, should default to 4.0.1
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	if v.Version() != "4.0.1" {
+		t.Errorf("Default version = %q, want %q", v.Version(), "4.0.1")
+	}
+}
+
+func TestNewValidatorUnknownVersion(t *testing.T) {
+	_, err := New(WithVersion("99.99.99"))
+	if err == nil {
+		t.Error("New() should fail for unknown FHIR version")
+	}
+}
+
+func TestValidateInvalidJSON(t *testing.T) {
+	v, err := New()
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	result, err := v.Validate(context.Background(), []byte("not valid json"))
+	if err != nil {
+		t.Fatalf("Validate() returned error: %v", err)
+	}
+
+	if !result.HasErrors() {
+		t.Error("Result should have errors for invalid JSON")
+	}
+
+	if result.ErrorCount() != 1 {
+		t.Errorf("Result should have 1 error, got %d", result.ErrorCount())
+	}
+
+	t.Logf("Error: %s", result.Issues[0].Diagnostics)
+}
+
+func TestValidateMissingResourceType(t *testing.T) {
+	v, err := New()
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	result, err := v.Validate(context.Background(), []byte(`{"name": "test"}`))
+	if err != nil {
+		t.Fatalf("Validate() returned error: %v", err)
+	}
+
+	if !result.HasErrors() {
+		t.Error("Result should have errors for missing resourceType")
+	}
+
+	found := false
+	for _, issue := range result.Issues {
+		if issue.Diagnostics == "Missing 'resourceType' property" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("Expected 'Missing resourceType' error not found")
+	}
+}
+
+func TestValidateUnknownResourceType(t *testing.T) {
+	v, err := New()
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	result, err := v.Validate(context.Background(), []byte(`{"resourceType": "NotAResource"}`))
+	if err != nil {
+		t.Fatalf("Validate() returned error: %v", err)
+	}
+
+	if !result.HasErrors() {
+		t.Error("Result should have errors for unknown resourceType")
+	}
+
+	found := false
+	for _, issue := range result.Issues {
+		t.Logf("Issue: %s", issue.Diagnostics)
+		if issue.Diagnostics == "Unknown resourceType 'NotAResource'" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("Expected 'Unknown resourceType' error not found")
+	}
+}
+
+func TestValidateMinimalPatient(t *testing.T) {
+	v, err := New()
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	resource := []byte(`{"resourceType": "Patient"}`)
+	result, err := v.Validate(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Validate() returned error: %v", err)
+	}
+
+	// A minimal Patient with just resourceType should be valid (no required fields)
+	// Note: Once we implement cardinality checking, this may have warnings
+	t.Logf("Errors: %d, Warnings: %d", result.ErrorCount(), result.WarningCount())
+}
+
+func TestValidatePatientWithName(t *testing.T) {
+	v, err := New()
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	resource := []byte(`{
+		"resourceType": "Patient",
+		"name": [{"family": "Smith", "given": ["John"]}]
+	}`)
+	result, err := v.Validate(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Validate() returned error: %v", err)
+	}
+
+	t.Logf("Errors: %d, Warnings: %d", result.ErrorCount(), result.WarningCount())
+	for _, issue := range result.Issues {
+		t.Logf("Issue [%s]: %s @ %v", issue.Severity, issue.Diagnostics, issue.Expression)
+	}
+}
+
+func TestValidatorConfig(t *testing.T) {
+	v, err := New(
+		WithVersion("4.0.1"),
+		WithProfile("http://example.org/profile"),
+		WithStrictMode(true),
+	)
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	config := v.Config()
+	if config.FHIRVersion != "4.0.1" {
+		t.Errorf("Config.FHIRVersion = %q, want %q", config.FHIRVersion, "4.0.1")
+	}
+	if !config.StrictMode {
+		t.Error("Config.StrictMode should be true")
+	}
+	if len(config.Profiles) != 1 || config.Profiles[0] != "http://example.org/profile" {
+		t.Errorf("Config.Profiles = %v, want [http://example.org/profile]", config.Profiles)
+	}
+}
+
+func TestValidateJSON(t *testing.T) {
+	v, err := New()
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	jsonStr := `{"resourceType": "Patient", "active": true}`
+	result, err := v.ValidateJSON(context.Background(), jsonStr)
+	if err != nil {
+		t.Fatalf("ValidateJSON() returned error: %v", err)
+	}
+
+	t.Logf("Errors: %d, Warnings: %d", result.ErrorCount(), result.WarningCount())
+}
+
+func TestValidateWithUSCoreProfile(t *testing.T) {
+	v, err := New(WithPackage("hl7.fhir.us.core", "6.1.0"))
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	// Check if US Core is available
+	usCorePatient := v.Registry().GetByURL("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
+	if usCorePatient == nil {
+		t.Skip("US Core Patient profile not available (package may not be installed)")
+	}
+
+	// Valid US Core Patient (minimal requirements: identifier, name, gender)
+	validPatient := `{
+		"resourceType": "Patient",
+		"meta": {
+			"profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+		},
+		"identifier": [{"system": "http://example.org/mrn", "value": "12345"}],
+		"name": [{"family": "Test", "given": ["John"]}],
+		"gender": "male"
+	}`
+
+	result, err := v.ValidateJSON(context.Background(), validPatient)
+	if err != nil {
+		t.Fatalf("ValidateJSON() returned error: %v", err)
+	}
+
+	t.Logf("Valid US Core Patient: %d errors, %d warnings", result.ErrorCount(), result.WarningCount())
+	for _, iss := range result.Issues {
+		t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+	}
+
+	// Invalid US Core Patient (missing required elements)
+	invalidPatient := `{
+		"resourceType": "Patient",
+		"meta": {
+			"profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+		},
+		"active": true
+	}`
+
+	result2, err := v.ValidateJSON(context.Background(), invalidPatient)
+	if err != nil {
+		t.Fatalf("ValidateJSON() returned error: %v", err)
+	}
+
+	t.Logf("Invalid US Core Patient: %d errors, %d warnings", result2.ErrorCount(), result2.WarningCount())
+	for _, iss := range result2.Issues {
+		t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+	}
+
+	// US Core Patient requires: identifier (1..*), name (1..*), gender (1..1)
+	if result2.ErrorCount() == 0 {
+		t.Error("Expected errors for invalid US Core Patient (missing required elements)")
+	}
+}
+
+func TestValidateWithMultipleProfiles(t *testing.T) {
+	v, err := New(WithPackage("hl7.fhir.us.core", "6.1.0"))
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	// Check if US Core is available
+	if v.Registry().GetByURL("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient") == nil {
+		t.Skip("US Core Patient profile not available")
+	}
+
+	// Patient with multiple profiles - validates against ALL found profiles
+	// According to FHIR spec, resource must be valid against ALL claimed profiles
+	patient := `{
+		"resourceType": "Patient",
+		"meta": {
+			"profile": [
+				"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+				"http://example.org/nonexistent-profile"
+			]
+		},
+		"identifier": [{"system": "http://example.org/mrn", "value": "12345"}],
+		"name": [{"family": "Test", "given": ["John"]}],
+		"gender": "male"
+	}`
+
+	result, err := v.ValidateJSON(context.Background(), patient)
+	if err != nil {
+		t.Fatalf("ValidateJSON() returned error: %v", err)
+	}
+
+	t.Logf("Multiple profiles: %d errors, %d warnings", result.ErrorCount(), result.WarningCount())
+	t.Logf("Profile used: %s", result.Stats.ProfileURL)
+
+	// Verify first valid profile is stored in stats
+	if result.Stats.ProfileURL != "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" {
+		t.Errorf("Expected US Core Patient profile, got %s", result.Stats.ProfileURL)
+	}
+
+	// Verify warning emitted for non-existent profile
+	foundNotFoundWarning := false
+	for _, iss := range result.Issues {
+		t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+		if iss.Severity == "warning" && iss.Code == "not-found" {
+			foundNotFoundWarning = true
+		}
+	}
+	if !foundNotFoundWarning {
+		t.Error("Expected warning for non-existent profile 'http://example.org/nonexistent-profile'")
+	}
+}
+
+func TestValidateAgainstAllProfiles(t *testing.T) {
+	v, err := New(WithPackage("hl7.fhir.us.core", "6.1.0"))
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	// Check if both profiles are available
+	usCorePatient := v.Registry().GetByURL("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
+	vitalsigns := v.Registry().GetByURL("http://hl7.org/fhir/StructureDefinition/vitalsigns")
+	if usCorePatient == nil || vitalsigns == nil {
+		t.Skip("Required profiles not available")
+	}
+
+	// A resource that is valid for both profiles would be validated against both
+	// Let's test with config profiles instead to have more control
+	v2, err := New(
+		WithProfile("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"),
+		WithPackage("hl7.fhir.us.core", "6.1.0"),
+	)
+	if err != nil {
+		t.Fatalf("Failed to create validator: %v", err)
+	}
+
+	// Valid patient for US Core
+	validPatient := `{
+		"resourceType": "Patient",
+		"identifier": [{"system": "http://example.org/mrn", "value": "12345"}],
+		"name": [{"family": "Test", "given": ["John"]}],
+		"gender": "male"
+	}`
+
+	result, err := v2.ValidateJSON(context.Background(), validPatient)
+	if err != nil {
+		t.Fatalf("ValidateJSON() returned error: %v", err)
+	}
+
+	t.Logf("Config profile validation: %d errors, %d warnings", result.ErrorCount(), result.WarningCount())
+	for _, iss := range result.Issues {
+		t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+	}
+
+	// Should be valid against US Core Patient (no cardinality errors)
+	if result.Stats.ProfileURL != "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" {
+		t.Errorf("Expected US Core Patient profile, got %s", result.Stats.ProfileURL)
+	}
+}
