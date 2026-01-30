@@ -100,7 +100,10 @@ type Registry struct {
 // Single JSON parse, shared across phases
 func (v *Validator) Validate(ctx context.Context, resource []byte) (*issue.Result, error) {
     var data map[string]any
-    json.Unmarshal(resource, &data)  // Parse once
+    if err := json.Unmarshal(resource, &data); err != nil {
+        result.AddError(issue.CodeStructure, fmt.Sprintf("Invalid JSON: %v", err))
+        return result, nil
+    }
     
     // All phases use pre-parsed data
     structResult := v.structValidator.ValidateData(data, sd)
