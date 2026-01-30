@@ -50,6 +50,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      - name: Cache FHIR packages
+        uses: actions/cache@v4
+        id: fhir-cache
+        with:
+          path: ~/.fhir/packages
+          key: fhir-packages-r4-4.0.1
+
+      - name: Download FHIR R4 packages
+        if: steps.fhir-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.fhir/packages/hl7.fhir.r4.core#4.0.1
+          curl -L https://packages.fhir.org/hl7.fhir.r4.core/4.0.1 -o /tmp/r4-core.tgz
+          tar -xzf /tmp/r4-core.tgz -C ~/.fhir/packages/hl7.fhir.r4.core#4.0.1
+          rm /tmp/r4-core.tgz
+
       - name: Run tests
         run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
