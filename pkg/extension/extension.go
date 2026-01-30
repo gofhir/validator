@@ -14,6 +14,14 @@ import (
 	"github.com/gofhir/validator/pkg/walker"
 )
 
+// Constants for commonly used string values.
+const (
+	keyExtension         = "extension"
+	keyModifierExtension = "modifierExtension"
+	strengthRequired     = "required"
+	strengthExtensible   = "extensible"
+)
+
 // arrayIndexRegex matches array indices like [0], [123], etc.
 var arrayIndexRegex = regexp.MustCompile(`\[\d+\]`)
 
@@ -69,26 +77,26 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 	v.walker.Walk(resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == resourceType {
-			return true // continue walking
+			return true
 		}
 
 		// Validate extensions in the nested resource using its own resourceType as context
 		v.validateElement(ctx.Data, ctx.FHIRPath, ctx.ResourceType, result)
-		return true // continue walking
+		return true
 	})
 }
 
 // validateElement recursively validates extensions in an element.
-// basePath is the FHIRPath to this element (e.g., "Patient.name[0]" or "Observation.contained[0].name")
-// contextType is the resource type (e.g., "Patient") for building extension context paths
+// BasePath is the FHIRPath to this element (e.g., "Patient.name[0]" or "Observation.contained[0].name").
+// ContextType is the resource type (e.g., "Patient") for building extension context paths.
 func (v *Validator) validateElement(data map[string]any, basePath, contextType string, result *issue.Result) {
 	// Build the context path for extension validation
 	// This converts "Observation.contained[0].birthDate" to "Patient.birthDate" for contained resources
 	contextPath := v.buildExtensionContextPath(basePath, contextType)
 
 	// Check for extension array - use contextPath for extension validation
-	if extensions, ok := data["extension"]; ok {
-		v.validateExtensionArray(extensions, basePath+".extension", contextPath, false, result)
+	if extensions, ok := data[keyExtension]; ok {
+		v.validateExtensionArray(extensions, basePath+"."+keyExtension, contextPath, false, result)
 	}
 
 	// Check for modifierExtension array
@@ -100,7 +108,7 @@ func (v *Validator) validateElement(data map[string]any, basePath, contextType s
 	for key, value := range data {
 		// Skip special keys - contained is handled separately by validateContainedExtensions
 		// entry is handled separately by validateBundleEntryExtensions
-		if key == "extension" || key == "modifierExtension" || key == "resourceType" || key == "contained" || key == "entry" {
+		if key == keyExtension || key == keyModifierExtension || key == "resourceType" || key == "contained" || key == "entry" {
 			continue
 		}
 
@@ -215,7 +223,7 @@ func (v *Validator) validateSingleExtension(ext map[string]any, extPath, context
 	v.validateExtensionValue(ext, extSD, extPath, result)
 
 	// Validate nested extensions
-	if nestedExts, ok := ext["extension"]; ok {
+	if nestedExts, ok := ext[keyExtension]; ok {
 		v.validateNestedExtensions(nestedExts, extSD, extPath, result)
 	}
 }
@@ -247,186 +255,167 @@ func (v *Validator) validateContext(extSD *registry.StructureDefinition, context
 	)
 }
 
-// stripArrayIndices removes array indices from a FHIRPath expression.
-// e.g., "ValueSet.compose.include[1].concept[10]" -> "ValueSet.compose.include.concept"
+// StripArrayIndices removes array indices from a FHIRPath expression.
+// E.g., "ValueSet.compose.include[1].concept[10]" -> "ValueSet.compose.include.concept".
 func stripArrayIndices(path string) string {
 	return arrayIndexRegex.ReplaceAllString(path, "")
 }
 
 // matchesContext checks if contextPath matches the allowed expression.
 func (v *Validator) matchesContext(contextPath, expression string) bool {
-	// Normalize shadow element paths (e.g., "Patient._birthDate" -> "Patient.birthDate")
+	// Normalize paths for matching
 	normalizedPath := v.normalizeShadowPath(contextPath)
-
-	// Also create a version without array indices for element-level matching
-	// e.g., "ValueSet.compose.include[1].concept[10]" -> "ValueSet.compose.include.concept"
 	pathWithoutIndices := stripArrayIndices(normalizedPath)
-
-	// Simple matching - extract resource type from path
 	resourceType := strings.Split(normalizedPath, ".")[0]
 
-	// Direct match
+	// Direct or prefix match
+	if v.matchesDirectOrPrefix(normalizedPath, pathWithoutIndices, resourceType, expression) {
+		return true
+	}
+
+	// Abstract type matches (Element, Resource, DomainResource, etc.)
+	if v.matchesAbstractType(resourceType, expression) {
+		return true
+	}
+
+	// ElementDefinition context match
+	if expression == "ElementDefinition" && v.matchesElementDefinitionContext(normalizedPath) {
+		return true
+	}
+
+	// Primitive type context match
+	if v.isPrimitiveType(expression) && v.getElementType(normalizedPath) == expression {
+		return true
+	}
+
+	// DataType context match (simple or with path)
+	if v.matchesDataTypeContext(normalizedPath, pathWithoutIndices, expression) {
+		return true
+	}
+
+	return false
+}
+
+// matchesDirectOrPrefix checks for direct resource or path prefix matches.
+func (v *Validator) matchesDirectOrPrefix(normalizedPath, pathWithoutIndices, resourceType, expression string) bool {
 	if expression == resourceType {
 		return true
 	}
+	return strings.HasPrefix(normalizedPath, expression) || strings.HasPrefix(pathWithoutIndices, expression)
+}
 
-	// Element-level match (e.g., "Patient.contact" matches "Patient.contact[0]")
-	// Check both with and without array indices
-	if strings.HasPrefix(normalizedPath, expression) || strings.HasPrefix(pathWithoutIndices, expression) {
+// matchesAbstractType checks if expression is an abstract FHIR type that matches the resource.
+func (v *Validator) matchesAbstractType(resourceType, expression string) bool {
+	switch expression {
+	case "Element", "Resource":
+		return true
+	case "DomainResource":
+		return v.isDomainResource(resourceType)
+	case "CanonicalResource":
+		return v.isCanonicalResource(resourceType)
+	case "MetadataResource":
+		return v.isMetadataResource(resourceType)
+	}
+	return false
+}
+
+// matchesElementDefinitionContext checks if path is within an ElementDefinition context.
+func (v *Validator) matchesElementDefinitionContext(normalizedPath string) bool {
+	if strings.Contains(normalizedPath, ".element[") {
 		return true
 	}
-
-	// "Element" means any element - this is a universal context that matches everything
-	if expression == "Element" {
-		return true
-	}
-
-	// "DomainResource" matches any resource that extends DomainResource
-	// Almost all FHIR resources are DomainResources (except Bundle, Binary, Parameters)
-	if expression == "DomainResource" && v.isDomainResource(resourceType) {
-		return true
-	}
-
-	// "Resource" matches any resource
-	if expression == "Resource" {
-		return true
-	}
-
-	// "CanonicalResource" matches resources that have a canonical URL
-	// This is an R5 concept but used in R4 extension packages for forward compatibility
-	// In R4, these resources have canonical URLs: StructureDefinition, ValueSet, CodeSystem,
-	// ConceptMap, CapabilityStatement, OperationDefinition, SearchParameter, etc.
-	if expression == "CanonicalResource" && v.isCanonicalResource(resourceType) {
-		return true
-	}
-
-	// "MetadataResource" is a subset of CanonicalResource (R5 concept)
-	if expression == "MetadataResource" && v.isMetadataResource(resourceType) {
-		return true
-	}
-
-	// Special handling for ElementDefinition context
-	// ElementDefinition is used as the type for StructureDefinition.snapshot.element and
-	// StructureDefinition.differential.element. When context is "ElementDefinition", it should
-	// match any path within those elements.
-	// e.g., "StructureDefinition.snapshot.element[0].type[0]" is within an ElementDefinition
-	if expression == "ElementDefinition" {
-		// Check if path contains ".element[" which indicates it's within an ElementDefinition
-		// in a StructureDefinition context
-		if strings.Contains(normalizedPath, ".element[") {
-			return true
-		}
-		// Also match the element itself (e.g., "StructureDefinition.snapshot.element[0]")
-		if strings.HasSuffix(normalizedPath, "]") {
-			// Strip the array index and check if it ends with ".element"
-			idx := strings.LastIndex(normalizedPath, "[")
-			if idx > 0 {
-				pathWithoutIndex := normalizedPath[:idx]
-				if strings.HasSuffix(pathWithoutIndex, ".element") {
-					return true
-				}
-			}
-		}
-	}
-
-	// Primitive type context (e.g., "string", "code", "markdown")
-	// These contexts mean the extension can be used on any element of that primitive type
-	// For example, "translation" extension has context "string", "code", "markdown"
-	// and can be used on ValueSet.description (which is markdown type)
-	if v.isPrimitiveType(expression) {
-		// Get the type of the element at this path
-		elementType := v.getElementType(normalizedPath)
-		if elementType == expression {
+	if strings.HasSuffix(normalizedPath, "]") {
+		idx := strings.LastIndex(normalizedPath, "[")
+		if idx > 0 && strings.HasSuffix(normalizedPath[:idx], ".element") {
 			return true
 		}
 	}
+	return false
+}
 
-	// DataType only context (e.g., "Coding" matches any Coding element like "Observation.component[0].valueCodeableConcept.coding[1]")
-	// When expression is just a datatype name, it allows extensions on any element of that type
+// matchesDataTypeContext checks if expression is a datatype context that matches the path.
+func (v *Validator) matchesDataTypeContext(normalizedPath, pathWithoutIndices, expression string) bool {
+	// Simple datatype context (e.g., "Coding")
 	if !strings.Contains(expression, ".") && v.isDataType(expression) {
-		// First, try to get the actual type of the element from the StructureDefinition
-		// This handles cases like Specimen.collection.method where the element name is "method"
-		// but the type is "CodeableConcept"
-		elementType := v.getElementType(pathWithoutIndices)
-		if elementType == expression {
+		if v.getElementType(pathWithoutIndices) == expression {
 			return true
 		}
-
-		// Fallback: The path should end with an element name that matches the datatype
-		// e.g., path ".coding[1]" matches "Coding", path ".valueCodeableConcept" matches "CodeableConcept"
-		pathParts := strings.Split(normalizedPath, ".")
-		if len(pathParts) > 0 {
-			lastPart := pathParts[len(pathParts)-1]
-			// Strip array index if present
-			if idx := strings.Index(lastPart, "["); idx > 0 {
-				lastPart = lastPart[:idx]
-			}
-			// Match if the element name corresponds to the datatype (case-insensitive)
-			// e.g., "coding" matches "Coding", "valueCodeableConcept" ends with "CodeableConcept"
-			if strings.EqualFold(lastPart, expression) ||
-				strings.HasSuffix(strings.ToLower(lastPart), strings.ToLower(expression)) {
-				return true
-			}
-			// Handle common FHIR naming patterns where element name is derived from type name
-			// e.g., "useContext" (element) vs "UsageContext" (type)
-			// Check if they share a common root (element often uses shortened type name)
-			exprLower := strings.ToLower(expression)
-			lastLower := strings.ToLower(lastPart)
-			// Check if element name is prefix of type name or vice versa (accounting for camelCase)
-			// "usecontext" starts with "use" and "usagecontext" starts with "usa" - both start with "us"
-			// Check if they share enough common prefix or suffix
-			if len(lastLower) >= 3 && len(exprLower) >= 3 {
-				// Check for common suffix (e.g., "Context" in both "useContext" and "UsageContext")
-				for suffixLen := 4; suffixLen <= len(lastLower) && suffixLen <= len(exprLower); suffixLen++ {
-					if lastLower[len(lastLower)-suffixLen:] == exprLower[len(exprLower)-suffixLen:] {
-						return true
-					}
-				}
-			}
+		if v.matchesDataTypeByElementName(normalizedPath, expression) {
+			return true
 		}
 	}
 
-	// DataType.element context match (e.g., "HumanName.family" matches "Patient.contact[0].name.family")
-	// The expression uses the data type name, the path uses the resource path
-	// Match if the path ends with the same element name after the type
+	// DataType.element context (e.g., "HumanName.family")
 	if strings.Contains(expression, ".") {
-		exprParts := strings.Split(expression, ".")
-		pathParts := strings.Split(normalizedPath, ".")
+		return v.matchesDataTypeElementContext(normalizedPath, expression)
+	}
 
-		// Get the element name from expression (e.g., "family" from "HumanName.family")
-		exprElement := exprParts[len(exprParts)-1]
+	return false
+}
 
-		// Get the element name from path, stripping any array indices
-		if len(pathParts) > 0 {
-			pathElement := pathParts[len(pathParts)-1]
-			// Strip array index if present (e.g., "family[0]" -> "family")
-			if idx := strings.Index(pathElement, "["); idx > 0 {
-				pathElement = pathElement[:idx]
-			}
+// matchesDataTypeByElementName checks if the last path element matches the datatype name.
+func (v *Validator) matchesDataTypeByElementName(normalizedPath, expression string) bool {
+	pathParts := strings.Split(normalizedPath, ".")
+	if len(pathParts) == 0 {
+		return false
+	}
 
-			// If element names match, check if this is a datatype context
-			if pathElement == exprElement {
-				exprType := exprParts[0]
-				// Check if expression type is a FHIR datatype (not a resource)
-				if v.isDataType(exprType) {
-					return true
-				}
-			}
+	lastPart := pathParts[len(pathParts)-1]
+	if idx := strings.Index(lastPart, "["); idx > 0 {
+		lastPart = lastPart[:idx]
+	}
 
-			// Also handle the case where extension is placed on parent element but context refers to child
-			// e.g., context "ElementDefinition.type.code" but extension is on ".type" element
-			// This is valid in FHIR - extensions on primitive children can be at parent level
-			if len(exprParts) >= 2 {
-				// Get the parent element from expression (e.g., "type" from "ElementDefinition.type.code")
-				exprParent := exprParts[len(exprParts)-2]
-				if pathElement == exprParent {
-					exprType := exprParts[0]
-					if v.isDataType(exprType) {
-						return true
-					}
-				}
-			}
+	// Direct or suffix match
+	if strings.EqualFold(lastPart, expression) ||
+		strings.HasSuffix(strings.ToLower(lastPart), strings.ToLower(expression)) {
+		return true
+	}
+
+	// Common suffix match for naming patterns (e.g., "useContext" vs "UsageContext")
+	return v.hasCommonSuffix(lastPart, expression)
+}
+
+// hasCommonSuffix checks if two strings share a significant common suffix.
+func (v *Validator) hasCommonSuffix(a, b string) bool {
+	aLower, bLower := strings.ToLower(a), strings.ToLower(b)
+	if len(aLower) < 3 || len(bLower) < 3 {
+		return false
+	}
+	for suffixLen := 4; suffixLen <= len(aLower) && suffixLen <= len(bLower); suffixLen++ {
+		if aLower[len(aLower)-suffixLen:] == bLower[len(bLower)-suffixLen:] {
+			return true
 		}
+	}
+	return false
+}
+
+// matchesDataTypeElementContext checks DataType.element context (e.g., "HumanName.family").
+func (v *Validator) matchesDataTypeElementContext(normalizedPath, expression string) bool {
+	exprParts := strings.Split(expression, ".")
+	pathParts := strings.Split(normalizedPath, ".")
+	if len(pathParts) == 0 {
+		return false
+	}
+
+	exprElement := exprParts[len(exprParts)-1]
+	pathElement := pathParts[len(pathParts)-1]
+	if idx := strings.Index(pathElement, "["); idx > 0 {
+		pathElement = pathElement[:idx]
+	}
+
+	exprType := exprParts[0]
+	if !v.isDataType(exprType) {
+		return false
+	}
+
+	// Direct element match
+	if pathElement == exprElement {
+		return true
+	}
+
+	// Parent element match (for extensions on primitive children)
+	if len(exprParts) >= 2 && pathElement == exprParts[len(exprParts)-2] {
+		return true
 	}
 
 	return false
@@ -465,72 +454,66 @@ func (v *Validator) isPrimitiveType(name string) bool {
 // getElementType returns the FHIR type of an element given its path.
 // Returns empty string if the type cannot be determined.
 func (v *Validator) getElementType(path string) string {
-	// Extract root type from path (e.g., "ValueSet" from "ValueSet.description")
 	parts := strings.Split(path, ".")
 	if len(parts) < 2 {
 		return ""
 	}
 
 	rootType := parts[0]
-	elementName := parts[len(parts)-1]
-
-	// Get the StructureDefinition for the root type
 	sd := v.registry.GetByType(rootType)
 	if sd == nil || sd.Snapshot == nil {
 		return ""
 	}
 
-	// Build the element path to look up
-	// For "ValueSet.description", look for "ValueSet.description"
-	lookupPath := path
-
-	// Find the ElementDefinition
-	for _, elem := range sd.Snapshot.Element {
-		if elem.Path == lookupPath {
-			if len(elem.Type) > 0 {
-				return elem.Type[0].Code
-			}
-		}
+	// Try direct path lookup
+	if t := v.findTypeInSnapshot(sd, path); t != "" {
+		return t
 	}
 
-	// If not found directly, try without array indices
-	cleanPath := stripArrayIndices(path)
-	for _, elem := range sd.Snapshot.Element {
-		if elem.Path == cleanPath {
-			if len(elem.Type) > 0 {
-				return elem.Type[0].Code
-			}
-		}
+	// Try without array indices
+	if t := v.findTypeInSnapshot(sd, stripArrayIndices(path)); t != "" {
+		return t
 	}
 
-	// For nested complex types, we need to look up the parent type's definition
-	// e.g., "ValueSet.compose.include.concept" -> look in ValueSet then BackboneElement types
+	// For nested types, look up in parent type's definition
 	if len(parts) > 2 {
-		// Try to find parent element and get its type
-		parentPath := strings.Join(parts[:len(parts)-1], ".")
-		parentType := v.getElementType(parentPath)
-		if parentType != "" {
-			// Look up element in the parent type's definition
-			parentSD := v.registry.GetByType(parentType)
-			if parentSD != nil && parentSD.Snapshot != nil {
-				lookupPath := parentType + "." + elementName
-				for _, elem := range parentSD.Snapshot.Element {
-					if elem.Path == lookupPath {
-						if len(elem.Type) > 0 {
-							return elem.Type[0].Code
-						}
-					}
-				}
-			}
-		}
+		return v.getTypeFromParent(parts)
 	}
 
 	return ""
 }
 
-// normalizeShadowPath converts shadow element paths to their base element paths.
-// For example: "Patient._birthDate" -> "Patient.birthDate"
-// "Patient.contact[0].name._family" -> "Patient.contact[0].name.family"
+// findTypeInSnapshot finds the type of an element in a StructureDefinition's snapshot.
+func (v *Validator) findTypeInSnapshot(sd *registry.StructureDefinition, path string) string {
+	for _, elem := range sd.Snapshot.Element {
+		if elem.Path == path && len(elem.Type) > 0 {
+			return elem.Type[0].Code
+		}
+	}
+	return ""
+}
+
+// getTypeFromParent recursively looks up type in parent type definitions.
+func (v *Validator) getTypeFromParent(parts []string) string {
+	elementName := parts[len(parts)-1]
+	parentPath := strings.Join(parts[:len(parts)-1], ".")
+	parentType := v.getElementType(parentPath)
+
+	if parentType == "" {
+		return ""
+	}
+
+	parentSD := v.registry.GetByType(parentType)
+	if parentSD == nil || parentSD.Snapshot == nil {
+		return ""
+	}
+
+	return v.findTypeInSnapshot(parentSD, parentType+"."+elementName)
+}
+
+// NormalizeShadowPath converts shadow element paths to their base element paths.
+// For example: "Patient._birthDate" -> "Patient.birthDate".
+// "Patient.contact[0].name._family" -> "Patient.contact[0].name.family".
 func (v *Validator) normalizeShadowPath(path string) string {
 	parts := strings.Split(path, ".")
 	for i, part := range parts {
@@ -567,7 +550,7 @@ func (v *Validator) validateExtensionValue(ext map[string]any, extSD *registry.S
 	}
 
 	// Check if value is required (min > 0)
-	hasNested := ext["extension"] != nil
+	hasNested := ext[keyExtension] != nil
 	if valueDef.Min > 0 && !v.hasValue(ext) && !hasNested {
 		result.AddErrorWithID(
 			issue.DiagExtensionValueRequired,
@@ -626,7 +609,7 @@ func (v *Validator) validateExtensionValue(ext map[string]any, extSD *registry.S
 
 // validatePrimitiveExtensionValue validates a primitive extension value using the primitive validator.
 // Returns true if valid, false if invalid.
-func (v *Validator) validatePrimitiveExtensionValue(value any, typeName string, fhirPath string, result *issue.Result) bool {
+func (v *Validator) validatePrimitiveExtensionValue(value any, typeName, fhirPath string, result *issue.Result) bool {
 	// Primitive values should not be objects (except for special cases handled elsewhere)
 	if _, isMap := value.(map[string]any); isMap {
 		// Complex value for primitive type - will be handled by validateValueContent
@@ -637,7 +620,7 @@ func (v *Validator) validatePrimitiveExtensionValue(value any, typeName string, 
 }
 
 // validateValueContent validates the content of a complex extension value against its type's SD.
-func (v *Validator) validateValueContent(value map[string]any, typeName string, valuePath string, result *issue.Result) {
+func (v *Validator) validateValueContent(value map[string]any, typeName, valuePath string, result *issue.Result) {
 	// Get the StructureDefinition for this type
 	typeSD := v.registry.GetByType(typeName)
 	if typeSD == nil {
@@ -659,68 +642,19 @@ func (v *Validator) validateValueContent(value map[string]any, typeName string, 
 }
 
 // validateValueStructure checks that all elements in the value are valid for the type.
-func (v *Validator) validateValueStructure(value map[string]any, typeSD *registry.StructureDefinition, typeName string, valuePath string, result *issue.Result) {
+func (v *Validator) validateValueStructure(value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
 	if typeSD.Snapshot == nil {
 		return
 	}
 
-	// Build a set of valid element names for this type
-	validElements := make(map[string]bool)
-	choiceTypes := make(map[string][]string) // baseName -> allowed type suffixes
+	validElements, choiceTypes := v.buildValidElementSets(typeSD, typeName)
 
-	for _, elem := range typeSD.Snapshot.Element {
-		// Skip the root element
-		if elem.Path == typeName {
-			continue
-		}
-
-		// Get the element name (last part of path)
-		parts := strings.Split(elem.Path, ".")
-		if len(parts) < 2 {
-			continue
-		}
-		elementName := parts[1]
-
-		// Handle choice types (e.g., "value[x]")
-		if strings.HasSuffix(elementName, "[x]") {
-			baseName := strings.TrimSuffix(elementName, "[x]")
-			for _, t := range elem.Type {
-				// Add each possible choice (e.g., "valueString", "valueBoolean")
-				suffix := strings.ToUpper(t.Code[:1]) + t.Code[1:]
-				choiceTypes[baseName] = append(choiceTypes[baseName], suffix)
-			}
-		} else {
-			validElements[elementName] = true
-		}
-	}
-
-	// Check each element in the value
+	// Validate each element in the value
 	for key := range value {
-		// Skip extension and id - always allowed
-		if key == "extension" || key == "id" || key == "modifierExtension" {
+		if v.isSkippableKey(key) || validElements[key] {
 			continue
 		}
-
-		// Check if it's a valid element
-		if validElements[key] {
-			continue
-		}
-
-		// Check if it's a valid choice type
-		isValidChoice := false
-		for baseName, suffixes := range choiceTypes {
-			for _, suffix := range suffixes {
-				if key == baseName+suffix {
-					isValidChoice = true
-					break
-				}
-			}
-			if isValidChoice {
-				break
-			}
-		}
-
-		if !isValidChoice {
+		if !v.isValidChoiceType(key, choiceTypes) {
 			result.AddErrorWithID(
 				issue.DiagStructureUnknownElement,
 				map[string]any{"element": key},
@@ -730,29 +664,76 @@ func (v *Validator) validateValueStructure(value map[string]any, typeSD *registr
 	}
 
 	// Recursively validate nested complex elements
+	v.validateNestedElements(value, typeSD, typeName, valuePath, result)
+}
+
+// buildValidElementSets builds the set of valid elements and choice types from a SD.
+func (v *Validator) buildValidElementSets(typeSD *registry.StructureDefinition, typeName string) (validElements map[string]bool, choiceTypes map[string][]string) {
+	validElements = make(map[string]bool)
+	choiceTypes = make(map[string][]string)
+
+	for _, elem := range typeSD.Snapshot.Element {
+		if elem.Path == typeName {
+			continue
+		}
+
+		parts := strings.Split(elem.Path, ".")
+		if len(parts) < 2 {
+			continue
+		}
+		elementName := parts[1]
+
+		if strings.HasSuffix(elementName, "[x]") {
+			baseName := strings.TrimSuffix(elementName, "[x]")
+			for _, t := range elem.Type {
+				suffix := strings.ToUpper(t.Code[:1]) + t.Code[1:]
+				choiceTypes[baseName] = append(choiceTypes[baseName], suffix)
+			}
+		} else {
+			validElements[elementName] = true
+		}
+	}
+
+	return validElements, choiceTypes
+}
+
+// isSkippableKey returns true if the key should be skipped during validation.
+func (v *Validator) isSkippableKey(key string) bool {
+	return key == keyExtension || key == "id" || key == keyModifierExtension
+}
+
+// isValidChoiceType checks if key is a valid choice type element.
+func (v *Validator) isValidChoiceType(key string, choiceTypes map[string][]string) bool {
+	for baseName, suffixes := range choiceTypes {
+		for _, suffix := range suffixes {
+			if key == baseName+suffix {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// validateNestedElements recursively validates nested complex elements.
+func (v *Validator) validateNestedElements(value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
 	for key, val := range value {
-		if key == "extension" || key == "id" || key == "modifierExtension" {
+		if v.isSkippableKey(key) {
 			continue
 		}
 
 		elementPath := valuePath + "." + key
+		nestedType := v.findElementType(typeSD, typeName+"."+key)
+		if nestedType == "" {
+			continue
+		}
 
 		switch typedVal := val.(type) {
 		case map[string]any:
-			// Find the type of this nested element
-			nestedType := v.findElementType(typeSD, typeName+"."+key)
-			if nestedType != "" {
-				v.validateValueContent(typedVal, nestedType, elementPath, result)
-			}
+			v.validateValueContent(typedVal, nestedType, elementPath, result)
 		case []any:
-			// Handle arrays
 			for i, item := range typedVal {
 				if itemMap, ok := item.(map[string]any); ok {
-					itemPath := fmt.Sprintf("%s[%d]", elementPath, i)
-					nestedType := v.findElementType(typeSD, typeName+"."+key)
-					if nestedType != "" {
-						v.validateValueContent(itemMap, nestedType, itemPath, result)
-					}
+					v.validateValueContent(itemMap, nestedType, fmt.Sprintf("%s[%d]", elementPath, i), result)
 				}
 			}
 		}
@@ -947,7 +928,7 @@ func (v *Validator) validateExtensionBinding(value any, binding *registry.Bindin
 	}
 
 	// Only validate required and extensible bindings
-	if binding.Strength != "required" && binding.Strength != "extensible" {
+	if binding.Strength != strengthRequired && binding.Strength != strengthExtensible {
 		return
 	}
 

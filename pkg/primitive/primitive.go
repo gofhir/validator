@@ -13,6 +13,14 @@ import (
 	"github.com/gofhir/validator/pkg/walker"
 )
 
+// FHIR primitive type names.
+const (
+	typeInteger     = "integer"
+	typePositiveInt = "positiveInt"
+	typeUnsignedInt = "unsignedInt"
+	typeDecimal     = "decimal"
+)
+
 // Validator performs primitive type validation of FHIR resources.
 type Validator struct {
 	registry     *registry.Registry
@@ -96,7 +104,7 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 	v.walker.Walk(data, rootType, rootType, func(wctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if wctx.FHIRPath == rootType {
-			return true // continue walking
+			return true
 		}
 
 		// Build index and context for the nested resource (cached)
@@ -108,7 +116,7 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 
 		// Validate primitive types in the nested resource
 		v.validateElement(wctx.Data, wctx.ResourceType, wctx.FHIRPath, nestedIdx, nestedCtx, result)
-		return true // continue walking
+		return true
 	})
 
 	return result
@@ -146,7 +154,9 @@ func (v *Validator) getOrBuildIndex(sd *registry.StructureDefinition) *elementIn
 
 	// Check cache
 	if cached, ok := v.idxCache.Load(sd.URL); ok {
-		return cached.(*elementIndex)
+		if idx, ok := cached.(*elementIndex); ok {
+			return idx
+		}
 	}
 
 	// Build and cache
@@ -372,7 +382,7 @@ func (v *Validator) validatePrimitiveValue(
 // scientific notation (e.g., "22125503" instead of "2.2125503e+07").
 func formatNumericValue(value any, typeName string) string {
 	switch typeName {
-	case "integer", "positiveInt", "unsignedInt":
+	case typeInteger, typePositiveInt, typeUnsignedInt:
 		// For integer types, format as integer to avoid scientific notation
 		switch v := value.(type) {
 		case float64:
@@ -389,7 +399,7 @@ func formatNumericValue(value any, typeName string) string {
 		default:
 			return fmt.Sprintf("%v", v)
 		}
-	case "decimal":
+	case typeDecimal:
 		// For decimal, preserve the numeric precision
 		switch v := value.(type) {
 		case float64:
@@ -434,7 +444,7 @@ func getExpectedJSONType(typeName string) jsonType {
 	switch typeName {
 	case "boolean":
 		return jsonTypeBoolean
-	case "integer", "decimal", "positiveInt", "unsignedInt":
+	case typeInteger, typeDecimal, typePositiveInt, typeUnsignedInt:
 		return jsonTypeNumber
 	default:
 		// All other primitives are strings in JSON
@@ -450,7 +460,7 @@ func isTypeCompatible(actual, expected jsonType, _ string) bool {
 // isNumericStringType returns true if the type is numeric but needs string regex validation.
 func isNumericStringType(typeName string) bool {
 	switch typeName {
-	case "integer", "decimal", "positiveInt", "unsignedInt":
+	case typeInteger, typeDecimal, typePositiveInt, typeUnsignedInt:
 		return true
 	default:
 		return false
@@ -564,9 +574,9 @@ func truncateValue(value string) string {
 
 // ValidateSinglePrimitive validates a single primitive value against its expected FHIR type.
 // This is used by the extension validator to validate value[x] elements.
-// typeName is the FHIR primitive type (e.g., "string", "boolean", "integer").
+// TypeName is the FHIR primitive type (e.g., "string", "boolean", "integer").
 // Returns true if valid, false if invalid (and issues are added to result).
-func (v *Validator) ValidateSinglePrimitive(value any, typeName string, fhirPath string, result *issue.Result) bool {
+func (v *Validator) ValidateSinglePrimitive(value any, typeName, fhirPath string, result *issue.Result) bool {
 	// Get actual JSON type
 	actualType := getJSONType(value)
 

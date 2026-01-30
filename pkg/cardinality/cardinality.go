@@ -63,12 +63,12 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 	v.walker.WalkWithProfiles(data, rootType, rootType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == rootType {
-			return true // continue walking
+			return true
 		}
 
 		// Validate cardinality in the nested resource using its profile/SD
 		v.validateElementCardinality(ctx.Data, ctx.ResourceType, ctx.FHIRPath, ctx.SD, result)
-		return true // continue walking
+		return true
 	})
 
 	return result
@@ -237,7 +237,7 @@ func (v *Validator) hasDirectChildren(sd *registry.StructureDefinition, parentPa
 // getDirectChildren returns ElementDefinitions that are direct children of the given path.
 // It deduplicates slice variations to avoid validating the same element multiple times.
 func (v *Validator) getDirectChildren(sd *registry.StructureDefinition, parentPath string) []registry.ElementDefinition {
-	var children []registry.ElementDefinition
+	children := make([]registry.ElementDefinition, 0, len(sd.Snapshot.Element)/4)
 	seenBasePaths := make(map[string]bool)
 
 	prefix := parentPath + "."

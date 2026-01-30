@@ -5,7 +5,9 @@ package loader
 import (
 	"archive/tar"
 	"compress/gzip"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -236,7 +238,9 @@ func (l *Loader) LoadFromTgz(tgzPath string) (*Package, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open tgz file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	return l.loadFromTgzReader(file, tgzPath)
 }
@@ -245,11 +249,18 @@ func (l *Loader) LoadFromTgz(tgzPath string) (*Package, error) {
 // The package is downloaded to a temporary location and loaded.
 func (l *Loader) LoadFromURL(url string) (*Package, error) {
 	// Download the .tgz file
-	resp, err := http.Get(url)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, http.NoBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request for %s: %w", url, err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download package from %s: %w", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to download package: HTTP %d", resp.StatusCode)
@@ -265,7 +276,9 @@ func (l *Loader) loadFromTgzReader(reader io.Reader, source string) (*Package, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to create gzip reader: %w", err)
 	}
-	defer gzReader.Close()
+	defer func() {
+		_ = gzReader.Close()
+	}()
 
 	// Create tar reader
 	tarReader := tar.NewReader(gzReader)
@@ -279,7 +292,7 @@ func (l *Loader) loadFromTgzReader(reader io.Reader, source string) (*Package, e
 	// Extract and process files
 	for {
 		header, err := tarReader.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {

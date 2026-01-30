@@ -70,12 +70,12 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 	v.walker.Walk(resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == resourceType {
-			return true // continue walking
+			return true
 		}
 
 		// Validate bindings in the nested resource
 		v.validateElementWithPaths(ctx.Data, ctx.SD, ctx.ResourceType, ctx.FHIRPath, result)
-		return true // continue walking
+		return true
 	})
 }
 
@@ -85,9 +85,9 @@ func (v *Validator) validateElement(data map[string]any, sd *registry.StructureD
 	v.validateElementWithPaths(data, sd, basePath, basePath, result)
 }
 
-// validateElementWithPaths validates bindings with separate paths for SD lookup and error reporting.
-// sdPath is used to look up ElementDefinitions in the StructureDefinition.
-// fhirPath is used for error reporting (e.g., "Patient.contained[0].telecom").
+// ValidateElementWithPaths validates bindings with separate paths for SD lookup and error reporting.
+// SdPath is used to look up ElementDefinitions in the StructureDefinition.
+// FhirPath is used for error reporting (e.g., "Patient.contained[0].telecom").
 func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.StructureDefinition, sdPath, fhirPath string, result *issue.Result) {
 	for key, value := range data {
 		if key == "resourceType" {
@@ -326,99 +326,95 @@ func (v *Validator) validateCodingBinding(coding map[string]any, binding *regist
 		return // Empty code is handled elsewhere
 	}
 
-	// First, validate that the code exists in its CodeSystem (if system is provided and loaded).
-	// This is independent of the ValueSet binding validation.
-	codeValidInCS := false
-	if system != "" {
-		codeValid, csFound := v.termRegistry.ValidateCodeInCodeSystem(system, code)
-		if csFound {
-			if !codeValid {
-				// Code doesn't exist in the CodeSystem
-				result.AddErrorWithID(
-					issue.DiagCodeNotInCodeSystem,
-					map[string]any{
-						"code":   code,
-						"system": system,
-					},
-					fhirPath,
-				)
-				return // Don't continue with binding validation if code is invalid in CodeSystem
-			}
-			codeValidInCS = true
-
-			// Validate display matches CodeSystem if code is valid and display is provided.
-			// This runs regardless of ValueSet binding validation.
-			// HL7 validator is case-insensitive for display comparison.
-			if providedDisplay != "" {
-				expectedDisplay, displayFound := v.termRegistry.GetDisplayForCode(system, code)
-				if displayFound && expectedDisplay != "" && !strings.EqualFold(providedDisplay, expectedDisplay) {
-					result.AddErrorWithID(
-						issue.DiagBindingDisplayMismatch,
-						map[string]any{
-							"code":     code,
-							"provided": providedDisplay,
-							"expected": expectedDisplay,
-						},
-						fhirPath+".display",
-					)
-				}
-			}
-		}
+	// Validate code exists in CodeSystem and check display
+	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(system, code, providedDisplay, fhirPath, result)
+	if shouldReturn {
+		return
 	}
 
-	// Now validate against the ValueSet binding
+	// Validate against the ValueSet binding
 	valid, found := v.termRegistry.ValidateCode(binding.ValueSet, system, code)
-
 	if !found {
 		return // ValueSet not found
 	}
 
 	if !valid {
-		codeDisplay := code
-		if system != "" {
-			codeDisplay = fmt.Sprintf("%s#%s", system, code)
-		}
-
-		if binding.Strength == strengthRequired {
-			result.AddErrorWithID(
-				issue.DiagBindingRequired,
-				map[string]any{
-					"code":     codeDisplay,
-					"valueSet": binding.ValueSet,
-				},
-				fhirPath,
-			)
-		} else if binding.Strength == strengthExtensible {
-			// For extensible bindings, only warn if the system IS in the ValueSet.
-			// If the system is NOT in the ValueSet, the code is "extending" the binding
-			// (using a different code system), which is allowed without warning.
-			if system == "" || v.termRegistry.IsSystemInValueSet(binding.ValueSet, system) {
-				result.AddWarningWithID(
-					issue.DiagBindingExtensible,
-					map[string]any{
-						"code":     codeDisplay,
-						"valueSet": binding.ValueSet,
-					},
-					fhirPath,
-				)
-			}
-			// If system is not in ValueSet, no warning - code is extending the binding
-		}
+		v.reportBindingViolation(system, code, binding, fhirPath, result)
+		return
 	}
 
-	// If code was valid in ValueSet but we didn't validate display yet (CodeSystem wasn't found),
-	// try to validate display against ValueSet codes
-	if valid && !codeValidInCS && providedDisplay != "" && system != "" {
-		expectedDisplay, displayFound := v.termRegistry.GetDisplayForCode(system, code)
-		if displayFound && expectedDisplay != "" && !strings.EqualFold(providedDisplay, expectedDisplay) {
-			result.AddErrorWithID(
-				issue.DiagBindingDisplayMismatch,
-				map[string]any{
-					"code":     code,
-					"provided": providedDisplay,
-					"expected": expectedDisplay,
-				},
-				fhirPath+".display",
+	// Validate display if not already validated via CodeSystem
+	if !codeValidInCS && providedDisplay != "" && system != "" {
+		v.validateDisplayMismatch(system, code, providedDisplay, fhirPath, result)
+	}
+}
+
+// validateCodeInCodeSystem validates a code exists in its CodeSystem and checks display.
+// Returns (codeValidInCS, shouldReturn) where shouldReturn indicates validation should stop.
+func (v *Validator) validateCodeInCodeSystem(system, code, providedDisplay, fhirPath string, result *issue.Result) (codeValidInCS, shouldReturn bool) {
+	if system == "" {
+		return false, false
+	}
+
+	codeValid, csFound := v.termRegistry.ValidateCodeInCodeSystem(system, code)
+	if !csFound {
+		return false, false
+	}
+
+	if !codeValid {
+		result.AddErrorWithID(
+			issue.DiagCodeNotInCodeSystem,
+			map[string]any{"code": code, "system": system},
+			fhirPath,
+		)
+		return false, true // Stop validation - code invalid in CodeSystem
+	}
+
+	// Validate display if provided (HL7 is case-insensitive)
+	if providedDisplay != "" {
+		v.validateDisplayMismatch(system, code, providedDisplay, fhirPath, result)
+	}
+
+	return true, false
+}
+
+// validateDisplayMismatch checks if the provided display matches the expected display.
+func (v *Validator) validateDisplayMismatch(system, code, providedDisplay, fhirPath string, result *issue.Result) {
+	expectedDisplay, displayFound := v.termRegistry.GetDisplayForCode(system, code)
+	if displayFound && expectedDisplay != "" && !strings.EqualFold(providedDisplay, expectedDisplay) {
+		result.AddErrorWithID(
+			issue.DiagBindingDisplayMismatch,
+			map[string]any{
+				"code":     code,
+				"provided": providedDisplay,
+				"expected": expectedDisplay,
+			},
+			fhirPath+".display",
+		)
+	}
+}
+
+// reportBindingViolation reports a binding violation based on binding strength.
+func (v *Validator) reportBindingViolation(system, code string, binding *registry.Binding, fhirPath string, result *issue.Result) {
+	codeDisplay := code
+	if system != "" {
+		codeDisplay = fmt.Sprintf("%s#%s", system, code)
+	}
+
+	switch binding.Strength {
+	case strengthRequired:
+		result.AddErrorWithID(
+			issue.DiagBindingRequired,
+			map[string]any{"code": codeDisplay, "valueSet": binding.ValueSet},
+			fhirPath,
+		)
+	case strengthExtensible:
+		// Only warn if system IS in ValueSet; extending with different system is allowed
+		if system == "" || v.termRegistry.IsSystemInValueSet(binding.ValueSet, system) {
+			result.AddWarningWithID(
+				issue.DiagBindingExtensible,
+				map[string]any{"code": codeDisplay, "valueSet": binding.ValueSet},
+				fhirPath,
 			)
 		}
 	}

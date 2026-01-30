@@ -32,7 +32,7 @@ func setupTestRegistry(t *testing.T) *registry.Registry {
 	return reg
 }
 
-func TestExtractSlicingContexts(t *testing.T) {
+func TestExtractContexts(t *testing.T) {
 	reg := setupTestRegistry(t)
 	validator := New(reg)
 
@@ -42,25 +42,26 @@ func TestExtractSlicingContexts(t *testing.T) {
 		t.Fatal("Patient SD not found")
 	}
 
-	contexts := validator.extractSlicingContexts(patientSD)
+	contexts := validator.extractContexts(patientSD)
 
 	// Patient base should have at least extension slicing
 	found := false
 	for _, ctx := range contexts {
-		if ctx.Path == "Patient.extension" {
-			found = true
-			if len(ctx.Discriminators) == 0 {
-				t.Error("Expected discriminators for Patient.extension slicing")
-			}
-			if ctx.Discriminators[0].Type != "value" {
-				t.Errorf("Expected discriminator type 'value', got '%s'", ctx.Discriminators[0].Type)
-			}
-			if ctx.Discriminators[0].Path != "url" {
-				t.Errorf("Expected discriminator path 'url', got '%s'", ctx.Discriminators[0].Path)
-			}
-			t.Logf("Found Patient.extension slicing with %d discriminators, rules=%s, %d slices",
-				len(ctx.Discriminators), ctx.Rules, len(ctx.Slices))
+		if ctx.Path != "Patient.extension" {
+			continue
 		}
+		found = true
+		if len(ctx.Discriminators) == 0 {
+			t.Error("Expected discriminators for Patient.extension slicing")
+		}
+		if ctx.Discriminators[0].Type != "value" {
+			t.Errorf("Expected discriminator type 'value', got '%s'", ctx.Discriminators[0].Type)
+		}
+		if ctx.Discriminators[0].Path != "url" {
+			t.Errorf("Expected discriminator path 'url', got '%s'", ctx.Discriminators[0].Path)
+		}
+		t.Logf("Found Patient.extension slicing with %d discriminators, rules=%s, %d slices",
+			len(ctx.Discriminators), ctx.Rules, len(ctx.Slices))
 	}
 
 	if !found {
@@ -68,7 +69,7 @@ func TestExtractSlicingContexts(t *testing.T) {
 	}
 }
 
-func TestExtractSlicingContextsUSCore(t *testing.T) {
+func TestExtractContextsUSCore(t *testing.T) {
 	reg := setupTestRegistry(t)
 	validator := New(reg)
 
@@ -78,10 +79,10 @@ func TestExtractSlicingContextsUSCore(t *testing.T) {
 		t.Skip("US Core Patient not available")
 	}
 
-	contexts := validator.extractSlicingContexts(usCorePatientSD)
+	contexts := validator.extractContexts(usCorePatientSD)
 
 	// Should have extension slicing with slices like race, ethnicity
-	var extensionCtx *SlicingContext
+	var extensionCtx *Context
 	for i, ctx := range contexts {
 		if ctx.Path == "Patient.extension" {
 			extensionCtx = &contexts[i]
@@ -304,7 +305,7 @@ func TestValueDiscriminatorMultiLevel(t *testing.T) {
 		t.Skip("vitalsigns profile not available")
 	}
 
-	contexts := validator.extractSlicingContexts(vitalsignsSD)
+	contexts := validator.extractContexts(vitalsignsSD)
 
 	// Find VSCat slice
 	var vsCatSlice *SliceInfo

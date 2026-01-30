@@ -51,7 +51,7 @@ func New(reg *registry.Registry) *Walker {
 
 // Walk traverses a resource and all its nested resources (contained, Bundle entries).
 // The visitor is called for each resource, starting with the root.
-func (w *Walker) Walk(data map[string]any, rootType string, rootPath string, visitor ResourceVisitor) {
+func (w *Walker) Walk(data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
 	// Get root SD
 	sd := w.registry.GetByType(rootType)
 	if sd == nil {
@@ -81,7 +81,7 @@ func (w *Walker) Walk(data map[string]any, rootType string, rootPath string, vis
 // WalkWithProfiles traverses a resource, visiting once per declared profile.
 // For resources with meta.profile, the visitor is called once per profile.
 // For resources without profiles, it's called once with the base SD.
-func (w *Walker) WalkWithProfiles(data map[string]any, rootType string, rootPath string, visitor ResourceVisitor) {
+func (w *Walker) WalkWithProfiles(data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
 	profiles := getMetaProfiles(data)
 
 	if len(profiles) > 0 {
@@ -303,87 +303,117 @@ func (w *Walker) walkBundleEntries(data map[string]any, basePath string, visitor
 
 // walkBundleEntriesWithProfiles traverses Bundle entries, visiting per profile.
 func (w *Walker) walkBundleEntriesWithProfiles(data map[string]any, basePath string, visitor ResourceVisitor) {
-	entriesRaw, ok := data["entry"]
-	if !ok {
-		return
-	}
-
-	entries, ok := entriesRaw.([]any)
-	if !ok {
+	entries := w.extractBundleEntries(data)
+	if entries == nil {
 		return
 	}
 
 	for i, entry := range entries {
-		entryMap, ok := entry.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		resourceRaw, ok := entryMap["resource"]
-		if !ok {
-			continue
-		}
-
-		resourceMap, ok := resourceRaw.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		resourceType, _ := resourceMap["resourceType"].(string)
-		if resourceType == "" {
+		resourceMap, resourceType := w.extractEntryResource(entry)
+		if resourceMap == nil {
 			continue
 		}
 
 		entryPath := fmt.Sprintf("%s.entry[%d].resource", basePath, i)
-		profiles := getMetaProfiles(resourceMap)
 
-		if len(profiles) > 0 {
-			for _, profileURL := range profiles {
-				sd := w.registry.GetByURL(profileURL)
-				if sd == nil || sd.Snapshot == nil {
-					continue
-				}
-
-				ctx := &ResourceContext{
-					Data:          resourceMap,
-					ResourceType:  resourceType,
-					FHIRPath:      entryPath,
-					SD:            sd,
-					Profiles:      profiles,
-					IsBundleEntry: true,
-					ParentPath:    basePath,
-				}
-
-				if !visitor(ctx) {
-					return
-				}
-			}
-		} else {
-			sd := w.registry.GetByType(resourceType)
-			if sd == nil || sd.Snapshot == nil {
-				continue
-			}
-
-			ctx := &ResourceContext{
-				Data:          resourceMap,
-				ResourceType:  resourceType,
-				FHIRPath:      entryPath,
-				SD:            sd,
-				IsBundleEntry: true,
-				ParentPath:    basePath,
-			}
-
-			if !visitor(ctx) {
-				return
-			}
+		if !w.visitEntryResource(resourceMap, resourceType, entryPath, basePath, visitor) {
+			return
 		}
 
-		// Recursively walk contained within entry
+		// Recursively walk contained and nested Bundles
 		w.walkContainedWithProfiles(resourceMap, entryPath, visitor)
-
-		// Recursively walk nested Bundles
 		w.walkBundleEntriesWithProfiles(resourceMap, entryPath, visitor)
 	}
+}
+
+// extractBundleEntries extracts the entry array from a Bundle.
+func (w *Walker) extractBundleEntries(data map[string]any) []any {
+	entriesRaw, ok := data["entry"]
+	if !ok {
+		return nil
+	}
+	entries, _ := entriesRaw.([]any)
+	return entries
+}
+
+// extractEntryResource extracts the resource map and type from a Bundle entry.
+func (w *Walker) extractEntryResource(entry any) (resourceMap map[string]any, resourceType string) {
+	entryMap, ok := entry.(map[string]any)
+	if !ok {
+		return nil, ""
+	}
+
+	resourceRaw, ok := entryMap["resource"]
+	if !ok {
+		return nil, ""
+	}
+
+	resourceMap, ok = resourceRaw.(map[string]any)
+	if !ok {
+		return nil, ""
+	}
+
+	resourceType, _ = resourceMap["resourceType"].(string)
+	if resourceType == "" {
+		return nil, ""
+	}
+
+	return resourceMap, resourceType
+}
+
+// visitEntryResource visits a Bundle entry resource with its profiles or base SD.
+func (w *Walker) visitEntryResource(resourceMap map[string]any, resourceType, entryPath, basePath string, visitor ResourceVisitor) bool {
+	profiles := getMetaProfiles(resourceMap)
+
+	if len(profiles) > 0 {
+		return w.visitWithProfiles(resourceMap, resourceType, entryPath, basePath, profiles, visitor)
+	}
+
+	return w.visitWithBaseSD(resourceMap, resourceType, entryPath, basePath, visitor)
+}
+
+// visitWithProfiles visits a resource once per declared profile.
+func (w *Walker) visitWithProfiles(resourceMap map[string]any, resourceType, entryPath, basePath string, profiles []string, visitor ResourceVisitor) bool {
+	for _, profileURL := range profiles {
+		sd := w.registry.GetByURL(profileURL)
+		if sd == nil || sd.Snapshot == nil {
+			continue
+		}
+
+		ctx := &ResourceContext{
+			Data:          resourceMap,
+			ResourceType:  resourceType,
+			FHIRPath:      entryPath,
+			SD:            sd,
+			Profiles:      profiles,
+			IsBundleEntry: true,
+			ParentPath:    basePath,
+		}
+
+		if !visitor(ctx) {
+			return false
+		}
+	}
+	return true
+}
+
+// visitWithBaseSD visits a resource with its base StructureDefinition.
+func (w *Walker) visitWithBaseSD(resourceMap map[string]any, resourceType, entryPath, basePath string, visitor ResourceVisitor) bool {
+	sd := w.registry.GetByType(resourceType)
+	if sd == nil || sd.Snapshot == nil {
+		return true
+	}
+
+	ctx := &ResourceContext{
+		Data:          resourceMap,
+		ResourceType:  resourceType,
+		FHIRPath:      entryPath,
+		SD:            sd,
+		IsBundleEntry: true,
+		ParentPath:    basePath,
+	}
+
+	return visitor(ctx)
 }
 
 // getMetaProfiles extracts profile URLs from resource's meta.profile array.

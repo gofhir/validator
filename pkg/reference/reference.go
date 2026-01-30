@@ -57,10 +57,10 @@ func NewBundleContext(bundle map[string]any) *BundleContext {
 
 // Reference format patterns.
 var (
-	// Relative reference: ResourceType/id or ResourceType/id/_history/vid
+	// Relative reference: ResourceType/id or ResourceType/id/_history/vid.
 	relativeRefPattern = regexp.MustCompile(`^[A-Za-z]+/[A-Za-z0-9\-.]+(?:/_history/[A-Za-z0-9\-.]+)?$`)
 
-	// Absolute URL reference (with optional _history/vid)
+	// Absolute URL reference (with optional _history/vid).
 	absoluteRefPattern = regexp.MustCompile(`^https?://\S+/[A-Za-z]+/[A-Za-z0-9\-.]+(?:/_history/[A-Za-z0-9\-.]+)?$`)
 
 	// Fragment reference (contained resource).
@@ -128,19 +128,19 @@ func (v *Validator) ValidateDataWithBundle(resource map[string]any, sd *registry
 	v.walker.Walk(resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == resourceType {
-			return true // continue walking
+			return true
 		}
 
 		// Validate references in the nested resource
 		// Use ResourceType for SD lookup, FHIRPath for error reporting
 		v.validateElementWithPaths(ctx.Data, ctx.SD, ctx.ResourceType, ctx.FHIRPath, bundleCtx, result)
-		return true // continue walking
+		return true
 	})
 }
 
-// validateElementWithPaths validates references with separate paths for SD lookup and error reporting.
-// sdPath is used to look up ElementDefinitions in the StructureDefinition.
-// fhirPath is used for error reporting (e.g., "Bundle.entry[0].resource.subject").
+// ValidateElementWithPaths validates references with separate paths for SD lookup and error reporting.
+// SdPath is used to look up ElementDefinitions in the StructureDefinition.
+// FhirPath is used for error reporting (e.g., "Bundle.entry[0].resource.subject").
 func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.StructureDefinition, sdPath, fhirPath string, bundleCtx *BundleContext, result *issue.Result) {
 	for key, value := range data {
 		if key == "resourceType" {

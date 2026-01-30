@@ -15,7 +15,7 @@ func DeepEqual(actual, expected json.RawMessage) bool {
 		return false
 	}
 
-	var a, e interface{}
+	var a, e any
 	if err := json.Unmarshal(actual, &a); err != nil {
 		return false
 	}
@@ -28,9 +28,9 @@ func DeepEqual(actual, expected json.RawMessage) bool {
 
 // ContainsPattern checks if the actual value contains/matches the pattern.
 // Used for validating pattern[x] constraints where:
-// - For primitives: values must be equal
-// - For objects: all properties in pattern must exist and match in actual
-// - For arrays: all items in pattern must be found in actual (order independent)
+// - For primitives: values must be equal.
+// - For objects: all properties in pattern must exist and match in actual.
+// - For arrays: all items in pattern must be found in actual (order independent).
 func ContainsPattern(actual, pattern json.RawMessage) bool {
 	if pattern == nil {
 		return true // No pattern = always matches
@@ -39,7 +39,7 @@ func ContainsPattern(actual, pattern json.RawMessage) bool {
 		return false // Pattern exists but actual is nil
 	}
 
-	var a, p interface{}
+	var a, p any
 	if err := json.Unmarshal(actual, &a); err != nil {
 		return false
 	}
@@ -51,11 +51,11 @@ func ContainsPattern(actual, pattern json.RawMessage) bool {
 }
 
 // matchRecursive performs recursive pattern matching.
-func matchRecursive(actual, pattern interface{}) bool {
+func matchRecursive(actual, pattern any) bool {
 	switch p := pattern.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		// Pattern is an object - actual must be an object with all pattern properties
-		a, ok := actual.(map[string]interface{})
+		a, ok := actual.(map[string]any)
 		if !ok {
 			return false
 		}
@@ -70,9 +70,9 @@ func matchRecursive(actual, pattern interface{}) bool {
 		}
 		return true
 
-	case []interface{}:
+	case []any:
 		// Pattern is an array - each pattern item must be found in actual
-		a, ok := actual.([]interface{})
+		a, ok := actual.([]any)
 		if !ok {
 			return false
 		}
@@ -98,16 +98,16 @@ func matchRecursive(actual, pattern interface{}) bool {
 
 // normalizeJSON normalizes JSON values for comparison.
 // Converts all numbers to float64 (JSON standard) and ensures consistent types.
-func normalizeJSON(v interface{}) interface{} {
+func normalizeJSON(v any) any {
 	switch val := v.(type) {
-	case map[string]interface{}:
-		result := make(map[string]interface{})
+	case map[string]any:
+		result := make(map[string]any)
 		for k, v := range val {
 			result[k] = normalizeJSON(v)
 		}
 		return result
-	case []interface{}:
-		result := make([]interface{}, len(val))
+	case []any:
+		result := make([]any, len(val))
 		for i, v := range val {
 			result[i] = normalizeJSON(v)
 		}

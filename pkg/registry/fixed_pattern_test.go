@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 )
@@ -76,7 +77,7 @@ func TestElementDefinition_GetFixed(t *testing.T) {
 			}
 
 			// Compare values by normalizing JSON
-			var gotVal, wantVal interface{}
+			var gotVal, wantVal any
 			if err := json.Unmarshal(value, &gotVal); err != nil {
 				t.Fatalf("unmarshal got value: %v", err)
 			}
@@ -86,7 +87,7 @@ func TestElementDefinition_GetFixed(t *testing.T) {
 
 			gotJSON, _ := json.Marshal(gotVal)
 			wantJSON, _ := json.Marshal(wantVal)
-			if string(gotJSON) != string(wantJSON) {
+			if !bytes.Equal(gotJSON, wantJSON) {
 				t.Errorf("value = %s, want %s", gotJSON, wantJSON)
 			}
 		})
@@ -150,7 +151,7 @@ func TestElementDefinition_GetPattern(t *testing.T) {
 			}
 
 			// Compare values by normalizing JSON
-			var gotVal, wantVal interface{}
+			var gotVal, wantVal any
 			if err := json.Unmarshal(value, &gotVal); err != nil {
 				t.Fatalf("unmarshal got value: %v", err)
 			}
@@ -160,7 +161,7 @@ func TestElementDefinition_GetPattern(t *testing.T) {
 
 			gotJSON, _ := json.Marshal(gotVal)
 			wantJSON, _ := json.Marshal(wantVal)
-			if string(gotJSON) != string(wantJSON) {
+			if !bytes.Equal(gotJSON, wantJSON) {
 				t.Errorf("value = %s, want %s", gotJSON, wantJSON)
 			}
 		})

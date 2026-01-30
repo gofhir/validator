@@ -215,10 +215,10 @@ func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath strin
 	}
 }
 
-// isBestPractice returns true if the constraint is a best-practice recommendation.
+// IsBestPractice returns true if the constraint is a best-practice recommendation.
 // All FHIR spec constraints are now evaluated - none are skipped.
-// dom-3: contained resource references - works with fhirpath v1.0.2
-// dom-6: narrative requirement - warning severity per FHIR spec
-func (v *Validator) isBestPractice(key string) bool {
+// Dom-3: contained resource references - works with fhirpath v1.0.2.
+// Dom-6: narrative requirement - warning severity per FHIR spec.
+func (v *Validator) isBestPractice(_ string) bool {
 	return false
 }

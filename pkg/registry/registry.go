@@ -10,6 +10,11 @@ import (
 	"github.com/gofhir/validator/pkg/loader"
 )
 
+// StructureDefinition.Kind constants.
+const (
+	KindResource = "resource"
+)
+
 // StructureDefinition represents a minimal view of a FHIR StructureDefinition.
 // We use a lightweight struct to avoid importing full FHIR types during loading.
 type StructureDefinition struct {
@@ -281,7 +286,7 @@ func (r *Registry) buildTypeClassificationCaches() {
 	domainResourceURL := "http://hl7.org/fhir/StructureDefinition/DomainResource"
 
 	for typeName, sd := range r.byType {
-		if sd.Kind != "resource" {
+		if sd.Kind != KindResource {
 			continue
 		}
 
@@ -437,7 +442,7 @@ func (r *Registry) IsResourceType(typeName string) bool {
 	if sd == nil {
 		return false
 	}
-	return sd.Kind == "resource"
+	return sd.Kind == KindResource
 }
 
 // IsPrimitiveType checks if the given type name is a FHIR primitive type.
@@ -496,55 +501,7 @@ func (r *Registry) IsMetadataResource(typeName string) bool {
 	return r.metadataResources[typeName]
 }
 
-// inheritsFrom checks if a StructureDefinition inherits from a given base URL.
-// Traverses the inheritance chain via baseDefinition.
-func (r *Registry) inheritsFrom(sd *StructureDefinition, baseURL string) bool {
-	if sd == nil {
-		return false
-	}
-	// Direct match
-	if sd.URL == baseURL {
-		return true
-	}
-	// Check base definition
-	if sd.BaseDefinition == "" {
-		return false
-	}
-	if sd.BaseDefinition == baseURL {
-		return true
-	}
-	// Recurse up the chain
-	baseSd := r.GetByURL(sd.BaseDefinition)
-	return r.inheritsFrom(baseSd, baseURL)
-}
-
-// hasRequiredElement checks if a StructureDefinition has an element with min >= 1.
-func (r *Registry) hasRequiredElement(sd *StructureDefinition, path string) bool {
-	if sd == nil || sd.Snapshot == nil {
-		return false
-	}
-	for _, elem := range sd.Snapshot.Element {
-		if elem.Path == path && elem.Min >= 1 {
-			return true
-		}
-	}
-	return false
-}
-
-// hasElement checks if a StructureDefinition has an element at the given path.
-func (r *Registry) hasElement(sd *StructureDefinition, path string) bool {
-	if sd == nil || sd.Snapshot == nil {
-		return false
-	}
-	for _, elem := range sd.Snapshot.Element {
-		if elem.Path == path {
-			return true
-		}
-	}
-	return false
-}
-
-// Unlocked versions for use inside buildTypeClassificationCaches (called while lock is held)
+// Unlocked versions for use inside buildTypeClassificationCaches (called while lock is held).
 
 // inheritsFromUnlocked checks inheritance without acquiring locks.
 // Used during cache building when the lock is already held.

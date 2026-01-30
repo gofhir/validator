@@ -84,7 +84,9 @@ func (v *Validator) getOrBuildIndex(sd *registry.StructureDefinition) *elementIn
 
 	// Check cache
 	if cached, ok := v.idxCache.Load(sd.URL); ok {
-		return cached.(*elementIndex)
+		if idx, ok := cached.(*elementIndex); ok {
+			return idx
+		}
 	}
 
 	// Build and cache
@@ -195,7 +197,7 @@ func (v *Validator) validateElement(
 
 // isShadowElementValid checks if a shadow element (_foo) is valid.
 // A shadow element is valid if the corresponding base element (foo) exists and is a primitive type.
-func (v *Validator) isShadowElementValid(data map[string]any, baseKey string, sdPath string, idx *elementIndex) bool {
+func (v *Validator) isShadowElementValid(data map[string]any, baseKey, sdPath string, idx *elementIndex) bool {
 	// The base element should exist in the data (either with a value or as null)
 	// OR the shadow element can exist alone if the primitive value is null
 	_, hasBase := data[baseKey]

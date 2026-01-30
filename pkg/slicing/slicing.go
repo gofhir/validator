@@ -5,12 +5,16 @@ package slicing
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gofhir/validator/pkg/fixedpattern"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
 )
+
+// FHIRPath special constants.
+const pathThis = "$this"
 
 // Validator validates slicing constraints for FHIR resources.
 type Validator struct {
@@ -33,8 +37,8 @@ type SliceInfo struct {
 	Max        string                        // Maximum cardinality ("*" = unbounded)
 }
 
-// SlicingContext contains slicing information for an element path.
-type SlicingContext struct {
+// Context contains slicing information for an element path.
+type Context struct {
 	Path           string                      // The sliced element path (e.g., "Patient.extension")
 	EntryDef       *registry.ElementDefinition // ElementDefinition with slicing definition
 	Discriminators []registry.Discriminator    // How to match elements to slices
@@ -71,20 +75,20 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 	}
 
 	// Extract all slicing contexts from the StructureDefinition
-	contexts := v.extractSlicingContexts(sd)
+	contexts := v.extractContexts(sd)
 
 	// Validate each slicing context against the resource
 	for _, ctx := range contexts {
-		v.validateSlicingContext(resource, resourceType, resourceType, ctx, result)
+		v.validateContext(resource, resourceType, resourceType, ctx, result)
 	}
 
 	// Also validate contained resources
 	v.validateContained(resource, resourceType, result)
 }
 
-// extractSlicingContexts extracts all slicing definitions from a StructureDefinition.
-func (v *Validator) extractSlicingContexts(sd *registry.StructureDefinition) []SlicingContext {
-	var contexts []SlicingContext
+// extractContexts extracts all slicing definitions from a StructureDefinition.
+func (v *Validator) extractContexts(sd *registry.StructureDefinition) []Context {
+	contexts := make([]Context, 0, 8)
 
 	// Map to group elements by their sliced parent path
 	slicesByPath := make(map[string][]SliceInfo)
@@ -115,9 +119,9 @@ func (v *Validator) extractSlicingContexts(sd *registry.StructureDefinition) []S
 		}
 	}
 
-	// Build SlicingContexts from entries and their slices
+	// Build Contexts from entries and their slices
 	for path, entry := range entryByPath {
-		ctx := SlicingContext{
+		ctx := Context{
 			Path:     path,
 			EntryDef: entry,
 			Rules:    entry.Slicing.Rules,
@@ -149,12 +153,12 @@ func (v *Validator) findSliceChildren(sd *registry.StructureDefinition, sliceID 
 	return children
 }
 
-// validateSlicingContext validates a single slicing context against resource data.
-func (v *Validator) validateSlicingContext(
+// validateContext validates a single slicing context against resource data.
+func (v *Validator) validateContext(
 	resource map[string]any,
 	sdPath string,
 	fhirPath string,
-	ctx SlicingContext,
+	ctx Context,
 	result *issue.Result,
 ) {
 	// Navigate to the sliced element in the resource
@@ -164,8 +168,8 @@ func (v *Validator) validateSlicingContext(
 	}
 
 	// Track which slice each element matches
-	sliceMatches := make(map[int]string)   // element index -> slice name
-	sliceCounts := make(map[string]int)    // slice name -> count
+	sliceMatches := make(map[int]string) // element index -> slice name
+	sliceCounts := make(map[string]int)  // slice name -> count
 
 	// Match each element to a slice
 	for i, elem := range elements {
@@ -195,8 +199,8 @@ func (v *Validator) validateSlicingContext(
 		count := sliceCounts[slice.Name]
 		slicePath := fmt.Sprintf("%s.%s:%s", fhirPath, v.lastPathSegment(ctx.Path), slice.Name)
 
-		// Check minimum
-		if uint32(count) < slice.Min {
+		// Check minimum (safe comparison avoiding overflow)
+		if count < 0 || count < int(slice.Min) {
 			result.AddIssue(issue.Issue{
 				Severity:    issue.SeverityError,
 				Code:        issue.CodeRequired,
@@ -207,9 +211,8 @@ func (v *Validator) validateSlicingContext(
 
 		// Check maximum
 		if slice.Max != "*" {
-			var maxInt int
-			fmt.Sscanf(slice.Max, "%d", &maxInt)
-			if count > maxInt {
+			maxInt, err := strconv.Atoi(slice.Max)
+			if err == nil && count > maxInt {
 				result.AddIssue(issue.Issue{
 					Severity:    issue.SeverityError,
 					Code:        issue.CodeBusinessRule,
@@ -222,7 +225,7 @@ func (v *Validator) validateSlicingContext(
 }
 
 // matchElementToSlice finds which slice an element matches based on discriminators.
-func (v *Validator) matchElementToSlice(element map[string]any, ctx SlicingContext) string {
+func (v *Validator) matchElementToSlice(element map[string]any, ctx Context) string {
 	for _, slice := range ctx.Slices {
 		if v.elementMatchesSlice(element, ctx.Discriminators, slice) {
 			return slice.Name
@@ -287,7 +290,7 @@ func (v *Validator) evaluateValueDiscriminator(element map[string]any, path stri
 func (v *Validator) evaluatePatternDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
 	var actualValue any
 
-	if path == "$this" {
+	if path == pathThis {
 		actualValue = element
 	} else {
 		actualValue = v.getValueAtPath(element, path)
@@ -337,7 +340,7 @@ func (v *Validator) evaluateTypeDiscriminator(element map[string]any, path strin
 		return actualType == expectedType
 	}
 
-	if path != "$this" {
+	if path != pathThis {
 		// For other non-$this paths, we'd need to resolve the type at that path
 		// This is complex and rare; for now, allow match
 		return true
@@ -452,7 +455,7 @@ func (v *Validator) getResourceProfiles(resource map[string]any) []string {
 // getValueAtPath extracts a value from an element at a given path.
 // Handles arrays by checking if any element matches.
 func (v *Validator) getValueAtPath(element map[string]any, path string) any {
-	if path == "$this" {
+	if path == pathThis {
 		return element
 	}
 
@@ -491,7 +494,7 @@ func (v *Validator) getValueAtPath(element map[string]any, path string) any {
 // getFixedValueForPath finds the fixed[x] value for a discriminator path in a slice.
 func (v *Validator) getFixedValueForPath(slice SliceInfo, path string) json.RawMessage {
 	// First check the slice definition itself
-	if path == "$this" || path == "" {
+	if path == pathThis || path == "" {
 		if val, _, has := slice.Definition.GetFixed(); has {
 			return val
 		}
@@ -513,7 +516,7 @@ func (v *Validator) getFixedValueForPath(slice SliceInfo, path string) json.RawM
 // getPatternValueForPath finds the pattern[x] value for a discriminator path in a slice.
 func (v *Validator) getPatternValueForPath(slice SliceInfo, path string) json.RawMessage {
 	// First check the slice definition itself
-	if path == "$this" || path == "" {
+	if path == pathThis || path == "" {
 		if val, _, has := slice.Definition.GetPattern(); has {
 			return val
 		}
@@ -560,7 +563,7 @@ func (v *Validator) inferElementType(element map[string]any) string {
 		return "Reference"
 	}
 
-	if _, hasUrl := element["url"]; hasUrl {
+	if _, hasURL := element["url"]; hasURL {
 		return "Extension"
 	}
 
@@ -576,12 +579,13 @@ func (v *Validator) getElementsAtPath(resource map[string]any, sdPath, resourceT
 	current := any(resource)
 
 	for _, part := range parts {
-		if m, ok := current.(map[string]any); ok {
-			current = m[part]
-		} else if arr, ok := current.([]any); ok {
+		switch v := current.(type) {
+		case map[string]any:
+			current = v[part]
+		case []any:
 			// Flatten array elements and continue
 			var results []any
-			for _, item := range arr {
+			for _, item := range v {
 				if m, ok := item.(map[string]any); ok {
 					if val := m[part]; val != nil {
 						results = append(results, val)
@@ -589,7 +593,7 @@ func (v *Validator) getElementsAtPath(resource map[string]any, sdPath, resourceT
 				}
 			}
 			current = results
-		} else {
+		default:
 			return nil
 		}
 	}
@@ -644,9 +648,9 @@ func (v *Validator) validateContained(resource map[string]any, baseFhirPath stri
 		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
 
 		// Extract and validate slicing contexts for contained resource
-		contexts := v.extractSlicingContexts(containedSD)
+		contexts := v.extractContexts(containedSD)
 		for _, ctx := range contexts {
-			v.validateSlicingContext(resourceMap, resourceType, containedFhirPath, ctx, result)
+			v.validateContext(resourceMap, resourceType, containedFhirPath, ctx, result)
 		}
 	}
 }

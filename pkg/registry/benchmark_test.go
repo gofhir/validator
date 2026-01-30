@@ -86,7 +86,7 @@ func BenchmarkIsMetadataResource(b *testing.B) {
 	}
 }
 
-// Benchmark realistic validation scenario - multiple type checks per element
+// BenchmarkTypeCategoryChecks tests realistic validation scenario - multiple type checks per element.
 func BenchmarkTypeCategoryChecks(b *testing.B) {
 	r := setupBenchRegistry(b)
 	// Typical types encountered during validation

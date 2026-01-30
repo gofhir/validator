@@ -27,13 +27,13 @@ const (
 
 // Diagnostic IDs for binding validation (M7).
 const (
-	DiagBindingRequired           DiagnosticID = "BINDING_REQUIRED"
-	DiagBindingExtensible         DiagnosticID = "BINDING_EXTENSIBLE"
-	DiagBindingDisplayMismatch    DiagnosticID = "BINDING_DISPLAY_MISMATCH"
-	DiagBindingTextOnlyWarning    DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
-	DiagBindingCannotValidate     DiagnosticID = "BINDING_CANNOT_VALIDATE"
-	DiagBindingValueSetNotFound   DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
-	DiagCodeNotInCodeSystem       DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
+	DiagBindingRequired         DiagnosticID = "BINDING_REQUIRED"
+	DiagBindingExtensible       DiagnosticID = "BINDING_EXTENSIBLE"
+	DiagBindingDisplayMismatch  DiagnosticID = "BINDING_DISPLAY_MISMATCH"
+	DiagBindingTextOnlyWarning  DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
+	DiagBindingCannotValidate   DiagnosticID = "BINDING_CANNOT_VALIDATE"
+	DiagBindingValueSetNotFound DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
+	DiagCodeNotInCodeSystem     DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
 )
 
 // Diagnostic IDs for extension validation (M8).

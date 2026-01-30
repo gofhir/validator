@@ -141,7 +141,10 @@ func NewResult() *Result {
 // GetPooledResult returns a Result from the pool.
 // Call ReleaseResult when done to return it to the pool.
 func GetPooledResult() *Result {
-	r := resultPool.Get().(*Result)
+	r, ok := resultPool.Get().(*Result)
+	if !ok {
+		r = &Result{Issues: make([]Issue, 0, 16)}
+	}
 	r.Issues = r.Issues[:0] // Reset length, keep capacity
 	r.Stats = nil
 	return r
@@ -167,7 +170,10 @@ func ReleaseResult(r *Result) {
 
 // GetPooledStats returns a Stats from the pool.
 func GetPooledStats() *Stats {
-	s := statsPool.Get().(*Stats)
+	s, ok := statsPool.Get().(*Stats)
+	if !ok {
+		s = &Stats{}
+	}
 	*s = Stats{} // Reset all fields
 	return s
 }

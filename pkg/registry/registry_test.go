@@ -240,7 +240,7 @@ func getTypeCodes(types []Type) []string {
 	return codes
 }
 
-// Tests for type classification methods derived from StructureDefinitions
+// Tests for type classification methods derived from StructureDefinitions.
 
 func TestRegistryIsPrimitiveType(t *testing.T) {
 	l := loader.NewLoader("")

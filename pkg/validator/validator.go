@@ -32,15 +32,15 @@ type Validator struct {
 	config       *Config
 
 	// Phase validators (reused across validations for caching)
-	structValidator      *structural.Validator
-	cardValidator        *cardinality.Validator
-	primValidator        *primitive.Validator
-	bindValidator        *binding.Validator
-	extValidator         *extension.Validator
-	refValidator         *reference.Validator
-	constraintValidator  *constraint.Validator
+	structValidator       *structural.Validator
+	cardValidator         *cardinality.Validator
+	primValidator         *primitive.Validator
+	bindValidator         *binding.Validator
+	extValidator          *extension.Validator
+	refValidator          *reference.Validator
+	constraintValidator   *constraint.Validator
 	fixedPatternValidator *fixedpattern.Validator
-	slicingValidator     *slicing.Validator
+	slicingValidator      *slicing.Validator
 }
 
 // PackageSpec represents an additional FHIR package to load.
@@ -392,9 +392,9 @@ func (v *Validator) Validate(ctx context.Context, resource []byte) (*issue.Resul
 	return result, nil
 }
 
-// validateAgainstProfile runs all validation phases against a single profile.
-// data is the pre-parsed JSON map, rawJSON is kept for phases that need raw bytes (constraint/fhirpath).
-func (v *Validator) validateAgainstProfile(data map[string]any, rawJSON []byte, sd *registry.StructureDefinition, profileURL string, result *issue.Result) {
+// ValidateAgainstProfile runs all validation phases against a single profile.
+// Data is the pre-parsed JSON map, rawJSON is kept for phases that need raw bytes (constraint/fhirpath).
+func (v *Validator) validateAgainstProfile(data map[string]any, rawJSON []byte, sd *registry.StructureDefinition, _ string, result *issue.Result) {
 	// Phase 1: Structural validation (uses cached element indexes)
 	structResult := v.structValidator.ValidateData(data, sd)
 	result.Merge(structResult)
@@ -465,8 +465,8 @@ func (v *Validator) Version() string {
 }
 
 // collectProfilesToValidate returns the ordered list of profiles to validate against.
-// Priority: 1) Config profiles, 2) meta.profile, 3) core resource SD
-func (v *Validator) collectProfilesToValidate(resourceType string, metaProfiles []string) []string {
+// Priority: 1) Config profiles, 2) meta.profile, 3) core resource SD.
+func (v *Validator) collectProfilesToValidate(_ string, metaProfiles []string) []string {
 	var profiles []string
 
 	// 1. Configured profiles take highest priority

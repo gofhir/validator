@@ -254,7 +254,7 @@ var externalSystems = map[string]bool{
 	// RxNorm - medication terminology
 	"http://www.nlm.nih.gov/research/umls/rxnorm": true,
 	// ICD-10
-	"http://hl7.org/fhir/sid/icd-10": true,
+	"http://hl7.org/fhir/sid/icd-10":    true,
 	"http://hl7.org/fhir/sid/icd-10-cm": true,
 	// CPT
 	"http://www.ama-assn.org/go/cpt": true,

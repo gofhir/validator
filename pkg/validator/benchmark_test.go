@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gofhir/fhirpath/funcs"
+
 	"github.com/gofhir/validator/pkg/logger"
 )
 
