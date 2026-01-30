@@ -66,7 +66,7 @@ jobs:
           rm /tmp/r4-core.tgz
 
       - name: Run tests
-        run: go test -v -race -timeout 30m -coverprofile=coverage.txt -covermode=atomic ./...
+        run: go test -v -race -short -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5

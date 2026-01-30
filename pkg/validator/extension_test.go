@@ -7,10 +7,7 @@ import (
 )
 
 func TestExtensionValidation(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	tests := []struct {
 		name           string

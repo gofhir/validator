@@ -8,10 +8,7 @@ import (
 )
 
 func TestM0Fixtures(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m0-infrastructure"
 
@@ -31,10 +28,7 @@ func TestM0Fixtures(t *testing.T) {
 }
 
 func TestM1Fixtures(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m1-structural"
 
@@ -74,10 +68,7 @@ func TestM1Fixtures(t *testing.T) {
 }
 
 func TestM2Fixtures(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m2-cardinality"
 
@@ -112,10 +103,7 @@ func TestM2Fixtures(t *testing.T) {
 }
 
 func TestM3Fixtures(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m3-primitive"
 
@@ -162,10 +150,7 @@ func TestM3Fixtures(t *testing.T) {
 }
 
 func TestM4Fixtures(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m4-complex"
 
@@ -252,10 +237,7 @@ func TestM4Fixtures(t *testing.T) {
 }
 
 func TestM5Fixtures(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m5-coding"
 
@@ -295,10 +277,7 @@ func TestM5Fixtures(t *testing.T) {
 }
 
 func TestM6Fixtures(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m6-codeableconcept"
 
@@ -338,10 +317,7 @@ func TestM6Fixtures(t *testing.T) {
 }
 
 func TestM7Fixtures(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m7-bindings"
 
@@ -396,10 +372,7 @@ func TestM7Fixtures(t *testing.T) {
 // TestMixedArrayValidation demonstrates how the validator handles arrays
 // with mixed valid/invalid elements - verifying recursive validation.
 func TestMixedArrayValidation(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	fixturesDir := "../../testdata/m4-complex"
 

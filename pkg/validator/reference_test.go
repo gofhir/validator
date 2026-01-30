@@ -7,10 +7,7 @@ import (
 )
 
 func TestReferenceValidation(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	tests := []struct {
 		name           string
@@ -114,10 +111,7 @@ func TestReferenceValidation(t *testing.T) {
 }
 
 func TestInvalidUUIDFormats(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	data, err := os.ReadFile("../../testdata/m9-references/invalid-uuid-formats.json")
 	if err != nil {

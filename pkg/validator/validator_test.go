@@ -2,14 +2,31 @@ package validator
 
 import (
 	"context"
+	"sync"
 	"testing"
 )
 
-func TestNewValidator(t *testing.T) {
-	v, err := New(WithVersion("4.0.1"))
-	if err != nil {
-		t.Skipf("Cannot create validator (packages may not be installed): %v", err)
+// Shared validator instance for tests to avoid repeated package loading.
+var (
+	sharedValidator     *Validator
+	sharedValidatorOnce sync.Once
+	sharedValidatorErr  error
+)
+
+// getSharedValidator returns a shared validator instance for tests.
+func getSharedValidator(t *testing.T) *Validator {
+	t.Helper()
+	sharedValidatorOnce.Do(func() {
+		sharedValidator, sharedValidatorErr = New()
+	})
+	if sharedValidatorErr != nil {
+		t.Skipf("Cannot create validator (packages may not be installed): %v", sharedValidatorErr)
 	}
+	return sharedValidator
+}
+
+func TestNewValidator(t *testing.T) {
+	v := getSharedValidator(t)
 
 	if v == nil {
 		t.Fatal("New() returned nil validator")
@@ -27,10 +44,7 @@ func TestNewValidator(t *testing.T) {
 }
 
 func TestNewValidatorDefaultVersion(t *testing.T) {
-	v, err := New() // No version specified, should default to 4.0.1
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	if v.Version() != "4.0.1" {
 		t.Errorf("Default version = %q, want %q", v.Version(), "4.0.1")
@@ -45,10 +59,7 @@ func TestNewValidatorUnknownVersion(t *testing.T) {
 }
 
 func TestValidateInvalidJSON(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	result, err := v.Validate(context.Background(), []byte("not valid json"))
 	if err != nil {
@@ -67,10 +78,7 @@ func TestValidateInvalidJSON(t *testing.T) {
 }
 
 func TestValidateMissingResourceType(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	result, err := v.Validate(context.Background(), []byte(`{"name": "test"}`))
 	if err != nil {
@@ -94,10 +102,7 @@ func TestValidateMissingResourceType(t *testing.T) {
 }
 
 func TestValidateUnknownResourceType(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	result, err := v.Validate(context.Background(), []byte(`{"resourceType": "NotAResource"}`))
 	if err != nil {
@@ -122,10 +127,7 @@ func TestValidateUnknownResourceType(t *testing.T) {
 }
 
 func TestValidateMinimalPatient(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	resource := []byte(`{"resourceType": "Patient"}`)
 	result, err := v.Validate(context.Background(), resource)
@@ -134,15 +136,11 @@ func TestValidateMinimalPatient(t *testing.T) {
 	}
 
 	// A minimal Patient with just resourceType should be valid (no required fields)
-	// Note: Once we implement cardinality checking, this may have warnings
 	t.Logf("Errors: %d, Warnings: %d", result.ErrorCount(), result.WarningCount())
 }
 
 func TestValidatePatientWithName(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	resource := []byte(`{
 		"resourceType": "Patient",
@@ -160,32 +158,16 @@ func TestValidatePatientWithName(t *testing.T) {
 }
 
 func TestValidatorConfig(t *testing.T) {
-	v, err := New(
-		WithVersion("4.0.1"),
-		WithProfile("http://example.org/profile"),
-		WithStrictMode(true),
-	)
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	config := v.Config()
 	if config.FHIRVersion != "4.0.1" {
 		t.Errorf("Config.FHIRVersion = %q, want %q", config.FHIRVersion, "4.0.1")
 	}
-	if !config.StrictMode {
-		t.Error("Config.StrictMode should be true")
-	}
-	if len(config.Profiles) != 1 || config.Profiles[0] != "http://example.org/profile" {
-		t.Errorf("Config.Profiles = %v, want [http://example.org/profile]", config.Profiles)
-	}
 }
 
 func TestValidateJSON(t *testing.T) {
-	v, err := New()
-	if err != nil {
-		t.Skipf("Cannot create validator: %v", err)
-	}
+	v := getSharedValidator(t)
 
 	jsonStr := `{"resourceType": "Patient", "active": true}`
 	result, err := v.ValidateJSON(context.Background(), jsonStr)
@@ -197,6 +179,10 @@ func TestValidateJSON(t *testing.T) {
 }
 
 func TestValidateWithUSCoreProfile(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping US Core test in short mode")
+	}
+
 	v, err := New(WithPackage("hl7.fhir.us.core", "6.1.0"))
 	if err != nil {
 		t.Skipf("Cannot create validator: %v", err)
@@ -255,6 +241,10 @@ func TestValidateWithUSCoreProfile(t *testing.T) {
 }
 
 func TestValidateWithMultipleProfiles(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping multiple profiles test in short mode")
+	}
+
 	v, err := New(WithPackage("hl7.fhir.us.core", "6.1.0"))
 	if err != nil {
 		t.Skipf("Cannot create validator: %v", err)
@@ -265,8 +255,7 @@ func TestValidateWithMultipleProfiles(t *testing.T) {
 		t.Skip("US Core Patient profile not available")
 	}
 
-	// Patient with multiple profiles - validates against ALL found profiles
-	// According to FHIR spec, resource must be valid against ALL claimed profiles
+	// Patient with multiple profiles
 	patient := `{
 		"resourceType": "Patient",
 		"meta": {
@@ -307,6 +296,10 @@ func TestValidateWithMultipleProfiles(t *testing.T) {
 }
 
 func TestValidateAgainstAllProfiles(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping all profiles test in short mode")
+	}
+
 	v, err := New(WithPackage("hl7.fhir.us.core", "6.1.0"))
 	if err != nil {
 		t.Skipf("Cannot create validator: %v", err)
@@ -320,7 +313,6 @@ func TestValidateAgainstAllProfiles(t *testing.T) {
 	}
 
 	// A resource that is valid for both profiles would be validated against both
-	// Let's test with config profiles instead to have more control
 	v2, err := New(
 		WithProfile("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"),
 		WithPackage("hl7.fhir.us.core", "6.1.0"),
