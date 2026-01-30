@@ -5,7 +5,7 @@ bin/
 *.dll
 *.so
 *.dylib
-gofhir-validator
+/gofhir-validator
 
 # Test binary, built with `go test -c`
 *.test
