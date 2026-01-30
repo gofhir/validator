@@ -10,17 +10,17 @@ import (
 var (
 	sharedValidator     *Validator
 	sharedValidatorOnce sync.Once
-	sharedValidatorErr  error
+	errSharedValidator  error
 )
 
 // getSharedValidator returns a shared validator instance for tests.
 func getSharedValidator(t *testing.T) *Validator {
 	t.Helper()
 	sharedValidatorOnce.Do(func() {
-		sharedValidator, sharedValidatorErr = New()
+		sharedValidator, errSharedValidator = New()
 	})
-	if sharedValidatorErr != nil {
-		t.Skipf("Cannot create validator (packages may not be installed): %v", sharedValidatorErr)
+	if errSharedValidator != nil {
+		t.Skipf("Cannot create validator (packages may not be installed): %v", errSharedValidator)
 	}
 	return sharedValidator
 }
