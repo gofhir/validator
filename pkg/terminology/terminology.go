@@ -62,10 +62,18 @@ type CodeSystem struct {
 
 // CodeSystemCode represents a code in a CodeSystem.
 type CodeSystemCode struct {
-	Code       string           `json:"code"`
-	Display    string           `json:"display,omitempty"`
-	Definition string           `json:"definition,omitempty"`
-	Concept    []CodeSystemCode `json:"concept,omitempty"` // Nested concepts
+	Code       string               `json:"code"`
+	Display    string               `json:"display,omitempty"`
+	Definition string               `json:"definition,omitempty"`
+	Property   []CodeSystemProperty `json:"property,omitempty"` // Properties including subsumedBy
+	Concept    []CodeSystemCode     `json:"concept,omitempty"`  // Nested concepts
+}
+
+// CodeSystemProperty represents a property of a code in a CodeSystem.
+// Used for hierarchy relationships (subsumedBy) and other metadata.
+type CodeSystemProperty struct {
+	Code      string `json:"code"`
+	ValueCode string `json:"valueCode,omitempty"`
 }
 
 // Registry holds loaded ValueSets and CodeSystems indexed by URL.
@@ -76,6 +84,10 @@ type Registry struct {
 
 	// Cache of expanded ValueSets (URL -> set of valid codes)
 	expansionCache map[string]map[string]bool
+
+	// Cache of hierarchy relationships per CodeSystem (system URL -> parent code -> child codes)
+	// Built from subsumedBy properties in CodeSystem concepts
+	hierarchyCache map[string]map[string][]string
 }
 
 // NewRegistry creates a new terminology Registry.
@@ -84,6 +96,7 @@ func NewRegistry() *Registry {
 		valueSets:      make(map[string]*ValueSet),
 		codeSystems:    make(map[string]*CodeSystem),
 		expansionCache: make(map[string]map[string]bool),
+		hierarchyCache: make(map[string]map[string][]string),
 	}
 }
 
@@ -200,39 +213,73 @@ func (r *Registry) expandValueSet(vs *ValueSet) map[string]bool {
 	codes := make(map[string]bool)
 
 	for _, inc := range vs.Compose.Include {
-		// If specific concepts are listed, use them
-		if len(inc.Concept) > 0 {
-			for _, c := range inc.Concept {
-				codes[c.Code] = true
-				if inc.System != "" {
-					codes[inc.System+"|"+c.Code] = true
-				}
-			}
-			continue
-		}
-
-		// Check for external systems that can't be locally expanded
-		// External systems should be allowed even when filters are present
-		// (we can't validate filters against external systems anyway)
-		if inc.System != "" && r.isExternalSystem(inc.System) {
-			// Mark as "any value allowed" for this system
-			codes["*"] = true
-			codes[inc.System+"|*"] = true
-			continue
-		}
-
-		// If no concepts but a system is specified, get all codes from CodeSystem
-		if inc.System != "" && len(inc.Filter) == 0 {
-			cs := r.GetCodeSystem(inc.System)
-			if cs != nil {
-				r.addCodesFromCodeSystem(codes, cs, inc.System)
-			}
-		}
-
-		// TODO: Handle filters and nested ValueSets for complex expansions
+		r.expandInclude(codes, &inc)
 	}
 
 	return codes
+}
+
+// expandInclude expands a single Include clause into the codes map.
+func (r *Registry) expandInclude(codes map[string]bool, inc *Include) {
+	// If specific concepts are listed, use them
+	if len(inc.Concept) > 0 {
+		r.addExplicitConcepts(codes, inc)
+		return
+	}
+
+	// Check for external systems
+	if inc.System != "" && r.isExternalSystem(inc.System) {
+		codes["*"] = true
+		codes[inc.System+"|*"] = true
+		return
+	}
+
+	// Expand from CodeSystem
+	r.expandFromCodeSystem(codes, inc)
+
+	// Handle nested ValueSets
+	r.expandNestedValueSets(codes, inc.ValueSet)
+}
+
+// addExplicitConcepts adds explicitly listed concepts to the codes map.
+func (r *Registry) addExplicitConcepts(codes map[string]bool, inc *Include) {
+	for _, c := range inc.Concept {
+		codes[c.Code] = true
+		if inc.System != "" {
+			codes[inc.System+"|"+c.Code] = true
+		}
+	}
+}
+
+// expandFromCodeSystem expands codes from a CodeSystem, applying filters if present.
+func (r *Registry) expandFromCodeSystem(codes map[string]bool, inc *Include) {
+	if inc.System == "" {
+		return
+	}
+
+	cs := r.GetCodeSystem(inc.System)
+	if cs == nil {
+		return
+	}
+
+	if len(inc.Filter) == 0 {
+		r.addCodesFromCodeSystem(codes, cs, inc.System)
+	} else {
+		r.applyFilters(codes, cs, inc.System, inc.Filter)
+	}
+}
+
+// expandNestedValueSets recursively expands nested ValueSets.
+func (r *Registry) expandNestedValueSets(codes map[string]bool, nestedURLs []string) {
+	for _, nestedVSURL := range nestedURLs {
+		nestedVS := r.GetValueSet(nestedVSURL)
+		if nestedVS == nil {
+			continue
+		}
+		for code := range r.expandValueSet(nestedVS) {
+			codes[code] = true
+		}
+	}
 }
 
 // externalSystems contains systems that cannot be locally expanded and require a terminology server.
@@ -285,6 +332,106 @@ func (r *Registry) addCodesFromCodeSystem(codes map[string]bool, cs *CodeSystem,
 		}
 	}
 	addConcepts(cs.Concept)
+}
+
+// applyFilters applies ValueSet filters to select codes from a CodeSystem.
+// Filters are derived from the CodeSystem's concept properties (e.g., subsumedBy).
+func (r *Registry) applyFilters(codes map[string]bool, cs *CodeSystem, system string, filters []Filter) {
+	for _, filter := range filters {
+		switch filter.Op {
+		case "is-a":
+			// is-a: Include all codes that are descendants of the filter value
+			// Hierarchy is derived from CodeSystem concept properties (subsumedBy)
+			r.applyIsAFilter(codes, cs, system, filter.Value)
+		case "=":
+			// Equality filter on a property
+			r.applyEqualityFilter(codes, cs, system, filter.Property, filter.Value)
+		}
+		// Other filter operators (descendent-of, in, not-in, regex, exists) can be added as needed
+	}
+}
+
+// applyIsAFilter adds all codes that are descendants of the given parent code.
+// Hierarchy is derived from the CodeSystem's subsumedBy properties.
+func (r *Registry) applyIsAFilter(codes map[string]bool, cs *CodeSystem, system, parentCode string) {
+	// Build or retrieve the hierarchy for this CodeSystem
+	hierarchy := r.getOrBuildHierarchy(cs)
+
+	// Recursively add all descendants
+	var addDescendants func(code string)
+	addDescendants = func(code string) {
+		children := hierarchy[code]
+		for _, child := range children {
+			codes[child] = true
+			codes[system+"|"+child] = true
+			addDescendants(child)
+		}
+	}
+
+	// Start from the parent code
+	addDescendants(parentCode)
+}
+
+// applyEqualityFilter adds codes where a property equals a specific value.
+func (r *Registry) applyEqualityFilter(codes map[string]bool, cs *CodeSystem, system, property, value string) {
+	var checkConcepts func(concepts []CodeSystemCode)
+	checkConcepts = func(concepts []CodeSystemCode) {
+		for _, c := range concepts {
+			for _, prop := range c.Property {
+				if prop.Code == property && prop.ValueCode == value {
+					codes[c.Code] = true
+					codes[system+"|"+c.Code] = true
+					break
+				}
+			}
+			if len(c.Concept) > 0 {
+				checkConcepts(c.Concept)
+			}
+		}
+	}
+	checkConcepts(cs.Concept)
+}
+
+// getOrBuildHierarchy returns the hierarchy for a CodeSystem, building it if necessary.
+// The hierarchy maps parent codes to their child codes, derived from subsumedBy properties.
+func (r *Registry) getOrBuildHierarchy(cs *CodeSystem) map[string][]string {
+	if hierarchy, ok := r.hierarchyCache[cs.URL]; ok {
+		return hierarchy
+	}
+
+	hierarchy := r.buildHierarchy(cs)
+	r.hierarchyCache[cs.URL] = hierarchy
+	return hierarchy
+}
+
+// buildHierarchy constructs a parent->children map from CodeSystem concept properties.
+// Reads the "subsumedBy" property to determine parent-child relationships.
+func (r *Registry) buildHierarchy(cs *CodeSystem) map[string][]string {
+	hierarchy := make(map[string][]string)
+
+	var processConcepts func(concepts []CodeSystemCode)
+	processConcepts = func(concepts []CodeSystemCode) {
+		for _, c := range concepts {
+			// Look for subsumedBy property to find parent
+			for _, prop := range c.Property {
+				if prop.Code == "subsumedBy" && prop.ValueCode != "" {
+					parent := prop.ValueCode
+					hierarchy[parent] = append(hierarchy[parent], c.Code)
+				}
+			}
+			// Also process nested concepts (structural hierarchy)
+			if len(c.Concept) > 0 {
+				// Nested concepts are children of this concept
+				for _, child := range c.Concept {
+					hierarchy[c.Code] = append(hierarchy[c.Code], child.Code)
+				}
+				processConcepts(c.Concept)
+			}
+		}
+	}
+	processConcepts(cs.Concept)
+
+	return hierarchy
 }
 
 // ValueSetCount returns the number of loaded ValueSets.
