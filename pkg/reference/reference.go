@@ -308,11 +308,114 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 		}
 	}
 
-	// Note: targetProfile validation is only done when resolving references,
-	// not against the reference string. This matches HL7 validator behavior.
-	// The targetProfile constraint is meant to validate the actual resolved
-	// resource, not just the reference string format.
-	_ = elemDef // elemDef contains targetProfile but we don't validate it here
+	// Validate targetProfile - check if reference target type is allowed.
+	// This validates structural conformance based on the StructureDefinition.
+	v.validateTargetProfile(extractedType, refStr, elemDef, fhirPath, bundleCtx, result)
+}
+
+// validateTargetProfile validates that the reference target type matches allowed targetProfiles.
+// Per FHIR spec, ElementDefinition.type[].targetProfile restricts which resource types
+// can be referenced. If no targetProfile is specified, any resource type is allowed.
+func (v *Validator) validateTargetProfile(extractedType, refStr string, elemDef *registry.ElementDefinition, fhirPath string, bundleCtx *BundleContext, result *issue.Result) {
+	// Can't validate if we couldn't extract the type.
+	// This happens for fragment (#) and URN references.
+	if extractedType == "" {
+		// For URN references in a Bundle, try to get the type from Bundle context
+		if bundleCtx != nil && (strings.HasPrefix(refStr, "urn:uuid:") || strings.HasPrefix(refStr, "urn:oid:")) {
+			if resourceType, found := bundleCtx.FullURLIndex[refStr]; found {
+				extractedType = resourceType
+			}
+		}
+		if extractedType == "" {
+			return // Still can't determine type, skip validation
+		}
+	}
+
+	// Get all targetProfiles from all Reference types in the element definition
+	allowedProfiles := v.getTargetProfiles(elemDef)
+
+	// If no targetProfiles specified, any type is allowed (Reference(Any))
+	if len(allowedProfiles) == 0 {
+		return
+	}
+
+	// Check if the extracted type matches any of the allowed profiles
+	if !v.typeMatchesProfiles(extractedType, allowedProfiles) {
+		// Build list of allowed types for error message
+		allowedTypes := v.extractTypesFromProfiles(allowedProfiles)
+		result.AddErrorWithID(
+			issue.DiagReferenceInvalidTarget,
+			map[string]any{
+				"type":    extractedType,
+				"allowed": strings.Join(allowedTypes, ", "),
+			},
+			fhirPath+".reference",
+		)
+	}
+}
+
+// getTargetProfiles extracts all targetProfile URLs from Reference types in an ElementDefinition.
+func (v *Validator) getTargetProfiles(elemDef *registry.ElementDefinition) []string {
+	var profiles []string
+	for _, t := range elemDef.Type {
+		if t.Code == "Reference" {
+			profiles = append(profiles, t.TargetProfile...)
+		}
+	}
+	return profiles
+}
+
+// typeMatchesProfiles checks if a resource type matches any of the allowed profile URLs.
+// Profile URLs are in the format: http://hl7.org/fhir/StructureDefinition/[ResourceType]
+func (v *Validator) typeMatchesProfiles(resourceType string, profiles []string) bool {
+	for _, profile := range profiles {
+		// Extract resource type from profile URL
+		profileType := v.extractTypeFromProfile(profile)
+		if profileType == resourceType {
+			return true
+		}
+		// Reference(Resource) should allow any resource type
+		if profileType == "Resource" {
+			return true
+		}
+	}
+	return false
+}
+
+// extractTypeFromProfile extracts the resource type from a StructureDefinition profile URL.
+func (v *Validator) extractTypeFromProfile(profileURL string) string {
+	// Standard FHIR profiles: http://hl7.org/fhir/StructureDefinition/[Type]
+	const basePrefix = "http://hl7.org/fhir/StructureDefinition/"
+	if strings.HasPrefix(profileURL, basePrefix) {
+		return strings.TrimPrefix(profileURL, basePrefix)
+	}
+
+	// For custom profiles, try to get the type from the loaded StructureDefinition
+	sd := v.registry.GetByURL(profileURL)
+	if sd != nil {
+		return sd.Type
+	}
+
+	// Fallback: extract last path segment
+	parts := strings.Split(profileURL, "/")
+	if len(parts) > 0 {
+		return parts[len(parts)-1]
+	}
+	return ""
+}
+
+// extractTypesFromProfiles extracts resource type names from profile URLs for error messages.
+func (v *Validator) extractTypesFromProfiles(profiles []string) []string {
+	seen := make(map[string]bool)
+	var types []string
+	for _, profile := range profiles {
+		t := v.extractTypeFromProfile(profile)
+		if t != "" && !seen[t] {
+			seen[t] = true
+			types = append(types, t)
+		}
+	}
+	return types
 }
 
 // isValidReferenceFormat checks if a reference string has a valid format.
@@ -380,12 +483,6 @@ func (v *Validator) extractResourceType(ref string) string {
 
 	return ""
 }
-
-// Note: validateTargetProfile is intentionally not implemented here.
-// The HL7 validator only validates targetProfile constraints when actually
-// resolving the referenced resource, not against the reference string alone.
-// This function could be added in the future for Bundle validation or when
-// implementing reference resolution.
 
 // findElementDef finds an ElementDefinition by path in the StructureDefinition.
 func (v *Validator) findElementDef(sd *registry.StructureDefinition, path string) *registry.ElementDefinition {

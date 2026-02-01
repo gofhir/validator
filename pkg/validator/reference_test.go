@@ -54,7 +54,7 @@ func TestReferenceValidation(t *testing.T) {
 		{
 			name:           "invalid-target-type",
 			file:           "../../testdata/m9-references/invalid-target-type.json",
-			expectErrors:   0, // HL7 validator doesn't validate targetProfile against reference string
+			expectErrors:   1, // Reference target type doesn't match targetProfile
 			expectWarnings: 1, // dom-6 (no narrative)
 		},
 		{
