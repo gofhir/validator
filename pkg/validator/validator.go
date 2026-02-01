@@ -15,6 +15,7 @@ import (
 	"github.com/gofhir/validator/pkg/fixedpattern"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/pkg/location"
 	"github.com/gofhir/validator/pkg/logger"
 	"github.com/gofhir/validator/pkg/primitive"
 	"github.com/gofhir/validator/pkg/reference"
@@ -381,6 +382,14 @@ func (v *Validator) Validate(ctx context.Context, resource []byte) (*issue.Resul
 	}
 
 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
+
+	// Enrich issues with line/column information from source JSON
+	result.EnrichLocations(func(expr string) *issue.Location {
+		if loc := location.Find(resource, expr); loc != nil {
+			return &issue.Location{Line: loc.Line, Column: loc.Column}
+		}
+		return nil
+	})
 
 	logger.Info("Validated %s in %.3fms: %d errors, %d warnings",
 		resourceType,

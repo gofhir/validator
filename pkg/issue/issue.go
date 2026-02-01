@@ -282,3 +282,18 @@ func (r *Result) Filter(severity Severity) *Result {
 	}
 	return filtered
 }
+
+// EnrichLocations adds line and column information to issues based on their expressions.
+// The locator function maps an expression path to a Location.
+func (r *Result) EnrichLocations(locator func(expression string) *Location) {
+	if locator == nil {
+		return
+	}
+	for i := range r.Issues {
+		if len(r.Issues[i].Expression) > 0 && r.Issues[i].Location == nil {
+			if loc := locator(r.Issues[i].Expression[0]); loc != nil {
+				r.Issues[i].Location = loc
+			}
+		}
+	}
+}
