@@ -1,0 +1,26 @@
+{
+  "resourceType": "Bundle",
+  "id": "valid-bundle-fullurl",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://example.org/fhir/Patient/patient-123",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-123",
+        "name": [{"family": "Test"}]
+      }
+    },
+    {
+      "fullUrl": "http://example.org/fhir/Observation/obs-456/_history/1",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-456",
+        "status": "final",
+        "code": {
+          "coding": [{"system": "http://loinc.org", "code": "15074-8"}]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "resourceType": "Bundle",
+  "id": "invalid-bundle-fullurl",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://example.org/fhir/Patient/patient-123",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "different-id",
+        "name": [{"family": "Test"}]
+      }
+    }
+  ]
+}

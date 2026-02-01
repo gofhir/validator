@@ -55,6 +55,11 @@ const (
 	DiagReferenceNotInBundle   DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
 )
 
+// Diagnostic IDs for Bundle validation.
+const (
+	DiagBundleFullURLMismatch DiagnosticID = "BUNDLE_FULLURL_ID_MISMATCH"
+)
+
 // Diagnostic IDs for constraint validation (M10).
 const (
 	DiagConstraintFailed       DiagnosticID = "CONSTRAINT_FAILED"
@@ -271,6 +276,13 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeNotFound,
 		Template: "URN reference is not locally contained within the bundle {reference}",
+	},
+
+	// Bundle validation
+	DiagBundleFullURLMismatch: {
+		Severity: SeverityError,
+		Code:     CodeValue,
+		Template: "fullUrl '{fullUrl}' is not consistent with resource id '{id}'",
 	},
 
 	// Constraint (M10)

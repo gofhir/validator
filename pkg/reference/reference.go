@@ -55,6 +55,80 @@ func NewBundleContext(bundle map[string]any) *BundleContext {
 	return ctx
 }
 
+// ValidateBundleFullUrls validates that fullUrl is consistent with resource.id for all entries.
+// Per FHIR spec: "fullUrl SHALL NOT disagree with the id in the resource"
+// This applies when fullUrl is a URL (not urn:uuid or urn:oid).
+func ValidateBundleFullUrls(bundle map[string]any, result *issue.Result) {
+	entries, ok := bundle["entry"].([]any)
+	if !ok {
+		return
+	}
+
+	for i, entry := range entries {
+		entryMap, ok := entry.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		fullURL, _ := entryMap["fullUrl"].(string)
+		if fullURL == "" {
+			continue
+		}
+
+		// Skip URN references - they don't need to match resource.id
+		if strings.HasPrefix(fullURL, "urn:uuid:") || strings.HasPrefix(fullURL, "urn:oid:") {
+			continue
+		}
+
+		resourceMap, ok := entryMap["resource"].(map[string]any)
+		if !ok {
+			continue
+		}
+
+		resourceID, _ := resourceMap["id"].(string)
+		if resourceID == "" {
+			// No id to validate against
+			continue
+		}
+
+		// Extract expected id from fullUrl
+		expectedID := extractIDFromFullURL(fullURL)
+		if expectedID == "" {
+			continue
+		}
+
+		if resourceID != expectedID {
+			result.AddErrorWithID(
+				issue.DiagBundleFullURLMismatch,
+				map[string]any{
+					"fullUrl": fullURL,
+					"id":      resourceID,
+				},
+				fmt.Sprintf("Bundle.entry[%d]", i),
+			)
+		}
+	}
+}
+
+// extractIDFromFullURL extracts the resource id from a fullUrl.
+// Examples: "http://example.org/fhir/Patient/123" -> "123",
+// "http://example.org/fhir/Patient/123/_history/1" -> "123".
+func extractIDFromFullURL(fullURL string) string {
+	// Remove _history suffix if present
+	historyIdx := strings.Index(fullURL, "/_history/")
+	if historyIdx != -1 {
+		fullURL = fullURL[:historyIdx]
+	}
+
+	// Extract last path segment
+	lastSlash := strings.LastIndex(fullURL, "/")
+	if lastSlash == -1 || lastSlash == len(fullURL)-1 {
+		return ""
+	}
+
+	return fullURL[lastSlash+1:]
+}
+
 // Reference format patterns.
 var (
 	// Relative reference: ResourceType/id or ResourceType/id/_history/vid.

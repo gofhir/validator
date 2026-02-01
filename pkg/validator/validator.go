@@ -426,6 +426,8 @@ func (v *Validator) validateAgainstProfile(data map[string]any, rawJSON []byte, 
 	var bundleCtx *reference.BundleContext
 	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
 		bundleCtx = reference.NewBundleContext(data)
+		// Validate Bundle-specific rules: fullUrl must be consistent with resource.id
+		reference.ValidateBundleFullUrls(data, result)
 	}
 	v.refValidator.ValidateDataWithBundle(data, sd, bundleCtx, result)
 	result.Stats.PhasesRun++

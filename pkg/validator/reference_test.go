@@ -81,6 +81,24 @@ func TestReferenceValidation(t *testing.T) {
 			expectErrors:   0, // HL7 validator doesn't validate UUID format strictly
 			expectWarnings: 1, // URN reference not found in Bundle (like HL7)
 		},
+		{
+			name:           "invalid-bundle-uuid-wrong-type",
+			file:           "../../testdata/m9-references/invalid-bundle-uuid-wrong-type.json",
+			expectErrors:   1, // Observation.subject references Organization (not allowed)
+			expectWarnings: 0,
+		},
+		{
+			name:           "valid-bundle-fullurl-id",
+			file:           "../../testdata/m9-references/valid-bundle-fullurl-id.json",
+			expectErrors:   0,
+			expectWarnings: 0,
+		},
+		{
+			name:           "invalid-bundle-fullurl-mismatch",
+			file:           "../../testdata/m9-references/invalid-bundle-fullurl-mismatch.json",
+			expectErrors:   1, // fullUrl doesn't match resource.id
+			expectWarnings: 0,
+		},
 	}
 
 	for _, tt := range tests {
