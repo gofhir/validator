@@ -47,7 +47,7 @@ func parseFHIRPath(path string) []string {
 	if idx := strings.Index(path, "."); idx > 0 {
 		first := path[:idx]
 		// Check if first segment looks like a resource type (starts with uppercase)
-		if len(first) > 0 && first[0] >= 'A' && first[0] <= 'Z' {
+		if first != "" && first[0] >= 'A' && first[0] <= 'Z' {
 			path = path[idx+1:]
 		}
 	}
@@ -198,7 +198,7 @@ func skipValue(dec *json.Decoder) error {
 }
 
 // skipRest skips the rest of an object or array after the opening delimiter.
-func skipRest(dec *json.Decoder, opening json.Delim) error {
+func skipRest(dec *json.Decoder, _ json.Delim) error {
 	depth := 1
 	for depth > 0 {
 		tok, err := dec.Token()
@@ -234,8 +234,11 @@ func offsetToLineCol(input []byte, offset int) (line, col int) {
 }
 
 // EnrichIssues adds Location information to issues based on their Expression.
-// jsonData is the original JSON source, issues are modified in place.
-func EnrichIssues(jsonData []byte, issues []interface{ GetExpression() []string; SetLocation(line, col int) }) {
+// The jsonData is the original JSON source, issues are modified in place.
+func EnrichIssues(jsonData []byte, issues []interface {
+	GetExpression() []string
+	SetLocation(line, col int)
+}) {
 	for _, issue := range issues {
 		exprs := issue.GetExpression()
 		if len(exprs) > 0 {
