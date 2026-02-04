@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/gofhir/fhirpath/funcs"
+
 	"github.com/gofhir/validator/pkg/binding"
 	"github.com/gofhir/validator/pkg/cardinality"
 	"github.com/gofhir/validator/pkg/constraint"
@@ -24,6 +26,13 @@ import (
 	"github.com/gofhir/validator/pkg/structural"
 	"github.com/gofhir/validator/pkg/terminology"
 )
+
+func init() {
+	// Disable FHIRPath trace() output by default.
+	// The trace() function is used in some FHIR constraints (e.g., dom-3)
+	// and outputs debug information that should only appear when explicitly enabled.
+	funcs.SetTraceLogger(funcs.NullTraceLogger{})
+}
 
 // Validator is the main FHIR resource validator.
 type Validator struct {
