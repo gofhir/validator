@@ -122,6 +122,22 @@ func WithPackageURL(url string) Option {
 	}
 }
 
+// validateConfig holds per-call validation options.
+type validateConfig struct {
+	profiles []string
+}
+
+// ValidateOption configures a single Validate call.
+type ValidateOption func(*validateConfig)
+
+// ValidateWithProfile adds a profile URL to validate against for this call only.
+// Does not modify the Validator's construction-time config.
+func ValidateWithProfile(profileURL string) ValidateOption {
+	return func(c *validateConfig) {
+		c.profiles = append(c.profiles, profileURL)
+	}
+}
+
 // New creates a new Validator with the given options.
 func New(opts ...Option) (*Validator, error) {
 	startTime := time.Now()
@@ -263,8 +279,15 @@ func formatBytes(b uint64) string {
 // Validate validates a FHIR resource and returns the validation result.
 // According to the FHIR specification, when a resource declares multiple profiles
 // in meta.profile, it MUST be valid against ALL of them.
-func (v *Validator) Validate(ctx context.Context, resource []byte) (*issue.Result, error) {
+// Optional ValidateOption parameters allow per-call configuration (e.g., ValidateWithProfile).
+func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...ValidateOption) (*issue.Result, error) {
 	startTime := time.Now()
+
+	// Apply per-call options
+	var vc validateConfig
+	for _, opt := range opts {
+		opt(&vc)
+	}
 
 	// Check for context cancellation
 	if err := ctx.Err(); err != nil {
@@ -317,7 +340,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte) (*issue.Resul
 	}
 
 	// Collect all profiles to validate against (metaProfiles already extracted above)
-	customProfiles := v.collectProfilesToValidate(resourceType, metaProfiles)
+	customProfiles := v.collectProfilesToValidate(vc.profiles, metaProfiles)
 
 	// Resolve profiles from registry
 	var resolvedProfiles []*registry.StructureDefinition
@@ -465,8 +488,8 @@ func (v *Validator) validateAgainstProfile(data map[string]any, rawJSON []byte, 
 }
 
 // ValidateJSON validates a FHIR resource from a JSON string.
-func (v *Validator) ValidateJSON(ctx context.Context, jsonStr string) (*issue.Result, error) {
-	return v.Validate(ctx, []byte(jsonStr))
+func (v *Validator) ValidateJSON(ctx context.Context, jsonStr string, opts ...ValidateOption) (*issue.Result, error) {
+	return v.Validate(ctx, []byte(jsonStr), opts...)
 }
 
 // Registry returns the underlying registry for advanced use cases.
@@ -485,17 +508,20 @@ func (v *Validator) Version() string {
 }
 
 // collectProfilesToValidate returns the ordered list of profiles to validate against.
-// Priority: 1) Config profiles, 2) meta.profile, 3) core resource SD.
-func (v *Validator) collectProfilesToValidate(_ string, metaProfiles []string) []string {
+// Priority: 1) Per-call profiles, 2) Config profiles, 3) meta.profile, 4) core resource SD.
+func (v *Validator) collectProfilesToValidate(perCallProfiles, metaProfiles []string) []string {
 	var profiles []string
 
-	// 1. Configured profiles take highest priority
+	// 1. Per-call profiles take highest priority
+	profiles = append(profiles, perCallProfiles...)
+
+	// 2. Configured profiles
 	profiles = append(profiles, v.config.Profiles...)
 
-	// 2. Profiles from meta.profile
+	// 3. Profiles from meta.profile
 	profiles = append(profiles, metaProfiles...)
 
-	// 3. Core resource type as fallback (added at validation time if needed)
+	// 4. Core resource type as fallback (added at validation time if needed)
 	// Not added here to allow detecting if all custom profiles failed
 
 	return profiles

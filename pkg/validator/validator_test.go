@@ -344,3 +344,77 @@ func TestValidateAgainstAllProfiles(t *testing.T) {
 		t.Errorf("Expected US Core Patient profile, got %s", result.Stats.ProfileURL)
 	}
 }
+
+func TestValidateWithPerCallProfile(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping per-call profile test in short mode")
+	}
+
+	// Create a single validator with US Core packages loaded (no config-time profiles)
+	v, err := New(WithPackage("hl7.fhir.us.core", "6.1.0"))
+	if err != nil {
+		t.Skipf("Cannot create validator: %v", err)
+	}
+
+	usCoreURL := "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+	if v.Registry().GetByURL(usCoreURL) == nil {
+		t.Skip("US Core Patient profile not available")
+	}
+
+	// Patient missing required US Core fields (identifier, name, gender)
+	minimalPatient := `{"resourceType": "Patient"}`
+
+	t.Run("without per-call profile validates against core only", func(t *testing.T) {
+		result, err := v.ValidateJSON(context.Background(), minimalPatient)
+		if err != nil {
+			t.Fatalf("ValidateJSON() returned error: %v", err)
+		}
+		// Core Patient has no required fields beyond resourceType, so no cardinality errors
+		if result.Stats.IsCustomProfile {
+			t.Error("Expected IsCustomProfile=false when no per-call profile")
+		}
+		t.Logf("Core-only: %d errors, %d warnings", result.ErrorCount(), result.WarningCount())
+	})
+
+	t.Run("with per-call profile validates against profile", func(t *testing.T) {
+		result, err := v.ValidateJSON(context.Background(), minimalPatient,
+			ValidateWithProfile(usCoreURL),
+		)
+		if err != nil {
+			t.Fatalf("ValidateJSON() returned error: %v", err)
+		}
+		// US Core Patient requires identifier, name, gender — should produce errors
+		if !result.Stats.IsCustomProfile {
+			t.Error("Expected IsCustomProfile=true when per-call profile is set")
+		}
+		if result.Stats.ProfileURL != usCoreURL {
+			t.Errorf("ProfileURL = %q, want %q", result.Stats.ProfileURL, usCoreURL)
+		}
+		if result.ErrorCount() == 0 {
+			t.Error("Expected errors for missing US Core required fields, got none")
+		}
+		t.Logf("Per-call profile: %d errors, %d warnings", result.ErrorCount(), result.WarningCount())
+		for _, iss := range result.Issues {
+			t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+		}
+	})
+
+	t.Run("per-call profile does not affect subsequent calls", func(t *testing.T) {
+		// First call with profile
+		_, err := v.Validate(context.Background(), []byte(minimalPatient),
+			ValidateWithProfile(usCoreURL),
+		)
+		if err != nil {
+			t.Fatalf("Validate() returned error: %v", err)
+		}
+
+		// Second call without profile — should validate against core only
+		result, err := v.Validate(context.Background(), []byte(minimalPatient))
+		if err != nil {
+			t.Fatalf("Validate() returned error: %v", err)
+		}
+		if result.Stats.IsCustomProfile {
+			t.Error("Per-call profile leaked to subsequent call")
+		}
+	})
+}
