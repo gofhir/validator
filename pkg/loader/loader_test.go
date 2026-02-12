@@ -145,3 +145,90 @@ func TestLoaderLoadVersionUnknown(t *testing.T) {
 		t.Error("LoadVersion should fail for unknown version")
 	}
 }
+
+func TestLoaderLoadFromTgzData(t *testing.T) {
+	// Find a .tgz file in the package cache to use as test data
+	l := NewLoader("")
+	cacheDir := l.BasePath()
+	tgzPath := filepath.Join(cacheDir, "hl7.fhir.r4.core#4.0.1.tgz")
+
+	data, err := os.ReadFile(tgzPath)
+	if err != nil {
+		// Try alternative location
+		tgzPath = filepath.Join(cacheDir, "hl7.fhir.r4.core-4.0.1.tgz")
+		data, err = os.ReadFile(tgzPath)
+		if err != nil {
+			t.Skipf("No .tgz file available for testing: %v", err)
+		}
+	}
+
+	pkg, err := l.LoadFromTgzData(data)
+	if err != nil {
+		t.Fatalf("LoadFromTgzData() error: %v", err)
+	}
+
+	if pkg.Name == "" {
+		t.Error("Package.Name is empty")
+	}
+	if pkg.Path != "memory" {
+		t.Errorf("Package.Path = %q, want %q", pkg.Path, "memory")
+	}
+	if len(pkg.Resources) == 0 {
+		t.Error("Package has no resources")
+	}
+	t.Logf("Loaded %s#%s from memory (%d resources)", pkg.Name, pkg.Version, len(pkg.Resources))
+}
+
+func TestLoaderLoadFromResources(t *testing.T) {
+	l := NewLoader("")
+
+	sd := []byte(`{
+		"resourceType": "StructureDefinition",
+		"id": "test-profile",
+		"url": "http://example.org/fhir/StructureDefinition/test-profile",
+		"name": "TestProfile",
+		"status": "active",
+		"kind": "resource",
+		"type": "Patient"
+	}`)
+
+	vs := []byte(`{
+		"resourceType": "ValueSet",
+		"id": "test-valueset",
+		"url": "http://example.org/fhir/ValueSet/test-valueset",
+		"name": "TestValueSet",
+		"status": "active"
+	}`)
+
+	invalid := []byte(`not valid json`)
+
+	pkg, err := l.LoadFromResources([][]byte{sd, vs, invalid})
+	if err != nil {
+		t.Fatalf("LoadFromResources() error: %v", err)
+	}
+
+	if pkg.Name != "custom" {
+		t.Errorf("Package.Name = %q, want %q", pkg.Name, "custom")
+	}
+	if pkg.Path != "memory" {
+		t.Errorf("Package.Path = %q, want %q", pkg.Path, "memory")
+	}
+
+	// Should have 4 entries: 2 by URL + 2 by resourceType/id (invalid JSON skipped)
+	if len(pkg.Resources) != 4 {
+		t.Errorf("Package has %d resources, want 4", len(pkg.Resources))
+	}
+
+	if _, ok := pkg.Resources["http://example.org/fhir/StructureDefinition/test-profile"]; !ok {
+		t.Error("Missing resource by URL: StructureDefinition")
+	}
+	if _, ok := pkg.Resources["StructureDefinition/test-profile"]; !ok {
+		t.Error("Missing resource by resourceType/id: StructureDefinition")
+	}
+	if _, ok := pkg.Resources["http://example.org/fhir/ValueSet/test-valueset"]; !ok {
+		t.Error("Missing resource by URL: ValueSet")
+	}
+	if _, ok := pkg.Resources["ValueSet/test-valueset"]; !ok {
+		t.Error("Missing resource by resourceType/id: ValueSet")
+	}
+}

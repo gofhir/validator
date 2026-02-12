@@ -61,13 +61,15 @@ type PackageSpec struct {
 
 // Config holds the validator configuration.
 type Config struct {
-	FHIRVersion        string        // e.g., "4.0.1", "4.3.0", "5.0.0"
-	Profiles           []string      // Additional profiles to validate against
-	StrictMode         bool          // Treat warnings as errors
-	PackagePath        string        // Path to FHIR package cache
-	AdditionalPackages []PackageSpec // Additional packages to load (e.g., US Core)
-	PackageTgzPaths    []string      // Paths to local .tgz package files
-	PackageURLs        []string      // URLs to remote .tgz package files
+	FHIRVersion          string        // e.g., "4.0.1", "4.3.0", "5.0.0"
+	Profiles             []string      // Additional profiles to validate against
+	StrictMode           bool          // Treat warnings as errors
+	PackagePath          string        // Path to FHIR package cache
+	AdditionalPackages   []PackageSpec // Additional packages to load (e.g., US Core)
+	PackageTgzPaths      []string      // Paths to local .tgz package files
+	PackageURLs          []string      // URLs to remote .tgz package files
+	PackageData          [][]byte      // In-memory .tgz package bytes (e.g., from //go:embed)
+	ConformanceResources [][]byte      // Individual conformance resource JSON bytes (e.g., from DB)
 }
 
 // Option is a functional option for configuring the validator.
@@ -119,6 +121,23 @@ func WithPackageTgz(path string) Option {
 func WithPackageURL(url string) Option {
 	return func(c *Config) {
 		c.PackageURLs = append(c.PackageURLs, url)
+	}
+}
+
+// WithPackageData loads a FHIR package from .tgz bytes in memory.
+// Useful for packages embedded in the binary via //go:embed.
+func WithPackageData(data []byte) Option {
+	return func(c *Config) {
+		c.PackageData = append(c.PackageData, data)
+	}
+}
+
+// WithConformanceResources loads individual conformance resources (JSON bytes)
+// directly into the validator's registry. Each entry should be a valid JSON
+// FHIR conformance resource (StructureDefinition, ValueSet, CodeSystem, etc.).
+func WithConformanceResources(resources [][]byte) Option {
+	return func(c *Config) {
+		c.ConformanceResources = append(c.ConformanceResources, resources...)
 	}
 }
 
@@ -196,6 +215,29 @@ func New(opts ...Option) (*Validator, error) {
 		logger.Info("  Loaded package from URL: %s#%s", pkg.Name, pkg.Version)
 		packages = append(packages, pkg)
 	}
+
+	// Load packages from in-memory .tgz data (e.g., //go:embed)
+	for i, data := range config.PackageData {
+		pkg, err := l.LoadFromTgzData(data)
+		if err != nil {
+			logger.Warn("Could not load package from memory data[%d]: %v", i, err)
+			continue
+		}
+		logger.Info("  Loaded package from memory: %s#%s", pkg.Name, pkg.Version)
+		packages = append(packages, pkg)
+	}
+
+	// Load individual conformance resources from memory (e.g., from database)
+	if len(config.ConformanceResources) > 0 {
+		pkg, err := l.LoadFromResources(config.ConformanceResources)
+		if err != nil {
+			logger.Warn("Could not load conformance resources: %v", err)
+		} else {
+			logger.Info("  Loaded %d conformance resources from memory", len(pkg.Resources))
+			packages = append(packages, pkg)
+		}
+	}
+
 	loadDuration := time.Since(loadStart)
 
 	// Log loaded packages

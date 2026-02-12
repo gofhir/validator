@@ -4,6 +4,7 @@ package loader
 
 import (
 	"archive/tar"
+	"bytes"
 	"compress/gzip"
 	"context"
 	"encoding/json"
@@ -365,6 +366,45 @@ func (l *Loader) loadFromTgzReader(reader io.Reader, source string) (*Package, e
 	pkg.Version = manifest.Version
 	pkg.FHIRVersion = manifest.FHIRVersion
 	pkg.Path = source
+
+	return pkg, nil
+}
+
+// LoadFromTgzData loads a FHIR package from .tgz bytes in memory.
+// Useful for packages embedded in the binary via //go:embed.
+func (l *Loader) LoadFromTgzData(data []byte) (*Package, error) {
+	return l.loadFromTgzReader(bytes.NewReader(data), "memory")
+}
+
+// LoadFromResources creates a Package from individual conformance resource JSON bytes.
+// Each entry should be a valid JSON FHIR conformance resource
+// (StructureDefinition, ValueSet, CodeSystem, etc.).
+func (l *Loader) LoadFromResources(resources [][]byte) (*Package, error) {
+	pkg := &Package{
+		Name:      "custom",
+		Version:   "0.0.0",
+		Path:      "memory",
+		Resources: make(map[string]json.RawMessage, len(resources)),
+	}
+
+	for _, data := range resources {
+		var resource struct {
+			ResourceType string `json:"resourceType"`
+			ID           string `json:"id"`
+			URL          string `json:"url"`
+		}
+		if err := json.Unmarshal(data, &resource); err != nil {
+			continue
+		}
+
+		if resource.URL != "" {
+			pkg.Resources[resource.URL] = data
+		}
+		if resource.ResourceType != "" && resource.ID != "" {
+			key := fmt.Sprintf("%s/%s", resource.ResourceType, resource.ID)
+			pkg.Resources[key] = data
+		}
+	}
 
 	return pkg, nil
 }
