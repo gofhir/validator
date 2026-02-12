@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/gofhir/validator/compare/v1.5.0...v1.6.0) (2026-02-12)
+
+
+### Features
+
+* **loader:** add WithPackageData and WithConformanceResources options ([48ba6b3](https://github.com/gofhir/validator/commit/48ba6b3f8f6ed2b7ae5e6ee7106a1d3109d3121f)), closes [#12](https://github.com/gofhir/validator/issues/12) [#13](https://github.com/gofhir/validator/issues/13)
+
 ## [1.5.0](https://github.com/gofhir/validator/compare/v1.4.1...v1.5.0) (2026-02-12)
 
 
