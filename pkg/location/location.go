@@ -125,15 +125,15 @@ func navigateToPath(dec *json.Decoder, segments []string) (int, error) {
 // navigateToKey finds a key in the current JSON object.
 func navigateToKey(dec *json.Decoder, key string) (int, error) {
 	for {
-		offset := int(dec.InputOffset())
 		tok, err := dec.Token()
 		if err != nil {
 			return 0, fmt.Errorf("key %q not found: %w", key, err)
 		}
 
-		// Looking for the key
+		// Looking for the key — capture offset AFTER reading the token
+		// so the position is on the same line as the key itself.
 		if k, ok := tok.(string); ok && k == key {
-			return offset, nil
+			return int(dec.InputOffset()), nil
 		}
 
 		// Handle delimiters

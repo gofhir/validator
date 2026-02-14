@@ -31,14 +31,14 @@ func TestFind(t *testing.T) {
 		{
 			name:       "root field",
 			fhirPath:   "Patient.resourceType",
-			wantLine:   1,
-			wantColumn: 2,
+			wantLine:   2,
+			wantColumn: 17,
 		},
 		{
 			name:       "simple field",
 			fhirPath:   "Patient.identifier",
-			wantLine:   2,
-			wantColumn: 28,
+			wantLine:   3,
+			wantColumn: 15,
 		},
 		{
 			name:       "array element",
@@ -49,20 +49,20 @@ func TestFind(t *testing.T) {
 		{
 			name:       "nested field in array",
 			fhirPath:   "Patient.identifier[0].system",
-			wantLine:   4,
-			wantColumn: 6,
+			wantLine:   5,
+			wantColumn: 15,
 		},
 		{
 			name:       "another nested field",
 			fhirPath:   "Patient.identifier[0].value",
-			wantLine:   5,
-			wantColumn: 37,
+			wantLine:   6,
+			wantColumn: 14,
 		},
 		{
 			name:       "second array",
 			fhirPath:   "Patient.name[0].family",
-			wantLine:   10,
-			wantColumn: 6,
+			wantLine:   11,
+			wantColumn: 15,
 		},
 		{
 			name:       "nested array element",
@@ -184,11 +184,11 @@ func TestFindMinifiedJSON(t *testing.T) {
 		wantLine   int
 		wantColumn int
 	}{
-		{"Patient.resourceType", 1, 2},
-		{"Patient.identifier", 1, 26},
+		{"Patient.resourceType", 1, 16},
+		{"Patient.identifier", 1, 39},
 		{"Patient.identifier[0]", 1, 41},
-		{"Patient.identifier[0].system", 1, 42},
-		{"Patient.identifier[0].value", 1, 71},
+		{"Patient.identifier[0].system", 1, 50},
+		{"Patient.identifier[0].value", 1, 79},
 	}
 
 	for _, tt := range tests {
@@ -225,12 +225,12 @@ func TestFindBundleEntry(t *testing.T) {
 		fhirPath string
 		wantLine int
 	}{
-		{"Bundle.entry", 2},
+		{"Bundle.entry", 3},
 		{"Bundle.entry[0]", 4},
-		{"Bundle.entry[0].fullUrl", 4},
-		{"Bundle.entry[0].resource", 5},
-		{"Bundle.entry[0].resource.resourceType", 6},
-		{"Bundle.entry[0].resource.id", 7},
+		{"Bundle.entry[0].fullUrl", 5},
+		{"Bundle.entry[0].resource", 6},
+		{"Bundle.entry[0].resource.resourceType", 7},
+		{"Bundle.entry[0].resource.id", 8},
 	}
 
 	for _, tt := range tests {
