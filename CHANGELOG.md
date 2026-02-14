@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/gofhir/validator/compare/v1.6.0...v1.6.1) (2026-02-14)
+
+
+### Bug Fixes
+
+* **location:** correct off-by-one line number in JSON position tracker ([967d661](https://github.com/gofhir/validator/commit/967d6616e88af09248b7efbefd1898a1df5b97e0)), closes [#15](https://github.com/gofhir/validator/issues/15)
+
 ## [1.6.0](https://github.com/gofhir/validator/compare/v1.5.0...v1.6.0) (2026-02-12)
 
 
