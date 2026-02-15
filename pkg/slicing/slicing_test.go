@@ -384,6 +384,121 @@ func TestValueDiscriminatorMultiLevel(t *testing.T) {
 	}
 }
 
+func TestSliceChildCardinality(t *testing.T) {
+	validator := &Validator{}
+
+	// Build a SliceInfo with children that have cardinality constraints
+	sliceName := "NombreSocial"
+	childGiven := &registry.ElementDefinition{
+		ID:   "Patient.name:NombreSocial.given",
+		Path: "Patient.name.given",
+		Min:  1, // Required in this slice
+		Max:  "*",
+	}
+	childFamily := &registry.ElementDefinition{
+		ID:   "Patient.name:NombreSocial.family",
+		Path: "Patient.name.family",
+		Min:  0,
+		Max:  "1",
+	}
+
+	ctx := Context{
+		Path: "Patient.name",
+		Slices: []SliceInfo{
+			{
+				Name: sliceName,
+				Children: []*registry.ElementDefinition{
+					childGiven,
+					childFamily,
+				},
+				Min: 0,
+				Max: "*",
+			},
+		},
+	}
+
+	t.Run("missing required child reports error", func(t *testing.T) {
+		// Element matches NombreSocial but is missing "given" (required min=1)
+		elements := []any{
+			map[string]any{"use": "usual", "family": "Garcia"},
+		}
+		sliceMatches := map[int]string{0: sliceName}
+
+		result := issue.NewResult()
+		validator.validateSliceChildren(elements, sliceMatches, ctx, "Patient", result)
+
+		if result.ErrorCount() != 1 {
+			t.Errorf("Expected 1 error, got %d", result.ErrorCount())
+			for _, iss := range result.Issues {
+				t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+			}
+			return
+		}
+
+		iss := result.Issues[0]
+		if iss.Severity != issue.SeverityError {
+			t.Errorf("Expected error severity, got %s", iss.Severity)
+		}
+		if len(iss.Expression) == 0 || iss.Expression[0] != "Patient.name[0].given" {
+			t.Errorf("Expected expression 'Patient.name[0].given', got %v", iss.Expression)
+		}
+		t.Logf("Issue: %s @ %v", iss.Diagnostics, iss.Expression)
+	})
+
+	t.Run("present required child no error", func(t *testing.T) {
+		elements := []any{
+			map[string]any{"use": "usual", "family": "Garcia", "given": []any{"Maria"}},
+		}
+		sliceMatches := map[int]string{0: sliceName}
+
+		result := issue.NewResult()
+		validator.validateSliceChildren(elements, sliceMatches, ctx, "Patient", result)
+
+		if result.ErrorCount() != 0 {
+			t.Errorf("Expected 0 errors, got %d", result.ErrorCount())
+			for _, iss := range result.Issues {
+				t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+			}
+		}
+	})
+
+	t.Run("unmatched element is not validated", func(t *testing.T) {
+		elements := []any{
+			map[string]any{"use": "official", "family": "Garcia"},
+		}
+		// Element 0 is NOT matched to any slice
+		sliceMatches := map[int]string{}
+
+		result := issue.NewResult()
+		validator.validateSliceChildren(elements, sliceMatches, ctx, "Patient", result)
+
+		if result.ErrorCount() != 0 {
+			t.Errorf("Expected 0 errors for unmatched element, got %d", result.ErrorCount())
+		}
+	})
+
+	t.Run("max cardinality exceeded", func(t *testing.T) {
+		elements := []any{
+			map[string]any{
+				"use":    "usual",
+				"family": []any{"Garcia", "Lopez"}, // family max=1, but 2 present
+				"given":  []any{"Maria"},
+			},
+		}
+		sliceMatches := map[int]string{0: sliceName}
+
+		result := issue.NewResult()
+		validator.validateSliceChildren(elements, sliceMatches, ctx, "Patient", result)
+
+		if result.ErrorCount() != 1 {
+			t.Errorf("Expected 1 error for max exceeded, got %d", result.ErrorCount())
+			for _, iss := range result.Issues {
+				t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+			}
+		}
+	})
+}
+
 func TestInferElementType(t *testing.T) {
 	validator := &Validator{}
 

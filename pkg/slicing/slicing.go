@@ -222,6 +222,92 @@ func (v *Validator) validateContext(
 			}
 		}
 	}
+
+	// Validate cardinality of child elements within matched slices
+	v.validateSliceChildren(elements, sliceMatches, ctx, fhirPath, result)
+}
+
+// validateSliceChildren validates cardinality of child elements for each matched slice instance.
+func (v *Validator) validateSliceChildren(
+	elements []any,
+	sliceMatches map[int]string,
+	ctx Context,
+	fhirPath string,
+	result *issue.Result,
+) {
+	// Build a quick lookup from slice name to SliceInfo
+	sliceByName := make(map[string]*SliceInfo, len(ctx.Slices))
+	for i := range ctx.Slices {
+		sliceByName[ctx.Slices[i].Name] = &ctx.Slices[i]
+	}
+
+	pathSegment := v.lastPathSegment(ctx.Path)
+
+	for elemIdx, sliceName := range sliceMatches {
+		slice := sliceByName[sliceName]
+		if slice == nil || len(slice.Children) == 0 {
+			continue
+		}
+
+		elemMap, ok := elements[elemIdx].(map[string]any)
+		if !ok {
+			continue
+		}
+
+		elemPath := fmt.Sprintf("%s.%s[%d]", fhirPath, pathSegment, elemIdx)
+
+		for _, child := range slice.Children {
+			// Skip children that are themselves slice definitions
+			if child.SliceName != nil && *child.SliceName != "" {
+				continue
+			}
+
+			// Extract child element name from path (last segment)
+			childName := child.Path[strings.LastIndex(child.Path, ".")+1:]
+
+			// Count occurrences in the resource element
+			count := countElement(elemMap, childName)
+
+			// Check minimum cardinality
+			if count < int(child.Min) {
+				childFHIRPath := fmt.Sprintf("%s.%s", elemPath, childName)
+				sliceChildPath := fmt.Sprintf("%s:%s.%s", ctx.Path, sliceName, childName)
+				result.AddIssue(issue.Issue{
+					Severity:    issue.SeverityError,
+					Code:        issue.CodeRequired,
+					Expression:  []string{childFHIRPath},
+					Diagnostics: fmt.Sprintf("Minimum cardinality of '%s' is %d, but found %d", sliceChildPath, child.Min, count),
+				})
+			}
+
+			// Check maximum cardinality
+			if child.Max != "" && child.Max != "*" {
+				maxInt, err := strconv.Atoi(child.Max)
+				if err == nil && count > maxInt {
+					childFHIRPath := fmt.Sprintf("%s.%s", elemPath, childName)
+					sliceChildPath := fmt.Sprintf("%s:%s.%s", ctx.Path, sliceName, childName)
+					result.AddIssue(issue.Issue{
+						Severity:    issue.SeverityError,
+						Code:        issue.CodeBusinessRule,
+						Expression:  []string{childFHIRPath},
+						Diagnostics: fmt.Sprintf("Maximum cardinality of '%s' is %d, but found %d", sliceChildPath, maxInt, count),
+					})
+				}
+			}
+		}
+	}
+}
+
+// countElement counts occurrences of a named element in a resource map.
+func countElement(m map[string]any, name string) int {
+	val, ok := m[name]
+	if !ok {
+		return 0
+	}
+	if arr, ok := val.([]any); ok {
+		return len(arr)
+	}
+	return 1
 }
 
 // matchElementToSlice finds which slice an element matches based on discriminators.
