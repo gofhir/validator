@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/gofhir/validator/compare/v1.6.2...v1.7.0) (2026-02-15)
+
+
+### Features
+
+* **slicing:** implement all discriminator types (value/pattern/exists/type/profile) ([1e5b238](https://github.com/gofhir/validator/commit/1e5b238c73358f6ea4121f52b5570d925883d4e0))
+
 ## [1.6.2](https://github.com/gofhir/validator/compare/v1.6.1...v1.6.2) (2026-02-15)
 
 
