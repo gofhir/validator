@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/gofhir/validator/compare/v1.6.1...v1.6.2) (2026-02-15)
+
+
+### Bug Fixes
+
+* **slicing:** enforce cardinality on child elements within matched slices ([3f9270b](https://github.com/gofhir/validator/commit/3f9270b421a66b62e45a9110d772e9d76553279d)), closes [#17](https://github.com/gofhir/validator/issues/17)
+
 ## [1.6.1](https://github.com/gofhir/validator/compare/v1.6.0...v1.6.1) (2026-02-14)
 
 
