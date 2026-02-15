@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/gofhir/validator/compare/v1.7.0...v1.7.1) (2026-02-15)
+
+
+### Bug Fixes
+
+* **slicing:** add MessageID to all slicing validation issues ([e1e7571](https://github.com/gofhir/validator/commit/e1e7571dfa9c7e4d63b688beeb37822808f0ff8c)), closes [#20](https://github.com/gofhir/validator/issues/20)
+
 ## [1.7.0](https://github.com/gofhir/validator/compare/v1.6.2...v1.7.0) (2026-02-15)
 
 
