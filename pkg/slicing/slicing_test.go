@@ -552,3 +552,296 @@ func TestInferElementType(t *testing.T) {
 		})
 	}
 }
+
+func TestValueDiscriminatorWithPatternCode(t *testing.T) {
+	reg := setupTestRegistry(t)
+	validator := New(reg)
+
+	sliceInfo := SliceInfo{
+		Name: "NombreSocial",
+		Children: []*registry.ElementDefinition{
+			{Path: "Patient.name.use"},
+		},
+	}
+	sliceInfo.Children[0].SetRaw(json.RawMessage(`{"path":"Patient.name.use","patternCode":"usual"}`))
+
+	t.Run("matching patternCode", func(t *testing.T) {
+		elem := map[string]any{"use": "usual", "family": "Garcia"}
+		if !validator.evaluateValueDiscriminator(elem, "use", sliceInfo) {
+			t.Error("Expected match for use='usual' with patternCode='usual'")
+		}
+	})
+
+	t.Run("non-matching patternCode", func(t *testing.T) {
+		elem := map[string]any{"use": "official", "family": "Garcia"}
+		if validator.evaluateValueDiscriminator(elem, "use", sliceInfo) {
+			t.Error("Expected no match for use='official' with patternCode='usual'")
+		}
+	})
+
+	t.Run("fixed takes priority over pattern", func(t *testing.T) {
+		fixedSlice := SliceInfo{
+			Name: "test",
+			Children: []*registry.ElementDefinition{
+				{Path: "Extension.url"},
+			},
+		}
+		fixedSlice.Children[0].SetRaw(json.RawMessage(`{"path":"Extension.url","fixedUri":"http://example.org/ext"}`))
+
+		match := map[string]any{"url": "http://example.org/ext"}
+		if !validator.evaluateValueDiscriminator(match, "url", fixedSlice) {
+			t.Error("Expected match on fixedUri")
+		}
+
+		noMatch := map[string]any{"url": "http://example.org/other"}
+		if validator.evaluateValueDiscriminator(noMatch, "url", fixedSlice) {
+			t.Error("Expected no match on different fixedUri")
+		}
+	})
+}
+
+func TestExistsDiscriminator(t *testing.T) {
+	reg := setupTestRegistry(t)
+	validator := New(reg)
+
+	// Slice "withValue" expects "value" to exist (min=1).
+	sliceWithValue := SliceInfo{
+		Name: "withValue",
+		Children: []*registry.ElementDefinition{
+			{Path: "Observation.component.value", Min: 1, Max: "1"},
+		},
+	}
+	// Slice "withoutValue" expects "value" to not exist (max=0).
+	sliceWithoutValue := SliceInfo{
+		Name: "withoutValue",
+		Children: []*registry.ElementDefinition{
+			{Path: "Observation.component.value", Min: 0, Max: "0"},
+		},
+	}
+
+	elemWithValue := map[string]any{"code": map[string]any{}, "value": "test"}
+	elemWithoutValue := map[string]any{"code": map[string]any{}}
+
+	t.Run("element with value matches withValue slice", func(t *testing.T) {
+		if !validator.evaluateExistsDiscriminator(elemWithValue, "value", sliceWithValue) {
+			t.Error("Expected match: element has value, slice expects it")
+		}
+	})
+
+	t.Run("element without value does not match withValue slice", func(t *testing.T) {
+		if validator.evaluateExistsDiscriminator(elemWithoutValue, "value", sliceWithValue) {
+			t.Error("Expected no match: element lacks value, slice expects it")
+		}
+	})
+
+	t.Run("element without value matches withoutValue slice", func(t *testing.T) {
+		if !validator.evaluateExistsDiscriminator(elemWithoutValue, "value", sliceWithoutValue) {
+			t.Error("Expected match: element lacks value, slice expects absence")
+		}
+	})
+
+	t.Run("element with value does not match withoutValue slice", func(t *testing.T) {
+		if validator.evaluateExistsDiscriminator(elemWithValue, "value", sliceWithoutValue) {
+			t.Error("Expected no match: element has value, slice expects absence")
+		}
+	})
+}
+
+func TestTypeDiscriminatorPolymorphic(t *testing.T) {
+	validator := &Validator{}
+
+	quantityType := registry.Type{Code: "Quantity"}
+	stringType := registry.Type{Code: "string"}
+
+	quantitySlice := SliceInfo{
+		Name:       "valueQuantity",
+		Definition: &registry.ElementDefinition{Type: []registry.Type{quantityType}},
+	}
+	stringSlice := SliceInfo{
+		Name:       "valueString",
+		Definition: &registry.ElementDefinition{Type: []registry.Type{stringType}},
+	}
+
+	elemQuantity := map[string]any{
+		"code":          map[string]any{},
+		"valueQuantity": map[string]any{"value": 120, "unit": "mmHg"},
+	}
+	elemString := map[string]any{
+		"code":        map[string]any{},
+		"valueString": "normal",
+	}
+
+	t.Run("valueQuantity matches Quantity slice", func(t *testing.T) {
+		if !validator.evaluateTypeDiscriminator(elemQuantity, "value", quantitySlice) {
+			t.Error("Expected valueQuantity to match Quantity slice")
+		}
+	})
+
+	t.Run("valueQuantity does not match string slice", func(t *testing.T) {
+		if validator.evaluateTypeDiscriminator(elemQuantity, "value", stringSlice) {
+			t.Error("Expected valueQuantity NOT to match string slice")
+		}
+	})
+
+	t.Run("valueString matches string slice", func(t *testing.T) {
+		if !validator.evaluateTypeDiscriminator(elemString, "value", stringSlice) {
+			t.Error("Expected valueString to match string slice")
+		}
+	})
+
+	t.Run("valueString does not match Quantity slice", func(t *testing.T) {
+		if validator.evaluateTypeDiscriminator(elemString, "value", quantitySlice) {
+			t.Error("Expected valueString NOT to match Quantity slice")
+		}
+	})
+}
+
+func TestProfileDiscriminatorThis(t *testing.T) {
+	reg := setupTestRegistry(t)
+	validator := New(reg)
+
+	t.Run("extension url matches profile", func(t *testing.T) {
+		slice := SliceInfo{
+			Name: "race",
+			Definition: &registry.ElementDefinition{
+				Type: []registry.Type{
+					{Code: "Extension", Profile: []string{"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"}},
+				},
+			},
+		}
+
+		match := map[string]any{"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"}
+		if !validator.evaluateProfileDiscriminator(match, "$this", slice) {
+			t.Error("Expected extension url to match profile")
+		}
+
+		noMatch := map[string]any{"url": "http://example.org/other"}
+		if validator.evaluateProfileDiscriminator(noMatch, "$this", slice) {
+			t.Error("Expected different url NOT to match profile")
+		}
+	})
+
+	t.Run("resource type matches profile via registry", func(t *testing.T) {
+		slice := SliceInfo{
+			Name: "patientRef",
+			Definition: &registry.ElementDefinition{
+				Type: []registry.Type{
+					{Code: "Reference", Profile: []string{"http://hl7.org/fhir/StructureDefinition/Patient"}},
+				},
+			},
+		}
+
+		patientResource := map[string]any{"resourceType": "Patient", "id": "123"}
+		if !validator.evaluateProfileDiscriminator(patientResource, "$this", slice) {
+			t.Error("Expected Patient resource to match Patient profile")
+		}
+
+		obsResource := map[string]any{"resourceType": "Observation", "id": "456"}
+		if validator.evaluateProfileDiscriminator(obsResource, "$this", slice) {
+			t.Error("Expected Observation NOT to match Patient profile")
+		}
+	})
+
+	t.Run("no expected profiles allows match", func(t *testing.T) {
+		slice := SliceInfo{
+			Name: "any",
+			Definition: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Extension"}},
+			},
+		}
+
+		elem := map[string]any{"url": "http://example.org/anything"}
+		if !validator.evaluateProfileDiscriminator(elem, "$this", slice) {
+			t.Error("Expected match when no profiles are constrained")
+		}
+	})
+}
+
+func TestSliceChildCardinality_PatternCodeDiscriminator(t *testing.T) {
+	validator := &Validator{}
+
+	// Build context mimicking Chilean Core: Patient.name sliced by value:use with patternCode.
+	sliceUseDef := &registry.ElementDefinition{
+		ID: "Patient.name:NombreSocial.use", Path: "Patient.name.use", Min: 1, Max: "1",
+	}
+	sliceUseDef.SetRaw(json.RawMessage(`{"path":"Patient.name.use","patternCode":"usual","min":1,"max":"1"}`))
+
+	sliceGivenDef := &registry.ElementDefinition{
+		ID: "Patient.name:NombreSocial.given", Path: "Patient.name.given", Min: 1, Max: "*",
+	}
+
+	ctx := Context{
+		Path:           "Patient.name",
+		Discriminators: []registry.Discriminator{{Type: "value", Path: "use"}},
+		Rules:          "open",
+		Slices: []SliceInfo{
+			{
+				Name:     "NombreSocial",
+				Children: []*registry.ElementDefinition{sliceUseDef, sliceGivenDef},
+				Min:      0, Max: "*",
+			},
+		},
+	}
+
+	t.Run("missing given detected via pattern discriminator match", func(t *testing.T) {
+		elements := []any{
+			map[string]any{"use": "usual", "family": "Garcia"},
+		}
+
+		// Match elements to slices (this now works with patternCode).
+		sliceMatches := make(map[int]string)
+		for i, elem := range elements {
+			if matched := validator.matchElementToSlice(elem.(map[string]any), ctx); matched != "" {
+				sliceMatches[i] = matched
+			}
+		}
+
+		if sliceMatches[0] != "NombreSocial" {
+			t.Fatalf("Expected match to 'NombreSocial', got '%s'", sliceMatches[0])
+		}
+
+		result := issue.NewResult()
+		validator.validateSliceChildren(elements, sliceMatches, ctx, "Patient", result)
+
+		if result.ErrorCount() != 1 {
+			t.Errorf("Expected 1 error for missing 'given', got %d", result.ErrorCount())
+			for _, iss := range result.Issues {
+				t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+			}
+			return
+		}
+
+		iss := result.Issues[0]
+		if len(iss.Expression) == 0 || iss.Expression[0] != "Patient.name[0].given" {
+			t.Errorf("Expected expression 'Patient.name[0].given', got %v", iss.Expression)
+		}
+	})
+
+	t.Run("given present produces no error", func(t *testing.T) {
+		elements := []any{
+			map[string]any{"use": "usual", "given": []any{"Maria"}},
+		}
+
+		sliceMatches := make(map[int]string)
+		for i, elem := range elements {
+			if matched := validator.matchElementToSlice(elem.(map[string]any), ctx); matched != "" {
+				sliceMatches[i] = matched
+			}
+		}
+
+		result := issue.NewResult()
+		validator.validateSliceChildren(elements, sliceMatches, ctx, "Patient", result)
+
+		if result.ErrorCount() != 0 {
+			t.Errorf("Expected 0 errors, got %d", result.ErrorCount())
+		}
+	})
+
+	t.Run("official name does not match NombreSocial", func(t *testing.T) {
+		elem := map[string]any{"use": "official", "family": "Garcia"}
+		matched := validator.matchElementToSlice(elem, ctx)
+		if matched != "" {
+			t.Errorf("Expected no match for use='official', got '%s'", matched)
+		}
+	})
+}

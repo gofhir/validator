@@ -342,34 +342,37 @@ func (v *Validator) evaluateDiscriminator(element map[string]any, disc registry.
 		return v.evaluateTypeDiscriminator(element, disc.Path, slice)
 	case "profile":
 		return v.evaluateProfileDiscriminator(element, disc.Path, slice)
+	case "exists":
+		return v.evaluateExistsDiscriminator(element, disc.Path, slice)
 	default:
-		// Unsupported discriminator type - allow match (permissive)
 		return true
 	}
 }
 
 // evaluateValueDiscriminator checks if element matches a "value" discriminator.
-// The discriminator path points to a child element whose fixed value must match.
+// Per the FHIR spec, value discriminators match using fixed[x], pattern[x], or required ValueSet binding.
 func (v *Validator) evaluateValueDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
-	// Get the actual value at the discriminator path
 	actualValue := v.getValueAtPath(element, path)
 	if actualValue == nil {
 		return false
 	}
 
-	// Find the expected fixed value from the slice's child ElementDefinitions
-	expectedValue := v.getFixedValueForPath(slice, path)
-	if expectedValue == nil {
-		return false
-	}
-
-	// Compare values
 	actualJSON, err := json.Marshal(actualValue)
 	if err != nil {
 		return false
 	}
 
-	return fixedpattern.DeepEqual(actualJSON, expectedValue)
+	// Try fixed[x] first (exact match).
+	if fixedVal := v.getFixedValueForPath(slice, path); fixedVal != nil {
+		return fixedpattern.DeepEqual(actualJSON, fixedVal)
+	}
+
+	// Fall back to pattern[x] (pattern match).
+	if patternVal := v.getPatternValueForPath(slice, path); patternVal != nil {
+		return fixedpattern.ContainsPattern(actualJSON, patternVal)
+	}
+
+	return false
 }
 
 // evaluatePatternDiscriminator checks if element matches a "pattern" discriminator.
@@ -401,6 +404,30 @@ func (v *Validator) evaluatePatternDiscriminator(element map[string]any, path st
 	return fixedpattern.ContainsPattern(actualJSON, patternValue)
 }
 
+// evaluateExistsDiscriminator checks if element matches an "exists" discriminator.
+// Slices are differentiated by presence or absence of the nominated element.
+func (v *Validator) evaluateExistsDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
+	actualExists := v.getValueAtPath(element, path) != nil
+	expectedExists := v.getExpectedExistence(slice, path)
+	return actualExists == expectedExists
+}
+
+// getExpectedExistence determines whether a slice expects an element to exist or not.
+// Derived from the child ElementDefinition's cardinality: min >= 1 means must exist, max == "0" means must not.
+func (v *Validator) getExpectedExistence(slice SliceInfo, path string) bool {
+	for _, child := range slice.Children {
+		if strings.HasSuffix(child.Path, "."+path) {
+			if child.Max == "0" {
+				return false
+			}
+			if child.Min >= 1 {
+				return true
+			}
+		}
+	}
+	return true
+}
+
 // evaluateTypeDiscriminator checks if element matches a "type" discriminator.
 func (v *Validator) evaluateTypeDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
 	// Handle "resource" path for Bundle.entry slicing
@@ -427,9 +454,21 @@ func (v *Validator) evaluateTypeDiscriminator(element map[string]any, path strin
 	}
 
 	if path != pathThis {
-		// For other non-$this paths, we'd need to resolve the type at that path
-		// This is complex and rare; for now, allow match
-		return true
+		// For polymorphic elements (value[x], effective[x], etc.), resolve the type
+		// from the JSON key suffix (e.g., "valueQuantity" → "Quantity").
+		if slice.Definition == nil || len(slice.Definition.Type) == 0 {
+			return true
+		}
+		actualType := v.resolvePolymorphicType(element, path)
+		if actualType == "" {
+			return false
+		}
+		for _, t := range slice.Definition.Type {
+			if strings.EqualFold(t.Code, actualType) {
+				return true
+			}
+		}
+		return false
 	}
 
 	// For $this, check if the element type matches the slice's allowed types
@@ -455,38 +494,95 @@ func (v *Validator) evaluateTypeDiscriminator(element map[string]any, path strin
 
 // evaluateProfileDiscriminator checks if element matches a "profile" discriminator.
 func (v *Validator) evaluateProfileDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
-	// Handle "resource" path for Bundle.entry slicing
-	// This is used when slicing Bundle entries by the profile of the contained resource
+	// Handle "resource" path for Bundle.entry slicing.
 	if path == "resource" {
 		resourceMap, ok := element["resource"].(map[string]any)
 		if !ok {
 			return false
 		}
-
-		// Get the profiles declared in meta.profile
-		actualProfiles := v.getResourceProfiles(resourceMap)
-
-		// Find the expected profile from the slice's child ElementDefinitions
 		expectedProfiles := v.getExpectedResourceProfiles(slice)
 		if len(expectedProfiles) == 0 {
-			// No specific profile constraint, allow match
 			return true
 		}
+		return v.profilesOverlap(v.getResourceProfiles(resourceMap), expectedProfiles)
+	}
 
-		// Check if any of the actual profiles match any of the expected profiles
-		for _, expected := range expectedProfiles {
-			for _, actual := range actualProfiles {
-				if actual == expected {
-					return true
-				}
-			}
-		}
-
+	// Resolve target element for $this or other paths.
+	targetElement := v.resolveTargetElement(element, path)
+	if targetElement == nil {
 		return false
 	}
 
-	// For other paths, not yet implemented
-	return true
+	expectedProfiles := v.collectExpectedProfiles(slice)
+	if len(expectedProfiles) == 0 {
+		return true
+	}
+
+	return v.matchElementToProfiles(targetElement, expectedProfiles)
+}
+
+// resolveTargetElement resolves the element at a discriminator path.
+func (v *Validator) resolveTargetElement(element map[string]any, path string) map[string]any {
+	if path == pathThis {
+		return element
+	}
+	val, ok := v.getValueAtPath(element, path).(map[string]any)
+	if !ok {
+		return nil
+	}
+	return val
+}
+
+// collectExpectedProfiles gathers profile URLs from a slice definition's type constraints.
+func (v *Validator) collectExpectedProfiles(slice SliceInfo) []string {
+	if slice.Definition == nil {
+		return nil
+	}
+	var profiles []string
+	for _, t := range slice.Definition.Type {
+		profiles = append(profiles, t.Profile...)
+	}
+	return profiles
+}
+
+// matchElementToProfiles checks if an element matches any of the expected profiles.
+func (v *Validator) matchElementToProfiles(element map[string]any, expectedProfiles []string) bool {
+	// For extensions: match url against expected profiles.
+	if url, ok := element["url"].(string); ok {
+		for _, p := range expectedProfiles {
+			if url == p {
+				return true
+			}
+		}
+		return false
+	}
+
+	// For resources: check meta.profile or resourceType via registry.
+	if rt, ok := element["resourceType"].(string); ok {
+		if v.profilesOverlap(v.getResourceProfiles(element), expectedProfiles) {
+			return true
+		}
+		for _, profileURL := range expectedProfiles {
+			if sd := v.registry.GetByURL(profileURL); sd != nil && sd.Type == rt {
+				return true
+			}
+		}
+		return false
+	}
+
+	return false
+}
+
+// profilesOverlap returns true if any actual profile matches any expected profile.
+func (v *Validator) profilesOverlap(actual, expected []string) bool {
+	for _, a := range actual {
+		for _, e := range expected {
+			if a == e {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // getExpectedResourceType returns the expected resource type for a slice.
@@ -653,6 +749,20 @@ func (v *Validator) inferElementType(element map[string]any) string {
 		return "Extension"
 	}
 
+	return ""
+}
+
+// resolvePolymorphicType finds the FHIR type of a polymorphic element (e.g., value[x])
+// by inspecting JSON keys. For basePath "value", a key "valueQuantity" yields "Quantity".
+func (v *Validator) resolvePolymorphicType(element map[string]any, basePath string) string {
+	for key := range element {
+		if len(key) > len(basePath) && strings.HasPrefix(key, basePath) {
+			suffix := key[len(basePath):]
+			if suffix != "" && suffix[0] >= 'A' && suffix[0] <= 'Z' {
+				return suffix
+			}
+		}
+	}
 	return ""
 }
 
