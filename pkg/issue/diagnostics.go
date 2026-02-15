@@ -67,6 +67,13 @@ const (
 	DiagConstraintEvalError    DiagnosticID = "CONSTRAINT_EVAL_ERROR"
 )
 
+// Diagnostic IDs for slicing validation.
+const (
+	DiagSlicingNoMatch        DiagnosticID = "SLICING_NO_MATCH"
+	DiagSlicingCardinalityMin DiagnosticID = "SLICING_CARDINALITY_MIN"
+	DiagSlicingCardinalityMax DiagnosticID = "SLICING_CARDINALITY_MAX"
+)
+
 // Diagnostic IDs for primitive type validation (M3).
 const (
 	DiagTypeInvalidBoolean     DiagnosticID = "TYPE_INVALID_BOOLEAN"
@@ -283,6 +290,23 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeValue,
 		Template: "fullUrl '{fullUrl}' is not consistent with resource id '{id}'",
+	},
+
+	// Slicing
+	DiagSlicingNoMatch: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "Element does not match any defined slice (slicing rules are 'closed')",
+	},
+	DiagSlicingCardinalityMin: {
+		Severity: SeverityError,
+		Code:     CodeRequired,
+		Template: "Minimum cardinality of '{path}' is {min}, but found {count}",
+	},
+	DiagSlicingCardinalityMax: {
+		Severity: SeverityError,
+		Code:     CodeBusinessRule,
+		Template: "Maximum cardinality of '{path}' is {max}, but found {count}",
 	},
 
 	// Constraint (M10)

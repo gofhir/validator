@@ -185,12 +185,7 @@ func (v *Validator) validateContext(
 		} else if ctx.Rules == "closed" {
 			// Element doesn't match any slice in closed slicing
 			elemPath := fmt.Sprintf("%s.%s[%d]", fhirPath, v.lastPathSegment(ctx.Path), i)
-			result.AddIssue(issue.Issue{
-				Severity:    issue.SeverityError,
-				Code:        issue.CodeStructure,
-				Expression:  []string{elemPath},
-				Diagnostics: "Element does not match any defined slice (slicing rules are 'closed')",
-			})
+			result.AddErrorWithID(issue.DiagSlicingNoMatch, nil, elemPath)
 		}
 	}
 
@@ -201,24 +196,18 @@ func (v *Validator) validateContext(
 
 		// Check minimum (safe comparison avoiding overflow)
 		if count < 0 || count < int(slice.Min) {
-			result.AddIssue(issue.Issue{
-				Severity:    issue.SeverityError,
-				Code:        issue.CodeRequired,
-				Expression:  []string{slicePath},
-				Diagnostics: fmt.Sprintf("Slice '%s' requires minimum %d element(s), found %d", slice.Name, slice.Min, count),
-			})
+			result.AddErrorWithID(issue.DiagSlicingCardinalityMin, map[string]any{
+				"path": slicePath, "min": slice.Min, "count": count,
+			}, slicePath)
 		}
 
 		// Check maximum
 		if slice.Max != "*" {
 			maxInt, err := strconv.Atoi(slice.Max)
 			if err == nil && count > maxInt {
-				result.AddIssue(issue.Issue{
-					Severity:    issue.SeverityError,
-					Code:        issue.CodeBusinessRule,
-					Expression:  []string{slicePath},
-					Diagnostics: fmt.Sprintf("Slice '%s' allows maximum %d element(s), found %d", slice.Name, maxInt, count),
-				})
+				result.AddErrorWithID(issue.DiagSlicingCardinalityMax, map[string]any{
+					"path": slicePath, "max": maxInt, "count": count,
+				}, slicePath)
 			}
 		}
 	}
@@ -272,12 +261,9 @@ func (v *Validator) validateSliceChildren(
 			if count < int(child.Min) {
 				childFHIRPath := fmt.Sprintf("%s.%s", elemPath, childName)
 				sliceChildPath := fmt.Sprintf("%s:%s.%s", ctx.Path, sliceName, childName)
-				result.AddIssue(issue.Issue{
-					Severity:    issue.SeverityError,
-					Code:        issue.CodeRequired,
-					Expression:  []string{childFHIRPath},
-					Diagnostics: fmt.Sprintf("Minimum cardinality of '%s' is %d, but found %d", sliceChildPath, child.Min, count),
-				})
+				result.AddErrorWithID(issue.DiagSlicingCardinalityMin, map[string]any{
+					"path": sliceChildPath, "min": child.Min, "count": count,
+				}, childFHIRPath)
 			}
 
 			// Check maximum cardinality
@@ -286,12 +272,9 @@ func (v *Validator) validateSliceChildren(
 				if err == nil && count > maxInt {
 					childFHIRPath := fmt.Sprintf("%s.%s", elemPath, childName)
 					sliceChildPath := fmt.Sprintf("%s:%s.%s", ctx.Path, sliceName, childName)
-					result.AddIssue(issue.Issue{
-						Severity:    issue.SeverityError,
-						Code:        issue.CodeBusinessRule,
-						Expression:  []string{childFHIRPath},
-						Diagnostics: fmt.Sprintf("Maximum cardinality of '%s' is %d, but found %d", sliceChildPath, maxInt, count),
-					})
+					result.AddErrorWithID(issue.DiagSlicingCardinalityMax, map[string]any{
+						"path": sliceChildPath, "max": maxInt, "count": count,
+					}, childFHIRPath)
 				}
 			}
 		}
