@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/gofhir/validator/compare/v1.7.1...v1.8.0) (2026-02-16)
+
+
+### Features
+
+* **terminology:** add Provider interface for external terminology validation ([ea9a89e](https://github.com/gofhir/validator/commit/ea9a89e5bdf99248e06fba8aa7cb93e8bffdc8f3)), closes [#22](https://github.com/gofhir/validator/issues/22)
+
 ## [1.7.1](https://github.com/gofhir/validator/compare/v1.7.0...v1.7.1) (2026-02-15)
 
 
