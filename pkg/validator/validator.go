@@ -61,15 +61,16 @@ type PackageSpec struct {
 
 // Config holds the validator configuration.
 type Config struct {
-	FHIRVersion          string        // e.g., "4.0.1", "4.3.0", "5.0.0"
-	Profiles             []string      // Additional profiles to validate against
-	StrictMode           bool          // Treat warnings as errors
-	PackagePath          string        // Path to FHIR package cache
-	AdditionalPackages   []PackageSpec // Additional packages to load (e.g., US Core)
-	PackageTgzPaths      []string      // Paths to local .tgz package files
-	PackageURLs          []string      // URLs to remote .tgz package files
-	PackageData          [][]byte      // In-memory .tgz package bytes (e.g., from //go:embed)
-	ConformanceResources [][]byte      // Individual conformance resource JSON bytes (e.g., from DB)
+	FHIRVersion          string               // e.g., "4.0.1", "4.3.0", "5.0.0"
+	Profiles             []string             // Additional profiles to validate against
+	StrictMode           bool                 // Treat warnings as errors
+	PackagePath          string               // Path to FHIR package cache
+	AdditionalPackages   []PackageSpec        // Additional packages to load (e.g., US Core)
+	PackageTgzPaths      []string             // Paths to local .tgz package files
+	PackageURLs          []string             // URLs to remote .tgz package files
+	PackageData          [][]byte             // In-memory .tgz package bytes (e.g., from //go:embed)
+	ConformanceResources [][]byte             // Individual conformance resource JSON bytes (e.g., from DB)
+	TerminologyProvider  terminology.Provider // Optional external terminology provider
 }
 
 // Option is a functional option for configuring the validator.
@@ -138,6 +139,16 @@ func WithPackageData(data []byte) Option {
 func WithConformanceResources(resources [][]byte) Option {
 	return func(c *Config) {
 		c.ConformanceResources = append(c.ConformanceResources, resources...)
+	}
+}
+
+// WithTerminologyProvider sets an external terminology provider for validating
+// codes in systems that cannot be expanded locally (e.g., SNOMED CT, LOINC).
+// When configured, the validator delegates to this provider instead of silently
+// accepting any code from external systems.
+func WithTerminologyProvider(provider terminology.Provider) Option {
+	return func(c *Config) {
+		c.TerminologyProvider = provider
 	}
 }
 
@@ -270,6 +281,11 @@ func New(opts ...Option) (*Validator, error) {
 		return nil, fmt.Errorf("failed to load terminology: %w", err)
 	}
 	logger.Debug("  Indexed %d ValueSets, %d CodeSystems", termReg.ValueSetCount(), termReg.CodeSystemCount())
+
+	if config.TerminologyProvider != nil {
+		termReg.SetProvider(config.TerminologyProvider)
+		logger.Debug("  External terminology provider configured")
+	}
 
 	totalDuration := time.Since(startTime)
 	totalMemUsed := getMemUsage() - startMem

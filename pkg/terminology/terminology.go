@@ -2,6 +2,7 @@
 package terminology
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 	"sync"
@@ -88,6 +89,9 @@ type Registry struct {
 	// Cache of hierarchy relationships per CodeSystem (system URL -> parent code -> child codes)
 	// Built from subsumedBy properties in CodeSystem concepts
 	hierarchyCache map[string]map[string][]string
+
+	// Optional external terminology provider for systems that can't be expanded locally.
+	provider Provider
 }
 
 // NewRegistry creates a new terminology Registry.
@@ -98,6 +102,14 @@ func NewRegistry() *Registry {
 		expansionCache: make(map[string]map[string]bool),
 		hierarchyCache: make(map[string]map[string][]string),
 	}
+}
+
+// SetProvider configures an external terminology provider for validating
+// codes in systems that cannot be expanded locally (e.g., SNOMED CT, LOINC).
+// When set, the Registry delegates to this provider instead of accepting
+// any code via wildcard for external systems.
+func (r *Registry) SetProvider(p Provider) {
+	r.provider = p
 }
 
 // LoadFromPackages loads ValueSets and CodeSystems from packages.
@@ -165,7 +177,7 @@ func (r *Registry) ValidateCode(valueSetURL, system, code string) (isValid, foun
 	r.mu.RLock()
 	if codes, ok := r.expansionCache[valueSetURL]; ok {
 		r.mu.RUnlock()
-		return r.checkCode(codes, system, code), true
+		return r.validateWithProvider(codes, system, code, valueSetURL), true
 	}
 	r.mu.RUnlock()
 
@@ -182,7 +194,27 @@ func (r *Registry) ValidateCode(valueSetURL, system, code string) (isValid, foun
 	r.expansionCache[valueSetURL] = codes
 	r.mu.Unlock()
 
-	return r.checkCode(codes, system, code), true
+	return r.validateWithProvider(codes, system, code, valueSetURL), true
+}
+
+// validateWithProvider checks a code against expanded codes, delegating to the
+// external provider for external systems when one is configured.
+func (r *Registry) validateWithProvider(codes map[string]bool, system, code, valueSetURL string) bool {
+	if r.provider != nil && system != "" && r.isExternalSystem(system) {
+		// Try ValueSet-specific validation first (more precise)
+		valid, vsFound, err := r.provider.ValidateCodeInValueSet(
+			context.Background(), system, code, valueSetURL)
+		if err == nil && vsFound {
+			return valid
+		}
+		// Fall back to system-level validation
+		valid, err = r.provider.ValidateCode(context.Background(), system, code)
+		if err == nil {
+			return valid
+		}
+		// Error from provider → fall through to wildcard (fail-open)
+	}
+	return r.checkCode(codes, system, code)
 }
 
 // checkCode checks if a code is in the expanded codes map.
@@ -517,8 +549,14 @@ func (r *Registry) ValidateCodeInCodeSystem(system, code string) (isValid, codeS
 		return false, false
 	}
 
-	// Check if this is an external system we can't validate
+	// Check if this is an external system we can't validate locally
 	if r.isExternalSystem(system) {
+		if r.provider != nil {
+			valid, err := r.provider.ValidateCode(context.Background(), system, code)
+			if err == nil {
+				return valid, true
+			}
+		}
 		return true, false // Accept but mark as not locally validated
 	}
 
