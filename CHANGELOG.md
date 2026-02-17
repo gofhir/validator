@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/gofhir/validator/compare/v1.8.0...v1.8.1) (2026-02-17)
+
+
+### Bug Fixes
+
+* **deps:** update fhirpath to v1.0.3, remove transitive gofhir/fhir dependency ([dce251d](https://github.com/gofhir/validator/commit/dce251d2151ed85d0586cffe559491700d03b1df))
+
 ## [1.8.0](https://github.com/gofhir/validator/compare/v1.7.1...v1.8.0) (2026-02-16)
 
 
