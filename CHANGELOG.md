@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/gofhir/validator/compare/v1.8.1...v1.9.0) (2026-02-17)
+
+
+### Features
+
+* **specs:** embed filtered FHIR specs for R4, R4B, and R5 ([ef4bb7b](https://github.com/gofhir/validator/commit/ef4bb7bd51ded0996da92e0c7761aaa0b43b7a3f))
+
 ## [1.8.1](https://github.com/gofhir/validator/compare/v1.8.0...v1.8.1) (2026-02-17)
 
 
