@@ -376,6 +376,19 @@ func (l *Loader) LoadFromTgzData(data []byte) (*Package, error) {
 	return l.loadFromTgzReader(bytes.NewReader(data), "memory")
 }
 
+// LoadFromEmbeddedData loads multiple FHIR packages from embedded .tgz data.
+func (l *Loader) LoadFromEmbeddedData(data [][]byte) ([]*Package, error) {
+	packages := make([]*Package, 0, len(data))
+	for i, d := range data {
+		pkg, err := l.LoadFromTgzData(d)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load embedded package %d: %w", i, err)
+		}
+		packages = append(packages, pkg)
+	}
+	return packages, nil
+}
+
 // LoadFromResources creates a Package from individual conformance resource JSON bytes.
 // Each entry should be a valid JSON FHIR conformance resource
 // (StructureDefinition, ValueSet, CodeSystem, etc.).

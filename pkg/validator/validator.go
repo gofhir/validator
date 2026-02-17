@@ -23,6 +23,7 @@ import (
 	"github.com/gofhir/validator/pkg/reference"
 	"github.com/gofhir/validator/pkg/registry"
 	"github.com/gofhir/validator/pkg/slicing"
+	"github.com/gofhir/validator/pkg/specs"
 	"github.com/gofhir/validator/pkg/structural"
 	"github.com/gofhir/validator/pkg/terminology"
 )
@@ -187,10 +188,18 @@ func New(opts ...Option) (*Validator, error) {
 	l := loader.NewLoader(config.PackagePath)
 	logger.Debug("Package cache: %s", l.BasePath())
 
-	// Load packages for the specified FHIR version
+	// Load packages for the specified FHIR version (embedded-first, fallback to disk)
 	logger.Info("Loading FHIR packages...")
 	loadStart := time.Now()
-	packages, err := l.LoadVersion(config.FHIRVersion)
+	var packages []*loader.Package //nolint:prealloc // assigned from branch, not built by appending
+	var err error
+	if embeddedData := specs.GetPackages(config.FHIRVersion); len(embeddedData) > 0 {
+		logger.Info("  Using embedded specs for %s", config.FHIRVersion)
+		packages, err = l.LoadFromEmbeddedData(embeddedData)
+	} else {
+		logger.Info("  Loading specs from disk for %s", config.FHIRVersion)
+		packages, err = l.LoadVersion(config.FHIRVersion)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to load FHIR packages: %w", err)
 	}
