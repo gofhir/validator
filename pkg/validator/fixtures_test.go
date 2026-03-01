@@ -410,7 +410,7 @@ func TestMixedArrayValidation(t *testing.T) {
 		{
 			name:          "mixed-array-patient-contact",
 			file:          "mixed-array-patient-contact.json",
-			expectedCount: 3, // unknownContactField, invalidElement, anotherBadField
+			expectedCount: 4, // unknownContactField, invalidElement, anotherBadField + pat-1 on contact[3]
 			description:   "Patient.contact BackboneElement array: 4 elements, 2 with unknown fields",
 		},
 		{

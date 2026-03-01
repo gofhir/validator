@@ -12,6 +12,8 @@ import (
 	"github.com/gofhir/validator/pkg/walker"
 )
 
+const typeCodeReference = "Reference"
+
 // BundleContext holds information about a Bundle for reference validation.
 type BundleContext struct {
 	// FullURLIndex maps fullUrl values to their resource types.
@@ -380,7 +382,7 @@ func (v *Validator) isBackboneType(elemDef *registry.ElementDefinition) bool {
 // isReferenceType checks if an element is of type Reference.
 func (v *Validator) isReferenceType(elemDef *registry.ElementDefinition) bool {
 	for _, t := range elemDef.Type {
-		if t.Code == "Reference" {
+		if t.Code == typeCodeReference {
 			return true
 		}
 	}
@@ -534,7 +536,7 @@ func (v *Validator) getAggregationModes(elemDef *registry.ElementDefinition) []s
 	var modes []string
 	seen := make(map[string]bool)
 	for _, t := range elemDef.Type {
-		if t.Code == "Reference" {
+		if t.Code == typeCodeReference {
 			for _, a := range t.Aggregation {
 				if !seen[a] {
 					seen[a] = true
@@ -597,7 +599,7 @@ func (v *Validator) validateTargetProfile(extractedType, refStr string, elemDef 
 func (v *Validator) getTargetProfiles(elemDef *registry.ElementDefinition) []string {
 	var profiles []string
 	for _, t := range elemDef.Type {
-		if t.Code == "Reference" {
+		if t.Code == typeCodeReference {
 			profiles = append(profiles, t.TargetProfile...)
 		}
 	}

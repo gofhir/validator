@@ -111,12 +111,12 @@ func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.S
 		// Recurse into complex types
 		switch val := value.(type) {
 		case map[string]any:
-			v.validateComplexElement(val, elemDef, elementFhirPath, result)
+			v.validateComplexElement(val, elemDef, sd, elementSDPath, elementFhirPath, result)
 		case []any:
 			for i, item := range val {
 				itemPath := fmt.Sprintf("%s[%d]", elementFhirPath, i)
 				if mapItem, ok := item.(map[string]any); ok {
-					v.validateComplexElement(mapItem, elemDef, itemPath, result)
+					v.validateComplexElement(mapItem, elemDef, sd, elementSDPath, itemPath, result)
 				} else if elemDef.Binding != nil {
 					// Array of primitives with binding (e.g., array of codes)
 					v.validatePrimitiveBinding(item, elemDef, itemPath, result)
@@ -126,14 +126,28 @@ func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.S
 	}
 }
 
+// isStructuralType returns true for types whose children are defined in the parent resource SD
+// rather than in their own standalone StructureDefinition.
+func isStructuralType(typeName string) bool {
+	return typeName == "BackboneElement" || typeName == "Element"
+}
+
 // validateComplexElement validates bindings within a complex element.
-func (v *Validator) validateComplexElement(data map[string]any, parentDef *registry.ElementDefinition, basePath string, result *issue.Result) {
-	// Get the type's StructureDefinition
+// The parent SD and path are used to look up children when the element type is BackboneElement.
+func (v *Validator) validateComplexElement(data map[string]any, parentDef *registry.ElementDefinition, parentSD *registry.StructureDefinition, parentSDPath, basePath string, result *issue.Result) {
 	if len(parentDef.Type) == 0 {
 		return
 	}
 
 	typeName := parentDef.Type[0].Code
+
+	// BackboneElement/Element children are defined in the parent resource's SD,
+	// not in the generic BackboneElement SD.
+	if isStructuralType(typeName) {
+		v.validateElementWithPaths(data, parentSD, parentSDPath, basePath, result)
+		return
+	}
+
 	typeSD := v.sdRegistry.GetByType(typeName)
 	if typeSD == nil || typeSD.Snapshot == nil {
 		return
@@ -165,12 +179,12 @@ func (v *Validator) validateComplexElement(data map[string]any, parentDef *regis
 		// Recurse
 		switch val := value.(type) {
 		case map[string]any:
-			v.validateComplexElement(val, elemDef, elementPath, result)
+			v.validateComplexElement(val, elemDef, typeSD, typePath, elementPath, result)
 		case []any:
 			for i, item := range val {
 				itemPath := fmt.Sprintf("%s[%d]", elementPath, i)
 				if mapItem, ok := item.(map[string]any); ok {
-					v.validateComplexElement(mapItem, elemDef, itemPath, result)
+					v.validateComplexElement(mapItem, elemDef, typeSD, typePath, itemPath, result)
 				}
 			}
 		}
@@ -246,15 +260,90 @@ func (v *Validator) validateCodeableConceptWithCoding(val map[string]any, coding
 		return
 	}
 
-	// Validate each Coding in the array
-	if isList {
-		for i, c := range codings {
-			if codingMap, ok := c.(map[string]any); ok {
-				codingPath := fmt.Sprintf("%s.coding[%d]", fhirPath, i)
-				v.validateCodingBinding(codingMap, binding, codingPath, result)
-			}
+	if !isList || len(codings) == 0 {
+		return
+	}
+
+	// Validate each Coding in the CC.
+	// Track whether any coding was valid in the ValueSet for CC-level aggregation.
+	anyValidInVS := false
+	var codeLabels []string
+
+	for i, c := range codings {
+		codingMap, ok := c.(map[string]any)
+		if !ok {
+			continue
+		}
+		codingPath := fmt.Sprintf("%s.coding[%d]", fhirPath, i)
+
+		// Validate within CC context: suppresses per-coding extensible warnings.
+		validInVS := v.validateCodingInCC(codingMap, binding, codingPath, result)
+		if validInVS {
+			anyValidInVS = true
+		}
+
+		// Collect system#code for aggregate warning.
+		sys, _ := codingMap["system"].(string)
+		cd, _ := codingMap["code"].(string)
+		if sys != "" && cd != "" {
+			codeLabels = append(codeLabels, fmt.Sprintf("%s#%s", sys, cd))
+		} else if cd != "" {
+			codeLabels = append(codeLabels, cd)
 		}
 	}
+
+	// CC-level extensible warning: none of the codings matched the ValueSet.
+	if !anyValidInVS && binding.Strength == strengthExtensible && len(codeLabels) > 0 {
+		result.AddWarningWithID(
+			issue.DiagBindingExtensibleNoCoding,
+			map[string]any{
+				"valueSet": binding.ValueSet,
+				"codes":    strings.Join(codeLabels, ", "),
+			},
+			fhirPath,
+		)
+	}
+}
+
+// validateCodingInCC validates a Coding within a CodeableConcept context.
+// It performs CodeSystem validation and display checks, but suppresses per-coding
+// extensible binding warnings (deferred to CC-level aggregation).
+// Returns true if the coding was valid in the ValueSet.
+func (v *Validator) validateCodingInCC(coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) bool {
+	system, _ := coding["system"].(string)
+	code, _ := coding["code"].(string)
+	providedDisplay, _ := coding["display"].(string)
+
+	if code == "" {
+		return false
+	}
+
+	// Validate code in CodeSystem (warnings still emitted per-coding).
+	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(system, code, providedDisplay, fhirPath, result)
+	if shouldReturn {
+		return false
+	}
+
+	// Check ValueSet.
+	valid, found := v.termRegistry.ValidateCode(binding.ValueSet, system, code)
+	if !found {
+		return false
+	}
+
+	if !valid {
+		// Only emit per-coding error for required bindings; extensible is deferred to CC level.
+		if binding.Strength == strengthRequired {
+			v.reportBindingViolation(system, code, binding, fhirPath, result)
+		}
+		return false
+	}
+
+	// Validate display if not already validated via CodeSystem.
+	if !codeValidInCS && providedDisplay != "" && system != "" {
+		v.validateDisplayMismatch(system, code, providedDisplay, fhirPath, result)
+	}
+
+	return true
 }
 
 // emitTextOnlyWarning emits a warning for text-only CodeableConcept on extensible bindings.
@@ -358,6 +447,11 @@ func (v *Validator) validateCodeInCodeSystem(system, code, providedDisplay, fhir
 
 	codeValid, csFound := v.termRegistry.ValidateCodeInCodeSystem(system, code)
 	if !csFound {
+		result.AddWarningWithID(
+			issue.DiagCodeSystemNotFound,
+			map[string]any{"system": system, "systemCode": code},
+			fhirPath,
+		)
 		return false, false
 	}
 

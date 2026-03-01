@@ -12,7 +12,7 @@
       }
     },
     {
-      "fullUrl": "http://example.org/fhir/Observation/obs-456/_history/1",
+      "fullUrl": "http://example.org/fhir/Observation/obs-456",
       "resource": {
         "resourceType": "Observation",
         "id": "obs-456",

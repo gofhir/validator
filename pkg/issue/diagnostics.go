@@ -40,24 +40,24 @@ const (
 
 // Diagnostic IDs for extension validation (M8).
 const (
-	DiagExtensionNoURL              DiagnosticID = "EXTENSION_NO_URL"
-	DiagExtensionUnknown            DiagnosticID = "EXTENSION_UNKNOWN"
-	DiagModifierExtensionUnknown    DiagnosticID = "MODIFIER_EXTENSION_UNKNOWN"
-	DiagExtensionInvalidContext     DiagnosticID = "EXTENSION_INVALID_CONTEXT"
-	DiagExtensionValueRequired      DiagnosticID = "EXTENSION_VALUE_REQUIRED"
-	DiagExtensionValueNotAllowed    DiagnosticID = "EXTENSION_VALUE_NOT_ALLOWED"
-	DiagExtensionInvalidValueType   DiagnosticID = "EXTENSION_INVALID_VALUE_TYPE"
-	DiagExtensionNestedUnknown      DiagnosticID = "EXTENSION_NESTED_UNKNOWN"
+	DiagExtensionNoURL            DiagnosticID = "EXTENSION_NO_URL"
+	DiagExtensionUnknown          DiagnosticID = "EXTENSION_UNKNOWN"
+	DiagModifierExtensionUnknown  DiagnosticID = "MODIFIER_EXTENSION_UNKNOWN"
+	DiagExtensionInvalidContext   DiagnosticID = "EXTENSION_INVALID_CONTEXT"
+	DiagExtensionValueRequired    DiagnosticID = "EXTENSION_VALUE_REQUIRED"
+	DiagExtensionValueNotAllowed  DiagnosticID = "EXTENSION_VALUE_NOT_ALLOWED"
+	DiagExtensionInvalidValueType DiagnosticID = "EXTENSION_INVALID_VALUE_TYPE"
+	DiagExtensionNestedUnknown    DiagnosticID = "EXTENSION_NESTED_UNKNOWN"
 )
 
 // Diagnostic IDs for reference validation (M9).
 const (
-	DiagReferenceInvalidFormat      DiagnosticID = "REFERENCE_INVALID_FORMAT"
-	DiagReferenceInvalidTarget      DiagnosticID = "REFERENCE_INVALID_TARGET"
-	DiagReferenceTypeMismatch       DiagnosticID = "REFERENCE_TYPE_MISMATCH"
-	DiagReferenceNotInBundle        DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
-	DiagReferenceContainedNotFound  DiagnosticID = "REFERENCE_CONTAINED_NOT_FOUND"
-	DiagReferenceAggregationMode    DiagnosticID = "REFERENCE_AGGREGATION_MODE"
+	DiagReferenceInvalidFormat     DiagnosticID = "REFERENCE_INVALID_FORMAT"
+	DiagReferenceInvalidTarget     DiagnosticID = "REFERENCE_INVALID_TARGET"
+	DiagReferenceTypeMismatch      DiagnosticID = "REFERENCE_TYPE_MISMATCH"
+	DiagReferenceNotInBundle       DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
+	DiagReferenceContainedNotFound DiagnosticID = "REFERENCE_CONTAINED_NOT_FOUND"
+	DiagReferenceAggregationMode   DiagnosticID = "REFERENCE_AGGREGATION_MODE"
 )
 
 // Diagnostic IDs for Bundle validation.

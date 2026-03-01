@@ -2,7 +2,7 @@ module github.com/gofhir/validator
 
 go 1.24.1
 
-require github.com/gofhir/fhirpath v1.0.3
+require github.com/gofhir/fhirpath v1.1.0
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect

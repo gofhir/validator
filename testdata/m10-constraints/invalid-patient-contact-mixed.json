@@ -1,0 +1,35 @@
+{
+  "resourceType": "Patient",
+  "id": "pat-contact-mixed",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient</div>"
+  },
+  "contact": [
+    {
+      "name": {
+        "family": "Smith"
+      }
+    },
+    {
+      "relationship": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+              "code": "N"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "555-9999"
+        }
+      ]
+    }
+  ]
+}

@@ -173,40 +173,7 @@ func parseFlags() *Config {
 }
 
 func run(config *Config) int {
-	// Build validator options
-	opts := []validator.Option{
-		validator.WithVersion(config.Version),
-	}
-
-	for _, profile := range config.Profiles {
-		opts = append(opts, validator.WithProfile(strings.TrimSpace(profile)))
-	}
-
-	for _, pkg := range config.Packages {
-		// Parse package format: name#version
-		parts := strings.SplitN(pkg, "#", 2)
-		if len(parts) == 2 {
-			opts = append(opts, validator.WithPackage(parts[0], parts[1]))
-		}
-	}
-
-	// Load packages from local .tgz files
-	for _, tgzPath := range config.PackageFiles {
-		opts = append(opts, validator.WithPackageTgz(strings.TrimSpace(tgzPath)))
-	}
-
-	// Load packages from remote URLs
-	for _, url := range config.PackageURLs {
-		opts = append(opts, validator.WithPackageURL(strings.TrimSpace(url)))
-	}
-
-	if config.Strict {
-		opts = append(opts, validator.WithStrictMode(true))
-	}
-
-	if config.NoTerminology {
-		opts = append(opts, validator.WithNoTerminology())
-	}
+	opts := buildOptions(config)
 
 	// Create validator
 	if !config.Quiet {
@@ -223,55 +190,7 @@ func run(config *Config) int {
 		fmt.Fprintf(os.Stderr, "Validator ready. Processing %d file(s)...\n\n", len(config.Files))
 	}
 
-	// Process files
-	hasErrors := false
-	outputs := make([]ValidationOutput, 0, len(config.Files))
-
-	for _, file := range config.Files {
-		var data []byte
-		var name string
-
-		if file == "-" {
-			// Read from stdin
-			name = "stdin"
-			data, err = io.ReadAll(os.Stdin)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error reading stdin: %v\n", err)
-				hasErrors = true
-				continue
-			}
-		} else {
-			// Handle glob patterns
-			matches, globErr := filepath.Glob(file)
-			if globErr != nil {
-				fmt.Fprintf(os.Stderr, "Error with pattern '%s': %v\n", file, globErr)
-				hasErrors = true
-				continue
-			}
-
-			if len(matches) == 0 {
-				fmt.Fprintf(os.Stderr, "No files match pattern: %s\n", file)
-				hasErrors = true
-				continue
-			}
-
-			for _, match := range matches {
-				output, fileHasErrors := validateFile(v, match, config)
-				outputs = append(outputs, output)
-				if fileHasErrors {
-					hasErrors = true
-				}
-			}
-			continue
-		}
-
-		// Validate stdin data
-		output, fileHasErrors := validateData(v, data, name, config)
-		outputs = append(outputs, output)
-		if fileHasErrors {
-			hasErrors = true
-		}
-	}
+	outputs, hasErrors := processFiles(v, config)
 
 	// Output JSON if requested
 	if config.Output == OutputJSON {
@@ -283,6 +202,88 @@ func run(config *Config) int {
 		return 1
 	}
 	return 0
+}
+
+// buildOptions builds validator options from the CLI config.
+func buildOptions(config *Config) []validator.Option {
+	opts := []validator.Option{
+		validator.WithVersion(config.Version),
+	}
+
+	for _, profile := range config.Profiles {
+		opts = append(opts, validator.WithProfile(strings.TrimSpace(profile)))
+	}
+
+	for _, pkg := range config.Packages {
+		parts := strings.SplitN(pkg, "#", 2)
+		if len(parts) == 2 {
+			opts = append(opts, validator.WithPackage(parts[0], parts[1]))
+		}
+	}
+
+	for _, tgzPath := range config.PackageFiles {
+		opts = append(opts, validator.WithPackageTgz(strings.TrimSpace(tgzPath)))
+	}
+
+	for _, url := range config.PackageURLs {
+		opts = append(opts, validator.WithPackageURL(strings.TrimSpace(url)))
+	}
+
+	if config.Strict {
+		opts = append(opts, validator.WithStrictMode(true))
+	}
+
+	if config.NoTerminology {
+		opts = append(opts, validator.WithNoTerminology())
+	}
+
+	return opts
+}
+
+// processFiles validates all files specified in the config.
+func processFiles(v *validator.Validator, config *Config) ([]ValidationOutput, bool) {
+	hasErrors := false
+	outputs := make([]ValidationOutput, 0, len(config.Files))
+
+	for _, file := range config.Files {
+		if file == "-" {
+			data, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error reading stdin: %v\n", err)
+				hasErrors = true
+				continue
+			}
+			output, fileHasErrors := validateData(v, data, "stdin", config)
+			outputs = append(outputs, output)
+			if fileHasErrors {
+				hasErrors = true
+			}
+			continue
+		}
+
+		matches, globErr := filepath.Glob(file)
+		if globErr != nil {
+			fmt.Fprintf(os.Stderr, "Error with pattern '%s': %v\n", file, globErr)
+			hasErrors = true
+			continue
+		}
+
+		if len(matches) == 0 {
+			fmt.Fprintf(os.Stderr, "No files match pattern: %s\n", file)
+			hasErrors = true
+			continue
+		}
+
+		for _, match := range matches {
+			output, fileHasErrors := validateFile(v, match, config)
+			outputs = append(outputs, output)
+			if fileHasErrors {
+				hasErrors = true
+			}
+		}
+	}
+
+	return outputs, hasErrors
 }
 
 func validateFile(v *validator.Validator, path string, config *Config) (ValidationOutput, bool) {

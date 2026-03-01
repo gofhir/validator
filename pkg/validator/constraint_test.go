@@ -45,6 +45,25 @@ func TestConstraintValidation(t *testing.T) {
 			expectErrors:   1, // Invalid telecom.system binding in contained Organization
 			expectWarnings: 2, // dom-6 for Patient and contained Organization (no narrative)
 		},
+		// Nested element constraint tests (pat-1 on Patient.contact).
+		{
+			name:           "invalid-patient-contact-no-details",
+			file:           "../../testdata/m10-constraints/invalid-patient-contact-no-details.json",
+			expectErrors:   1, // pat-1: contact has no name, telecom, address, or organization
+			expectWarnings: 1, // extensible binding on contact.relationship
+		},
+		{
+			name:           "valid-patient-contact-with-name",
+			file:           "../../testdata/m10-constraints/valid-patient-contact-with-name.json",
+			expectErrors:   0,
+			expectWarnings: 1, // extensible binding on contact.relationship
+		},
+		{
+			name:           "invalid-patient-contact-mixed",
+			file:           "../../testdata/m10-constraints/invalid-patient-contact-mixed.json",
+			expectErrors:   1, // pat-1: second contact has no name/telecom/address/organization
+			expectWarnings: 1, // extensible binding on contact[1].relationship
+		},
 	}
 
 	for _, tt := range tests {

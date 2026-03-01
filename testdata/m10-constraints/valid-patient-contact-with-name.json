@@ -1,0 +1,26 @@
+{
+  "resourceType": "Patient",
+  "id": "pat-contact-ok",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient</div>"
+  },
+  "contact": [
+    {
+      "relationship": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+              "code": "N"
+            }
+          ]
+        }
+      ],
+      "name": {
+        "family": "Smith",
+        "given": ["Jane"]
+      }
+    }
+  ]
+}
