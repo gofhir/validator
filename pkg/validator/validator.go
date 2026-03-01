@@ -357,7 +357,13 @@ func New(opts ...Option) (*Validator, error) {
 	v.bindValidator = binding.New(reg, termReg)
 	v.extValidator = extension.New(reg, termReg, v.primValidator)
 	v.refValidator = reference.New(reg)
-	v.constraintValidator = constraint.New(reg)
+	// Pass termRegistry to constraint validator for memberOf() support.
+	// When NoTerminology is set, pass nil to disable terminology in FHIRPath.
+	constraintTermReg := termReg
+	if config.NoTerminology {
+		constraintTermReg = nil
+	}
+	v.constraintValidator = constraint.New(reg, constraintTermReg)
 	v.fixedPatternValidator = fixedpattern.New(reg)
 	v.slicingValidator = slicing.New(reg)
 
@@ -505,7 +511,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	// Pass parsed data to avoid re-parsing JSON in each phase
 	for i, sd := range profilesToValidate {
 		profileURL := profileURLsToValidate[i]
-		v.validateAgainstProfile(data, resource, sd, profileURL, result)
+		v.validateAgainstProfile(ctx, data, resource, sd, profileURL, result)
 	}
 
 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
@@ -530,7 +536,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 
 // ValidateAgainstProfile runs all validation phases against a single profile.
 // Data is the pre-parsed JSON map, rawJSON is kept for phases that need raw bytes (constraint/fhirpath).
-func (v *Validator) validateAgainstProfile(data map[string]any, rawJSON []byte, sd *registry.StructureDefinition, _ string, result *issue.Result) {
+func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]any, rawJSON []byte, sd *registry.StructureDefinition, _ string, result *issue.Result) {
 	// Phase 1: Structural validation (uses cached element indexes)
 	structResult := v.structValidator.ValidateData(data, sd)
 	result.Merge(structResult)
@@ -571,8 +577,12 @@ func (v *Validator) validateAgainstProfile(data map[string]any, rawJSON []byte, 
 	result.Stats.PhasesRun++
 
 	// Phase 7: Constraint validation (FHIRPath, uses cached expressions)
-	// Note: constraint validation needs raw bytes for FHIRPath evaluation
-	v.constraintValidator.Validate(rawJSON, sd, result)
+	// Build constraint options: pass Bundle data for resolve() support.
+	var constraintOpts *constraint.ValidateOptions
+	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
+		constraintOpts = &constraint.ValidateOptions{BundleData: data}
+	}
+	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
 	result.Stats.PhasesRun++
 
 	// Phase 8: Fixed/Pattern value validation

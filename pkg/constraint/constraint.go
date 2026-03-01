@@ -2,17 +2,21 @@
 package constraint
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 	"unicode"
 
 	"github.com/gofhir/fhirpath"
+	"github.com/gofhir/fhirpath/eval"
 	"github.com/gofhir/fhirpath/types"
 
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/pkg/terminology"
 )
 
 // elementInstance represents a single instance of a FHIR element found in the resource JSON.
@@ -27,9 +31,27 @@ type jsonNode struct {
 	fhirPath string
 }
 
+// ValidateOptions holds per-call options for constraint validation.
+type ValidateOptions struct {
+	// BundleData is the parsed Bundle JSON, enabling resolve() in FHIRPath.
+	// When non-nil, a resolver is created that can find resources by fullUrl.
+	BundleData map[string]any
+}
+
+// constraintEvalOpts carries all contextual data for a single constraint evaluation.
+type constraintEvalOpts struct {
+	ctx             context.Context
+	resourceCol     fhirpath.Collection // %resource variable.
+	rootResourceCol fhirpath.Collection // %rootResource variable (for contained/Bundle).
+	resolver        eval.Resolver       // For resolve() in FHIRPath.
+	termService     eval.TerminologyService
+	timeout         time.Duration
+}
+
 // Validator validates constraints defined in ElementDefinitions.
 type Validator struct {
-	registry *registry.Registry
+	registry     *registry.Registry
+	termRegistry *terminology.Registry
 
 	// Cache of compiled FHIRPath expressions.
 	exprCache   map[string]*fhirpath.Expression
@@ -37,15 +59,17 @@ type Validator struct {
 }
 
 // New creates a new constraint Validator.
-func New(reg *registry.Registry) *Validator {
+// The termRegistry may be nil to disable memberOf() support (e.g., when -tx n/a is set).
+func New(reg *registry.Registry, termReg *terminology.Registry) *Validator {
 	return &Validator{
-		registry:  reg,
-		exprCache: make(map[string]*fhirpath.Expression),
+		registry:     reg,
+		termRegistry: termReg,
+		exprCache:    make(map[string]*fhirpath.Expression),
 	}
 }
 
 // Validate validates all constraints in a resource.
-func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.StructureDefinition, result *issue.Result) {
+func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, sd *registry.StructureDefinition, opts *ValidateOptions, result *issue.Result) {
 	if sd == nil || sd.Snapshot == nil {
 		return
 	}
@@ -66,6 +90,9 @@ func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.Structur
 		resourceCollection = nil
 	}
 
+	// Build eval options shared by all constraints in this resource.
+	evalOpts := v.buildEvalOpts(ctx, resourceCollection, resourceCollection, opts)
+
 	// Evaluate constraints on ALL elements in the snapshot.
 	for i := range sd.Snapshot.Element {
 		elem := &sd.Snapshot.Element[i]
@@ -80,24 +107,25 @@ func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.Structur
 		}
 
 		if elem.Path == resourceType {
-			// Root element: evaluate against full resource (existing behavior).
-			v.evaluateConstraints(resourceData, elem.Constraint, resourceType, result)
+			// Root element: evaluate against full resource.
+			v.evaluateConstraintsWithCtx(resourceData, elem.Constraint, resourceType, evalOpts, result)
 			continue
 		}
 
 		// Nested element: extract instances and evaluate each.
 		instances := extractElementInstances(resource, elem.Path, resourceType, resourceType)
 		for _, inst := range instances {
-			v.evaluateNestedConstraints(inst.data, resourceCollection, elem.Constraint, inst.fhirPath, result)
+			v.evaluateConstraintsWithCtx(inst.data, elem.Constraint, inst.fhirPath, evalOpts, result)
 		}
 	}
 
 	// Validate constraints on contained resources.
-	v.validateContainedConstraints(resource, resourceType, result)
+	v.validateContainedConstraints(ctx, resource, resourceData, resourceType, opts, result)
 }
 
 // validateContainedConstraints validates constraints on contained resources.
-func (v *Validator) validateContainedConstraints(resource map[string]any, baseFhirPath string, result *issue.Result) {
+// The rootResourceData is the parent resource's JSON — used as %rootResource per FHIRPath spec.
+func (v *Validator) validateContainedConstraints(ctx context.Context, resource map[string]any, rootResourceData json.RawMessage, baseFhirPath string, vopts *ValidateOptions, result *issue.Result) {
 	containedRaw, ok := resource["contained"]
 	if !ok {
 		return
@@ -107,6 +135,9 @@ func (v *Validator) validateContainedConstraints(resource map[string]any, baseFh
 	if !ok {
 		return
 	}
+
+	// Build root resource collection for %rootResource.
+	rootResourceCol, _ := types.JSONToCollection(rootResourceData)
 
 	for i, item := range contained {
 		resourceMap, ok := item.(map[string]any)
@@ -131,10 +162,13 @@ func (v *Validator) validateContainedConstraints(resource map[string]any, baseFh
 			continue
 		}
 
-		// Build resource collection for the contained resource itself.
+		// Build resource collection for the contained resource itself (%resource).
 		containedCollection, _ := types.JSONToCollection(containedJSON)
 
 		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
+
+		// Build eval options: %resource = contained resource, %rootResource = parent resource.
+		evalOpts := v.buildEvalOpts(ctx, containedCollection, rootResourceCol, vopts)
 
 		// Evaluate constraints on ALL elements of the contained resource.
 		for j := range containedSD.Snapshot.Element {
@@ -149,36 +183,56 @@ func (v *Validator) validateContainedConstraints(resource map[string]any, baseFh
 			}
 
 			if elem.Path == resourceType {
-				v.evaluateConstraints(containedJSON, elem.Constraint, containedFhirPath, result)
+				v.evaluateConstraintsWithCtx(containedJSON, elem.Constraint, containedFhirPath, evalOpts, result)
 				continue
 			}
 
 			// Nested element in contained resource.
 			instances := extractElementInstances(resourceMap, elem.Path, resourceType, containedFhirPath)
 			for _, inst := range instances {
-				v.evaluateNestedConstraints(inst.data, containedCollection, elem.Constraint, inst.fhirPath, result)
+				v.evaluateConstraintsWithCtx(inst.data, elem.Constraint, inst.fhirPath, evalOpts, result)
 			}
 		}
 	}
 }
 
-// evaluateConstraints evaluates all constraints on an element.
-func (v *Validator) evaluateConstraints(data json.RawMessage, constraints []registry.Constraint, fhirPath string, result *issue.Result) {
+// buildEvalOpts constructs constraintEvalOpts from the validator state and per-call options.
+func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResourceCol fhirpath.Collection, vopts *ValidateOptions) *constraintEvalOpts {
+	opts := &constraintEvalOpts{
+		ctx:             ctx,
+		resourceCol:     resourceCol,
+		rootResourceCol: rootResourceCol,
+		timeout:         5 * time.Second,
+	}
+
+	// Wire terminology service if available.
+	if v.termRegistry != nil {
+		opts.termService = &fhirpathTermService{termRegistry: v.termRegistry}
+	}
+
+	// Wire resolver if Bundle data is available.
+	if vopts != nil && vopts.BundleData != nil {
+		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData}
+	}
+
+	return opts
+}
+
+// evaluateConstraintsWithCtx evaluates all constraints on an element using eval.Context.
+// This is the unified method that handles both root and nested element constraints,
+// wiring resolve(), memberOf(), %resource, %rootResource, and timeout.
+func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints []registry.Constraint, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
 	for _, c := range constraints {
 		if c.Expression == "" {
 			continue
 		}
 
-		// Skip best-practice constraints (dom-6, etc.) for now.
-		// These are typically warnings about narrative, performer, etc.
 		if v.isBestPractice(c.Key) {
 			continue
 		}
 
-		// Get or compile the expression.
 		expr, err := v.getCompiledExpression(c.Expression)
 		if err != nil {
-			// Log compilation error but don't fail validation.
 			result.AddWarningWithID(
 				issue.DiagConstraintCompileError,
 				map[string]any{
@@ -190,10 +244,8 @@ func (v *Validator) evaluateConstraints(data json.RawMessage, constraints []regi
 			continue
 		}
 
-		// Evaluate the expression.
-		evalResult, err := expr.Evaluate(data)
+		evalResult, err := v.evaluateWithContext(expr, data, opts)
 		if err != nil {
-			// Log evaluation error but don't fail validation.
 			result.AddWarningWithID(
 				issue.DiagConstraintEvalError,
 				map[string]any{
@@ -205,11 +257,50 @@ func (v *Validator) evaluateConstraints(data json.RawMessage, constraints []regi
 			continue
 		}
 
-		// Check if constraint passed.
 		if !v.constraintPassed(evalResult) {
 			v.addConstraintViolation(c, fhirPath, result)
 		}
 	}
+}
+
+// evaluateWithContext builds an eval.Context with all services wired and evaluates the expression.
+func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.RawMessage, opts *constraintEvalOpts) (fhirpath.Collection, error) {
+	evalCtx := eval.NewContext(data)
+
+	// Wire Go context with timeout.
+	goCtx := opts.ctx
+	if opts.timeout > 0 {
+		var cancel context.CancelFunc
+		goCtx, cancel = context.WithTimeout(goCtx, opts.timeout)
+		defer cancel()
+	}
+	evalCtx.SetContext(goCtx)
+
+	// Set safety limits.
+	evalCtx.SetLimit("maxDepth", 100)
+	evalCtx.SetLimit("maxCollectionSize", 10000)
+
+	// Override %resource if provided (for nested elements, this points to the full resource).
+	if opts.resourceCol != nil {
+		evalCtx.SetVariable("resource", opts.resourceCol)
+	}
+
+	// Override %rootResource if provided (for contained/Bundle resources, this points to the parent).
+	if opts.rootResourceCol != nil {
+		evalCtx.SetVariable("rootResource", opts.rootResourceCol)
+	}
+
+	// Wire resolve() support.
+	if opts.resolver != nil {
+		evalCtx.SetResolver(opts.resolver)
+	}
+
+	// Wire memberOf() support.
+	if opts.termService != nil {
+		evalCtx.SetTerminologyService(opts.termService)
+	}
+
+	return expr.EvaluateWithContext(evalCtx)
 }
 
 // getCompiledExpression returns a cached compiled expression or compiles a new one.
@@ -281,60 +372,6 @@ func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath strin
 // Dom-6: narrative requirement - warning severity per FHIR spec.
 func (v *Validator) isBestPractice(_ string) bool {
 	return false
-}
-
-// evaluateNestedConstraints evaluates constraints on a nested element with the element
-// as the FHIRPath context and %resource pointing to the full resource.
-func (v *Validator) evaluateNestedConstraints(
-	elementData json.RawMessage,
-	resourceCollection fhirpath.Collection,
-	constraints []registry.Constraint,
-	fhirPath string,
-	result *issue.Result,
-) {
-	for _, c := range constraints {
-		if c.Expression == "" {
-			continue
-		}
-
-		if v.isBestPractice(c.Key) {
-			continue
-		}
-
-		expr, err := v.getCompiledExpression(c.Expression)
-		if err != nil {
-			result.AddWarningWithID(
-				issue.DiagConstraintCompileError,
-				map[string]any{
-					"key":   c.Key,
-					"error": err.Error(),
-				},
-				fhirPath,
-			)
-			continue
-		}
-
-		// Evaluate with the element as context and %resource pointing to the full resource.
-		evalResult, err := expr.EvaluateWithOptions(
-			elementData,
-			fhirpath.WithVariable("resource", resourceCollection),
-		)
-		if err != nil {
-			result.AddWarningWithID(
-				issue.DiagConstraintEvalError,
-				map[string]any{
-					"key":   c.Key,
-					"error": err.Error(),
-				},
-				fhirPath,
-			)
-			continue
-		}
-
-		if !v.constraintPassed(evalResult) {
-			v.addConstraintViolation(c, fhirPath, result)
-		}
-	}
 }
 
 // extractElementInstances navigates the parsed resource JSON to find all instances

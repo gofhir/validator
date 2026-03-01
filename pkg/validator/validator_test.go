@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 )
@@ -417,4 +418,118 @@ func TestValidateWithPerCallProfile(t *testing.T) {
 			t.Error("Per-call profile leaked to subsequent call")
 		}
 	})
+}
+
+func TestValidateMaxZeroWithProfile(t *testing.T) {
+	v := getSharedValidator(t)
+
+	// Build a profile SD that prohibits Patient.photo (max="0").
+	// We copy the base Patient SD snapshot and override photo's max cardinality.
+	baseSD := v.Registry().GetByURL("http://hl7.org/fhir/StructureDefinition/Patient")
+	if baseSD == nil || baseSD.Snapshot == nil {
+		t.Fatal("Patient StructureDefinition not found")
+	}
+
+	profileURL := "http://example.org/StructureDefinition/no-photo-patient"
+
+	// Build snapshot elements JSON with photo max="0"
+	elements := baseSD.Snapshot.Element
+	elemJSON := make([]string, 0, len(elements))
+	for _, elem := range elements {
+		elemMax := elem.Max
+		if elem.Path == "Patient.photo" {
+			elemMax = "0"
+		}
+		elemJSON = append(elemJSON, fmt.Sprintf(
+			`{"id":%q,"path":%q,"min":%d,"max":%q}`,
+			elem.ID, elem.Path, elem.Min, elemMax,
+		))
+	}
+
+	profileJSON := fmt.Sprintf(`{
+		"resourceType": "StructureDefinition",
+		"url": "%s",
+		"name": "NoPhotoPatient",
+		"status": "active",
+		"kind": "resource",
+		"abstract": false,
+		"type": "Patient",
+		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+		"derivation": "constraint",
+		"snapshot": {"element": [%s]}
+	}`, profileURL, joinStrings(elemJSON, ","))
+
+	// Create a new validator with the custom profile loaded
+	v2, err := New(WithConformanceResources([][]byte{[]byte(profileJSON)}))
+	if err != nil {
+		t.Fatalf("Failed to create validator: %v", err)
+	}
+
+	t.Run("photo present violates max=0 profile", func(t *testing.T) {
+		patient := `{
+			"resourceType": "Patient",
+			"photo": [{"contentType": "image/png"}]
+		}`
+		result, err := v2.Validate(context.Background(), []byte(patient),
+			ValidateWithProfile(profileURL),
+		)
+		if err != nil {
+			t.Fatalf("Validate returned error: %v", err)
+		}
+		t.Logf("Errors: %d, Warnings: %d", result.ErrorCount(), result.WarningCount())
+		for _, iss := range result.Issues {
+			t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+		}
+		if result.ErrorCount() == 0 {
+			t.Error("Expected cardinality error for prohibited Patient.photo, got none")
+		}
+	})
+
+	t.Run("photo absent passes max=0 profile", func(t *testing.T) {
+		patient := `{
+			"resourceType": "Patient",
+			"name": [{"family": "Smith"}]
+		}`
+		result, err := v2.Validate(context.Background(), []byte(patient),
+			ValidateWithProfile(profileURL),
+		)
+		if err != nil {
+			t.Fatalf("Validate returned error: %v", err)
+		}
+		if result.ErrorCount() != 0 {
+			t.Errorf("Expected 0 errors, got %d", result.ErrorCount())
+			for _, iss := range result.Issues {
+				t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+			}
+		}
+	})
+
+	t.Run("photo present passes against base SD (no profile)", func(t *testing.T) {
+		patient := `{
+			"resourceType": "Patient",
+			"photo": [{"contentType": "image/png"}]
+		}`
+		result, err := v2.Validate(context.Background(), []byte(patient))
+		if err != nil {
+			t.Fatalf("Validate returned error: %v", err)
+		}
+		if result.ErrorCount() != 0 {
+			t.Errorf("Expected 0 errors against base SD, got %d", result.ErrorCount())
+			for _, iss := range result.Issues {
+				t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+			}
+		}
+	})
+}
+
+// joinStrings joins string elements with a separator (avoids importing strings in test).
+func joinStrings(elems []string, sep string) string {
+	result := ""
+	for i, e := range elems {
+		if i > 0 {
+			result += sep
+		}
+		result += e
+	}
+	return result
 }

@@ -243,6 +243,105 @@ func TestValidateMaxCardinality(t *testing.T) {
 	}
 }
 
+func TestValidateMaxZeroProhibited(t *testing.T) {
+	reg := setupTestRegistry(t)
+	v := New(reg)
+
+	// Get the Patient SD and create a modified copy where photo has max="0" (prohibited).
+	baseSd := reg.GetByURL("http://hl7.org/fhir/StructureDefinition/Patient")
+	if baseSd == nil {
+		t.Fatal("Patient StructureDefinition not found")
+	}
+
+	// Deep-copy snapshot elements so we don't mutate the registry
+	elements := make([]registry.ElementDefinition, len(baseSd.Snapshot.Element))
+	copy(elements, baseSd.Snapshot.Element)
+	for i := range elements {
+		if elements[i].Path == "Patient.photo" {
+			elements[i].Max = "0"
+		}
+	}
+	profileSD := &registry.StructureDefinition{
+		URL:  "http://example.org/StructureDefinition/no-photo-patient",
+		Type: "Patient",
+		Kind: "resource",
+		Snapshot: &registry.Snapshot{
+			Element: elements,
+		},
+	}
+
+	tests := []struct {
+		name        string
+		resource    string
+		expectError bool
+		errorPath   string
+	}{
+		{
+			name: "patient without photo is valid",
+			resource: `{
+				"resourceType": "Patient"
+			}`,
+			expectError: false,
+		},
+		{
+			name: "patient with photo violates max=0",
+			resource: `{
+				"resourceType": "Patient",
+				"photo": [{"contentType": "image/png"}]
+			}`,
+			expectError: true,
+			errorPath:   "Patient.photo",
+		},
+		{
+			name: "patient with photo still valid against base SD",
+			resource: `{
+				"resourceType": "Patient",
+				"photo": [{"contentType": "image/png"}]
+			}`,
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Use the profile SD for prohibition tests, base SD for the last test
+			sd := profileSD
+			if tt.name == "patient with photo still valid against base SD" {
+				sd = baseSd
+			}
+
+			result := v.Validate([]byte(tt.resource), sd)
+
+			if tt.expectError {
+				if !result.HasErrors() {
+					t.Error("Expected error but got none")
+					return
+				}
+				if tt.errorPath != "" {
+					found := false
+					for _, iss := range result.Issues {
+						if len(iss.Expression) > 0 && iss.Expression[0] == tt.errorPath {
+							found = true
+							break
+						}
+					}
+					if !found {
+						t.Errorf("Expected error at path '%s' not found", tt.errorPath)
+						for _, iss := range result.Issues {
+							t.Logf("  - [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+						}
+					}
+				}
+			} else if result.HasErrors() {
+				t.Errorf("Expected no error but got %d:", result.ErrorCount())
+				for _, iss := range result.Issues {
+					t.Logf("  - [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+				}
+			}
+		})
+	}
+}
+
 func TestGetElementName(t *testing.T) {
 	tests := []struct {
 		path     string
