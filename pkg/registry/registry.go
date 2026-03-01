@@ -187,6 +187,7 @@ type Constraint struct {
 	Severity   string `json:"severity"` // error | warning
 	Human      string `json:"human"`
 	Expression string `json:"expression"`
+	Source     string `json:"source"` // Canonical URL of the SD that originally defined this constraint
 }
 
 // Slicing represents slicing rules for an element.

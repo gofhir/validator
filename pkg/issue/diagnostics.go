@@ -38,13 +38,14 @@ const (
 
 // Diagnostic IDs for extension validation (M8).
 const (
-	DiagExtensionNoURL            DiagnosticID = "EXTENSION_NO_URL"
-	DiagExtensionUnknown          DiagnosticID = "EXTENSION_UNKNOWN"
-	DiagExtensionInvalidContext   DiagnosticID = "EXTENSION_INVALID_CONTEXT"
-	DiagExtensionValueRequired    DiagnosticID = "EXTENSION_VALUE_REQUIRED"
-	DiagExtensionValueNotAllowed  DiagnosticID = "EXTENSION_VALUE_NOT_ALLOWED"
-	DiagExtensionInvalidValueType DiagnosticID = "EXTENSION_INVALID_VALUE_TYPE"
-	DiagExtensionNestedUnknown    DiagnosticID = "EXTENSION_NESTED_UNKNOWN"
+	DiagExtensionNoURL              DiagnosticID = "EXTENSION_NO_URL"
+	DiagExtensionUnknown            DiagnosticID = "EXTENSION_UNKNOWN"
+	DiagModifierExtensionUnknown    DiagnosticID = "MODIFIER_EXTENSION_UNKNOWN"
+	DiagExtensionInvalidContext     DiagnosticID = "EXTENSION_INVALID_CONTEXT"
+	DiagExtensionValueRequired      DiagnosticID = "EXTENSION_VALUE_REQUIRED"
+	DiagExtensionValueNotAllowed    DiagnosticID = "EXTENSION_VALUE_NOT_ALLOWED"
+	DiagExtensionInvalidValueType   DiagnosticID = "EXTENSION_INVALID_VALUE_TYPE"
+	DiagExtensionNestedUnknown      DiagnosticID = "EXTENSION_NESTED_UNKNOWN"
 )
 
 // Diagnostic IDs for reference validation (M9).
@@ -237,6 +238,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeExtension,
 		Template: "Unknown extension '{url}'",
+	},
+	DiagModifierExtensionUnknown: {
+		Severity: SeverityError,
+		Code:     CodeExtension,
+		Template: "Unknown modifier extension '{url}'",
 	},
 	DiagExtensionInvalidContext: {
 		Severity: SeverityError,

@@ -204,6 +204,10 @@ func run(config *Config) int {
 		opts = append(opts, validator.WithStrictMode(true))
 	}
 
+	if config.NoTerminology {
+		opts = append(opts, validator.WithNoTerminology())
+	}
+
 	// Create validator
 	if !config.Quiet {
 		fmt.Fprintf(os.Stderr, "Initializing FHIR Validator (version %s)...\n", config.Version)

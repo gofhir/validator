@@ -73,6 +73,7 @@ type Config struct {
 	ConformanceResources [][]byte                 // Individual conformance resource JSON bytes (e.g., from DB)
 	TerminologyProvider  terminology.Provider     // Optional external terminology provider
 	ProfileResolver      registry.ProfileResolver // Optional external profile resolver for on-demand SD loading
+	NoTerminology        bool                     // When true, skip all terminology/binding validation
 }
 
 // Option is a functional option for configuring the validator.
@@ -151,6 +152,14 @@ func WithConformanceResources(resources [][]byte) Option {
 func WithTerminologyProvider(provider terminology.Provider) Option {
 	return func(c *Config) {
 		c.TerminologyProvider = provider
+	}
+}
+
+// WithNoTerminology disables all terminology/binding validation.
+// This is equivalent to the HL7 Validator's "-tx n/a" flag.
+func WithNoTerminology() Option {
+	return func(c *Config) {
+		c.NoTerminology = true
 	}
 }
 
@@ -540,8 +549,10 @@ func (v *Validator) validateAgainstProfile(data map[string]any, rawJSON []byte, 
 	issue.ReleaseResult(primResult)
 	result.Stats.PhasesRun++
 
-	// Phase 4: Binding validation (terminology)
-	v.bindValidator.ValidateData(data, sd, result)
+	// Phase 4: Binding validation (terminology) — skipped when NoTerminology is set
+	if !v.config.NoTerminology {
+		v.bindValidator.ValidateData(data, sd, result)
+	}
 	result.Stats.PhasesRun++
 
 	// Phase 5: Extension validation

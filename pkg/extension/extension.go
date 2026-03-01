@@ -188,9 +188,10 @@ func (v *Validator) validateExtensionArray(extensions any, basePath, contextPath
 	}
 }
 
-// ValidateSingleExtension validates a single extension.
-// The isModifier parameter is reserved for future use to validate modifierExtension-specific rules.
-func (v *Validator) validateSingleExtension(ext map[string]any, extPath, contextPath string, _ bool, result *issue.Result) {
+// validateSingleExtension validates a single extension.
+// Per FHIR R4 §2.1.0.1, unknown modifier extensions produce an ERROR (not a warning),
+// because a system SHALL refuse to process a resource with an unrecognized modifier extension.
+func (v *Validator) validateSingleExtension(ext map[string]any, extPath, contextPath string, isModifier bool, result *issue.Result) {
 	// Get extension URL
 	url, ok := ext["url"].(string)
 	if !ok || url == "" {
@@ -205,13 +206,12 @@ func (v *Validator) validateSingleExtension(ext map[string]any, extPath, context
 	// Resolve extension StructureDefinition
 	extSD := v.registry.GetByURL(url)
 	if extSD == nil {
-		result.AddWarningWithID(
-			issue.DiagExtensionUnknown,
-			map[string]any{
-				"url": url,
-			},
-			extPath,
-		)
+		params := map[string]any{"url": url}
+		if isModifier {
+			result.AddErrorWithID(issue.DiagModifierExtensionUnknown, params, extPath)
+		} else {
+			result.AddWarningWithID(issue.DiagExtensionUnknown, params, extPath)
+		}
 		// Can't validate further without SD
 		return
 	}
