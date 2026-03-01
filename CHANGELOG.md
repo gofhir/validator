@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/gofhir/validator/compare/v1.9.0...v1.9.1) (2026-03-01)
+
+
+### Bug Fixes
+
+* **reference:** validate fragment references against contained resources ([#26](https://github.com/gofhir/validator/issues/26)) ([8ecfbc4](https://github.com/gofhir/validator/commit/8ecfbc440e2c7d98d27e6bfd4ba858620512fe7b))
+
 ## [1.9.0](https://github.com/gofhir/validator/compare/v1.8.1...v1.9.0) (2026-02-17)
 
 
