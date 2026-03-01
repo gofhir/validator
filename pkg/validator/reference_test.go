@@ -99,6 +99,18 @@ func TestReferenceValidation(t *testing.T) {
 			expectErrors:   1, // fullUrl doesn't match resource.id
 			expectWarnings: 0,
 		},
+		{
+			name:           "invalid-fragment-not-found",
+			file:           "../../testdata/m9-references/invalid-fragment-not-found.json",
+			expectErrors:   2, // Fragment reference not found + dom-3 (contained not referenced)
+			expectWarnings: 2, // dom-6 for Observation and contained Patient
+		},
+		{
+			name:           "invalid-fragment-no-contained",
+			file:           "../../testdata/m9-references/invalid-fragment-no-contained.json",
+			expectErrors:   1, // Fragment reference but no contained array
+			expectWarnings: 1, // dom-6 for Observation
+		},
 	}
 
 	for _, tt := range tests {

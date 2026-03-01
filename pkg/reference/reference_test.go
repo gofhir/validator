@@ -314,7 +314,7 @@ func TestValidateTargetProfile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := issue.NewResult()
-			v.validateTargetProfile(tt.extractedType, tt.refStr, tt.elemDef, "Test.reference", tt.bundleCtx, result)
+			v.validateTargetProfile(tt.extractedType, tt.refStr, tt.elemDef, "Test.reference", tt.bundleCtx, nil, result)
 
 			hasError := result.HasErrors()
 			if hasError != tt.expectError {
@@ -372,6 +372,82 @@ func TestExtractTypesFromProfiles(t *testing.T) {
 			for i, typ := range result {
 				if typ != tt.expected[i] {
 					t.Errorf("extractTypesFromProfiles()[%d] = %q, want %q", i, typ, tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
+func TestNewContainedContext(t *testing.T) {
+	tests := []struct {
+		name     string
+		resource map[string]any
+		wantIDs  map[string]string
+	}{
+		{
+			name:     "no contained array",
+			resource: map[string]any{"resourceType": "Patient"},
+			wantIDs:  map[string]string{},
+		},
+		{
+			name: "empty contained array",
+			resource: map[string]any{
+				"resourceType": "Observation",
+				"contained":    []any{},
+			},
+			wantIDs: map[string]string{},
+		},
+		{
+			name: "single contained resource",
+			resource: map[string]any{
+				"resourceType": "Observation",
+				"contained": []any{
+					map[string]any{"resourceType": "Patient", "id": "pat-1"},
+				},
+			},
+			wantIDs: map[string]string{"pat-1": "Patient"},
+		},
+		{
+			name: "multiple contained resources",
+			resource: map[string]any{
+				"resourceType": "Observation",
+				"contained": []any{
+					map[string]any{"resourceType": "Patient", "id": "pat-1"},
+					map[string]any{"resourceType": "Organization", "id": "org-1"},
+				},
+			},
+			wantIDs: map[string]string{
+				"pat-1": "Patient",
+				"org-1": "Organization",
+			},
+		},
+		{
+			name: "contained without id is skipped",
+			resource: map[string]any{
+				"resourceType": "Observation",
+				"contained": []any{
+					map[string]any{"resourceType": "Patient"},
+				},
+			},
+			wantIDs: map[string]string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := NewContainedContext(tt.resource)
+			if ctx == nil {
+				t.Fatal("NewContainedContext returned nil")
+			}
+			if len(ctx.IDIndex) != len(tt.wantIDs) {
+				t.Errorf("IDIndex has %d entries, want %d", len(ctx.IDIndex), len(tt.wantIDs))
+			}
+			for id, wantType := range tt.wantIDs {
+				gotType, found := ctx.IDIndex[id]
+				if !found {
+					t.Errorf("IDIndex missing key %q", id)
+				} else if gotType != wantType {
+					t.Errorf("IDIndex[%q] = %q, want %q", id, gotType, wantType)
 				}
 			}
 		})

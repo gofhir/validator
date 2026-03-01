@@ -49,10 +49,11 @@ const (
 
 // Diagnostic IDs for reference validation (M9).
 const (
-	DiagReferenceInvalidFormat DiagnosticID = "REFERENCE_INVALID_FORMAT"
-	DiagReferenceInvalidTarget DiagnosticID = "REFERENCE_INVALID_TARGET"
-	DiagReferenceTypeMismatch  DiagnosticID = "REFERENCE_TYPE_MISMATCH"
-	DiagReferenceNotInBundle   DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
+	DiagReferenceInvalidFormat     DiagnosticID = "REFERENCE_INVALID_FORMAT"
+	DiagReferenceInvalidTarget     DiagnosticID = "REFERENCE_INVALID_TARGET"
+	DiagReferenceTypeMismatch      DiagnosticID = "REFERENCE_TYPE_MISMATCH"
+	DiagReferenceNotInBundle       DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
+	DiagReferenceContainedNotFound DiagnosticID = "REFERENCE_CONTAINED_NOT_FOUND"
 )
 
 // Diagnostic IDs for Bundle validation.
@@ -283,6 +284,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeNotFound,
 		Template: "URN reference is not locally contained within the bundle {reference}",
+	},
+	DiagReferenceContainedNotFound: {
+		Severity: SeverityError,
+		Code:     CodeInvalid,
+		Template: "Contained resource '{id}' not found. Reference is not defined within the resource",
 	},
 
 	// Bundle validation
