@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.2](https://github.com/gofhir/validator/compare/v1.9.1...v1.9.2) (2026-03-01)
+
+
+### Bug Fixes
+
+* **reference:** traverse BackboneElement children using parent resource SD ([1263ede](https://github.com/gofhir/validator/commit/1263edebe0d96b93b512bce384fed33434e0801d))
+
 ## [1.9.1](https://github.com/gofhir/validator/compare/v1.9.0...v1.9.1) (2026-03-01)
 
 
