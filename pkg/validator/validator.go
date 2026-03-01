@@ -62,16 +62,17 @@ type PackageSpec struct {
 
 // Config holds the validator configuration.
 type Config struct {
-	FHIRVersion          string               // e.g., "4.0.1", "4.3.0", "5.0.0"
-	Profiles             []string             // Additional profiles to validate against
-	StrictMode           bool                 // Treat warnings as errors
-	PackagePath          string               // Path to FHIR package cache
-	AdditionalPackages   []PackageSpec        // Additional packages to load (e.g., US Core)
-	PackageTgzPaths      []string             // Paths to local .tgz package files
-	PackageURLs          []string             // URLs to remote .tgz package files
-	PackageData          [][]byte             // In-memory .tgz package bytes (e.g., from //go:embed)
-	ConformanceResources [][]byte             // Individual conformance resource JSON bytes (e.g., from DB)
-	TerminologyProvider  terminology.Provider // Optional external terminology provider
+	FHIRVersion          string                   // e.g., "4.0.1", "4.3.0", "5.0.0"
+	Profiles             []string                 // Additional profiles to validate against
+	StrictMode           bool                     // Treat warnings as errors
+	PackagePath          string                   // Path to FHIR package cache
+	AdditionalPackages   []PackageSpec            // Additional packages to load (e.g., US Core)
+	PackageTgzPaths      []string                 // Paths to local .tgz package files
+	PackageURLs          []string                 // URLs to remote .tgz package files
+	PackageData          [][]byte                 // In-memory .tgz package bytes (e.g., from //go:embed)
+	ConformanceResources [][]byte                 // Individual conformance resource JSON bytes (e.g., from DB)
+	TerminologyProvider  terminology.Provider     // Optional external terminology provider
+	ProfileResolver      registry.ProfileResolver // Optional external profile resolver for on-demand SD loading
 }
 
 // Option is a functional option for configuring the validator.
@@ -153,9 +154,26 @@ func WithTerminologyProvider(provider terminology.Provider) Option {
 	}
 }
 
+// WithProfileResolver sets an external profile resolver for on-demand SD loading.
+// When configured, the registry falls back to this resolver for profiles not found in memory.
+// This is optional: in standalone mode (CLI), the validator pre-loads all SDs at init.
+// In server mode, the server provides a resolver backed by its conformance store.
+func WithProfileResolver(resolver registry.ProfileResolver) Option {
+	return func(c *Config) {
+		c.ProfileResolver = resolver
+	}
+}
+
+// canonicalRef represents a parsed canonical reference with URL and optional version.
+type canonicalRef struct {
+	url     string
+	version string
+}
+
 // validateConfig holds per-call validation options.
 type validateConfig struct {
-	profiles []string
+	profiles          []string
+	canonicalProfiles []canonicalRef
 }
 
 // ValidateOption configures a single Validate call.
@@ -166,6 +184,16 @@ type ValidateOption func(*validateConfig)
 func ValidateWithProfile(profileURL string) ValidateOption {
 	return func(c *validateConfig) {
 		c.profiles = append(c.profiles, profileURL)
+	}
+}
+
+// ValidateWithCanonicalProfile adds a canonical reference (url|version) as a profile
+// to validate against for this call only. The version is used for version-aware resolution.
+// If no "|" is present, behaves like ValidateWithProfile.
+func ValidateWithCanonicalProfile(canonical string) ValidateOption {
+	return func(c *validateConfig) {
+		url, version := registry.ParseCanonical(canonical)
+		c.canonicalProfiles = append(c.canonicalProfiles, canonicalRef{url: url, version: version})
 	}
 }
 
@@ -296,6 +324,11 @@ func New(opts ...Option) (*Validator, error) {
 		logger.Debug("  External terminology provider configured")
 	}
 
+	if config.ProfileResolver != nil {
+		reg.SetResolver(config.ProfileResolver)
+		logger.Debug("  External profile resolver configured")
+	}
+
 	totalDuration := time.Since(startTime)
 	totalMemUsed := getMemUsage() - startMem
 	logger.Info("Validator ready in %v (total memory: %s)", totalDuration.Round(time.Millisecond), formatBytes(totalMemUsed))
@@ -406,23 +439,9 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		return result, nil
 	}
 
-	// Collect all profiles to validate against (metaProfiles already extracted above)
+	// Collect and resolve all profiles to validate against
 	customProfiles := v.collectProfilesToValidate(vc.profiles, metaProfiles)
-
-	// Resolve profiles from registry
-	var resolvedProfiles []*registry.StructureDefinition
-	var profileURLs []string
-	var profilesNotFound []string
-
-	for _, profileURL := range customProfiles {
-		sd := v.registry.GetByURL(profileURL)
-		if sd != nil {
-			resolvedProfiles = append(resolvedProfiles, sd)
-			profileURLs = append(profileURLs, profileURL)
-		} else {
-			profilesNotFound = append(profilesNotFound, profileURL)
-		}
-	}
+	resolvedProfiles, profileURLs, profilesNotFound := v.resolveProfiles(ctx, vc.canonicalProfiles, customProfiles)
 
 	// Emit warnings for profiles not found
 	for _, notFound := range profilesNotFound {
@@ -572,6 +591,44 @@ func (v *Validator) Config() *Config {
 // Version returns the FHIR version being used.
 func (v *Validator) Version() string {
 	return v.config.FHIRVersion
+}
+
+// resolveProfiles resolves canonical and plain URL profiles using version-aware lookup
+// with optional resolver fallback. Returns resolved SDs, their URLs, and unresolved profile strings.
+func (v *Validator) resolveProfiles(ctx context.Context, canonicals []canonicalRef, plainURLs []string) (resolved []*registry.StructureDefinition, urls, notFound []string) {
+	// Canonical profiles (url|version) from per-call options
+	for _, cp := range canonicals {
+		sd := v.registry.ResolveByCanonical(ctx, cp.url, cp.version)
+		if sd != nil {
+			resolved = append(resolved, sd)
+			urls = append(urls, cp.url)
+		} else {
+			canonical := cp.url
+			if cp.version != "" {
+				canonical = cp.url + "|" + cp.version
+			}
+			notFound = append(notFound, canonical)
+		}
+	}
+
+	// Plain URL profiles (may contain url|version syntax in meta.profile)
+	for _, profileURL := range plainURLs {
+		url, version := registry.ParseCanonical(profileURL)
+		sd := v.registry.ResolveByCanonical(ctx, url, version)
+		if sd != nil {
+			resolved = append(resolved, sd)
+			urls = append(urls, url)
+		} else {
+			notFound = append(notFound, profileURL)
+		}
+	}
+
+	// Ensure base definition chains are resolved for all profiles
+	for _, sd := range resolved {
+		v.registry.ResolveBaseChain(ctx, sd)
+	}
+
+	return resolved, urls, notFound
 }
 
 // collectProfilesToValidate returns the ordered list of profiles to validate against.

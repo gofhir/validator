@@ -2,6 +2,7 @@
 package registry
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -27,6 +28,7 @@ type StructureDefinition struct {
 	Type           string `json:"type"`           // The type this SD defines
 	BaseDefinition string `json:"baseDefinition"` // URL of the base SD
 	Derivation     string `json:"derivation"`     // specialization | constraint
+	Version        string `json:"version"`        // Business version (e.g., "4.0.1", "2.0.0")
 
 	// Context defines where an extension can be used
 	Context []ExtensionContext `json:"context,omitempty"`
@@ -203,8 +205,13 @@ type Discriminator struct {
 type Registry struct {
 	mu              sync.RWMutex
 	byURL           map[string]*StructureDefinition
+	byURLVersion    map[string]*StructureDefinition // key: "url|version" for version-aware lookup
 	byType          map[string]*StructureDefinition // For base types like "Patient", "HumanName"
 	elementDefCache map[string]*ElementDefinition   // path -> ElementDefinition cache
+
+	// Optional external profile resolver for on-demand SD loading.
+	// When nil, the registry works exclusively with pre-loaded SDs (standalone mode).
+	resolver ProfileResolver
 
 	// Type classification caches - computed once after loading for O(1) lookups
 	domainResources    map[string]bool // types that inherit from DomainResource
@@ -216,6 +223,7 @@ type Registry struct {
 func New() *Registry {
 	return &Registry{
 		byURL:              make(map[string]*StructureDefinition),
+		byURLVersion:       make(map[string]*StructureDefinition),
 		byType:             make(map[string]*StructureDefinition),
 		elementDefCache:    make(map[string]*ElementDefinition),
 		domainResources:    make(map[string]bool),
@@ -233,44 +241,8 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 	defer r.mu.Unlock()
 
 	for _, pkg := range packages {
-		for key, data := range pkg.Resources {
-			// Quick check if this is a StructureDefinition
-			var peek struct {
-				ResourceType string `json:"resourceType"`
-			}
-			if err := json.Unmarshal(data, &peek); err != nil {
-				continue
-			}
-			if peek.ResourceType != "StructureDefinition" {
-				continue
-			}
-
-			var sd StructureDefinition
-			if err := json.Unmarshal(data, &sd); err != nil {
-				continue
-			}
-			sd.raw = data
-
-			// Index by URL
-			if sd.URL != "" {
-				if existing, exists := r.byURL[sd.URL]; exists {
-					// Merge extension contexts from multiple package definitions
-					// This allows both R4 naming (RequestGroup) and R5 naming (RequestOrchestration)
-					// as well as broader contexts (CanonicalResource) from extension packages
-					r.mergeExtensionContexts(existing, &sd)
-				} else {
-					r.byURL[sd.URL] = &sd
-				}
-			}
-
-			// Index by type for base definitions - first definition wins
-			if sd.Type != "" && sd.Derivation != "constraint" {
-				if _, exists := r.byType[sd.Type]; !exists {
-					r.byType[sd.Type] = &sd
-				}
-			}
-
-			_ = key // Suppress unused warning
+		for _, data := range pkg.Resources {
+			r.loadResourceUnlocked(data)
 		}
 	}
 
@@ -278,6 +250,50 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 	r.buildTypeClassificationCaches()
 
 	return nil
+}
+
+// loadResourceUnlocked parses and indexes a single resource if it is a StructureDefinition.
+// Must be called while the write lock is held.
+func (r *Registry) loadResourceUnlocked(data json.RawMessage) {
+	var peek struct {
+		ResourceType string `json:"resourceType"`
+	}
+	if err := json.Unmarshal(data, &peek); err != nil {
+		return
+	}
+	if peek.ResourceType != "StructureDefinition" {
+		return
+	}
+
+	var sd StructureDefinition
+	if err := json.Unmarshal(data, &sd); err != nil {
+		return
+	}
+	sd.raw = data
+
+	// Index by URL
+	if sd.URL != "" {
+		if existing, exists := r.byURL[sd.URL]; exists {
+			// Merge extension contexts from multiple package definitions
+			r.mergeExtensionContexts(existing, &sd)
+		} else {
+			r.byURL[sd.URL] = &sd
+		}
+		// Version-aware index for canonical|version lookups
+		if sd.Version != "" {
+			vKey := sd.URL + "|" + sd.Version
+			if _, exists := r.byURLVersion[vKey]; !exists {
+				r.byURLVersion[vKey] = &sd
+			}
+		}
+	}
+
+	// Index by type for base definitions - first definition wins
+	if sd.Type != "" && sd.Derivation != "constraint" {
+		if _, exists := r.byType[sd.Type]; !exists {
+			r.byType[sd.Type] = &sd
+		}
+	}
 }
 
 // buildTypeClassificationCaches pre-computes type classifications for O(1) lookups.
@@ -333,11 +349,107 @@ func (r *Registry) mergeExtensionContexts(existing, newSD *StructureDefinition) 
 	}
 }
 
+// SetResolver configures an external profile resolver for on-demand SD loading.
+// When set, the registry falls back to this resolver for profiles not found in memory.
+func (r *Registry) SetResolver(resolver ProfileResolver) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.resolver = resolver
+}
+
 // GetByURL returns a StructureDefinition by its canonical URL.
 func (r *Registry) GetByURL(url string) *StructureDefinition {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.byURL[url]
+}
+
+// GetByCanonical returns a StructureDefinition by canonical URL and optional version.
+// When version is empty, falls back to any loaded version of that URL.
+// When version is specified, tries exact version match first, then any version.
+// This is a pure in-memory lookup — it does not consult the external resolver.
+func (r *Registry) GetByCanonical(url, version string) *StructureDefinition {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if version != "" {
+		if sd := r.byURLVersion[url+"|"+version]; sd != nil {
+			return sd
+		}
+	}
+	return r.byURL[url]
+}
+
+// ResolveByCanonical resolves a StructureDefinition by canonical URL and optional version.
+// It first checks the in-memory registry, then falls back to the external resolver if configured.
+// Resolved profiles are cached in the registry for subsequent lookups.
+// Returns nil if the profile cannot be found or resolved.
+func (r *Registry) ResolveByCanonical(ctx context.Context, url, version string) *StructureDefinition {
+	// 1. Check in-memory registry first
+	if sd := r.GetByCanonical(url, version); sd != nil {
+		return sd
+	}
+
+	// 2. No resolver configured — cannot fetch externally
+	r.mu.RLock()
+	resolver := r.resolver
+	r.mu.RUnlock()
+
+	if resolver == nil {
+		return nil
+	}
+
+	// 3. Fetch from external resolver
+	data, err := resolver.ResolveProfile(ctx, url, version)
+	if err != nil || data == nil {
+		return nil
+	}
+
+	// 4. Parse the resolved SD
+	var sd StructureDefinition
+	if err := json.Unmarshal(data, &sd); err != nil {
+		return nil
+	}
+	sd.raw = data
+
+	// 5. Cache in registry (check-then-set for race protection)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if sd.URL != "" {
+		if _, exists := r.byURL[sd.URL]; !exists {
+			r.byURL[sd.URL] = &sd
+		}
+		if sd.Version != "" {
+			key := sd.URL + "|" + sd.Version
+			if _, exists := r.byURLVersion[key]; !exists {
+				r.byURLVersion[key] = &sd
+			}
+		}
+	}
+
+	return &sd
+}
+
+// ResolveBaseChain ensures the entire baseDefinition chain for an SD is loaded.
+// This is important for profile validation where constraint profiles reference
+// base definitions that may not be pre-loaded in the registry.
+func (r *Registry) ResolveBaseChain(ctx context.Context, sd *StructureDefinition) {
+	current := sd
+	visited := make(map[string]bool)
+
+	for current != nil && current.BaseDefinition != "" {
+		if visited[current.BaseDefinition] {
+			break // cycle protection
+		}
+		visited[current.BaseDefinition] = true
+
+		base := r.ResolveByCanonical(ctx, current.BaseDefinition, "")
+		if base == nil {
+			break
+		}
+		current = base
+	}
 }
 
 // GetByType returns a StructureDefinition for a type name (e.g., "Patient", "HumanName").
