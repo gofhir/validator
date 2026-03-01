@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/gofhir/validator/compare/v1.9.2...v1.10.0) (2026-03-01)
+
+
+### Features
+
+* **registry:** version-aware profile resolution with ProfileResolver interface ([#29](https://github.com/gofhir/validator/issues/29)) ([e167955](https://github.com/gofhir/validator/commit/e16795518cc1f6338f8e0e26a2971ac7ec9ece5a))
+
 ## [1.9.2](https://github.com/gofhir/validator/compare/v1.9.1...v1.9.2) (2026-03-01)
 
 
