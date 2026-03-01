@@ -477,6 +477,73 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 	// Validate targetProfile - check if reference target type is allowed.
 	// This validates structural conformance based on the StructureDefinition.
 	v.validateTargetProfile(extractedType, refStr, elemDef, fhirPath, bundleCtx, containedCtx, result)
+
+	// Validate aggregation mode constraints.
+	// Per FHIR spec, ElementDefinition.type.aggregation restricts how references should be resolved:
+	// - "contained": reference must be a fragment (#id) to a contained resource
+	// - "referenced": reference must be a literal URL (relative or absolute)
+	// - "bundled": reference must resolve within the Bundle
+	v.validateAggregation(refStr, elemDef, fhirPath, result)
+}
+
+// validateAggregation validates that the reference format matches the allowed aggregation modes.
+// When aggregation is empty, any reference format is allowed (default FHIR behavior).
+func (v *Validator) validateAggregation(refStr string, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
+	modes := v.getAggregationModes(elemDef)
+	if len(modes) == 0 {
+		return // No aggregation constraints — any format allowed
+	}
+
+	isFragment := strings.HasPrefix(refStr, "#")
+	isURN := strings.HasPrefix(refStr, "urn:uuid:") || strings.HasPrefix(refStr, "urn:oid:")
+
+	allowed := false
+	for _, mode := range modes {
+		switch mode {
+		case "contained":
+			if isFragment {
+				allowed = true
+			}
+		case "bundled":
+			// URN references and fragment references can resolve in a Bundle
+			if isURN {
+				allowed = true
+			}
+		case "referenced":
+			// Literal URL references (relative or absolute, not fragment, not URN)
+			if !isFragment && !isURN {
+				allowed = true
+			}
+		}
+	}
+
+	if !allowed {
+		result.AddErrorWithID(
+			issue.DiagReferenceAggregationMode,
+			map[string]any{
+				"reference": refStr,
+				"allowed":   strings.Join(modes, ", "),
+			},
+			fhirPath+".reference",
+		)
+	}
+}
+
+// getAggregationModes extracts aggregation modes from all Reference types in an ElementDefinition.
+func (v *Validator) getAggregationModes(elemDef *registry.ElementDefinition) []string {
+	var modes []string
+	seen := make(map[string]bool)
+	for _, t := range elemDef.Type {
+		if t.Code == "Reference" {
+			for _, a := range t.Aggregation {
+				if !seen[a] {
+					seen[a] = true
+					modes = append(modes, a)
+				}
+			}
+		}
+	}
+	return modes
 }
 
 // validateTargetProfile validates that the reference target type matches allowed targetProfiles.

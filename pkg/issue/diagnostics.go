@@ -27,13 +27,15 @@ const (
 
 // Diagnostic IDs for binding validation (M7).
 const (
-	DiagBindingRequired         DiagnosticID = "BINDING_REQUIRED"
-	DiagBindingExtensible       DiagnosticID = "BINDING_EXTENSIBLE"
-	DiagBindingDisplayMismatch  DiagnosticID = "BINDING_DISPLAY_MISMATCH"
-	DiagBindingTextOnlyWarning  DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
-	DiagBindingCannotValidate   DiagnosticID = "BINDING_CANNOT_VALIDATE"
-	DiagBindingValueSetNotFound DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
-	DiagCodeNotInCodeSystem     DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
+	DiagBindingRequired           DiagnosticID = "BINDING_REQUIRED"
+	DiagBindingExtensible         DiagnosticID = "BINDING_EXTENSIBLE"
+	DiagBindingExtensibleNoCoding DiagnosticID = "BINDING_EXTENSIBLE_NO_CODING"
+	DiagBindingDisplayMismatch    DiagnosticID = "BINDING_DISPLAY_MISMATCH"
+	DiagBindingTextOnlyWarning    DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
+	DiagBindingCannotValidate     DiagnosticID = "BINDING_CANNOT_VALIDATE"
+	DiagBindingValueSetNotFound   DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
+	DiagCodeNotInCodeSystem       DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
+	DiagCodeSystemNotFound        DiagnosticID = "CODESYSTEM_NOT_FOUND"
 )
 
 // Diagnostic IDs for extension validation (M8).
@@ -50,11 +52,12 @@ const (
 
 // Diagnostic IDs for reference validation (M9).
 const (
-	DiagReferenceInvalidFormat     DiagnosticID = "REFERENCE_INVALID_FORMAT"
-	DiagReferenceInvalidTarget     DiagnosticID = "REFERENCE_INVALID_TARGET"
-	DiagReferenceTypeMismatch      DiagnosticID = "REFERENCE_TYPE_MISMATCH"
-	DiagReferenceNotInBundle       DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
-	DiagReferenceContainedNotFound DiagnosticID = "REFERENCE_CONTAINED_NOT_FOUND"
+	DiagReferenceInvalidFormat      DiagnosticID = "REFERENCE_INVALID_FORMAT"
+	DiagReferenceInvalidTarget      DiagnosticID = "REFERENCE_INVALID_TARGET"
+	DiagReferenceTypeMismatch       DiagnosticID = "REFERENCE_TYPE_MISMATCH"
+	DiagReferenceNotInBundle        DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
+	DiagReferenceContainedNotFound  DiagnosticID = "REFERENCE_CONTAINED_NOT_FOUND"
+	DiagReferenceAggregationMode    DiagnosticID = "REFERENCE_AGGREGATION_MODE"
 )
 
 // Diagnostic IDs for Bundle validation.
@@ -227,6 +230,16 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Code:     CodeInvalid,
 		Template: "The code '{code}' is not valid in the CodeSystem '{system}'",
 	},
+	DiagCodeSystemNotFound: {
+		Severity: SeverityWarning,
+		Code:     CodeProcessing,
+		Template: "CodeSystem is unknown and can't be validated: {system} for '{systemCode}'",
+	},
+	DiagBindingExtensibleNoCoding: {
+		Severity: SeverityWarning,
+		Code:     CodeProcessing,
+		Template: "None of the codings provided are in the value set '{valueSet}', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = {codes})",
+	},
 
 	// Extension (M8)
 	DiagExtensionNoURL: {
@@ -295,6 +308,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeInvalid,
 		Template: "Contained resource '{id}' not found. Reference is not defined within the resource",
+	},
+	DiagReferenceAggregationMode: {
+		Severity: SeverityError,
+		Code:     CodeValue,
+		Template: "Reference '{reference}' is not allowed by aggregation mode. Allowed: {allowed}",
 	},
 
 	// Bundle validation

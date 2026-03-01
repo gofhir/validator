@@ -165,6 +165,7 @@ type Type struct {
 	Code          string      `json:"code"`
 	Profile       []string    `json:"profile,omitempty"`
 	TargetProfile []string    `json:"targetProfile,omitempty"`
+	Aggregation   []string    `json:"aggregation,omitempty"` // contained | referenced | bundled
 	Extension     []Extension `json:"extension,omitempty"`
 }
 

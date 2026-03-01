@@ -378,6 +378,177 @@ func TestExtractTypesFromProfiles(t *testing.T) {
 	}
 }
 
+func TestValidateAggregation(t *testing.T) {
+	v := &Validator{registry: mockRegistry()}
+
+	tests := []struct {
+		name        string
+		refStr      string
+		elemDef     *registry.ElementDefinition
+		expectError bool
+	}{
+		{
+			name:   "no aggregation — any reference allowed",
+			refStr: "Patient/123",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference"}},
+			},
+			expectError: false,
+		},
+		{
+			name:   "contained only — fragment reference allowed",
+			refStr: "#pat-1",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained"}}},
+			},
+			expectError: false,
+		},
+		{
+			name:   "contained only — relative reference rejected",
+			refStr: "Organization/123",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained"}}},
+			},
+			expectError: true,
+		},
+		{
+			name:   "referenced only — relative reference allowed",
+			refStr: "Patient/123",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"referenced"}}},
+			},
+			expectError: false,
+		},
+		{
+			name:   "referenced only — absolute reference allowed",
+			refStr: "http://example.org/fhir/Patient/123",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"referenced"}}},
+			},
+			expectError: false,
+		},
+		{
+			name:   "referenced only — fragment reference rejected",
+			refStr: "#pat-1",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"referenced"}}},
+			},
+			expectError: true,
+		},
+		{
+			name:   "bundled only — URN reference allowed",
+			refStr: "urn:uuid:abc-123",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"bundled"}}},
+			},
+			expectError: false,
+		},
+		{
+			name:   "bundled only — relative reference rejected",
+			refStr: "Patient/123",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"bundled"}}},
+			},
+			expectError: true,
+		},
+		{
+			name:   "contained + referenced — both fragment and relative allowed",
+			refStr: "Patient/123",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained", "referenced"}}},
+			},
+			expectError: false,
+		},
+		{
+			name:   "contained + referenced — fragment also allowed",
+			refStr: "#pat-1",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained", "referenced"}}},
+			},
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := issue.NewResult()
+			v.validateAggregation(tt.refStr, tt.elemDef, "Test.ref", result)
+
+			hasError := result.HasErrors()
+			if hasError != tt.expectError {
+				t.Errorf("validateAggregation(%q) hasError = %v, want %v", tt.refStr, hasError, tt.expectError)
+				for _, iss := range result.Issues {
+					t.Logf("  Issue: [%s] %s", iss.Severity, iss.Diagnostics)
+				}
+			}
+		})
+	}
+}
+
+func TestGetAggregationModes(t *testing.T) {
+	v := &Validator{registry: mockRegistry()}
+
+	tests := []struct {
+		name     string
+		elemDef  *registry.ElementDefinition
+		expected []string
+	}{
+		{
+			name: "no aggregation",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference"}},
+			},
+			expected: nil,
+		},
+		{
+			name: "single mode",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained"}}},
+			},
+			expected: []string{"contained"},
+		},
+		{
+			name: "multiple modes",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained", "referenced"}}},
+			},
+			expected: []string{"contained", "referenced"},
+		},
+		{
+			name: "non-Reference type ignored",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{{Code: "string", Aggregation: []string{"contained"}}},
+			},
+			expected: nil,
+		},
+		{
+			name: "deduplicates across multiple Reference types",
+			elemDef: &registry.ElementDefinition{
+				Type: []registry.Type{
+					{Code: "Reference", Aggregation: []string{"contained"}},
+					{Code: "Reference", Aggregation: []string{"contained", "referenced"}},
+				},
+			},
+			expected: []string{"contained", "referenced"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := v.getAggregationModes(tt.elemDef)
+			if len(result) != len(tt.expected) {
+				t.Errorf("getAggregationModes() = %v, want %v", result, tt.expected)
+				return
+			}
+			for i, mode := range result {
+				if mode != tt.expected[i] {
+					t.Errorf("getAggregationModes()[%d] = %q, want %q", i, mode, tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
 func TestNewContainedContext(t *testing.T) {
 	tests := []struct {
 		name     string
