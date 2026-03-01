@@ -280,20 +280,39 @@ func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.S
 			v.validateReference(value, elemDef, elementFhirPath, bundleCtx, containedCtx, result)
 		}
 
+		// BackboneElement children are defined in the parent resource SD (e.g., Patient.link.other),
+		// not in BackboneElement's own SD. Use validateElementWithPaths to look them up correctly.
+		isBackbone := v.isBackboneType(elemDef)
+
 		// Recurse into complex types
 		switch val := value.(type) {
 		case map[string]any:
-			v.validateComplexElement(val, elemDef, elementFhirPath, bundleCtx, containedCtx, result)
-		case []any:
-			for i, item := range val {
-				itemPath := fmt.Sprintf("%s[%d]", elementFhirPath, i)
-				if mapItem, ok := item.(map[string]any); ok {
-					if v.isReferenceType(elemDef) {
-						v.validateReference(mapItem, elemDef, itemPath, bundleCtx, containedCtx, result)
-					}
-					v.validateComplexElement(mapItem, elemDef, itemPath, bundleCtx, containedCtx, result)
-				}
+			if isBackbone {
+				v.validateElementWithPaths(val, sd, elementSDPath, elementFhirPath, bundleCtx, containedCtx, result)
+			} else {
+				v.validateComplexElement(val, elemDef, elementFhirPath, bundleCtx, containedCtx, result)
 			}
+		case []any:
+			v.validateArrayElement(val, sd, elemDef, elementSDPath, elementFhirPath, isBackbone, bundleCtx, containedCtx, result)
+		}
+	}
+}
+
+// validateArrayElement validates references within array elements.
+func (v *Validator) validateArrayElement(items []any, sd *registry.StructureDefinition, elemDef *registry.ElementDefinition, elementSDPath, elementFhirPath string, isBackbone bool, bundleCtx *BundleContext, containedCtx *ContainedContext, result *issue.Result) {
+	for i, item := range items {
+		itemPath := fmt.Sprintf("%s[%d]", elementFhirPath, i)
+		mapItem, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		if v.isReferenceType(elemDef) {
+			v.validateReference(mapItem, elemDef, itemPath, bundleCtx, containedCtx, result)
+		}
+		if isBackbone {
+			v.validateElementWithPaths(mapItem, sd, elementSDPath, itemPath, bundleCtx, containedCtx, result)
+		} else {
+			v.validateComplexElement(mapItem, elemDef, itemPath, bundleCtx, containedCtx, result)
 		}
 	}
 }
@@ -345,6 +364,17 @@ func (v *Validator) validateComplexElement(data map[string]any, parentDef *regis
 			}
 		}
 	}
+}
+
+// isBackboneType checks if an element is of type BackboneElement.
+// BackboneElement children are defined in the parent resource's SD, not in BackboneElement's own SD.
+func (v *Validator) isBackboneType(elemDef *registry.ElementDefinition) bool {
+	for _, t := range elemDef.Type {
+		if t.Code == "BackboneElement" {
+			return true
+		}
+	}
+	return false
 }
 
 // isReferenceType checks if an element is of type Reference.
