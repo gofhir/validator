@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.11.0](https://github.com/gofhir/validator/compare/v1.10.0...v1.11.0) (2026-03-01)
+
+
+### Features
+
+* **constraint:** wire FHIRPath with resolve(), memberOf(), context, and timeout ([#31](https://github.com/gofhir/validator/issues/31), [#34](https://github.com/gofhir/validator/issues/34)) ([2668a9f](https://github.com/gofhir/validator/commit/2668a9f17cb0a015eaf9b1c4fd8dcf59467a3360))
+* nested constraint evaluation, BackboneElement binding traversal, and lint fixes ([#32](https://github.com/gofhir/validator/issues/32), [#39](https://github.com/gofhir/validator/issues/39), [#40](https://github.com/gofhir/validator/issues/40), [#41](https://github.com/gofhir/validator/issues/41), [#42](https://github.com/gofhir/validator/issues/42)) ([4dfe98f](https://github.com/gofhir/validator/commit/4dfe98f2b254de7ea5eda22a8df291246a9758d7))
+* **reference:** validate ElementDefinition.type.aggregation modes ([#36](https://github.com/gofhir/validator/issues/36)) ([2ecd3a3](https://github.com/gofhir/validator/commit/2ecd3a3d92923f88dd2c43a00718e3df91f912a9))
+* **registry:** generate snapshot from differential + baseDefinition ([#38](https://github.com/gofhir/validator/issues/38)) ([5a1c806](https://github.com/gofhir/validator/commit/5a1c806492ec18f9b76dc361e16709b97b981923))
+
+
+### Bug Fixes
+
+* wire -tx n/a flag, error on unknown modifier extensions, add constraint source ([11ea30f](https://github.com/gofhir/validator/commit/11ea30fab2687ab542847d72550399cec1820943))
+
 ## [1.10.0](https://github.com/gofhir/validator/compare/v1.9.2...v1.10.0) (2026-03-01)
 
 
