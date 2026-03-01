@@ -522,6 +522,79 @@ func TestValidateMaxZeroWithProfile(t *testing.T) {
 	})
 }
 
+func TestValidateWithDifferentialOnlyProfile(t *testing.T) {
+	profileURL := "http://example.org/StructureDefinition/diff-only-patient"
+
+	// Profile with ONLY a differential (no snapshot) — requires identifier.
+	profileJSON := fmt.Sprintf(`{
+		"resourceType": "StructureDefinition",
+		"url": "%s",
+		"name": "DiffOnlyPatient",
+		"status": "active",
+		"kind": "resource",
+		"abstract": false,
+		"type": "Patient",
+		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+		"derivation": "constraint",
+		"differential": {
+			"element": [
+				{"id": "Patient", "path": "Patient"},
+				{"id": "Patient.identifier", "path": "Patient.identifier", "min": 1}
+			]
+		}
+	}`, profileURL)
+
+	v, err := New(WithConformanceResources([][]byte{[]byte(profileJSON)}))
+	if err != nil {
+		t.Fatalf("Failed to create validator: %v", err)
+	}
+
+	t.Run("missing identifier fails against differential-only profile", func(t *testing.T) {
+		patient := `{
+			"resourceType": "Patient",
+			"name": [{"family": "Smith"}]
+		}`
+		result, err := v.Validate(context.Background(), []byte(patient),
+			ValidateWithProfile(profileURL),
+		)
+		if err != nil {
+			t.Fatalf("Validate returned error: %v", err)
+		}
+		t.Logf("Errors: %d, Warnings: %d", result.ErrorCount(), result.WarningCount())
+		for _, iss := range result.Issues {
+			t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+		}
+		if result.ErrorCount() == 0 {
+			t.Error("Expected cardinality error for missing identifier, got none")
+		}
+	})
+
+	t.Run("identifier present passes differential-only profile", func(t *testing.T) {
+		patient := `{
+			"resourceType": "Patient",
+			"identifier": [{"system": "http://example.org", "value": "123"}],
+			"name": [{"family": "Smith"}]
+		}`
+		result, err := v.Validate(context.Background(), []byte(patient),
+			ValidateWithProfile(profileURL),
+		)
+		if err != nil {
+			t.Fatalf("Validate returned error: %v", err)
+		}
+		// Only check for cardinality/structural errors, not warnings.
+		errCount := 0
+		for _, iss := range result.Issues {
+			if iss.Severity == "error" {
+				errCount++
+				t.Logf("  [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+			}
+		}
+		if errCount != 0 {
+			t.Errorf("Expected 0 errors with identifier present, got %d", errCount)
+		}
+	})
+}
+
 // joinStrings joins string elements with a separator (avoids importing strings in test).
 func joinStrings(elems []string, sep string) string {
 	result := ""

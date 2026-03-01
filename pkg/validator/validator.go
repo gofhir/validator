@@ -649,7 +649,20 @@ func (v *Validator) resolveProfiles(ctx context.Context, canonicals []canonicalR
 		v.registry.ResolveBaseChain(ctx, sd)
 	}
 
-	return resolved, urls, notFound
+	// Generate snapshots for profiles that only have differentials
+	withSnapshots := make([]*registry.StructureDefinition, 0, len(resolved))
+	withSnapshotURLs := make([]string, 0, len(resolved))
+	for i, sd := range resolved {
+		if err := v.registry.EnsureSnapshot(ctx, sd); err != nil {
+			logger.Warn("Snapshot generation failed for %s: %v", urls[i], err)
+			notFound = append(notFound, urls[i])
+			continue
+		}
+		withSnapshots = append(withSnapshots, sd)
+		withSnapshotURLs = append(withSnapshotURLs, urls[i])
+	}
+
+	return withSnapshots, withSnapshotURLs, notFound
 }
 
 // collectProfilesToValidate returns the ordered list of profiles to validate against.
