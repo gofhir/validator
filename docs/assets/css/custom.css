@@ -1,0 +1,10 @@
+/* GoFHIR Validator documentation brand colors.
+ * HL7 FHIR blue: #005a9c => HSL(205, 100%, 31%)
+ * Lightness adjusted to 44% for better UI readability.
+ */
+
+:root {
+  --primary-hue: 205deg;
+  --primary-saturation: 100%;
+  --primary-lightness: 44%;
+}

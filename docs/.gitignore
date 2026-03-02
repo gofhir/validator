@@ -1,0 +1,5 @@
+# Hugo build artifacts
+public/
+resources/
+hugo.work
+.DS_Store

@@ -1,0 +1,88 @@
+baseURL: "https://gofhir.github.io/validator/"
+title: "GoFHIR Validator"
+enableRobotsTXT: true
+enableGitInfo: true
+defaultContentLanguage: en
+
+languages:
+  en:
+    languageName: English
+    weight: 1
+    title: GoFHIR Validator
+  es:
+    languageName: Español
+    languageCode: es
+    weight: 2
+    title: GoFHIR Validator
+
+module:
+  hugoVersion:
+    extended: true
+    min: "0.155.3"
+  imports:
+    - path: github.com/imfing/hextra
+
+outputs:
+  home: [html]
+  page: [html]
+  section: [html, rss]
+
+menu:
+  main:
+    - identifier: documentation
+      name: Documentation
+      pageRef: /docs
+      weight: 1
+    - identifier: cli
+      name: CLI
+      pageRef: /docs/cli-reference
+      weight: 2
+    - identifier: api
+      name: Go API
+      pageRef: /docs/api-reference
+      weight: 3
+    - name: Search
+      weight: 5
+      params:
+        type: search
+    - name: GitHub
+      weight: 6
+      url: "https://github.com/gofhir/validator"
+      params:
+        icon: github
+
+markup:
+  highlight:
+    noClasses: false
+  goldmark:
+    renderer:
+      unsafe: true
+
+params:
+  description: "High-performance FHIR resource validator for Go"
+  navbar:
+    displayTitle: true
+    displayLogo: false
+    width: wide
+  theme:
+    default: system
+    displayToggle: true
+  footer:
+    enable: true
+    displayCopyright: true
+    displayPoweredBy: false
+  displayUpdatedDate: true
+  dateFormat: "January 2, 2006"
+  search:
+    enable: true
+    type: flexsearch
+    flexsearch:
+      index: content
+      tokenize: forward
+  editURL:
+    enable: true
+    base: "https://github.com/gofhir/validator/edit/main/docs/content"
+  highlight:
+    copy:
+      enable: true
+      display: hover

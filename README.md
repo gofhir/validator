@@ -2,154 +2,70 @@
 
 A high-performance FHIR resource validator written in Go, designed to be compatible with the HL7 FHIR Validator.
 
+[![CI](https://github.com/gofhir/validator/actions/workflows/ci.yml/badge.svg)](https://github.com/gofhir/validator/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/gofhir/validator.svg)](https://pkg.go.dev/github.com/gofhir/validator)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**[Full Documentation](https://gofhir.github.io/validator/)**
+
 ## Features
 
-- **Full FHIR R4 Support** - Validates against HL7 FHIR R4 (4.0.1) specification
-- **Profile Validation** - Supports StructureDefinition-based validation
-- **Terminology Validation** - CodeSystem and ValueSet binding validation
-- **FHIRPath Constraints** - Evaluates FHIRPath invariants from ElementDefinitions
-- **Extension Validation** - Validates extensions against their StructureDefinitions
-- **Reference Validation** - Validates references including Bundle UUID resolution
-- **HL7 Conformance** - Designed to match HL7 FHIR Validator behavior
+- Full FHIR R4/R4B/R5 support via StructureDefinitions
+- Profile validation with Implementation Guide loading
+- FHIRPath constraint evaluation
+- Terminology binding validation (CodeSystem/ValueSet)
+- Extension, reference, and slicing validation
+- Designed to match HL7 FHIR Validator behavior
 
 ## Installation
 
-### As a Library
-
 ```bash
-go get github.com/gofhir/validator
-```
-
-### CLI Tool
-
-```bash
+# As a CLI tool
 go install github.com/gofhir/validator/cmd/gofhir-validator@latest
+
+# As a library
+go get github.com/gofhir/validator
 ```
 
 ## Quick Start
 
-### Library Usage
-
 ```go
-package main
+v, err := validator.New()
+if err != nil {
+    log.Fatal(err)
+}
 
-import (
-    "context"
-    "fmt"
-    "os"
-
-    "github.com/gofhir/validator/pkg/validator"
-)
-
-func main() {
-    // Create validator (downloads FHIR packages on first run)
-    v, err := validator.New()
-    if err != nil {
-        panic(err)
-    }
-
-    // Read FHIR resource
-    data, _ := os.ReadFile("patient.json")
-
-    // Validate
-    result, err := v.Validate(context.Background(), data)
-    if err != nil {
-        panic(err)
-    }
-
-    // Check results
-    fmt.Printf("Valid: %v\n", result.Valid)
-    fmt.Printf("Errors: %d, Warnings: %d\n", result.ErrorCount(), result.WarningCount())
-
+result, err := v.Validate(context.Background(), resourceJSON)
+if result.HasErrors() {
     for _, issue := range result.Issues {
         fmt.Printf("[%s] %s @ %v\n", issue.Severity, issue.Diagnostics, issue.Expression)
     }
 }
 ```
 
-### CLI Usage
-
 ```bash
-# Validate a resource
 gofhir-validator patient.json
-
-# Specify FHIR version
-gofhir-validator -version 4.0.1 patient.json
-
-# Validate against a profile
-gofhir-validator -profile http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient patient.json
-
-# JSON output
-gofhir-validator -output json patient.json
-
-# Validate from stdin
-cat patient.json | gofhir-validator -
+gofhir-validator -ig http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient patient.json
 ```
 
-## Validation Phases
+## Documentation
 
-The validator runs multiple phases in sequence:
+Visit **[gofhir.github.io/validator](https://gofhir.github.io/validator/)** for complete documentation:
 
-1. **Structural** - JSON structure and unknown elements
-2. **Cardinality** - min/max element counts
-3. **Primitive Types** - date, dateTime, uri, etc.
-4. **Terminology** - CodeSystem/ValueSet bindings
-5. **Extensions** - Extension StructureDefinition validation
-6. **References** - Reference format and Bundle resolution
-7. **Constraints** - FHIRPath invariants (dom-6, etc.)
-8. **Fixed/Pattern** - Fixed and pattern value matching
-
-## Comparison with HL7 Validator
-
-| Feature | GoFHIR | HL7 Validator |
-|---------|--------|---------------|
-| Language | Go | Java |
-| Startup Time | ~2-3s | ~10-15s |
-| Memory | ~200MB | ~600MB+ |
-| FHIR R4 | ✅ | ✅ |
-| Profiles | ✅ | ✅ |
-| Terminology | ✅ (local) | ✅ (+ tx server) |
-| FHIRPath | ✅ | ✅ |
-| Extensions | ✅ | ✅ |
-
-## Project Structure
-
-```
-├── cmd/gofhir-validator/   # CLI application
-├── pkg/
-│   ├── validator/          # Main validator API
-│   ├── binding/            # Terminology validation
-│   ├── cardinality/        # Cardinality validation
-│   ├── constraint/         # FHIRPath constraints
-│   ├── extension/          # Extension validation
-│   ├── fixedpattern/       # Fixed/pattern validation
-│   ├── issue/              # Diagnostic messages
-│   ├── loader/             # FHIR package loading
-│   ├── primitive/          # Primitive type validation
-│   ├── reference/          # Reference validation
-│   ├── registry/           # StructureDefinition registry
-│   ├── slicing/            # Slicing validation
-│   ├── structural/         # Structure validation
-│   ├── terminology/        # Terminology services
-│   └── walker/             # Resource tree walker
-├── testdata/               # Test fixtures
-└── docs/                   # Documentation
-```
+- [Getting Started](https://gofhir.github.io/validator/docs/getting-started/) - Installation, quick start, comparison
+- [Concepts](https://gofhir.github.io/validator/docs/concepts/) - Validation phases, StructureDefinitions, terminology
+- [API Reference](https://gofhir.github.io/validator/docs/api-reference/) - Go library types and interfaces
+- [CLI Reference](https://gofhir.github.io/validator/docs/cli-reference/) - Command-line usage and flags
+- [Advanced](https://gofhir.github.io/validator/docs/advanced/) - IGs, embedding, server integration
+- [Examples](https://gofhir.github.io/validator/docs/examples/) - Real-world validation patterns
+- [Error Reference](https://gofhir.github.io/validator/docs/error-reference/) - Complete error code catalog
 
 ## Development
 
 ```bash
-# Run tests
-go test ./...
-
-# Run tests with race detector
-go test -race ./...
-
-# Run benchmarks
-go test -bench=. ./pkg/validator/
-
-# Build CLI
-go build -o bin/gofhir-validator ./cmd/gofhir-validator/
+make test          # Run tests
+make lint          # Run linter
+make build         # Build CLI
 ```
 
 ## License
