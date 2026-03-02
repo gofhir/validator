@@ -3,6 +3,11 @@ title: "GoFHIR Validator"
 enableRobotsTXT: true
 enableGitInfo: true
 defaultContentLanguage: en
+defaultContentLanguageInSubdir: false
+
+disableKinds:
+  - taxonomy
+  - term
 
 languages:
   en:
@@ -55,6 +60,9 @@ markup:
   highlight:
     noClasses: false
   goldmark:
+    parser:
+      attribute:
+        block: true
     renderer:
       unsafe: true
 
@@ -62,8 +70,12 @@ params:
   description: "High-performance FHIR resource validator for Go"
   navbar:
     displayTitle: true
-    displayLogo: false
-    width: wide
+    displayLogo: true
+    logo:
+      path: icons/logo.svg
+      dark: icons/logo-dark.svg
+      width: 32
+      height: 32
   theme:
     default: system
     displayToggle: true
@@ -71,6 +83,8 @@ params:
     enable: true
     displayCopyright: true
     displayPoweredBy: false
+  page:
+    width: normal
   displayUpdatedDate: true
   dateFormat: "January 2, 2006"
   search:
