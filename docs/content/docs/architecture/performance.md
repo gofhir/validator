@@ -76,7 +76,7 @@ func (idx *elementIndex) Get(path string) *ElementDefinition {
 
 ### Embedded Specifications
 
-FHIR R4 base definitions are embedded directly into the binary using Go's `embed` package via `pkg/specs`. This eliminates disk I/O at startup and makes the validator binary fully self-contained.
+FHIR R4, R4B, and R5 base definitions are embedded directly into the binary using Go's `embed` package via `pkg/specs`. This eliminates disk I/O at startup and makes the validator binary fully self-contained.
 
 ```go
 //go:embed data/r4/*.json

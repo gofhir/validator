@@ -1,6 +1,6 @@
 ---
 title: "GoFHIR Validator"
-description: "Validación de recursos FHIR de alto rendimiento para Go. Valida recursos contra StructureDefinitions, perfiles y terminología."
+description: "Validación de recursos FHIR de alto rendimiento para Go. Valida recursos R4, R4B y R5 contra StructureDefinitions, perfiles y terminología."
 layout: hextra-home
 ---
 
@@ -19,7 +19,7 @@ layout: hextra-home
 
 <div class="hx:mb-12">
 {{< hextra/hero-subtitle >}}
-  Valida recursos FHIR R4 contra StructureDefinitions, perfiles y terminología&nbsp;<br class="sm:hx:block hx:hidden" />con una librería Go rápida e integrable y una herramienta CLI.
+  Valida recursos FHIR R4, R4B y R5 contra StructureDefinitions, perfiles y terminología&nbsp;<br class="sm:hx:block hx:hidden" />con una librería Go rápida e integrable y una herramienta CLI.
 {{< /hextra/hero-subtitle >}}
 </div>
 

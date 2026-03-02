@@ -45,12 +45,12 @@ This adds the validator module to your `go.mod` and makes the `validator` packag
 The GoFHIR Validator uses the standard FHIR package cache located at `~/.fhir/packages/`. This is the same cache used by other FHIR tools such as the HL7 Validator and SUSHI.
 
 {{< callout type="info" >}}
-The GoFHIR Validator includes **embedded FHIR R4 specifications**, so external packages are optional for basic R4 validation. You only need to install additional packages if you are validating against custom profiles or implementation guides.
+The GoFHIR Validator includes **embedded FHIR R4, R4B, and R5 specifications**, so external packages are optional for basic validation. You only need to install additional packages if you are validating against custom profiles or implementation guides.
 {{< /callout >}}
 
-### Installing FHIR R4 Core Packages
+### Installing FHIR Core Packages
 
-If you need the full R4 package cache (for example, for offline terminology validation or custom profile resolution), install the core packages using the NPM FHIR package registry:
+If you need the full package cache (for example, for offline terminology validation or custom profile resolution), install the core packages using the NPM FHIR package registry:
 
 {{< tabs >}}
 

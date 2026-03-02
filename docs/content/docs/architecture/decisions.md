@@ -97,7 +97,7 @@ This page documents every significant architecture decision made during the deve
 
 **Context**: Users need to validate resources against the correct FHIR version (R4, R4B, R5). Requiring manual configuration of base definitions creates friction.
 
-**Decision**: The validator automatically loads the appropriate FHIR specification package based on the declared version. FHIR R4 base definitions are embedded in the binary via `pkg/specs`, eliminating external file dependencies.
+**Decision**: The validator automatically loads the appropriate FHIR specification package based on the declared version. FHIR R4, R4B, and R5 base definitions are embedded in the binary via `pkg/specs`, eliminating external file dependencies.
 
 **Consequences**: Zero-configuration validation works out of the box. The binary is self-contained with no need to download specification files. The trade-off is increased binary size due to embedded specifications.
 

@@ -15,13 +15,14 @@ The GoFHIR Validator aims to produce validation results equivalent to the [HL7 F
 | Startup Time | ~2-3s | ~10-15s |
 | Memory Usage | ~200 MB | ~600 MB+ |
 | FHIR R4 | Yes | Yes |
+| FHIR R4B | Yes | Yes |
+| FHIR R5 | Yes | Yes |
 | Profiles | Yes | Yes |
 | Terminology | Yes (local) | Yes (+ tx server) |
 | FHIRPath | Yes | Yes |
 | Extensions | Yes | Yes |
 | Slicing | Yes | Yes |
 | Batch Validation | Yes (concurrent) | Yes |
-| FHIR R5 | Planned | Yes |
 
 ## CLI Flag Equivalence
 
@@ -90,7 +91,7 @@ The HL7 Validator remains the better choice when:
 - **Reference conformance** is critical -- the HL7 Validator is the official reference implementation.
 
 {{< callout type="info" >}}
-**Conformance goal.** The GoFHIR Validator strives to match the HL7 Validator's output for all FHIR R4 validation scenarios. If you find a case where the two validators disagree, please [open an issue](https://github.com/gofhir/validator/issues) so we can investigate and align behavior.
+**Conformance goal.** The GoFHIR Validator strives to match the HL7 Validator's output for all FHIR R4, R4B, and R5 validation scenarios. If you find a case where the two validators disagree, please [open an issue](https://github.com/gofhir/validator/issues) so we can investigate and align behavior.
 {{< /callout >}}
 
 ## Performance Benchmarks

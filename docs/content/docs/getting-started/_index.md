@@ -4,7 +4,7 @@ linkTitle: "Getting Started"
 description: "Install the GoFHIR Validator and validate your first FHIR resource in minutes."
 ---
 
-The **GoFHIR Validator** is a high-performance FHIR R4 resource validator written in Go. It is designed to be compatible with the [HL7 FHIR Validator](https://confluence.hl7.org/display/FHIR/Using+the+FHIR+Validator), producing equivalent validation results while offering significantly faster startup times and lower memory usage.
+The **GoFHIR Validator** is a high-performance FHIR resource validator written in Go, with support for **R4, R4B, and R5**. It is designed to be compatible with the [HL7 FHIR Validator](https://confluence.hl7.org/display/FHIR/Using+the+FHIR+Validator), producing equivalent validation results while offering significantly faster startup times and lower memory usage.
 
 {{< callout type="info" >}}
 GoFHIR Validator derives **all** validation rules from FHIR StructureDefinitions at runtime -- nothing is hardcoded. This means it works with any conformant profile, implementation guide, or custom StructureDefinition out of the box.
@@ -16,7 +16,7 @@ GoFHIR Validator derives **all** validation rules from FHIR StructureDefinitions
 **Performance** -- Startup in ~2-3 seconds with ~200 MB memory footprint, compared to ~10-15 seconds and ~600 MB+ for the Java-based HL7 Validator.
 {{< /callout >}}
 
-- **Full FHIR R4 support** -- Validates against the complete FHIR R4 specification
+- **Full FHIR R4, R4B, and R5 support** -- Validates against the complete FHIR specification for each version
 - **Profile validation** -- Supports custom profiles, implementation guides, and profile chains
 - **Terminology validation** -- Local code system and value set validation
 - **FHIRPath constraints** -- Evaluates all FHIRPath invariants defined in StructureDefinitions

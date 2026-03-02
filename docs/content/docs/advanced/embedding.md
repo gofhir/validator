@@ -31,7 +31,11 @@ if specs.HasVersion("4.0.1") {
     fmt.Println("FHIR R4 specs are embedded")
 }
 
-// Get the embedded package data
+if specs.HasVersion("5.0.0") {
+    fmt.Println("FHIR R5 specs are embedded")
+}
+
+// Get the embedded package data for a specific version
 packages := specs.GetPackages("4.0.1")
 fmt.Printf("Found %d embedded packages for R4\n", len(packages))
 ```
@@ -231,9 +235,10 @@ Embedding FHIR specification packages increases the binary size. Here are approx
 
 | Embedded Content | Approximate Size |
 |-----------------|-----------------|
-| FHIR R4 core only | ~15 MB |
-| FHIR R4 + US Core | ~18 MB |
-| FHIR R4 + multiple IGs | ~20-30 MB |
+| FHIR R4/R4B/R5 core (all versions) | ~45 MB |
+| Single version core (e.g. R4) | ~15 MB |
+| Single version + US Core | ~18 MB |
+| Single version + multiple IGs | ~20-30 MB |
 
 {{< callout type="info" >}}
 These sizes are for the compressed `.tgz` data embedded in the binary. The packages are decompressed in memory at startup. Consider the memory impact when embedding very large IGs.

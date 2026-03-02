@@ -222,7 +222,7 @@ v, err := validator.New(
 
 ## Seleccion de Version FHIR
 
-El validador usa FHIR R4 (`4.0.1`) por defecto. Para validar contra una version diferente, especificala al momento de la construccion.
+El validador soporta FHIR R4 (`4.0.1`), R4B (`4.3.0`) y R5 (`5.0.0`). Por defecto usa R4. Para validar contra una version diferente, especificala al momento de la construccion.
 
 **CLI:**
 

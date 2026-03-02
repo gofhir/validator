@@ -97,7 +97,7 @@ Esta pagina documenta cada decision de arquitectura significativa tomada durante
 
 **Contexto**: Los usuarios necesitan validar recursos contra la version correcta de FHIR (R4, R4B, R5). Requerir configuracion manual de definiciones base crea friccion.
 
-**Decision**: El validador carga automaticamente el paquete de especificacion FHIR apropiado basandose en la version declarada. Las definiciones base de FHIR R4 estan embebidas en el binario via `pkg/specs`, eliminando dependencias de archivos externos.
+**Decision**: El validador carga automaticamente el paquete de especificacion FHIR apropiado basandose en la version declarada. Las definiciones base de FHIR R4, R4B y R5 estan embebidas en el binario via `pkg/specs`, eliminando dependencias de archivos externos.
 
 **Consecuencias**: La validacion sin configuracion funciona directamente. El binario es autocontenido sin necesidad de descargar archivos de especificacion. El compromiso es un mayor tamano del binario debido a las especificaciones embebidas.
 

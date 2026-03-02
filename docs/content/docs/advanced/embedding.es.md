@@ -31,7 +31,11 @@ if specs.HasVersion("4.0.1") {
     fmt.Println("Las specs de FHIR R4 estan embebidas")
 }
 
-// Obtener los datos del paquete embebido
+if specs.HasVersion("5.0.0") {
+    fmt.Println("Las specs de FHIR R5 estan embebidas")
+}
+
+// Obtener los datos del paquete embebido para una version especifica
 packages := specs.GetPackages("4.0.1")
 fmt.Printf("Se encontraron %d paquetes embebidos para R4\n", len(packages))
 ```
@@ -231,9 +235,10 @@ Embeber paquetes de la especificacion FHIR aumenta el tamano del binario. Aqui h
 
 | Contenido Embebido | Tamano Aproximado |
 |--------------------|-------------------|
-| Solo FHIR R4 core | ~15 MB |
-| FHIR R4 + US Core | ~18 MB |
-| FHIR R4 + multiples IGs | ~20-30 MB |
+| FHIR R4/R4B/R5 core (todas las versiones) | ~45 MB |
+| Una sola version core (ej. R4) | ~15 MB |
+| Una sola version + US Core | ~18 MB |
+| Una sola version + multiples IGs | ~20-30 MB |
 
 {{< callout type="info" >}}
 Estos tamanos son para los datos `.tgz` comprimidos embebidos en el binario. Los paquetes se descomprimen en memoria al inicio. Considera el impacto en memoria al embeber IGs muy grandes.

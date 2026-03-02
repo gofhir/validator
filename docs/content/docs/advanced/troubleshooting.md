@@ -123,7 +123,7 @@ result, _ = v.Validate(ctx, resource2)
 
 **Symptom:** The validator uses more memory than expected.
 
-**Solution:** The typical memory footprint is approximately 200 MB for FHIR R4 core. To reduce memory usage:
+**Solution:** The typical memory footprint is approximately 200 MB per FHIR version (R4, R4B, or R5). To reduce memory usage:
 
 - **Reuse the validator.** Do not create a new `Validator` instance for each resource. Each instance loads its own copy of the registry.
 - **Load only the packages you need.** Avoid loading IGs that are not required for your validation.

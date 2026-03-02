@@ -123,7 +123,7 @@ result, _ = v.Validate(ctx, resource2)
 
 **Sintoma:** El validador usa mas memoria de lo esperado.
 
-**Solucion:** La huella de memoria tipica es aproximadamente 200 MB para FHIR R4 core. Para reducir el uso de memoria:
+**Solucion:** La huella de memoria tipica es aproximadamente 200 MB por version FHIR (R4, R4B o R5). Para reducir el uso de memoria:
 
 - **Reutiliza el validador.** No crees una nueva instancia de `Validator` para cada recurso. Cada instancia carga su propia copia del registro.
 - **Carga solo los paquetes que necesitas.** Evita cargar IGs que no son necesarios para tu validacion.
