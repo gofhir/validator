@@ -485,41 +485,14 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		return result, nil
 	}
 
-	// Mode-specific validation for delete: only require resourceType + id.
-	if vc.mode == ValidateModeDelete {
-		if _, hasID := data["id"]; !hasID {
-			result.AddErrorWithID(
-				issue.DiagModeDeleteRequiresID,
-				map[string]any{"resourceType": resourceType},
-				resourceType+".id",
-			)
-		}
+	// Mode-specific validation: delete returns early, update checks id.
+	if earlyReturn := v.validateMode(vc.mode, data, resourceType, result); earlyReturn {
 		result.Stats.Duration = time.Since(startTime).Nanoseconds()
 		return result, nil
 	}
 
-	// Mode-specific validation for update: id must be present.
-	if vc.mode == ValidateModeUpdate {
-		if _, hasID := data["id"]; !hasID {
-			result.AddErrorWithID(
-				issue.DiagModeUpdateRequiresID,
-				map[string]any{"resourceType": resourceType},
-				resourceType+".id",
-			)
-		}
-	}
-
 	// Extract meta.profile if present
-	var metaProfiles []string
-	if meta, ok := data["meta"].(map[string]any); ok {
-		if profiles, ok := meta["profile"].([]any); ok {
-			for _, p := range profiles {
-				if ps, ok := p.(string); ok {
-					metaProfiles = append(metaProfiles, ps)
-				}
-			}
-		}
-	}
+	metaProfiles := extractMetaProfiles(data)
 
 	// Get core resource StructureDefinition (always validate against this)
 	coreURL := registry.GetSDForResource(resourceType)
@@ -533,20 +506,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 
 	// If an IG is specified, add its profiles that match this resource type
 	if vc.ig != "" {
-		igProfiles := v.registry.GetProfilesByPackage(vc.ig)
-		if len(igProfiles) == 0 {
-			result.AddIssue(issue.Issue{
-				Severity:    issue.SeverityWarning,
-				Code:        issue.CodeNotFound,
-				Diagnostics: fmt.Sprintf("No profiles found for IG package '%s'", vc.ig),
-			})
-		} else {
-			for _, sd := range igProfiles {
-				if sd.Type == resourceType {
-					vc.profiles = append(vc.profiles, sd.URL)
-				}
-			}
-		}
+		vc.profiles = v.resolveIGProfiles(vc.ig, resourceType, vc.profiles, result)
 	}
 
 	// Collect and resolve all profiles to validate against
@@ -687,6 +647,69 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	// Phase 9: Slicing validation
 	v.slicingValidator.ValidateData(data, sd, result)
 	result.Stats.PhasesRun++
+}
+
+// validateMode applies mode-specific validation rules.
+// Returns true if validation should return early (delete mode).
+func (v *Validator) validateMode(mode ValidateMode, data map[string]any, resourceType string, result *issue.Result) bool {
+	switch mode {
+	case ValidateModeDelete:
+		if _, hasID := data["id"]; !hasID {
+			result.AddErrorWithID(
+				issue.DiagModeDeleteRequiresID,
+				map[string]any{"resourceType": resourceType},
+				resourceType+".id",
+			)
+		}
+		return true
+	case ValidateModeUpdate:
+		if _, hasID := data["id"]; !hasID {
+			result.AddErrorWithID(
+				issue.DiagModeUpdateRequiresID,
+				map[string]any{"resourceType": resourceType},
+				resourceType+".id",
+			)
+		}
+	}
+	return false
+}
+
+// extractMetaProfiles extracts profile URLs from resource meta.profile.
+func extractMetaProfiles(data map[string]any) []string {
+	meta, ok := data["meta"].(map[string]any)
+	if !ok {
+		return nil
+	}
+	profiles, ok := meta["profile"].([]any)
+	if !ok {
+		return nil
+	}
+	result := make([]string, 0, len(profiles))
+	for _, p := range profiles {
+		if ps, ok := p.(string); ok {
+			result = append(result, ps)
+		}
+	}
+	return result
+}
+
+// resolveIGProfiles finds profiles from an IG package that match the resource type.
+func (v *Validator) resolveIGProfiles(ig, resourceType string, profiles []string, result *issue.Result) []string {
+	igProfiles := v.registry.GetProfilesByPackage(ig)
+	if len(igProfiles) == 0 {
+		result.AddIssue(issue.Issue{
+			Severity:    issue.SeverityWarning,
+			Code:        issue.CodeNotFound,
+			Diagnostics: fmt.Sprintf("No profiles found for IG package '%s'", ig),
+		})
+		return profiles
+	}
+	for _, sd := range igProfiles {
+		if sd.Type == resourceType {
+			profiles = append(profiles, sd.URL)
+		}
+	}
+	return profiles
 }
 
 // ValidateJSON validates a FHIR resource from a JSON string.

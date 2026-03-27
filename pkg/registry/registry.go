@@ -260,7 +260,7 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 }
 
 // loadResourceUnlocked parses and indexes a single resource if it is a StructureDefinition.
-// packageID identifies the source package (e.g., "hl7.fhir.us.core#6.1.0"); empty if unknown.
+// PackageID identifies the source package (e.g., "hl7.fhir.us.core#6.1.0"); empty if unknown.
 // Must be called while the write lock is held.
 func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) {
 	var peek struct {
