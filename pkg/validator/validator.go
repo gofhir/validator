@@ -179,10 +179,32 @@ type canonicalRef struct {
 	version string
 }
 
+// ValidateMode represents the validation mode for the $validate operation.
+// Per FHIR R4, mode affects which rules apply during validation.
+type ValidateMode string
+
+const (
+	// ValidateModeNone means no specific mode — default validation rules apply.
+	ValidateModeNone ValidateMode = ""
+
+	// ValidateModeCreate validates as if the resource is being created.
+	// Server-assigned fields (id, meta.versionId, meta.lastUpdated) are not required.
+	ValidateModeCreate ValidateMode = "create"
+
+	// ValidateModeUpdate validates as if the resource is being updated.
+	// The id element must be present.
+	ValidateModeUpdate ValidateMode = "update"
+
+	// ValidateModeDelete validates as if the resource is being deleted.
+	// Only minimal validation is performed (resourceType and id must be present).
+	ValidateModeDelete ValidateMode = "delete"
+)
+
 // validateConfig holds per-call validation options.
 type validateConfig struct {
 	profiles          []string
 	canonicalProfiles []canonicalRef
+	mode              ValidateMode
 }
 
 // ValidateOption configures a single Validate call.
@@ -203,6 +225,19 @@ func ValidateWithCanonicalProfile(canonical string) ValidateOption {
 	return func(c *validateConfig) {
 		url, version := registry.ParseCanonical(canonical)
 		c.canonicalProfiles = append(c.canonicalProfiles, canonicalRef{url: url, version: version})
+	}
+}
+
+// ValidateWithMode sets the validation mode for this call.
+// Per FHIR R4, mode affects which rules apply:
+//   - "create": server-assigned fields (id, meta.versionId, meta.lastUpdated) are not required
+//   - "update": id must be present
+//   - "delete": only minimal validation is performed
+//
+// See https://hl7.org/fhir/R4/resource-operation-validate.html
+func ValidateWithMode(mode ValidateMode) ValidateOption {
+	return func(c *validateConfig) {
+		c.mode = mode
 	}
 }
 
@@ -404,6 +439,11 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		opt(&vc)
 	}
 
+	// Validate mode parameter
+	if vc.mode != ValidateModeNone && vc.mode != ValidateModeCreate && vc.mode != ValidateModeUpdate && vc.mode != ValidateModeDelete {
+		return nil, fmt.Errorf("invalid validation mode %q: must be \"create\", \"update\", or \"delete\"", vc.mode)
+	}
+
 	// Check for context cancellation
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -430,6 +470,30 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		result.AddError(issue.CodeStructure, "Missing 'resourceType' property")
 		result.Stats.Duration = time.Since(startTime).Nanoseconds()
 		return result, nil
+	}
+
+	// Mode-specific validation for delete: only require resourceType + id.
+	if vc.mode == ValidateModeDelete {
+		if _, hasID := data["id"]; !hasID {
+			result.AddErrorWithID(
+				issue.DiagModeDeleteRequiresID,
+				map[string]any{"resourceType": resourceType},
+				resourceType+".id",
+			)
+		}
+		result.Stats.Duration = time.Since(startTime).Nanoseconds()
+		return result, nil
+	}
+
+	// Mode-specific validation for update: id must be present.
+	if vc.mode == ValidateModeUpdate {
+		if _, hasID := data["id"]; !hasID {
+			result.AddErrorWithID(
+				issue.DiagModeUpdateRequiresID,
+				map[string]any{"resourceType": resourceType},
+				resourceType+".id",
+			)
+		}
 	}
 
 	// Extract meta.profile if present

@@ -79,6 +79,12 @@ const (
 	DiagSlicingCardinalityMax DiagnosticID = "SLICING_CARDINALITY_MAX"
 )
 
+// Diagnostic IDs for $validate mode validation.
+const (
+	DiagModeUpdateRequiresID DiagnosticID = "MODE_UPDATE_REQUIRES_ID"
+	DiagModeDeleteRequiresID DiagnosticID = "MODE_DELETE_REQUIRES_ID"
+)
+
 // Diagnostic IDs for primitive type validation (M3).
 const (
 	DiagTypeInvalidBoolean     DiagnosticID = "TYPE_INVALID_BOOLEAN"
@@ -354,6 +360,18 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeProcessing,
 		Template: "Could not evaluate constraint '{key}': {error}",
+	},
+
+	// $validate mode
+	DiagModeUpdateRequiresID: {
+		Severity: SeverityError,
+		Code:     CodeRequired,
+		Template: "Resource id is required in 'update' mode for {resourceType}",
+	},
+	DiagModeDeleteRequiresID: {
+		Severity: SeverityError,
+		Code:     CodeRequired,
+		Template: "Resource id is required in 'delete' mode for {resourceType}",
 	},
 }
 
