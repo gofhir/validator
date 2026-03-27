@@ -205,6 +205,7 @@ type validateConfig struct {
 	profiles          []string
 	canonicalProfiles []canonicalRef
 	mode              ValidateMode
+	ig                string // Package ID for IG-scoped validation (e.g., "hl7.fhir.us.core#6.1.0")
 }
 
 // ValidateOption configures a single Validate call.
@@ -225,6 +226,18 @@ func ValidateWithCanonicalProfile(canonical string) ValidateOption {
 	return func(c *validateConfig) {
 		url, version := registry.ParseCanonical(canonical)
 		c.canonicalProfiles = append(c.canonicalProfiles, canonicalRef{url: url, version: version})
+	}
+}
+
+// ValidateWithIG sets the implementation guide package for this call.
+// When set, profiles from the specified IG that match the resource type are automatically
+// added to validation. The ig parameter is a package ID (e.g., "hl7.fhir.us.core#6.1.0").
+// The IG package must have been loaded at construction time via WithPackage.
+//
+// See https://hl7.org/fhir/R4/resource-operation-validate.html
+func ValidateWithIG(ig string) ValidateOption {
+	return func(c *validateConfig) {
+		c.ig = ig
 	}
 }
 
@@ -516,6 +529,24 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		result.AddError(issue.CodeStructure, fmt.Sprintf("Unknown resourceType '%s'", resourceType))
 		result.Stats.Duration = time.Since(startTime).Nanoseconds()
 		return result, nil
+	}
+
+	// If an IG is specified, add its profiles that match this resource type
+	if vc.ig != "" {
+		igProfiles := v.registry.GetProfilesByPackage(vc.ig)
+		if len(igProfiles) == 0 {
+			result.AddIssue(issue.Issue{
+				Severity:    issue.SeverityWarning,
+				Code:        issue.CodeNotFound,
+				Diagnostics: fmt.Sprintf("No profiles found for IG package '%s'", vc.ig),
+			})
+		} else {
+			for _, sd := range igProfiles {
+				if sd.Type == resourceType {
+					vc.profiles = append(vc.profiles, sd.URL)
+				}
+			}
+		}
 	}
 
 	// Collect and resolve all profiles to validate against

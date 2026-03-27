@@ -36,6 +36,10 @@ type StructureDefinition struct {
 	Snapshot     *Snapshot     `json:"snapshot,omitempty"`
 	Differential *Differential `json:"differential,omitempty"`
 
+	// PackageID identifies the FHIR package this SD was loaded from (e.g., "hl7.fhir.us.core#6.1.0").
+	// Empty for SDs loaded from individual resources or external resolvers.
+	PackageID string `json:"-"`
+
 	// Raw JSON for full access when needed
 	raw json.RawMessage
 }
@@ -243,8 +247,9 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 	defer r.mu.Unlock()
 
 	for _, pkg := range packages {
+		packageID := pkg.Name + "#" + pkg.Version
 		for _, data := range pkg.Resources {
-			r.loadResourceUnlocked(data)
+			r.loadResourceUnlocked(data, packageID)
 		}
 	}
 
@@ -255,8 +260,9 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 }
 
 // loadResourceUnlocked parses and indexes a single resource if it is a StructureDefinition.
+// packageID identifies the source package (e.g., "hl7.fhir.us.core#6.1.0"); empty if unknown.
 // Must be called while the write lock is held.
-func (r *Registry) loadResourceUnlocked(data json.RawMessage) {
+func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) {
 	var peek struct {
 		ResourceType string `json:"resourceType"`
 	}
@@ -272,6 +278,7 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage) {
 		return
 	}
 	sd.raw = data
+	sd.PackageID = packageID
 
 	// Index by URL
 	if sd.URL != "" {
@@ -364,6 +371,22 @@ func (r *Registry) GetByURL(url string) *StructureDefinition {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.byURL[url]
+}
+
+// GetProfilesByPackage returns all constraint StructureDefinitions (profiles) from a given package.
+// The packageID should match the format "name#version" (e.g., "hl7.fhir.us.core#6.1.0").
+// Returns nil if no profiles are found for the given package.
+func (r *Registry) GetProfilesByPackage(packageID string) []*StructureDefinition {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var profiles []*StructureDefinition
+	for _, sd := range r.byURL {
+		if sd.PackageID == packageID && sd.Derivation == "constraint" {
+			profiles = append(profiles, sd)
+		}
+	}
+	return profiles
 }
 
 // GetByCanonical returns a StructureDefinition by canonical URL and optional version.
