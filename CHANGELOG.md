@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.12.0](https://github.com/gofhir/validator/compare/v1.11.0...v1.12.0) (2026-03-28)
+
+
+### Features
+
+* add ValidateWithIG per-call option for implementation guide context ([f0cc05a](https://github.com/gofhir/validator/commit/f0cc05a47cc014b3cccc581f9345d35bc3ddf24e)), closes [#45](https://github.com/gofhir/validator/issues/45)
+* add ValidateWithMode per-call option for $validate mode parameter ([9f0715a](https://github.com/gofhir/validator/commit/9f0715aaec5614a734ff4be5214a5b38d56a13ed)), closes [#44](https://github.com/gofhir/validator/issues/44)
+
+
+### Bug Fixes
+
+* resolve all golangci-lint issues across codebase ([3b93403](https://github.com/gofhir/validator/commit/3b93403bb03a0a2eef8d6eff604a3a9fe19908ac))
+
 ## [1.11.0](https://github.com/gofhir/validator/compare/v1.10.0...v1.11.0) (2026-03-01)
 
 
