@@ -27,6 +27,7 @@ func New(reg *registry.Registry) *Validator {
 }
 
 // Validate validates the cardinality of a FHIR resource against its StructureDefinition.
+//
 // Deprecated: Use ValidateData for better performance when JSON is already parsed.
 func (v *Validator) Validate(resource []byte, sd *registry.StructureDefinition) *issue.Result {
 	result := issue.GetPooledResult()

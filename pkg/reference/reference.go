@@ -201,6 +201,7 @@ func New(reg *registry.Registry) *Validator {
 }
 
 // Validate validates all Reference elements in a resource.
+//
 // Deprecated: Use ValidateData for better performance when JSON is already parsed.
 func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.StructureDefinition, result *issue.Result) {
 	if sd == nil || sd.Snapshot == nil {

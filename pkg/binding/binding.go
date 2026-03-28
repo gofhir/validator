@@ -35,6 +35,7 @@ func New(sdRegistry *registry.Registry, termRegistry *terminology.Registry) *Val
 }
 
 // Validate validates bindings for a resource.
+//
 // Deprecated: Use ValidateData for better performance when JSON is already parsed.
 func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.StructureDefinition, result *issue.Result) {
 	if sd == nil || sd.Snapshot == nil {
@@ -383,7 +384,8 @@ func (v *Validator) validateCodeBinding(code, system string, binding *registry.B
 	}
 
 	if !valid {
-		if binding.Strength == strengthRequired {
+		switch binding.Strength {
+		case strengthRequired:
 			result.AddErrorWithID(
 				issue.DiagBindingRequired,
 				map[string]any{
@@ -392,7 +394,7 @@ func (v *Validator) validateCodeBinding(code, system string, binding *registry.B
 				},
 				fhirPath,
 			)
-		} else if binding.Strength == strengthExtensible {
+		case strengthExtensible:
 			result.AddWarningWithID(
 				issue.DiagBindingExtensible,
 				map[string]any{

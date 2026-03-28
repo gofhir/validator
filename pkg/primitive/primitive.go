@@ -66,6 +66,7 @@ type elementIndex struct {
 }
 
 // Validate validates primitive types in a FHIR resource against its StructureDefinition.
+//
 // Deprecated: Use ValidateData for better performance when JSON is already parsed.
 func (v *Validator) Validate(resource []byte, sd *registry.StructureDefinition) *issue.Result {
 	result := issue.GetPooledResult()

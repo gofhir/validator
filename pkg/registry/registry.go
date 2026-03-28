@@ -16,6 +16,11 @@ const (
 	KindResource = "resource"
 )
 
+// StructureDefinition.Derivation constants.
+const (
+	DerivationConstraint = "constraint"
+)
+
 // StructureDefinition represents a minimal view of a FHIR StructureDefinition.
 // We use a lightweight struct to avoid importing full FHIR types during loading.
 type StructureDefinition struct {
@@ -298,7 +303,7 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) 
 	}
 
 	// Index by type for base definitions - first definition wins
-	if sd.Type != "" && sd.Derivation != "constraint" {
+	if sd.Type != "" && sd.Derivation != DerivationConstraint {
 		if _, exists := r.byType[sd.Type]; !exists {
 			r.byType[sd.Type] = &sd
 		}
@@ -382,7 +387,7 @@ func (r *Registry) GetProfilesByPackage(packageID string) []*StructureDefinition
 
 	var profiles []*StructureDefinition
 	for _, sd := range r.byURL {
-		if sd.PackageID == packageID && sd.Derivation == "constraint" {
+		if sd.PackageID == packageID && sd.Derivation == DerivationConstraint {
 			profiles = append(profiles, sd)
 		}
 	}

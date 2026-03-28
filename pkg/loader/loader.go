@@ -180,7 +180,7 @@ func (l *Loader) LoadVersion(version string) ([]*Package, error) {
 	}
 
 	packages := make([]*Package, 0, len(refs))
-	var errors []string
+	var loadErrors []string
 
 	for _, ref := range refs {
 		pkg, err := l.LoadPackageRef(ref)
@@ -189,16 +189,16 @@ func (l *Loader) LoadVersion(version string) ([]*Package, error) {
 			if strings.Contains(ref.Name, ".core") {
 				return nil, fmt.Errorf("failed to load core package: %w", err)
 			}
-			errors = append(errors, fmt.Sprintf("%s: %v", ref.String(), err))
+			loadErrors = append(loadErrors, fmt.Sprintf("%s: %v", ref.String(), err))
 			continue
 		}
 		packages = append(packages, pkg)
 	}
 
-	if len(errors) > 0 {
+	if len(loadErrors) > 0 {
 		// Log warnings for optional packages that failed to load
 		// In production, this should use a proper logger
-		for _, e := range errors {
+		for _, e := range loadErrors {
 			fmt.Fprintf(os.Stderr, "Warning: %s\n", e)
 		}
 	}

@@ -48,6 +48,7 @@ type Context struct {
 }
 
 // Validate validates slicing constraints for a FHIR resource.
+//
 // Deprecated: Use ValidateData for better performance when JSON is already parsed.
 func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.StructureDefinition, result *issue.Result) {
 	if sd == nil || sd.Snapshot == nil {

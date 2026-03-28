@@ -44,6 +44,7 @@ func New(reg *registry.Registry, termReg *terminology.Registry, primVal *primiti
 }
 
 // Validate validates all extensions in a resource.
+//
 // Deprecated: Use ValidateData for better performance when JSON is already parsed.
 func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.StructureDefinition, result *issue.Result) {
 	if sd == nil || sd.Type == "" {
@@ -977,7 +978,8 @@ func (v *Validator) validateCodeBinding(code, system string, binding *registry.B
 	}
 
 	if !valid {
-		if binding.Strength == "required" {
+		switch binding.Strength {
+		case "required":
 			result.AddErrorWithID(
 				issue.DiagBindingRequired,
 				map[string]any{
@@ -986,7 +988,7 @@ func (v *Validator) validateCodeBinding(code, system string, binding *registry.B
 				},
 				fhirPath,
 			)
-		} else if binding.Strength == "extensible" {
+		case "extensible":
 			result.AddWarningWithID(
 				issue.DiagBindingExtensible,
 				map[string]any{
@@ -1075,7 +1077,8 @@ func (v *Validator) validateCodingBinding(coding map[string]any, binding *regist
 			codeDisplay = fmt.Sprintf("%s#%s", system, code)
 		}
 
-		if binding.Strength == "required" {
+		switch binding.Strength {
+		case "required":
 			result.AddErrorWithID(
 				issue.DiagBindingRequired,
 				map[string]any{
@@ -1084,7 +1087,7 @@ func (v *Validator) validateCodingBinding(coding map[string]any, binding *regist
 				},
 				fhirPath,
 			)
-		} else if binding.Strength == "extensible" {
+		case "extensible":
 			// For extensible bindings, only warn if the system IS in the ValueSet.
 			// If the system is NOT in the ValueSet, the code is "extending" the binding
 			// (using a different code system), which is allowed without warning.

@@ -786,7 +786,7 @@ func (v *Validator) resolveProfiles(ctx context.Context, canonicals []canonicalR
 // collectProfilesToValidate returns the ordered list of profiles to validate against.
 // Priority: 1) Per-call profiles, 2) Config profiles, 3) meta.profile, 4) core resource SD.
 func (v *Validator) collectProfilesToValidate(perCallProfiles, metaProfiles []string) []string {
-	var profiles []string
+	profiles := make([]string, 0, len(perCallProfiles)+len(v.config.Profiles)+len(metaProfiles))
 
 	// 1. Per-call profiles take highest priority
 	profiles = append(profiles, perCallProfiles...)
