@@ -4,24 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
-
-	"github.com/gofhir/validator/pkg/loader"
 )
 
-// helperLoadRegistry loads the FHIR R4 package into a registry.
-func helperLoadRegistry(t *testing.T) *Registry {
-	t.Helper()
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
-	return r
-}
+// NOTE: Most tests in this file use getSharedRegistry (see shared_test.go).
+// Tests that mutate the registry use newMutableRegistry instead.
 
 // makeDiffElement builds a raw JSON ElementDefinition from a map of fields.
 func makeDiffElement(t *testing.T, fields map[string]any) ElementDefinition {
@@ -95,7 +81,7 @@ func TestEnsureSnapshot_BaseNotFound(t *testing.T) {
 }
 
 func TestEnsureSnapshot_BasicMerge(t *testing.T) {
-	r := helperLoadRegistry(t)
+	r := getSharedRegistry(t)
 	ctx := context.Background()
 
 	// Build a profile that makes Patient.identifier required (min=1).
@@ -155,7 +141,7 @@ func TestEnsureSnapshot_BasicMerge(t *testing.T) {
 }
 
 func TestEnsureSnapshot_TypeNarrowing(t *testing.T) {
-	r := helperLoadRegistry(t)
+	r := getSharedRegistry(t)
 	ctx := context.Background()
 
 	// Profile that narrows Observation.value[x] to only valueQuantity.
@@ -201,7 +187,7 @@ func TestEnsureSnapshot_TypeNarrowing(t *testing.T) {
 }
 
 func TestEnsureSnapshot_BindingOverride(t *testing.T) {
-	r := helperLoadRegistry(t)
+	r := getSharedRegistry(t)
 	ctx := context.Background()
 
 	// Profile that tightens Observation.status binding to a custom ValueSet.
@@ -248,7 +234,7 @@ func TestEnsureSnapshot_BindingOverride(t *testing.T) {
 }
 
 func TestEnsureSnapshot_ConstraintAccumulation(t *testing.T) {
-	r := helperLoadRegistry(t)
+	r := getSharedRegistry(t)
 	ctx := context.Background()
 
 	// Profile that adds a custom constraint to Patient.
@@ -308,7 +294,7 @@ func TestEnsureSnapshot_ConstraintAccumulation(t *testing.T) {
 }
 
 func TestEnsureSnapshot_NewSliceElement(t *testing.T) {
-	r := helperLoadRegistry(t)
+	r := getSharedRegistry(t)
 	ctx := context.Background()
 
 	sliceName := "MRN"
@@ -370,7 +356,8 @@ func TestEnsureSnapshot_NewSliceElement(t *testing.T) {
 }
 
 func TestEnsureSnapshot_ChainedProfiles(t *testing.T) {
-	r := helperLoadRegistry(t)
+	// This test mutates the registry (adds profileA to byURL), so it needs its own instance.
+	r := newMutableRegistry(t)
 	ctx := context.Background()
 
 	// Profile A derives from Patient (makes identifier required).
@@ -445,7 +432,7 @@ func TestEnsureSnapshot_ChainedProfiles(t *testing.T) {
 }
 
 func TestEnsureSnapshot_PolymorphicFixed(t *testing.T) {
-	r := helperLoadRegistry(t)
+	r := getSharedRegistry(t)
 	ctx := context.Background()
 
 	// Profile that sets fixedCode on Patient.gender.
@@ -499,7 +486,7 @@ func TestEnsureSnapshot_PolymorphicFixed(t *testing.T) {
 }
 
 func TestEnsureSnapshot_Idempotent(t *testing.T) {
-	r := helperLoadRegistry(t)
+	r := getSharedRegistry(t)
 	ctx := context.Background()
 
 	profile := &StructureDefinition{

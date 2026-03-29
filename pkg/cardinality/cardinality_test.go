@@ -1,27 +1,47 @@
 package cardinality
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/registry"
 )
 
-func setupTestRegistry(t *testing.T) *registry.Registry {
-	t.Helper()
+var (
+	sharedRegistry     *registry.Registry
+	errSharedRegistry  error
+	sharedRegistryOnce sync.Once
+)
 
+func initSharedRegistry() {
 	l := loader.NewLoader("")
 	packages, err := l.LoadVersion("4.0.1")
 	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
+		errSharedRegistry = fmt.Errorf("cannot load FHIR packages: %w", err)
+		return
 	}
 
 	reg := registry.New()
 	if err := reg.LoadFromPackages(packages); err != nil {
-		t.Fatalf("Failed to load registry: %v", err)
+		errSharedRegistry = fmt.Errorf("failed to load registry: %w", err)
+		return
 	}
 
-	return reg
+	sharedRegistry = reg
+}
+
+func setupTestRegistry(t *testing.T) *registry.Registry {
+	t.Helper()
+
+	sharedRegistryOnce.Do(initSharedRegistry)
+
+	if errSharedRegistry != nil {
+		t.Skipf("%v", errSharedRegistry)
+	}
+
+	return sharedRegistry
 }
 
 func TestValidateObservationRequiredElements(t *testing.T) {

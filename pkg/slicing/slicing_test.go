@@ -2,6 +2,8 @@ package slicing
 
 import (
 	"encoding/json"
+	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/issue"
@@ -9,32 +11,46 @@ import (
 	"github.com/gofhir/validator/pkg/registry"
 )
 
-func setupTestRegistry(t *testing.T) *registry.Registry {
+var (
+	sharedSlicingValidator *Validator
+	sharedRegistry         *registry.Registry
+	sharedSetupOnce        sync.Once
+	errSharedSetup         error
+)
+
+func getSharedSetup(t *testing.T) (*Validator, *registry.Registry) {
 	t.Helper()
+	sharedSetupOnce.Do(func() {
+		l := loader.NewLoader("")
+		packages, err := l.LoadVersion("4.0.1")
+		if err != nil {
+			errSharedSetup = fmt.Errorf("failed to load packages: %w", err)
+			return
+		}
 
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Fatalf("Failed to load packages: %v", err)
+		// Also try to load US Core if available
+		usCorePkgs, _ := l.LoadPackage("hl7.fhir.us.core", "6.1.0")
+		if usCorePkgs != nil {
+			packages = append(packages, usCorePkgs)
+		}
+
+		reg := registry.New()
+		if err := reg.LoadFromPackages(packages); err != nil {
+			errSharedSetup = fmt.Errorf("failed to load registry: %w", err)
+			return
+		}
+
+		sharedRegistry = reg
+		sharedSlicingValidator = New(reg)
+	})
+	if errSharedSetup != nil {
+		t.Fatalf("Shared setup failed: %v", errSharedSetup)
 	}
-
-	// Also try to load US Core if available
-	usCorePkgs, _ := l.LoadPackage("hl7.fhir.us.core", "6.1.0")
-	if usCorePkgs != nil {
-		packages = append(packages, usCorePkgs)
-	}
-
-	reg := registry.New()
-	if err := reg.LoadFromPackages(packages); err != nil {
-		t.Fatalf("Failed to load registry: %v", err)
-	}
-
-	return reg
+	return sharedSlicingValidator, sharedRegistry
 }
 
 func TestExtractContexts(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, reg := getSharedSetup(t)
 
 	// Test with Patient - extensions are sliced
 	patientSD := reg.GetByType("Patient")
@@ -70,8 +86,7 @@ func TestExtractContexts(t *testing.T) {
 }
 
 func TestExtractContextsUSCore(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, reg := getSharedSetup(t)
 
 	// Try US Core Patient if available
 	usCorePatientSD := reg.GetByURL("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
@@ -114,8 +129,7 @@ func TestExtractContextsUSCore(t *testing.T) {
 }
 
 func TestValueDiscriminator(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, _ := getSharedSetup(t)
 
 	// Create a mock slice with a fixed URL
 	sliceInfo := SliceInfo{
@@ -153,8 +167,7 @@ func TestValueDiscriminator(t *testing.T) {
 }
 
 func TestPatternDiscriminator(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, _ := getSharedSetup(t)
 
 	// Create a mock slice with a pattern
 	sliceInfo := SliceInfo{
@@ -214,8 +227,7 @@ func TestPatternDiscriminator(t *testing.T) {
 }
 
 func TestSlicingValidation_OpenRules(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, reg := getSharedSetup(t)
 
 	// Test resource with extensions (open slicing allows additional extensions)
 	resource := json.RawMessage(`{
@@ -296,8 +308,7 @@ func TestGetValueAtPath(t *testing.T) {
 }
 
 func TestValueDiscriminatorMultiLevel(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, reg := getSharedSetup(t)
 
 	// Get vitalsigns profile
 	vitalsignsSD := reg.GetByURL("http://hl7.org/fhir/StructureDefinition/vitalsigns")
@@ -554,8 +565,7 @@ func TestInferElementType(t *testing.T) {
 }
 
 func TestValueDiscriminatorWithPatternCode(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, _ := getSharedSetup(t)
 
 	sliceInfo := SliceInfo{
 		Name: "NombreSocial",
@@ -601,8 +611,7 @@ func TestValueDiscriminatorWithPatternCode(t *testing.T) {
 }
 
 func TestExistsDiscriminator(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, _ := getSharedSetup(t)
 
 	// Slice "withValue" expects "value" to exist (min=1).
 	sliceWithValue := SliceInfo{
@@ -697,8 +706,7 @@ func TestTypeDiscriminatorPolymorphic(t *testing.T) {
 }
 
 func TestProfileDiscriminatorThis(t *testing.T) {
-	reg := setupTestRegistry(t)
-	validator := New(reg)
+	validator, _ := getSharedSetup(t)
 
 	t.Run("extension url matches profile", func(t *testing.T) {
 		slice := SliceInfo{

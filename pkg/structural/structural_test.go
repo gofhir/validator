@@ -1,27 +1,43 @@
 package structural
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/registry"
 )
 
+var (
+	sharedOnce     sync.Once
+	sharedRegistry *registry.Registry
+	errSharedLoad  error
+)
+
 func setupTestRegistry(t *testing.T) *registry.Registry {
 	t.Helper()
 
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
+	sharedOnce.Do(func() {
+		l := loader.NewLoader("")
+		packages, err := l.LoadVersion("4.0.1")
+		if err != nil {
+			errSharedLoad = err
+			return
+		}
+
+		reg := registry.New()
+		if err := reg.LoadFromPackages(packages); err != nil {
+			errSharedLoad = err
+			return
+		}
+		sharedRegistry = reg
+	})
+
+	if errSharedLoad != nil {
+		t.Skipf("Cannot load FHIR packages: %v", errSharedLoad)
 	}
 
-	reg := registry.New()
-	if err := reg.LoadFromPackages(packages); err != nil {
-		t.Fatalf("Failed to load registry: %v", err)
-	}
-
-	return reg
+	return sharedRegistry
 }
 
 func TestValidateValidPatient(t *testing.T) {

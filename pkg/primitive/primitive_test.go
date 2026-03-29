@@ -1,24 +1,46 @@
 package primitive
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/registry"
 )
 
+var (
+	sharedRegistry     *registry.Registry
+	sharedRegistryOnce sync.Once
+	errSharedRegistry  error
+)
+
+func loadSharedRegistry() (*registry.Registry, error) {
+	sharedRegistryOnce.Do(func() {
+		l := loader.NewLoader("")
+		packages, err := l.LoadVersion("4.0.1")
+		if err != nil {
+			errSharedRegistry = fmt.Errorf("cannot load FHIR packages: %w", err)
+			return
+		}
+
+		reg := registry.New()
+		if err := reg.LoadFromPackages(packages); err != nil {
+			errSharedRegistry = fmt.Errorf("failed to load registry: %w", err)
+			return
+		}
+
+		sharedRegistry = reg
+	})
+	return sharedRegistry, errSharedRegistry
+}
+
 func setupTestRegistry(t *testing.T) *registry.Registry {
 	t.Helper()
 
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
+	reg, err := loadSharedRegistry()
 	if err != nil {
 		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	reg := registry.New()
-	if err := reg.LoadFromPackages(packages); err != nil {
-		t.Fatalf("Failed to load registry: %v", err)
 	}
 
 	return reg

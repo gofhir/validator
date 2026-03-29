@@ -6,6 +6,9 @@ import (
 	"github.com/gofhir/validator/pkg/loader"
 )
 
+// NOTE: Most tests in this file use getSharedRegistry (see shared_test.go)
+// which loads FHIR packages once via sync.Once.
+
 func TestNewRegistry(t *testing.T) {
 	r := New()
 	if r == nil {
@@ -39,16 +42,7 @@ func TestRegistryLoadFromPackages(t *testing.T) {
 }
 
 func TestRegistryGetByURL(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	// Test getting Patient StructureDefinition
 	patientURL := "http://hl7.org/fhir/StructureDefinition/Patient"
@@ -71,16 +65,7 @@ func TestRegistryGetByURL(t *testing.T) {
 }
 
 func TestRegistryGetByType(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	tests := []struct {
 		typeName     string
@@ -109,16 +94,7 @@ func TestRegistryGetByType(t *testing.T) {
 }
 
 func TestRegistryGetElementDefinition(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	tests := []struct {
 		path        string
@@ -165,16 +141,7 @@ func TestRegistryGetElementDefinition(t *testing.T) {
 }
 
 func TestRegistryElementDefinitionBinding(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	// Patient.gender has a required binding
 	ed := r.GetElementDefinition("Patient.gender")
@@ -194,16 +161,7 @@ func TestRegistryElementDefinitionBinding(t *testing.T) {
 }
 
 func TestRegistryElementDefinitionConstraints(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	// Patient.contact has constraints
 	ed := r.GetElementDefinition("Patient.contact")
@@ -243,16 +201,7 @@ func getTypeCodes(types []Type) []string {
 // Tests for type classification methods derived from StructureDefinitions.
 
 func TestRegistryIsPrimitiveType(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	primitives := []string{
 		"string", "boolean", "integer", "decimal", "uri", "url",
@@ -278,16 +227,7 @@ func TestRegistryIsPrimitiveType(t *testing.T) {
 }
 
 func TestRegistryIsDataType(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	dataTypes := []string{
 		"HumanName", "Address", "ContactPoint", "Identifier",
@@ -314,16 +254,7 @@ func TestRegistryIsDataType(t *testing.T) {
 }
 
 func TestRegistryIsDomainResource(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	domainResources := []string{
 		"Patient", "Observation", "Encounter", "MedicationRequest",
@@ -359,16 +290,7 @@ func TestRegistryIsDomainResource(t *testing.T) {
 }
 
 func TestRegistryIsCanonicalResource(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	// Canonical resources have required 'url' element
 	canonicalResources := []string{
@@ -395,16 +317,7 @@ func TestRegistryIsCanonicalResource(t *testing.T) {
 }
 
 func TestRegistryIsMetadataResource(t *testing.T) {
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
+	r := getSharedRegistry(t)
 
 	// MetadataResources have url + name + status + experimental
 	metadataResources := []string{
