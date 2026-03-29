@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/gofhir/validator/compare/v1.12.0...v1.12.1) (2026-03-29)
+
+
+### Performance Improvements
+
+* **tests:** use sync.Once shared setup to avoid redundant FHIR package loading ([6c73530](https://github.com/gofhir/validator/commit/6c735304b3d99e79424b90c61b31480af7d88b98))
+
 ## [1.12.0](https://github.com/gofhir/validator/compare/v1.11.0...v1.12.0) (2026-03-28)
 
 
