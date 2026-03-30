@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://raw.githubusercontent.com/FHIR/Ucum-java/master/src/main/java/org/fhir/ucum/ExpressionParser.java)",
+      "Bash(curl -s https://raw.githubusercontent.com/FHIR/Ucum-java/master/src/main/java/org/fhir/ucum/Lexer.java)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "Bash(curl -s https://raw.githubusercontent.com/FHIR/Ucum-java/master/src/main/java/org/fhir/ucum/Converter.java)",
+      "Bash(curl -s https://raw.githubusercontent.com/FHIR/Ucum-java/master/src/main/java/org/fhir/ucum/special/HoldingHandler.java)",
+      "Read(//Users/robertoaraneda/projects/personal/opensource/ucum/**)",
+      "Bash(go test:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/robertoaraneda/projects/personal/opensource/ucum"
+    ]
+  }
+}

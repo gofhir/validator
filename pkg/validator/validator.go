@@ -26,6 +26,9 @@ import (
 	"github.com/gofhir/validator/pkg/specs"
 	"github.com/gofhir/validator/pkg/structural"
 	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/pkg/ucumvalidator"
+
+	"github.com/gofhir/ucum"
 )
 
 func init() {
@@ -52,6 +55,7 @@ type Validator struct {
 	constraintValidator   *constraint.Validator
 	fixedPatternValidator *fixedpattern.Validator
 	slicingValidator      *slicing.Validator
+	ucumValidator         *ucumvalidator.Validator
 }
 
 // PackageSpec represents an additional FHIR package to load.
@@ -415,7 +419,19 @@ func New(opts ...Option) (*Validator, error) {
 	v.fixedPatternValidator = fixedpattern.New(reg)
 	v.slicingValidator = slicing.New(reg)
 
+	v.ucumValidator = initUCUMValidator(reg)
+
 	return v, nil
+}
+
+// initUCUMValidator creates the UCUM validator for Quantity.code validation.
+func initUCUMValidator(reg *registry.Registry) *ucumvalidator.Validator {
+	ucumSvc, err := ucum.New()
+	if err != nil {
+		logger.Warn("Could not initialize UCUM service: %v", err)
+		return nil
+	}
+	return ucumvalidator.New(reg, ucumSvc)
 }
 
 // getMemUsage returns the current memory allocation in bytes.
@@ -646,6 +662,12 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 
 	// Phase 9: Slicing validation
 	v.slicingValidator.ValidateData(data, sd, result)
+	result.Stats.PhasesRun++
+
+	// Phase 10: UCUM validation (Quantity.code syntax)
+	if v.ucumValidator != nil {
+		v.ucumValidator.ValidateData(data, sd, result)
+	}
 	result.Stats.PhasesRun++
 }
 

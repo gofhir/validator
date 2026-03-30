@@ -85,6 +85,11 @@ const (
 	DiagModeDeleteRequiresID DiagnosticID = "MODE_DELETE_REQUIRES_ID"
 )
 
+// Diagnostic IDs for UCUM validation.
+const (
+	DiagUCUMInvalidCode DiagnosticID = "UCUM_INVALID_CODE"
+)
+
 // Diagnostic IDs for primitive type validation (M3).
 const (
 	DiagTypeInvalidBoolean     DiagnosticID = "TYPE_INVALID_BOOLEAN"
@@ -372,6 +377,13 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeRequired,
 		Template: "Resource id is required in 'delete' mode for {resourceType}",
+	},
+
+	// UCUM validation.
+	DiagUCUMInvalidCode: {
+		Severity: SeverityWarning,
+		Code:     CodeValue,
+		Template: "Invalid UCUM code '{code}': {error}",
 	},
 }
 
