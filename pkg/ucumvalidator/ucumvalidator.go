@@ -4,6 +4,7 @@ package ucumvalidator
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
@@ -12,13 +13,17 @@ import (
 	"github.com/gofhir/ucum"
 )
 
-const ucumSystem = "http://unitsofmeasure.org"
+const (
+	ucumSystem       = "http://unitsofmeasure.org"
+	quantityTypeName = "Quantity"
+)
 
 // Validator validates UCUM codes in Quantity elements.
 type Validator struct {
-	registry *registry.Registry
-	walker   *walker.Walker
-	ucum     ucum.Service
+	registry      *registry.Registry
+	walker        *walker.Walker
+	ucum          ucum.Service
+	quantityCache sync.Map // map[string]bool — caches whether a type derives from Quantity
 }
 
 // New creates a new UCUM validator.
@@ -128,13 +133,51 @@ func (v *Validator) validateQuantity(data map[string]any, fhirPath string, resul
 	}
 }
 
-// isQuantityType checks if an element definition has Quantity as its type.
+// isQuantityType checks if any of the element's types derive from Quantity
+// by walking the baseDefinition chain in the registry. Results are cached.
 func (v *Validator) isQuantityType(elemDef *registry.ElementDefinition) bool {
 	for _, t := range elemDef.Type {
-		switch t.Code {
-		case "Quantity", "SimpleQuantity", "Age", "Distance", "Count", "Duration", "MoneyQuantity":
+		if v.derivesFromQuantity(t.Code) {
 			return true
 		}
+	}
+	return false
+}
+
+// derivesFromQuantity checks whether a type derives from Quantity by walking
+// the StructureDefinition.baseDefinition chain. Results are cached for performance.
+func (v *Validator) derivesFromQuantity(typeName string) bool {
+	if typeName == quantityTypeName {
+		return true
+	}
+
+	if cached, ok := v.quantityCache.Load(typeName); ok {
+		b, _ := cached.(bool)
+		return b
+	}
+
+	result := v.walkBaseChain(typeName)
+	v.quantityCache.Store(typeName, result)
+	return result
+}
+
+// walkBaseChain walks the baseDefinition chain to check if a type ultimately derives from Quantity.
+func (v *Validator) walkBaseChain(typeName string) bool {
+	sd := v.registry.GetByType(typeName)
+	if sd == nil {
+		return false
+	}
+
+	visited := make(map[string]bool)
+	for sd != nil {
+		if sd.Type == quantityTypeName {
+			return true
+		}
+		if sd.BaseDefinition == "" || visited[sd.BaseDefinition] {
+			return false
+		}
+		visited[sd.BaseDefinition] = true
+		sd = v.registry.GetByURL(sd.BaseDefinition)
 	}
 	return false
 }
