@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/gofhir/validator/compare/v1.13.0...v1.13.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* close 4 FHIR R4 compliance gaps on write-time validation ([c828de2](https://github.com/gofhir/validator/commit/c828de22e30c3019808be4750047da03bcd4f88d)), closes [#51](https://github.com/gofhir/validator/issues/51)
+
 ## [1.13.0](https://github.com/gofhir/validator/compare/v1.12.1...v1.13.0) (2026-03-30)
 
 
