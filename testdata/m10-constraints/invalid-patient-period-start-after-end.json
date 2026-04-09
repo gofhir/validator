@@ -1,0 +1,13 @@
+{
+  "resourceType": "Patient",
+  "name": [
+    {
+      "family": "BadPeriod",
+      "period": {
+        "start": "2025-01-01",
+        "end": "2020-01-01"
+      }
+    }
+  ],
+  "gender": "male"
+}

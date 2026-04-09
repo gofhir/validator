@@ -1,0 +1,15 @@
+{
+  "resourceType": "Patient",
+  "extension": [
+    {
+      "url": "relative-not-absolute",
+      "valueString": "bad"
+    }
+  ],
+  "name": [
+    {
+      "family": "BadExtUrl"
+    }
+  ],
+  "gender": "female"
+}

@@ -64,6 +64,12 @@ func TestConstraintValidation(t *testing.T) {
 			expectErrors:   1, // pat-1: second contact has no name/telecom/address/organization
 			expectWarnings: 1, // extensible binding on contact[1].relationship
 		},
+		{
+			name:           "invalid-patient-period-start-after-end",
+			file:           "../../testdata/m10-constraints/invalid-patient-period-start-after-end.json",
+			expectErrors:   1, // per-1: start > end
+			expectWarnings: 1, // dom-6 (no narrative)
+		},
 	}
 
 	for _, tt := range tests {

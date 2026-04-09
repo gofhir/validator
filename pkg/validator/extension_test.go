@@ -39,6 +39,12 @@ func TestExtensionValidation(t *testing.T) {
 			expectErrors:   1, // Wrong context is an error
 			expectWarnings: 1, // dom-6 (no narrative)
 		},
+		{
+			name:           "invalid-extension-relative-url",
+			file:           "../../testdata/m8-extensions/invalid-extension-relative-url.json",
+			expectErrors:   1, // Extension URL must be absolute URI
+			expectWarnings: 1, // dom-6 (no narrative)
+		},
 	}
 
 	for _, tt := range tests {

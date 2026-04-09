@@ -189,6 +189,11 @@ func (v *Validator) validateExtensionArray(extensions any, basePath, contextPath
 	}
 }
 
+// isAbsoluteURI checks if a URL is an absolute URI per RFC 3986 (has a scheme).
+func isAbsoluteURI(url string) bool {
+	return strings.Contains(url, "://") || strings.HasPrefix(url, "urn:")
+}
+
 // validateSingleExtension validates a single extension.
 // Per FHIR R4 §2.1.0.1, unknown modifier extensions produce an ERROR (not a warning),
 // because a system SHALL refuse to process a resource with an unrecognized modifier extension.
@@ -199,6 +204,19 @@ func (v *Validator) validateSingleExtension(ext map[string]any, extPath, context
 		result.AddErrorWithID(
 			issue.DiagExtensionNoURL,
 			nil,
+			extPath,
+		)
+		return
+	}
+
+	// Validate that URL is an absolute URI (FHIR R4 §2.1.0.6).
+	// This rule is stated in the FHIR prose specification and is not expressible
+	// via the StructureDefinition (Extension.url is typed as System.String with
+	// no regex or constraint enforcing absolute URI format).
+	if !isAbsoluteURI(url) {
+		result.AddErrorWithID(
+			issue.DiagExtensionInvalidURL,
+			map[string]any{"url": url},
 			extPath,
 		)
 		return

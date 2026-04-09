@@ -1,0 +1,13 @@
+{
+  "resourceType": "Patient",
+  "text": {
+    "status": "generated",
+    "div": "<p>not wrapped in div</p>"
+  },
+  "name": [
+    {
+      "family": "BadDiv"
+    }
+  ],
+  "gender": "female"
+}

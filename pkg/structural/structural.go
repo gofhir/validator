@@ -141,6 +141,21 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 	return result
 }
 
+// matchChoiceType checks if a data key matches a choice type in the element index.
+// Returns the choice base path (e.g., "Observation.value") if matched, or empty string otherwise.
+func matchChoiceType(key string, sdPath string, idx *elementIndex) string {
+	for choiceBasePath, choiceElemDef := range idx.choiceTypes {
+		choiceBaseName := choiceBasePath[strings.LastIndex(choiceBasePath, ".")+1:]
+		if strings.HasPrefix(key, choiceBaseName) && len(key) > len(choiceBaseName) {
+			typeSuffix := key[len(choiceBaseName):]
+			if findMatchingChoiceType(choiceElemDef, typeSuffix) != "" {
+				return choiceBasePath
+			}
+		}
+	}
+	return ""
+}
+
 // validateElement recursively validates an element and its children.
 func (v *Validator) validateElement(
 	data map[string]any,
@@ -150,6 +165,27 @@ func (v *Validator) validateElement(
 	ctx *validationContext,
 	result *issue.Result,
 ) {
+	// Pre-scan: detect multiple variants of the same choice type (FHIR R4 §2.6.2)
+	choiceMatches := make(map[string][]string) // choiceBasePath -> list of data keys
+	for key := range data {
+		if key == "resourceType" || strings.HasPrefix(key, "_") {
+			continue
+		}
+		if basePath := matchChoiceType(key, sdPath, idx); basePath != "" {
+			choiceMatches[basePath] = append(choiceMatches[basePath], key)
+		}
+	}
+	for basePath, keys := range choiceMatches {
+		if len(keys) > 1 {
+			baseName := basePath[strings.LastIndex(basePath, ".")+1:]
+			result.AddErrorWithID(
+				issue.DiagStructureChoiceMutualExclusion,
+				map[string]any{"basePath": baseName, "variants": strings.Join(keys, ", ")},
+				fhirPath,
+			)
+		}
+	}
+
 	for key, value := range data {
 		// Skip resourceType - it's handled separately
 		if key == "resourceType" {

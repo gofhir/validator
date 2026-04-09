@@ -62,6 +62,11 @@ func TestM1Fixtures(t *testing.T) {
 			file:        "invalid-patient-unknown-nested.json",
 			expectError: true,
 		},
+		{
+			name:        "invalid-observation-dual-choice-type",
+			file:        "invalid-observation-dual-choice-type.json",
+			expectError: true,
+		},
 	}
 
 	runFixtureTests(t, v, fixturesDir, tests)
@@ -142,6 +147,11 @@ func TestM3Fixtures(t *testing.T) {
 		{
 			name:        "invalid-patient-uri-whitespace",
 			file:        "invalid-patient-uri-whitespace.json",
+			expectError: true,
+		},
+		{
+			name:        "invalid-patient-xhtml-no-div",
+			file:        "invalid-patient-xhtml-no-div.json",
 			expectError: true,
 		},
 	}

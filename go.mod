@@ -1,6 +1,6 @@
 module github.com/gofhir/validator
 
-go 1.24.1
+go 1.25.0
 
 require github.com/gofhir/fhirpath v1.1.0
 
@@ -10,4 +10,5 @@ require (
 	github.com/gofhir/ucum v1.0.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
+	golang.org/x/net v0.52.0 // indirect
 )

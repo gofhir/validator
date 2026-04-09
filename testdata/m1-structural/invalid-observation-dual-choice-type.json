@@ -1,0 +1,12 @@
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {
+    "text": "test"
+  },
+  "valueQuantity": {
+    "value": 72,
+    "unit": "bpm"
+  },
+  "valueString": "also a string"
+}

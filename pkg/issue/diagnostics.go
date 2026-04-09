@@ -15,8 +15,9 @@ const (
 	DiagStructureInvalidJSON       DiagnosticID = "STRUCTURE_INVALID_JSON"
 	DiagStructureNoResourceType    DiagnosticID = "STRUCTURE_NO_RESOURCE_TYPE"
 	DiagStructureUnknownResource   DiagnosticID = "STRUCTURE_UNKNOWN_RESOURCE"
-	DiagStructureInvalidChoiceType DiagnosticID = "STRUCTURE_INVALID_CHOICE_TYPE"
-	DiagStructureNoType            DiagnosticID = "STRUCTURE_NO_TYPE"
+	DiagStructureInvalidChoiceType      DiagnosticID = "STRUCTURE_INVALID_CHOICE_TYPE"
+	DiagStructureChoiceMutualExclusion DiagnosticID = "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
+	DiagStructureNoType                DiagnosticID = "STRUCTURE_NO_TYPE"
 )
 
 // Diagnostic IDs for cardinality validation (M2).
@@ -48,6 +49,7 @@ const (
 	DiagExtensionValueNotAllowed  DiagnosticID = "EXTENSION_VALUE_NOT_ALLOWED"
 	DiagExtensionInvalidValueType DiagnosticID = "EXTENSION_INVALID_VALUE_TYPE"
 	DiagExtensionNestedUnknown    DiagnosticID = "EXTENSION_NESTED_UNKNOWN"
+	DiagExtensionInvalidURL       DiagnosticID = "EXTENSION_INVALID_URL"
 )
 
 // Diagnostic IDs for reference validation (M9).
@@ -149,6 +151,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "Invalid choice type '{element}' for {path}",
+	},
+	DiagStructureChoiceMutualExclusion: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "Only one variant of choice type '{basePath}[x]' is allowed, but found: {variants}",
 	},
 	DiagStructureNoType: {
 		Severity: SeverityError,
@@ -292,6 +299,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeExtension,
 		Template: "Unknown nested extension '{url}' in parent '{parent}'",
+	},
+	DiagExtensionInvalidURL: {
+		Severity: SeverityError,
+		Code:     CodeValue,
+		Template: "Extension URL must be an absolute URI: '{url}'",
 	},
 
 	// Reference (M9)
