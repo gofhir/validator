@@ -28,7 +28,7 @@ func init() {
 //   - Must only use allowed HTML elements
 //   - Must not contain prohibited elements (script, style, head, body, etc.)
 //   - Must not contain event handler attributes (onClick, onLoad, etc.)
-func fnHTMLChecks(_ *eval.Context, input types.Collection, _ []interface{}) (types.Collection, error) {
+func fnHTMLChecks(_ *eval.Context, input types.Collection, _ []any) (types.Collection, error) {
 	if input.Empty() {
 		return types.Collection{}, nil
 	}
@@ -160,43 +160,42 @@ func isAllowedElement(tag string) bool {
 	return allowedElements[tag]
 }
 
+// commonAttrs are safe attributes allowed on all elements.
+var commonAttrs = map[string]bool{
+	"id": true, "class": true, "style": true, "title": true,
+	"lang": true, "dir": true, "xml:lang": true, "xmlns": true,
+}
+
+// elementAttrs maps element names to their allowed element-specific attributes.
+var elementAttrs = map[string]map[string]bool{
+	"a":          {"href": true, "name": true, "rel": true, "target": true},
+	"img":        {"src": true, "alt": true, "width": true, "height": true},
+	"table":      {"border": true, "cellpadding": true, "cellspacing": true, "width": true, "summary": true},
+	"td":         {"colspan": true, "rowspan": true, "width": true, "valign": true, "align": true, "headers": true, "scope": true, "abbr": true},
+	"th":         {"colspan": true, "rowspan": true, "width": true, "valign": true, "align": true, "headers": true, "scope": true, "abbr": true},
+	"col":        {"span": true, "width": true, "align": true, "valign": true},
+	"colgroup":   {"span": true, "width": true, "align": true, "valign": true},
+	"ol":         {"start": true, "type": true},
+	"blockquote": {"cite": true},
+	"q":          {"cite": true},
+	"tr":         {"align": true, "valign": true},
+	"caption":    {"align": true},
+	"thead":      {"align": true, "valign": true},
+	"tbody":      {"align": true, "valign": true},
+	"tfoot":      {"align": true, "valign": true},
+}
+
 // isAllowedAttribute checks if an attribute is permitted on the given element.
 func isAllowedAttribute(attr, tag string) bool {
-	// Event handler attributes are always prohibited.
 	if strings.HasPrefix(strings.ToLower(attr), "on") {
 		return false
 	}
-
-	// Common safe attributes.
-	switch attr {
-	case "id", "class", "style", "title", "lang", "dir", "xml:lang", "xmlns":
+	if commonAttrs[attr] {
 		return true
 	}
-
-	// Element-specific attributes.
-	switch tag {
-	case "a":
-		return attr == "href" || attr == "name" || attr == "rel" || attr == "target"
-	case "img":
-		return attr == "src" || attr == "alt" || attr == "width" || attr == "height"
-	case "table":
-		return attr == "border" || attr == "cellpadding" || attr == "cellspacing" || attr == "width" || attr == "summary"
-	case "td", "th":
-		return attr == "colspan" || attr == "rowspan" || attr == "width" || attr == "valign" || attr == "align" || attr == "headers" || attr == "scope" || attr == "abbr"
-	case "col", "colgroup":
-		return attr == "span" || attr == "width" || attr == "align" || attr == "valign"
-	case "ol":
-		return attr == "start" || attr == "type"
-	case "blockquote", "q":
-		return attr == "cite"
-	case "tr":
-		return attr == "align" || attr == "valign"
-	case "caption":
-		return attr == "align"
-	case "thead", "tbody", "tfoot":
-		return attr == "align" || attr == "valign"
+	if allowed, ok := elementAttrs[tag]; ok {
+		return allowed[attr]
 	}
-
 	return false
 }
 

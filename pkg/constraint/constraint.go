@@ -442,21 +442,11 @@ func (v *Validator) evaluateTypeConstraints(resource map[string]any, sd *registr
 
 // evaluateTypeSDConstraints evaluates all constraints from a type SD on a set of instances,
 // and recursively evaluates constraints from nested complex-type SDs.
-// elemPath is the resource-level path (e.g., "Patient.name"), resourceType is the root type,
+// ElemPath is the resource-level path (e.g., "Patient.name"), resourceType is the root type,
 // and snapshotPaths contains paths already present in the resource snapshot (to skip duplicates).
 func (v *Validator) evaluateTypeSDConstraints(instances []elementInstance, typeSD *registry.StructureDefinition, typeCode, elemPath, resourceType string, snapshotPaths map[string]struct{}, evalOpts *constraintEvalOpts, result *issue.Result) {
 	for i := range typeSD.Snapshot.Element {
 		typeElem := &typeSD.Snapshot.Element[i]
-
-		// Build the resource-level path for this type element.
-		// e.g., typeElem.Path="HumanName.period" with elemPath="Patient.name" → "Patient.name.period"
-		var resourcePath string
-		if typeElem.Path == typeCode {
-			resourcePath = elemPath
-		} else {
-			suffix := strings.TrimPrefix(typeElem.Path, typeCode+".")
-			resourcePath = elemPath + "." + suffix
-		}
 
 		if typeElem.Path == typeCode {
 			// Root element of the type: evaluate its constraints against each instance.
@@ -468,77 +458,72 @@ func (v *Validator) evaluateTypeSDConstraints(instances []elementInstance, typeS
 			continue
 		}
 
-		// Nested element within the type.
+		// Build the resource-level path for this sub-element.
+		suffix := strings.TrimPrefix(typeElem.Path, typeCode+".")
+		resourcePath := elemPath + "." + suffix
+
 		// Skip if this sub-path is already in the resource snapshot (handled by main loop).
 		if _, inSnapshot := snapshotPaths[resourcePath]; inSnapshot {
 			continue
 		}
 
-		// Evaluate any constraints on this element itself.
 		if len(typeElem.Constraint) > 0 {
-			for _, inst := range instances {
-				var instData map[string]any
-				if err := json.Unmarshal(inst.data, &instData); err != nil {
-					continue
-				}
-				// For primitive sub-elements, extract the raw JSON value directly
-				// since extractElementInstances wraps them in __value__ objects.
-				suffix := strings.TrimPrefix(typeElem.Path, typeCode+".")
-				subFhirPath := inst.fhirPath + "." + suffix
-				if rawVal, ok := instData[suffix]; ok {
-					rawJSON, err := json.Marshal(rawVal)
-					if err == nil {
-						v.evaluateConstraintsWithCtx(rawJSON, typeElem.Constraint, subFhirPath, evalOpts, result)
-						continue
-					}
-				}
-				// Fallback: use extractElementInstances for complex sub-paths.
-				subInstances := extractElementInstances(instData, typeElem.Path, typeCode, inst.fhirPath)
-				for _, sub := range subInstances {
-					v.evaluateConstraintsWithCtx(sub.data, typeElem.Constraint, sub.fhirPath, evalOpts, result)
-				}
-			}
+			v.evaluateSubElementConstraints(instances, typeElem, typeCode, evalOpts, result)
 		}
 
-		// Then, recurse into the sub-element's type SD if it's a complex type.
-		if len(typeElem.Type) == 1 {
-			subTypeCode := typeElem.Type[0].Code
-			if subTypeCode == typeCode {
-				continue // Avoid infinite recursion on self-referencing types.
-			}
-			subTypeSD := v.registry.GetByType(subTypeCode)
-			if subTypeSD == nil || subTypeSD.Snapshot == nil || subTypeSD.Kind != "complex-type" {
+		v.recurseIntoSubType(instances, typeElem, typeCode, resourcePath, resourceType, snapshotPaths, evalOpts, result)
+	}
+}
+
+// evaluateSubElementConstraints evaluates constraints on a nested element within a type SD.
+func (v *Validator) evaluateSubElementConstraints(instances []elementInstance, typeElem *registry.ElementDefinition, typeCode string, evalOpts *constraintEvalOpts, result *issue.Result) {
+	suffix := strings.TrimPrefix(typeElem.Path, typeCode+".")
+	for _, inst := range instances {
+		var instData map[string]any
+		if err := json.Unmarshal(inst.data, &instData); err != nil {
+			continue
+		}
+		// For primitive sub-elements, extract the raw JSON value directly
+		// since extractElementInstances wraps them in __value__ objects.
+		subFhirPath := inst.fhirPath + "." + suffix
+		if rawVal, ok := instData[suffix]; ok {
+			rawJSON, err := json.Marshal(rawVal)
+			if err == nil {
+				v.evaluateConstraintsWithCtx(rawJSON, typeElem.Constraint, subFhirPath, evalOpts, result)
 				continue
 			}
-			// Extract sub-instances and recursively evaluate.
-			for _, inst := range instances {
-				var instData map[string]any
-				if err := json.Unmarshal(inst.data, &instData); err != nil {
-					continue
-				}
-				subInstances := extractElementInstances(instData, typeElem.Path, typeCode, inst.fhirPath)
-				if len(subInstances) > 0 {
-					v.evaluateTypeSDConstraints(subInstances, subTypeSD, subTypeCode, resourcePath, resourceType, snapshotPaths, evalOpts, result)
-				}
-			}
+		}
+		// Fallback: use extractElementInstances for complex sub-paths.
+		subInstances := extractElementInstances(instData, typeElem.Path, typeCode, inst.fhirPath)
+		for _, sub := range subInstances {
+			v.evaluateConstraintsWithCtx(sub.data, typeElem.Constraint, sub.fhirPath, evalOpts, result)
 		}
 	}
 }
 
-// filterNewConstraints returns constraints from typeConstraints that are not already
-// present in elemConstraints (by key), avoiding duplicate evaluation.
-func filterNewConstraints(typeConstraints, elemConstraints []registry.Constraint) []registry.Constraint {
-	existing := make(map[string]struct{}, len(elemConstraints))
-	for _, c := range elemConstraints {
-		existing[c.Key] = struct{}{}
+// recurseIntoSubType recurses into the sub-element's type SD if it's a complex type.
+func (v *Validator) recurseIntoSubType(instances []elementInstance, typeElem *registry.ElementDefinition, typeCode, resourcePath, resourceType string, snapshotPaths map[string]struct{}, evalOpts *constraintEvalOpts, result *issue.Result) {
+	if len(typeElem.Type) != 1 {
+		return
 	}
-	var extra []registry.Constraint
-	for _, c := range typeConstraints {
-		if _, ok := existing[c.Key]; !ok {
-			extra = append(extra, c)
+	subTypeCode := typeElem.Type[0].Code
+	if subTypeCode == typeCode {
+		return
+	}
+	subTypeSD := v.registry.GetByType(subTypeCode)
+	if subTypeSD == nil || subTypeSD.Snapshot == nil || subTypeSD.Kind != "complex-type" {
+		return
+	}
+	for _, inst := range instances {
+		var instData map[string]any
+		if err := json.Unmarshal(inst.data, &instData); err != nil {
+			continue
+		}
+		subInstances := extractElementInstances(instData, typeElem.Path, typeCode, inst.fhirPath)
+		if len(subInstances) > 0 {
+			v.evaluateTypeSDConstraints(subInstances, subTypeSD, subTypeCode, resourcePath, resourceType, snapshotPaths, evalOpts, result)
 		}
 	}
-	return extra
 }
 
 // extractElementInstances navigates the parsed resource JSON to find all instances

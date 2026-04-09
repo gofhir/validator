@@ -143,7 +143,7 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 
 // matchChoiceType checks if a data key matches a choice type in the element index.
 // Returns the choice base path (e.g., "Observation.value") if matched, or empty string otherwise.
-func matchChoiceType(key string, sdPath string, idx *elementIndex) string {
+func matchChoiceType(key, _ string, idx *elementIndex) string {
 	for choiceBasePath, choiceElemDef := range idx.choiceTypes {
 		choiceBaseName := choiceBasePath[strings.LastIndex(choiceBasePath, ".")+1:]
 		if strings.HasPrefix(key, choiceBaseName) && len(key) > len(choiceBaseName) {

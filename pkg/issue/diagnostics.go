@@ -11,11 +11,11 @@ type DiagnosticID string
 
 // Diagnostic IDs for structural validation (M1).
 const (
-	DiagStructureUnknownElement    DiagnosticID = "STRUCTURE_UNKNOWN_ELEMENT"
-	DiagStructureInvalidJSON       DiagnosticID = "STRUCTURE_INVALID_JSON"
-	DiagStructureNoResourceType    DiagnosticID = "STRUCTURE_NO_RESOURCE_TYPE"
-	DiagStructureUnknownResource   DiagnosticID = "STRUCTURE_UNKNOWN_RESOURCE"
-	DiagStructureInvalidChoiceType      DiagnosticID = "STRUCTURE_INVALID_CHOICE_TYPE"
+	DiagStructureUnknownElement        DiagnosticID = "STRUCTURE_UNKNOWN_ELEMENT"
+	DiagStructureInvalidJSON           DiagnosticID = "STRUCTURE_INVALID_JSON"
+	DiagStructureNoResourceType        DiagnosticID = "STRUCTURE_NO_RESOURCE_TYPE"
+	DiagStructureUnknownResource       DiagnosticID = "STRUCTURE_UNKNOWN_RESOURCE"
+	DiagStructureInvalidChoiceType     DiagnosticID = "STRUCTURE_INVALID_CHOICE_TYPE"
 	DiagStructureChoiceMutualExclusion DiagnosticID = "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
 	DiagStructureNoType                DiagnosticID = "STRUCTURE_NO_TYPE"
 )

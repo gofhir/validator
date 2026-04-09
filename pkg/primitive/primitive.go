@@ -366,7 +366,6 @@ func (v *Validator) validatePrimitiveValue(
 		strVal, ok := value.(string)
 		if ok {
 			v.validateStringFormat(strVal, typeName, fhirPath, result)
-
 		}
 	}
 
