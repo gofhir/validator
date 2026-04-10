@@ -154,6 +154,16 @@ func TestM3Fixtures(t *testing.T) {
 			file:        "invalid-patient-xhtml-no-div.json",
 			expectError: true,
 		},
+		{
+			name:        "invalid-observation-positiveint-zero",
+			file:        "invalid-observation-positiveint-zero.json",
+			expectError: true,
+		},
+		{
+			name:        "invalid-observation-unsignedint-negative",
+			file:        "invalid-observation-unsignedint-negative.json",
+			expectError: true,
+		},
 	}
 
 	runFixtureTests(t, v, fixturesDir, tests)

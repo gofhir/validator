@@ -300,7 +300,7 @@ func (v *Validator) validateComplexElement(
 	resolved *resolvedElement,
 	sdPath string,
 	fhirPath string,
-	_ *elementIndex, // currentIdx - reserved for future use
+	currentIdx *elementIndex,
 	ctx *validationContext,
 	result *issue.Result,
 ) {
@@ -313,19 +313,23 @@ func (v *Validator) validateComplexElement(
 		return
 	}
 
-	// Handle BackboneElement - use root SD
-	if typeName == "BackboneElement" {
-		v.validateElement(data, sdPath, fhirPath, ctx.rootIdx, ctx, result)
-		return
-	}
-
-	// For other complex types, get their StructureDefinition
+	// Get the StructureDefinition for this type.
 	typeSD := v.registry.GetByType(typeName)
 	if typeSD == nil {
 		return
 	}
 
 	if typeSD.Kind == "primitive-type" {
+		return
+	}
+
+	// If the type is an inline container (its SD only defines infrastructure
+	// children like id/extension/modifierExtension), the real children are
+	// defined in the parent SD. Continue with the current SD path and index.
+	// This covers BackboneElement, Element, and any similar infrastructure type
+	// without hardcoding type names — derived from the SD's own snapshot.
+	if v.isInlineContainerType(typeSD) {
+		v.validateElement(data, sdPath, fhirPath, currentIdx, ctx, result)
 		return
 	}
 
@@ -527,8 +531,9 @@ func (v *Validator) getRegexForType(typeName string) *regexp.Regexp {
 		return nil
 	}
 
-	// Compile the regex (anchored to match entire string)
-	compiled, err := regexp.Compile("^" + regexPattern + "$")
+	// Compile the regex (anchored to match entire string).
+	// Wrap in a non-capturing group so alternations (|) are fully anchored.
+	compiled, err := regexp.Compile("^(?:" + regexPattern + ")$")
 	if err != nil {
 		return nil
 	}
@@ -563,6 +568,36 @@ func extractRegexFromSD(sd *registry.StructureDefinition) string {
 	}
 
 	return ""
+}
+
+// infrastructureChildren are the only children that inline container types
+// (Element, BackboneElement) define in their own StructureDefinition.
+var infrastructureChildren = map[string]bool{
+	"id": true, "extension": true, "modifierExtension": true,
+}
+
+// isInlineContainerType checks if a type SD is an inline container whose real
+// children are defined in the parent SD, not in its own. Derived from the SD
+// snapshot: if ALL non-root children are infrastructure-only (id, extension,
+// modifierExtension), the type is an inline container.
+func (v *Validator) isInlineContainerType(sd *registry.StructureDefinition) bool {
+	if sd.Snapshot == nil {
+		return false
+	}
+	for _, elem := range sd.Snapshot.Element {
+		if elem.Path == sd.Type {
+			continue // Skip root element.
+		}
+		// Extract the child name (last segment after the type prefix).
+		child := strings.TrimPrefix(elem.Path, sd.Type+".")
+		if strings.Contains(child, ".") {
+			continue // Skip deeper nested paths.
+		}
+		if !infrastructureChildren[child] {
+			return false
+		}
+	}
+	return true
 }
 
 // truncateValue truncates a value for display in error messages.
