@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.2](https://github.com/gofhir/validator/compare/v1.13.1...v1.13.2) (2026-04-10)
+
+
+### Bug Fixes
+
+* enforce positiveInt/unsignedInt constraints via SD-derived regex ([50e5b51](https://github.com/gofhir/validator/commit/50e5b51ddeb7d3924759bf170f9da535ff3ac8de)), closes [#53](https://github.com/gofhir/validator/issues/53)
+
 ## [1.13.1](https://github.com/gofhir/validator/compare/v1.13.0...v1.13.1) (2026-04-09)
 
 
