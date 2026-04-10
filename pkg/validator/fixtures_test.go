@@ -154,10 +154,32 @@ func TestM3Fixtures(t *testing.T) {
 			file:        "invalid-patient-xhtml-no-div.json",
 			expectError: true,
 		},
+		// positiveInt: must be > 0 (regex [1-9][0-9]* from SD)
+		{
+			name:        "valid-observation-positiveint",
+			file:        "valid-observation-positiveint.json",
+			expectError: false,
+		},
 		{
 			name:        "invalid-observation-positiveint-zero",
 			file:        "invalid-observation-positiveint-zero.json",
 			expectError: true,
+		},
+		{
+			name:        "invalid-observation-positiveint-negative",
+			file:        "invalid-observation-positiveint-negative.json",
+			expectError: true,
+		},
+		// unsignedInt: must be >= 0 (regex [0]|([1-9][0-9]*) from SD)
+		{
+			name:        "valid-observation-unsignedint",
+			file:        "valid-observation-unsignedint.json",
+			expectError: false,
+		},
+		{
+			name:        "valid-observation-unsignedint-zero",
+			file:        "valid-observation-unsignedint-zero.json",
+			expectError: false,
 		},
 		{
 			name:        "invalid-observation-unsignedint-negative",
