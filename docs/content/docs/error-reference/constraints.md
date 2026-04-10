@@ -67,6 +67,9 @@ Here are some frequently encountered FHIR constraints:
 | `obs-7` | Observation | If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present | error |
 | `pat-1` | Patient.contact | SHALL at least contain a contact's details or a reference to an organization | error |
 | `ref-1` | Reference | SHALL have a contained resource if a local reference is provided | error |
+| `per-1` | Period | If present, start SHALL have a lower value than end | error |
+| `txt-1` | Narrative.div | The narrative SHALL contain only the basic html formatting elements and attributes | error |
+| `txt-2` | Narrative.div | The narrative SHALL have some non-whitespace content | error |
 
 ### Severity From the Constraint Definition
 
@@ -110,3 +113,26 @@ WARNING: Constraint 'inv-1' evaluation error: Function 'iif' not implemented
 {{< callout type="warning" >}}
 Constraint evaluation errors indicate a limitation of the FHIRPath engine, not necessarily a problem with the resource. If you encounter these consistently, check whether the FHIRPath function used in the constraint is supported by the GoFHIR Validator.
 {{< /callout >}}
+
+---
+
+## Type-Level Constraint Evaluation
+
+The validator evaluates FHIRPath constraints not only from the resource's own StructureDefinition, but also from the StructureDefinitions of complex data types used within the resource. For example, when a `Patient` resource contains a `name[0].period` element of type `Period`, the validator loads the Period StructureDefinition and evaluates its constraints (such as `per-1`: start <= end) against each Period instance found in the resource.
+
+This recursive evaluation covers all nesting levels. For example, `Patient.name` (type HumanName) contains `HumanName.period` (type Period), and the Period SD's `per-1` constraint is evaluated even though it does not appear in the Patient snapshot.
+
+### FHIR Additional Functions
+
+The constraint engine supports FHIR-specific FHIRPath functions defined in [FHIR R4 §2.9.1.5](https://hl7.org/fhir/R4/fhirpath.html):
+
+| Function | Description |
+|----------|-------------|
+| `resolve()` | Resolves a FHIR reference to the target resource |
+| `memberOf()` | Checks if a code is in a ValueSet |
+| `extension()` | Returns extensions matching a URL |
+| `hasExtension()` | Checks if an extension exists |
+| `conformsTo()` | Checks if a resource conforms to a profile |
+| `htmlChecks()` | Validates XHTML narrative content per FHIR rules |
+
+The `htmlChecks()` function validates that `text.div` content follows the FHIR XHTML rules (R4 §2.4.1): `<div>` root element, allowed HTML element whitelist, prohibited elements/attributes, and non-empty content. This enables the `txt-1` and `txt-2` constraints to be evaluated dynamically from the Narrative StructureDefinition.

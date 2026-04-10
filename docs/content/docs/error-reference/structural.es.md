@@ -16,6 +16,7 @@ Los errores estructurales se detectan durante la fase de validación más tempra
 | `STRUCTURE_NOT_OBJECT` | error | Resource must be a JSON object |
 | `STRUCTURE_NO_RESOURCE_TYPE` | error | Missing 'resourceType' property |
 | `STRUCTURE_UNKNOWN_RESOURCE` | error | Unknown resourceType '{type}' |
+| `STRUCTURE_CHOICE_MUTUAL_EXCLUSION` | error | Only one variant of choice type '{basePath}[x]' is allowed, but found: {variants} |
 
 ---
 
@@ -169,4 +170,39 @@ El valor `Pateint` no es un tipo de recurso FHIR válido (nota el error tipográ
 
 {{< callout type="warning" >}}
 El conjunto de tipos de recurso conocidos está determinado por los StructureDefinitions cargados en el validador. Si estás usando un tipo de recurso personalizado definido en una Implementation Guide, asegúrate de que el StructureDefinition correspondiente esté cargado.
+{{< /callout >}}
+
+---
+
+## STRUCTURE_CHOICE_MUTUAL_EXCLUSION
+
+Se encontraron múltiples variantes del mismo tipo choice. FHIR solo permite una variante de un tipo choice `[x]` en cualquier elemento dado. Por ejemplo, `Observation.value[x]` puede ser `valueQuantity` O `valueString`, pero no ambos.
+
+**Ejemplo -- recurso inválido:**
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "test"},
+  "valueQuantity": {"value": 72, "unit": "bpm"},
+  "valueString": "also a string"
+}
+```
+
+Tanto `valueQuantity` como `valueString` son variantes del mismo tipo choice `value[x]`. Solo se permite una.
+
+**Corrección:** Mantén solo la variante apropiada:
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "test"},
+  "valueQuantity": {"value": 72, "unit": "bpm"}
+}
+```
+
+{{< callout type="info" >}}
+Las variantes de tipos choice se detectan comparando los nombres de elementos contra las entradas `ElementDefinition.path` que terminan en `[x]` en el snapshot del StructureDefinition. Los tipos permitidos provienen del array `ElementDefinition.type`. No se hardcodean nombres de elementos.
 {{< /callout >}}

@@ -17,6 +17,7 @@ Los errores de extension ocurren cuando las extensions FHIR no se ajustan a sus 
 | `EXTENSION_NO_VALUE` | error | Extension at '{path}' has no value[x] |
 | `EXTENSION_MULTIPLE_VALUES` | error | Extension at '{path}' has multiple value[x] elements |
 | `EXTENSION_WRONG_TYPE` | error | Extension '{url}' expects {expected}, got {type} |
+| `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URI: '{url}' |
 | `MODIFIER_EXTENSION_UNKNOWN` | error | Unknown modifier extension '{url}' |
 
 ---
@@ -219,6 +220,46 @@ Si la definición de la extension declara el tipo de valor como `CodeableConcept
   ]
 }
 ```
+
+---
+
+## EXTENSION_INVALID_URL
+
+La URL de la extension no es una URI absoluta. Según FHIR R4 §2.1.0.6, las URLs de extensions deben ser URIs absolutas (conteniendo `://` o comenzando con `urn:`). Las URLs relativas no están permitidas.
+
+**Ejemplo -- recurso inválido:**
+
+```json
+{
+  "resourceType": "Patient",
+  "extension": [
+    {
+      "url": "my-custom-extension",
+      "valueString": "bad"
+    }
+  ]
+}
+```
+
+La URL `my-custom-extension` es una referencia relativa, no una URI absoluta.
+
+**Corrección:** Usa la URI absoluta completa:
+
+```json
+{
+  "resourceType": "Patient",
+  "extension": [
+    {
+      "url": "http://example.org/fhir/StructureDefinition/my-custom-extension",
+      "valueString": "good"
+    }
+  ]
+}
+```
+
+{{< callout type="info" >}}
+Esta validación aplica una regla en prosa de la especificación FHIR (§2.1.0.6). El elemento `Extension.url` en el StructureDefinition está tipado como `System.String` sin un constraint de regex para URIs absolutas, por lo que esta verificación no puede derivarse solo del SD.
+{{< /callout >}}
 
 ---
 

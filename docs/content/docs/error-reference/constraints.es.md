@@ -67,6 +67,9 @@ Aquí hay algunos constraints FHIR encontrados frecuentemente:
 | `obs-7` | Observation | If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present | error |
 | `pat-1` | Patient.contact | SHALL at least contain a contact's details or a reference to an organization | error |
 | `ref-1` | Reference | SHALL have a contained resource if a local reference is provided | error |
+| `per-1` | Period | If present, start SHALL have a lower value than end | error |
+| `txt-1` | Narrative.div | The narrative SHALL contain only the basic html formatting elements and attributes | error |
+| `txt-2` | Narrative.div | The narrative SHALL have some non-whitespace content | error |
 
 ### Severidad Desde la Definición del Constraint
 
@@ -110,3 +113,26 @@ WARNING: Constraint 'inv-1' evaluation error: Function 'iif' not implemented
 {{< callout type="warning" >}}
 Los errores de evaluación de constraints indican una limitación del motor FHIRPath, no necesariamente un problema con el recurso. Si los encuentras consistentemente, verifica si la función FHIRPath utilizada en el constraint está soportada por el GoFHIR Validator.
 {{< /callout >}}
+
+---
+
+## Evaluación de Constraints a Nivel de Tipo
+
+El validador evalúa constraints FHIRPath no solo del StructureDefinition del recurso, sino también de los StructureDefinitions de los tipos de datos complejos utilizados dentro del recurso. Por ejemplo, cuando un recurso `Patient` contiene un elemento `name[0].period` de tipo `Period`, el validador carga el StructureDefinition de Period y evalúa sus constraints (como `per-1`: start <= end) contra cada instancia de Period encontrada en el recurso.
+
+Esta evaluación recursiva cubre todos los niveles de anidamiento. Por ejemplo, `Patient.name` (tipo HumanName) contiene `HumanName.period` (tipo Period), y el constraint `per-1` del SD de Period se evalúa aunque no aparezca en el snapshot del Patient.
+
+### Funciones Adicionales FHIR
+
+El motor de constraints soporta funciones FHIRPath específicas de FHIR definidas en [FHIR R4 §2.9.1.5](https://hl7.org/fhir/R4/fhirpath.html):
+
+| Función | Descripción |
+|---------|-------------|
+| `resolve()` | Resuelve una referencia FHIR al recurso objetivo |
+| `memberOf()` | Verifica si un código está en un ValueSet |
+| `extension()` | Retorna extensions que coincidan con una URL |
+| `hasExtension()` | Verifica si existe una extension |
+| `conformsTo()` | Verifica si un recurso conforma con un perfil |
+| `htmlChecks()` | Valida contenido XHTML narrativo según las reglas FHIR |
+
+La función `htmlChecks()` valida que el contenido de `text.div` siga las reglas XHTML de FHIR (R4 §2.4.1): elemento raíz `<div>`, whitelist de elementos HTML permitidos, elementos/atributos prohibidos, y contenido no vacío. Esto permite que los constraints `txt-1` y `txt-2` se evalúen dinámicamente desde el StructureDefinition de Narrative.

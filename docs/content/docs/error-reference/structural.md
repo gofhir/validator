@@ -16,6 +16,7 @@ Structural errors are detected during the earliest validation phase. They indica
 | `STRUCTURE_NOT_OBJECT` | error | Resource must be a JSON object |
 | `STRUCTURE_NO_RESOURCE_TYPE` | error | Missing 'resourceType' property |
 | `STRUCTURE_UNKNOWN_RESOURCE` | error | Unknown resourceType '{type}' |
+| `STRUCTURE_CHOICE_MUTUAL_EXCLUSION` | error | Only one variant of choice type '{basePath}[x]' is allowed, but found: {variants} |
 
 ---
 
@@ -169,4 +170,39 @@ The value `Pateint` is not a valid FHIR resource type (note the typo).
 
 {{< callout type="warning" >}}
 The set of known resource types is determined by the StructureDefinitions loaded into the validator. If you are using a custom resource type defined in an Implementation Guide, make sure the corresponding StructureDefinition is loaded.
+{{< /callout >}}
+
+---
+
+## STRUCTURE_CHOICE_MUTUAL_EXCLUSION
+
+Multiple variants of the same choice type element were found. FHIR allows only one variant of a `[x]` choice type to be present on any given element. For example, `Observation.value[x]` can be `valueQuantity` OR `valueString`, but not both.
+
+**Example -- invalid resource:**
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "test"},
+  "valueQuantity": {"value": 72, "unit": "bpm"},
+  "valueString": "also a string"
+}
+```
+
+Both `valueQuantity` and `valueString` are variants of the same choice type `value[x]`. Only one is allowed.
+
+**Fix:** Keep only the appropriate variant:
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "test"},
+  "valueQuantity": {"value": 72, "unit": "bpm"}
+}
+```
+
+{{< callout type="info" >}}
+Choice type variants are detected by matching element names against `ElementDefinition.path` entries ending in `[x]` in the StructureDefinition snapshot. The allowed types come from the `ElementDefinition.type` array. No element names are hardcoded.
 {{< /callout >}}

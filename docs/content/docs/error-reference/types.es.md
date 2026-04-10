@@ -200,20 +200,77 @@ El valor no es contenido codificado en base64 válido. Los valores base64Binary 
 
 ### TYPE_INVALID_POSITIVE_INT
 
-Los valores positiveInt de FHIR deben ser enteros mayores que cero (> 0).
+Los valores positiveInt de FHIR deben ser enteros mayores que cero (> 0). El rango válido es 1..2,147,483,647. Esto se aplica mediante el patrón regex `[1-9][0-9]*` derivado del StructureDefinition de positiveInt.
+
+**Ejemplo -- recurso inválido:**
 
 ```json
 {
-  "resourceType": "Timing",
-  "repeat": {
-    "count": 0
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "test"},
+  "effectiveTiming": {
+    "repeat": {
+      "frequency": 0
+    }
+  }
+}
+```
+
+`Timing.repeat.frequency` es un positiveInt. El valor `0` no está permitido.
+
+**Corrección:** Usa un valor mayor que cero:
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "test"},
+  "effectiveTiming": {
+    "repeat": {
+      "frequency": 1
+    }
   }
 }
 ```
 
 ### TYPE_INVALID_UNSIGNED_INT
 
-Los valores unsignedInt de FHIR deben ser enteros mayores o iguales a cero (>= 0).
+Los valores unsignedInt de FHIR deben ser enteros no negativos (>= 0). El rango válido es 0..2,147,483,647. Esto se aplica mediante el patrón regex `[0]|([1-9][0-9]*)` derivado del StructureDefinition de unsignedInt.
+
+**Ejemplo -- recurso inválido:**
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "test"},
+  "effectiveTiming": {
+    "repeat": {
+      "frequency": 1,
+      "offset": -5
+    }
+  }
+}
+```
+
+`Timing.repeat.offset` es un unsignedInt. Los valores negativos no están permitidos.
+
+**Corrección:** Usa un valor no negativo:
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": {"text": "test"},
+  "effectiveTiming": {
+    "repeat": {
+      "frequency": 1,
+      "offset": 30
+    }
+  }
+}
+```
 
 ### TYPE_STRING_TOO_LONG
 
