@@ -2,6 +2,18 @@
 
 > Gaps identified by comparing against YAFV (Node.js FHIR validator).
 > Date: 2026-03-06
+> Updated: 2026-04-10
+
+## Resolved Gaps
+
+### ~~GO-GAP-008~~: XHTML Structural Validation — RESOLVED (v1.14.0)
+
+Resolved via `htmlChecks()` FHIRPath function implementation (`pkg/constraint/htmlchecks.go`).
+The `txt-1`/`txt-2` constraints from the Narrative StructureDefinition now evaluate dynamically.
+Validates: `<div>` root, allowed HTML elements, prohibited elements/attributes, non-empty content.
+See: #51 (Gap 4).
+
+---
 
 ## Gaps to Address
 
@@ -94,23 +106,6 @@ Multiple contained resources with the same `id` are not flagged. This violates t
 
 ---
 
-### GO-GAP-008: No XHTML Structural Validation
-
-**Priority**: Low-Medium
-**File**: `pkg/primitive/primitive.go`
-
-XHTML is validated only by regex format (via SD-derived pattern). There is no validation of:
-- Allowed HTML elements per FHIR XHTML subset
-- Allowed attributes per element
-- Required `xmlns="http://www.w3.org/1999/xhtml"` on `<div>`
-- Prohibited elements (script, style, etc.)
-
-**FHIR spec reference**: https://hl7.org/fhir/R4/narrative.html#xhtml
-
-**Implementation**: Add a dedicated XHTML validation phase using an XML parser to check the allowed element/attribute whitelist.
-
----
-
 ### GO-GAP-009: Best Practice Constraint Classification
 
 **Priority**: Low
@@ -124,10 +119,9 @@ XHTML is validated only by regex format (via SD-derived pattern). There is no va
 
 ## Implementation Priority
 
-```
+```text
 Phase 1 - Medium Priority
   GO-GAP-001: ValueSet compose.exclude
-  GO-GAP-008: XHTML structural validation
 
 Phase 2 - Low Priority (Feature Parity with YAFV)
   GO-GAP-002: Additional filter operators
