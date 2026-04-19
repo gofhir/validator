@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.3](https://github.com/gofhir/validator/compare/v1.13.2...v1.13.3) (2026-04-19)
+
+
+### Bug Fixes
+
+* extension validator uses ResolveByCanonical for ProfileResolver fallback ([a1f9c1f](https://github.com/gofhir/validator/commit/a1f9c1f7c582e70c893e3cb36ca672b452381a1b)), closes [#55](https://github.com/gofhir/validator/issues/55)
+
 ## [1.13.2](https://github.com/gofhir/validator/compare/v1.13.1...v1.13.2) (2026-04-10)
 
 
