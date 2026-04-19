@@ -633,7 +633,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	result.Stats.PhasesRun++
 
 	// Phase 5: Extension validation
-	v.extValidator.ValidateData(data, sd, result)
+	v.extValidator.ValidateData(ctx, data, sd, result)
 	result.Stats.PhasesRun++
 
 	// Phase 6: Reference validation

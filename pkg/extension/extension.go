@@ -2,6 +2,7 @@
 package extension
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -46,7 +47,7 @@ func New(reg *registry.Registry, termReg *terminology.Registry, primVal *primiti
 // Validate validates all extensions in a resource.
 //
 // Deprecated: Use ValidateData for better performance when JSON is already parsed.
-func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.StructureDefinition, result *issue.Result) {
+func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, sd *registry.StructureDefinition, result *issue.Result) {
 	if sd == nil || sd.Type == "" {
 		return
 	}
@@ -56,12 +57,12 @@ func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.Structur
 		return
 	}
 
-	v.ValidateData(resource, sd, result)
+	v.ValidateData(ctx, resource, sd, result)
 }
 
 // ValidateData validates all extensions in a pre-parsed FHIR resource.
 // This is the preferred method when JSON has already been parsed to avoid redundant parsing.
-func (v *Validator) ValidateData(resource map[string]any, sd *registry.StructureDefinition, result *issue.Result) {
+func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, sd *registry.StructureDefinition, result *issue.Result) {
 	if sd == nil || sd.Type == "" {
 		return
 	}
@@ -72,17 +73,17 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 	}
 
 	// Validate extensions at root level and recursively
-	v.validateElement(resource, resourceType, resourceType, result)
+	v.validateElement(ctx, resource, resourceType, resourceType, result)
 
 	// Walk all nested resources (contained + Bundle entries) using the generic walker.
-	v.walker.Walk(resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
+	v.walker.Walk(resource, resourceType, resourceType, func(wctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
-		if ctx.FHIRPath == resourceType {
+		if wctx.FHIRPath == resourceType {
 			return true
 		}
 
 		// Validate extensions in the nested resource using its own resourceType as context
-		v.validateElement(ctx.Data, ctx.FHIRPath, ctx.ResourceType, result)
+		v.validateElement(ctx, wctx.Data, wctx.FHIRPath, wctx.ResourceType, result)
 		return true
 	})
 }
@@ -90,19 +91,19 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 // validateElement recursively validates extensions in an element.
 // BasePath is the FHIRPath to this element (e.g., "Patient.name[0]" or "Observation.contained[0].name").
 // ContextType is the resource type (e.g., "Patient") for building extension context paths.
-func (v *Validator) validateElement(data map[string]any, basePath, contextType string, result *issue.Result) {
+func (v *Validator) validateElement(ctx context.Context, data map[string]any, basePath, contextType string, result *issue.Result) {
 	// Build the context path for extension validation
 	// This converts "Observation.contained[0].birthDate" to "Patient.birthDate" for contained resources
 	contextPath := v.buildExtensionContextPath(basePath, contextType)
 
 	// Check for extension array - use contextPath for extension validation
 	if extensions, ok := data[keyExtension]; ok {
-		v.validateExtensionArray(extensions, basePath+"."+keyExtension, contextPath, false, result)
+		v.validateExtensionArray(ctx, extensions, basePath+"."+keyExtension, contextPath, false, result)
 	}
 
 	// Check for modifierExtension array
 	if modifierExts, ok := data["modifierExtension"]; ok {
-		v.validateExtensionArray(modifierExts, basePath+".modifierExtension", contextPath, true, result)
+		v.validateExtensionArray(ctx, modifierExts, basePath+".modifierExtension", contextPath, true, result)
 	}
 
 	// Recurse into nested elements
@@ -117,12 +118,12 @@ func (v *Validator) validateElement(data map[string]any, basePath, contextType s
 
 		switch val := value.(type) {
 		case map[string]any:
-			v.validateElement(val, elementPath, contextType, result)
+			v.validateElement(ctx, val, elementPath, contextType, result)
 		case []any:
 			for i, item := range val {
 				itemPath := fmt.Sprintf("%s[%d]", elementPath, i)
 				if mapItem, ok := item.(map[string]any); ok {
-					v.validateElement(mapItem, itemPath, contextType, result)
+					v.validateElement(ctx, mapItem, itemPath, contextType, result)
 				}
 			}
 		}
@@ -172,7 +173,7 @@ func (v *Validator) buildExtensionContextPath(basePath, contextType string) stri
 }
 
 // validateExtensionArray validates an array of extensions.
-func (v *Validator) validateExtensionArray(extensions any, basePath, contextPath string, isModifier bool, result *issue.Result) {
+func (v *Validator) validateExtensionArray(ctx context.Context, extensions any, basePath, contextPath string, isModifier bool, result *issue.Result) {
 	extArray, ok := extensions.([]any)
 	if !ok {
 		return
@@ -185,7 +186,7 @@ func (v *Validator) validateExtensionArray(extensions any, basePath, contextPath
 		}
 
 		extPath := fmt.Sprintf("%s[%d]", basePath, i)
-		v.validateSingleExtension(extMap, extPath, contextPath, isModifier, result)
+		v.validateSingleExtension(ctx, extMap, extPath, contextPath, isModifier, result)
 	}
 }
 
@@ -197,7 +198,7 @@ func isAbsoluteURI(url string) bool {
 // validateSingleExtension validates a single extension.
 // Per FHIR R4 §2.1.0.1, unknown modifier extensions produce an ERROR (not a warning),
 // because a system SHALL refuse to process a resource with an unrecognized modifier extension.
-func (v *Validator) validateSingleExtension(ext map[string]any, extPath, contextPath string, isModifier bool, result *issue.Result) {
+func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]any, extPath, contextPath string, isModifier bool, result *issue.Result) {
 	// Get extension URL
 	url, ok := ext["url"].(string)
 	if !ok || url == "" {
@@ -222,8 +223,10 @@ func (v *Validator) validateSingleExtension(ext map[string]any, extPath, context
 		return
 	}
 
-	// Resolve extension StructureDefinition
-	extSD := v.registry.GetByURL(url)
+	// Resolve extension StructureDefinition.
+	// Use ResolveByCanonical (not GetByURL) so the ProfileResolver fallback runs —
+	// this enables on-demand loading of SDs from external sources (DB, IG packages).
+	extSD := v.registry.ResolveByCanonical(ctx, url, "")
 	if extSD == nil {
 		params := map[string]any{"url": url}
 		if isModifier {
@@ -239,7 +242,7 @@ func (v *Validator) validateSingleExtension(ext map[string]any, extPath, context
 	v.validateContext(extSD, contextPath, extPath, result)
 
 	// Validate value[x]
-	v.validateExtensionValue(ext, extSD, extPath, result)
+	v.validateExtensionValue(ctx, ext, extSD, extPath, result)
 
 	// Validate nested extensions
 	if nestedExts, ok := ext[keyExtension]; ok {
@@ -546,7 +549,7 @@ func (v *Validator) normalizeShadowPath(path string) string {
 }
 
 // validateExtensionValue validates the value[x] of an extension.
-func (v *Validator) validateExtensionValue(ext map[string]any, extSD *registry.StructureDefinition, extPath string, result *issue.Result) {
+func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]any, extSD *registry.StructureDefinition, extPath string, result *issue.Result) {
 	// Find the value[x] element definition
 	valueDef := v.findValueDefinition(extSD)
 	if valueDef == nil {
@@ -622,7 +625,7 @@ func (v *Validator) validateExtensionValue(ext map[string]any, extSD *registry.S
 	// Validate the value content recursively against its type's StructureDefinition
 	// This ensures complex types like CodeableConcept, Identifier, etc. are fully validated
 	if valueMap, ok := value.(map[string]any); ok {
-		v.validateValueContent(valueMap, valueType, valuePath, result)
+		v.validateValueContent(ctx, valueMap, valueType, valuePath, result)
 	}
 }
 
@@ -639,7 +642,7 @@ func (v *Validator) validatePrimitiveExtensionValue(value any, typeName, fhirPat
 }
 
 // validateValueContent validates the content of a complex extension value against its type's SD.
-func (v *Validator) validateValueContent(value map[string]any, typeName, valuePath string, result *issue.Result) {
+func (v *Validator) validateValueContent(ctx context.Context, value map[string]any, typeName, valuePath string, result *issue.Result) {
 	// Get the StructureDefinition for this type
 	typeSD := v.registry.GetByType(typeName)
 	if typeSD == nil {
@@ -653,15 +656,15 @@ func (v *Validator) validateValueContent(value map[string]any, typeName, valuePa
 	}
 
 	// Validate structural elements - check for unknown elements in the value
-	v.validateValueStructure(value, typeSD, typeName, valuePath, result)
+	v.validateValueStructure(ctx, value, typeSD, typeName, valuePath, result)
 
 	// Recursively validate any extensions within this value
 	// (e.g., CodeableConcept can have extensions on coding elements)
-	v.validateElement(value, valuePath, typeName, result)
+	v.validateElement(ctx, value, valuePath, typeName, result)
 }
 
 // validateValueStructure checks that all elements in the value are valid for the type.
-func (v *Validator) validateValueStructure(value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
+func (v *Validator) validateValueStructure(ctx context.Context, value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
 	if typeSD.Snapshot == nil {
 		return
 	}
@@ -683,7 +686,7 @@ func (v *Validator) validateValueStructure(value map[string]any, typeSD *registr
 	}
 
 	// Recursively validate nested complex elements
-	v.validateNestedElements(value, typeSD, typeName, valuePath, result)
+	v.validateNestedElements(ctx, value, typeSD, typeName, valuePath, result)
 }
 
 // buildValidElementSets builds the set of valid elements and choice types from a SD.
@@ -734,7 +737,7 @@ func (v *Validator) isValidChoiceType(key string, choiceTypes map[string][]strin
 }
 
 // validateNestedElements recursively validates nested complex elements.
-func (v *Validator) validateNestedElements(value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
+func (v *Validator) validateNestedElements(ctx context.Context, value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
 	for key, val := range value {
 		if v.isSkippableKey(key) {
 			continue
@@ -748,11 +751,11 @@ func (v *Validator) validateNestedElements(value map[string]any, typeSD *registr
 
 		switch typedVal := val.(type) {
 		case map[string]any:
-			v.validateValueContent(typedVal, nestedType, elementPath, result)
+			v.validateValueContent(ctx, typedVal, nestedType, elementPath, result)
 		case []any:
 			for i, item := range typedVal {
 				if itemMap, ok := item.(map[string]any); ok {
-					v.validateValueContent(itemMap, nestedType, fmt.Sprintf("%s[%d]", elementPath, i), result)
+					v.validateValueContent(ctx, itemMap, nestedType, fmt.Sprintf("%s[%d]", elementPath, i), result)
 				}
 			}
 		}
