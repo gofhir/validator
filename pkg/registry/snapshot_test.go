@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"testing"
 )
 
@@ -617,5 +618,70 @@ func TestMergeArrayField_NilBase(t *testing.T) {
 
 	if string(merged) != string(diffJSON) {
 		t.Errorf("Expected diff as-is when base is nil, got %s", string(merged))
+	}
+}
+
+// TestEnsureSnapshot_ConcurrentSafe verifies that EnsureSnapshot is safe to call
+// concurrently on the same StructureDefinition. In an embedded server scenario
+// (gofhir/go-fhir-server), the validator instance is shared across HTTP request
+// goroutines; the first request to validate against a differential-only profile
+// triggered an unsynchronized read+write on sd.Snapshot. Run with `go test -race`
+// to detect the data race when the fix is missing.
+func TestEnsureSnapshot_ConcurrentSafe(t *testing.T) {
+	r := newMutableRegistry(t)
+	ctx := context.Background()
+
+	profile := &StructureDefinition{
+		URL:            "http://example.org/StructureDefinition/concurrent-test",
+		Type:           "Patient",
+		BaseDefinition: "http://hl7.org/fhir/StructureDefinition/Patient",
+		Derivation:     "constraint",
+		Differential: &Differential{
+			Element: []ElementDefinition{
+				makeDiffElement(t, map[string]any{
+					"id":   "Patient",
+					"path": "Patient",
+				}),
+				makeDiffElement(t, map[string]any{
+					"id":   "Patient.identifier",
+					"path": "Patient.identifier",
+					"min":  1,
+				}),
+			},
+		},
+	}
+
+	const goroutines = 32
+	var wg sync.WaitGroup
+	wg.Add(goroutines)
+	start := make(chan struct{})
+	for i := 0; i < goroutines; i++ {
+		go func() {
+			defer wg.Done()
+			<-start // unblock all at once to maximize contention
+			if err := r.EnsureSnapshot(ctx, profile); err != nil {
+				t.Errorf("EnsureSnapshot failed: %v", err)
+			}
+		}()
+	}
+	close(start)
+	wg.Wait()
+
+	if profile.Snapshot == nil {
+		t.Fatal("Snapshot should have been generated")
+	}
+	// Sanity: identifier.min should be 1 from the differential.
+	found := false
+	for _, elem := range profile.Snapshot.Element {
+		if elem.Path == "Patient.identifier" && elem.SliceName == nil {
+			found = true
+			if elem.Min != 1 {
+				t.Errorf("Patient.identifier.min = %d, want 1", elem.Min)
+			}
+			break
+		}
+	}
+	if !found {
+		t.Error("Patient.identifier not found in generated snapshot")
 	}
 }

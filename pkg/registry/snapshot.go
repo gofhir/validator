@@ -20,7 +20,15 @@ var accumulateFields = map[string]bool{
 // only has a differential. It resolves the base chain, deep-copies the base
 // snapshot, and merges the differential on top.
 // If the SD already has a snapshot, this is a no-op.
+//
+// Safe for concurrent use: a per-SD mutex serializes lazy snapshot generation,
+// so multiple goroutines validating the same differential-only profile observe
+// a single, consistent snapshot. Different SDs can be generated in parallel,
+// and the per-SD lock keeps the recursive call to the base SD deadlock-free.
 func (r *Registry) EnsureSnapshot(ctx context.Context, sd *StructureDefinition) error {
+	sd.snapshotMu.Lock()
+	defer sd.snapshotMu.Unlock()
+
 	if sd.Snapshot != nil {
 		return nil
 	}
@@ -39,6 +47,7 @@ func (r *Registry) EnsureSnapshot(ctx context.Context, sd *StructureDefinition) 
 	}
 
 	// Recursively ensure the base has a snapshot (handles chained profiles).
+	// Each SD has its own mutex, so recursing into the base does not deadlock.
 	if err := r.EnsureSnapshot(ctx, baseSD); err != nil {
 		return fmt.Errorf("cannot generate snapshot for %s: base snapshot failed: %w", sd.URL, err)
 	}

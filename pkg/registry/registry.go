@@ -47,6 +47,11 @@ type StructureDefinition struct {
 
 	// Raw JSON for full access when needed
 	raw json.RawMessage
+
+	// snapshotMu serializes lazy snapshot generation in EnsureSnapshot.
+	// Concurrent validation across goroutines (e.g. in an embedded HTTP server)
+	// previously raced on the Snapshot field.
+	snapshotMu sync.Mutex
 }
 
 // ExtensionContext defines where an extension can be used.
