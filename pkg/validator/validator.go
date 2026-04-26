@@ -64,6 +64,15 @@ type PackageSpec struct {
 	Version string
 }
 
+// ConformancePackage is a group of conformance resources tagged with their
+// source FHIR package metadata. Use with WithConformancePackage so that
+// Registry.GetProfilesByPackage and ValidateWithIG can correctly scope by IG.
+type ConformancePackage struct {
+	Name      string   // e.g., "hl7.fhir.us.core"
+	Version   string   // e.g., "6.1.0"
+	Resources [][]byte // FHIR conformance resource JSON bytes (StructureDefinition, ValueSet, etc.)
+}
+
 // Config holds the validator configuration.
 type Config struct {
 	FHIRVersion          string                   // e.g., "4.0.1", "4.3.0", "5.0.0"
@@ -75,6 +84,7 @@ type Config struct {
 	PackageURLs          []string                 // URLs to remote .tgz package files
 	PackageData          [][]byte                 // In-memory .tgz package bytes (e.g., from //go:embed)
 	ConformanceResources [][]byte                 // Individual conformance resource JSON bytes (e.g., from DB)
+	ConformancePackages  []ConformancePackage     // Conformance resources grouped by source IG package
 	TerminologyProvider  terminology.Provider     // Optional external terminology provider
 	ProfileResolver      registry.ProfileResolver // Optional external profile resolver for on-demand SD loading
 	NoTerminology        bool                     // When true, skip all terminology/binding validation
@@ -143,9 +153,31 @@ func WithPackageData(data []byte) Option {
 // WithConformanceResources loads individual conformance resources (JSON bytes)
 // directly into the validator's registry. Each entry should be a valid JSON
 // FHIR conformance resource (StructureDefinition, ValueSet, CodeSystem, etc.).
+//
+// Resources loaded this way are tagged with PackageID "custom#0.0.0" — IG-scoped
+// lookups via Registry.GetProfilesByPackage / ValidateWithIG will not find them.
+// Prefer WithConformancePackage when the source IG metadata is known.
 func WithConformanceResources(resources [][]byte) Option {
 	return func(c *Config) {
 		c.ConformanceResources = append(c.ConformanceResources, resources...)
+	}
+}
+
+// WithConformancePackage loads conformance resources tagged with their source
+// IG package metadata. Each StructureDefinition / ValueSet / CodeSystem will
+// carry PackageID "<name>#<version>" so Registry.GetProfilesByPackage and
+// ValidateWithIG can scope by IG.
+//
+// Use this when conformance resources originate from a known FHIR package but
+// are stored outside the on-disk package cache (for example, in a database
+// table populated by an IG-install pipeline).
+func WithConformancePackage(name, version string, resources [][]byte) Option {
+	return func(c *Config) {
+		c.ConformancePackages = append(c.ConformancePackages, ConformancePackage{
+			Name:      name,
+			Version:   version,
+			Resources: resources,
+		})
 	}
 }
 
@@ -345,6 +377,18 @@ func New(opts ...Option) (*Validator, error) {
 			logger.Info("  Loaded %d conformance resources from memory", len(pkg.Resources))
 			packages = append(packages, pkg)
 		}
+	}
+
+	// Load conformance resources grouped by their source IG package, preserving
+	// PackageID so IG-scoped lookups (GetProfilesByPackage / ValidateWithIG) work.
+	for _, cp := range config.ConformancePackages {
+		pkg, err := l.LoadFromResourcesWithMeta(cp.Name, cp.Version, cp.Resources)
+		if err != nil {
+			logger.Warn("Could not load conformance package %s#%s: %v", cp.Name, cp.Version, err)
+			continue
+		}
+		logger.Info("  Loaded %s#%s (%d conformance resources from memory)", pkg.Name, pkg.Version, len(pkg.Resources))
+		packages = append(packages, pkg)
 	}
 
 	loadDuration := time.Since(loadStart)

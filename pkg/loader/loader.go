@@ -392,10 +392,21 @@ func (l *Loader) LoadFromEmbeddedData(data [][]byte) ([]*Package, error) {
 // LoadFromResources creates a Package from individual conformance resource JSON bytes.
 // Each entry should be a valid JSON FHIR conformance resource
 // (StructureDefinition, ValueSet, CodeSystem, etc.).
+//
+// The resulting package carries the placeholder name/version "custom"/"0.0.0".
+// Use LoadFromResourcesWithMeta to preserve real IG package metadata so that
+// Registry.GetProfilesByPackage and ValidateWithIG can scope by IG.
 func (l *Loader) LoadFromResources(resources [][]byte) (*Package, error) {
+	return l.LoadFromResourcesWithMeta("custom", "0.0.0", resources)
+}
+
+// LoadFromResourcesWithMeta is LoadFromResources with explicit package name and
+// version. Use this when conformance resources originate from a known IG so that
+// PackageID is preserved (e.g., "hl7.fhir.us.core#6.1.0") for IG-scoped lookups.
+func (l *Loader) LoadFromResourcesWithMeta(name, version string, resources [][]byte) (*Package, error) {
 	pkg := &Package{
-		Name:      "custom",
-		Version:   "0.0.0",
+		Name:      name,
+		Version:   version,
 		Path:      "memory",
 		Resources: make(map[string]json.RawMessage, len(resources)),
 	}
