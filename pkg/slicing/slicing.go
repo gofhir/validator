@@ -356,7 +356,13 @@ func (v *Validator) evaluateValueDiscriminator(element map[string]any, path stri
 		return fixedpattern.ContainsPattern(actualJSON, patternVal)
 	}
 
-	return false
+	// Fall back to fixed/pattern resolved from slice.Type[].Profile[] (FHIR
+	// R4 §profiling.html#discriminator). SUSHI/IG Publisher emit slices like
+	// `extension contains X named Y` without a redundant fixedUri on the slice
+	// — the constraint lives on Extension.url.fixedUri inside the referenced
+	// profile. ANY-of semantics: match if the actual value matches the
+	// constraint contributed by ANY of the referenced profiles.
+	return v.matchAgainstReferencedProfiles(actualJSON, slice, path)
 }
 
 // evaluatePatternDiscriminator checks if element matches a "pattern" discriminator.
@@ -699,6 +705,49 @@ func (v *Validator) getPatternValueForPath(slice SliceInfo, path string) json.Ra
 	}
 
 	return nil
+}
+
+// matchAgainstReferencedProfiles compares actualJSON against fixed[x]/pattern[x]
+// emitted by each profile referenced from slice.Definition.Type[].Profile[].
+// FHIR R4 §profiling.html#discriminator allows a slice to inherit its discriminator
+// constraint from a referenced profile rather than carrying it inline (the SUSHI
+// idiom for `extension contains X named Y`).
+//
+// Returns true on first match (ANY-of semantics across multiple profiles). Returns
+// false if no profile is loaded in the registry, none has a snapshot, or none
+// carries a fixed/pattern value at "<refSD.Type>.<path>".
+func (v *Validator) matchAgainstReferencedProfiles(actualJSON json.RawMessage, slice SliceInfo, path string) bool {
+	if slice.Definition == nil || path == "" || path == pathThis {
+		return false
+	}
+	for _, t := range slice.Definition.Type {
+		for _, profileURL := range t.Profile {
+			refSD := v.registry.GetByURL(profileURL)
+			if refSD == nil || refSD.Snapshot == nil {
+				continue
+			}
+			// Element path inside the referenced SD: "<Type>.<discriminatorPath>".
+			// e.g., type.code = "Extension" + path = "url" → "Extension.url".
+			targetPath := refSD.Type + "." + path
+			for i := range refSD.Snapshot.Element {
+				elem := &refSD.Snapshot.Element[i]
+				if elem.Path != targetPath {
+					continue
+				}
+				if fixedVal, _, has := elem.GetFixed(); has {
+					if fixedpattern.DeepEqual(actualJSON, fixedVal) {
+						return true
+					}
+				}
+				if patternVal, _, has := elem.GetPattern(); has {
+					if fixedpattern.ContainsPattern(actualJSON, patternVal) {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
 
 // inferElementType attempts to infer the FHIR type of an element.

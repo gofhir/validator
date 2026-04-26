@@ -853,3 +853,261 @@ func TestSliceChildCardinality_PatternCodeDiscriminator(t *testing.T) {
 		}
 	})
 }
+
+// TestValueDiscriminator_FollowsTypeProfileChain reproduces the FALP/SUSHI bug where
+// a slice declares its expected url implicitly via type[0].profile pointing to an
+// Extension StructureDefinition whose Extension.url.fixedUri carries the canonical URL.
+// HAPI/HL7 IG Publisher follow this chain; we must too.
+//
+// FHIR R4 §profiling.html#discriminator: when type.profile is present, that profile
+// contributes constraints to the slice — including Extension.url.fixedUri.
+func TestValueDiscriminator_FollowsTypeProfileChain(t *testing.T) {
+	const extURL = "https://falp.cl/fhir/ctms/StructureDefinition/falp-activity-category-ext"
+
+	extSDJSON := []byte(`{
+		"resourceType": "StructureDefinition",
+		"url": "` + extURL + `",
+		"name": "FalpActivityCategoryExt",
+		"type": "Extension",
+		"kind": "complex-type",
+		"abstract": false,
+		"derivation": "constraint",
+		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+		"snapshot": {
+			"element": [
+				{"id": "Extension", "path": "Extension", "min": 0, "max": "*"},
+				{"id": "Extension.url", "path": "Extension.url", "fixedUri": "` + extURL + `"},
+				{"id": "Extension.value[x]", "path": "Extension.value[x]", "type": [{"code": "code"}]}
+			]
+		}
+	}`)
+
+	l := loader.NewLoader("")
+	pkg, err := l.LoadFromResources([][]byte{extSDJSON})
+	if err != nil {
+		t.Fatalf("LoadFromResources: %v", err)
+	}
+	reg := registry.New()
+	if err := reg.LoadFromPackages([]*loader.Package{pkg}); err != nil {
+		t.Fatalf("LoadFromPackages: %v", err)
+	}
+	if reg.GetByURL(extURL) == nil {
+		t.Fatalf("test setup: extension SD %q not in registry", extURL)
+	}
+
+	v := New(reg)
+
+	// Slice declares ONLY type[0].profile — no fixed/pattern on slice itself
+	// nor on a child Extension.url. This matches what SUSHI emits for
+	// `* extension contains FalpActivityCategoryExt named category 1..1`.
+	sliceDef := &registry.ElementDefinition{
+		Path: "ActivityDefinition.extension",
+		Type: []registry.Type{
+			{Code: "Extension", Profile: []string{extURL}},
+		},
+	}
+	sliceDef.SetRaw(json.RawMessage(`{
+		"path": "ActivityDefinition.extension",
+		"sliceName": "category",
+		"min": 1,
+		"max": "1",
+		"type": [{"code": "Extension", "profile": ["` + extURL + `"]}]
+	}`))
+
+	sliceInfo := SliceInfo{
+		Name:       "category",
+		Definition: sliceDef,
+		Children:   nil, // SUSHI does not emit a child Extension.url with fixedUri
+		Min:        1,
+		Max:        "1",
+	}
+
+	t.Run("matching url via type.profile chain", func(t *testing.T) {
+		element := map[string]any{
+			"url":       extURL,
+			"valueCode": "local-lab",
+		}
+		if !v.evaluateValueDiscriminator(element, "url", sliceInfo) {
+			t.Errorf("expected element with url=%q to match slice via type.profile chain "+
+				"to %q (Extension.url.fixedUri)", extURL, extURL)
+		}
+	})
+
+	t.Run("non-matching url does not match", func(t *testing.T) {
+		element := map[string]any{
+			"url":       "https://example.org/other-extension",
+			"valueCode": "x",
+		}
+		if v.evaluateValueDiscriminator(element, "url", sliceInfo) {
+			t.Errorf("expected element with mismatched url NOT to match slice")
+		}
+	})
+}
+
+// TestValueDiscriminator_TypeProfileChain_MultipleProfiles verifies ANY-of semantics
+// when slice.Type[0].Profile carries multiple URLs — match should succeed if the
+// instance's url matches the fixedUri of ANY referenced profile.
+func TestValueDiscriminator_TypeProfileChain_MultipleProfiles(t *testing.T) {
+	const extURLA = "https://example.org/fhir/StructureDefinition/ext-a"
+	const extURLB = "https://example.org/fhir/StructureDefinition/ext-b"
+
+	makeExt := func(url string) []byte {
+		return []byte(`{
+			"resourceType": "StructureDefinition",
+			"url": "` + url + `",
+			"name": "Ext",
+			"type": "Extension",
+			"kind": "complex-type",
+			"abstract": false,
+			"derivation": "constraint",
+			"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+			"snapshot": {
+				"element": [
+					{"id": "Extension", "path": "Extension"},
+					{"id": "Extension.url", "path": "Extension.url", "fixedUri": "` + url + `"}
+				]
+			}
+		}`)
+	}
+
+	l := loader.NewLoader("")
+	pkg, err := l.LoadFromResources([][]byte{makeExt(extURLA), makeExt(extURLB)})
+	if err != nil {
+		t.Fatalf("LoadFromResources: %v", err)
+	}
+	reg := registry.New()
+	if err := reg.LoadFromPackages([]*loader.Package{pkg}); err != nil {
+		t.Fatalf("LoadFromPackages: %v", err)
+	}
+	v := New(reg)
+
+	sliceDef := &registry.ElementDefinition{
+		Path: "X.extension",
+		Type: []registry.Type{
+			{Code: "Extension", Profile: []string{extURLA, extURLB}},
+		},
+	}
+	sliceDef.SetRaw(json.RawMessage(`{"path":"X.extension","sliceName":"any","min":1,"max":"1"}`))
+	sliceInfo := SliceInfo{Name: "any", Definition: sliceDef, Min: 1, Max: "1"}
+
+	cases := []struct {
+		name string
+		url  string
+		want bool
+	}{
+		{"matches first profile", extURLA, true},
+		{"matches second profile", extURLB, true},
+		{"matches neither", "https://example.org/nope", false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			elem := map[string]any{"url": tc.url}
+			got := v.evaluateValueDiscriminator(elem, "url", sliceInfo)
+			if got != tc.want {
+				t.Errorf("evaluateValueDiscriminator url=%q: got %v, want %v", tc.url, got, tc.want)
+			}
+		})
+	}
+}
+
+// TestSlicingValidation_TypeProfileChain_NoCardinalityError end-to-end reproduction
+// of the FALP/paito-fhir-server v0.13.0 regression: an ActivityDefinition profile
+// declares `extension:category 1..1` via type.profile, the instance carries that
+// extension by URL, and the validator must NOT emit SLICING_CARDINALITY_MIN.
+func TestSlicingValidation_TypeProfileChain_NoCardinalityError(t *testing.T) {
+	const extURL = "https://falp.cl/fhir/ctms/StructureDefinition/falp-activity-category-ext"
+	const profileURL = "https://falp.cl/fhir/ctms/StructureDefinition/falp-activity-definition"
+
+	extSD := []byte(`{
+		"resourceType": "StructureDefinition",
+		"url": "` + extURL + `",
+		"name": "FalpActivityCategoryExt",
+		"type": "Extension",
+		"kind": "complex-type",
+		"abstract": false,
+		"derivation": "constraint",
+		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+		"snapshot": {
+			"element": [
+				{"id": "Extension", "path": "Extension"},
+				{"id": "Extension.url", "path": "Extension.url", "fixedUri": "` + extURL + `"},
+				{"id": "Extension.value[x]", "path": "Extension.value[x]", "type": [{"code": "code"}]}
+			]
+		}
+	}`)
+
+	// Profile slices ActivityDefinition.extension by url with one slice "category"
+	// whose only constraint is type.profile → extSD. SUSHI does NOT emit a
+	// child Extension.url with fixedUri here — that's the whole point of the bug.
+	activityProfile := []byte(`{
+		"resourceType": "StructureDefinition",
+		"url": "` + profileURL + `",
+		"name": "FalpActivityDefinition",
+		"type": "ActivityDefinition",
+		"kind": "resource",
+		"abstract": false,
+		"derivation": "constraint",
+		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/ActivityDefinition",
+		"snapshot": {
+			"element": [
+				{"id": "ActivityDefinition", "path": "ActivityDefinition"},
+				{
+					"id": "ActivityDefinition.extension",
+					"path": "ActivityDefinition.extension",
+					"slicing": {
+						"discriminator": [{"type": "value", "path": "url"}],
+						"rules": "open"
+					},
+					"min": 0, "max": "*"
+				},
+				{
+					"id": "ActivityDefinition.extension:category",
+					"path": "ActivityDefinition.extension",
+					"sliceName": "category",
+					"min": 1, "max": "1",
+					"type": [{"code": "Extension", "profile": ["` + extURL + `"]}]
+				}
+			]
+		}
+	}`)
+
+	l := loader.NewLoader("")
+	pkg, err := l.LoadFromResources([][]byte{extSD, activityProfile})
+	if err != nil {
+		t.Fatalf("LoadFromResources: %v", err)
+	}
+	reg := registry.New()
+	if err := reg.LoadFromPackages([]*loader.Package{pkg}); err != nil {
+		t.Fatalf("LoadFromPackages: %v", err)
+	}
+	profileSD := reg.GetByURL(profileURL)
+	if profileSD == nil {
+		t.Fatalf("activity profile not loaded into registry")
+	}
+	v := New(reg)
+
+	resource := map[string]any{
+		"resourceType": "ActivityDefinition",
+		"status":       "active",
+		"extension": []any{
+			map[string]any{
+				"url":       extURL,
+				"valueCode": "local-lab",
+			},
+		},
+	}
+
+	result := issue.NewResult()
+	v.ValidateData(resource, profileSD, result)
+
+	for _, iss := range result.Issues {
+		if iss.MessageID == string(issue.DiagSlicingCardinalityMin) {
+			t.Errorf("unexpected SLICING_CARDINALITY_MIN issue (regression): %s @ %v",
+				iss.Diagnostics, iss.Expression)
+		}
+		if iss.MessageID == string(issue.DiagSlicingNoMatch) {
+			t.Errorf("unexpected SLICING_NO_MATCH issue: %s @ %v",
+				iss.Diagnostics, iss.Expression)
+		}
+	}
+}
