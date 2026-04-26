@@ -368,28 +368,8 @@ func New(opts ...Option) (*Validator, error) {
 		packages = append(packages, pkg)
 	}
 
-	// Load individual conformance resources from memory (e.g., from database)
-	if len(config.ConformanceResources) > 0 {
-		pkg, err := l.LoadFromResources(config.ConformanceResources)
-		if err != nil {
-			logger.Warn("Could not load conformance resources: %v", err)
-		} else {
-			logger.Info("  Loaded %d conformance resources from memory", len(pkg.Resources))
-			packages = append(packages, pkg)
-		}
-	}
-
-	// Load conformance resources grouped by their source IG package, preserving
-	// PackageID so IG-scoped lookups (GetProfilesByPackage / ValidateWithIG) work.
-	for _, cp := range config.ConformancePackages {
-		pkg, err := l.LoadFromResourcesWithMeta(cp.Name, cp.Version, cp.Resources)
-		if err != nil {
-			logger.Warn("Could not load conformance package %s#%s: %v", cp.Name, cp.Version, err)
-			continue
-		}
-		logger.Info("  Loaded %s#%s (%d conformance resources from memory)", pkg.Name, pkg.Version, len(pkg.Resources))
-		packages = append(packages, pkg)
-	}
+	// Load conformance resources from memory (raw + IG-tagged).
+	packages = loadConformanceResources(l, config, packages)
 
 	loadDuration := time.Since(loadStart)
 
@@ -867,4 +847,29 @@ func (v *Validator) collectProfilesToValidate(perCallProfiles, metaProfiles []st
 	// Not added here to allow detecting if all custom profiles failed
 
 	return profiles
+}
+
+// loadConformanceResources loads in-memory conformance resources into the
+// package list. Handles both the legacy untagged form (ConformanceResources)
+// and the IG-tagged form (ConformancePackages).
+func loadConformanceResources(l *loader.Loader, config *Config, packages []*loader.Package) []*loader.Package {
+	if len(config.ConformanceResources) > 0 {
+		pkg, err := l.LoadFromResources(config.ConformanceResources)
+		if err != nil {
+			logger.Warn("Could not load conformance resources: %v", err)
+		} else {
+			logger.Info("  Loaded %d conformance resources from memory", len(pkg.Resources))
+			packages = append(packages, pkg)
+		}
+	}
+	for _, cp := range config.ConformancePackages {
+		pkg, err := l.LoadFromResourcesWithMeta(cp.Name, cp.Version, cp.Resources)
+		if err != nil {
+			logger.Warn("Could not load conformance package %s#%s: %v", cp.Name, cp.Version, err)
+			continue
+		}
+		logger.Info("  Loaded %s#%s (%d conformance resources from memory)", pkg.Name, pkg.Version, len(pkg.Resources))
+		packages = append(packages, pkg)
+	}
+	return packages
 }

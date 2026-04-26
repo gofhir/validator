@@ -722,29 +722,46 @@ func (v *Validator) matchAgainstReferencedProfiles(actualJSON json.RawMessage, s
 	}
 	for _, t := range slice.Definition.Type {
 		for _, profileURL := range t.Profile {
-			refSD := v.registry.GetByURL(profileURL)
-			if refSD == nil || refSD.Snapshot == nil {
-				continue
+			if v.matchInReferencedProfile(actualJSON, profileURL, path) {
+				return true
 			}
-			// Element path inside the referenced SD: "<Type>.<discriminatorPath>".
-			// e.g., type.code = "Extension" + path = "url" → "Extension.url".
-			targetPath := refSD.Type + "." + path
-			for i := range refSD.Snapshot.Element {
-				elem := &refSD.Snapshot.Element[i]
-				if elem.Path != targetPath {
-					continue
-				}
-				if fixedVal, _, has := elem.GetFixed(); has {
-					if fixedpattern.DeepEqual(actualJSON, fixedVal) {
-						return true
-					}
-				}
-				if patternVal, _, has := elem.GetPattern(); has {
-					if fixedpattern.ContainsPattern(actualJSON, patternVal) {
-						return true
-					}
-				}
-			}
+		}
+	}
+	return false
+}
+
+// matchInReferencedProfile loads a single referenced profile from the registry and
+// checks whether actualJSON matches the fixed[x]/pattern[x] declared at
+// "<refSD.Type>.<path>" inside its snapshot.
+func (v *Validator) matchInReferencedProfile(actualJSON json.RawMessage, profileURL, path string) bool {
+	refSD := v.registry.GetByURL(profileURL)
+	if refSD == nil || refSD.Snapshot == nil {
+		return false
+	}
+	targetPath := refSD.Type + "." + path
+	for i := range refSD.Snapshot.Element {
+		elem := &refSD.Snapshot.Element[i]
+		if elem.Path != targetPath {
+			continue
+		}
+		if matchElementFixedOrPattern(actualJSON, elem) {
+			return true
+		}
+	}
+	return false
+}
+
+// matchElementFixedOrPattern checks fixed[x] (exact) then pattern[x] (subset) on
+// the given ElementDefinition against actualJSON.
+func matchElementFixedOrPattern(actualJSON json.RawMessage, elem *registry.ElementDefinition) bool {
+	if fixedVal, _, has := elem.GetFixed(); has {
+		if fixedpattern.DeepEqual(actualJSON, fixedVal) {
+			return true
+		}
+	}
+	if patternVal, _, has := elem.GetPattern(); has {
+		if fixedpattern.ContainsPattern(actualJSON, patternVal) {
+			return true
 		}
 	}
 	return false
