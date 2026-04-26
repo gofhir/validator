@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.14.0](https://github.com/gofhir/validator/compare/v1.13.3...v1.14.0) (2026-04-26)
+
+
+### Features
+
+* **validator:** WithConformancePackage preserves IG package metadata ([c91b51c](https://github.com/gofhir/validator/commit/c91b51cfa8452700687d372dfa0fa6c5c921a165))
+
+
+### Bug Fixes
+
+* **registry:** serialize EnsureSnapshot to eliminate data race ([f5d2bbc](https://github.com/gofhir/validator/commit/f5d2bbc24469e0a65d8729526f6a2f736f580200))
+* **slicing:** value discriminator follows type.profile chain to referenced SD ([2dd72ed](https://github.com/gofhir/validator/commit/2dd72edf8ba5258d4305ca578edd4d2ee44f4ca6))
+
 ## [1.13.3](https://github.com/gofhir/validator/compare/v1.13.2...v1.13.3) (2026-04-19)
 
 
