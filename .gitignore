@@ -66,3 +66,6 @@ docs/resources/
 public/
 .hugo_build.lock
 docs/.hugo_build.lock
+
+# Local development worktrees
+.worktrees/
