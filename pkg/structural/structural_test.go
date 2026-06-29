@@ -1,9 +1,12 @@
 package structural
 
 import (
+	"fmt"
+	"strings"
 	"sync"
 	"testing"
 
+	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/registry"
 )
@@ -363,6 +366,115 @@ func TestValidateObservationChoiceTypes(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestValidateChoiceTypeExclusivityDeterministic reproduces issue #59:
+// matchChoiceType ignored the element-level scope, so on a resource with two
+// choice types sharing the same baseName at different levels (Observation
+// value[x] vs component.value[x]), the mutual-exclusion detection was
+// non-deterministic. Running the same validation many times must ALWAYS flag
+// the violation; before the fix, some iterations missed it due to Go's
+// randomized map iteration order.
+func TestValidateChoiceTypeExclusivityDeterministic(t *testing.T) {
+	reg := setupTestRegistry(t)
+	v := New(reg)
+
+	sd := reg.GetByURL("http://hl7.org/fhir/StructureDefinition/Observation")
+	if sd == nil {
+		t.Skip("Observation StructureDefinition not found")
+	}
+
+	// Two variants of value[x] present at the root -> must always be rejected.
+	resource := []byte(`{
+		"resourceType": "Observation",
+		"status": "final",
+		"code": {"text": "test"},
+		"valueQuantity": {"value": 42, "unit": "mg"},
+		"valueString": "forty-two"
+	}`)
+
+	const iterations = 500
+	for i := range iterations {
+		result := v.Validate(resource, sd)
+		if !hasMutualExclusionError(result) {
+			t.Fatalf("iteration %d: expected choice-type mutual-exclusion error, got none. Issues:\n%s",
+				i, formatIssues(result))
+		}
+	}
+}
+
+// TestValidateChoiceTypeComponentScope ensures a value[x] inside component is
+// resolved against component.value[x] and a single root value[x] is still
+// accepted (no false positive from cross-level baseName collisions).
+func TestValidateChoiceTypeComponentScope(t *testing.T) {
+	reg := setupTestRegistry(t)
+	v := New(reg)
+
+	sd := reg.GetByURL("http://hl7.org/fhir/StructureDefinition/Observation")
+	if sd == nil {
+		t.Skip("Observation StructureDefinition not found")
+	}
+
+	// Single value[x] at root AND a single value[x] inside a component: valid.
+	resource := []byte(`{
+		"resourceType": "Observation",
+		"status": "final",
+		"code": {"text": "test"},
+		"valueString": "positive",
+		"component": [
+			{
+				"code": {"text": "sub"},
+				"valueQuantity": {"value": 1, "unit": "mg"}
+			}
+		]
+	}`)
+
+	const iterations = 500
+	for i := range iterations {
+		result := v.Validate(resource, sd)
+		if hasMutualExclusionError(result) {
+			t.Fatalf("iteration %d: unexpected mutual-exclusion error for single value[x] per level. Issues:\n%s",
+				i, formatIssues(result))
+		}
+	}
+
+	// Two variants inside component -> must always be rejected.
+	bad := []byte(`{
+		"resourceType": "Observation",
+		"status": "final",
+		"code": {"text": "test"},
+		"component": [
+			{
+				"code": {"text": "sub"},
+				"valueQuantity": {"value": 1, "unit": "mg"},
+				"valueString": "one"
+			}
+		]
+	}`)
+	for i := range iterations {
+		result := v.Validate(bad, sd)
+		if !hasMutualExclusionError(result) {
+			t.Fatalf("iteration %d: expected mutual-exclusion error for two component value[x], got none. Issues:\n%s",
+				i, formatIssues(result))
+		}
+	}
+}
+
+func hasMutualExclusionError(result *issue.Result) bool {
+	for _, iss := range result.Issues {
+		if iss.MessageID == string(issue.DiagStructureChoiceMutualExclusion) {
+			return true
+		}
+	}
+	return false
+}
+
+func formatIssues(result *issue.Result) string {
+	var b strings.Builder
+	for _, iss := range result.Issues {
+		fmt.Fprintf(&b, "  - [%s] %s @ %v\n", iss.Severity, iss.Diagnostics, iss.Expression)
+	}
+	return b.String()
 }
 
 func TestValidateBundleEntryResource(t *testing.T) {

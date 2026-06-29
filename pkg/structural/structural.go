@@ -141,11 +141,22 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 	return result
 }
 
-// matchChoiceType checks if a data key matches a choice type in the element index.
+// matchChoiceType checks if a data key matches a choice type defined as a
+// direct child of sdPath in the element index.
 // Returns the choice base path (e.g., "Observation.value") if matched, or empty string otherwise.
-func matchChoiceType(key, _ string, idx *elementIndex) string {
+//
+// Scoping to sdPath is required for determinism: a StructureDefinition can have
+// multiple choice types sharing the same baseName at different levels (e.g.
+// Observation.value[x] and Observation.component.value[x]). Without the scope,
+// the result depended on Go's randomized map iteration order, so choice-type
+// mutual-exclusion detection became non-deterministic (issue #59).
+func matchChoiceType(key, sdPath string, idx *elementIndex) string {
 	for choiceBasePath, choiceElemDef := range idx.choiceTypes {
 		choiceBaseName := choiceBasePath[strings.LastIndex(choiceBasePath, ".")+1:]
+		// Only consider choice types that are direct children of sdPath.
+		if choiceBasePath != sdPath+"."+choiceBaseName {
+			continue
+		}
 		if strings.HasPrefix(key, choiceBaseName) && len(key) > len(choiceBaseName) {
 			typeSuffix := key[len(choiceBaseName):]
 			if findMatchingChoiceType(choiceElemDef, typeSuffix) != "" {
@@ -327,10 +338,19 @@ func (v *Validator) resolveElementDefinition(
 	}
 
 	// 2. Try resolving as choice type
-	// Look for a choice type whose base matches the beginning of elementName
+	// Look for a choice type whose base matches the beginning of elementName.
+	// Scope to choice types defined as a direct child of elementPath's parent,
+	// so that baseName collisions across levels (e.g. Observation.value[x] vs
+	// Observation.component.value[x]) resolve deterministically (issue #59).
+	parentPath := elementPath[:strings.LastIndex(elementPath, ".")+1]
 	for choiceBasePath, choiceElemDef := range idx.choiceTypes {
 		// Get the element name from the choice path (e.g., "Patient.deceased" -> "deceased")
 		choiceBaseName := choiceBasePath[strings.LastIndex(choiceBasePath, ".")+1:]
+
+		// Only consider choice types that are direct children of the same parent.
+		if choiceBasePath != parentPath+choiceBaseName {
+			continue
+		}
 
 		// Check if element starts with the choice base name
 		if strings.HasPrefix(elementName, choiceBaseName) && len(elementName) > len(choiceBaseName) {
