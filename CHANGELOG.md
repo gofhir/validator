@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.1](https://github.com/gofhir/validator/compare/v1.14.0...v1.14.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* **structural:** deterministic choice-type exclusivity ([#60](https://github.com/gofhir/validator/issues/60)) ([53bd0b0](https://github.com/gofhir/validator/commit/53bd0b09f87e6e3b885427e13548bd678b638928))
+
 ## [1.14.0](https://github.com/gofhir/validator/compare/v1.13.3...v1.14.0) (2026-04-26)
 
 
