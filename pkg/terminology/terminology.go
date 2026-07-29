@@ -87,10 +87,17 @@ type Registry struct {
 	// Cache of expanded ValueSets (URL -> set of valid codes)
 	expansionCache map[string]map[string]bool
 
+	// hierarchyMu guards hierarchyCache. Hierarchies are built lazily during
+	// expansion, which runs outside the mu critical section, so the cache needs
+	// its own lock rather than riding on mu.
+	hierarchyMu sync.RWMutex
 	// Cache of hierarchy relationships per CodeSystem (system URL -> parent code -> child codes)
 	// Built from subsumedBy properties in CodeSystem concepts
 	hierarchyCache map[string]map[string][]string
 
+	// providerMu guards provider, which may be replaced after construction while
+	// validation is already reading it.
+	providerMu sync.RWMutex
 	// Optional external terminology provider for systems that can't be expanded locally.
 	provider Provider
 }
@@ -110,7 +117,16 @@ func NewRegistry() *Registry {
 // When set, the Registry delegates to this provider instead of accepting
 // any code via wildcard for external systems.
 func (r *Registry) SetProvider(p Provider) {
+	r.providerMu.Lock()
+	defer r.providerMu.Unlock()
 	r.provider = p
+}
+
+// getProvider returns the configured provider, or nil when none is set.
+func (r *Registry) getProvider() Provider {
+	r.providerMu.RLock()
+	defer r.providerMu.RUnlock()
+	return r.provider
 }
 
 // LoadFromPackages loads ValueSets and CodeSystems from packages.
@@ -196,7 +212,11 @@ func (r *Registry) ValidateCodeContext(ctx context.Context, valueSetURL, system,
 	// Expand the ValueSet
 	vs := r.GetValueSet(valueSetURL)
 	if vs == nil {
-		return false, false
+		// Not held by this registry. A configured provider may still know it —
+		// a host that owns terminology can hold ValueSets created after this
+		// registry was populated (e.g. authored over a REST API) — so ask before
+		// reporting the ValueSet unresolvable.
+		return r.validateViaProvider(ctx, system, code, valueSetURL)
 	}
 
 	codes := r.expandValueSet(vs)
@@ -212,20 +232,41 @@ func (r *Registry) ValidateCodeContext(ctx context.Context, valueSetURL, system,
 // validateWithProvider checks a code against expanded codes, delegating to the
 // external provider for external systems when one is configured.
 func (r *Registry) validateWithProvider(ctx context.Context, codes map[string]bool, system, code, valueSetURL string) bool {
-	if r.provider != nil && system != "" && r.isExternalSystem(system) {
-		// Try ValueSet-specific validation first (more precise)
-		valid, vsFound, err := r.provider.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
-		if err == nil && vsFound {
-			return valid
+	// The cheap local checks come first so the provider lock is only taken on
+	// the external-system path.
+	if system != "" && r.isExternalSystem(system) {
+		if p := r.getProvider(); p != nil {
+			// Try ValueSet-specific validation first (more precise)
+			valid, vsFound, err := p.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
+			if err == nil && vsFound {
+				return valid
+			}
+			// Fall back to system-level validation
+			valid, err = p.ValidateCode(ctx, system, code)
+			if err == nil {
+				return valid
+			}
+			// Error from provider → fall through to wildcard (fail-open)
 		}
-		// Fall back to system-level validation
-		valid, err = r.provider.ValidateCode(ctx, system, code)
-		if err == nil {
-			return valid
-		}
-		// Error from provider → fall through to wildcard (fail-open)
 	}
 	return r.checkCode(codes, system, code)
+}
+
+// validateViaProvider answers a ValueSet this registry does not hold by asking
+// the configured provider. Returns found=false when no provider is configured or
+// the provider does not know the ValueSet either, which callers report as
+// unresolvable rather than as an invalid code.
+func (r *Registry) validateViaProvider(ctx context.Context, system, code, valueSetURL string) (isValid, found bool) {
+	p := r.getProvider()
+	if p == nil {
+		return false, false
+	}
+
+	valid, vsFound, err := p.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
+	if err != nil || !vsFound {
+		return false, false
+	}
+	return valid, true
 }
 
 // checkCode checks if a code is in the expanded codes map.
@@ -252,6 +293,7 @@ func (r *Registry) checkCode(codes map[string]bool, system, code string) bool {
 // expandValueSet expands a ValueSet to a set of valid codes.
 // Returns a map where keys are either "code" (for code elements) or "system|code" (for Coding).
 // Special marker "*" is added when the ValueSet includes external systems that can't be expanded.
+//
 // Exclusions (compose.exclude) are applied after the includes, per
 // https://hl7.org/fhir/R4/valueset-definitions.html#ValueSet.compose.exclude.
 func (r *Registry) expandValueSet(vs *ValueSet) map[string]bool {
@@ -529,14 +571,28 @@ func (r *Registry) applyEqualityFilter(codes map[string]bool, cs *CodeSystem, sy
 
 // getOrBuildHierarchy returns the hierarchy for a CodeSystem, building it if necessary.
 // The hierarchy maps parent codes to their child codes, derived from subsumedBy properties.
+//
+// The returned map is never mutated after publication, so callers may read it
+// without holding a lock.
 func (r *Registry) getOrBuildHierarchy(cs *CodeSystem) map[string][]string {
-	if hierarchy, ok := r.hierarchyCache[cs.URL]; ok {
+	r.hierarchyMu.RLock()
+	hierarchy, ok := r.hierarchyCache[cs.URL]
+	r.hierarchyMu.RUnlock()
+	if ok {
 		return hierarchy
 	}
 
-	hierarchy := r.buildHierarchy(cs)
-	r.hierarchyCache[cs.URL] = hierarchy
-	return hierarchy
+	built := r.buildHierarchy(cs)
+
+	r.hierarchyMu.Lock()
+	defer r.hierarchyMu.Unlock()
+	// Another goroutine may have won the race; prefer the published map so all
+	// callers share one instance.
+	if existing, ok := r.hierarchyCache[cs.URL]; ok {
+		return existing
+	}
+	r.hierarchyCache[cs.URL] = built
+	return built
 }
 
 // buildHierarchy constructs a parent->children map from CodeSystem concept properties.
@@ -665,8 +721,8 @@ func (r *Registry) ValidateCodeInCodeSystemContext(ctx context.Context, system, 
 
 	// Check if this is an external system we can't validate locally
 	if r.isExternalSystem(system) {
-		if r.provider != nil {
-			valid, err := r.provider.ValidateCode(ctx, system, code)
+		if p := r.getProvider(); p != nil {
+			valid, err := p.ValidateCode(ctx, system, code)
 			if err == nil {
 				return valid, true
 			}
@@ -676,6 +732,14 @@ func (r *Registry) ValidateCodeInCodeSystemContext(ctx context.Context, system, 
 
 	cs := r.GetCodeSystem(system)
 	if cs == nil {
+		// Not held by this registry; a configured provider may know it — for
+		// instance a CodeSystem authored over a REST API after this registry was
+		// populated.
+		if p := r.getProvider(); p != nil {
+			if valid, err := p.ValidateCode(ctx, system, code); err == nil {
+				return valid, true
+			}
+		}
 		return false, false // CodeSystem not loaded
 	}
 
