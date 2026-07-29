@@ -242,14 +242,94 @@ func (r *Registry) checkCode(codes map[string]bool, system, code string) bool {
 // expandValueSet expands a ValueSet to a set of valid codes.
 // Returns a map where keys are either "code" (for code elements) or "system|code" (for Coding).
 // Special marker "*" is added when the ValueSet includes external systems that can't be expanded.
+// Exclusions (compose.exclude) are applied after the includes, per
+// https://hl7.org/fhir/R4/valueset-definitions.html#ValueSet.compose.exclude.
 func (r *Registry) expandValueSet(vs *ValueSet) map[string]bool {
 	codes := make(map[string]bool)
 
-	for _, inc := range vs.Compose.Include {
-		r.expandInclude(codes, &inc)
+	for i := range vs.Compose.Include {
+		r.expandInclude(codes, &vs.Compose.Include[i])
 	}
 
-	return codes
+	if len(vs.Compose.Exclude) == 0 {
+		return codes
+	}
+
+	excluded := make(map[string]bool)
+	for i := range vs.Compose.Exclude {
+		r.expandInclude(excluded, &vs.Compose.Exclude[i])
+	}
+
+	return subtractExcluded(codes, excluded)
+}
+
+// subtractExcluded removes excluded codes from an expansion while preserving the
+// dual-key representation described on expandValueSet.
+//
+// A system-qualified key is dropped when the exclusion names it exactly. A bare
+// "code" key — which exists so that primitive code elements can be validated
+// without a system — survives while any system still contributes that code, so
+// excluding one system's code does not invalidate a code another include still
+// provides.
+//
+// Wildcards never remove anything: an exclusion over a system that cannot be
+// expanded locally cannot be applied precisely, so it is ignored rather than
+// over-excluding. Those cases resolve through the terminology Provider instead.
+func subtractExcluded(codes, excluded map[string]bool) map[string]bool {
+	result := make(map[string]bool, len(codes))
+
+	for key := range codes {
+		if !isSystemQualified(key) || excluded[key] {
+			continue
+		}
+		result[key] = true
+	}
+
+	contributedBefore := countContributors(codes)
+	contributedAfter := countContributors(result)
+
+	for key := range codes {
+		if isSystemQualified(key) {
+			continue
+		}
+		switch {
+		case key == "*":
+			// Preserved: the ValueSet reaches a system we cannot enumerate.
+			result[key] = true
+		case contributedBefore[key] > 0:
+			// Some system contributed this code; keep it while one survives.
+			if contributedAfter[key] > 0 {
+				result[key] = true
+			}
+		case !excluded[key]:
+			// Contributed without a system (e.g. an include with no system).
+			result[key] = true
+		}
+	}
+
+	return result
+}
+
+// isSystemQualified reports whether a key is of the form "system|code" rather
+// than a bare code.
+func isSystemQualified(key string) bool {
+	return strings.LastIndex(key, "|") > 0
+}
+
+// countContributors counts, per bare code, how many system-qualified keys
+// provide it. Wildcard entries are not contributors.
+func countContributors(codes map[string]bool) map[string]int {
+	counts := make(map[string]int)
+	for key := range codes {
+		i := strings.LastIndex(key, "|")
+		if i <= 0 {
+			continue
+		}
+		if code := key[i+1:]; code != "*" {
+			counts[code]++
+		}
+	}
+	return counts
 }
 
 // expandInclude expands a single Include clause into the codes map.
