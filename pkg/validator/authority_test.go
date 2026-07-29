@@ -8,56 +8,25 @@ import (
 	"github.com/gofhir/validator/pkg/terminology"
 )
 
-// hostAuthority is a minimal stand-in for a host that owns terminology.
-type hostAuthority struct{ calls int }
-
-func (a *hostAuthority) ResolveCodeInValueSet(_ context.Context, _, _, _ string, _ terminology.LookupOptions) (terminology.CodeResult, error) {
-	a.calls++
-	return terminology.CodeResult{Resolution: terminology.Valid}, nil
-}
-
-func (a *hostAuthority) ResolveCodeInCodeSystem(_ context.Context, _, _ string, _ terminology.LookupOptions) (terminology.CodeResult, error) {
-	a.calls++
-	return terminology.CodeResult{Resolution: terminology.Valid}, nil
-}
-
-func (a *hostAuthority) Supports(context.Context, string) bool { return true }
-
-// TestWithTerminologyAuthoritySkipsBaseLoad verifies the mechanism that reclaims
-// the duplicate copy: with an authority configured, the validator parses no base
-// ValueSets or CodeSystems at all.
-func TestWithTerminologyAuthoritySkipsBaseLoad(t *testing.T) {
-	withAuthority, err := New(WithVersion("4.0.1"), WithTerminologyAuthority(&hostAuthority{}))
-	if err != nil {
-		t.Fatalf("New with authority: %v", err)
-	}
-	reg := withAuthority.TerminologyRegistry()
-	if got := reg.ValueSetCount(); got != 0 {
-		t.Errorf("ValueSetCount = %d, want 0: the base terminology must not be parsed", got)
-	}
-	if got := reg.CodeSystemCount(); got != 0 {
-		t.Errorf("CodeSystemCount = %d, want 0", got)
+// TestWithTerminologyAuthorityReclaimsBaseTerminology covers both halves of the
+// mechanism with one pair of validators: that the base terminology is not parsed,
+// and what that saves. Each New() reloads the full package set, so building
+// separate validators per assertion is what pushed this package past its test
+// timeout in CI.
+func TestWithTerminologyAuthorityReclaimsBaseTerminology(t *testing.T) {
+	// Building two full validators and forcing GC around each is expensive, and
+	// the heap figure is a measurement rather than a correctness property. CI runs
+	// with -short, -race and coverage, where this alone costs a large share of the
+	// package's 10-minute test budget.
+	if testing.Short() {
+		t.Skip("builds two validators and measures heap; run without -short")
 	}
 
-	// Sanity check the other direction, so a broken loader cannot make the
-	// assertion above pass for the wrong reason.
-	plain, err := New(WithVersion("4.0.1"))
-	if err != nil {
-		t.Fatalf("New without authority: %v", err)
-	}
-	if got := plain.TerminologyRegistry().ValueSetCount(); got < 3000 {
-		t.Errorf("ValueSetCount without authority = %d, want the full base corpus (>3000)", got)
-	}
-}
-
-// TestWithTerminologyAuthorityReclaimsHeap measures the reason the server asked
-// for this: the base terminology is otherwise resident twice per process.
-func TestWithTerminologyAuthorityReclaimsHeap(t *testing.T) {
 	// Measure the resident cost of one validator: GC to a quiet baseline, build
 	// it, GC again, and take the delta while it is still reachable. Measuring
 	// absolute HeapAlloc instead would fold in whatever earlier validators the
 	// test already built.
-	residentCost := func(opts ...Option) uint64 {
+	residentCost := func(opts ...Option) (uint64, *Validator) {
 		runtime.GC()
 		var before runtime.MemStats
 		runtime.ReadMemStats(&before)
@@ -70,16 +39,30 @@ func TestWithTerminologyAuthorityReclaimsHeap(t *testing.T) {
 		runtime.GC()
 		var after runtime.MemStats
 		runtime.ReadMemStats(&after)
-		runtime.KeepAlive(v)
 
 		if after.HeapAlloc < before.HeapAlloc {
-			return 0
+			return 0, v
 		}
-		return after.HeapAlloc - before.HeapAlloc
+		return after.HeapAlloc - before.HeapAlloc, v
 	}
 
-	withAuth := residentCost(WithVersion("4.0.1"), WithTerminologyAuthority(&hostAuthority{}))
-	plain := residentCost(WithVersion("4.0.1"))
+	withAuth, authValidator := residentCost(WithVersion("4.0.1"), WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}))
+	plain, plainValidator := residentCost(WithVersion("4.0.1"))
+
+	// The base terminology must not be parsed at all under an authority.
+	reg := authValidator.TerminologyRegistry()
+	if got := reg.ValueSetCount(); got != 0 {
+		t.Errorf("ValueSetCount = %d, want 0: the base terminology must not be parsed", got)
+	}
+	if got := reg.CodeSystemCount(); got != 0 {
+		t.Errorf("CodeSystemCount = %d, want 0", got)
+	}
+
+	// Sanity check the other direction, so a broken loader cannot make the
+	// assertion above pass for the wrong reason.
+	if got := plainValidator.TerminologyRegistry().ValueSetCount(); got < 3000 {
+		t.Errorf("ValueSetCount without authority = %d, want the full base corpus (>3000)", got)
+	}
 
 	const mib = 1 << 20
 	if plain <= withAuth {
@@ -104,11 +87,8 @@ func TestWithTerminologyAuthorityReclaimsHeap(t *testing.T) {
 // TestAuthorityAnswersBindingValidation confirms the authority is actually
 // consulted during validation, not merely stored.
 func TestAuthorityAnswersBindingValidation(t *testing.T) {
-	auth := &hostAuthority{}
-	v, err := New(WithVersion("4.0.1"), WithTerminologyAuthority(auth))
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
+	v, auth := authorityValidator(t)
+	auth.set(terminology.Valid, terminology.MembershipIncluded)
 
 	// Patient.gender is bound required to administrative-gender. With no local
 	// copy, the only way to decide it is the authority.

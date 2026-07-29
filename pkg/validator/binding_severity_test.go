@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/issue"
@@ -13,9 +14,44 @@ import (
 type membershipAuthority struct {
 	resolution terminology.Resolution
 	membership terminology.Membership
+	calls      int
+}
+
+// set retargets the verdict so one validator can drive every row of the table.
+func (a *membershipAuthority) set(res terminology.Resolution, m terminology.Membership) {
+	a.resolution = res
+	a.membership = m
+	a.calls = 0
+}
+
+// authorityFixture is built once for the whole package. Every New() reloads the
+// full package set, which under CI's -race and coverage costs roughly 30s, so
+// tests share one validator and retarget its authority instead.
+type authorityFixture struct {
+	v    *Validator
+	auth *membershipAuthority
+	err  error
+}
+
+var sharedAuthorityFixture = sync.OnceValue(func() authorityFixture {
+	auth := &membershipAuthority{}
+	v, err := New(WithVersion("4.0.1"), WithTerminologyAuthority(auth))
+	return authorityFixture{v: v, auth: auth, err: err}
+})
+
+// authorityValidator returns the shared validator and its mutable authority.
+// Callers must not run in parallel: they retarget shared state.
+func authorityValidator(t *testing.T) (*Validator, *membershipAuthority) {
+	t.Helper()
+	f := sharedAuthorityFixture()
+	if f.err != nil {
+		t.Fatalf("New: %v", f.err)
+	}
+	return f.v, f.auth
 }
 
 func (a *membershipAuthority) ResolveCodeInValueSet(_ context.Context, _, _, _ string, _ terminology.LookupOptions) (terminology.CodeResult, error) {
+	a.calls++
 	return terminology.CodeResult{
 		Resolution:       a.resolution,
 		SystemInValueSet: a.membership,
@@ -23,6 +59,7 @@ func (a *membershipAuthority) ResolveCodeInValueSet(_ context.Context, _, _, _ s
 }
 
 func (a *membershipAuthority) ResolveCodeInCodeSystem(_ context.Context, _, _ string, _ terminology.LookupOptions) (terminology.CodeResult, error) {
+	a.calls++
 	// Codes exist in their CodeSystem; only ValueSet membership is under test.
 	return terminology.CodeResult{Resolution: terminology.Valid}, nil
 }
@@ -80,15 +117,11 @@ func TestExtensibleBindingSeverityTable(t *testing.T) {
 		},
 	}
 
+	v, auth := authorityValidator(t)
+
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			v, err := New(WithVersion("4.0.1"), WithTerminologyAuthority(&membershipAuthority{
-				resolution: terminology.Invalid,
-				membership: tc.membership,
-			}))
-			if err != nil {
-				t.Fatalf("New: %v", err)
-			}
+			auth.set(terminology.Invalid, tc.membership)
 
 			result, err := v.Validate(context.Background(), []byte(extensibleBindingResource))
 			if err != nil {
@@ -110,83 +143,62 @@ func TestExtensibleBindingSeverityTable(t *testing.T) {
 // TestExtensibleViolationIsNotSilentUnderAuthority is the regression this work
 // exists for: with the base terminology not loaded, the old code path asked the
 // empty local registry whether the system was in the ValueSet, got false, and
-// emitted nothing at all.
-func TestExtensibleViolationIsNotSilentUnderAuthority(t *testing.T) {
-	v, err := New(WithVersion("4.0.1"), WithTerminologyAuthority(&membershipAuthority{
-		resolution: terminology.Invalid,
-		membership: terminology.MembershipIncluded,
-	}))
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
+// emitted nothing at all for a bare Coding.
+//
+// It also covers the required row and the Unresolved case, sharing one validator
+// because each New() reloads the full package set.
+func TestBindingOutcomesUnderAuthority(t *testing.T) {
+	v, auth := authorityValidator(t)
+	ctx := context.Background()
 
-	result, err := v.Validate(context.Background(), []byte(extensibleBindingResource))
-	if err != nil {
-		t.Fatalf("Validate: %v", err)
-	}
-
-	for _, iss := range result.Issues {
-		switch iss.MessageID {
-		case string(issue.DiagBindingExtensible),
-			string(issue.DiagBindingExtensibleOther),
-			string(issue.DiagBindingExtensibleUnknown):
-			return // something was reported
+	t.Run("extensible violation is not silent", func(t *testing.T) {
+		auth.set(terminology.Invalid, terminology.MembershipIncluded)
+		result, err := v.Validate(ctx, []byte(extensibleBindingResource))
+		if err != nil {
+			t.Fatalf("Validate: %v", err)
 		}
-	}
-	t.Errorf("an extensible binding violation was silently dropped under an authority; issues: %v",
-		result.Issues)
-}
-
-// TestRequiredBindingStillErrors guards the one row where severity does escalate.
-func TestRequiredBindingStillErrors(t *testing.T) {
-	v, err := New(WithVersion("4.0.1"), WithTerminologyAuthority(&membershipAuthority{
-		resolution: terminology.Invalid,
-		membership: terminology.MembershipIncluded,
-	}))
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-
-	// Patient.gender is bound required to administrative-gender.
-	result, err := v.Validate(context.Background(),
-		[]byte(`{"resourceType":"Patient","gender":"not-a-gender"}`))
-	if err != nil {
-		t.Fatalf("Validate: %v", err)
-	}
-
-	got := issueFor(t, result, issue.DiagBindingRequired)
-	if got == nil {
-		t.Fatalf("required binding violation must be reported; issues: %v", result.Issues)
-	}
-	if got.Severity != issue.SeverityError {
-		t.Errorf("severity = %s, want %s: error is reserved for required", got.Severity, issue.SeverityError)
-	}
-}
-
-// TestUnresolvedIsNotAViolation checks that an undecidable lookup produces no
-// binding violation, which is the whole point of separating Unresolved from
-// Invalid.
-func TestUnresolvedIsNotAViolation(t *testing.T) {
-	v, err := New(WithVersion("4.0.1"), WithTerminologyAuthority(&membershipAuthority{
-		resolution: terminology.Unresolved,
-		membership: terminology.MembershipUnknown,
-	}))
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-
-	result, err := v.Validate(context.Background(), []byte(extensibleBindingResource))
-	if err != nil {
-		t.Fatalf("Validate: %v", err)
-	}
-
-	for _, iss := range result.Issues {
-		switch iss.MessageID {
-		case string(issue.DiagBindingRequired),
-			string(issue.DiagBindingExtensible),
-			string(issue.DiagBindingExtensibleOther),
-			string(issue.DiagBindingExtensibleUnknown):
-			t.Errorf("Unresolved must not produce a binding violation, got %s", iss.MessageID)
+		for _, iss := range result.Issues {
+			switch iss.MessageID {
+			case string(issue.DiagBindingExtensible),
+				string(issue.DiagBindingExtensibleOther),
+				string(issue.DiagBindingExtensibleUnknown):
+				return
+			}
 		}
-	}
+		t.Errorf("an extensible binding violation was silently dropped; issues: %v", result.Issues)
+	})
+
+	t.Run("required still errors", func(t *testing.T) {
+		auth.set(terminology.Invalid, terminology.MembershipIncluded)
+		// Patient.gender is bound required to administrative-gender.
+		result, err := v.Validate(ctx, []byte(`{"resourceType":"Patient","gender":"not-a-gender"}`))
+		if err != nil {
+			t.Fatalf("Validate: %v", err)
+		}
+		got := issueFor(t, result, issue.DiagBindingRequired)
+		if got == nil {
+			t.Fatalf("required binding violation must be reported; issues: %v", result.Issues)
+		}
+		if got.Severity != issue.SeverityError {
+			t.Errorf("severity = %s, want %s: error is reserved for required",
+				got.Severity, issue.SeverityError)
+		}
+	})
+
+	t.Run("unresolved is not a violation", func(t *testing.T) {
+		auth.set(terminology.Unresolved, terminology.MembershipUnknown)
+		result, err := v.Validate(ctx, []byte(extensibleBindingResource))
+		if err != nil {
+			t.Fatalf("Validate: %v", err)
+		}
+		for _, iss := range result.Issues {
+			switch iss.MessageID {
+			case string(issue.DiagBindingRequired),
+				string(issue.DiagBindingExtensible),
+				string(issue.DiagBindingExtensibleOther),
+				string(issue.DiagBindingExtensibleUnknown):
+				t.Errorf("Unresolved must not produce a binding violation, got %s", iss.MessageID)
+			}
+		}
+	})
 }

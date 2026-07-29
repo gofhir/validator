@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+
+	"github.com/gofhir/validator/pkg/terminology"
 )
 
 // Shared validator instance for tests to avoid repeated package loading.
@@ -460,7 +462,13 @@ func TestValidateMaxZeroWithProfile(t *testing.T) {
 	}`, profileURL, joinStrings(elemJSON, ","))
 
 	// Create a new validator with the custom profile loaded
-	v2, err := New(WithConformanceResources([][]byte{[]byte(profileJSON)}))
+	v2, err := New(
+		WithConformanceResources([][]byte{[]byte(profileJSON)}),
+		// Terminology is not under test here; an authority skips parsing the base
+		// ValueSets/CodeSystems, the dominant cost of building a validator under
+		// -race and coverage.
+		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
+	)
 	if err != nil {
 		t.Fatalf("Failed to create validator: %v", err)
 	}
@@ -544,7 +552,13 @@ func TestValidateWithDifferentialOnlyProfile(t *testing.T) {
 		}
 	}`, profileURL)
 
-	v, err := New(WithConformanceResources([][]byte{[]byte(profileJSON)}))
+	v, err := New(
+		WithConformanceResources([][]byte{[]byte(profileJSON)}),
+		// Terminology is not under test here; an authority skips parsing the base
+		// ValueSets/CodeSystems, the dominant cost of building a validator under
+		// -race and coverage.
+		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
+	)
 	if err != nil {
 		t.Fatalf("Failed to create validator: %v", err)
 	}

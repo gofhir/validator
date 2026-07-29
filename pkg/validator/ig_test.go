@@ -3,6 +3,8 @@ package validator
 import (
 	"context"
 	"testing"
+
+	"github.com/gofhir/validator/pkg/terminology"
 )
 
 func TestValidateWithIGUnknownPackage(t *testing.T) {
@@ -145,6 +147,10 @@ func TestWithConformancePackage_PackageIDPreserved(t *testing.T) {
 	v, err := New(
 		WithVersion("4.0.1"),
 		WithConformancePackage(pkgName, pkgVersion, [][]byte{profileJSON}),
+		// Terminology is not under test here; an authority skips parsing the base
+		// ValueSets/CodeSystems, the dominant cost of building a validator under
+		// -race and coverage.
+		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
 	)
 	if err != nil {
 		t.Fatalf("New: %v", err)
