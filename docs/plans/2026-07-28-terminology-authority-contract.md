@@ -11,6 +11,13 @@ correct and is adopted.
 > and has been removed. Your objection was right on all three grounds and the evidence we went looking for
 > supports you, not us. See [Semantics](#semantics-we-will-implement-on-top-of-it). Everything else in this
 > document stands as frozen in round 6 and signed off in round 7.
+>
+> **Amendment (round 9) — the frozen method names do not compile.** `Authority` as frozen reused
+> `ValidateCodeInValueSet` and `ValidateCodeInCodeSystem`, which already exist on `Provider` with different
+> signatures. Go permits one method per name per type, so **no single type could have implemented both ports**
+> — the exact migration path we both agreed on. The methods are now `ResolveCodeInValueSet` and
+> `ResolveCodeInCodeSystem`; nothing else about the shape changed. Shipped in `pkg/terminology/authority.go`,
+> with a dual-adapter compile assertion in `authority_test.go` so the clash cannot silently return.
 
 Rounds 1–5 live in
 [2026-07-28-rfc-response-terminology-registry-api.md](2026-07-28-rfc-response-terminology-registry-api.md)
@@ -160,9 +167,12 @@ type CodeResult struct {
 // Resolution and error are distinct. Return Unresolved for "cannot decide"
 // (no backend configured, canonical unknown to the chain). Reserve error for
 // genuine failures (backend unreachable, circuit open, query failed).
+// Method names are Resolve* rather than ValidateCode* because the latter already
+// exist on Provider with different signatures, and Go permits one method per
+// name per type — see the round-9 amendment.
 type Authority interface {
-    ValidateCodeInValueSet(ctx context.Context, system, code, valueSetURL string, opts LookupOptions) (CodeResult, error)
-    ValidateCodeInCodeSystem(ctx context.Context, system, code string, opts LookupOptions) (CodeResult, error)
+    ResolveCodeInValueSet(ctx context.Context, system, code, valueSetURL string, opts LookupOptions) (CodeResult, error)
+    ResolveCodeInCodeSystem(ctx context.Context, system, code string, opts LookupOptions) (CodeResult, error)
 
     // Supports reports whether anything in this authority's chain might decide
     // the canonical URL. It is a short-circuit hint, not a guarantee: a chain
