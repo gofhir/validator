@@ -73,8 +73,9 @@ type CodeSystemCode struct {
 // CodeSystemProperty represents a property of a code in a CodeSystem.
 // Used for hierarchy relationships (subsumedBy) and other metadata.
 type CodeSystemProperty struct {
-	Code      string `json:"code"`
-	ValueCode string `json:"valueCode,omitempty"`
+	Code         string `json:"code"`
+	ValueCode    string `json:"valueCode,omitempty"`
+	ValueBoolean *bool  `json:"valueBoolean,omitempty"`
 }
 
 // Registry holds loaded ValueSets and CodeSystems indexed by URL.
@@ -383,9 +384,21 @@ func (r *Registry) applyFilters(codes map[string]bool, cs *CodeSystem, system st
 	}
 }
 
-// applyIsAFilter adds all codes that are descendants of the given parent code.
-// Hierarchy is derived from the CodeSystem's subsumedBy properties.
+// applyIsAFilter adds the codes selected by an "is-a" filter: the concept named
+// by the filter and all of its descendants.
+//
+// Per https://hl7.org/fhir/R4/codesystem-filter-operator.html, "is-a" includes
+// the provided concept itself ("include descendant codes and self"), unlike
+// "descendent-of" which excludes it. Self is added only when the CodeSystem
+// actually defines the code — an is-a naming an absent concept must not mint a
+// member — and only when the concept is selectable: notSelectable/abstract
+// concepts belong to the value set but must not appear as instance values.
 func (r *Registry) applyIsAFilter(codes map[string]bool, cs *CodeSystem, system, parentCode string) {
+	if self := findConcept(cs.Concept, parentCode); self != nil && self.isSelectable() {
+		codes[parentCode] = true
+		codes[system+"|"+parentCode] = true
+	}
+
 	// Build or retrieve the hierarchy for this CodeSystem
 	hierarchy := r.getOrBuildHierarchy(cs)
 
@@ -582,6 +595,35 @@ func (r *Registry) ValidateCodeInCodeSystem(system, code string) (isValid, codeS
 	}
 
 	return findCode(cs.Concept), true
+}
+
+// findConcept returns the concept declaring code anywhere in the concept tree,
+// or nil when the CodeSystem does not define it.
+func findConcept(concepts []CodeSystemCode, code string) *CodeSystemCode {
+	for i := range concepts {
+		if concepts[i].Code == code {
+			return &concepts[i]
+		}
+		if found := findConcept(concepts[i].Concept, code); found != nil {
+			return found
+		}
+	}
+	return nil
+}
+
+// isSelectable reports whether the concept may be used as a value in an
+// instance. Concepts flagged notSelectable (the v3 CodeSystem convention) or
+// abstract group other concepts and must not themselves appear in data.
+func (c *CodeSystemCode) isSelectable() bool {
+	for _, p := range c.Property {
+		if p.Code != "notSelectable" && p.Code != "abstract" {
+			continue
+		}
+		if p.ValueBoolean != nil && *p.ValueBoolean {
+			return false
+		}
+	}
+	return true
 }
 
 // stripVersion removes version from ValueSet URL (e.g., "url|4.0.1" -> "url").
