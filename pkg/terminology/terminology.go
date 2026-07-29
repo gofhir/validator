@@ -266,7 +266,26 @@ func (r *Registry) ResolveCodeInValueSet(ctx context.Context, system, code, valu
 	}
 
 	valid, found := r.validateCodeLocally(ctx, valueSetURL, system, code)
-	return localCodeResult(valid, found), nil
+	res := localCodeResult(valid, found)
+	res.SystemInValueSet = r.localMembership(valueSetURL, system)
+	return res, nil
+}
+
+// localMembership reports whether system is among the ValueSet's declared
+// systems, using local copies only.
+//
+// Unknown when there is no system to place (a primitive code element), or when
+// this registry does not hold the ValueSet — in that case the system's absence
+// from a ValueSet we never read proves nothing, and reporting Excluded would let
+// callers infer a permitted extension that may not exist.
+func (r *Registry) localMembership(valueSetURL, system string) Membership {
+	if system == "" || r.GetValueSet(valueSetURL) == nil {
+		return MembershipUnknown
+	}
+	if r.IsSystemInValueSet(valueSetURL, system) {
+		return MembershipIncluded
+	}
+	return MembershipExcluded
 }
 
 // localCodeResult maps the registry's two-state answer onto a CodeResult.

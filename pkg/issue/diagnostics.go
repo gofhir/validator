@@ -30,6 +30,8 @@ const (
 const (
 	DiagBindingRequired           DiagnosticID = "BINDING_REQUIRED"
 	DiagBindingExtensible         DiagnosticID = "BINDING_EXTENSIBLE"
+	DiagBindingExtensibleOther    DiagnosticID = "BINDING_EXTENSIBLE_OTHER_SYSTEM"
+	DiagBindingExtensibleUnknown  DiagnosticID = "BINDING_EXTENSIBLE_UNKNOWN_SYSTEM"
 	DiagBindingExtensibleNoCoding DiagnosticID = "BINDING_EXTENSIBLE_NO_CODING"
 	DiagBindingDisplayMismatch    DiagnosticID = "BINDING_DISPLAY_MISMATCH"
 	DiagBindingTextOnlyWarning    DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
@@ -222,6 +224,21 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeCodeInvalid,
 		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (extensible)",
+	},
+	// The code's system is not among those the ValueSet declares, which is the
+	// case extensible bindings exist to permit. Informational rather than a
+	// warning so it stays non-failing under strict mode.
+	DiagBindingExtensibleOther: {
+		Severity: SeverityInformation,
+		Code:     CodeInformational,
+		Template: "The value provided ('{code}') is not in the value set '{valueSet}', and comes from a system the value set does not declare (extensible bindings permit this)",
+	},
+	// Membership could not be established, so neither acceptance nor rejection
+	// can be justified; reported at the same severity as a plain extensible miss.
+	DiagBindingExtensibleUnknown: {
+		Severity: SeverityWarning,
+		Code:     CodeCodeInvalid,
+		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (extensible); whether its system belongs to the value set could not be determined",
 	},
 	DiagBindingDisplayMismatch: {
 		Severity: SeverityError,

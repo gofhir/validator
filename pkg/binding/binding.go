@@ -327,15 +327,16 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 	}
 
 	// Check ValueSet.
-	valid, found := v.termRegistry.ValidateCodeContext(ctx, binding.ValueSet, system, code)
-	if !found {
+	res, err := v.termRegistry.ResolveCodeInValueSet(ctx, system, code, binding.ValueSet,
+		terminology.LookupOptions{})
+	if err != nil || res.Resolution == terminology.Unresolved {
 		return false
 	}
 
-	if !valid {
+	if res.Resolution == terminology.Invalid {
 		// Only emit per-coding error for required bindings; extensible is deferred to CC level.
 		if binding.Strength == strengthRequired {
-			v.reportBindingViolation(system, code, binding, fhirPath, result)
+			v.reportBindingViolation(system, code, res.SystemInValueSet, binding, fhirPath, result)
 		}
 		return false
 	}
@@ -376,35 +377,16 @@ func (v *Validator) validateCodeBinding(ctx context.Context, code, system string
 		return // Empty code is handled by cardinality validation
 	}
 
-	valid, found := v.termRegistry.ValidateCodeContext(ctx, binding.ValueSet, system, code)
-
-	if !found {
-		// ValueSet not found - can't validate
-		// This is a warning, not an error
+	res, err := v.termRegistry.ResolveCodeInValueSet(ctx, system, code, binding.ValueSet,
+		terminology.LookupOptions{})
+	if err != nil || res.Resolution == terminology.Unresolved {
+		// Undecidable: neither the local copies nor any configured backend could
+		// answer. Not a validation failure.
 		return
 	}
 
-	if !valid {
-		switch binding.Strength {
-		case strengthRequired:
-			result.AddErrorWithID(
-				issue.DiagBindingRequired,
-				map[string]any{
-					"code":     code,
-					"valueSet": binding.ValueSet,
-				},
-				fhirPath,
-			)
-		case strengthExtensible:
-			result.AddWarningWithID(
-				issue.DiagBindingExtensible,
-				map[string]any{
-					"code":     code,
-					"valueSet": binding.ValueSet,
-				},
-				fhirPath,
-			)
-		}
+	if res.Resolution == terminology.Invalid {
+		v.reportBindingViolation(system, code, res.SystemInValueSet, binding, fhirPath, result)
 	}
 }
 
@@ -425,13 +407,14 @@ func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string
 	}
 
 	// Validate against the ValueSet binding
-	valid, found := v.termRegistry.ValidateCodeContext(ctx, binding.ValueSet, system, code)
-	if !found {
-		return // ValueSet not found
+	res, err := v.termRegistry.ResolveCodeInValueSet(ctx, system, code, binding.ValueSet,
+		terminology.LookupOptions{})
+	if err != nil || res.Resolution == terminology.Unresolved {
+		return // undecidable
 	}
 
-	if !valid {
-		v.reportBindingViolation(system, code, binding, fhirPath, result)
+	if res.Resolution == terminology.Invalid {
+		v.reportBindingViolation(system, code, res.SystemInValueSet, binding, fhirPath, result)
 		return
 	}
 
@@ -492,28 +475,47 @@ func (v *Validator) validateDisplayMismatch(system, code, providedDisplay, fhirP
 }
 
 // reportBindingViolation reports a binding violation based on binding strength.
-func (v *Validator) reportBindingViolation(system, code string, binding *registry.Binding, fhirPath string, result *issue.Result) {
+//
+// Severity is driven by strength alone; membership only selects which extensible
+// diagnostic to emit. Escalating on membership would diverge from the HL7
+// validator and HAPI, which both treat an extensible miss as a warning regardless
+// of whether the ValueSet declares the code's system, and the spec conditions
+// extensible conformance on whether the ValueSet covers the concept — a judgment
+// — not on whether the system is declared.
+func (v *Validator) reportBindingViolation(system, code string, membership terminology.Membership, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	codeDisplay := code
 	if system != "" {
 		codeDisplay = fmt.Sprintf("%s#%s", system, code)
 	}
+	args := map[string]any{"code": codeDisplay, "valueSet": binding.ValueSet}
 
 	switch binding.Strength {
 	case strengthRequired:
-		result.AddErrorWithID(
-			issue.DiagBindingRequired,
-			map[string]any{"code": codeDisplay, "valueSet": binding.ValueSet},
-			fhirPath,
-		)
+		result.AddErrorWithID(issue.DiagBindingRequired, args, fhirPath)
 	case strengthExtensible:
-		// Only warn if system IS in ValueSet; extending with different system is allowed
-		if system == "" || v.termRegistry.IsSystemInValueSet(binding.ValueSet, system) {
-			result.AddWarningWithID(
-				issue.DiagBindingExtensible,
-				map[string]any{"code": codeDisplay, "valueSet": binding.ValueSet},
-				fhirPath,
-			)
-		}
+		reportExtensibleViolation(system, membership, args, fhirPath, result)
+	}
+}
+
+// reportExtensibleViolation picks the extensible diagnostic for a non-member code.
+func reportExtensibleViolation(system string, membership terminology.Membership, args map[string]any, fhirPath string, result *issue.Result) {
+	// A primitive code element carries no system — it is implied by the ValueSet
+	// — so there is no other system to be extending with.
+	if system == "" {
+		result.AddWarningWithID(issue.DiagBindingExtensible, args, fhirPath)
+		return
+	}
+
+	switch membership {
+	case terminology.MembershipExcluded:
+		// A code from a system the ValueSet does not declare: exactly the
+		// extension an extensible binding exists to permit. Informational so it
+		// stays non-failing under strict mode, where a warning would fail.
+		result.AddInfoWithID(issue.DiagBindingExtensibleOther, args, fhirPath)
+	case terminology.MembershipUnknown:
+		result.AddWarningWithID(issue.DiagBindingExtensibleUnknown, args, fhirPath)
+	case terminology.MembershipIncluded:
+		result.AddWarningWithID(issue.DiagBindingExtensible, args, fhirPath)
 	}
 }
 
