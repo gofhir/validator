@@ -95,11 +95,17 @@ type Registry struct {
 	// Built from subsumedBy properties in CodeSystem concepts
 	hierarchyCache map[string]map[string][]string
 
-	// providerMu guards provider, which may be replaced after construction while
-	// validation is already reading it.
+	// providerMu guards provider, authority and authoritative, any of which may be
+	// replaced after construction while validation is already reading them.
 	providerMu sync.RWMutex
 	// Optional external terminology provider for systems that can't be expanded locally.
 	provider Provider
+	// Optional full terminology port. When authoritative, it decides every
+	// lookup; otherwise it is used wherever provider would be.
+	authority Authority
+	// authoritative reports whether authority owns terminology resolution, in
+	// which case local copies are not consulted.
+	authoritative bool
 }
 
 // NewRegistry creates a new terminology Registry.
@@ -116,10 +122,31 @@ func NewRegistry() *Registry {
 // codes in systems that cannot be expanded locally (e.g., SNOMED CT, LOINC).
 // When set, the Registry delegates to this provider instead of accepting
 // any code via wildcard for external systems.
+// It supplements the local copies: they are still consulted first. If p also
+// implements Authority, the richer port is used wherever the provider would be.
 func (r *Registry) SetProvider(p Provider) {
 	r.providerMu.Lock()
 	defer r.providerMu.Unlock()
 	r.provider = p
+	r.authority, _ = p.(Authority)
+	r.authoritative = false
+}
+
+// SetAuthority configures an authoritative terminology port: it decides every
+// lookup, and local copies are not consulted. Use it when the host owns
+// terminology resolution — including resources authored after this registry was
+// built, and any remote terminology server behind its chain.
+//
+// If a also implements Provider, that narrower port is retained so callers of
+// the older paths keep working.
+func (r *Registry) SetAuthority(a Authority) {
+	r.providerMu.Lock()
+	defer r.providerMu.Unlock()
+	r.authority = a
+	r.authoritative = true
+	if p, ok := a.(Provider); ok {
+		r.provider = p
+	}
 }
 
 // getProvider returns the configured provider, or nil when none is set.
@@ -127,6 +154,13 @@ func (r *Registry) getProvider() Provider {
 	r.providerMu.RLock()
 	defer r.providerMu.RUnlock()
 	return r.provider
+}
+
+// authorityFor returns the configured Authority and whether it owns resolution.
+func (r *Registry) authorityFor() (a Authority, authoritative bool) {
+	r.providerMu.RLock()
+	defer r.providerMu.RUnlock()
+	return r.authority, r.authoritative && r.authority != nil
 }
 
 // LoadFromPackages loads ValueSets and CodeSystems from packages.
@@ -198,7 +232,69 @@ func (r *Registry) ValidateCode(valueSetURL, system, code string) (isValid, foun
 // ValidateCodeContext checks if a code is valid for a given ValueSet URL,
 // propagating ctx to the terminology Provider when one is configured.
 // Returns (isValid, found) where found indicates if the ValueSet was found.
+//
+// With an authoritative Authority configured this is a two-state view of
+// ResolveCodeInValueSet, where Unresolved collapses to found=false. Without one
+// it keeps the historical local behavior verbatim, including accepting codes
+// from unexpandable external systems. Prefer ResolveCodeInValueSet when the
+// caller can act on the difference between "not a member" and "undecidable".
 func (r *Registry) ValidateCodeContext(ctx context.Context, valueSetURL, system, code string) (isValid, found bool) {
+	if a, authoritative := r.authorityFor(); authoritative {
+		res, err := a.ResolveCodeInValueSet(ctx, system, code, valueSetURL, LookupOptions{})
+		if err != nil {
+			return false, false
+		}
+		return res.Resolution == Valid, res.Resolution != Unresolved
+	}
+	return r.validateCodeLocally(ctx, valueSetURL, system, code)
+}
+
+// ResolveCodeInValueSet decides whether code (in system) is a member of the
+// ValueSet identified by valueSetURL.
+//
+// When an authoritative Authority is configured it decides alone. Otherwise the
+// registry answers from its own copies, consulting a configured Provider for
+// external systems and for ValueSets it does not hold.
+//
+// An empty system is valid and means the caller has a primitive code element,
+// whose system is implied by the ValueSet rather than carried by the data. In
+// that case SystemInValueSet is not meaningful: there is no other system to be
+// extending with.
+func (r *Registry) ResolveCodeInValueSet(ctx context.Context, system, code, valueSetURL string, opts LookupOptions) (CodeResult, error) {
+	if a, authoritative := r.authorityFor(); authoritative {
+		return a.ResolveCodeInValueSet(ctx, system, code, valueSetURL, opts)
+	}
+
+	valid, found := r.validateCodeLocally(ctx, valueSetURL, system, code)
+	return localCodeResult(valid, found), nil
+}
+
+// localCodeResult maps the registry's two-state answer onto a CodeResult.
+//
+// SystemInValueSet is left Unknown: the local path does not compute it here, and
+// reporting Excluded would let callers infer an absence we have not established.
+//
+// Note the deliberate asymmetry with ValidateCodeContext on the local path. The
+// legacy pair encodes "could not validate, but accept" as (valid=true,
+// found=false) — a fail-open baked into the return values. Resolve* reports that
+// same situation as Unresolved and leaves the accept/reject decision to the
+// caller's unresolved policy, which is the whole point of the three-state
+// contract. Until WithUnresolvedPolicy lands, Validate* keeps the historical
+// behavior so no existing caller changes outcomes.
+func localCodeResult(valid, found bool) CodeResult {
+	switch {
+	case !found:
+		return CodeResult{Resolution: Unresolved}
+	case valid:
+		return CodeResult{Resolution: Valid}
+	default:
+		return CodeResult{Resolution: Invalid}
+	}
+}
+
+// validateCodeLocally answers from the registry's own copies, falling back to a
+// configured Provider.
+func (r *Registry) validateCodeLocally(ctx context.Context, valueSetURL, system, code string) (isValid, found bool) {
 	valueSetURL = stripVersion(valueSetURL)
 
 	// Check cache first
@@ -714,7 +810,40 @@ func (r *Registry) ValidateCodeInCodeSystem(system, code string) (isValid, codeS
 // ValidateCodeInCodeSystemContext checks if a code exists in a CodeSystem,
 // propagating ctx to the terminology Provider when one is configured.
 // Returns (isValid, codeSystemFound) as documented on ValidateCodeInCodeSystem.
+//
+// As with ValidateCodeContext, an authoritative Authority yields a two-state view
+// of ResolveCodeInCodeSystem; without one the historical local behavior is kept
+// verbatim, including the (valid=true, found=false) fail-open for external
+// systems that no provider could decide.
 func (r *Registry) ValidateCodeInCodeSystemContext(ctx context.Context, system, code string) (isValid, codeSystemFound bool) {
+	if a, authoritative := r.authorityFor(); authoritative {
+		res, err := a.ResolveCodeInCodeSystem(ctx, system, code, LookupOptions{})
+		if err != nil {
+			return false, false
+		}
+		return res.Resolution == Valid, res.Resolution != Unresolved
+	}
+	return r.validateCodeInCodeSystemLocally(ctx, system, code)
+}
+
+// ResolveCodeInCodeSystem decides whether code exists in system, regardless of
+// any ValueSet binding.
+//
+// When an authoritative Authority is configured it decides alone. Otherwise the
+// registry answers from its own copies, consulting a configured Provider for
+// external systems and for CodeSystems it does not hold.
+func (r *Registry) ResolveCodeInCodeSystem(ctx context.Context, system, code string, opts LookupOptions) (CodeResult, error) {
+	if a, authoritative := r.authorityFor(); authoritative {
+		return a.ResolveCodeInCodeSystem(ctx, system, code, opts)
+	}
+
+	valid, found := r.validateCodeInCodeSystemLocally(ctx, system, code)
+	return localCodeResult(valid, found), nil
+}
+
+// validateCodeInCodeSystemLocally answers from the registry's own copies,
+// falling back to a configured Provider.
+func (r *Registry) validateCodeInCodeSystemLocally(ctx context.Context, system, code string) (isValid, codeSystemFound bool) {
 	if system == "" || code == "" {
 		return false, false
 	}
