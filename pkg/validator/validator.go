@@ -652,7 +652,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 
 	// Phase 4: Binding validation (terminology) — skipped when NoTerminology is set
 	if !v.config.NoTerminology {
-		v.bindValidator.ValidateData(data, sd, result)
+		v.bindValidator.ValidateData(ctx, data, sd, result)
 	}
 	result.Stats.PhasesRun++
 

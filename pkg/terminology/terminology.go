@@ -171,14 +171,25 @@ func (r *Registry) GetCodeSystem(url string) *CodeSystem {
 
 // ValidateCode checks if a code is valid for a given ValueSet URL.
 // Returns (isValid, found) where found indicates if the ValueSet was found.
+//
+// Deprecated: use ValidateCodeContext. Without a caller-supplied context, calls
+// to a configured Provider cannot honor deadlines or cancellation, and traces
+// break at the provider boundary.
 func (r *Registry) ValidateCode(valueSetURL, system, code string) (isValid, found bool) {
+	return r.ValidateCodeContext(context.Background(), valueSetURL, system, code)
+}
+
+// ValidateCodeContext checks if a code is valid for a given ValueSet URL,
+// propagating ctx to the terminology Provider when one is configured.
+// Returns (isValid, found) where found indicates if the ValueSet was found.
+func (r *Registry) ValidateCodeContext(ctx context.Context, valueSetURL, system, code string) (isValid, found bool) {
 	valueSetURL = stripVersion(valueSetURL)
 
 	// Check cache first
 	r.mu.RLock()
 	if codes, ok := r.expansionCache[valueSetURL]; ok {
 		r.mu.RUnlock()
-		return r.validateWithProvider(codes, system, code, valueSetURL), true
+		return r.validateWithProvider(ctx, codes, system, code, valueSetURL), true
 	}
 	r.mu.RUnlock()
 
@@ -195,21 +206,20 @@ func (r *Registry) ValidateCode(valueSetURL, system, code string) (isValid, foun
 	r.expansionCache[valueSetURL] = codes
 	r.mu.Unlock()
 
-	return r.validateWithProvider(codes, system, code, valueSetURL), true
+	return r.validateWithProvider(ctx, codes, system, code, valueSetURL), true
 }
 
 // validateWithProvider checks a code against expanded codes, delegating to the
 // external provider for external systems when one is configured.
-func (r *Registry) validateWithProvider(codes map[string]bool, system, code, valueSetURL string) bool {
+func (r *Registry) validateWithProvider(ctx context.Context, codes map[string]bool, system, code, valueSetURL string) bool {
 	if r.provider != nil && system != "" && r.isExternalSystem(system) {
 		// Try ValueSet-specific validation first (more precise)
-		valid, vsFound, err := r.provider.ValidateCodeInValueSet(
-			context.Background(), system, code, valueSetURL)
+		valid, vsFound, err := r.provider.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
 		if err == nil && vsFound {
 			return valid
 		}
 		// Fall back to system-level validation
-		valid, err = r.provider.ValidateCode(context.Background(), system, code)
+		valid, err = r.provider.ValidateCode(ctx, system, code)
 		if err == nil {
 			return valid
 		}
@@ -637,7 +647,18 @@ func (r *Registry) IsSystemInValueSet(valueSetURL, system string) bool {
 //
 // This is used to validate that codes exist in their declared CodeSystems,
 // regardless of any ValueSet binding.
+//
+// Deprecated: use ValidateCodeInCodeSystemContext. Without a caller-supplied
+// context, calls to a configured Provider cannot honor deadlines or
+// cancellation, and traces break at the provider boundary.
 func (r *Registry) ValidateCodeInCodeSystem(system, code string) (isValid, codeSystemFound bool) {
+	return r.ValidateCodeInCodeSystemContext(context.Background(), system, code)
+}
+
+// ValidateCodeInCodeSystemContext checks if a code exists in a CodeSystem,
+// propagating ctx to the terminology Provider when one is configured.
+// Returns (isValid, codeSystemFound) as documented on ValidateCodeInCodeSystem.
+func (r *Registry) ValidateCodeInCodeSystemContext(ctx context.Context, system, code string) (isValid, codeSystemFound bool) {
 	if system == "" || code == "" {
 		return false, false
 	}
@@ -645,7 +666,7 @@ func (r *Registry) ValidateCodeInCodeSystem(system, code string) (isValid, codeS
 	// Check if this is an external system we can't validate locally
 	if r.isExternalSystem(system) {
 		if r.provider != nil {
-			valid, err := r.provider.ValidateCode(context.Background(), system, code)
+			valid, err := r.provider.ValidateCode(ctx, system, code)
 			if err == nil {
 				return valid, true
 			}
