@@ -86,6 +86,7 @@ type Config struct {
 	ConformanceResources [][]byte                 // Individual conformance resource JSON bytes (e.g., from DB)
 	ConformancePackages  []ConformancePackage     // Conformance resources grouped by source IG package
 	TerminologyProvider  terminology.Provider     // Optional external terminology provider
+	TerminologyAuthority terminology.Authority    // Optional authoritative terminology port (replaces the base copy)
 	ProfileResolver      registry.ProfileResolver // Optional external profile resolver for on-demand SD loading
 	NoTerminology        bool                     // When true, skip all terminology/binding validation
 }
@@ -188,6 +189,26 @@ func WithConformancePackage(name, version string, resources [][]byte) Option {
 func WithTerminologyProvider(provider terminology.Provider) Option {
 	return func(c *Config) {
 		c.TerminologyProvider = provider
+	}
+}
+
+// WithTerminologyAuthority delegates all terminology resolution to a, and skips
+// loading the embedded base ValueSets/CodeSystems entirely.
+//
+// Use it for embedded deployments where the host already owns terminology — a
+// FHIR server whose chain holds the base vocabularies, resources authored over
+// its API, and any configured remote terminology server. It removes the second
+// in-memory copy of the base terminology from the process, and lets binding
+// validation see ValueSets and CodeSystems created after the validator was
+// constructed, which a constructor-time snapshot cannot.
+//
+// Unlike WithTerminologyProvider — which supplements the local copies and is
+// consulted only for systems that cannot be expanded locally — this replaces
+// them. The authority answers every lookup, so it must be prepared to resolve
+// the base vocabularies too. When both options are given, the authority wins.
+func WithTerminologyAuthority(a terminology.Authority) Option {
+	return func(c *Config) {
+		c.TerminologyAuthority = a
 	}
 }
 
@@ -399,14 +420,23 @@ func New(opts ...Option) (*Validator, error) {
 	// Create and populate the terminology registry
 	logger.Debug("Building terminology registry...")
 	termReg := terminology.NewRegistry()
-	if err := termReg.LoadFromPackages(packages); err != nil {
-		return nil, fmt.Errorf("failed to load terminology: %w", err)
-	}
-	logger.Debug("  Indexed %d ValueSets, %d CodeSystems", termReg.ValueSetCount(), termReg.CodeSystemCount())
 
-	if config.TerminologyProvider != nil {
-		termReg.SetProvider(config.TerminologyProvider)
-		logger.Debug("  External terminology provider configured")
+	if config.TerminologyAuthority != nil {
+		// The host owns terminology resolution, so parsing our own copy of the
+		// base ValueSets/CodeSystems would be dead weight — this is where the
+		// duplicate in-memory copy is avoided.
+		termReg.SetAuthority(config.TerminologyAuthority)
+		logger.Debug("  Terminology authority configured; base terminology not loaded")
+	} else {
+		if err := termReg.LoadFromPackages(packages); err != nil {
+			return nil, fmt.Errorf("failed to load terminology: %w", err)
+		}
+		logger.Debug("  Indexed %d ValueSets, %d CodeSystems", termReg.ValueSetCount(), termReg.CodeSystemCount())
+
+		if config.TerminologyProvider != nil {
+			termReg.SetProvider(config.TerminologyProvider)
+			logger.Debug("  External terminology provider configured")
+		}
 	}
 
 	if config.ProfileResolver != nil {
@@ -766,6 +796,22 @@ func (v *Validator) ValidateJSON(ctx context.Context, jsonStr string, opts ...Va
 // Registry returns the underlying registry for advanced use cases.
 func (v *Validator) Registry() *registry.Registry {
 	return v.registry
+}
+
+// TerminologyRegistry returns the terminology registry in use, for introspection
+// and diagnostics.
+//
+// It is not a terminology service. Its contents depend entirely on how this
+// Validator was configured — it is empty under WithTerminologyAuthority, and
+// otherwise holds only what the configured packages provided. It is also owned by
+// the Validator and shared with its validation phases, so callers must treat it,
+// and every resource reachable through it, as read-only: mutating anything it
+// returns corrupts validation for the whole process.
+//
+// To share one terminology source across components, have the host own it and
+// pass WithTerminologyAuthority rather than reading from here.
+func (v *Validator) TerminologyRegistry() *terminology.Registry {
+	return v.termRegistry
 }
 
 // Config returns the validator configuration.
