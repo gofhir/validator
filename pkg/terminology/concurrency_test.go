@@ -76,6 +76,43 @@ func TestConcurrentExpansionBuildsHierarchySafely(t *testing.T) {
 	wg.Wait()
 }
 
+// TestConcurrentNegativeCacheIsSafe hammers the negative cache from many
+// goroutines, mixing canonicals so entries are created and read concurrently.
+// Run with -race.
+func TestConcurrentNegativeCacheIsSafe(_ *testing.T) {
+	r := NewRegistry()
+	r.SetAuthority(&countingAuthority{resolution: Unresolved})
+
+	ctx := context.Background()
+	var wg sync.WaitGroup
+
+	for g := range 8 {
+		wg.Add(1)
+		go func(g int) {
+			defer wg.Done()
+			for i := range 100 {
+				url := fmt.Sprintf("http://example.org/ValueSet/missing-%d", (g+i)%5)
+				r.ResolveCodeInValueSet(ctx, "sys", "code", url, LookupOptions{})
+			}
+		}(g)
+	}
+
+	// Concurrently reconfigure the TTL, which swaps the map out from under readers.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := range 50 {
+			if i%2 == 0 {
+				r.SetUnresolvedCacheTTL(0)
+			} else {
+				r.SetUnresolvedCacheTTL(DefaultUnresolvedCacheTTL)
+			}
+		}
+	}()
+
+	wg.Wait()
+}
+
 // TestConcurrentSetProviderIsSafe covers the other unsynchronised field: the
 // provider was written without a lock while validation read it. Run with -race.
 func TestConcurrentSetProviderIsSafe(_ *testing.T) {

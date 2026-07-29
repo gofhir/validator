@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gofhir/validator/pkg/loader"
 )
@@ -106,7 +107,26 @@ type Registry struct {
 	// authoritative reports whether authority owns terminology resolution, in
 	// which case local copies are not consulted.
 	authoritative bool
+
+	// unresolvedMu guards the negative cache below.
+	unresolvedMu sync.Mutex
+	// unresolved remembers canonicals an Authority reported as unresolvable, so a
+	// resource referencing an unknown ValueSet many times costs one round-trip
+	// rather than one per occurrence. Keyed by canonical URL, which is sound
+	// because "I do not hold this ValueSet" does not vary by code.
+	unresolved map[string]time.Time
+	// unresolvedTTL bounds how long a negative entry is trusted. Short by design:
+	// a host with an authoring API can start holding a ValueSet at any moment, and
+	// this cache has no way to be invalidated from outside. Zero disables it.
+	unresolvedTTL time.Duration
+	// now is the clock, replaceable in tests.
+	now func() time.Time
 }
+
+// DefaultUnresolvedCacheTTL bounds how long an Authority's "unresolvable" answer
+// is reused. It trades a small staleness window for not issuing one network call
+// per occurrence of an unknown canonical.
+const DefaultUnresolvedCacheTTL = 5 * time.Second
 
 // NewRegistry creates a new terminology Registry.
 func NewRegistry() *Registry {
@@ -115,7 +135,50 @@ func NewRegistry() *Registry {
 		codeSystems:    make(map[string]*CodeSystem),
 		expansionCache: make(map[string]map[string]bool),
 		hierarchyCache: make(map[string]map[string][]string),
+		unresolved:     make(map[string]time.Time),
+		unresolvedTTL:  DefaultUnresolvedCacheTTL,
+		now:            time.Now,
 	}
+}
+
+// SetUnresolvedCacheTTL bounds how long an Authority's "unresolvable" answer is
+// reused for the same canonical. Zero disables the cache, at the cost of one
+// backend call per occurrence of an unknown canonical.
+func (r *Registry) SetUnresolvedCacheTTL(ttl time.Duration) {
+	r.unresolvedMu.Lock()
+	defer r.unresolvedMu.Unlock()
+	r.unresolvedTTL = ttl
+	// Drop what was cached under the previous policy rather than let entries
+	// outlive a shortened TTL.
+	r.unresolved = make(map[string]time.Time)
+}
+
+// isKnownUnresolved reports whether url was recently reported unresolvable.
+func (r *Registry) isKnownUnresolved(url string) bool {
+	r.unresolvedMu.Lock()
+	defer r.unresolvedMu.Unlock()
+	if r.unresolvedTTL <= 0 {
+		return false
+	}
+	at, ok := r.unresolved[url]
+	if !ok {
+		return false
+	}
+	if r.now().Sub(at) >= r.unresolvedTTL {
+		delete(r.unresolved, url)
+		return false
+	}
+	return true
+}
+
+// markUnresolved records that url could not be resolved.
+func (r *Registry) markUnresolved(url string) {
+	r.unresolvedMu.Lock()
+	defer r.unresolvedMu.Unlock()
+	if r.unresolvedTTL <= 0 {
+		return
+	}
+	r.unresolved[url] = r.now()
 }
 
 // SetProvider configures an external terminology provider for validating
@@ -213,7 +276,12 @@ func (r *Registry) GetValueSet(url string) *ValueSet {
 }
 
 // GetCodeSystem returns a CodeSystem by URL.
+//
+// A version suffix is stripped, as in GetValueSet, so a versioned canonical such
+// as "http://x|1.0.0" resolves to the loaded CodeSystem.
 func (r *Registry) GetCodeSystem(url string) *CodeSystem {
+	url = stripVersion(url)
+
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.codeSystems[url]
@@ -262,7 +330,19 @@ func (r *Registry) ValidateCodeContext(ctx context.Context, valueSetURL, system,
 // extending with.
 func (r *Registry) ResolveCodeInValueSet(ctx context.Context, system, code, valueSetURL string, opts LookupOptions) (CodeResult, error) {
 	if a, authoritative := r.authorityFor(); authoritative {
-		return a.ResolveCodeInValueSet(ctx, system, code, valueSetURL, opts)
+		// A canonical the authority just said it cannot resolve will not become
+		// resolvable for the next code in the same resource. Without this, a
+		// misspelled binding URL in a large Bundle costs one round-trip per
+		// occurrence.
+		if r.isKnownUnresolved(valueSetURL) {
+			return CodeResult{Resolution: Unresolved}, nil
+		}
+
+		res, err := a.ResolveCodeInValueSet(ctx, system, code, valueSetURL, opts)
+		if err == nil && res.Resolution == Unresolved {
+			r.markUnresolved(valueSetURL)
+		}
+		return res, err
 	}
 
 	valid, found := r.validateCodeLocally(ctx, valueSetURL, system, code)
