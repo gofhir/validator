@@ -3,6 +3,8 @@ package validator
 import (
 	"context"
 	"testing"
+
+	"github.com/gofhir/validator/pkg/terminology"
 )
 
 // mockExtensionResolver serves a single extension StructureDefinition on demand.
@@ -53,7 +55,13 @@ func TestExtensionValidation_UsesProfileResolver(t *testing.T) {
 		sdJSON:       extSDJSON,
 	}
 
-	v, err := New(WithProfileResolver(resolver))
+	v, err := New(
+		WithProfileResolver(resolver),
+		// Terminology is not under test here; an authority skips parsing the base
+		// ValueSets/CodeSystems, the dominant cost of building a validator under
+		// -race and coverage.
+		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
+	)
 	if err != nil {
 		t.Skipf("cannot create validator: %v", err)
 	}

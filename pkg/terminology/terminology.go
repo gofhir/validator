@@ -4,8 +4,10 @@ package terminology
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gofhir/validator/pkg/loader"
 )
@@ -28,6 +30,9 @@ type Compose struct {
 }
 
 // Include defines a set of codes to include/exclude.
+//
+// Version selects which version of System to expand from; see
+// expandFromCodeSystem for what happens when that version was not loaded.
 type Include struct {
 	System   string    `json:"system,omitempty"`
 	Version  string    `json:"version,omitempty"`
@@ -73,43 +78,166 @@ type CodeSystemCode struct {
 // CodeSystemProperty represents a property of a code in a CodeSystem.
 // Used for hierarchy relationships (subsumedBy) and other metadata.
 type CodeSystemProperty struct {
-	Code      string `json:"code"`
-	ValueCode string `json:"valueCode,omitempty"`
+	Code         string `json:"code"`
+	ValueCode    string `json:"valueCode,omitempty"`
+	ValueBoolean *bool  `json:"valueBoolean,omitempty"`
 }
 
 // Registry holds loaded ValueSets and CodeSystems indexed by URL.
 type Registry struct {
-	mu          sync.RWMutex
+	mu sync.RWMutex
+	// valueSets and codeSystems are keyed by canonical URL and hold whichever
+	// version was loaded last, which is what an unversioned lookup resolves to.
 	valueSets   map[string]*ValueSet
 	codeSystems map[string]*CodeSystem
+	// valueSetsByVersion and codeSystemsByVersion are keyed "url|version", so a
+	// versioned request resolves to that exact version when it was loaded. Without
+	// these a canonical could only ever have one version, and honoring a requested
+	// version was impossible rather than merely unimplemented.
+	valueSetsByVersion   map[string]*ValueSet
+	codeSystemsByVersion map[string]*CodeSystem
 
 	// Cache of expanded ValueSets (URL -> set of valid codes)
 	expansionCache map[string]map[string]bool
 
+	// hierarchyMu guards hierarchyCache. Hierarchies are built lazily during
+	// expansion, which runs outside the mu critical section, so the cache needs
+	// its own lock rather than riding on mu.
+	hierarchyMu sync.RWMutex
 	// Cache of hierarchy relationships per CodeSystem (system URL -> parent code -> child codes)
 	// Built from subsumedBy properties in CodeSystem concepts
 	hierarchyCache map[string]map[string][]string
 
+	// providerMu guards provider, authority and authoritative, any of which may be
+	// replaced after construction while validation is already reading them.
+	providerMu sync.RWMutex
 	// Optional external terminology provider for systems that can't be expanded locally.
 	provider Provider
+	// Optional full terminology port. When authoritative, it decides every
+	// lookup; otherwise it is used wherever provider would be.
+	authority Authority
+	// authoritative reports whether authority owns terminology resolution, in
+	// which case local copies are not consulted.
+	authoritative bool
+
+	// unresolvedMu guards the negative cache below.
+	unresolvedMu sync.Mutex
+	// unresolved remembers canonicals an Authority reported as unresolvable, so a
+	// resource referencing an unknown ValueSet many times costs one round-trip
+	// rather than one per occurrence. Keyed by canonical URL, which is sound
+	// because "I do not hold this ValueSet" does not vary by code.
+	unresolved map[string]time.Time
+	// unresolvedTTL bounds how long a negative entry is trusted. Short by design:
+	// a host with an authoring API can start holding a ValueSet at any moment, and
+	// this cache has no way to be invalidated from outside. Zero disables it.
+	unresolvedTTL time.Duration
+	// now is the clock, replaceable in tests.
+	now func() time.Time
 }
+
+// DefaultUnresolvedCacheTTL bounds how long an Authority's "unresolvable" answer
+// is reused. It trades a small staleness window for not issuing one network call
+// per occurrence of an unknown canonical.
+const DefaultUnresolvedCacheTTL = 5 * time.Second
 
 // NewRegistry creates a new terminology Registry.
 func NewRegistry() *Registry {
 	return &Registry{
-		valueSets:      make(map[string]*ValueSet),
-		codeSystems:    make(map[string]*CodeSystem),
-		expansionCache: make(map[string]map[string]bool),
-		hierarchyCache: make(map[string]map[string][]string),
+		valueSets:            make(map[string]*ValueSet),
+		codeSystems:          make(map[string]*CodeSystem),
+		valueSetsByVersion:   make(map[string]*ValueSet),
+		codeSystemsByVersion: make(map[string]*CodeSystem),
+		expansionCache:       make(map[string]map[string]bool),
+		hierarchyCache:       make(map[string]map[string][]string),
+		unresolved:           make(map[string]time.Time),
+		unresolvedTTL:        DefaultUnresolvedCacheTTL,
+		now:                  time.Now,
 	}
+}
+
+// SetUnresolvedCacheTTL bounds how long an Authority's "unresolvable" answer is
+// reused for the same canonical. Zero disables the cache, at the cost of one
+// backend call per occurrence of an unknown canonical.
+func (r *Registry) SetUnresolvedCacheTTL(ttl time.Duration) {
+	r.unresolvedMu.Lock()
+	defer r.unresolvedMu.Unlock()
+	r.unresolvedTTL = ttl
+	// Drop what was cached under the previous policy rather than let entries
+	// outlive a shortened TTL.
+	r.unresolved = make(map[string]time.Time)
+}
+
+// isKnownUnresolved reports whether url was recently reported unresolvable.
+func (r *Registry) isKnownUnresolved(url string) bool {
+	r.unresolvedMu.Lock()
+	defer r.unresolvedMu.Unlock()
+	if r.unresolvedTTL <= 0 {
+		return false
+	}
+	at, ok := r.unresolved[url]
+	if !ok {
+		return false
+	}
+	if r.now().Sub(at) >= r.unresolvedTTL {
+		delete(r.unresolved, url)
+		return false
+	}
+	return true
+}
+
+// markUnresolved records that url could not be resolved.
+func (r *Registry) markUnresolved(url string) {
+	r.unresolvedMu.Lock()
+	defer r.unresolvedMu.Unlock()
+	if r.unresolvedTTL <= 0 {
+		return
+	}
+	r.unresolved[url] = r.now()
 }
 
 // SetProvider configures an external terminology provider for validating
 // codes in systems that cannot be expanded locally (e.g., SNOMED CT, LOINC).
 // When set, the Registry delegates to this provider instead of accepting
 // any code via wildcard for external systems.
+// It supplements the local copies: they are still consulted first. If p also
+// implements Authority, the richer port is used wherever the provider would be.
 func (r *Registry) SetProvider(p Provider) {
+	r.providerMu.Lock()
+	defer r.providerMu.Unlock()
 	r.provider = p
+	r.authority, _ = p.(Authority)
+	r.authoritative = false
+}
+
+// SetAuthority configures an authoritative terminology port: it decides every
+// lookup, and local copies are not consulted. Use it when the host owns
+// terminology resolution — including resources authored after this registry was
+// built, and any remote terminology server behind its chain.
+//
+// If a also implements Provider, that narrower port is retained so callers of
+// the older paths keep working.
+func (r *Registry) SetAuthority(a Authority) {
+	r.providerMu.Lock()
+	defer r.providerMu.Unlock()
+	r.authority = a
+	r.authoritative = true
+	if p, ok := a.(Provider); ok {
+		r.provider = p
+	}
+}
+
+// getProvider returns the configured provider, or nil when none is set.
+func (r *Registry) getProvider() Provider {
+	r.providerMu.RLock()
+	defer r.providerMu.RUnlock()
+	return r.provider
+}
+
+// authorityFor returns the configured Authority and whether it owns resolution.
+func (r *Registry) authorityFor() (a Authority, authoritative bool) {
+	r.providerMu.RLock()
+	defer r.providerMu.RUnlock()
+	return r.authority, r.authoritative && r.authority != nil
 }
 
 // LoadFromPackages loads ValueSets and CodeSystems from packages.
@@ -128,22 +256,9 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 			switch peek.ResourceType {
 			case "ValueSet":
-				var vs ValueSet
-				if err := json.Unmarshal(data, &vs); err != nil {
-					continue
-				}
-				if vs.URL != "" {
-					r.valueSets[vs.URL] = &vs
-				}
-
+				r.indexValueSetUnlocked(data)
 			case "CodeSystem":
-				var cs CodeSystem
-				if err := json.Unmarshal(data, &cs); err != nil {
-					continue
-				}
-				if cs.URL != "" {
-					r.codeSystems[cs.URL] = &cs
-				}
+				r.indexCodeSystemUnlocked(data)
 			}
 		}
 	}
@@ -151,10 +266,40 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 	return nil
 }
 
+// indexValueSetUnlocked adds a ValueSet to both indexes. Must be called with the
+// write lock held.
+func (r *Registry) indexValueSetUnlocked(data json.RawMessage) {
+	var vs ValueSet
+	if err := json.Unmarshal(data, &vs); err != nil || vs.URL == "" {
+		return
+	}
+	r.valueSets[vs.URL] = &vs
+	if vs.Version != "" {
+		r.valueSetsByVersion[vs.URL+"|"+vs.Version] = &vs
+	}
+}
+
+// indexCodeSystemUnlocked adds a CodeSystem to both indexes. Must be called with
+// the write lock held.
+func (r *Registry) indexCodeSystemUnlocked(data json.RawMessage) {
+	var cs CodeSystem
+	if err := json.Unmarshal(data, &cs); err != nil || cs.URL == "" {
+		return
+	}
+	r.codeSystems[cs.URL] = &cs
+	if cs.Version != "" {
+		r.codeSystemsByVersion[cs.URL+"|"+cs.Version] = &cs
+	}
+}
+
 // GetValueSet returns a ValueSet by URL.
+//
+// A "url|version" canonical resolves to that exact version when it was loaded,
+// and otherwise falls back to whichever version is held for the URL.
 func (r *Registry) GetValueSet(url string) *ValueSet {
-	// Strip version from URL if present (e.g., "http://...ValueSet/x|4.0.1")
-	url = stripVersion(url)
+	if base, version := splitCanonical(url); version != "" {
+		return r.GetValueSetVersion(base, version)
+	}
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -162,59 +307,246 @@ func (r *Registry) GetValueSet(url string) *ValueSet {
 }
 
 // GetCodeSystem returns a CodeSystem by URL.
+//
+// A "url|version" canonical resolves to that exact version when it was loaded,
+// and otherwise falls back to whichever version is held for the URL.
 func (r *Registry) GetCodeSystem(url string) *CodeSystem {
+	if base, version := splitCanonical(url); version != "" {
+		return r.GetCodeSystemVersion(base, version)
+	}
+
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.codeSystems[url]
 }
 
+// GetCodeSystemVersion returns the CodeSystem for url at the given version when
+// that version was loaded.
+//
+// When it was not, it falls back to the version held for url rather than
+// resolving nothing: the published corpus is systematically inconsistent here —
+// the v2 ValueSets in hl7.terminology request version "2.0.0" of CodeSystems that
+// the same package ships at "3.0.0" — and refusing to expand would make 433 of the
+// 441 versioned includes unresolvable. The fallback is reported by
+// CodeSystemVersionMatches for callers that need to know.
+func (r *Registry) GetCodeSystemVersion(url, version string) *CodeSystem {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if cs, ok := r.codeSystemsByVersion[url+"|"+version]; ok {
+		return cs
+	}
+	return r.codeSystems[url]
+}
+
+// GetValueSetVersion returns the ValueSet for url at the given version when that
+// version was loaded, falling back to the version held for url otherwise.
+func (r *Registry) GetValueSetVersion(url, version string) *ValueSet {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if vs, ok := r.valueSetsByVersion[url+"|"+version]; ok {
+		return vs
+	}
+	return r.valueSets[url]
+}
+
+// CodeSystemVersionMatches reports whether the requested version of url is the one
+// held. False means a lookup for that version resolved by fallback, so any
+// expansion from it describes a different version than the caller asked for.
+func (r *Registry) CodeSystemVersionMatches(url, version string) bool {
+	if version == "" {
+		return true
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	_, ok := r.codeSystemsByVersion[url+"|"+version]
+	return ok
+}
+
 // ValidateCode checks if a code is valid for a given ValueSet URL.
 // Returns (isValid, found) where found indicates if the ValueSet was found.
+//
+// Deprecated: use ValidateCodeContext. Without a caller-supplied context, calls
+// to a configured Provider cannot honor deadlines or cancellation, and traces
+// break at the provider boundary.
 func (r *Registry) ValidateCode(valueSetURL, system, code string) (isValid, found bool) {
-	valueSetURL = stripVersion(valueSetURL)
+	return r.ValidateCodeContext(context.Background(), valueSetURL, system, code)
+}
 
-	// Check cache first
-	r.mu.RLock()
-	if codes, ok := r.expansionCache[valueSetURL]; ok {
-		r.mu.RUnlock()
-		return r.validateWithProvider(codes, system, code, valueSetURL), true
+// ValidateCodeContext checks if a code is valid for a given ValueSet URL,
+// propagating ctx to the terminology Provider when one is configured.
+// Returns (isValid, found) where found indicates if the ValueSet was found.
+//
+// With an authoritative Authority configured this is a two-state view of
+// ResolveCodeInValueSet, where Unresolved collapses to found=false. Without one
+// it keeps the historical local behavior verbatim, including accepting codes
+// from unexpandable external systems. Prefer ResolveCodeInValueSet when the
+// caller can act on the difference between "not a member" and "undecidable".
+func (r *Registry) ValidateCodeContext(ctx context.Context, valueSetURL, system, code string) (isValid, found bool) {
+	if a, authoritative := r.authorityFor(); authoritative {
+		res, err := a.ResolveCodeInValueSet(ctx, system, code, valueSetURL, LookupOptions{})
+		if err != nil {
+			return false, false
+		}
+		return res.Resolution == Valid, res.Resolution != Unresolved
 	}
-	r.mu.RUnlock()
+	return r.validateCodeLocally(ctx, valueSetURL, system, code)
+}
 
-	// Expand the ValueSet
+// ResolveCodeInValueSet decides whether code (in system) is a member of the
+// ValueSet identified by valueSetURL.
+//
+// When an authoritative Authority is configured it decides alone. Otherwise the
+// registry answers from its own copies, consulting a configured Provider for
+// external systems and for ValueSets it does not hold.
+//
+// An empty system is valid and means the caller has a primitive code element,
+// whose system is implied by the ValueSet rather than carried by the data. In
+// that case SystemInValueSet is not meaningful: there is no other system to be
+// extending with.
+func (r *Registry) ResolveCodeInValueSet(ctx context.Context, system, code, valueSetURL string, opts LookupOptions) (CodeResult, error) {
+	if a, authoritative := r.authorityFor(); authoritative {
+		// A canonical the authority just said it cannot resolve will not become
+		// resolvable for the next code in the same resource. Without this, a
+		// misspelled binding URL in a large Bundle costs one round-trip per
+		// occurrence.
+		if r.isKnownUnresolved(valueSetURL) {
+			return CodeResult{Resolution: Unresolved}, nil
+		}
+
+		res, err := a.ResolveCodeInValueSet(ctx, system, code, valueSetURL, opts)
+		if err == nil && res.Resolution == Unresolved {
+			r.markUnresolved(valueSetURL)
+		}
+		return res, err
+	}
+
+	valid, found := r.validateCodeLocally(ctx, valueSetURL, system, code)
+	res := localCodeResult(valid, found)
+	res.SystemInValueSet = r.localMembership(valueSetURL, system)
+	return res, nil
+}
+
+// localMembership reports whether system is among the ValueSet's declared
+// systems, using local copies only.
+//
+// Unknown when there is no system to place (a primitive code element), or when
+// this registry does not hold the ValueSet — in that case the system's absence
+// from a ValueSet we never read proves nothing, and reporting Excluded would let
+// callers infer a permitted extension that may not exist.
+func (r *Registry) localMembership(valueSetURL, system string) Membership {
+	if system == "" || r.GetValueSet(valueSetURL) == nil {
+		return MembershipUnknown
+	}
+	if r.IsSystemInValueSet(valueSetURL, system) {
+		return MembershipIncluded
+	}
+	return MembershipExcluded
+}
+
+// localCodeResult maps the registry's two-state answer onto a CodeResult.
+//
+// SystemInValueSet is left Unknown: the local path does not compute it here, and
+// reporting Excluded would let callers infer an absence we have not established.
+//
+// Note the deliberate asymmetry with ValidateCodeContext on the local path. The
+// legacy pair encodes "could not validate, but accept" as (valid=true,
+// found=false) — a fail-open baked into the return values. Resolve* reports that
+// same situation as Unresolved and leaves the accept/reject decision to the
+// caller's unresolved policy, which is the whole point of the three-state
+// contract. Until WithUnresolvedPolicy lands, Validate* keeps the historical
+// behavior so no existing caller changes outcomes.
+func localCodeResult(valid, found bool) CodeResult {
+	switch {
+	case !found:
+		return CodeResult{Resolution: Unresolved}
+	case valid:
+		return CodeResult{Resolution: Valid}
+	default:
+		return CodeResult{Resolution: Invalid}
+	}
+}
+
+// validateCodeLocally answers from the registry's own copies, falling back to a
+// configured Provider.
+func (r *Registry) validateCodeLocally(ctx context.Context, valueSetURL, system, code string) (isValid, found bool) {
+	// Resolve first: the ValueSet decides the cache key, so two versions of the
+	// same canonical cannot share an expansion. Keying by the version-stripped URL
+	// would let a lookup for one version be answered from another's expansion,
+	// which would make version-aware resolution pointless.
 	vs := r.GetValueSet(valueSetURL)
 	if vs == nil {
-		return false, false
+		// Not held by this registry. A configured provider may still know it —
+		// a host that owns terminology can hold ValueSets created after this
+		// registry was populated (e.g. authored over a REST API) — so ask before
+		// reporting the ValueSet unresolvable.
+		return r.validateViaProvider(ctx, system, code, valueSetURL)
 	}
 
-	codes := r.expandValueSet(vs)
+	cacheKey := canonicalOf(vs.URL, vs.Version)
 
-	// Cache the expansion
-	r.mu.Lock()
-	r.expansionCache[valueSetURL] = codes
-	r.mu.Unlock()
+	r.mu.RLock()
+	codes, cached := r.expansionCache[cacheKey]
+	r.mu.RUnlock()
 
-	return r.validateWithProvider(codes, system, code, valueSetURL), true
+	if !cached {
+		codes = r.expandValueSet(vs)
+		r.mu.Lock()
+		r.expansionCache[cacheKey] = codes
+		r.mu.Unlock()
+	}
+
+	return r.validateWithProvider(ctx, codes, system, code, valueSetURL), true
+}
+
+// canonicalOf builds the "url|version" key used by the version-scoped caches. A
+// resource without a version keys on its URL alone.
+func canonicalOf(url, version string) string {
+	if version == "" {
+		return url
+	}
+	return url + "|" + version
 }
 
 // validateWithProvider checks a code against expanded codes, delegating to the
 // external provider for external systems when one is configured.
-func (r *Registry) validateWithProvider(codes map[string]bool, system, code, valueSetURL string) bool {
-	if r.provider != nil && system != "" && r.isExternalSystem(system) {
-		// Try ValueSet-specific validation first (more precise)
-		valid, vsFound, err := r.provider.ValidateCodeInValueSet(
-			context.Background(), system, code, valueSetURL)
-		if err == nil && vsFound {
-			return valid
+func (r *Registry) validateWithProvider(ctx context.Context, codes map[string]bool, system, code, valueSetURL string) bool {
+	// The cheap local checks come first so the provider lock is only taken on
+	// the external-system path.
+	if system != "" && r.isExternalSystem(system) {
+		if p := r.getProvider(); p != nil {
+			// Try ValueSet-specific validation first (more precise)
+			valid, vsFound, err := p.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
+			if err == nil && vsFound {
+				return valid
+			}
+			// Fall back to system-level validation
+			valid, err = p.ValidateCode(ctx, system, code)
+			if err == nil {
+				return valid
+			}
+			// Error from provider → fall through to wildcard (fail-open)
 		}
-		// Fall back to system-level validation
-		valid, err = r.provider.ValidateCode(context.Background(), system, code)
-		if err == nil {
-			return valid
-		}
-		// Error from provider → fall through to wildcard (fail-open)
 	}
 	return r.checkCode(codes, system, code)
+}
+
+// validateViaProvider answers a ValueSet this registry does not hold by asking
+// the configured provider. Returns found=false when no provider is configured or
+// the provider does not know the ValueSet either, which callers report as
+// unresolvable rather than as an invalid code.
+func (r *Registry) validateViaProvider(ctx context.Context, system, code, valueSetURL string) (isValid, found bool) {
+	p := r.getProvider()
+	if p == nil {
+		return false, false
+	}
+
+	valid, vsFound, err := p.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
+	if err != nil || !vsFound {
+		return false, false
+	}
+	return valid, true
 }
 
 // checkCode checks if a code is in the expanded codes map.
@@ -241,14 +573,95 @@ func (r *Registry) checkCode(codes map[string]bool, system, code string) bool {
 // expandValueSet expands a ValueSet to a set of valid codes.
 // Returns a map where keys are either "code" (for code elements) or "system|code" (for Coding).
 // Special marker "*" is added when the ValueSet includes external systems that can't be expanded.
+//
+// Exclusions (compose.exclude) are applied after the includes, per
+// https://hl7.org/fhir/R4/valueset-definitions.html#ValueSet.compose.exclude.
 func (r *Registry) expandValueSet(vs *ValueSet) map[string]bool {
 	codes := make(map[string]bool)
 
-	for _, inc := range vs.Compose.Include {
-		r.expandInclude(codes, &inc)
+	for i := range vs.Compose.Include {
+		r.expandInclude(codes, &vs.Compose.Include[i])
 	}
 
-	return codes
+	if len(vs.Compose.Exclude) == 0 {
+		return codes
+	}
+
+	excluded := make(map[string]bool)
+	for i := range vs.Compose.Exclude {
+		r.expandInclude(excluded, &vs.Compose.Exclude[i])
+	}
+
+	return subtractExcluded(codes, excluded)
+}
+
+// subtractExcluded removes excluded codes from an expansion while preserving the
+// dual-key representation described on expandValueSet.
+//
+// A system-qualified key is dropped when the exclusion names it exactly. A bare
+// "code" key — which exists so that primitive code elements can be validated
+// without a system — survives while any system still contributes that code, so
+// excluding one system's code does not invalidate a code another include still
+// provides.
+//
+// Wildcards never remove anything: an exclusion over a system that cannot be
+// expanded locally cannot be applied precisely, so it is ignored rather than
+// over-excluding. Those cases resolve through the terminology Provider instead.
+func subtractExcluded(codes, excluded map[string]bool) map[string]bool {
+	result := make(map[string]bool, len(codes))
+
+	for key := range codes {
+		if !isSystemQualified(key) || excluded[key] {
+			continue
+		}
+		result[key] = true
+	}
+
+	contributedBefore := countContributors(codes)
+	contributedAfter := countContributors(result)
+
+	for key := range codes {
+		if isSystemQualified(key) {
+			continue
+		}
+		switch {
+		case key == "*":
+			// Preserved: the ValueSet reaches a system we cannot enumerate.
+			result[key] = true
+		case contributedBefore[key] > 0:
+			// Some system contributed this code; keep it while one survives.
+			if contributedAfter[key] > 0 {
+				result[key] = true
+			}
+		case !excluded[key]:
+			// Contributed without a system (e.g. an include with no system).
+			result[key] = true
+		}
+	}
+
+	return result
+}
+
+// isSystemQualified reports whether a key is of the form "system|code" rather
+// than a bare code.
+func isSystemQualified(key string) bool {
+	return strings.LastIndex(key, "|") > 0
+}
+
+// countContributors counts, per bare code, how many system-qualified keys
+// provide it. Wildcard entries are not contributors.
+func countContributors(codes map[string]bool) map[string]int {
+	counts := make(map[string]int)
+	for key := range codes {
+		i := strings.LastIndex(key, "|")
+		if i <= 0 {
+			continue
+		}
+		if code := key[i+1:]; code != "*" {
+			counts[code]++
+		}
+	}
+	return counts
 }
 
 // expandInclude expands a single Include clause into the codes map.
@@ -284,12 +697,22 @@ func (r *Registry) addExplicitConcepts(codes map[string]bool, inc *Include) {
 }
 
 // expandFromCodeSystem expands codes from a CodeSystem, applying filters if present.
+//
+// A requested inc.Version selects that exact version when it was loaded. When it
+// was not, expansion proceeds from the version held rather than resolving nothing:
+// see GetCodeSystemVersion for why refusing would break most of the versioned
+// includes in the published corpus.
 func (r *Registry) expandFromCodeSystem(codes map[string]bool, inc *Include) {
 	if inc.System == "" {
 		return
 	}
 
-	cs := r.GetCodeSystem(inc.System)
+	var cs *CodeSystem
+	if inc.Version != "" {
+		cs = r.GetCodeSystemVersion(inc.System, inc.Version)
+	} else {
+		cs = r.GetCodeSystem(inc.System)
+	}
 	if cs == nil {
 		return
 	}
@@ -372,36 +795,123 @@ func (r *Registry) applyFilters(codes map[string]bool, cs *CodeSystem, system st
 	for _, filter := range filters {
 		switch filter.Op {
 		case "is-a":
-			// is-a: Include all codes that are descendants of the filter value
-			// Hierarchy is derived from CodeSystem concept properties (subsumedBy)
+			// The named concept and all its descendants.
 			r.applyIsAFilter(codes, cs, system, filter.Value)
+		case "descendent-of":
+			// Descendants only, excluding the named concept itself.
+			r.applyDescendantsFilter(codes, cs, system, filter.Value)
+		case "is-not-a":
+			// Everything outside the named concept's is-a closure.
+			r.applyIsNotAFilter(codes, cs, system, filter.Value)
 		case "=":
 			// Equality filter on a property
 			r.applyEqualityFilter(codes, cs, system, filter.Property, filter.Value)
+		case "in":
+			r.applyPropertyInFilter(codes, cs, system, filter.Property, filter.Value, true)
+		case "not-in":
+			r.applyPropertyInFilter(codes, cs, system, filter.Property, filter.Value, false)
 		}
-		// Other filter operators (descendent-of, in, not-in, regex, exists) can be added as needed
+		// regex and exists are not implemented. In the R4 base corpus regex appears
+		// only over external vocabularies (urn:iso:std:iso:3166), which cannot be
+		// enumerated locally in any case, and exists does not appear at all.
 	}
 }
 
-// applyIsAFilter adds all codes that are descendants of the given parent code.
-// Hierarchy is derived from the CodeSystem's subsumedBy properties.
+// applyIsAFilter adds the codes selected by an "is-a" filter: the concept named
+// by the filter and all of its descendants.
+//
+// Per https://hl7.org/fhir/R4/codesystem-filter-operator.html, "is-a" includes
+// the provided concept itself ("include descendant codes and self"), unlike
+// "descendent-of" which excludes it. Self is added only when the CodeSystem
+// actually defines the code — an is-a naming an absent concept must not mint a
+// member — and only when the concept is selectable: notSelectable/abstract
+// concepts belong to the value set but must not appear as instance values.
 func (r *Registry) applyIsAFilter(codes map[string]bool, cs *CodeSystem, system, parentCode string) {
-	// Build or retrieve the hierarchy for this CodeSystem
-	hierarchy := r.getOrBuildHierarchy(cs)
+	if self := findConcept(cs.Concept, parentCode); self != nil && self.isSelectable() {
+		codes[parentCode] = true
+		codes[system+"|"+parentCode] = true
+	}
+	r.applyDescendantsFilter(codes, cs, system, parentCode)
+}
 
-	// Recursively add all descendants
-	var addDescendants func(code string)
-	addDescendants = func(code string) {
-		children := hierarchy[code]
-		for _, child := range children {
-			codes[child] = true
-			codes[system+"|"+child] = true
-			addDescendants(child)
+// applyDescendantsFilter adds the descendants of parentCode, excluding the concept
+// itself — the "descendent-of" operator.
+func (r *Registry) applyDescendantsFilter(codes map[string]bool, cs *CodeSystem, system, parentCode string) {
+	for descendant := range r.descendantsOf(cs, parentCode) {
+		codes[descendant] = true
+		codes[system+"|"+descendant] = true
+	}
+}
+
+// applyIsNotAFilter adds every concept outside parentCode's is-a closure — the
+// "is-not-a" operator. The closure is the concept plus its descendants, so
+// everything else in the CodeSystem is a member.
+func (r *Registry) applyIsNotAFilter(codes map[string]bool, cs *CodeSystem, system, parentCode string) {
+	closure := r.descendantsOf(cs, parentCode)
+	closure[parentCode] = struct{}{}
+
+	forEachConcept(cs.Concept, func(c *CodeSystemCode) {
+		if _, inClosure := closure[c.Code]; inClosure {
+			return
 		}
+		codes[c.Code] = true
+		codes[system+"|"+c.Code] = true
+	})
+}
+
+// applyPropertyInFilter implements "in" and "not-in": the named property's value
+// is, or is not, among a comma-separated list.
+//
+// A concept that does not carry the property at all counts as not being in the
+// list, so it is a member under "not-in" and not under "in". That is what makes
+// the base corpus's only use of the operator work — obligation excludes concepts
+// whose not-selectable property is true, and most concepts simply omit it.
+func (r *Registry) applyPropertyInFilter(codes map[string]bool, cs *CodeSystem, system, property, value string, want bool) {
+	wanted := make(map[string]struct{})
+	for v := range strings.SplitSeq(value, ",") {
+		wanted[strings.TrimSpace(v)] = struct{}{}
 	}
 
-	// Start from the parent code
-	addDescendants(parentCode)
+	forEachConcept(cs.Concept, func(c *CodeSystemCode) {
+		got, present := c.propertyValue(property)
+		_, inList := wanted[got]
+		if present && inList != want {
+			return
+		}
+		if !present && want {
+			return
+		}
+		codes[c.Code] = true
+		codes[system+"|"+c.Code] = true
+	})
+}
+
+// descendantsOf returns the transitive descendants of parentCode, excluding it.
+func (r *Registry) descendantsOf(cs *CodeSystem, parentCode string) map[string]struct{} {
+	hierarchy := r.getOrBuildHierarchy(cs)
+	found := make(map[string]struct{})
+
+	var walk func(code string)
+	walk = func(code string) {
+		for _, child := range hierarchy[code] {
+			if _, seen := found[child]; seen {
+				continue // guards against a cyclic subsumedBy chain
+			}
+			found[child] = struct{}{}
+			walk(child)
+		}
+	}
+	walk(parentCode)
+
+	return found
+}
+
+// forEachConcept visits every concept in the tree, nested concepts included.
+func forEachConcept(concepts []CodeSystemCode, visit func(*CodeSystemCode)) {
+	for i := range concepts {
+		visit(&concepts[i])
+		forEachConcept(concepts[i].Concept, visit)
+	}
 }
 
 // applyEqualityFilter adds codes where a property equals a specific value.
@@ -426,14 +936,33 @@ func (r *Registry) applyEqualityFilter(codes map[string]bool, cs *CodeSystem, sy
 
 // getOrBuildHierarchy returns the hierarchy for a CodeSystem, building it if necessary.
 // The hierarchy maps parent codes to their child codes, derived from subsumedBy properties.
+//
+// The returned map is never mutated after publication, so callers may read it
+// without holding a lock.
 func (r *Registry) getOrBuildHierarchy(cs *CodeSystem) map[string][]string {
-	if hierarchy, ok := r.hierarchyCache[cs.URL]; ok {
+	// Keyed by canonical, not URL: two versions of a CodeSystem can have different
+	// hierarchies, and sharing one cache entry between them would silently expand
+	// an is-a filter against the wrong structure.
+	key := canonicalOf(cs.URL, cs.Version)
+
+	r.hierarchyMu.RLock()
+	hierarchy, ok := r.hierarchyCache[key]
+	r.hierarchyMu.RUnlock()
+	if ok {
 		return hierarchy
 	}
 
-	hierarchy := r.buildHierarchy(cs)
-	r.hierarchyCache[cs.URL] = hierarchy
-	return hierarchy
+	built := r.buildHierarchy(cs)
+
+	r.hierarchyMu.Lock()
+	defer r.hierarchyMu.Unlock()
+	// Another goroutine may have won the race; prefer the published map so all
+	// callers share one instance.
+	if existing, ok := r.hierarchyCache[key]; ok {
+		return existing
+	}
+	r.hierarchyCache[key] = built
+	return built
 }
 
 // buildHierarchy constructs a parent->children map from CodeSystem concept properties.
@@ -507,6 +1036,11 @@ func (r *Registry) GetDisplayForCode(system, code string) (string, bool) {
 }
 
 // IsSystemInValueSet checks if a system is one of the systems defined in a ValueSet.
+//
+// A versioned canonical resolves to that version of the ValueSet: which systems a
+// ValueSet declares can change between versions, and answering from the wrong one
+// would misreport a code as expected-from-a-declared-system when the pinned version
+// never declared it — changing the extensible diagnostic, and its severity, with it.
 // This is used to determine if a code is "extending" an extensible binding (using a different system)
 // or if it's from a system that should be in the ValueSet.
 func (r *Registry) IsSystemInValueSet(valueSetURL, system string) bool {
@@ -514,8 +1048,8 @@ func (r *Registry) IsSystemInValueSet(valueSetURL, system string) bool {
 		return false
 	}
 
-	valueSetURL = stripVersion(valueSetURL)
-
+	// GetValueSet resolves a "url|version" canonical itself; stripping the version
+	// here would send every lookup to whichever version happens to be current.
 	vs := r.GetValueSet(valueSetURL)
 	if vs == nil {
 		return false
@@ -544,15 +1078,83 @@ func (r *Registry) IsSystemInValueSet(valueSetURL, system string) bool {
 //
 // This is used to validate that codes exist in their declared CodeSystems,
 // regardless of any ValueSet binding.
+//
+// Deprecated: use ValidateCodeInCodeSystemContext. Without a caller-supplied
+// context, calls to a configured Provider cannot honor deadlines or
+// cancellation, and traces break at the provider boundary.
 func (r *Registry) ValidateCodeInCodeSystem(system, code string) (isValid, codeSystemFound bool) {
+	return r.ValidateCodeInCodeSystemContext(context.Background(), system, code)
+}
+
+// ValidateCodeInCodeSystemContext checks if a code exists in a CodeSystem,
+// propagating ctx to the terminology Provider when one is configured.
+// Returns (isValid, codeSystemFound) as documented on ValidateCodeInCodeSystem.
+//
+// As with ValidateCodeContext, an authoritative Authority yields a two-state view
+// of ResolveCodeInCodeSystem; without one the historical local behavior is kept
+// verbatim, including the (valid=true, found=false) fail-open for external
+// systems that no provider could decide.
+func (r *Registry) ValidateCodeInCodeSystemContext(ctx context.Context, system, code string) (isValid, codeSystemFound bool) {
+	if a, authoritative := r.authorityFor(); authoritative {
+		res, err := a.ResolveCodeInCodeSystem(ctx, system, code, LookupOptions{})
+		if err != nil {
+			return false, false
+		}
+		return res.Resolution == Valid, res.Resolution != Unresolved
+	}
+	return r.validateCodeInCodeSystemLocally(ctx, system, code)
+}
+
+// ResolveCodeInCodeSystem decides whether code exists in system, regardless of
+// any ValueSet binding.
+//
+// When an authoritative Authority is configured it decides alone. Otherwise the
+// registry answers from its own copies, consulting a configured Provider for
+// external systems and for CodeSystems it does not hold.
+func (r *Registry) ResolveCodeInCodeSystem(ctx context.Context, system, code string, opts LookupOptions) (CodeResult, error) {
+	if a, authoritative := r.authorityFor(); authoritative {
+		return a.ResolveCodeInCodeSystem(ctx, system, code, opts)
+	}
+
+	// A declared Coding.version asks to be checked against that version of the
+	// CodeSystem, which the canonical form selects.
+	lookupSystem := system
+	if opts.SystemVersion != "" {
+		lookupSystem = canonicalOf(system, opts.SystemVersion)
+	}
+
+	valid, found := r.validateCodeInCodeSystemLocally(ctx, lookupSystem, code)
+	res := localCodeResult(valid, found)
+
+	// Carry the display so callers can validate a Coding.display without a second
+	// lookup. Only the CodeSystem's own display is parsed — designations are not —
+	// so a specific language cannot be honored locally, and saying so lets callers
+	// skip the comparison instead of checking a submitted translation against
+	// English.
+	if res.Resolution == Valid {
+		if display, ok := r.GetDisplayForCode(lookupSystem, code); ok {
+			res.Display = display
+			res.DisplayLanguageHonored = opts.DisplayLanguage == ""
+		}
+	}
+	return res, nil
+}
+
+// validateCodeInCodeSystemLocally answers from the registry's own copies,
+// falling back to a configured Provider.
+func (r *Registry) validateCodeInCodeSystemLocally(ctx context.Context, system, code string) (isValid, codeSystemFound bool) {
 	if system == "" || code == "" {
 		return false, false
 	}
 
+	// The system may arrive as a versioned canonical; external-system membership and
+	// provider calls are about the system itself, not a version of it.
+	bareSystem, _ := splitCanonical(system)
+
 	// Check if this is an external system we can't validate locally
-	if r.isExternalSystem(system) {
-		if r.provider != nil {
-			valid, err := r.provider.ValidateCode(context.Background(), system, code)
+	if r.isExternalSystem(bareSystem) {
+		if p := r.getProvider(); p != nil {
+			valid, err := p.ValidateCode(ctx, bareSystem, code)
 			if err == nil {
 				return valid, true
 			}
@@ -562,6 +1164,14 @@ func (r *Registry) ValidateCodeInCodeSystem(system, code string) (isValid, codeS
 
 	cs := r.GetCodeSystem(system)
 	if cs == nil {
+		// Not held by this registry; a configured provider may know it — for
+		// instance a CodeSystem authored over a REST API after this registry was
+		// populated.
+		if p := r.getProvider(); p != nil {
+			if valid, err := p.ValidateCode(ctx, bareSystem, code); err == nil {
+				return valid, true
+			}
+		}
 		return false, false // CodeSystem not loaded
 	}
 
@@ -584,10 +1194,61 @@ func (r *Registry) ValidateCodeInCodeSystem(system, code string) (isValid, codeS
 	return findCode(cs.Concept), true
 }
 
-// stripVersion removes version from ValueSet URL (e.g., "url|4.0.1" -> "url").
-func stripVersion(url string) string {
-	if idx := strings.LastIndex(url, "|"); idx != -1 {
-		return url[:idx]
+// findConcept returns the concept declaring code anywhere in the concept tree,
+// or nil when the CodeSystem does not define it.
+func findConcept(concepts []CodeSystemCode, code string) *CodeSystemCode {
+	for i := range concepts {
+		if concepts[i].Code == code {
+			return &concepts[i]
+		}
+		if found := findConcept(concepts[i].Concept, code); found != nil {
+			return found
+		}
 	}
-	return url
+	return nil
+}
+
+// propertyValue returns the concept's value for the named property rendered as a
+// string, and whether the property is present at all. Filter values arrive as
+// strings, so a boolean property compares against "true"/"false".
+func (c *CodeSystemCode) propertyValue(name string) (value string, present bool) {
+	for _, p := range c.Property {
+		if p.Code != name {
+			continue
+		}
+		switch {
+		case p.ValueBoolean != nil:
+			return strconv.FormatBool(*p.ValueBoolean), true
+		case p.ValueCode != "":
+			return p.ValueCode, true
+		default:
+			// Present, but of a value type this parser does not model.
+			return "", true
+		}
+	}
+	return "", false
+}
+
+// isSelectable reports whether the concept may be used as a value in an
+// instance. Concepts flagged notSelectable (the v3 CodeSystem convention) or
+// abstract group other concepts and must not themselves appear in data.
+func (c *CodeSystemCode) isSelectable() bool {
+	for _, p := range c.Property {
+		if p.Code != "notSelectable" && p.Code != "abstract" {
+			continue
+		}
+		if p.ValueBoolean != nil && *p.ValueBoolean {
+			return false
+		}
+	}
+	return true
+}
+
+// splitCanonical splits "url|version" into its parts. The version is empty when
+// the canonical carries none.
+func splitCanonical(canonical string) (url, version string) {
+	if i := strings.LastIndex(canonical, "|"); i > 0 {
+		return canonical[:i], canonical[i+1:]
+	}
+	return canonical, ""
 }

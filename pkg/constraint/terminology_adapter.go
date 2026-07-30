@@ -17,7 +17,7 @@ type fhirpathTermService struct {
 //   - Code string: {"code": "male"}
 //   - Coding: {"system": "http://...", "code": "male", "version": "...", "display": "..."}
 //   - CodeableConcept: {"coding": [{"system": "...", "code": "..."}], "text": "..."}
-func (ts *fhirpathTermService) MemberOf(_ context.Context, code any, vsURL string) (bool, error) {
+func (ts *fhirpathTermService) MemberOf(ctx context.Context, code any, vsURL string) (bool, error) {
 	codeMap, ok := code.(map[string]any)
 	if !ok {
 		return false, nil
@@ -25,7 +25,7 @@ func (ts *fhirpathTermService) MemberOf(_ context.Context, code any, vsURL strin
 
 	// Check if this is a CodeableConcept (has "coding" array).
 	if codings, hasCoding := codeMap["coding"]; hasCoding {
-		return ts.memberOfCodeableConcept(codings, vsURL), nil
+		return ts.memberOfCodeableConcept(ctx, codings, vsURL), nil
 	}
 
 	// Single Coding or code string.
@@ -35,7 +35,7 @@ func (ts *fhirpathTermService) MemberOf(_ context.Context, code any, vsURL strin
 		return false, nil
 	}
 
-	valid, found := ts.termRegistry.ValidateCode(vsURL, system, codeVal)
+	valid, found := ts.termRegistry.ValidateCodeContext(ctx, vsURL, system, codeVal)
 	if !found {
 		// ValueSet not loaded — return false (unknown).
 		return false, nil
@@ -44,7 +44,7 @@ func (ts *fhirpathTermService) MemberOf(_ context.Context, code any, vsURL strin
 }
 
 // memberOfCodeableConcept checks if any coding in a CodeableConcept is a member of the ValueSet.
-func (ts *fhirpathTermService) memberOfCodeableConcept(codings any, vsURL string) bool {
+func (ts *fhirpathTermService) memberOfCodeableConcept(ctx context.Context, codings any, vsURL string) bool {
 	codingList, ok := codings.([]any)
 	if !ok {
 		return false
@@ -60,7 +60,7 @@ func (ts *fhirpathTermService) memberOfCodeableConcept(codings any, vsURL string
 		if code == "" {
 			continue
 		}
-		valid, found := ts.termRegistry.ValidateCode(vsURL, system, code)
+		valid, found := ts.termRegistry.ValidateCodeContext(ctx, vsURL, system, code)
 		if found && valid {
 			return true
 		}

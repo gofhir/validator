@@ -619,7 +619,7 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 
 	// Validate binding if present on Extension.value[x]
 	if valueDef.Binding != nil && valueDef.Binding.ValueSet != "" {
-		v.validateExtensionBinding(value, valueDef.Binding, valuePath, result)
+		v.validateExtensionBinding(ctx, value, valueDef.Binding, valuePath, result)
 	}
 
 	// Validate the value content recursively against its type's StructureDefinition
@@ -944,7 +944,7 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 }
 
 // validateExtensionBinding validates the binding on an extension's value[x].
-func (v *Validator) validateExtensionBinding(value any, binding *registry.Binding, valuePath string, result *issue.Result) {
+func (v *Validator) validateExtensionBinding(ctx context.Context, value any, binding *registry.Binding, valuePath string, result *issue.Result) {
 	if v.termRegistry == nil {
 		return // No terminology registry available
 	}
@@ -957,16 +957,16 @@ func (v *Validator) validateExtensionBinding(value any, binding *registry.Bindin
 	switch val := value.(type) {
 	case string:
 		// Simple code value (e.g., valueCode)
-		v.validateCodeBinding(val, "", binding, valuePath, result)
+		v.validateCodeBinding(ctx, val, "", binding, valuePath, result)
 
 	case map[string]any:
 		// Could be Coding, CodeableConcept, or other complex type
-		v.validateMapBinding(val, binding, valuePath, result)
+		v.validateMapBinding(ctx, val, binding, valuePath, result)
 	}
 }
 
 // validateCodeBinding validates a code against a ValueSet binding.
-func (v *Validator) validateCodeBinding(code, system string, binding *registry.Binding, fhirPath string, result *issue.Result) {
+func (v *Validator) validateCodeBinding(ctx context.Context, code, system string, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	if code == "" {
 		return
 	}
@@ -984,7 +984,7 @@ func (v *Validator) validateCodeBinding(code, system string, binding *registry.B
 		return // Accept code from external system with info message
 	}
 
-	valid, found := v.termRegistry.ValidateCode(binding.ValueSet, system, code)
+	valid, found := v.termRegistry.ValidateCodeContext(ctx, binding.ValueSet, system, code)
 	if !found {
 		// ValueSet not found - emit warning
 		result.AddWarningWithID(
@@ -1023,7 +1023,7 @@ func (v *Validator) validateCodeBinding(code, system string, binding *registry.B
 }
 
 // validateMapBinding validates a map value (Coding or CodeableConcept) against a binding.
-func (v *Validator) validateMapBinding(val map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
+func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	// Check if it's a CodeableConcept with coding array
 	if coding, ok := val["coding"]; ok {
 		codings, isList := coding.([]any)
@@ -1031,7 +1031,7 @@ func (v *Validator) validateMapBinding(val map[string]any, binding *registry.Bin
 			for i, c := range codings {
 				if codingMap, ok := c.(map[string]any); ok {
 					codingPath := fmt.Sprintf("%s.coding[%d]", fhirPath, i)
-					v.validateCodingBinding(codingMap, binding, codingPath, result)
+					v.validateCodingBinding(ctx, codingMap, binding, codingPath, result)
 				}
 			}
 		}
@@ -1040,20 +1040,20 @@ func (v *Validator) validateMapBinding(val map[string]any, binding *registry.Bin
 
 	// Looks like a Coding with system/code
 	if _, ok := val["system"]; ok {
-		v.validateCodingBinding(val, binding, fhirPath, result)
+		v.validateCodingBinding(ctx, val, binding, fhirPath, result)
 		return
 	}
 
 	// Coding with just code
 	if code, ok := val["code"]; ok {
 		if codeStr, ok := code.(string); ok {
-			v.validateCodeBinding(codeStr, "", binding, fhirPath, result)
+			v.validateCodeBinding(ctx, codeStr, "", binding, fhirPath, result)
 		}
 	}
 }
 
 // validateCodingBinding validates a Coding against a ValueSet binding.
-func (v *Validator) validateCodingBinding(coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
+func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 
@@ -1074,7 +1074,7 @@ func (v *Validator) validateCodingBinding(coding map[string]any, binding *regist
 		return // Accept code from external system with info message
 	}
 
-	valid, found := v.termRegistry.ValidateCode(binding.ValueSet, system, code)
+	valid, found := v.termRegistry.ValidateCodeContext(ctx, binding.ValueSet, system, code)
 	if !found {
 		// ValueSet not found - emit warning
 		codeDisplay := code
