@@ -40,6 +40,10 @@ type Validator struct {
 // concrete type, and so terminology-free callers can leave it unset.
 type BindingValidator interface {
 	ValidateValueBinding(ctx context.Context, value any, binding *registry.Binding, fhirPath string, result *issue.Result)
+
+	// ValidateCodedValue checks a Coding against the CodeSystem it declares, which is
+	// independent of any binding — see its implementation in pkg/binding.
+	ValidateCodedValue(ctx context.Context, value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result)
 }
 
 // New creates a new extension Validator.
@@ -634,6 +638,12 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 	// Validate binding if present on Extension.value[x]
 	if valueDef.Binding != nil && valueDef.Binding.ValueSet != "" {
 		v.validateExtensionBinding(ctx, value, valueDef.Binding, valuePath, result)
+	}
+
+	// Independent of the binding: an extension value that is a Coding must name a code
+	// that exists in the system it declares.
+	if v.bindValidator != nil {
+		v.bindValidator.ValidateCodedValue(ctx, value, valueDef, valuePath, result)
 	}
 
 	// Validate the value content recursively against its type's StructureDefinition
