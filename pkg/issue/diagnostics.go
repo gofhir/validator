@@ -219,12 +219,12 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 	DiagBindingRequired: {
 		Severity: SeverityError,
 		Code:     CodeCodeInvalid,
-		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (required)",
+		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (required){detail}",
 	},
 	DiagBindingExtensible: {
 		Severity: SeverityWarning,
 		Code:     CodeCodeInvalid,
-		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (extensible)",
+		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (extensible){detail}",
 	},
 	// The code's system is not among those the ValueSet declares, which is the
 	// case extensible bindings exist to permit. Informational rather than a
@@ -232,14 +232,14 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 	DiagBindingExtensibleOther: {
 		Severity: SeverityInformation,
 		Code:     CodeInformational,
-		Template: "The value provided ('{code}') is not in the value set '{valueSet}', and comes from a system the value set does not declare (extensible bindings permit this)",
+		Template: "The value provided ('{code}') is not in the value set '{valueSet}', and comes from a system the value set does not declare (extensible bindings permit this){detail}",
 	},
 	// Membership could not be established, so neither acceptance nor rejection
 	// can be justified; reported at the same severity as a plain extensible miss.
 	DiagBindingExtensibleUnknown: {
 		Severity: SeverityWarning,
 		Code:     CodeCodeInvalid,
-		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (extensible); whether its system belongs to the value set could not be determined",
+		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (extensible); whether its system belongs to the value set could not be determined{detail}",
 	},
 	DiagBindingDisplayMismatch: {
 		Severity: SeverityError,
@@ -257,7 +257,7 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 	DiagBindingUnresolved: {
 		Severity: SeverityError,
 		Code:     CodeCodeInvalid,
-		Template: "The value provided ('{code}') could not be checked against value set '{valueSet}': no terminology source could resolve it",
+		Template: "The value provided ('{code}') could not be checked against value set '{valueSet}': no terminology source could resolve it{detail}",
 	},
 	DiagBindingCannotValidate: {
 		Severity: SeverityInformation,

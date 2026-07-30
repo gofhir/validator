@@ -505,6 +505,9 @@ func New(opts ...Option) (*Validator, error) {
 	v.bindValidator.SetUnresolvedPolicy(config.UnresolvedPolicy)
 	v.bindValidator.SetDisplayLanguage(config.DisplayLanguage)
 	v.extValidator = extension.New(reg, termReg, v.primValidator)
+	// Extension values are bound like any other element, so they are validated by
+	// the same code rather than a second copy of it.
+	v.extValidator.SetBindingValidator(v.bindValidator)
 	v.refValidator = reference.New(reg)
 	// Pass termRegistry to constraint validator for memberOf() support.
 	// When NoTerminology is set, pass nil to disable terminology in FHIRPath.

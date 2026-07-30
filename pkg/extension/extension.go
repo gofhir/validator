@@ -31,7 +31,15 @@ type Validator struct {
 	registry      *registry.Registry
 	walker        *walker.Walker
 	termRegistry  *terminology.Registry
+	bindValidator BindingValidator
 	primValidator *primitive.Validator
+}
+
+// BindingValidator validates a value against an element binding. Implemented by
+// *binding.Validator; an interface here so this package does not depend on the
+// concrete type, and so terminology-free callers can leave it unset.
+type BindingValidator interface {
+	ValidateValueBinding(ctx context.Context, value any, binding *registry.Binding, fhirPath string, result *issue.Result)
 }
 
 // New creates a new extension Validator.
@@ -42,6 +50,12 @@ func New(reg *registry.Registry, termReg *terminology.Registry, primVal *primiti
 		termRegistry:  termReg,
 		primValidator: primVal,
 	}
+}
+
+// SetBindingValidator supplies the validator used for bindings on extension
+// values, so extension values are checked by the same code as any other element.
+func (v *Validator) SetBindingValidator(b BindingValidator) {
+	v.bindValidator = b
 }
 
 // Validate validates all extensions in a resource.
@@ -945,184 +959,14 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 
 // validateExtensionBinding validates the binding on an extension's value[x].
 func (v *Validator) validateExtensionBinding(ctx context.Context, value any, binding *registry.Binding, valuePath string, result *issue.Result) {
-	if v.termRegistry == nil {
-		return // No terminology registry available
+	if v.bindValidator == nil {
+		return // binding validation not wired
 	}
-
-	// Only validate required and extensible bindings
-	if binding.Strength != strengthRequired && binding.Strength != strengthExtensible {
-		return
-	}
-
-	switch val := value.(type) {
-	case string:
-		// Simple code value (e.g., valueCode)
-		v.validateCodeBinding(ctx, val, "", binding, valuePath, result)
-
-	case map[string]any:
-		// Could be Coding, CodeableConcept, or other complex type
-		v.validateMapBinding(ctx, val, binding, valuePath, result)
-	}
-}
-
-// validateCodeBinding validates a code against a ValueSet binding.
-func (v *Validator) validateCodeBinding(ctx context.Context, code, system string, binding *registry.Binding, fhirPath string, result *issue.Result) {
-	if code == "" {
-		return
-	}
-
-	// Check if system is external (requires terminology server)
-	if system != "" && v.termRegistry.IsExternalSystem(system) {
-		result.AddInfoWithID(
-			issue.DiagBindingCannotValidate,
-			map[string]any{
-				"code":   code,
-				"system": system,
-			},
-			fhirPath,
-		)
-		return // Accept code from external system with info message
-	}
-
-	valid, found := v.termRegistry.ValidateCodeContext(ctx, binding.ValueSet, system, code)
-	if !found {
-		// ValueSet not found - emit warning
-		result.AddWarningWithID(
-			issue.DiagBindingValueSetNotFound,
-			map[string]any{
-				"valueSet": binding.ValueSet,
-				"code":     code,
-			},
-			fhirPath,
-		)
-		return
-	}
-
-	if !valid {
-		switch binding.Strength {
-		case "required":
-			result.AddErrorWithID(
-				issue.DiagBindingRequired,
-				map[string]any{
-					"code":     code,
-					"valueSet": binding.ValueSet,
-				},
-				fhirPath,
-			)
-		case "extensible":
-			result.AddWarningWithID(
-				issue.DiagBindingExtensible,
-				map[string]any{
-					"code":     code,
-					"valueSet": binding.ValueSet,
-				},
-				fhirPath,
-			)
-		}
-	}
-}
-
-// validateMapBinding validates a map value (Coding or CodeableConcept) against a binding.
-func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
-	// Check if it's a CodeableConcept with coding array
-	if coding, ok := val["coding"]; ok {
-		codings, isList := coding.([]any)
-		if isList {
-			for i, c := range codings {
-				if codingMap, ok := c.(map[string]any); ok {
-					codingPath := fmt.Sprintf("%s.coding[%d]", fhirPath, i)
-					v.validateCodingBinding(ctx, codingMap, binding, codingPath, result)
-				}
-			}
-		}
-		return
-	}
-
-	// Looks like a Coding with system/code
-	if _, ok := val["system"]; ok {
-		v.validateCodingBinding(ctx, val, binding, fhirPath, result)
-		return
-	}
-
-	// Coding with just code
-	if code, ok := val["code"]; ok {
-		if codeStr, ok := code.(string); ok {
-			v.validateCodeBinding(ctx, codeStr, "", binding, fhirPath, result)
-		}
-	}
-}
-
-// validateCodingBinding validates a Coding against a ValueSet binding.
-func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
-	system, _ := coding["system"].(string)
-	code, _ := coding["code"].(string)
-
-	if code == "" {
-		return
-	}
-
-	// Check if system is external (requires terminology server)
-	if system != "" && v.termRegistry.IsExternalSystem(system) {
-		result.AddInfoWithID(
-			issue.DiagBindingCannotValidate,
-			map[string]any{
-				"code":   code,
-				"system": system,
-			},
-			fhirPath,
-		)
-		return // Accept code from external system with info message
-	}
-
-	valid, found := v.termRegistry.ValidateCodeContext(ctx, binding.ValueSet, system, code)
-	if !found {
-		// ValueSet not found - emit warning
-		codeDisplay := code
-		if system != "" {
-			codeDisplay = fmt.Sprintf("%s#%s", system, code)
-		}
-		result.AddWarningWithID(
-			issue.DiagBindingValueSetNotFound,
-			map[string]any{
-				"valueSet": binding.ValueSet,
-				"code":     codeDisplay,
-			},
-			fhirPath,
-		)
-		return
-	}
-
-	if !valid {
-		codeDisplay := code
-		if system != "" {
-			codeDisplay = fmt.Sprintf("%s#%s", system, code)
-		}
-
-		switch binding.Strength {
-		case "required":
-			result.AddErrorWithID(
-				issue.DiagBindingRequired,
-				map[string]any{
-					"code":     codeDisplay,
-					"valueSet": binding.ValueSet,
-				},
-				fhirPath,
-			)
-		case "extensible":
-			// For extensible bindings, only warn if the system IS in the ValueSet.
-			// If the system is NOT in the ValueSet, the code is "extending" the binding
-			// (using a different code system), which is allowed without warning.
-			if system == "" || v.termRegistry.IsSystemInValueSet(binding.ValueSet, system) {
-				result.AddWarningWithID(
-					issue.DiagBindingExtensible,
-					map[string]any{
-						"code":     codeDisplay,
-						"valueSet": binding.ValueSet,
-					},
-					fhirPath,
-				)
-			}
-			// If system is not in ValueSet, no warning - code is extending the binding
-		}
-	}
+	// Delegated rather than reimplemented. This path used to have its own copy of
+	// the logic, which is how it fell behind: it never checked Coding.display or
+	// whether a code exists in its own CodeSystem, reported one issue per coding
+	// instead of aggregating a CodeableConcept, and treated an unresolvable binding
+	// as nothing at all. An extension value is bound like any other element and is
+	// now validated like one.
+	v.bindValidator.ValidateValueBinding(ctx, value, binding, valuePath, result)
 }
