@@ -31,8 +31,8 @@ type Compose struct {
 
 // Include defines a set of codes to include/exclude.
 //
-// Version is parsed but deliberately not used to select a CodeSystem. See
-// expandFromCodeSystem for why.
+// Version selects which version of System to expand from; see
+// expandFromCodeSystem for what happens when that version was not loaded.
 type Include struct {
 	System   string    `json:"system,omitempty"`
 	Version  string    `json:"version,omitempty"`
@@ -1036,6 +1036,11 @@ func (r *Registry) GetDisplayForCode(system, code string) (string, bool) {
 }
 
 // IsSystemInValueSet checks if a system is one of the systems defined in a ValueSet.
+//
+// A versioned canonical resolves to that version of the ValueSet: which systems a
+// ValueSet declares can change between versions, and answering from the wrong one
+// would misreport a code as expected-from-a-declared-system when the pinned version
+// never declared it — changing the extensible diagnostic, and its severity, with it.
 // This is used to determine if a code is "extending" an extensible binding (using a different system)
 // or if it's from a system that should be in the ValueSet.
 func (r *Registry) IsSystemInValueSet(valueSetURL, system string) bool {
@@ -1043,8 +1048,8 @@ func (r *Registry) IsSystemInValueSet(valueSetURL, system string) bool {
 		return false
 	}
 
-	valueSetURL = stripVersion(valueSetURL)
-
+	// GetValueSet resolves a "url|version" canonical itself; stripping the version
+	// here would send every lookup to whichever version happens to be current.
 	vs := r.GetValueSet(valueSetURL)
 	if vs == nil {
 		return false
@@ -1246,12 +1251,4 @@ func splitCanonical(canonical string) (url, version string) {
 		return canonical[:i], canonical[i+1:]
 	}
 	return canonical, ""
-}
-
-// stripVersion removes version from ValueSet URL (e.g., "url|4.0.1" -> "url").
-func stripVersion(url string) string {
-	if idx := strings.LastIndex(url, "|"); idx != -1 {
-		return url[:idx]
-	}
-	return url
 }

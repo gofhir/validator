@@ -493,3 +493,48 @@ func (p *recordingSystemProvider) ValidateCode(_ context.Context, system, _ stri
 func (p *recordingSystemProvider) ValidateCodeInValueSet(_ context.Context, _, _, _ string) (valid, found bool, err error) {
 	return true, true, nil
 }
+
+// TestSystemInValueSetIsVersionAware covers the last place that answered from the
+// wrong version. Which systems a ValueSet declares can change between versions, and
+// Membership selects the extensible diagnostic — including whether it is a warning
+// or informational, which decides pass/fail under strict mode.
+func TestSystemInValueSetIsVersionAware(t *testing.T) {
+	const vsURL = "http://example.org/ValueSet/vs"
+	const systemA = "http://example.org/CodeSystem/a"
+	const systemB = "http://example.org/CodeSystem/b"
+
+	r := NewRegistry()
+
+	// v1 declares only A; v2 added B.
+	v1 := &ValueSet{
+		URL: vsURL, Version: "1.0.0",
+		Compose: Compose{Include: []Include{{System: systemA}}},
+	}
+	v2 := &ValueSet{
+		URL: vsURL, Version: "2.0.0",
+		Compose: Compose{Include: []Include{{System: systemA}, {System: systemB}}},
+	}
+	r.valueSets[vsURL] = v2
+	r.valueSetsByVersion[vsURL+"|1.0.0"] = v1
+	r.valueSetsByVersion[vsURL+"|2.0.0"] = v2
+
+	if r.IsSystemInValueSet(vsURL+"|1.0.0", systemB) {
+		t.Error("v1.0.0 never declared system B; answering from v2 would report a " +
+			"permitted extension as an expected-system miss")
+	}
+	if !r.IsSystemInValueSet(vsURL+"|2.0.0", systemB) {
+		t.Error("v2.0.0 declares system B")
+	}
+	if !r.IsSystemInValueSet(vsURL, systemB) {
+		t.Error("an unversioned lookup uses the version held, which declares B")
+	}
+
+	// The Membership reported to binding validation follows.
+	if got := r.localMembership(vsURL+"|1.0.0", systemB); got != MembershipExcluded {
+		t.Errorf("localMembership = %v, want %v for a system the pinned version does not declare",
+			got, MembershipExcluded)
+	}
+	if got := r.localMembership(vsURL+"|2.0.0", systemB); got != MembershipIncluded {
+		t.Errorf("localMembership = %v, want %v", got, MembershipIncluded)
+	}
+}
