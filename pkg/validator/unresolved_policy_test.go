@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/issue"
@@ -155,5 +156,45 @@ func TestUnresolvedPolicyIgnoresWeakBindings(t *testing.T) {
 	// nothing was reported at all.
 	if len(reportedFor) == 0 {
 		t.Error("expected the required binding on Observation.status to report; got nothing")
+	}
+}
+
+// explainingAuthority rejects with an explanation, as a real backend would for a
+// retired code or an edition mismatch.
+type explainingAuthority struct{}
+
+func (explainingAuthority) ResolveCodeInValueSet(_ context.Context, _, _, _ string, _ terminology.LookupOptions) (terminology.CodeResult, error) {
+	return terminology.CodeResult{
+		Resolution: terminology.Invalid,
+		Message:    "code was retired in the 2024 edition",
+	}, nil
+}
+
+func (explainingAuthority) ResolveCodeInCodeSystem(_ context.Context, _, _ string, _ terminology.LookupOptions) (terminology.CodeResult, error) {
+	return terminology.CodeResult{Resolution: terminology.Valid}, nil
+}
+
+func (explainingAuthority) Supports(context.Context, string) bool { return true }
+
+// TestBackendExplanationSurfacesInTheIssue checks the message reaches the
+// OperationOutcome. A backend that says why it rejected a code is contributing the
+// part a user can act on, and it used to be dropped on the floor.
+func TestBackendExplanationSurfacesInTheIssue(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"), WithTerminologyAuthority(explainingAuthority{}))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	result, err := v.Validate(context.Background(), []byte(requiredBindingResource))
+	if err != nil {
+		t.Fatalf("Validate: %v", err)
+	}
+
+	got := issueFor(t, result, issue.DiagBindingRequired)
+	if got == nil {
+		t.Fatalf("expected a required binding violation; issues: %v", result.Issues)
+	}
+	if !strings.Contains(got.Diagnostics, "retired in the 2024 edition") {
+		t.Errorf("the backend's explanation is missing from the diagnostic: %q", got.Diagnostics)
 	}
 }

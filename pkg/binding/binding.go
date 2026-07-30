@@ -55,14 +55,25 @@ func (v *Validator) SetDisplayLanguage(lang string) {
 	v.displayLanguage = lang
 }
 
+// detailSuffix renders a backend diagnostic for appending to a message. The
+// terminology port lets a backend explain its verdict — a retired code, an edition
+// mismatch — and dropping that would discard the most useful part of the answer.
+// Formatted here rather than in the template so an absent message leaves no trace.
+func detailSuffix(message string) string {
+	if message == "" {
+		return ""
+	}
+	return ": " + message
+}
+
 // reportUnresolved records a binding that could not be checked, at the severity
 // the configured policy asks for. Only required and extensible bindings reach
 // here, so a weaker binding never produces noise.
-func (v *Validator) reportUnresolved(code, valueSet, strength, fhirPath string, result *issue.Result) {
+func (v *Validator) reportUnresolved(code, valueSet, strength, detail, fhirPath string, result *issue.Result) {
 	if strength != strengthRequired && strength != strengthExtensible {
 		return
 	}
-	args := map[string]any{"code": code, "valueSet": valueSet}
+	args := map[string]any{"code": code, "valueSet": valueSet, "detail": detailSuffix(detail)}
 	if v.unresolvedPolicy == terminology.UnresolvedError {
 		result.AddErrorWithID(issue.DiagBindingUnresolved, args, fhirPath)
 		return
@@ -317,7 +328,7 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val m
 	// Nothing could be decided for any coding: the binding is unresolvable, which
 	// is not the same as "none of the codings are members".
 	if !anyDecided && len(codeLabels) > 0 {
-		v.reportUnresolved(strings.Join(codeLabels, ", "), binding.ValueSet, binding.Strength, fhirPath, result)
+		v.reportUnresolved(strings.Join(codeLabels, ", "), binding.ValueSet, binding.Strength, "", fhirPath, result)
 		return
 	}
 
@@ -368,7 +379,7 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 	if res.Resolution == terminology.Invalid {
 		// Only emit per-coding error for required bindings; extensible is deferred to CC level.
 		if binding.Strength == strengthRequired {
-			v.reportBindingViolation(system, code, res.SystemInValueSet, binding, fhirPath, result)
+			v.reportBindingViolation(system, code, res, binding, fhirPath, result)
 		}
 		return terminology.Invalid
 	}
@@ -449,12 +460,12 @@ func (v *Validator) validateCodeBinding(ctx context.Context, code, system string
 		// Undecidable: neither the local copies nor any configured backend could
 		// answer. Whether that is acceptable is a policy decision, not something
 		// this function gets to assume.
-		v.reportUnresolved(code, binding.ValueSet, binding.Strength, fhirPath, result)
+		v.reportUnresolved(code, binding.ValueSet, binding.Strength, res.Message, fhirPath, result)
 		return
 	}
 
 	if res.Resolution == terminology.Invalid {
-		v.reportBindingViolation(system, code, res.SystemInValueSet, binding, fhirPath, result)
+		v.reportBindingViolation(system, code, res, binding, fhirPath, result)
 	}
 }
 
@@ -483,12 +494,12 @@ func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string
 		if system != "" {
 			codeDisplay = fmt.Sprintf("%s#%s", system, code)
 		}
-		v.reportUnresolved(codeDisplay, binding.ValueSet, binding.Strength, fhirPath, result)
+		v.reportUnresolved(codeDisplay, binding.ValueSet, binding.Strength, res.Message, fhirPath, result)
 		return
 	}
 
 	if res.Resolution == terminology.Invalid {
-		v.reportBindingViolation(system, code, res.SystemInValueSet, binding, fhirPath, result)
+		v.reportBindingViolation(system, code, res, binding, fhirPath, result)
 		return
 	}
 
@@ -590,12 +601,17 @@ func (v *Validator) validateDisplayMismatch(ctx context.Context, system, systemV
 // of whether the ValueSet declares the code's system, and the spec conditions
 // extensible conformance on whether the ValueSet covers the concept — a judgment
 // — not on whether the system is declared.
-func (v *Validator) reportBindingViolation(system, code string, membership terminology.Membership, binding *registry.Binding, fhirPath string, result *issue.Result) {
+func (v *Validator) reportBindingViolation(system, code string, res terminology.CodeResult, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	codeDisplay := code
 	if system != "" {
 		codeDisplay = fmt.Sprintf("%s#%s", system, code)
 	}
-	args := map[string]any{"code": codeDisplay, "valueSet": binding.ValueSet}
+	args := map[string]any{
+		"code":     codeDisplay,
+		"valueSet": binding.ValueSet,
+		"detail":   detailSuffix(res.Message),
+	}
+	membership := res.SystemInValueSet
 
 	switch binding.Strength {
 	case strengthRequired:

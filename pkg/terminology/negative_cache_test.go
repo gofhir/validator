@@ -173,3 +173,67 @@ func TestUnresolvedCacheIsPerCanonical(t *testing.T) {
 		t.Errorf("authority called %d times, want 2 (one per distinct canonical)", a.calls.Load())
 	}
 }
+
+// unsupportingAuthority declines every canonical through Supports, which is how a
+// chain with no terminology server configured answers.
+type unsupportingAuthority struct{ resolveCalls atomic.Int64 }
+
+func (a *unsupportingAuthority) ResolveCodeInValueSet(context.Context, string, string, string, LookupOptions) (CodeResult, error) {
+	a.resolveCalls.Add(1)
+	return CodeResult{Resolution: Unresolved}, nil
+}
+
+func (a *unsupportingAuthority) ResolveCodeInCodeSystem(context.Context, string, string, LookupOptions) (CodeResult, error) {
+	return CodeResult{Resolution: Unresolved}, nil
+}
+
+func (a *unsupportingAuthority) Supports(context.Context, string) bool { return false }
+
+// TestSupportsShortCircuitsTheLookup covers the hint the contract promises: when the
+// authority says nothing in its chain can decide a canonical, asking anyway would
+// spend a round-trip to learn what it already said.
+func TestSupportsShortCircuitsTheLookup(t *testing.T) {
+	r := NewRegistry()
+	a := &unsupportingAuthority{}
+	r.SetAuthority(a)
+
+	res, err := r.ResolveCodeInValueSet(context.Background(), "sys", "code", missingVS, LookupOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Resolution != Unresolved {
+		t.Errorf("Resolution = %v, want %v", res.Resolution, Unresolved)
+	}
+	if a.resolveCalls.Load() != 0 {
+		t.Errorf("the resolve call was made %d times despite Supports being false",
+			a.resolveCalls.Load())
+	}
+}
+
+// TestBackendMessageReachesTheDiagnostic keeps CodeResult.Message from being
+// discarded: a backend that explains its verdict — a retired code, an edition
+// mismatch — is saying the most useful part of the answer.
+func TestBackendMessageReachesTheDiagnostic(t *testing.T) {
+	r := NewRegistry()
+	r.SetAuthority(&messagingAuthority{message: "code was retired in the 2024 edition"})
+
+	res, err := r.ResolveCodeInValueSet(context.Background(), "sys", "code", missingVS, LookupOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Message != "code was retired in the 2024 edition" {
+		t.Errorf("Message = %q, want the backend's explanation", res.Message)
+	}
+}
+
+type messagingAuthority struct{ message string }
+
+func (a *messagingAuthority) ResolveCodeInValueSet(context.Context, string, string, string, LookupOptions) (CodeResult, error) {
+	return CodeResult{Resolution: Invalid, Message: a.message}, nil
+}
+
+func (a *messagingAuthority) ResolveCodeInCodeSystem(context.Context, string, string, LookupOptions) (CodeResult, error) {
+	return CodeResult{Resolution: Invalid, Message: a.message}, nil
+}
+
+func (a *messagingAuthority) Supports(context.Context, string) bool { return true }

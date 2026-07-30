@@ -415,6 +415,15 @@ func (r *Registry) ResolveCodeInValueSet(ctx context.Context, system, code, valu
 			return CodeResult{Resolution: Unresolved}, nil
 		}
 
+		// Supports is the authority's own short-circuit: false means nothing in its
+		// chain could decide this canonical, so asking would spend a round-trip to
+		// learn what it already told us. Remembered like any other unresolvable
+		// answer.
+		if !a.Supports(ctx, valueSetURL) {
+			r.markUnresolved(valueSetURL)
+			return CodeResult{Resolution: Unresolved}, nil
+		}
+
 		res, err := a.ResolveCodeInValueSet(ctx, system, code, valueSetURL, opts)
 		if err == nil && res.Resolution == Unresolved {
 			r.markUnresolved(valueSetURL)
