@@ -439,7 +439,7 @@ func TestMixedArrayValidation(t *testing.T) {
 		{
 			name:          "mixed-array-coding",
 			file:          "mixed-array-coding.json",
-			expectedCount: 3, // badField, invalidElement, alsoInvalid
+			expectedCount: 4, // badField, invalidElement, alsoInvalid + coding[3] names a system with no code
 			description:   "Observation.code.coding array with 4 elements: 2 valid, 2 with unknown fields",
 		},
 		{

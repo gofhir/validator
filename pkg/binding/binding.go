@@ -322,9 +322,25 @@ func (v *Validator) checkConceptCodings(ctx context.Context, cc map[string]any, 
 func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map[string]any, fhirPath string, result *issue.Result) {
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
-	if system == "" || code == "" {
+
+	// A Coding that names no system cannot be placed in any vocabulary, and one that names
+	// a system without a code identifies nothing in it. Neither is decidable, so both are
+	// reported here rather than falling through to a lookup that cannot answer.
+	//
+	// The severities differ, and follow the reference: a missing system is a warning because
+	// the concept may still be conveyed by CodeableConcept.text, whereas a system with no
+	// code is an error — the instance committed to a vocabulary and then said nothing in it.
+	// Verified against HL7 validator_cli 6.9.12; both are reported on the Coding itself, not
+	// on a child, since the defect is the combination rather than either value.
+	switch {
+	case system == "":
+		result.AddWarningWithID(issue.DiagCodingNoSystem, nil, fhirPath)
+		return
+	case code == "":
+		result.AddErrorWithID(issue.DiagCodingNoCode, map[string]any{"system": system}, fhirPath)
 		return
 	}
+
 	systemVersion, _ := coding["version"].(string)
 	providedDisplay, _ := coding["display"].(string)
 

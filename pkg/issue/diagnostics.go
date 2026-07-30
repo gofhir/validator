@@ -40,6 +40,8 @@ const (
 	DiagBindingValueSetNotFound   DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
 	DiagCodeNotInCodeSystem       DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
 	DiagCodeSystemNotFound        DiagnosticID = "CODESYSTEM_NOT_FOUND"
+	DiagCodingNoSystem            DiagnosticID = "CODING_NO_SYSTEM"
+	DiagCodingNoCode              DiagnosticID = "CODING_NO_CODE"
 )
 
 // Diagnostic IDs for extension validation (M8).
@@ -283,6 +285,16 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeProcessing,
 		Template: "None of the codings provided are in the value set '{valueSet}', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = {codes})",
+	},
+	DiagCodingNoSystem: {
+		Severity: SeverityWarning,
+		Code:     CodeProcessing,
+		Template: "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided",
+	},
+	DiagCodingNoCode: {
+		Severity: SeverityError,
+		Code:     CodeInvalid,
+		Template: "Coding has no code for system {system} and cannot be validated",
 	},
 
 	// Extension (M8)
