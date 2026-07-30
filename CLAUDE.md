@@ -255,7 +255,7 @@ go install github.com/gofhir/validator/cmd/gofhir-validator@latest
 gofhir-validator patient.json
 
 # Especificar versión FHIR
-gofhir-validator -version r4 patient.json
+gofhir-validator -version 4.0.1 patient.json
 
 # Validar contra profile
 gofhir-validator -ig http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient patient.json
@@ -271,7 +271,7 @@ cat patient.json | gofhir-validator -
 
 | gofhir-validator | HL7 validator | Descripción |
 |------------------|---------------|-------------|
-| `-version r4` | `-version 4.0.1` | Versión FHIR |
+| `-version 4.0.1` | `-version 4.0.1` | Versión FHIR (acepta 4.0.1, 4.3.0, 5.0.0) |
 | `-ig <url>` | `-ig <url>` | Profile/IG |
 | `-output json` | `-output` | Formato salida |
 | `-tx n/a` | `-tx n/a` | Deshabilitar terminología |

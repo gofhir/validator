@@ -46,7 +46,7 @@ Si NO existe validator_cli.jar:
 
 ```bash
 # Compilar el validador Go
-cd /Users/robertoaraneda/projects/personal/opensource/validator
+cd /Users/robertoaraneda/projects/personal/opensource/go-validator
 go build -o bin/gofhir-validator ./cmd/gofhir-validator/
 ```
 
@@ -66,7 +66,7 @@ Capturar:
 
 ```bash
 # Ejecutar GoFHIR validator y capturar output
-./bin/gofhir-validator -version r4 <archivo> 2>&1
+./bin/gofhir-validator -version 4.0.1 <archivo> 2>&1
 ```
 
 Capturar:
@@ -119,7 +119,7 @@ java -jar validator_cli.jar <file> -version 4.0.1
 ### GoFHIR Validator
 **Comando:**
 ```bash
-gofhir-validator -version r4 <file>
+gofhir-validator -version 4.0.1 <file>
 ```
 
 **Output:**
