@@ -1,12 +1,15 @@
-# v1.15.0 and v1.16.0 are out — what changed since you signed the contract
+# v1.15.0, v1.16.0 and v1.16.1 are out — what changed since you signed the contract
 
 **For:** GoFHIR Server (terminology, ADR-014)
 **From:** the `github.com/gofhir/validator` maintainers
 **Date:** 2026-07-30
-**Re:** rounds 1–9; releases v1.15.0 and v1.16.0
+**Re:** rounds 1–9; releases v1.15.0, v1.16.0 and v1.16.1
 
-Your blocker is lifted: `go get github.com/gofhir/validator@v1.16.0` has the `Authority`
+Your blocker is lifted: `go get github.com/gofhir/validator@v1.16.1` has the `Authority`
 port. Everything we owed from the shared work order is shipped.
+
+Take **v1.16.1**, not v1.16.0: the patch removes a false positive that was present in
+both earlier releases. §5 explains it, and it changes one row of the audit table.
 
 Five things below need action on your side, and two correct an expectation we set.
 
@@ -53,7 +56,7 @@ You already flagged this at the bump. Ranked by how much surface each touches:
 | --- | --- | --- |
 | `compose.exclude` now applied | accept → **reject** | 412 of 3237 base ValueSets carry exclusions |
 | `is-a` includes the named concept | reject → **accept** | 903 selectable root codes |
-| `is-a` still excludes `notSelectable` | unchanged (reject) | 523 abstract v3 grouping concepts |
+| `is-a` includes `notSelectable` roots | **fixed in v1.16.1** — see §5 | 133 ValueSets, 9 reachable bindings |
 | Extension value bindings fully validated | new issues | any resource with a bound extension |
 | `Coding.version` honored | can flip either way | codings that declare a version |
 
@@ -91,22 +94,42 @@ maintaining the expansion cache, which costs more than the extra indirection. At
 ~1.1 µs/lookup you measured against your in-memory layer, real chain latency adds about
 1.4% on this Bundle. The ~1000× per-element concern does not materialise.
 
-## 5. What we verified against the reference, and what we did not
+## 5. What we verified against the reference — and the false positive it found
 
-We compared against HL7 `validator_cli` 6.9.12 over 25 fixtures (`m5-coding`,
-`m6-codeableconcept`, `m7-bindings`, `m8-extensions`). Where it overlaps your interests
-we agree with the reference: display mismatch is an **error** on both sides, `required`
-bindings on primitive `code` elements are errors on both, text-only CodeableConcept
-under an extensible binding is a warning on both.
+We compared against HL7 `validator_cli` 6.9.12. Where it overlaps your interests we agree:
+display mismatch is an **error** on both sides, `required` bindings on primitive `code`
+elements are errors on both, text-only CodeableConcept under an extensible binding is a
+warning on both.
 
-**Not verified: `compose.exclude` and the `notSelectable` exclusion.** No fixture in the
-suite exercises either, so the two largest behaviour changes rest on our reading of the
-specification rather than on agreement with the reference. Same for bindings inside
-extensions — the `m8` fixtures cover context, value type and URL, not bindings.
+Two fixtures were missing from the suite, so the two largest behaviour changes of v1.15.0
+were unverified. We wrote them (`testdata/m11-terminology-conformance`) and one of them
+found a bug of ours:
 
-If your corpus has resources that hit a ValueSet with `compose.exclude`, or that use an
-abstract v3 code such as `_ActEncounterCode`, those are the most valuable thing you could
-send us. They close the gap that matters most.
+| Case | HL7 | v1.15.0 / v1.16.0 | v1.16.1 |
+| --- | --- | --- | --- |
+| Code removed by `compose.exclude` | warning | warning | warning ✅ |
+| Abstract code reached by `is-a` | *(silent)* | **warning** ❌ | *(silent)* ✅ |
+| Extension value violating a required binding | error | error | error ✅ |
+
+**`compose.exclude` — the 412-ValueSet change — was correct all along.** The fixture
+confirms it rather than changing it, so nothing to re-audit there.
+
+**Abstract concepts were wrongly rejected.** We had filtered `notSelectable`/abstract
+concepts out of an `is-a` expansion, reasoning from the spec's *"this concept is 'abstract'
+and should not be used as a value in an instance"*. Wrong twice over: it is SHOULD, not
+SHALL, so using one is not a conformance violation; and an expansion answers membership,
+which an abstract concept reached by `is-a` has. `AuditEvent.purposeOfEvent` is the case
+that settled it — bound extensible to `v3-PurposeOfUse`, whose `is-a` root `PurposeOfUse`
+is notSelectable and not excluded — where the reference reports nothing and we reported a
+warning.
+
+Scope, in case you saw it: of the 521 `is-a` filters with an abstract root, **390 also
+exclude that root explicitly**, so `compose.exclude` kept those out on its own and our
+filter was redundant there. The 133 remaining are where we diverged, of which 9 are
+reachable by bindings we validate — `AuditEvent.purposeOfEvent`,
+`AuditEvent.agent.purposeOfUse`, `Provenance.reason`, `Consent.provision.purpose`,
+`Contract.term.offer.decision`. If your fixtures touch those, v1.16.0 gave you spurious
+warnings and v1.16.1 does not.
 
 One thing the comparison surfaced that is worth knowing: HL7's validator connects to
 `tx.fhir.org`. Several apparent gaps on our side — no verdict on LOINC or SNOMED codes,
@@ -116,7 +139,7 @@ by changing our code.
 
 ## 6. Your migration, unchanged
 
-1. Bump to `v1.16.0` and audit fixtures against the table in §3.
+1. Bump to `v1.16.1` and audit fixtures against the table in §3.
 2. Implement `Authority` with the `Resolve*` names, returning `MembershipUnknown` for an
    empty system, routing `SystemVersion`, populating `Message`, and answering `Supports`
    honestly.
