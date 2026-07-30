@@ -230,7 +230,18 @@ func (v *Validator) validateComplexElement(ctx context.Context, data map[string]
 
 // validateBinding validates a value against its binding.
 func (v *Validator) validateBinding(ctx context.Context, value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
-	binding := elemDef.Binding
+	v.ValidateValueBinding(ctx, value, elemDef.Binding, fhirPath, result)
+}
+
+// ValidateValueBinding validates a value against an element binding.
+//
+// Exported for callers that hold the binding without an ElementDefinition — chiefly
+// extension validation, where the binding comes from the extension's own
+// StructureDefinition. Routing both traversals through here is what keeps them from
+// drifting: display checks, CodeSystem membership, CodeableConcept aggregation, the
+// unresolved policy and the extensible severity table apply the same way to an
+// extension value as to any other element.
+func (v *Validator) ValidateValueBinding(ctx context.Context, value any, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	if binding == nil {
 		return
 	}
@@ -252,7 +263,7 @@ func (v *Validator) validateBinding(ctx context.Context, value any, elemDef *reg
 	case []any:
 		for i, item := range val {
 			itemPath := fmt.Sprintf("%s[%d]", fhirPath, i)
-			v.validateBinding(ctx, item, elemDef, itemPath, result)
+			v.ValidateValueBinding(ctx, item, binding, itemPath, result)
 		}
 	}
 }
