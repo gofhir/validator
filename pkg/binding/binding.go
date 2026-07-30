@@ -156,6 +156,10 @@ func (v *Validator) validateElementWithPaths(ctx context.Context, data map[strin
 			v.validateBinding(ctx, value, elemDef, elementFhirPath, result)
 		}
 
+		// Independent of any binding: a Coding must name a code that exists in the
+		// system it declares.
+		v.ValidateCodedValue(ctx, value, elemDef, elementFhirPath, result)
+
 		// Recurse into complex types
 		switch val := value.(type) {
 		case map[string]any:
@@ -239,7 +243,137 @@ func (v *Validator) validateComplexElement(ctx context.Context, data map[string]
 	}
 }
 
-// validateBinding validates a value against its binding.
+// ValidateCodedValue checks a Coding against the CodeSystem the data itself declares:
+// does this code exist in this system, and does the display match.
+//
+// Deliberately independent of any binding. Two different rules are at play and they
+// used to be tangled: a binding asks whether a code belongs to the ValueSet an element
+// requires, which depends on strength; Coding.system + Coding.code ask whether the code
+// exists in the system the instance names, which depends on nothing else. A Coding
+// saying "system: v3-ActCode, code: INVENTED" is wrong whether the element is bound
+// required, bound example, or not bound at all.
+//
+// Running it only inside binding validation meant every element bound example,
+// preferred or unbound — Observation.code, Condition.code, Procedure.code, most
+// clinical codes in FHIR — accepted codes that do not exist in a CodeSystem we hold.
+// Verified against HL7 validator_cli 6.9.12, which reports these as errors regardless
+// of binding strength.
+func (v *Validator) ValidateCodedValue(ctx context.Context, value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
+	if elemDef == nil || len(elemDef.Type) == 0 {
+		return
+	}
+
+	switch elemDef.Type[0].Code {
+	case "Coding":
+		v.validateCodingValue(ctx, value, fhirPath, result)
+	case "CodeableConcept":
+		v.validateCodeableConceptValue(ctx, value, fhirPath, result)
+	}
+}
+
+// validateCodingValue handles a Coding, or an array of them.
+func (v *Validator) validateCodingValue(ctx context.Context, value any, fhirPath string, result *issue.Result) {
+	switch val := value.(type) {
+	case map[string]any:
+		v.checkCodingAgainstCodeSystem(ctx, val, fhirPath, result)
+	case []any:
+		for i, item := range val {
+			if m, ok := item.(map[string]any); ok {
+				v.checkCodingAgainstCodeSystem(ctx, m, fmt.Sprintf("%s[%d]", fhirPath, i), result)
+			}
+		}
+	}
+}
+
+// validateCodeableConceptValue handles a CodeableConcept, or an array of them, checking
+// each of its codings.
+func (v *Validator) validateCodeableConceptValue(ctx context.Context, value any, fhirPath string, result *issue.Result) {
+	switch val := value.(type) {
+	case map[string]any:
+		v.checkConceptCodings(ctx, val, fhirPath, result)
+	case []any:
+		for i, item := range val {
+			if m, ok := item.(map[string]any); ok {
+				v.checkConceptCodings(ctx, m, fmt.Sprintf("%s[%d]", fhirPath, i), result)
+			}
+		}
+	}
+}
+
+// checkConceptCodings visits each coding of one CodeableConcept.
+func (v *Validator) checkConceptCodings(ctx context.Context, cc map[string]any, fhirPath string, result *issue.Result) {
+	codings, ok := cc["coding"].([]any)
+	if !ok {
+		return
+	}
+	for i, c := range codings {
+		if m, ok := c.(map[string]any); ok {
+			v.checkCodingAgainstCodeSystem(ctx, m, fmt.Sprintf("%s.coding[%d]", fhirPath, i), result)
+		}
+	}
+}
+
+// checkCodingAgainstCodeSystem is where the actual check happens: the code must exist in
+// the system the Coding names, and the display must match the concept's.
+//
+// The code diagnostic is reported on the .code child rather than the element, matching
+// where the reference puts it: the defect is in that value, not in the element as a
+// whole, and a CodeableConcept with several codings needs to say which one is wrong.
+func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map[string]any, fhirPath string, result *issue.Result) {
+	system, _ := coding["system"].(string)
+	code, _ := coding["code"].(string)
+	if system == "" || code == "" {
+		return
+	}
+	systemVersion, _ := coding["version"].(string)
+	providedDisplay, _ := coding["display"].(string)
+
+	res, err := v.termRegistry.ResolveCodeInCodeSystem(ctx, system, code,
+		terminology.LookupOptions{SystemVersion: systemVersion})
+	if err != nil {
+		return
+	}
+
+	switch res.Resolution {
+	case terminology.Unresolved:
+		// Unchecked rather than wrong, and the two reasons deserve different weight.
+		//
+		// A known external vocabulary — SNOMED, LOINC, RxNorm — is expected to need a
+		// terminology server, so saying so is informational. The reference does not warn
+		// here at all because it resolves these against tx.fhir.org; a deployment that
+		// configures an Authority gets the same verdicts and this note disappears.
+		//
+		// A CodeSystem that is simply unknown is a weaker position: nothing says it needs
+		// a server, so it may well be a typo or a missing package. That stays a warning.
+		if v.termRegistry.IsExternalSystem(system) {
+			result.AddInfoWithID(
+				issue.DiagBindingCannotValidate,
+				map[string]any{"code": code, "system": system},
+				fhirPath,
+			)
+			return
+		}
+		result.AddWarningWithID(
+			issue.DiagCodeSystemNotFound,
+			map[string]any{"system": system, "systemCode": code},
+			fhirPath,
+		)
+		return
+	case terminology.Invalid:
+		result.AddErrorWithID(
+			issue.DiagCodeNotInCodeSystem,
+			map[string]any{"code": code, "system": system},
+			fhirPath+".code",
+		)
+		return
+	case terminology.Valid:
+	}
+
+	if providedDisplay != "" {
+		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
+	}
+}
+
 func (v *Validator) validateBinding(ctx context.Context, value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
 	v.ValidateValueBinding(ctx, value, elemDef.Binding, fhirPath, result)
 }
@@ -353,19 +487,14 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val m
 func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) terminology.Resolution {
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
-	providedDisplay, _ := coding["display"].(string)
-	systemVersion, _ := coding["version"].(string)
 
 	if code == "" {
 		return terminology.Unresolved
 	}
 
-	// Validate code in CodeSystem (warnings still emitted per-coding).
-	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
-	if shouldReturn {
-		// The code is invalid in its own CodeSystem, already reported as an error.
-		return terminology.Invalid
-	}
+	// The CodeSystem check runs separately, in ValidateCodedValue: a code missing from
+	// its own system is reported there, and the reference reports value set membership
+	// alongside it rather than instead of it.
 
 	// Check ValueSet.
 	res, err := v.termRegistry.ResolveCodeInValueSet(ctx, system, code, binding.ValueSet,
@@ -382,11 +511,6 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 			v.reportBindingViolation(system, code, res, binding, fhirPath, result)
 		}
 		return terminology.Invalid
-	}
-
-	// Validate display if not already validated via CodeSystem.
-	if !codeValidInCS && providedDisplay != "" && system != "" {
-		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
 	}
 
 	return terminology.Valid
@@ -473,17 +597,9 @@ func (v *Validator) validateCodeBinding(ctx context.Context, code, system string
 func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
-	providedDisplay, _ := coding["display"].(string)
-	systemVersion, _ := coding["version"].(string)
 
 	if code == "" {
 		return // Empty code is handled elsewhere
-	}
-
-	// Validate code exists in CodeSystem and check display
-	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
-	if shouldReturn {
-		return
 	}
 
 	// Validate against the ValueSet binding
@@ -502,55 +618,6 @@ func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string
 		v.reportBindingViolation(system, code, res, binding, fhirPath, result)
 		return
 	}
-
-	// Validate display if not already validated via CodeSystem
-	if !codeValidInCS && providedDisplay != "" && system != "" {
-		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
-	}
-}
-
-// validateCodeInCodeSystem validates a code exists in its CodeSystem and checks display.
-// Returns (codeValidInCS, shouldReturn) where shouldReturn indicates validation should stop.
-//
-// The systemVersion argument is Coding.version when the data declared one. A code
-// can exist in one version of a CodeSystem and not another, so a declared version
-// is checked against rather than ignored.
-func (v *Validator) validateCodeInCodeSystem(ctx context.Context, system, systemVersion, code, providedDisplay, fhirPath string, result *issue.Result) (codeValidInCS, shouldReturn bool) {
-	if system == "" {
-		return false, false
-	}
-
-	res, err := v.termRegistry.ResolveCodeInCodeSystem(ctx, system, code,
-		terminology.LookupOptions{SystemVersion: systemVersion})
-	if err != nil {
-		return false, false
-	}
-	codeValid := res.Resolution == terminology.Valid
-	csFound := res.Resolution != terminology.Unresolved
-	if !csFound {
-		result.AddWarningWithID(
-			issue.DiagCodeSystemNotFound,
-			map[string]any{"system": system, "systemCode": code},
-			fhirPath,
-		)
-		return false, false
-	}
-
-	if !codeValid {
-		result.AddErrorWithID(
-			issue.DiagCodeNotInCodeSystem,
-			map[string]any{"code": code, "system": system},
-			fhirPath,
-		)
-		return false, true // Stop validation - code invalid in CodeSystem
-	}
-
-	// Validate display if provided (HL7 is case-insensitive)
-	if providedDisplay != "" {
-		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
-	}
-
-	return true, false
 }
 
 // validateDisplayMismatch reports a Coding.display that does not match the

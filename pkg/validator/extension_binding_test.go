@@ -145,3 +145,82 @@ func TestExtensionBindingUsesTheElementPath(t *testing.T) {
 		}
 	})
 }
+
+// codedValueResource carries a Coding on Observation.code, which is bound example —
+// weak enough that binding validation skips it entirely.
+const codedValueResource = `{
+  "resourceType": "Observation",
+  "status": "final",
+  "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"},
+  "code": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "THIS-CODE-DOES-NOT-EXIST"
+      }
+    ]
+  }
+}`
+
+// TestCodeSystemCheckIsIndependentOfBinding is the gap the reference comparison found.
+//
+// A Coding naming a code that does not exist in the system it declares is wrong
+// regardless of binding strength, but the check used to live inside binding validation
+// — which returns early for anything weaker than extensible. Since most clinical codes
+// in FHIR are bound example (Observation.code, Condition.code, Procedure.code), we were
+// accepting codes absent from CodeSystems we hold.
+//
+// HL7 validator_cli 6.9.12 reports this as an error on the .code child.
+func TestCodeSystemCheckIsIndependentOfBinding(t *testing.T) {
+	v := getSharedValidator(t)
+
+	result, err := v.Validate(context.Background(), []byte(codedValueResource))
+	if err != nil {
+		t.Fatalf("Validate: %v", err)
+	}
+
+	got := issueFor(t, result, issue.DiagCodeNotInCodeSystem)
+	if got == nil {
+		t.Fatalf("a code absent from its own CodeSystem must be reported even under an "+
+			"example binding; issues: %v", result.Issues)
+	}
+	if got.Severity != issue.SeverityError {
+		t.Errorf("severity = %s, want %s", got.Severity, issue.SeverityError)
+	}
+	// Reported on the code itself, as the reference does: a CodeableConcept with several
+	// codings has to say which one is wrong.
+	if len(got.Expression) == 0 || !strings.HasSuffix(got.Expression[0], ".code") {
+		t.Errorf("expression = %v, want the .code child", got.Expression)
+	}
+}
+
+// TestExternalSystemIsInformationalNotWarning keeps the check from becoming noise. A
+// known external vocabulary is expected to need a terminology server, and the reference
+// reports nothing at all because it resolves these against tx.fhir.org.
+func TestExternalSystemIsInformationalNotWarning(t *testing.T) {
+	v := getSharedValidator(t)
+
+	loinc := []byte(`{
+	  "resourceType": "Observation",
+	  "status": "final",
+	  "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"},
+	  "code": {"coding": [{"system": "http://loinc.org", "code": "29463-7"}]}
+	}`)
+
+	result, err := v.Validate(context.Background(), loinc)
+	if err != nil {
+		t.Fatalf("Validate: %v", err)
+	}
+
+	got := issueFor(t, result, issue.DiagBindingCannotValidate)
+	if got == nil {
+		t.Fatalf("an unresolvable external system should be noted; issues: %v", result.Issues)
+	}
+	if got.Severity != issue.SeverityInformation {
+		t.Errorf("severity = %s, want %s: a vocabulary that needs a server is not a defect",
+			got.Severity, issue.SeverityInformation)
+	}
+	if issueFor(t, result, issue.DiagCodeNotInCodeSystem) != nil {
+		t.Error("an unresolvable code must not be reported as invalid")
+	}
+}
