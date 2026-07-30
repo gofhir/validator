@@ -73,11 +73,21 @@ func TestIsAFilterIncludesSelf(t *testing.T) {
 	}
 }
 
-// TestIsAFilterExcludesNotSelectableRoot covers the v3 grouping concepts (523 of
-// the 1515 is-a filters in the embedded R4 corpus): they head a hierarchy but
-// carry notSelectable, so they must not be accepted as instance values even
-// though is-a nominally includes self.
-func TestIsAFilterExcludesNotSelectableRoot(t *testing.T) {
+// TestIsAFilterIncludesNotSelectableRoot pins the alignment with the reference.
+//
+// An expansion answers membership, and an abstract concept reached by is-a is a
+// member. Verified against HL7 validator_cli 6.9.12 on AuditEvent.purposeOfEvent
+// (extensible to v3-PurposeOfUse, whose is-a root PurposeOfUse is notSelectable and
+// not excluded): it reports nothing, so accepting the code is the reference
+// behavior. We used to filter these out of the expansion and emitted a binding
+// warning instead — a false positive in the 133 base ValueSets whose is-a root is
+// notSelectable without also being excluded.
+//
+// Whether an abstract concept is appropriate as an instance value is a separate
+// question, and the specification frames it as "should not be used", a
+// recommendation rather than a conformance rule. If it is ever reported, it belongs
+// in its own check at informational severity.
+func TestIsAFilterIncludesNotSelectableRoot(t *testing.T) {
 	const system = "http://terminology.hl7.org/CodeSystem/v3-ActCode"
 	yes := true
 
@@ -118,8 +128,50 @@ func TestIsAFilterExcludesNotSelectableRoot(t *testing.T) {
 	if valid, _ := r.ValidateCode(vs.URL, system, "AMB"); !valid {
 		t.Error("selectable descendant AMB should be a member")
 	}
+	if valid, _ := r.ValidateCode(vs.URL, system, "_ActEncounterCode"); !valid {
+		t.Error("the abstract root is reached by is-a, so it is a member of the value set; " +
+			"excluding it here produced binding warnings the reference does not produce")
+	}
+}
+
+// TestExcludeStillRemovesAbstractRoots is how the base corpus actually keeps abstract
+// codes out: 390 of the 521 is-a filters with a notSelectable root also exclude that
+// root explicitly, and compose.exclude handles them without the expansion having to
+// judge selectability.
+func TestExcludeStillRemovesAbstractRoots(t *testing.T) {
+	const system = "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+	yes := true
+
+	cs := &CodeSystem{
+		URL: system,
+		Concept: []CodeSystemCode{
+			{Code: "_ActEncounterCode", Property: []CodeSystemProperty{{Code: "notSelectable", ValueBoolean: &yes}}},
+			{Code: "AMB", Property: []CodeSystemProperty{{Code: "subsumedBy", ValueCode: "_ActEncounterCode"}}},
+		},
+	}
+	vs := &ValueSet{
+		URL: "http://terminology.hl7.org/ValueSet/v3-ActEncounterCode",
+		Compose: Compose{
+			Include: []Include{{
+				System: system,
+				Filter: []Filter{{Property: "concept", Op: "is-a", Value: "_ActEncounterCode"}},
+			}},
+			Exclude: []Include{{
+				System:  system,
+				Concept: []Concept{{Code: "_ActEncounterCode"}},
+			}},
+		},
+	}
+
+	r := NewRegistry()
+	r.codeSystems[cs.URL] = cs
+	r.valueSets[vs.URL] = vs
+
+	if valid, _ := r.ValidateCode(vs.URL, system, "AMB"); !valid {
+		t.Error("AMB should remain a member")
+	}
 	if valid, _ := r.ValidateCode(vs.URL, system, "_ActEncounterCode"); valid {
-		t.Error("notSelectable grouping concept must not be valid as an instance value")
+		t.Error("compose.exclude removes the abstract root; that is what the corpus relies on")
 	}
 }
 
