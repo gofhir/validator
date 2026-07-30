@@ -774,7 +774,7 @@ func (r *Registry) applyIsNotAFilter(codes map[string]bool, cs *CodeSystem, syst
 // whose not-selectable property is true, and most concepts simply omit it.
 func (r *Registry) applyPropertyInFilter(codes map[string]bool, cs *CodeSystem, system, property, value string, want bool) {
 	wanted := make(map[string]struct{})
-	for _, v := range strings.Split(value, ",") {
+	for v := range strings.SplitSeq(value, ",") {
 		wanted[strings.TrimSpace(v)] = struct{}{}
 	}
 
@@ -1013,7 +1013,20 @@ func (r *Registry) ResolveCodeInCodeSystem(ctx context.Context, system, code str
 	}
 
 	valid, found := r.validateCodeInCodeSystemLocally(ctx, system, code)
-	return localCodeResult(valid, found), nil
+	res := localCodeResult(valid, found)
+
+	// Carry the display so callers can validate a Coding.display without a second
+	// lookup. Only the CodeSystem's own display is parsed — designations are not —
+	// so a specific language cannot be honored locally, and saying so lets callers
+	// skip the comparison instead of checking a submitted translation against
+	// English.
+	if res.Resolution == Valid {
+		if display, ok := r.GetDisplayForCode(system, code); ok {
+			res.Display = display
+			res.DisplayLanguageHonored = opts.DisplayLanguage == ""
+		}
+	}
+	return res, nil
 }
 
 // validateCodeInCodeSystemLocally answers from the registry's own copies,

@@ -28,6 +28,10 @@ type Validator struct {
 	// unresolvedPolicy decides what happens when no terminology source can decide
 	// a binding. Zero value is UnresolvedWarn.
 	unresolvedPolicy terminology.UnresolvedPolicy
+
+	// displayLanguage is the BCP-47 tag preferred when checking Coding.display.
+	// Empty means no preference.
+	displayLanguage string
 }
 
 // New creates a new binding Validator.
@@ -43,6 +47,12 @@ func New(sdRegistry *registry.Registry, termRegistry *terminology.Registry) *Val
 // resolve are reported. Defaults to terminology.UnresolvedWarn.
 func (v *Validator) SetUnresolvedPolicy(p terminology.UnresolvedPolicy) {
 	v.unresolvedPolicy = p
+}
+
+// SetDisplayLanguage sets the BCP-47 language preferred when checking
+// Coding.display. Empty means no preference.
+func (v *Validator) SetDisplayLanguage(lang string) {
+	v.displayLanguage = lang
 }
 
 // reportUnresolved records a binding that could not be checked, at the severity
@@ -353,7 +363,7 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 
 	// Validate display if not already validated via CodeSystem.
 	if !codeValidInCS && providedDisplay != "" && system != "" {
-		v.validateDisplayMismatch(system, code, providedDisplay, fhirPath, result)
+		v.validateDisplayMismatch(ctx, system, code, providedDisplay, fhirPath, result)
 	}
 
 	return terminology.Valid
@@ -471,7 +481,7 @@ func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string
 
 	// Validate display if not already validated via CodeSystem
 	if !codeValidInCS && providedDisplay != "" && system != "" {
-		v.validateDisplayMismatch(system, code, providedDisplay, fhirPath, result)
+		v.validateDisplayMismatch(ctx, system, code, providedDisplay, fhirPath, result)
 	}
 }
 
@@ -503,26 +513,48 @@ func (v *Validator) validateCodeInCodeSystem(ctx context.Context, system, code, 
 
 	// Validate display if provided (HL7 is case-insensitive)
 	if providedDisplay != "" {
-		v.validateDisplayMismatch(system, code, providedDisplay, fhirPath, result)
+		v.validateDisplayMismatch(ctx, system, code, providedDisplay, fhirPath, result)
 	}
 
 	return true, false
 }
 
-// validateDisplayMismatch checks if the provided display matches the expected display.
-func (v *Validator) validateDisplayMismatch(system, code, providedDisplay, fhirPath string, result *issue.Result) {
-	expectedDisplay, displayFound := v.termRegistry.GetDisplayForCode(system, code)
-	if displayFound && expectedDisplay != "" && !strings.EqualFold(providedDisplay, expectedDisplay) {
-		result.AddErrorWithID(
-			issue.DiagBindingDisplayMismatch,
-			map[string]any{
-				"code":     code,
-				"provided": providedDisplay,
-				"expected": expectedDisplay,
-			},
-			fhirPath+".display",
-		)
+// validateDisplayMismatch reports a Coding.display that does not match the
+// concept's display.
+//
+// An error, not a warning, deliberately: per HL7's validator guidance a wrong
+// display is often a sign the wrong code was chosen — right display, wrong code —
+// and the specification requires the display to be valid per the code system.
+//
+// The comparison is skipped whenever the display cannot be established in the
+// language being checked. Otherwise a submitted Spanish display would be compared
+// against the English one and rejected, which is a validator bug rather than a
+// data problem. Concretely: when a display language is requested and the backend
+// could not honor it, there is nothing to compare against.
+func (v *Validator) validateDisplayMismatch(ctx context.Context, system, code, providedDisplay, fhirPath string, result *issue.Result) {
+	res, err := v.termRegistry.ResolveCodeInCodeSystem(ctx, system, code,
+		terminology.LookupOptions{DisplayLanguage: v.displayLanguage})
+	if err != nil || res.Display == "" {
+		return
 	}
+	if v.displayLanguage != "" && !res.DisplayLanguageHonored {
+		// The backend has no display in the requested language, so a mismatch here
+		// would say nothing about the submitted one.
+		return
+	}
+	if strings.EqualFold(providedDisplay, res.Display) {
+		return
+	}
+
+	result.AddErrorWithID(
+		issue.DiagBindingDisplayMismatch,
+		map[string]any{
+			"code":     code,
+			"provided": providedDisplay,
+			"expected": res.Display,
+		},
+		fhirPath+".display",
+	)
 }
 
 // reportBindingViolation reports a binding violation based on binding strength.

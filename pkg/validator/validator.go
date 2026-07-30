@@ -90,6 +90,7 @@ type Config struct {
 	ProfileResolver      registry.ProfileResolver // Optional external profile resolver for on-demand SD loading
 	NoTerminology        bool                     // When true, skip all terminology/binding validation
 	UnresolvedPolicy     UnresolvedPolicy         // How to report bindings no terminology source could decide
+	DisplayLanguage      string                   // BCP-47 tag preferred when checking Coding.display
 }
 
 // UnresolvedPolicy decides what happens when no terminology source can decide a
@@ -233,6 +234,22 @@ func WithTerminologyAuthority(a terminology.Authority) Option {
 func WithUnresolvedPolicy(p UnresolvedPolicy) Option {
 	return func(c *Config) {
 		c.UnresolvedPolicy = p
+	}
+}
+
+// WithDisplayLanguage sets the BCP-47 language preferred when checking
+// Coding.display against the concept's display.
+//
+// Without it, display validation compares against whatever display the
+// terminology source returns by default, which for the base FHIR packages is
+// English. Set it when resources carry displays in another language, so a valid
+// translation is not reported as a mismatch.
+//
+// When the terminology source cannot supply a display in the requested language,
+// display validation is skipped rather than compared against a fallback.
+func WithDisplayLanguage(lang string) Option {
+	return func(c *Config) {
+		c.DisplayLanguage = lang
 	}
 }
 
@@ -486,6 +503,7 @@ func New(opts ...Option) (*Validator, error) {
 	v.primValidator = primitive.New(reg)
 	v.bindValidator = binding.New(reg, termReg)
 	v.bindValidator.SetUnresolvedPolicy(config.UnresolvedPolicy)
+	v.bindValidator.SetDisplayLanguage(config.DisplayLanguage)
 	v.extValidator = extension.New(reg, termReg, v.primValidator)
 	v.refValidator = reference.New(reg)
 	// Pass termRegistry to constraint validator for memberOf() support.
