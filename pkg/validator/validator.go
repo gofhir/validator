@@ -89,7 +89,18 @@ type Config struct {
 	TerminologyAuthority terminology.Authority    // Optional authoritative terminology port (replaces the base copy)
 	ProfileResolver      registry.ProfileResolver // Optional external profile resolver for on-demand SD loading
 	NoTerminology        bool                     // When true, skip all terminology/binding validation
+	UnresolvedPolicy     UnresolvedPolicy         // How to report bindings no terminology source could decide
 }
+
+// UnresolvedPolicy decides what happens when no terminology source can decide a
+// binding. Aliased from pkg/terminology, where the phase validators consume it.
+type UnresolvedPolicy = terminology.UnresolvedPolicy
+
+// Unresolved policies. See terminology.UnresolvedPolicy.
+const (
+	UnresolvedWarn  = terminology.UnresolvedWarn
+	UnresolvedError = terminology.UnresolvedError
+)
 
 // Option is a functional option for configuring the validator.
 type Option func(*Config)
@@ -209,6 +220,19 @@ func WithTerminologyProvider(provider terminology.Provider) Option {
 func WithTerminologyAuthority(a terminology.Authority) Option {
 	return func(c *Config) {
 		c.TerminologyAuthority = a
+	}
+}
+
+// WithUnresolvedPolicy decides how a binding that no terminology source could
+// resolve is reported: UnresolvedWarn (default) accepts the code and records an
+// informational issue, UnresolvedError treats it as a validation failure.
+//
+// The default matches the HL7 validator's -tx n/a behavior. Choose
+// UnresolvedError for closed-world validation, where accepting an unchecked code
+// is worse than rejecting it.
+func WithUnresolvedPolicy(p UnresolvedPolicy) Option {
+	return func(c *Config) {
+		c.UnresolvedPolicy = p
 	}
 }
 
@@ -461,6 +485,7 @@ func New(opts ...Option) (*Validator, error) {
 	v.cardValidator = cardinality.New(reg)
 	v.primValidator = primitive.New(reg)
 	v.bindValidator = binding.New(reg, termReg)
+	v.bindValidator.SetUnresolvedPolicy(config.UnresolvedPolicy)
 	v.extValidator = extension.New(reg, termReg, v.primValidator)
 	v.refValidator = reference.New(reg)
 	// Pass termRegistry to constraint validator for memberOf() support.

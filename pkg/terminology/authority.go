@@ -2,6 +2,9 @@ package terminology
 
 import "context"
 
+// unknownLabel is the String() result for an out-of-range enum value.
+const unknownLabel = "unknown"
+
 // Resolution is the outcome of a terminology decision.
 //
 // Unresolved and Invalid are deliberately distinct. A backend that cannot decide
@@ -30,7 +33,7 @@ func (r Resolution) String() string {
 	case Invalid:
 		return "invalid"
 	default:
-		return "unknown"
+		return unknownLabel
 	}
 }
 
@@ -58,13 +61,45 @@ const (
 func (m Membership) String() string {
 	switch m {
 	case MembershipUnknown:
-		return "unknown"
+		return unknownLabel
 	case MembershipIncluded:
 		return "included"
 	case MembershipExcluded:
 		return "excluded"
 	default:
 		return "invalid"
+	}
+}
+
+// UnresolvedPolicy decides what a caller does when terminology cannot be
+// resolved — Resolution is Unresolved rather than Valid or Invalid.
+//
+// It exists so that "accept what we could not check" is a stated policy rather
+// than a value baked into a return type. Before it, the answer was hardcoded in
+// two places and could not be changed by an operator who needed closed-world
+// validation.
+type UnresolvedPolicy int
+
+const (
+	// UnresolvedWarn accepts the code and records an informational issue. Default,
+	// and equivalent to the HL7 validator's -tx n/a: without a terminology source
+	// there is nothing to check against, and failing every coded element would be
+	// worse than saying so.
+	UnresolvedWarn UnresolvedPolicy = iota
+	// UnresolvedError treats an unresolvable binding as a validation failure. For
+	// deployments that would rather reject data than accept it unchecked.
+	UnresolvedError
+)
+
+// String implements fmt.Stringer.
+func (p UnresolvedPolicy) String() string {
+	switch p {
+	case UnresolvedWarn:
+		return "warn"
+	case UnresolvedError:
+		return "error"
+	default:
+		return unknownLabel
 	}
 }
 

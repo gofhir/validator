@@ -32,6 +32,7 @@ const (
 	DiagBindingExtensible         DiagnosticID = "BINDING_EXTENSIBLE"
 	DiagBindingExtensibleOther    DiagnosticID = "BINDING_EXTENSIBLE_OTHER_SYSTEM"
 	DiagBindingExtensibleUnknown  DiagnosticID = "BINDING_EXTENSIBLE_UNKNOWN_SYSTEM"
+	DiagBindingUnresolved         DiagnosticID = "BINDING_UNRESOLVED"
 	DiagBindingExtensibleNoCoding DiagnosticID = "BINDING_EXTENSIBLE_NO_CODING"
 	DiagBindingDisplayMismatch    DiagnosticID = "BINDING_DISPLAY_MISMATCH"
 	DiagBindingTextOnlyWarning    DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
@@ -249,6 +250,14 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeCodeInvalid,
 		Template: "No code provided, and a code should be provided from the value set '{valueSet}' (extensible)",
+	},
+	// Emitted when no terminology source could decide a binding. Declared at error
+	// severity for UnresolvedError; under the default policy it is reported through
+	// AddInfoWithID, which lowers it to information.
+	DiagBindingUnresolved: {
+		Severity: SeverityError,
+		Code:     CodeCodeInvalid,
+		Template: "The value provided ('{code}') could not be checked against value set '{valueSet}': no terminology source could resolve it",
 	},
 	DiagBindingCannotValidate: {
 		Severity: SeverityInformation,

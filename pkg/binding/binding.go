@@ -24,6 +24,10 @@ type Validator struct {
 	sdRegistry   *registry.Registry
 	termRegistry *terminology.Registry
 	walker       *walker.Walker
+
+	// unresolvedPolicy decides what happens when no terminology source can decide
+	// a binding. Zero value is UnresolvedWarn.
+	unresolvedPolicy terminology.UnresolvedPolicy
 }
 
 // New creates a new binding Validator.
@@ -33,6 +37,27 @@ func New(sdRegistry *registry.Registry, termRegistry *terminology.Registry) *Val
 		termRegistry: termRegistry,
 		walker:       walker.New(sdRegistry),
 	}
+}
+
+// SetUnresolvedPolicy decides how bindings that no terminology source could
+// resolve are reported. Defaults to terminology.UnresolvedWarn.
+func (v *Validator) SetUnresolvedPolicy(p terminology.UnresolvedPolicy) {
+	v.unresolvedPolicy = p
+}
+
+// reportUnresolved records a binding that could not be checked, at the severity
+// the configured policy asks for. Only required and extensible bindings reach
+// here, so a weaker binding never produces noise.
+func (v *Validator) reportUnresolved(code, valueSet, strength, fhirPath string, result *issue.Result) {
+	if strength != strengthRequired && strength != strengthExtensible {
+		return
+	}
+	args := map[string]any{"code": code, "valueSet": valueSet}
+	if v.unresolvedPolicy == terminology.UnresolvedError {
+		result.AddErrorWithID(issue.DiagBindingUnresolved, args, fhirPath)
+		return
+	}
+	result.AddInfoWithID(issue.DiagBindingUnresolved, args, fhirPath)
 }
 
 // Validate validates bindings for a resource.
@@ -266,32 +291,13 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val m
 		return
 	}
 
-	// Validate each Coding in the CC.
-	// Track whether any coding was valid in the ValueSet for CC-level aggregation.
-	anyValidInVS := false
-	var codeLabels []string
+	anyValidInVS, anyDecided, codeLabels := v.validateCodings(ctx, codings, binding, fhirPath, result)
 
-	for i, c := range codings {
-		codingMap, ok := c.(map[string]any)
-		if !ok {
-			continue
-		}
-		codingPath := fmt.Sprintf("%s.coding[%d]", fhirPath, i)
-
-		// Validate within CC context: suppresses per-coding extensible warnings.
-		validInVS := v.validateCodingInCC(ctx, codingMap, binding, codingPath, result)
-		if validInVS {
-			anyValidInVS = true
-		}
-
-		// Collect system#code for aggregate warning.
-		sys, _ := codingMap["system"].(string)
-		cd, _ := codingMap["code"].(string)
-		if sys != "" && cd != "" {
-			codeLabels = append(codeLabels, fmt.Sprintf("%s#%s", sys, cd))
-		} else if cd != "" {
-			codeLabels = append(codeLabels, cd)
-		}
+	// Nothing could be decided for any coding: the binding is unresolvable, which
+	// is not the same as "none of the codings are members".
+	if !anyDecided && len(codeLabels) > 0 {
+		v.reportUnresolved(strings.Join(codeLabels, ", "), binding.ValueSet, binding.Strength, fhirPath, result)
+		return
 	}
 
 	// CC-level extensible warning: none of the codings matched the ValueSet.
@@ -310,27 +316,31 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val m
 // validateCodingInCC validates a Coding within a CodeableConcept context.
 // It performs CodeSystem validation and display checks, but suppresses per-coding
 // extensible binding warnings (deferred to CC-level aggregation).
-// Returns true if the coding was valid in the ValueSet.
-func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) bool {
+// Returns the ValueSet resolution for the coding, so the caller can aggregate:
+// Unresolved must not be reported as "not a member".
+func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) terminology.Resolution {
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 	providedDisplay, _ := coding["display"].(string)
 
 	if code == "" {
-		return false
+		return terminology.Unresolved
 	}
 
 	// Validate code in CodeSystem (warnings still emitted per-coding).
 	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(ctx, system, code, providedDisplay, fhirPath, result)
 	if shouldReturn {
-		return false
+		// The code is invalid in its own CodeSystem, already reported as an error.
+		return terminology.Invalid
 	}
 
 	// Check ValueSet.
 	res, err := v.termRegistry.ResolveCodeInValueSet(ctx, system, code, binding.ValueSet,
 		terminology.LookupOptions{})
 	if err != nil || res.Resolution == terminology.Unresolved {
-		return false
+		// Undecidable. Reported at CC level rather than per coding, so a
+		// CodeableConcept with several codings yields one issue.
+		return terminology.Unresolved
 	}
 
 	if res.Resolution == terminology.Invalid {
@@ -338,7 +348,7 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 		if binding.Strength == strengthRequired {
 			v.reportBindingViolation(system, code, res.SystemInValueSet, binding, fhirPath, result)
 		}
-		return false
+		return terminology.Invalid
 	}
 
 	// Validate display if not already validated via CodeSystem.
@@ -346,7 +356,41 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 		v.validateDisplayMismatch(system, code, providedDisplay, fhirPath, result)
 	}
 
-	return true
+	return terminology.Valid
+}
+
+// validateCodings validates each Coding of a CodeableConcept and reports what the
+// set as a whole established: whether any is a member, whether anything at all
+// could be decided, and the labels for an aggregate diagnostic.
+func (v *Validator) validateCodings(ctx context.Context, codings []any, binding *registry.Binding, fhirPath string, result *issue.Result) (anyValidInVS, anyDecided bool, codeLabels []string) {
+	for i, c := range codings {
+		codingMap, ok := c.(map[string]any)
+		if !ok {
+			continue
+		}
+		codingPath := fmt.Sprintf("%s.coding[%d]", fhirPath, i)
+
+		// Validate within CC context: suppresses per-coding extensible warnings.
+		switch v.validateCodingInCC(ctx, codingMap, binding, codingPath, result) {
+		case terminology.Valid:
+			anyValidInVS = true
+			anyDecided = true
+		case terminology.Invalid:
+			anyDecided = true
+		case terminology.Unresolved:
+			// Leaves anyDecided alone: nothing was established either way.
+		}
+
+		sys, _ := codingMap["system"].(string)
+		cd, _ := codingMap["code"].(string)
+		switch {
+		case sys != "" && cd != "":
+			codeLabels = append(codeLabels, fmt.Sprintf("%s#%s", sys, cd))
+		case cd != "":
+			codeLabels = append(codeLabels, cd)
+		}
+	}
+	return anyValidInVS, anyDecided, codeLabels
 }
 
 // emitTextOnlyWarning emits a warning for text-only CodeableConcept on extensible bindings.
@@ -381,7 +425,9 @@ func (v *Validator) validateCodeBinding(ctx context.Context, code, system string
 		terminology.LookupOptions{})
 	if err != nil || res.Resolution == terminology.Unresolved {
 		// Undecidable: neither the local copies nor any configured backend could
-		// answer. Not a validation failure.
+		// answer. Whether that is acceptable is a policy decision, not something
+		// this function gets to assume.
+		v.reportUnresolved(code, binding.ValueSet, binding.Strength, fhirPath, result)
 		return
 	}
 
@@ -410,7 +456,12 @@ func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string
 	res, err := v.termRegistry.ResolveCodeInValueSet(ctx, system, code, binding.ValueSet,
 		terminology.LookupOptions{})
 	if err != nil || res.Resolution == terminology.Unresolved {
-		return // undecidable
+		codeDisplay := code
+		if system != "" {
+			codeDisplay = fmt.Sprintf("%s#%s", system, code)
+		}
+		v.reportUnresolved(codeDisplay, binding.ValueSet, binding.Strength, fhirPath, result)
+		return
 	}
 
 	if res.Resolution == terminology.Invalid {
