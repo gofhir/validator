@@ -47,22 +47,26 @@ func TestConstraintValidation(t *testing.T) {
 		},
 		// Nested element constraint tests (pat-1 on Patient.contact).
 		{
-			name:           "invalid-patient-contact-no-details",
-			file:           "../../testdata/m10-constraints/invalid-patient-contact-no-details.json",
-			expectErrors:   1, // pat-1: contact has no name, telecom, address, or organization
-			expectWarnings: 1, // extensible binding on contact.relationship
+			name:         "invalid-patient-contact-no-details",
+			file:         "../../testdata/m10-constraints/invalid-patient-contact-no-details.json",
+			expectErrors: 1, // pat-1: contact has no name, telecom, address, or organization
+			// No binding warning: v2-0131#N is a legitimate member of
+			// patient-contactrelationship, which includes v2-0131 filtered by
+			// is-not-a "O". The warning this used to expect was a false positive from
+			// is-not-a being unimplemented, which left the include expanding to nothing.
+			expectWarnings: 0,
 		},
 		{
 			name:           "valid-patient-contact-with-name",
 			file:           "../../testdata/m10-constraints/valid-patient-contact-with-name.json",
 			expectErrors:   0,
-			expectWarnings: 1, // extensible binding on contact.relationship
+			expectWarnings: 0, // see above: v2-0131#N is a valid member
 		},
 		{
 			name:           "invalid-patient-contact-mixed",
 			file:           "../../testdata/m10-constraints/invalid-patient-contact-mixed.json",
 			expectErrors:   1, // pat-1: second contact has no name/telecom/address/organization
-			expectWarnings: 1, // extensible binding on contact[1].relationship
+			expectWarnings: 0, // see above: v2-0131#N is a valid member
 		},
 		{
 			name:           "invalid-patient-period-start-after-end",

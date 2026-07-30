@@ -2,9 +2,61 @@
 
 > Gaps identified by comparing against YAFV (Node.js FHIR validator).
 > Date: 2026-03-06
-> Updated: 2026-04-10
+> Updated: 2026-07-29
 
 ## Resolved Gaps
+
+### ~~GO-GAP-001~~: ValueSet compose.exclude — RESOLVED
+
+`compose.exclude` is now applied after the includes (`subtractExcluded` in
+`pkg/terminology/terminology.go`). Excluded codes previously passed binding validation — a false
+accept, and an audit of the embedded R4 corpus found **412 of 3237 ValueSets (12.7%)** carry
+exclusions.
+
+The subtraction respects the dual-key representation of an expansion: keys are both `code` and
+`system|code`, the bare form so primitive `code` elements validate without a system. A bare key
+survives while any system still contributes it, so excluding one system's code does not invalidate a
+code another include provides.
+
+Exclusions over systems that cannot be enumerated locally are deliberately ignored rather than
+applied imprecisely; those resolve through the terminology `Provider`/`Authority`.
+
+---
+
+### ~~GO-GAP-002~~: ValueSet Filter Operators — RESOLVED for every operator the base corpus uses
+
+Audited against the embedded R4 packages (core + THO + extensions), counting only filters over
+CodeSystems the registry holds:
+
+| Operator | Base-corpus uses | Status |
+| --- | --- | --- |
+| `is-a` | 1505 | Implemented |
+| `descendent-of` | 17 | Implemented |
+| `=` | 1 | Implemented |
+| `is-not-a` | 1 | Implemented |
+| `not-in` | 1 | Implemented |
+| `in` | 0 | Implemented (dual of `not-in`) |
+| `regex` | 0 locally — 5 uses, all over `urn:iso:std:iso:3166` | Not implemented |
+| `generalizes` | 0 | Not implemented |
+| `exists` | 0 | Not implemented |
+
+Two findings from the audit are worth recording:
+
+- **`is-a` was implementing `descendent-of`.** It never added the concept named by the filter, so the
+  root code of every `is-a` filter was rejected as a non-member. Of the 1515 `is-a` filters, **903**
+  name a selectable root — a false negative each. The other 523 name `notSelectable`/abstract v3
+  grouping concepts, which must stay excluded because an abstract concept "should not be used as a
+  value in an instance"; adding self unconditionally would have traded 903 false rejects for 523 false
+  accepts.
+- **`not-in` filters by property, not by code**, in the only base-corpus use: the `obligation`
+  CodeSystem excludes concepts whose `not-selectable` property is `true`. A concept that omits the
+  property counts as not being in the list.
+
+`regex` and `exists` remain unimplemented on purpose. Every `regex` use in the base corpus targets
+`urn:iso:std:iso:3166`, an external vocabulary that cannot be enumerated locally regardless, and
+`exists` does not appear.
+
+---
 
 ### ~~GO-GAP-008~~: XHTML Structural Validation — RESOLVED (v1.14.0)
 
@@ -16,40 +68,6 @@ See: #51 (Gap 4).
 ---
 
 ## Gaps to Address
-
-### GO-GAP-001: ValueSet compose.exclude Not Implemented
-
-**Priority**: Medium
-**File**: `pkg/terminology/terminology.go`
-
-The `compose.exclude` section is declared in the struct but not used during ValueSet expansion. Codes that should be excluded from the ValueSet are still considered valid.
-
-**Example**: A ValueSet that includes all of SNOMED CT but excludes deprecated concepts will incorrectly validate deprecated codes as valid.
-
-**Fix**: After expanding `compose.include`, filter out codes matching `compose.exclude` criteria.
-
----
-
-### GO-GAP-002: Limited ValueSet Filter Operators
-
-**Priority**: Low-Medium
-**File**: `pkg/terminology/terminology.go`
-
-Only `is-a` and `=` filter operators are implemented. Missing operators:
-
-| Operator | Description | Status |
-|----------|-------------|--------|
-| `is-a` | Hierarchy/subsumedBy | Implemented |
-| `=` | Property equality | Implemented |
-| `descendent-of` | Descendants only (excludes self) | Not implemented |
-| `in` | Value in a set | Not implemented |
-| `not-in` | Value not in a set | Not implemented |
-| `regex` | Regex match on property | Not implemented |
-| `exists` | Property exists/not exists | Not implemented |
-
-**Impact**: Some ValueSets with complex filters cannot be expanded locally and fall back to wildcard acceptance.
-
----
 
 ### GO-GAP-003: No MustSupport Validation
 
@@ -120,17 +138,15 @@ Multiple contained resources with the same `id` are not flagged. This violates t
 ## Implementation Priority
 
 ```text
-Phase 1 - Medium Priority
-  GO-GAP-001: ValueSet compose.exclude
-
-Phase 2 - Low Priority (Feature Parity with YAFV)
-  GO-GAP-002: Additional filter operators
+Phase 1 - Low Priority (Feature Parity with YAFV)
   GO-GAP-003: MustSupport validation
   GO-GAP-006: Duplicate contained ID
   GO-GAP-007: Unreferenced contained resources
 
-Phase 3 - Nice to Have
+Phase 2 - Nice to Have
   GO-GAP-004: Fail-fast mode
   GO-GAP-005: Issue deduplication
   GO-GAP-009: Best practice classification
 ```
+
+Done: GO-GAP-001 (`compose.exclude`) and GO-GAP-002 (filter operators) — see Resolved Gaps above.

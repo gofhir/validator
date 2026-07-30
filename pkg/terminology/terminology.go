@@ -4,6 +4,7 @@ package terminology
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -700,14 +701,25 @@ func (r *Registry) applyFilters(codes map[string]bool, cs *CodeSystem, system st
 	for _, filter := range filters {
 		switch filter.Op {
 		case "is-a":
-			// is-a: Include all codes that are descendants of the filter value
-			// Hierarchy is derived from CodeSystem concept properties (subsumedBy)
+			// The named concept and all its descendants.
 			r.applyIsAFilter(codes, cs, system, filter.Value)
+		case "descendent-of":
+			// Descendants only, excluding the named concept itself.
+			r.applyDescendantsFilter(codes, cs, system, filter.Value)
+		case "is-not-a":
+			// Everything outside the named concept's is-a closure.
+			r.applyIsNotAFilter(codes, cs, system, filter.Value)
 		case "=":
 			// Equality filter on a property
 			r.applyEqualityFilter(codes, cs, system, filter.Property, filter.Value)
+		case "in":
+			r.applyPropertyInFilter(codes, cs, system, filter.Property, filter.Value, true)
+		case "not-in":
+			r.applyPropertyInFilter(codes, cs, system, filter.Property, filter.Value, false)
 		}
-		// Other filter operators (descendent-of, in, not-in, regex, exists) can be added as needed
+		// regex and exists are not implemented. In the R4 base corpus regex appears
+		// only over external vocabularies (urn:iso:std:iso:3166), which cannot be
+		// enumerated locally in any case, and exists does not appear at all.
 	}
 }
 
@@ -725,23 +737,87 @@ func (r *Registry) applyIsAFilter(codes map[string]bool, cs *CodeSystem, system,
 		codes[parentCode] = true
 		codes[system+"|"+parentCode] = true
 	}
+	r.applyDescendantsFilter(codes, cs, system, parentCode)
+}
 
-	// Build or retrieve the hierarchy for this CodeSystem
-	hierarchy := r.getOrBuildHierarchy(cs)
+// applyDescendantsFilter adds the descendants of parentCode, excluding the concept
+// itself — the "descendent-of" operator.
+func (r *Registry) applyDescendantsFilter(codes map[string]bool, cs *CodeSystem, system, parentCode string) {
+	for descendant := range r.descendantsOf(cs, parentCode) {
+		codes[descendant] = true
+		codes[system+"|"+descendant] = true
+	}
+}
 
-	// Recursively add all descendants
-	var addDescendants func(code string)
-	addDescendants = func(code string) {
-		children := hierarchy[code]
-		for _, child := range children {
-			codes[child] = true
-			codes[system+"|"+child] = true
-			addDescendants(child)
+// applyIsNotAFilter adds every concept outside parentCode's is-a closure — the
+// "is-not-a" operator. The closure is the concept plus its descendants, so
+// everything else in the CodeSystem is a member.
+func (r *Registry) applyIsNotAFilter(codes map[string]bool, cs *CodeSystem, system, parentCode string) {
+	closure := r.descendantsOf(cs, parentCode)
+	closure[parentCode] = struct{}{}
+
+	forEachConcept(cs.Concept, func(c *CodeSystemCode) {
+		if _, inClosure := closure[c.Code]; inClosure {
+			return
 		}
+		codes[c.Code] = true
+		codes[system+"|"+c.Code] = true
+	})
+}
+
+// applyPropertyInFilter implements "in" and "not-in": the named property's value
+// is, or is not, among a comma-separated list.
+//
+// A concept that does not carry the property at all counts as not being in the
+// list, so it is a member under "not-in" and not under "in". That is what makes
+// the base corpus's only use of the operator work — obligation excludes concepts
+// whose not-selectable property is true, and most concepts simply omit it.
+func (r *Registry) applyPropertyInFilter(codes map[string]bool, cs *CodeSystem, system, property, value string, want bool) {
+	wanted := make(map[string]struct{})
+	for _, v := range strings.Split(value, ",") {
+		wanted[strings.TrimSpace(v)] = struct{}{}
 	}
 
-	// Start from the parent code
-	addDescendants(parentCode)
+	forEachConcept(cs.Concept, func(c *CodeSystemCode) {
+		got, present := c.propertyValue(property)
+		_, inList := wanted[got]
+		if present && inList != want {
+			return
+		}
+		if !present && want {
+			return
+		}
+		codes[c.Code] = true
+		codes[system+"|"+c.Code] = true
+	})
+}
+
+// descendantsOf returns the transitive descendants of parentCode, excluding it.
+func (r *Registry) descendantsOf(cs *CodeSystem, parentCode string) map[string]struct{} {
+	hierarchy := r.getOrBuildHierarchy(cs)
+	found := make(map[string]struct{})
+
+	var walk func(code string)
+	walk = func(code string) {
+		for _, child := range hierarchy[code] {
+			if _, seen := found[child]; seen {
+				continue // guards against a cyclic subsumedBy chain
+			}
+			found[child] = struct{}{}
+			walk(child)
+		}
+	}
+	walk(parentCode)
+
+	return found
+}
+
+// forEachConcept visits every concept in the tree, nested concepts included.
+func forEachConcept(concepts []CodeSystemCode, visit func(*CodeSystemCode)) {
+	for i := range concepts {
+		visit(&concepts[i])
+		forEachConcept(concepts[i].Concept, visit)
+	}
 }
 
 // applyEqualityFilter adds codes where a property equals a specific value.
@@ -1002,6 +1078,27 @@ func findConcept(concepts []CodeSystemCode, code string) *CodeSystemCode {
 		}
 	}
 	return nil
+}
+
+// propertyValue returns the concept's value for the named property rendered as a
+// string, and whether the property is present at all. Filter values arrive as
+// strings, so a boolean property compares against "true"/"false".
+func (c *CodeSystemCode) propertyValue(name string) (value string, present bool) {
+	for _, p := range c.Property {
+		if p.Code != name {
+			continue
+		}
+		switch {
+		case p.ValueBoolean != nil:
+			return strconv.FormatBool(*p.ValueBoolean), true
+		case p.ValueCode != "":
+			return p.ValueCode, true
+		default:
+			// Present, but of a value type this parser does not model.
+			return "", true
+		}
+	}
+	return "", false
 }
 
 // isSelectable reports whether the concept may be used as a value in an
