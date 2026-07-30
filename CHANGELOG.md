@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.1](https://github.com/gofhir/validator/compare/v1.16.0...v1.16.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* **terminology:** include abstract concepts in an is-a expansion ([#67](https://github.com/gofhir/validator/issues/67)) ([c4a871a](https://github.com/gofhir/validator/commit/c4a871a8ade91544f73f85d0c1cb5aaa800f5744))
+
 ## [1.16.0](https://github.com/gofhir/validator/compare/v1.15.0...v1.16.0) (2026-07-30)
 
 
