@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/gofhir/validator/compare/v1.15.0...v1.16.0) (2026-07-30)
+
+
+### Features
+
+* unify extension binding validation, consume Supports and CodeResult.Message ([#64](https://github.com/gofhir/validator/issues/64)) ([a823061](https://github.com/gofhir/validator/commit/a823061f8cdeb4240dd4e654b905e33e8db29114))
+
 ## [1.15.0](https://github.com/gofhir/validator/compare/v1.14.1...v1.15.0) (2026-07-30)
 
 
