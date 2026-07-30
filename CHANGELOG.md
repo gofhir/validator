@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.0](https://github.com/gofhir/validator/compare/v1.14.1...v1.15.0) (2026-07-30)
+
+
+### Features
+
+* **terminology:** Authority port, provider-first delegation, and conformance fixes ([#62](https://github.com/gofhir/validator/issues/62)) ([62472a8](https://github.com/gofhir/validator/commit/62472a8809c1bf687f6ff0240652fc7b260ab71a))
+
 ## [1.14.1](https://github.com/gofhir/validator/compare/v1.14.0...v1.14.1) (2026-06-29)
 
 
