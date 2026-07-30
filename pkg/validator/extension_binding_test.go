@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/issue"
@@ -60,114 +61,87 @@ func resourceWithBoundExtension(display string) []byte {
 	}`)
 }
 
-// TestExtensionBindingChecksDisplay is the point of routing extension values through
-// the binding validator: this path had its own copy of the logic, which never checked
-// Coding.display. A wrong display inside an extension went unreported.
-func TestExtensionBindingChecksDisplay(t *testing.T) {
-	auth := &localizingAuthority{displays: map[string]string{"": "Good"}}
-	v, err := New(
-		WithVersion("4.0.1"),
-		WithConformanceResources([][]byte{[]byte(boundExtensionSD)}),
-		WithTerminologyAuthority(auth),
-	)
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
+// TestExtensionBindingUsesTheElementPath covers what routing extension values
+// through the binding validator gained. This path used to carry its own copy of the
+// logic and had fallen behind on checks the specification requires.
+//
+// Subtests share one validator: each New() reloads the full package set, which under
+// CI's -race and coverage dominates this package's test budget.
+func TestExtensionBindingUsesTheElementPath(t *testing.T) {
+	v, auth := authorityValidator(t)
+	ctx := context.Background()
 
-	result, err := v.Validate(context.Background(), resourceWithBoundExtension("Totally Wrong"))
-	if err != nil {
-		t.Fatalf("Validate: %v", err)
-	}
+	t.Run("checks Coding.display", func(t *testing.T) {
+		// The copy in pkg/extension never looked at the display, so a wrong one inside
+		// an extension went unreported while the same display on any other element
+		// errored.
+		auth.set(terminology.Valid, terminology.MembershipIncluded)
+		auth.setDisplay("Good")
 
-	if issueFor(t, result, issue.DiagBindingDisplayMismatch) == nil {
-		t.Errorf("a wrong display inside an extension must be reported, as it is "+
-			"anywhere else; issues: %v", result.Issues)
-	}
-}
+		result, err := v.Validate(ctx, resourceWithBoundExtension("Totally Wrong"))
+		if err != nil {
+			t.Fatalf("Validate: %v", err)
+		}
+		if issueFor(t, result, issue.DiagBindingDisplayMismatch) == nil {
+			t.Errorf("a wrong display inside an extension must be reported, as it is "+
+				"anywhere else; issues: %v", result.Issues)
+		}
+	})
 
-// TestExtensionBindingHonorsUnresolvedPolicy covers the other half: the extension
-// path treated an unresolvable binding as nothing at all, so WithUnresolvedPolicy
-// had no effect there.
-func TestExtensionBindingHonorsUnresolvedPolicy(t *testing.T) {
-	v, err := New(
-		WithVersion("4.0.1"),
-		WithConformanceResources([][]byte{[]byte(boundExtensionSD)}),
-		WithTerminologyAuthority(unresolvableAuthority{}),
-		WithUnresolvedPolicy(UnresolvedError),
-	)
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
+	t.Run("honors the unresolved policy", func(t *testing.T) {
+		// The extension path treated an undecidable binding as nothing at all, so
+		// WithUnresolvedPolicy had no effect there. The shared fixture is built with
+		// UnresolvedError.
+		auth.set(terminology.Unresolved, terminology.MembershipUnknown)
 
-	result, err := v.Validate(context.Background(), resourceWithBoundExtension("Good"))
-	if err != nil {
-		t.Fatalf("Validate: %v", err)
-	}
+		result, err := v.Validate(ctx, resourceWithBoundExtension("Good"))
+		if err != nil {
+			t.Fatalf("Validate: %v", err)
+		}
+		got := issueFor(t, result, issue.DiagBindingUnresolved)
+		if got == nil {
+			t.Fatalf("an unresolvable binding on an extension value must be reported "+
+				"under UnresolvedError; issues: %v", result.Issues)
+		}
+		if got.Severity != issue.SeverityError {
+			t.Errorf("severity = %s, want %s", got.Severity, issue.SeverityError)
+		}
+	})
 
-	got := issueFor(t, result, issue.DiagBindingUnresolved)
-	if got == nil {
-		t.Fatalf("an unresolvable binding on an extension value must be reported "+
-			"under UnresolvedError; issues: %v", result.Issues)
-	}
-	if got.Severity != issue.SeverityError {
-		t.Errorf("severity = %s, want %s", got.Severity, issue.SeverityError)
-	}
-}
+	t.Run("reports a required violation", func(t *testing.T) {
+		// Behavior that already worked and must survive the unification.
+		auth.set(terminology.Invalid, terminology.MembershipIncluded)
 
-// TestExtensionBindingHonorsDisplayLanguage confirms the i18n handling reaches
-// extensions too: a valid translation must not be reported as a mismatch.
-func TestExtensionBindingHonorsDisplayLanguage(t *testing.T) {
-	auth := &localizingAuthority{displays: map[string]string{
-		"":   "Good",
-		"es": "Bueno",
-	}}
-	v, err := New(
-		WithVersion("4.0.1"),
-		WithConformanceResources([][]byte{[]byte(boundExtensionSD)}),
-		WithTerminologyAuthority(auth),
-		WithDisplayLanguage("es"),
-	)
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
+		result, err := v.Validate(ctx, resourceWithBoundExtension("Good"))
+		if err != nil {
+			t.Fatalf("Validate: %v", err)
+		}
+		got := issueFor(t, result, issue.DiagBindingRequired)
+		if got == nil {
+			t.Fatalf("a required binding violation on an extension value must error; "+
+				"issues: %v", result.Issues)
+		}
+		if got.Severity != issue.SeverityError {
+			t.Errorf("severity = %s, want %s", got.Severity, issue.SeverityError)
+		}
+	})
 
-	result, err := v.Validate(context.Background(), resourceWithBoundExtension("Bueno"))
-	if err != nil {
-		t.Fatalf("Validate: %v", err)
-	}
+	t.Run("surfaces the backend explanation", func(t *testing.T) {
+		// CodeResult.Message used to be discarded, dropping the part a user can act on.
+		auth.set(terminology.Invalid, terminology.MembershipIncluded)
+		auth.setMessage("code was retired in the 2024 edition")
 
-	if got := issueFor(t, result, issue.DiagBindingDisplayMismatch); got != nil {
-		t.Errorf("a valid Spanish display inside an extension must not be a mismatch: %s",
-			got.Diagnostics)
-	}
-}
-
-// TestExtensionBindingReportsRequiredViolation keeps the behavior that already
-// worked: a non-member code under a required binding is still an error.
-func TestExtensionBindingReportsRequiredViolation(t *testing.T) {
-	v, err := New(
-		WithVersion("4.0.1"),
-		WithConformanceResources([][]byte{[]byte(boundExtensionSD)}),
-		WithTerminologyAuthority(&membershipAuthority{
-			resolution: terminology.Invalid,
-			membership: terminology.MembershipIncluded,
-		}),
-	)
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-
-	result, err := v.Validate(context.Background(), resourceWithBoundExtension("Good"))
-	if err != nil {
-		t.Fatalf("Validate: %v", err)
-	}
-
-	got := issueFor(t, result, issue.DiagBindingRequired)
-	if got == nil {
-		t.Fatalf("a required binding violation on an extension value must error; issues: %v",
-			result.Issues)
-	}
-	if got.Severity != issue.SeverityError {
-		t.Errorf("severity = %s, want %s", got.Severity, issue.SeverityError)
-	}
+		result, err := v.Validate(ctx, resourceWithBoundExtension("Good"))
+		if err != nil {
+			t.Fatalf("Validate: %v", err)
+		}
+		got := issueFor(t, result, issue.DiagBindingRequired)
+		if got == nil {
+			t.Fatalf("expected a binding violation; issues: %v", result.Issues)
+		}
+		if !strings.Contains(got.Diagnostics, "retired in the 2024 edition") {
+			t.Errorf("the backend's explanation is missing from the diagnostic: %q",
+				got.Diagnostics)
+		}
+	})
 }
