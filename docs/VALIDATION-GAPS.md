@@ -148,14 +148,35 @@ Multiple contained resources with the same `id` are not flagged. This violates t
 
 ---
 
-### GO-GAP-009: Best Practice Constraint Classification
+### GO-GAP-009: Best-Practice Constraint Severity Is Not Configurable
 
 **Priority**: Low
 **File**: `pkg/constraint/constraint.go`
 
-`isBestPractice()` always returns `false`. All constraints are evaluated equally. HAPI validator distinguishes best-practice constraints and allows users to configure their severity (error, warning, or ignore).
+Restated after verifying against the code — the previous description of this gap was wrong
+in both halves.
 
-**Fix**: Detect best-practice constraints (those with `expression` starting with `%` or tagged in spec) and make their severity configurable.
+**What is already there.** Best-practice constraints *are* recognised, just not through
+`isBestPractice`. `addConstraintViolation` reads `constraint.severity` from the
+ElementDefinition: a `warning` constraint is reported as a warning and labelled
+"(Best Practice Recommendation)", an `error` constraint as an error. So `dom-6` already
+comes out as a warning rather than an error, and the earlier claim that "all constraints
+are evaluated equally" was inaccurate.
+
+**What `isBestPractice` actually is.** Not an unfinished stub. Its comment records a
+deliberate decision — *"All FHIR spec constraints are now evaluated - none are skipped"* —
+taken once `dom-3` worked on fhirpath v1.0.2. It returns `false` so that nothing is
+skipped, which is the intended behaviour, not a missing implementation.
+
+**What is genuinely missing.** Only configurability. HAPI lets an operator raise or lower
+best-practice severity, or ignore those constraints outright; we always follow the
+severity the specification declares.
+
+**Fix**: an option along the lines of `WithBestPracticeSeverity(error|warning|ignore)`,
+applied where `addConstraintViolation` reads `constraint.severity`. Note the heuristic the
+previous version of this entry proposed — expressions starting with `%` — does not identify
+best-practice constraints; `constraint.severity` is what does, and it is already being
+read.
 
 ---
 
@@ -170,7 +191,13 @@ Phase 1 - Low Priority (Feature Parity with YAFV)
 Phase 2 - Nice to Have
   GO-GAP-004: Fail-fast mode
   GO-GAP-005: Issue deduplication
-  GO-GAP-009: Best practice classification
+  GO-GAP-009: Configurable best-practice severity
 ```
 
-Done: GO-GAP-001 (`compose.exclude`) and GO-GAP-002 (filter operators) — see Resolved Gaps above.
+Done: GO-GAP-001 (`compose.exclude`), GO-GAP-002 (filter operators) and version-aware
+resolution — see Resolved Gaps above.
+
+> Every entry below "Gaps to Address" was verified against the code on 2026-07-30. GO-GAP-003
+> through GO-GAP-007 are real and unimplemented; GO-GAP-009 was restated, since its previous
+> description claimed behaviour that already works. Verifying beats trusting this file: two
+> entries had drifted into claiming the opposite of what the code did.
