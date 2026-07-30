@@ -1,6 +1,9 @@
 package terminology
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 // Filter operators beyond is-a and =, as used by the R4 base corpus:
 // descendent-of (17 includes), is-not-a (1) and not-in (1).
@@ -408,4 +411,85 @@ func TestHierarchyCacheIsScopedByVersion(t *testing.T) {
 	if isAOver("2.0.0")[system+"|b"] {
 		t.Error(`in v2, "b" is not under "a"; the v1 hierarchy was reused`)
 	}
+}
+
+// TestCodingVersionSelectsTheCodeSystem covers Coding.version: a code can exist in
+// one version of a CodeSystem and be absent from another, so a Coding that declares
+// a version must be checked against that version.
+func TestCodingVersionSelectsTheCodeSystem(t *testing.T) {
+	const system = "http://example.org/CodeSystem/lab-status"
+
+	r := NewRegistry()
+	v1 := &CodeSystem{
+		URL: system, Version: "1.0.0",
+		Concept: []CodeSystemCode{{Code: "pending", Display: "Pending"}},
+	}
+	v2 := &CodeSystem{
+		URL: system, Version: "2.0.0",
+		Concept: []CodeSystemCode{{Code: "waiting", Display: "Waiting"}},
+	}
+	r.codeSystems[system] = v2
+	r.codeSystemsByVersion[system+"|1.0.0"] = v1
+	r.codeSystemsByVersion[system+"|2.0.0"] = v2
+
+	ctx := context.Background()
+
+	// "pending" exists only in 1.0.0.
+	res, err := r.ResolveCodeInCodeSystem(ctx, system, "pending", LookupOptions{SystemVersion: "1.0.0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Resolution != Valid {
+		t.Errorf(`"pending" is in 1.0.0; got %v`, res.Resolution)
+	}
+	if res.Display != "Pending" {
+		t.Errorf("display = %q, want %q: the display must come from the requested version",
+			res.Display, "Pending")
+	}
+
+	res, err = r.ResolveCodeInCodeSystem(ctx, system, "pending", LookupOptions{SystemVersion: "2.0.0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Resolution != Invalid {
+		t.Errorf(`"pending" was removed in 2.0.0, so it must be Invalid there; got %v`, res.Resolution)
+	}
+
+	// Without a declared version, the current one answers.
+	res, err = r.ResolveCodeInCodeSystem(ctx, system, "waiting", LookupOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Resolution != Valid {
+		t.Errorf(`"waiting" is in the current version; got %v`, res.Resolution)
+	}
+}
+
+// TestCodingVersionDoesNotBreakExternalSystems guards the plumbing: the versioned
+// canonical must not leak into the external-system check or into provider calls,
+// which are about the system itself.
+func TestCodingVersionDoesNotBreakExternalSystems(t *testing.T) {
+	r := NewRegistry()
+	seen := ""
+	r.SetProvider(&recordingSystemProvider{onValidate: func(system string) { seen = system }})
+
+	_, _ = r.ResolveCodeInCodeSystem(context.Background(), externalSystem, "73211009",
+		LookupOptions{SystemVersion: "20240301"})
+
+	if seen != externalSystem {
+		t.Errorf("provider saw system %q, want %q: the version must not be appended", seen, externalSystem)
+	}
+}
+
+type recordingSystemProvider struct {
+	onValidate func(system string)
+}
+
+func (p *recordingSystemProvider) ValidateCode(_ context.Context, system, _ string) (bool, error) {
+	p.onValidate(system)
+	return true, nil
+}
+
+func (p *recordingSystemProvider) ValidateCodeInValueSet(_ context.Context, _, _, _ string) (valid, found bool, err error) {
+	return true, true, nil
 }

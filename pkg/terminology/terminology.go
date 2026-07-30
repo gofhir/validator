@@ -1111,7 +1111,14 @@ func (r *Registry) ResolveCodeInCodeSystem(ctx context.Context, system, code str
 		return a.ResolveCodeInCodeSystem(ctx, system, code, opts)
 	}
 
-	valid, found := r.validateCodeInCodeSystemLocally(ctx, system, code)
+	// A declared Coding.version asks to be checked against that version of the
+	// CodeSystem, which the canonical form selects.
+	lookupSystem := system
+	if opts.SystemVersion != "" {
+		lookupSystem = canonicalOf(system, opts.SystemVersion)
+	}
+
+	valid, found := r.validateCodeInCodeSystemLocally(ctx, lookupSystem, code)
 	res := localCodeResult(valid, found)
 
 	// Carry the display so callers can validate a Coding.display without a second
@@ -1120,7 +1127,7 @@ func (r *Registry) ResolveCodeInCodeSystem(ctx context.Context, system, code str
 	// skip the comparison instead of checking a submitted translation against
 	// English.
 	if res.Resolution == Valid {
-		if display, ok := r.GetDisplayForCode(system, code); ok {
+		if display, ok := r.GetDisplayForCode(lookupSystem, code); ok {
 			res.Display = display
 			res.DisplayLanguageHonored = opts.DisplayLanguage == ""
 		}
@@ -1135,10 +1142,14 @@ func (r *Registry) validateCodeInCodeSystemLocally(ctx context.Context, system, 
 		return false, false
 	}
 
+	// The system may arrive as a versioned canonical; external-system membership and
+	// provider calls are about the system itself, not a version of it.
+	bareSystem, _ := splitCanonical(system)
+
 	// Check if this is an external system we can't validate locally
-	if r.isExternalSystem(system) {
+	if r.isExternalSystem(bareSystem) {
 		if p := r.getProvider(); p != nil {
-			valid, err := p.ValidateCode(ctx, system, code)
+			valid, err := p.ValidateCode(ctx, bareSystem, code)
 			if err == nil {
 				return valid, true
 			}
@@ -1152,7 +1163,7 @@ func (r *Registry) validateCodeInCodeSystemLocally(ctx context.Context, system, 
 		// instance a CodeSystem authored over a REST API after this registry was
 		// populated.
 		if p := r.getProvider(); p != nil {
-			if valid, err := p.ValidateCode(ctx, system, code); err == nil {
+			if valid, err := p.ValidateCode(ctx, bareSystem, code); err == nil {
 				return valid, true
 			}
 		}

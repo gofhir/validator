@@ -108,6 +108,15 @@ func (p UnresolvedPolicy) String() string {
 type LookupOptions struct {
 	// DisplayLanguage is a BCP-47 language tag. Empty means no preference.
 	DisplayLanguage string
+
+	// SystemVersion is the CodeSystem version the code was authored against,
+	// taken from Coding.version. Empty means no preference, in which case the
+	// backend resolves whichever version it considers current.
+	//
+	// A code can be valid in one version of a CodeSystem and absent from another,
+	// so a Coding that declares a version is asking to be checked against that
+	// version specifically.
+	SystemVersion string
 }
 
 // CodeResult answers a single coded-element question.

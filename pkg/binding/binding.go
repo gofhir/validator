@@ -332,13 +332,14 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 	providedDisplay, _ := coding["display"].(string)
+	systemVersion, _ := coding["version"].(string)
 
 	if code == "" {
 		return terminology.Unresolved
 	}
 
 	// Validate code in CodeSystem (warnings still emitted per-coding).
-	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(ctx, system, code, providedDisplay, fhirPath, result)
+	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
 	if shouldReturn {
 		// The code is invalid in its own CodeSystem, already reported as an error.
 		return terminology.Invalid
@@ -363,7 +364,7 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 
 	// Validate display if not already validated via CodeSystem.
 	if !codeValidInCS && providedDisplay != "" && system != "" {
-		v.validateDisplayMismatch(ctx, system, code, providedDisplay, fhirPath, result)
+		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
 	}
 
 	return terminology.Valid
@@ -451,13 +452,14 @@ func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 	providedDisplay, _ := coding["display"].(string)
+	systemVersion, _ := coding["version"].(string)
 
 	if code == "" {
 		return // Empty code is handled elsewhere
 	}
 
 	// Validate code exists in CodeSystem and check display
-	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(ctx, system, code, providedDisplay, fhirPath, result)
+	codeValidInCS, shouldReturn := v.validateCodeInCodeSystem(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
 	if shouldReturn {
 		return
 	}
@@ -481,18 +483,28 @@ func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string
 
 	// Validate display if not already validated via CodeSystem
 	if !codeValidInCS && providedDisplay != "" && system != "" {
-		v.validateDisplayMismatch(ctx, system, code, providedDisplay, fhirPath, result)
+		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
 	}
 }
 
 // validateCodeInCodeSystem validates a code exists in its CodeSystem and checks display.
 // Returns (codeValidInCS, shouldReturn) where shouldReturn indicates validation should stop.
-func (v *Validator) validateCodeInCodeSystem(ctx context.Context, system, code, providedDisplay, fhirPath string, result *issue.Result) (codeValidInCS, shouldReturn bool) {
+//
+// The systemVersion argument is Coding.version when the data declared one. A code
+// can exist in one version of a CodeSystem and not another, so a declared version
+// is checked against rather than ignored.
+func (v *Validator) validateCodeInCodeSystem(ctx context.Context, system, systemVersion, code, providedDisplay, fhirPath string, result *issue.Result) (codeValidInCS, shouldReturn bool) {
 	if system == "" {
 		return false, false
 	}
 
-	codeValid, csFound := v.termRegistry.ValidateCodeInCodeSystemContext(ctx, system, code)
+	res, err := v.termRegistry.ResolveCodeInCodeSystem(ctx, system, code,
+		terminology.LookupOptions{SystemVersion: systemVersion})
+	if err != nil {
+		return false, false
+	}
+	codeValid := res.Resolution == terminology.Valid
+	csFound := res.Resolution != terminology.Unresolved
 	if !csFound {
 		result.AddWarningWithID(
 			issue.DiagCodeSystemNotFound,
@@ -513,7 +525,7 @@ func (v *Validator) validateCodeInCodeSystem(ctx context.Context, system, code, 
 
 	// Validate display if provided (HL7 is case-insensitive)
 	if providedDisplay != "" {
-		v.validateDisplayMismatch(ctx, system, code, providedDisplay, fhirPath, result)
+		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
 	}
 
 	return true, false
@@ -531,9 +543,11 @@ func (v *Validator) validateCodeInCodeSystem(ctx context.Context, system, code, 
 // against the English one and rejected, which is a validator bug rather than a
 // data problem. Concretely: when a display language is requested and the backend
 // could not honor it, there is nothing to compare against.
-func (v *Validator) validateDisplayMismatch(ctx context.Context, system, code, providedDisplay, fhirPath string, result *issue.Result) {
-	res, err := v.termRegistry.ResolveCodeInCodeSystem(ctx, system, code,
-		terminology.LookupOptions{DisplayLanguage: v.displayLanguage})
+func (v *Validator) validateDisplayMismatch(ctx context.Context, system, systemVersion, code, providedDisplay, fhirPath string, result *issue.Result) {
+	res, err := v.termRegistry.ResolveCodeInCodeSystem(ctx, system, code, terminology.LookupOptions{
+		DisplayLanguage: v.displayLanguage,
+		SystemVersion:   systemVersion,
+	})
 	if err != nil || res.Display == "" {
 		return
 	}
