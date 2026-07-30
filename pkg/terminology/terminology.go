@@ -833,10 +833,22 @@ func (r *Registry) applyFilters(codes map[string]bool, cs *CodeSystem, system st
 // the provided concept itself ("include descendant codes and self"), unlike
 // "descendent-of" which excludes it. Self is added only when the CodeSystem
 // actually defines the code — an is-a naming an absent concept must not mint a
-// member — and only when the concept is selectable: notSelectable/abstract
-// concepts belong to the value set but must not appear as instance values.
+// member.
+//
+// Abstract and notSelectable concepts are included. An expansion answers one
+// question — is this code a member of the value set — and an abstract concept
+// reached by is-a is a member. Whether it is appropriate as an instance value is a
+// separate question about the concept, and the specification frames it as
+// "should not be used as a value in an instance": a recommendation, not a
+// conformance rule. Filtering them out here answered the second question inside
+// the first, which produced binding warnings the HL7 validator does not produce —
+// verified against validator_cli 6.9.12 on AuditEvent.purposeOfEvent, where it
+// reports nothing for the abstract PurposeOfUse and we reported a warning.
+//
+// Reporting abstract use, if wanted, belongs in a check of its own at
+// informational severity, not in the membership answer.
 func (r *Registry) applyIsAFilter(codes map[string]bool, cs *CodeSystem, system, parentCode string) {
-	if self := findConcept(cs.Concept, parentCode); self != nil && self.isSelectable() {
+	if findConcept(cs.Concept, parentCode) != nil {
 		codes[parentCode] = true
 		codes[system+"|"+parentCode] = true
 	}
@@ -1236,21 +1248,6 @@ func (c *CodeSystemCode) propertyValue(name string) (value string, present bool)
 		}
 	}
 	return "", false
-}
-
-// isSelectable reports whether the concept may be used as a value in an
-// instance. Concepts flagged notSelectable (the v3 CodeSystem convention) or
-// abstract group other concepts and must not themselves appear in data.
-func (c *CodeSystemCode) isSelectable() bool {
-	for _, p := range c.Property {
-		if p.Code != "notSelectable" && p.Code != "abstract" {
-			continue
-		}
-		if p.ValueBoolean != nil && *p.ValueBoolean {
-			return false
-		}
-	}
-	return true
 }
 
 // splitCanonical splits "url|version" into its parts. The version is empty when

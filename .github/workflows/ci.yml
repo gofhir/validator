@@ -26,6 +26,11 @@ jobs:
         uses: golangci/golangci-lint-action@v7
         with:
           version: v2.11.3
+          # Skip `golangci-lint config verify`, which downloads a JSON schema from
+          # golangci-lint.run before any code is analysed. That request timed out and
+          # failed the job with 0 findings, so a network hiccup at their host could
+          # block a merge. The config is validated by the linter itself when it runs.
+          verify: false
 
   test:
     name: Test

@@ -43,11 +43,17 @@ CodeSystems the registry holds:
 Two findings from the audit are worth recording:
 
 - **`is-a` was implementing `descendent-of`.** It never added the concept named by the filter, so the
-  root code of every `is-a` filter was rejected as a non-member. Of the 1515 `is-a` filters, **903**
-  name a selectable root — a false negative each. The other 523 name `notSelectable`/abstract v3
-  grouping concepts, which must stay excluded because an abstract concept "should not be used as a
-  value in an instance"; adding self unconditionally would have traded 903 false rejects for 523 false
-  accepts.
+  root code of every `is-a` filter was rejected as a non-member — a false negative in each of the 1515
+  `is-a` filters in the corpus.
+- **Abstract roots are included, and that was corrected against the reference.** The first fix filtered
+  `notSelectable`/abstract concepts out of the expansion, reasoning from the spec's "should not be used
+  as a value in an instance". Comparing against HL7 `validator_cli` 6.9.12 showed that is wrong: on
+  `AuditEvent.purposeOfEvent` (extensible to `v3-PurposeOfUse`, whose is-a root `PurposeOfUse` is
+  notSelectable and not excluded) the reference reports nothing and we reported a binding warning.
+  An expansion answers membership; "should not" is a recommendation, not a conformance rule. The filter
+  was removed. Of the 521 is-a filters with an abstract root, **390 also exclude that root explicitly**,
+  so `compose.exclude` keeps them out without the expansion judging selectability; the remaining 133
+  were where the false positive lived.
 - **`not-in` filters by property, not by code**, in the only base-corpus use: the `obligation`
   CodeSystem excludes concepts whose `not-selectable` property is `true`. A concept that omits the
   property counts as not being in the list.

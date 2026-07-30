@@ -1,0 +1,16 @@
+{
+  "resourceType": "Patient",
+  "id": "extension-value-binding",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">data-absent-reason on a primitive, with a code outside its required binding</div>"
+  },
+  "_birthDate": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+        "valueCode": "not-a-real-absent-reason"
+      }
+    ]
+  }
+}
