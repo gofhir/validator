@@ -204,3 +204,208 @@ func TestDescendantsOfSurvivesCyclicHierarchy(t *testing.T) {
 		t.Error(`"b" is subsumed by "a" and should be a member`)
 	}
 }
+
+// TestUnheldIncludeVersionFallsBack covers the published corpus: 441 of its
+// include/exclude entries carry a version and only 3 match the CodeSystem shipped
+// alongside them — the v2 ValueSets in hl7.terminology request "2.0.0" of
+// CodeSystems that same package ships at "3.0.0". Resolving nothing would make 433
+// includes unexpandable, so an unheld version falls back to the one held.
+func TestUnheldIncludeVersionFallsBack(t *testing.T) {
+	const system = "http://terminology.hl7.org/CodeSystem/v2-0155"
+
+	r := NewRegistry()
+	held := &CodeSystem{
+		URL:     system,
+		Version: "3.0.0",
+		Concept: []CodeSystemCode{{Code: "AL"}, {Code: "NE"}},
+	}
+	r.codeSystems[system] = held
+	r.codeSystemsByVersion[system+"|3.0.0"] = held
+
+	vs := &ValueSet{
+		URL: "http://terminology.hl7.org/ValueSet/v2-0155",
+		Compose: Compose{Include: []Include{{
+			System:  system,
+			Version: "2.0.0", // not loaded; the corpus asks for it anyway
+		}}},
+	}
+	r.valueSets[vs.URL] = vs
+
+	if valid, found := r.ValidateCode(vs.URL, system, "AL"); !found || !valid {
+		t.Error("an unheld version must fall back rather than make the include unexpandable")
+	}
+	if r.CodeSystemVersionMatches(system, "2.0.0") {
+		t.Error("the fallback must remain distinguishable from an exact match")
+	}
+}
+
+// TestIncludeVersionResolvesExactVersion covers the case the corpus does not
+// exercise but a loaded IG can: when the requested version is held, it is the one
+// expanded from.
+func TestIncludeVersionResolvesExactVersion(t *testing.T) {
+	const system = "http://example.org/CodeSystem/versioned"
+
+	r := NewRegistry()
+	old := &CodeSystem{
+		URL: system, Version: "1.0.0",
+		Concept: []CodeSystemCode{{Code: "only-in-v1"}},
+	}
+	current := &CodeSystem{
+		URL: system, Version: "2.0.0",
+		Concept: []CodeSystemCode{{Code: "only-in-v2"}},
+	}
+	r.codeSystems[system] = current // unversioned lookups get the newer one
+	r.codeSystemsByVersion[system+"|1.0.0"] = old
+	r.codeSystemsByVersion[system+"|2.0.0"] = current
+
+	vs := &ValueSet{
+		URL: "http://example.org/ValueSet/pinned-to-v1",
+		Compose: Compose{Include: []Include{{
+			System:  system,
+			Version: "1.0.0",
+		}}},
+	}
+	r.valueSets[vs.URL] = vs
+
+	codes := r.expandValueSet(vs)
+	if !codes[system+"|only-in-v1"] {
+		t.Error("the requested version was loaded, so its codes must be the ones expanded")
+	}
+	if codes[system+"|only-in-v2"] {
+		t.Error("a version was pinned; codes from another version must not leak in")
+	}
+}
+
+// TestCodeSystemVersionMatchesReportsFallback makes the fallback observable rather
+// than silent, so a caller can tell an exact match from a substitution.
+func TestCodeSystemVersionMatchesReportsFallback(t *testing.T) {
+	const system = "http://example.org/CodeSystem/versioned"
+
+	r := NewRegistry()
+	held := &CodeSystem{URL: system, Version: "3.0.0"}
+	r.codeSystems[system] = held
+	r.codeSystemsByVersion[system+"|3.0.0"] = held
+
+	if !r.CodeSystemVersionMatches(system, "3.0.0") {
+		t.Error("the held version must report as a match")
+	}
+	if r.CodeSystemVersionMatches(system, "2.0.0") {
+		t.Error("a version that was not loaded must not report as a match")
+	}
+	if !r.CodeSystemVersionMatches(system, "") {
+		t.Error("no requested version is trivially a match")
+	}
+
+	// The fallback still resolves, so expansion is possible.
+	if got := r.GetCodeSystemVersion(system, "2.0.0"); got != held {
+		t.Error("an unheld version must fall back to the one held, not resolve nothing")
+	}
+}
+
+// TestVersionedCanonicalResolvesExactly checks the accessors used by callers that
+// pass a "url|version" canonical rather than a separate version.
+func TestVersionedCanonicalResolvesExactly(t *testing.T) {
+	const url = "http://example.org/ValueSet/v"
+
+	r := NewRegistry()
+	v1 := &ValueSet{URL: url, Version: "1.0.0"}
+	v2 := &ValueSet{URL: url, Version: "2.0.0"}
+	r.valueSets[url] = v2
+	r.valueSetsByVersion[url+"|1.0.0"] = v1
+	r.valueSetsByVersion[url+"|2.0.0"] = v2
+
+	if got := r.GetValueSet(url + "|1.0.0"); got != v1 {
+		t.Error("a versioned canonical must resolve to that exact version when loaded")
+	}
+	if got := r.GetValueSet(url); got != v2 {
+		t.Error("an unversioned lookup resolves to the version held")
+	}
+	if got := r.GetValueSet(url + "|9.9.9"); got != v2 {
+		t.Error("an unheld version falls back rather than resolving nothing")
+	}
+}
+
+// TestExpansionCacheIsScopedByVersion guards the hole that made version-aware
+// resolution illusory: the expansion cache was keyed by the version-stripped URL,
+// so a lookup against one version could be answered from another's expansion.
+func TestExpansionCacheIsScopedByVersion(t *testing.T) {
+	const system = "http://example.org/CodeSystem/cs"
+	const vsURL = "http://example.org/ValueSet/vs"
+
+	r := NewRegistry()
+
+	csV1 := &CodeSystem{URL: system, Version: "1.0.0", Concept: []CodeSystemCode{{Code: "old"}}}
+	csV2 := &CodeSystem{URL: system, Version: "2.0.0", Concept: []CodeSystemCode{{Code: "new"}}}
+	r.codeSystems[system] = csV2
+	r.codeSystemsByVersion[system+"|1.0.0"] = csV1
+	r.codeSystemsByVersion[system+"|2.0.0"] = csV2
+
+	vsV1 := &ValueSet{
+		URL: vsURL, Version: "1.0.0",
+		Compose: Compose{Include: []Include{{System: system, Version: "1.0.0"}}},
+	}
+	vsV2 := &ValueSet{
+		URL: vsURL, Version: "2.0.0",
+		Compose: Compose{Include: []Include{{System: system, Version: "2.0.0"}}},
+	}
+	r.valueSets[vsURL] = vsV2
+	r.valueSetsByVersion[vsURL+"|1.0.0"] = vsV1
+	r.valueSetsByVersion[vsURL+"|2.0.0"] = vsV2
+
+	// Warm the cache with v1, then ask v2. A shared cache entry would answer the
+	// second question with the first expansion.
+	if valid, _ := r.ValidateCode(vsURL+"|1.0.0", system, "old"); !valid {
+		t.Fatal(`"old" is a member of the v1 ValueSet`)
+	}
+	if valid, _ := r.ValidateCode(vsURL+"|2.0.0", system, "new"); !valid {
+		t.Error(`"new" is a member of the v2 ValueSet; the v1 expansion must not answer for it`)
+	}
+	if valid, _ := r.ValidateCode(vsURL+"|2.0.0", system, "old"); valid {
+		t.Error(`"old" is not in the v2 ValueSet; the cached v1 expansion leaked`)
+	}
+}
+
+// TestHierarchyCacheIsScopedByVersion covers the same hazard for is-a filters: two
+// versions of a CodeSystem can have different hierarchies.
+func TestHierarchyCacheIsScopedByVersion(t *testing.T) {
+	const system = "http://example.org/CodeSystem/tree"
+
+	r := NewRegistry()
+
+	// In v1, "b" is under "a". In v2 it is not.
+	csV1 := &CodeSystem{
+		URL: system, Version: "1.0.0",
+		Concept: []CodeSystemCode{
+			{Code: "a"},
+			{Code: "b", Property: []CodeSystemProperty{{Code: "subsumedBy", ValueCode: "a"}}},
+		},
+	}
+	csV2 := &CodeSystem{
+		URL: system, Version: "2.0.0",
+		Concept: []CodeSystemCode{{Code: "a"}, {Code: "b"}},
+	}
+	r.codeSystems[system] = csV2
+	r.codeSystemsByVersion[system+"|1.0.0"] = csV1
+	r.codeSystemsByVersion[system+"|2.0.0"] = csV2
+
+	isAOver := func(csVersion string) map[string]bool {
+		vs := &ValueSet{
+			URL:     "http://example.org/ValueSet/isa-" + csVersion,
+			Version: csVersion,
+			Compose: Compose{Include: []Include{{
+				System:  system,
+				Version: csVersion,
+				Filter:  []Filter{{Property: "concept", Op: "is-a", Value: "a"}},
+			}}},
+		}
+		r.valueSets[vs.URL] = vs
+		return r.expandValueSet(vs)
+	}
+
+	if !isAOver("1.0.0")[system+"|b"] {
+		t.Fatal(`in v1, "b" is subsumed by "a"`)
+	}
+	if isAOver("2.0.0")[system+"|b"] {
+		t.Error(`in v2, "b" is not under "a"; the v1 hierarchy was reused`)
+	}
+}

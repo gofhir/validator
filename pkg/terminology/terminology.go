@@ -30,6 +30,9 @@ type Compose struct {
 }
 
 // Include defines a set of codes to include/exclude.
+//
+// Version is parsed but deliberately not used to select a CodeSystem. See
+// expandFromCodeSystem for why.
 type Include struct {
 	System   string    `json:"system,omitempty"`
 	Version  string    `json:"version,omitempty"`
@@ -82,9 +85,17 @@ type CodeSystemProperty struct {
 
 // Registry holds loaded ValueSets and CodeSystems indexed by URL.
 type Registry struct {
-	mu          sync.RWMutex
+	mu sync.RWMutex
+	// valueSets and codeSystems are keyed by canonical URL and hold whichever
+	// version was loaded last, which is what an unversioned lookup resolves to.
 	valueSets   map[string]*ValueSet
 	codeSystems map[string]*CodeSystem
+	// valueSetsByVersion and codeSystemsByVersion are keyed "url|version", so a
+	// versioned request resolves to that exact version when it was loaded. Without
+	// these a canonical could only ever have one version, and honoring a requested
+	// version was impossible rather than merely unimplemented.
+	valueSetsByVersion   map[string]*ValueSet
+	codeSystemsByVersion map[string]*CodeSystem
 
 	// Cache of expanded ValueSets (URL -> set of valid codes)
 	expansionCache map[string]map[string]bool
@@ -132,13 +143,15 @@ const DefaultUnresolvedCacheTTL = 5 * time.Second
 // NewRegistry creates a new terminology Registry.
 func NewRegistry() *Registry {
 	return &Registry{
-		valueSets:      make(map[string]*ValueSet),
-		codeSystems:    make(map[string]*CodeSystem),
-		expansionCache: make(map[string]map[string]bool),
-		hierarchyCache: make(map[string]map[string][]string),
-		unresolved:     make(map[string]time.Time),
-		unresolvedTTL:  DefaultUnresolvedCacheTTL,
-		now:            time.Now,
+		valueSets:            make(map[string]*ValueSet),
+		codeSystems:          make(map[string]*CodeSystem),
+		valueSetsByVersion:   make(map[string]*ValueSet),
+		codeSystemsByVersion: make(map[string]*CodeSystem),
+		expansionCache:       make(map[string]map[string]bool),
+		hierarchyCache:       make(map[string]map[string][]string),
+		unresolved:           make(map[string]time.Time),
+		unresolvedTTL:        DefaultUnresolvedCacheTTL,
+		now:                  time.Now,
 	}
 }
 
@@ -243,22 +256,9 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 			switch peek.ResourceType {
 			case "ValueSet":
-				var vs ValueSet
-				if err := json.Unmarshal(data, &vs); err != nil {
-					continue
-				}
-				if vs.URL != "" {
-					r.valueSets[vs.URL] = &vs
-				}
-
+				r.indexValueSetUnlocked(data)
 			case "CodeSystem":
-				var cs CodeSystem
-				if err := json.Unmarshal(data, &cs); err != nil {
-					continue
-				}
-				if cs.URL != "" {
-					r.codeSystems[cs.URL] = &cs
-				}
+				r.indexCodeSystemUnlocked(data)
 			}
 		}
 	}
@@ -266,10 +266,40 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 	return nil
 }
 
+// indexValueSetUnlocked adds a ValueSet to both indexes. Must be called with the
+// write lock held.
+func (r *Registry) indexValueSetUnlocked(data json.RawMessage) {
+	var vs ValueSet
+	if err := json.Unmarshal(data, &vs); err != nil || vs.URL == "" {
+		return
+	}
+	r.valueSets[vs.URL] = &vs
+	if vs.Version != "" {
+		r.valueSetsByVersion[vs.URL+"|"+vs.Version] = &vs
+	}
+}
+
+// indexCodeSystemUnlocked adds a CodeSystem to both indexes. Must be called with
+// the write lock held.
+func (r *Registry) indexCodeSystemUnlocked(data json.RawMessage) {
+	var cs CodeSystem
+	if err := json.Unmarshal(data, &cs); err != nil || cs.URL == "" {
+		return
+	}
+	r.codeSystems[cs.URL] = &cs
+	if cs.Version != "" {
+		r.codeSystemsByVersion[cs.URL+"|"+cs.Version] = &cs
+	}
+}
+
 // GetValueSet returns a ValueSet by URL.
+//
+// A "url|version" canonical resolves to that exact version when it was loaded,
+// and otherwise falls back to whichever version is held for the URL.
 func (r *Registry) GetValueSet(url string) *ValueSet {
-	// Strip version from URL if present (e.g., "http://...ValueSet/x|4.0.1")
-	url = stripVersion(url)
+	if base, version := splitCanonical(url); version != "" {
+		return r.GetValueSetVersion(base, version)
+	}
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -278,14 +308,60 @@ func (r *Registry) GetValueSet(url string) *ValueSet {
 
 // GetCodeSystem returns a CodeSystem by URL.
 //
-// A version suffix is stripped, as in GetValueSet, so a versioned canonical such
-// as "http://x|1.0.0" resolves to the loaded CodeSystem.
+// A "url|version" canonical resolves to that exact version when it was loaded,
+// and otherwise falls back to whichever version is held for the URL.
 func (r *Registry) GetCodeSystem(url string) *CodeSystem {
-	url = stripVersion(url)
+	if base, version := splitCanonical(url); version != "" {
+		return r.GetCodeSystemVersion(base, version)
+	}
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.codeSystems[url]
+}
+
+// GetCodeSystemVersion returns the CodeSystem for url at the given version when
+// that version was loaded.
+//
+// When it was not, it falls back to the version held for url rather than
+// resolving nothing: the published corpus is systematically inconsistent here —
+// the v2 ValueSets in hl7.terminology request version "2.0.0" of CodeSystems that
+// the same package ships at "3.0.0" — and refusing to expand would make 433 of the
+// 441 versioned includes unresolvable. The fallback is reported by
+// CodeSystemVersionMatches for callers that need to know.
+func (r *Registry) GetCodeSystemVersion(url, version string) *CodeSystem {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if cs, ok := r.codeSystemsByVersion[url+"|"+version]; ok {
+		return cs
+	}
+	return r.codeSystems[url]
+}
+
+// GetValueSetVersion returns the ValueSet for url at the given version when that
+// version was loaded, falling back to the version held for url otherwise.
+func (r *Registry) GetValueSetVersion(url, version string) *ValueSet {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if vs, ok := r.valueSetsByVersion[url+"|"+version]; ok {
+		return vs
+	}
+	return r.valueSets[url]
+}
+
+// CodeSystemVersionMatches reports whether the requested version of url is the one
+// held. False means a lookup for that version resolved by fallback, so any
+// expansion from it describes a different version than the caller asked for.
+func (r *Registry) CodeSystemVersionMatches(url, version string) bool {
+	if version == "" {
+		return true
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	_, ok := r.codeSystemsByVersion[url+"|"+version]
+	return ok
 }
 
 // ValidateCode checks if a code is valid for a given ValueSet URL.
@@ -395,17 +471,10 @@ func localCodeResult(valid, found bool) CodeResult {
 // validateCodeLocally answers from the registry's own copies, falling back to a
 // configured Provider.
 func (r *Registry) validateCodeLocally(ctx context.Context, valueSetURL, system, code string) (isValid, found bool) {
-	valueSetURL = stripVersion(valueSetURL)
-
-	// Check cache first
-	r.mu.RLock()
-	if codes, ok := r.expansionCache[valueSetURL]; ok {
-		r.mu.RUnlock()
-		return r.validateWithProvider(ctx, codes, system, code, valueSetURL), true
-	}
-	r.mu.RUnlock()
-
-	// Expand the ValueSet
+	// Resolve first: the ValueSet decides the cache key, so two versions of the
+	// same canonical cannot share an expansion. Keying by the version-stripped URL
+	// would let a lookup for one version be answered from another's expansion,
+	// which would make version-aware resolution pointless.
 	vs := r.GetValueSet(valueSetURL)
 	if vs == nil {
 		// Not held by this registry. A configured provider may still know it —
@@ -415,14 +484,29 @@ func (r *Registry) validateCodeLocally(ctx context.Context, valueSetURL, system,
 		return r.validateViaProvider(ctx, system, code, valueSetURL)
 	}
 
-	codes := r.expandValueSet(vs)
+	cacheKey := canonicalOf(vs.URL, vs.Version)
 
-	// Cache the expansion
-	r.mu.Lock()
-	r.expansionCache[valueSetURL] = codes
-	r.mu.Unlock()
+	r.mu.RLock()
+	codes, cached := r.expansionCache[cacheKey]
+	r.mu.RUnlock()
+
+	if !cached {
+		codes = r.expandValueSet(vs)
+		r.mu.Lock()
+		r.expansionCache[cacheKey] = codes
+		r.mu.Unlock()
+	}
 
 	return r.validateWithProvider(ctx, codes, system, code, valueSetURL), true
+}
+
+// canonicalOf builds the "url|version" key used by the version-scoped caches. A
+// resource without a version keys on its URL alone.
+func canonicalOf(url, version string) string {
+	if version == "" {
+		return url
+	}
+	return url + "|" + version
 }
 
 // validateWithProvider checks a code against expanded codes, delegating to the
@@ -613,12 +697,22 @@ func (r *Registry) addExplicitConcepts(codes map[string]bool, inc *Include) {
 }
 
 // expandFromCodeSystem expands codes from a CodeSystem, applying filters if present.
+//
+// A requested inc.Version selects that exact version when it was loaded. When it
+// was not, expansion proceeds from the version held rather than resolving nothing:
+// see GetCodeSystemVersion for why refusing would break most of the versioned
+// includes in the published corpus.
 func (r *Registry) expandFromCodeSystem(codes map[string]bool, inc *Include) {
 	if inc.System == "" {
 		return
 	}
 
-	cs := r.GetCodeSystem(inc.System)
+	var cs *CodeSystem
+	if inc.Version != "" {
+		cs = r.GetCodeSystemVersion(inc.System, inc.Version)
+	} else {
+		cs = r.GetCodeSystem(inc.System)
+	}
 	if cs == nil {
 		return
 	}
@@ -846,8 +940,13 @@ func (r *Registry) applyEqualityFilter(codes map[string]bool, cs *CodeSystem, sy
 // The returned map is never mutated after publication, so callers may read it
 // without holding a lock.
 func (r *Registry) getOrBuildHierarchy(cs *CodeSystem) map[string][]string {
+	// Keyed by canonical, not URL: two versions of a CodeSystem can have different
+	// hierarchies, and sharing one cache entry between them would silently expand
+	// an is-a filter against the wrong structure.
+	key := canonicalOf(cs.URL, cs.Version)
+
 	r.hierarchyMu.RLock()
-	hierarchy, ok := r.hierarchyCache[cs.URL]
+	hierarchy, ok := r.hierarchyCache[key]
 	r.hierarchyMu.RUnlock()
 	if ok {
 		return hierarchy
@@ -859,10 +958,10 @@ func (r *Registry) getOrBuildHierarchy(cs *CodeSystem) map[string][]string {
 	defer r.hierarchyMu.Unlock()
 	// Another goroutine may have won the race; prefer the published map so all
 	// callers share one instance.
-	if existing, ok := r.hierarchyCache[cs.URL]; ok {
+	if existing, ok := r.hierarchyCache[key]; ok {
 		return existing
 	}
-	r.hierarchyCache[cs.URL] = built
+	r.hierarchyCache[key] = built
 	return built
 }
 
@@ -1127,6 +1226,15 @@ func (c *CodeSystemCode) isSelectable() bool {
 		}
 	}
 	return true
+}
+
+// splitCanonical splits "url|version" into its parts. The version is empty when
+// the canonical carries none.
+func splitCanonical(canonical string) (url, version string) {
+	if i := strings.LastIndex(canonical, "|"); i > 0 {
+		return canonical[:i], canonical[i+1:]
+	}
+	return canonical, ""
 }
 
 // stripVersion removes version from ValueSet URL (e.g., "url|4.0.1" -> "url").

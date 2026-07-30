@@ -58,6 +58,30 @@ Two findings from the audit are worth recording:
 
 ---
 
+### ~~compose.include.version~~: version-aware resolution — RESOLVED
+
+`include.version` was parsed and then ignored, and could not have been honored: the
+registry indexed one version per canonical URL, so there was no second version to
+select. CodeSystems and ValueSets are now indexed by `url|version` as well, and a
+versioned request resolves to that exact version when it was loaded.
+
+When it was not loaded, resolution falls back to the version held rather than resolving
+nothing. That is not a shortcut — it is what the published corpus requires. An audit of
+the embedded R4 packages found **441** include/exclude entries carrying a version, of
+which only **3** match the CodeSystem shipped alongside them: the v2 ValueSets in
+`hl7.terminology` request `2.0.0` of CodeSystems that the same package ships at `3.0.0`.
+Refusing to expand on a mismatch would make **433 includes unresolvable**, turning a
+systematic inconsistency in the corpus into a flood of unresolvable bindings.
+
+The fallback is observable rather than silent: `Registry.CodeSystemVersionMatches`
+reports whether a requested version is the one held, so a caller can tell an exact match
+from a substitution.
+
+Accessors: `GetCodeSystemVersion`, `GetValueSetVersion`, and `GetCodeSystem`/`GetValueSet`
+which resolve a `url|version` canonical exactly when possible.
+
+---
+
 ### ~~GO-GAP-008~~: XHTML Structural Validation — RESOLVED (v1.14.0)
 
 Resolved via `htmlChecks()` FHIRPath function implementation (`pkg/constraint/htmlchecks.go`).
