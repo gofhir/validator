@@ -2,7 +2,7 @@
 
 > Gaps identified by comparing against YAFV (Node.js FHIR validator).
 > Date: 2026-03-06
-> Updated: 2026-07-30
+> Updated: 2026-07-31
 
 ## Resolved Gaps
 
@@ -121,6 +121,59 @@ reference in severity, path and text. See #72.
 
 ---
 
+### ~~UCUM code validity~~ — RESOLVED (v1.19.0)
+
+An invalid UCUM code was a warning while a code absent from any other CodeSystem was an error,
+so the same question got a different answer depending on the vocabulary. `system` is
+`http://unitsofmeasure.org` and the code does not exist there, which is the rule made an error
+in #70. Now an error, matching the reference. See #78.
+
+---
+
+### ~~GO-GAP-006~~: Duplicate contained id — RESOLVED (v1.19.0)
+
+Reported as an error on the repeated occurrence, matching the reference's path exactly. The
+same change fixed a worse problem: `NewContainedContext` indexed by overwriting, so a fragment
+resolved to the *last* contained resource with that id, and a reference could be reported as
+pointing at a disallowed type — an invented defect, while the real one went unmentioned. First
+occurrence now wins. See #79.
+
+The uniqueness rule is prose, not an invariant: no `dom-*` constraint covers it and it is not
+expressible through a StructureDefinition, so it follows the precedent of the absolute-URI
+check on `Extension.url`.
+
+---
+
+### ~~GO-GAP-007~~: Unreferenced contained resources — NOT A GAP
+
+`dom-3` already covers this, derived from the StructureDefinition as it should be. Verified
+against the reference: a contained resource referenced from nowhere is an error on both sides.
+The only difference is granularity — HL7 reports `Patient.contained[0]`, we report `Patient`.
+
+Auditing this also confirmed `dom-2`, `dom-4` and `dom-5` all evaluate correctly, same text
+and severity as the reference. There was nothing to implement here, and implementing it by
+hand would have duplicated a constraint the SD already provides.
+
+---
+
+### ~~GO-GAP-003~~: MustSupport validation — NOT A GAP, and would be wrong
+
+`mustSupport` is an obligation on the **implementing system**, not on the instance. From
+`profiling.html` §5.1.0.19: *"If true, it means that systems claiming to conform to a given
+profile must 'support' the element. This is distinct from cardinality"*, and *"It is possible
+to have an element with a minimum cardinality of '0', but still expect systems to support the
+element."*
+
+So warning about an absent `mustSupport` element would report a conformance failure that the
+specification explicitly does not define. Verified against the reference with a profile marking
+`Patient.birthDate` and `Patient.gender` as `mustSupport` and an instance carrying neither: HL7
+reports nothing.
+
+An IG-authoring tool may still want a report of which `mustSupport` elements a dataset
+exercises, but that is coverage tooling, not resource validation.
+
+---
+
 ## Deliberate Divergences from the Reference
 
 Cases where we differ from HL7 `validator_cli` **on purpose**, because the base specification does
@@ -175,17 +228,6 @@ would fail the official FHIR example resources. Not implemented.
 
 ## Gaps to Address
 
-### GO-GAP-003: No MustSupport Validation
-
-**Priority**: Low
-**Description**: The validator does not check whether elements flagged as `mustSupport` in profiles are present in the resource.
-
-**What YAFV does**: Optional `validateMustSupport` flag that warns about missing mustSupport elements. Useful for IG conformance testing by data producers.
-
-**Implementation**: Add optional phase that reads `mustSupport: true` from ElementDefinitions and warns if those elements are absent.
-
----
-
 ### GO-GAP-004: No Fail-Fast Mode
 
 **Priority**: Low
@@ -199,34 +241,15 @@ would fail the official FHIR example resources. Not implemented.
 
 ### GO-GAP-005: No Issue Deduplication
 
-**Priority**: Low
-**Description**: When validating against multiple profiles (base + meta.profile entries), the same validation issue can appear multiple times.
+**Priority**: Low — no evidence of a real duplicate yet
 
-**What YAFV does**: Deduplicates issues after multi-profile validation, preferring profile-specific messages over base messages.
+Restated after looking for one. On an Observation with the same invalid code in two codings
+plus an invalid UCUM code, every issue came out once, each on its own path
+(`code.coding[0].code`, `code.coding[1].code`, `valueQuantity.code`). Two codings that are both
+wrong are two defects, not a duplicate, and collapsing them would lose which one to fix.
 
-**Implementation**: Post-validation deduplication by path + code + message hash.
-
----
-
-### GO-GAP-006: No Duplicate Contained ID Detection
-
-**Priority**: Low
-**File**: `pkg/structural/structural.go`
-
-Multiple contained resources with the same `id` are not flagged. This violates the FHIR rule that contained resource IDs must be unique within the parent.
-
-**Fix**: Build a set of contained IDs during structural validation and report duplicates.
-
----
-
-### GO-GAP-007: No Unreferenced Contained Resource Detection
-
-**Priority**: Low
-**Description**: Contained resources that are never referenced from the parent resource via `#id` are not flagged. These are effectively dead resources.
-
-**What YAFV does**: Traverses the resource tree to find all `#id` references and warns about contained resources not in that set.
-
-**Implementation**: After reference validation, compare contained IDs against referenced contained IDs.
+Worth keeping open only if a case turns up where the *same* defect at the *same* path is
+reported twice. Until then there is nothing to deduplicate.
 
 ---
 
@@ -265,15 +288,21 @@ read.
 ## Implementation Priority
 
 ```text
-Phase 1 - Low Priority (Feature Parity with YAFV)
-  GO-GAP-003: MustSupport validation
-  GO-GAP-006: Duplicate contained ID
-  GO-GAP-007: Unreferenced contained resources
+No conformance work is outstanding on our side.
 
-Phase 2 - Nice to Have
+What remains is ergonomics, neither of which changes a verdict:
   GO-GAP-004: Fail-fast mode
-  GO-GAP-005: Issue deduplication
   GO-GAP-009: Configurable best-practice severity
+
+Open only if evidence appears:
+  GO-GAP-005: Issue deduplication - no real duplicate found yet
+
+Blocked upstream in gofhir/fhirpath (9 constraints, see
+docs/plans/2026-07-30-fhirpath-engine-gaps.md):
+  ref-1                              type-name shadowing, silent false pass
+  age-1 cnt-3 dis-1 drt-1 ras-1      %ucum undefined
+  eld-19 eld-20                      published FHIR regex rejected as dangerous
+  rng-2                              Quantity comparison unsupported
 ```
 
 Done: GO-GAP-001 (`compose.exclude`), GO-GAP-002 (filter operators) and version-aware
