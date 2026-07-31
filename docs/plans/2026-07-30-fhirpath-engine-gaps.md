@@ -165,6 +165,23 @@ The ReDoS guard is a good idea, but here it rejects a pattern that ships with th
 specification, so `ElementDefinition.path` cannot be validated at all — which matters for
 anyone validating StructureDefinitions, profiles or IG content.
 
+Confirmed end to end on a StructureDefinition whose differential declares
+`"path": "Patient has spaces, and #bad chars!"`:
+
+```text
+HL7:    Error   @ StructureDefinition.differential.element[1]
+                  Constraint failed: eld-19: 'Element names cannot include some special characters'
+        Warning @ StructureDefinition.differential.element[1]
+                  Constraint failed: eld-20: 'Element names should be simple alphanumerics ...'
+
+ours:   Warning @ StructureDefinition.differential.element[1]
+                  Could not evaluate constraint 'eld-19': potentially dangerous regex
+        Warning @ StructureDefinition.differential.element[1]
+                  Could not evaluate constraint 'eld-20': potentially dangerous regex
+```
+
+The `SHALL`-level `eld-19` never produces a verdict, so a malformed element path passes.
+
 Worth considering: Go's `regexp` is RE2, which has no catastrophic backtracking, so the
 consecutive-quantifier heuristic may be guarding against a risk the underlying engine does
 not carry. If the guard is needed for a non-RE2 path, an allowance for patterns coming from
