@@ -58,13 +58,16 @@ func TestUCUMInvalidQuantityCode(t *testing.T) {
 			continue
 		}
 		found = true
-		if iss.Severity != issue.SeverityWarning {
-			t.Errorf("Expected warning severity, got %s", iss.Severity)
+		// An error rather than a warning: the instance names UCUM as its system and the code
+		// does not exist there, which is the same rule as a code absent from any other
+		// CodeSystem the instance declares. The reference reports it as an error too.
+		if iss.Severity != issue.SeverityError {
+			t.Errorf("Expected error severity, got %s", iss.Severity)
 		}
 		if len(iss.Expression) == 0 {
 			t.Error("Expected expression path")
 		}
-		t.Logf("UCUM warning: %s @ %v", iss.Diagnostics, iss.Expression)
+		t.Logf("UCUM error: %s @ %v", iss.Diagnostics, iss.Expression)
 		break
 	}
 	if !found {

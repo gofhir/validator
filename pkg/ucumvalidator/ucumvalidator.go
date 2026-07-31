@@ -125,7 +125,7 @@ func (v *Validator) validateQuantity(data map[string]any, fhirPath string, resul
 	}
 
 	if err := v.ucum.Validate(code); err != nil {
-		result.AddWarningWithID(
+		result.AddErrorWithID(
 			issue.DiagUCUMInvalidCode,
 			map[string]any{"code": code, "error": err.Error()},
 			fhirPath+".code",
