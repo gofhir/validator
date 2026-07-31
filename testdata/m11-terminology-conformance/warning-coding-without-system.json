@@ -1,0 +1,21 @@
+{
+  "resourceType": "Observation",
+  "id": "coding-without-system",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">A Coding that names no system, alongside text that does carry the meaning</div>"
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "code": "8302-2",
+        "display": "Body height"
+      }
+    ],
+    "text": "Body height"
+  },
+  "subject": {
+    "reference": "Patient/example"
+  }
+}

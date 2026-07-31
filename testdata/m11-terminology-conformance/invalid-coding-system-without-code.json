@@ -1,0 +1,20 @@
+{
+  "resourceType": "Observation",
+  "id": "coding-system-without-code",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">A Coding that names a vocabulary and then says nothing in it</div>"
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "display": "Body height"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  }
+}
