@@ -1,9 +1,9 @@
-# Engine gaps blocking base R4 invariants — `gofhir/fhirpath` v1.1.0
+# Engine gaps blocking base R4 invariants — `gofhir/fhirpath`
 
 **For:** the `github.com/gofhir/fhirpath` maintainers
 **From:** the `github.com/gofhir/validator` maintainers
 **Date:** 2026-07-30
-**Engine:** `gofhir/fhirpath v1.1.0`
+**Engine:** `gofhir/fhirpath v1.4.0` (originally reported against v1.1.0)
 **Compared against:** HL7 `validator_cli` 6.9.12, FHIR R4 (4.0.1)
 
 None of these are worked around on our side. Affected constraints are reported as
@@ -13,6 +13,23 @@ gaps rather than changing cosmetics.
 They surfaced now because our constraint engine used to skip any element declaring more than
 one type, which made every constraint of every choice type unreachable — 167 elements in R4.
 With that fixed, these constraints are reached for the first time.
+
+## Status as of v1.4.0
+
+**Gap 1 is fixed.** Re-running the audit against v1.4.0: `0 of 3` shadowing candidates are
+shadowed, `Reference.reference` navigates to its value, and `ref-1` now fails where it should
+— verified end to end against the reference, which reports the same two errors at the same two
+paths. Zero false positives across 30 official examples carrying local references. The `trace()`
+output that used to reach stdout on every reference is gone as well.
+
+Gaps 2, 3 and 4 are unchanged in v1.4.0, still affecting 8 constraints.
+
+| # | Gap | Constraints | v1.4.0 |
+| --- | --- | --- | --- |
+| 1 | Type-name shadowing | `ref-1` | **fixed** |
+| 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | open |
+| 3 | Published FHIR regex rejected | `eld-19` `eld-20` | open |
+| 4 | `Quantity` comparison | `rng-2` | open |
 
 ## How this was measured
 
@@ -39,7 +56,9 @@ evaluation. `FPAUDIT_VERSION=4.3.0` or `5.0.0` re-runs it against R4B or R5.
 
 ---
 
-## 1. An element whose name matches its containing type returns the container
+## 1. An element whose name matches its containing type returns the container — FIXED in v1.4.0
+
+Kept for the record; the behaviour below is v1.1.0's.
 
 The engine infers a node's FHIR type from its shape, then treats an identifier matching that
 type name — **case-insensitively, in any position** — as a reference to the node itself
@@ -216,12 +235,11 @@ decidable in the common case without claiming unit conversion.
 
 ## Priority
 
-1. **Type-name shadowing** — a silent false pass on every `Reference`, and no diagnostic
-   admits it. The narrow fix is to resolve a type name to the node only when capitalised and
-   at the start of an expression.
-2. **`%ucum`** — five invariants, and the fix is a constant.
-3. **The regex guard** — two invariants, and it blocks patterns the specification publishes.
-4. **`Quantity` comparison** — one invariant; the correct fix needs unit handling.
+Type-name shadowing was the critical one and is fixed in v1.4.0. Of what remains:
+
+1. **`%ucum`** — five invariants, and the fix is a constant.
+2. **The regex guard** — two invariants, and it blocks patterns the specification publishes.
+3. **`Quantity` comparison** — one invariant; the correct fix needs unit handling.
 
 ## `gofhir/ucum` — audited, no defects found
 
