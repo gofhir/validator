@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.17.0](https://github.com/gofhir/validator/compare/v1.16.1...v1.17.0) (2026-07-31)
+
+
+### Features
+
+* **binding:** check a Coding against its CodeSystem regardless of binding strength ([#70](https://github.com/gofhir/validator/issues/70)) ([ccdc996](https://github.com/gofhir/validator/commit/ccdc996b65ebe2386501486e116ddfc82a45934b))
+* **binding:** report a Coding that is missing its system or its code ([#72](https://github.com/gofhir/validator/issues/72)) ([f5731aa](https://github.com/gofhir/validator/commit/f5731aa0d28b392b1ca1756b1bd5c6eed729ecd5))
+
 ## [1.16.1](https://github.com/gofhir/validator/compare/v1.16.0...v1.16.1) (2026-07-30)
 
 
