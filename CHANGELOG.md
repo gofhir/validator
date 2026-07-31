@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.19.0](https://github.com/gofhir/validator/compare/v1.18.0...v1.19.0) (2026-07-31)
+
+
+### Features
+
+* **ucum:** report an invalid UCUM code as an error, not a warning ([#78](https://github.com/gofhir/validator/issues/78)) ([caea909](https://github.com/gofhir/validator/commit/caea9095425c68c48dbe6d2cd90e02c6dd9599cd))
+
+
+### Bug Fixes
+
+* **contained:** resolve a fragment deterministically and report a duplicate id ([#79](https://github.com/gofhir/validator/issues/79)) ([72770cf](https://github.com/gofhir/validator/commit/72770cf0360b49b1796810d01f31662b93b15b2f))
+
 ## [1.18.0](https://github.com/gofhir/validator/compare/v1.17.0...v1.18.0) (2026-07-31)
 
 
