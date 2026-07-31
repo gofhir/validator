@@ -430,9 +430,14 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 	},
 
 	// UCUM validation.
+	//
+	// An error, not a warning: the instance names http://unitsofmeasure.org as its system and
+	// the code does not exist there, which is the same rule as DiagCodeNotInCodeSystem — a
+	// code absent from the CodeSystem the instance declares. The reference agrees, reporting
+	// "Unknown code 'mmHg' in the CodeSystem 'http://unitsofmeasure.org'".
 	DiagUCUMInvalidCode: {
-		Severity: SeverityWarning,
-		Code:     CodeValue,
+		Severity: SeverityError,
+		Code:     CodeInvalid,
 		Template: "Invalid UCUM code '{code}': {error}",
 	},
 }
