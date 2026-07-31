@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.18.0](https://github.com/gofhir/validator/compare/v1.17.0...v1.18.0) (2026-07-31)
+
+
+### Features
+
+* **constraint:** evaluate type constraints on every type a choice element declares ([#74](https://github.com/gofhir/validator/issues/74)) ([346d8e7](https://github.com/gofhir/validator/commit/346d8e7db35245b8b8b603ffa552aa1c9b8780f9))
+
 ## [1.17.0](https://github.com/gofhir/validator/compare/v1.16.1...v1.17.0) (2026-07-31)
 
 
