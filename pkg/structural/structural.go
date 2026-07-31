@@ -420,10 +420,32 @@ func (v *Validator) validateChildren(
 
 // validateContainedResources validates each contained resource against its own StructureDefinition.
 func (v *Validator) validateContainedResources(contained []any, baseFhirPath string, result *issue.Result) {
+	// Ids must be distinct for a fragment reference to identify anything. FHIR R4
+	// §3.1.0.1.10 defines resolution as "internal fragment references (start with '#') refer
+	// to contained resources" — a single one — so two contained resources sharing an id make
+	// every reference to it undecidable.
+	//
+	// This is prose rather than an invariant: no dom-* constraint covers uniqueness, and the
+	// rule is not expressible through a StructureDefinition. Same situation as the absolute-URI
+	// requirement on Extension.url in pkg/extension.
+	seenIDs := make(map[string]struct{}, len(contained))
+
 	for i, item := range contained {
 		resourceMap, ok := item.(map[string]any)
 		if !ok {
 			continue
+		}
+
+		if id, _ := resourceMap["id"].(string); id != "" {
+			if _, dup := seenIDs[id]; dup {
+				result.AddErrorWithID(
+					issue.DiagContainedDuplicateID,
+					map[string]any{"id": id},
+					fmt.Sprintf("%s[%d]", baseFhirPath, i),
+				)
+			} else {
+				seenIDs[id] = struct{}{}
+			}
 		}
 
 		resourceType, _ := resourceMap["resourceType"].(string)

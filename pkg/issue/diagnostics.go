@@ -18,6 +18,7 @@ const (
 	DiagStructureInvalidChoiceType     DiagnosticID = "STRUCTURE_INVALID_CHOICE_TYPE"
 	DiagStructureChoiceMutualExclusion DiagnosticID = "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
 	DiagStructureNoType                DiagnosticID = "STRUCTURE_NO_TYPE"
+	DiagContainedDuplicateID           DiagnosticID = "CONTAINED_DUPLICATE_ID"
 )
 
 // Diagnostic IDs for cardinality validation (M2).
@@ -146,6 +147,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "Missing 'resourceType' property",
+	},
+	DiagContainedDuplicateID: {
+		Severity: SeverityError,
+		Code:     CodeInvalid,
+		Template: "Duplicate ID for contained resource: {id}",
 	},
 	DiagStructureUnknownResource: {
 		Severity: SeverityError,

@@ -86,6 +86,15 @@ func NewContainedContext(resource map[string]any) *ContainedContext {
 			continue
 		}
 
+		// First occurrence wins. When two contained resources share an id the fragment is
+		// ambiguous, and overwriting made the *last* one resolve — so a reference could be
+		// reported as pointing at the wrong type while the real defect, the repeated id,
+		// went unmentioned. Document order is the one deterministic choice available, and
+		// it is what the reference resolves to.
+		if _, seen := ctx.IDIndex[id]; seen {
+			continue
+		}
+
 		rt, _ := m["resourceType"].(string)
 		ctx.IDIndex[id] = rt
 	}
