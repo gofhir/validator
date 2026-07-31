@@ -1,15 +1,17 @@
-# v1.15.0, v1.16.0 and v1.16.1 are out — what changed since you signed the contract
+# v1.15.0 through v1.17.0 are out — what changed since you signed the contract
 
 **For:** GoFHIR Server (terminology, ADR-014)
 **From:** the `github.com/gofhir/validator` maintainers
 **Date:** 2026-07-30
-**Re:** rounds 1–9; releases v1.15.0, v1.16.0 and v1.16.1
+**Re:** rounds 1–9; releases v1.15.0, v1.16.0, v1.16.1 and v1.17.0
 
-Your blocker is lifted: `go get github.com/gofhir/validator@v1.16.1` has the `Authority`
+Your blocker is lifted: `go get github.com/gofhir/validator@v1.17.0` has the `Authority`
 port. Everything we owed from the shared work order is shipped.
 
-Take **v1.16.1**, not v1.16.0: the patch removes a false positive that was present in
-both earlier releases. §5 explains it, and it changes one row of the audit table.
+Take **v1.17.0**. It is the only release we would hand you: v1.16.0 carries a false
+positive that v1.16.1 removes (§5), and v1.17.0 adds two conformance fixes that came out
+of the same comparison against the reference (§3a). Both of those are accept → reject, so
+read §3a before you bump — one of them widens where codes get checked at all.
 
 Five things below need action on your side, and two correct an expectation we set.
 
@@ -72,6 +74,38 @@ Three new diagnostics, all non-failing by default: `BINDING_UNRESOLVED`,
 `BINDING_EXTENSIBLE_OTHER_SYSTEM` (information, deliberately, so `-strict` does not flip
 it to a failure), `BINDING_EXTENSIBLE_UNKNOWN_SYSTEM`.
 
+## 3a. v1.17.0: two more, and the first one is the widest change yet
+
+Both came out of the reference comparison, both are accept → **reject**, and both are
+structural rather than terminology-dependent — they fire with or without your chain
+attached.
+
+**A `Coding` is now checked against its own CodeSystem regardless of binding strength.**
+This is the one to audit. Whether `Coding.code` exists in the system that
+`Coding.system` names is not a binding question, but our check lived inside binding
+validation, which returns early for anything weaker than `extensible`. Most clinical codes
+in FHIR are bound `example` — `Observation.code`, `Condition.code`, `Procedure.code`,
+`Immunization.vaccineCode` — so codes absent from a CodeSystem we hold were never checked
+there at all. They are now, as `CODE_NOT_IN_CODESYSTEM` on the `.code` child. The
+reference reports the same error at the same path; we were silent.
+
+Where this touches you: a code your users author against a CodeSystem *you* serve gets a
+real verdict through `ResolveCodeInCodeSystem`, on every coded element rather than only
+the strongly-bound ones. Expect more traffic on that method than the round-9 estimate
+assumed. When nothing can decide, a known external vocabulary (SNOMED, LOINC, RxNorm) is
+reported as `BINDING_CANNOT_VALIDATE` at **information** severity rather than a warning,
+so a deployment without a chain does not drown; once you are the authority those become
+verdicts and the notes disappear.
+
+**A `Coding` missing half of its pair is reported.** No `system` → warning
+(`CODING_NO_SYSTEM`); a `system` with no `code` → **error** (`CODING_NO_CODE`). Previously
+both produced nothing, because there was nothing to look up and we let silence stand in
+for a verdict. A `CodeableConcept` carrying only `text` stays silent, as it should.
+
+Note for your `$validate` fixtures: the reference reports the missing-code error even when
+`_code` carries a `data-absent-reason` extension. We checked that case specifically,
+expecting an exemption; there is none, so the rule is purely structural and we match.
+
 ## 4. Two expectations we set that were wrong
 
 **Reclaimed heap is ~15 MiB, not ~60 MiB.** Measured: 95 MiB resident for a validator
@@ -84,7 +118,7 @@ assumed a symmetric duplicate and there wasn't one.
 **Provider-first does not regress throughput, so your condition is met.** On a 25-entry
 Bundle with CI's flags:
 
-```
+```text
 local terminology     10.03 ms/op   43701 allocs
 with authority         9.80 ms/op   43644 allocs
 ```
@@ -137,9 +171,33 @@ silence where it reports a code system as unresolvable — are the absence of a 
 terminology server, not missing logic. Those close when your chain is the authority, not
 by changing our code.
 
+**One divergence we are keeping, because the spec is on its side.** An extension whose
+StructureDefinition we cannot resolve is a **warning** for us and an **error** for the
+reference. This matters to you directly: your users author custom extensions, and under
+the reference's rule every extension whose IG is not loaded would fail a write.
+
+`extensibility.html` §2.5.0 does not support that reading. "Applications SHOULD ignore
+extensions that they do not recognize if they are not 'modifier' extensions", and "the
+structure definitions for the extension SHOULD be available to consumers of an instance" —
+`SHOULD` in both cases, which maps to a warning. The `SHALL` in that section is reserved
+for modifier extensions ("implementations SHALL ensure that they do not process data
+containing unrecognized modifier extensions"), and an unknown `modifierExtension` **is** an
+error for us. The base `Element.extension` definition is explicit that "there can be no
+stigma associated with the use of extensions".
+
+Worth noting the reference is not self-consistent here: an unresolvable CodeSystem is a
+warning there, an unresolvable extension an error, though in both cases it merely lacks a
+definition. We treat both as warnings. If you want the stricter behaviour, `-strict`
+already promotes warnings, so it is your policy to set rather than ours to hardcode.
+
+Same reasoning for `Example URLs are not allowed in this context`, which the reference
+raises for `example.org` and `acme.com`: it is an IG-publishing policy — HL7 exposes it as
+a toggle — not a rule of the base spec, and enforcing it would fail the official FHIR
+example resources. Not implemented.
+
 ## 6. Your migration, unchanged
 
-1. Bump to `v1.16.1` and audit fixtures against the table in §3.
+1. Bump to `v1.17.0` and audit fixtures against the table in §3 and the two changes in §3a.
 2. Implement `Authority` with the `Resolve*` names, returning `MembershipUnknown` for an
    empty system, routing `SystemVersion`, populating `Message`, and answering `Supports`
    honestly.
