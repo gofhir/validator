@@ -1,11 +1,16 @@
 {
   "resourceType": "Observation",
   "status": "final",
-  "code": {"text": "test"},
+  "code": {
+    "text": "test"
+  },
   "effectiveTiming": {
     "repeat": {
       "frequency": 1,
-      "offset": 0
+      "offset": 0,
+      "when": [
+        "MORN"
+      ]
     }
   }
 }

@@ -56,16 +56,107 @@ type Validator struct {
 	// Cache of compiled FHIRPath expressions.
 	exprCache   map[string]*fhirpath.Expression
 	exprCacheMu sync.RWMutex
+
+	// Cache of which complex types carry constraints worth descending into, keyed by
+	// type code. Choice elements declare up to ~50 types, so this question is asked
+	// far more often than there are types to answer it for.
+	typeConstraintCache   map[string]*registry.StructureDefinition
+	typeConstraintCacheMu sync.RWMutex
 }
 
 // New creates a new constraint Validator.
 // The termRegistry may be nil to disable memberOf() support (e.g., when -tx n/a is set).
 func New(reg *registry.Registry, termReg *terminology.Registry) *Validator {
 	return &Validator{
-		registry:     reg,
-		termRegistry: termReg,
-		exprCache:    make(map[string]*fhirpath.Expression),
+		registry:            reg,
+		termRegistry:        termReg,
+		exprCache:           make(map[string]*fhirpath.Expression),
+		typeConstraintCache: make(map[string]*registry.StructureDefinition),
 	}
+}
+
+// constrainedTypeSD returns the StructureDefinition for typeCode when it is a complex type
+// that carries constraints of its own, and nil otherwise — meaning there is nothing to
+// descend into.
+//
+// Everything here is read from the StructureDefinition: whether the type is a complex type
+// comes from Kind, and whether it is worth visiting comes from its elements' constraints.
+func (v *Validator) constrainedTypeSD(typeCode string) *registry.StructureDefinition {
+	v.typeConstraintCacheMu.RLock()
+	sd, ok := v.typeConstraintCache[typeCode]
+	v.typeConstraintCacheMu.RUnlock()
+	if ok {
+		return sd
+	}
+
+	sd = v.registry.GetByType(typeCode)
+	if sd == nil || sd.Snapshot == nil || sd.Kind != "complex-type" {
+		sd = nil
+	} else {
+		hasConstraints := false
+		for i := range sd.Snapshot.Element {
+			if len(sd.Snapshot.Element[i].Constraint) > 0 {
+				hasConstraints = true
+				break
+			}
+		}
+		if !hasConstraints {
+			sd = nil
+		}
+	}
+
+	v.typeConstraintCacheMu.Lock()
+	v.typeConstraintCache[typeCode] = sd
+	v.typeConstraintCacheMu.Unlock()
+	return sd
+}
+
+// choiceElementPath renders the concrete path of a choice element for one of the types it
+// declares — "Observation.value[x]" with Quantity becomes "Observation.valueQuantity".
+//
+// This is the naming rule the specification defines for [x] elements (§2.1.0: the property
+// name is the base name plus the type name, capitalized), applied to the type list read
+// from ElementDefinition.type. No path or type is named here.
+func choiceElementPath(elemPath, typeCode string) string {
+	if typeCode == "" {
+		return elemPath
+	}
+	base := strings.TrimSuffix(elemPath, "[x]")
+	return base + strings.ToUpper(typeCode[:1]) + typeCode[1:]
+}
+
+// typePathsFor pairs each type a element declares with the concrete path that type occupies
+// in an instance. A single-type element yields its own path unchanged; a choice element
+// yields one path per declared type.
+//
+// Only types that carry constraints are returned, so callers do not navigate the instance
+// once per declared type — a choice element such as Parameters.parameter.value[x] declares
+// around fifty, of which a handful are constrained.
+func (v *Validator) typePathsFor(elem *registry.ElementDefinition) []typePath {
+	isChoice := strings.HasSuffix(elem.Path, "[x]")
+
+	out := make([]typePath, 0, len(elem.Type))
+	for i := range elem.Type {
+		typeCode := elem.Type[i].Code
+		typeSD := v.constrainedTypeSD(typeCode)
+		if typeSD == nil {
+			continue
+		}
+		path := elem.Path
+		if isChoice {
+			path = choiceElementPath(elem.Path, typeCode)
+		}
+		out = append(out, typePath{typeCode: typeCode, path: path, sd: typeSD})
+	}
+	return out
+}
+
+// typePath is one declared type of an element, paired with where that type lives in an
+// instance and the StructureDefinition holding its constraints.
+type typePath struct {
+	typeCode string
+	path     string
+	sd       *registry.StructureDefinition
 }
 
 // Validate validates all constraints in a resource.
@@ -401,42 +492,27 @@ func (v *Validator) evaluateTypeConstraints(resource map[string]any, sd *registr
 	for i := range sd.Snapshot.Element {
 		elem := &sd.Snapshot.Element[i]
 
-		// Only process elements with a single complex type.
-		if len(elem.Type) != 1 {
-			continue
-		}
-
-		typeCode := elem.Type[0].Code
-
-		// Only recurse into complex data types (Kind == "complex-type").
-		// Skip primitives (Kind == "primitive-type"), resources (Kind == "resource"),
-		// and backbone elements — all derived from the StructureDefinition.
-		typeSD := v.registry.GetByType(typeCode)
-		if typeSD == nil || typeSD.Snapshot == nil || typeSD.Kind != "complex-type" {
-			continue
-		}
-
-		// Check if this type SD has any constraints worth evaluating.
-		hasConstraints := false
-		for j := range typeSD.Snapshot.Element {
-			if len(typeSD.Snapshot.Element[j].Constraint) > 0 {
-				hasConstraints = true
-				break
+		// Every type the element declares, not just the first. A choice element such as
+		// Observation.value[x] declares many, and each one it can hold brings its own
+		// constraints — qty-3 when it holds a Quantity, per-1 when it holds a Period.
+		// Treating only single-type elements made every constraint of every choice type
+		// unreachable, which in R4 is 167 elements across 15 constrained types.
+		//
+		// Primitives, resources and backbone elements yield nothing here: what comes back
+		// is decided by Kind and by whether the type carries constraints, both read from
+		// the StructureDefinition.
+		for _, tp := range v.typePathsFor(elem) {
+			// Extract only the instances of this specific type. A choice element holds one
+			// type at a time, so the concrete path is what distinguishes valueQuantity from
+			// valuePeriod and keeps a type's constraints off a sibling's data.
+			instances := extractElementInstances(resource, tp.path, resourceType, resourceType)
+			if len(instances) == 0 {
+				continue
 			}
-		}
-		if !hasConstraints {
-			continue
-		}
 
-		// Extract instances of this element from the resource.
-		instances := extractElementInstances(resource, elem.Path, resourceType, resourceType)
-		if len(instances) == 0 {
-			continue
+			// Pass the resource snapshot paths so we can skip elements already covered.
+			v.evaluateTypeSDConstraints(instances, tp.sd, tp.typeCode, tp.path, resourceType, snapshotPaths, evalOpts, result)
 		}
-
-		// Evaluate constraints from the type SD on each instance.
-		// Pass the resource snapshot paths so we can skip elements already covered.
-		v.evaluateTypeSDConstraints(instances, typeSD, typeCode, elem.Path, resourceType, snapshotPaths, evalOpts, result)
 	}
 }
 
@@ -503,25 +579,36 @@ func (v *Validator) evaluateSubElementConstraints(instances []elementInstance, t
 
 // recurseIntoSubType recurses into the sub-element's type SD if it's a complex type.
 func (v *Validator) recurseIntoSubType(instances []elementInstance, typeElem *registry.ElementDefinition, typeCode, resourcePath, resourceType string, snapshotPaths map[string]struct{}, evalOpts *constraintEvalOpts, result *issue.Result) {
-	if len(typeElem.Type) != 1 {
-		return
-	}
-	subTypeCode := typeElem.Type[0].Code
-	if subTypeCode == typeCode {
-		return
-	}
-	subTypeSD := v.registry.GetByType(subTypeCode)
-	if subTypeSD == nil || subTypeSD.Snapshot == nil || subTypeSD.Kind != "complex-type" {
-		return
-	}
-	for _, inst := range instances {
-		var instData map[string]any
-		if err := json.Unmarshal(inst.data, &instData); err != nil {
+	// As above, every declared type. This is the path that reaches a choice element nested
+	// inside a data type — Extension.value[x], Dosage.doseAndRate.dose[x] — where the same
+	// single-type guard hid the type's constraints.
+	for _, tp := range v.typePathsFor(typeElem) {
+		// A type nested in itself is already being evaluated by the caller; descending
+		// again would repeat its constraints on the same data.
+		if tp.typeCode == typeCode {
 			continue
 		}
-		subInstances := extractElementInstances(instData, typeElem.Path, typeCode, inst.fhirPath)
-		if len(subInstances) > 0 {
-			v.evaluateTypeSDConstraints(subInstances, subTypeSD, subTypeCode, resourcePath, resourceType, snapshotPaths, evalOpts, result)
+
+		// tp.path is the sub-element's path inside the parent type, already made concrete
+		// for this type (Extension.value[x] -> Extension.valueQuantity), so a choice
+		// yields only the instances it actually holds.
+		//
+		// resourcePath is the same position expressed from the resource, and has to be
+		// made concrete the same way — it is what the next level reports against.
+		resourceSubPath := resourcePath
+		if strings.HasSuffix(resourcePath, "[x]") {
+			resourceSubPath = choiceElementPath(resourcePath, tp.typeCode)
+		}
+
+		for _, inst := range instances {
+			var instData map[string]any
+			if err := json.Unmarshal(inst.data, &instData); err != nil {
+				continue
+			}
+			subInstances := extractElementInstances(instData, tp.path, typeCode, inst.fhirPath)
+			if len(subInstances) > 0 {
+				v.evaluateTypeSDConstraints(subInstances, tp.sd, tp.typeCode, resourceSubPath, resourceType, snapshotPaths, evalOpts, result)
+			}
 		}
 	}
 }
