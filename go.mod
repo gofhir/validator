@@ -3,7 +3,7 @@ module github.com/gofhir/validator
 go 1.25.0
 
 require (
-	github.com/gofhir/fhirpath v1.1.0
+	github.com/gofhir/fhirpath v1.4.0
 	github.com/gofhir/ucum v1.0.1
 	golang.org/x/net v0.33.0
 )

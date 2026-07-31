@@ -100,15 +100,21 @@ func TestReferenceValidation(t *testing.T) {
 			expectWarnings: 0,
 		},
 		{
-			name:           "invalid-fragment-not-found",
-			file:           "../../testdata/m9-references/invalid-fragment-not-found.json",
-			expectErrors:   2, // Fragment reference not found + dom-3 (contained not referenced)
+			name: "invalid-fragment-not-found",
+			file: "../../testdata/m9-references/invalid-fragment-not-found.json",
+			// Fragment not found + dom-3 (contained not referenced) + ref-1. ref-1 became
+			// reachable with fhirpath v1.4.0, which fixed the type-name shadowing that made
+			// `reference` resolve to the container: startsWith('#') returned false, so the
+			// constraint could never fail. The reference reports both the resolution error and
+			// the constraint failure, as we now do.
+			expectErrors:   3,
 			expectWarnings: 2, // dom-6 for Observation and contained Patient
 		},
 		{
-			name:           "invalid-fragment-no-contained",
-			file:           "../../testdata/m9-references/invalid-fragment-no-contained.json",
-			expectErrors:   1, // Fragment reference but no contained array
+			name: "invalid-fragment-no-contained",
+			file: "../../testdata/m9-references/invalid-fragment-no-contained.json",
+			// Fragment reference with no contained array, plus ref-1 — see above.
+			expectErrors:   2,
 			expectWarnings: 1, // dom-6 for Observation
 		},
 	}
