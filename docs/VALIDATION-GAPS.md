@@ -2,7 +2,7 @@
 
 > Gaps identified by comparing against YAFV (Node.js FHIR validator).
 > Date: 2026-03-06
-> Updated: 2026-07-29
+> Updated: 2026-07-30
 
 ## Resolved Gaps
 
@@ -94,6 +94,82 @@ Resolved via `htmlChecks()` FHIRPath function implementation (`pkg/constraint/ht
 The `txt-1`/`txt-2` constraints from the Narrative StructureDefinition now evaluate dynamically.
 Validates: `<div>` root, allowed HTML elements, prohibited elements/attributes, non-empty content.
 See: #51 (Gap 4).
+
+---
+
+### ~~Coding checked only under a strong binding~~ — RESOLVED (v1.17.0)
+
+Whether a `Coding`'s code exists in the system the instance names does not depend on the element's
+binding, but the check lived inside binding validation, which returns early for anything weaker than
+`extensible`. Since most clinical codes in FHIR are bound `example` — `Observation.code`,
+`Condition.code`, `Procedure.code` — codes absent from CodeSystems we hold were silently accepted.
+
+`ValidateCodedValue` now runs from the element traversal, driven by the element's type in the
+StructureDefinition rather than by the shape of the data, and reports on the `.code` child as the
+reference does. A known external vocabulary that nothing can resolve is `information` rather than a
+warning: it is expected to need a terminology server, and configuring an `Authority` makes the note
+disappear. See #70.
+
+---
+
+### ~~Coding missing half of its pair~~ — RESOLVED (v1.17.0)
+
+A `Coding` with no `system`, or a `system` with no `code`, produced no lookup and therefore no
+finding — silence standing in for a verdict. Now a missing system is a warning (the concept may
+still be carried by `CodeableConcept.text`) and a system with no code is an error. Matches the
+reference in severity, path and text. See #72.
+
+---
+
+## Deliberate Divergences from the Reference
+
+Cases where we differ from HL7 `validator_cli` **on purpose**, because the base specification does
+not support what it does. These are not gaps and should not be "fixed" without revisiting the
+citations below.
+
+### Unknown non-modifier extension: we warn, HL7 errors
+
+| Validator | plain extension | modifierExtension |
+| --- | --- | --- |
+| ours | warning | error |
+| HL7 | error | error |
+
+Verified with a definition-less extension on a neutral domain (a URL under `example.org` or
+`acme.com` triggers a second, separate HL7 rule — see below):
+
+```text
+HL7:   Error @ Patient.extension[0]  The extension http://miclinica.cl/... could not be found
+                                     so is not allowed here
+ours:  WARN  [extension] Unknown extension 'http://miclinica.cl/...'
+```
+
+The base specification does not support raising this to an error for plain extensions. From
+`extensibility.html` §2.5.0, with the normative keywords as published:
+
+- "Applications **SHOULD** ignore extensions that they do not recognize if they are not 'modifier' extensions"
+- "The structure definitions for the extension **SHOULD** be available to consumers of an instance."
+- "Implementations **SHALL** ensure that they do not process data containing unrecognized modifier extensions."
+
+And from the base `Element.extension` definition: "There can be no stigma associated with the use of
+extensions by any application, project, or standard."
+
+So the only thing an unresolvable plain extension transgresses is a `SHOULD` — reported as a
+warning, per the usual mapping — while unrecognized *modifier* extensions transgress a `SHALL` and
+are an error. The distinction already in `pkg/extension/extension.go` is calibrated to exactly those
+two normative levels. `validation.html` says nothing about unresolvable definitions either way.
+
+Worth noting that the reference is not self-consistent here: an unresolvable **CodeSystem** is a
+warning there, an unresolvable **extension** an error, though in both cases the validator merely
+lacks a definition. We treat both as warnings.
+
+### Example URLs in canonical positions: we say nothing, HL7 errors
+
+HL7 additionally reports `Error @ Patient.extension[0].url — Example URLs are not allowed in this
+context`, and applies it to `acme.com` as well as `example.org`.
+
+This is an IG-publishing policy rather than a rule of the base specification — HL7 exposes it as a
+toggle (`-allow-example-urls`), and the specification's own examples use these domains. Enforcing it
+would fail the official FHIR example resources. Not implemented.
 
 ---
 
