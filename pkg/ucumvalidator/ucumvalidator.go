@@ -10,7 +10,7 @@ import (
 	"github.com/gofhir/validator/pkg/registry"
 	"github.com/gofhir/validator/pkg/walker"
 
-	"github.com/gofhir/ucum"
+	"github.com/gofhir/ucum/v4"
 )
 
 const (

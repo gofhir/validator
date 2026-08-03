@@ -199,13 +199,14 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 			compileFails = append(compileFails, failure{e.key, e.sd, e.path, "-", e.expr, cerr.Error()})
 			continue
 		}
-		// Evaluate against the instance of its own type first, then every other shape.
-		order := make([]string, 0, 2+len(shapes))
-		order = append(order, e.sd, "empty")
-		for name := range shapes {
-			order = append(order, name)
-		}
-		for _, shapeName := range order {
+		// Only the instance of the constraint's own type, plus the empty object.
+		//
+		// Cross-evaluating every expression against every shape used to be harmless because
+		// a mismatched navigation just returned empty. Since the engine became strict about
+		// types it raises a TypeError instead, so a Timing constraint evaluated against a
+		// Patient reports "expected a String, got HumanName" — a fact about the audit, not
+		// about the engine. Reporting those upstream would waste the maintainers' time.
+		for _, shapeName := range []string{e.sd, "empty"} {
 			shape, ok := shapes[shapeName]
 			if !ok {
 				continue

@@ -3,7 +3,7 @@
 **For:** the `github.com/gofhir/fhirpath` maintainers
 **From:** the `github.com/gofhir/validator` maintainers
 **Date:** 2026-07-30
-**Engine:** `gofhir/fhirpath v1.4.0` (originally reported against v1.1.0)
+**Engine:** `gofhir/fhirpath v1.5.1` (originally reported against v1.1.0)
 **Compared against:** HL7 `validator_cli` 6.9.12, FHIR R4 (4.0.1)
 
 None of these are worked around on our side. Affected constraints are reported as
@@ -14,22 +14,41 @@ They surfaced now because our constraint engine used to skip any element declari
 one type, which made every constraint of every choice type unreachable — 167 elements in R4.
 With that fixed, these constraints are reached for the first time.
 
-## Status as of v1.4.0
+## Status as of v1.5.1 — three of four fixed
 
-**Gap 1 is fixed.** Re-running the audit against v1.4.0: `0 of 3` shadowing candidates are
-shadowed, `Reference.reference` navigates to its value, and `ref-1` now fails where it should
-— verified end to end against the reference, which reports the same two errors at the same two
-paths. Zero false positives across 30 official examples carrying local references. The `trace()`
-output that used to reach stdout on every reference is gone as well.
-
-Gaps 2, 3 and 4 are unchanged in v1.4.0, still affecting 8 constraints.
-
-| # | Gap | Constraints | v1.4.0 |
+| # | Gap | Constraints | Status |
 | --- | --- | --- | --- |
-| 1 | Type-name shadowing | `ref-1` | **fixed** |
-| 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | open |
-| 3 | Published FHIR regex rejected | `eld-19` `eld-20` | open |
-| 4 | `Quantity` comparison | `rng-2` | open |
+| 1 | Type-name shadowing | `ref-1` | **fixed in v1.4.0** |
+| 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | **fixed in v1.5.1** |
+| 3 | Published FHIR regex rejected as dangerous | `eld-19` `eld-20` | **open** |
+| 4 | `Quantity` comparison | `rng-2` | **fixed in v1.5.1** |
+
+Re-running the audit against v1.5.1 leaves **one** evaluation failure class, gap 3. Verified end
+to end that the two newly fixed ones now produce verdicts rather than could-not-evaluate
+warnings:
+
+```text
+age-1  Condition.onsetAge with a non-UCUM system
+       ERROR  Constraint failed: age-1: 'There SHALL be a code if there is a value ...'
+
+rng-2  MedicationRequest ... doseAndRate[0].doseRange, low 10 mg, high 2 mg
+       ERROR  Constraint failed: rng-2: 'If present, low SHALL have a lower value than high'
+```
+
+v1.5.1 also picked up `github.com/gofhir/ucum/v4` as a dependency, which is presumably how
+`%ucum` and quantity comparison were closed — the approach suggested at the end of gap 4.
+
+### A correction to how this was measured
+
+The first v1.5.1 run reported ten failure classes, including `TypeError: expected a String, got
+HumanName` across 30 constraints. Those were **artefacts of the audit, not engine defects**: it
+was cross-evaluating every expression against every synthetic instance, which used to be
+harmless because a mismatched navigation returned empty. Now that the engine is strict about
+types it raises a TypeError instead, so a Timing constraint evaluated against a Patient reports
+a type mismatch that says nothing about the engine.
+
+The audit now evaluates each expression only against an instance of its own type. The full
+validator suite passing unchanged on v1.5.1 is what showed those classes were not real.
 
 ## How this was measured
 
@@ -141,7 +160,9 @@ Each of those should have been a bare id.
 
 ---
 
-## 2. `%ucum` is undefined
+## 2. `%ucum` is undefined — FIXED in v1.5.1
+
+Kept for the record; the behaviour below is v1.1.0's.
 
 ```
 InvalidPathError: undefined variable: %ucum
@@ -208,7 +229,9 @@ loaded StructureDefinitions would keep the specification's own regexes working.
 
 ---
 
-## 4. Two `Quantity` values cannot be compared
+## 4. Two `Quantity` values cannot be compared — FIXED in v1.5.1
+
+Kept for the record; the behaviour below is v1.1.0's.
 
 ```
 InvalidOperationError: cannot apply 'compare' to Quantity and Quantity
@@ -233,13 +256,15 @@ decidable in the common case without claiming unit conversion.
 
 ---
 
-## Priority
+## What remains
 
-Type-name shadowing was the critical one and is fixed in v1.4.0. Of what remains:
+Only the regex guard, affecting `eld-19` and `eld-20`. It blocks a pattern the specification
+itself publishes, so `ElementDefinition.path` cannot be validated and a malformed path passes.
 
-1. **`%ucum`** — five invariants, and the fix is a constant.
-2. **The regex guard** — two invariants, and it blocks patterns the specification publishes.
-3. **`Quantity` comparison** — one invariant; the correct fix needs unit handling.
+Go's `regexp` is RE2, which has no catastrophic backtracking, so the consecutive-quantifier
+heuristic may be guarding a risk this engine does not carry. If the guard is needed for a
+non-RE2 path, an allowance for patterns coming from loaded StructureDefinitions would keep the
+specification's own regexes working.
 
 ## `gofhir/ucum` — audited, no defects found
 

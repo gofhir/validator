@@ -2,7 +2,7 @@
 
 > Gaps identified by comparing against YAFV (Node.js FHIR validator).
 > Date: 2026-03-06
-> Updated: 2026-07-31 (fhirpath v1.4.0)
+> Updated: 2026-07-31 (fhirpath v1.5.1, ucum/v4 v4.2.0)
 
 ## Resolved Gaps
 
@@ -297,14 +297,14 @@ What remains is ergonomics, neither of which changes a verdict:
 Open only if evidence appears:
   GO-GAP-005: Issue deduplication - no real duplicate found yet
 
-Blocked upstream in gofhir/fhirpath (8 constraints, see
+Blocked upstream in gofhir/fhirpath (2 constraints, see
 docs/plans/2026-07-30-fhirpath-engine-gaps.md):
-  age-1 cnt-3 dis-1 drt-1 ras-1      %ucum undefined
   eld-19 eld-20                      published FHIR regex rejected as dangerous
-  rng-2                              Quantity comparison unsupported
 
-Fixed upstream in fhirpath v1.4.0:
-  ref-1                              type-name shadowing - now evaluates and fails correctly
+Fixed upstream, now evaluating correctly:
+  ref-1                              type-name shadowing        (fhirpath v1.4.0)
+  age-1 cnt-3 dis-1 drt-1 ras-1      %ucum undefined            (fhirpath v1.5.1)
+  rng-2                              Quantity comparison        (fhirpath v1.5.1)
 ```
 
 Done: GO-GAP-001 (`compose.exclude`), GO-GAP-002 (filter operators) and version-aware
