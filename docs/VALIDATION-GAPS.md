@@ -330,14 +330,21 @@ What remains is ergonomics, neither of which changes a verdict:
 Open only if evidence appears:
   GO-GAP-005: Issue deduplication - no real duplicate found yet
 
-Blocked upstream in gofhir/fhirpath (2 constraints, see
-docs/plans/2026-07-30-fhirpath-engine-gaps.md):
-  eld-19 eld-20                      published FHIR regex rejected as dangerous
-
-Fixed upstream, now evaluating correctly:
+Nothing is blocked in gofhir/fhirpath any more. Every engine finding is closed
+(see docs/plans/2026-07-30-fhirpath-engine-gaps.md):
   ref-1                              type-name shadowing        (fhirpath v1.4.0)
   age-1 cnt-3 dis-1 drt-1 ras-1      %ucum undefined            (fhirpath v1.5.1)
   rng-2                              Quantity comparison        (fhirpath v1.5.1)
+  eld-19 eld-20                      ReDoS guard false positive (fhirpath v1.5.2)
+  R5 sdf-24 sdf-25                   substring panic            (fhirpath v1.6.0)
+
+Awaiting HL7, not the engine:
+  eld-19 eld-20 + 30 canonical *-0   invariants use matches() where they meant matchesFull(),
+                                     so they pass on any value containing an acceptable
+                                     substring. A defect in the published constraints; we
+                                     evaluate them as written. To be co-filed against FHIR core.
+  R4B sdf-24 sdf-25                  $this.length() on an object; HL7 fixed it in R5
+  R5 eld-11                          double-quoted string literal, invalid in FHIRPath
 ```
 
 Done: GO-GAP-001 (`compose.exclude`), GO-GAP-002 (filter operators) and version-aware
