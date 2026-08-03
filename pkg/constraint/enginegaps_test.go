@@ -1,7 +1,7 @@
 package constraint_test
 
 import (
-	"fmt"
+	"encoding/json"
 	"os"
 	"sort"
 	"strings"
@@ -83,9 +83,11 @@ func collectConstraints(reg *registry.Registry) []constraintEntry {
 	return out
 }
 
-// syntheticInstance builds a JSON object for a type using its own ElementDefinitions:
-// each direct child is populated with a value of the type the SD declares. The depth
-// argument bounds recursion into complex children.
+// syntheticInstance builds a JSON object for a type from its own snapshot.
+//
+// It walks every element path, not just direct children, so backbone elements are modeled
+// too: Measure.group.linkId is defined in Measure's snapshot rather than in any separate SD,
+// and building only direct children left it with nowhere to point.
 func syntheticInstance(reg *registry.Registry, sd *registry.StructureDefinition, depth int) string {
 	if sd == nil || sd.Snapshot == nil || depth < 0 {
 		return "{}"
@@ -95,36 +97,81 @@ func syntheticInstance(reg *registry.Registry, sd *registry.StructureDefinition,
 		typeName = sd.ID
 	}
 
-	var fields []string
+	root := map[string]any{}
 	for i := range sd.Snapshot.Element {
 		elem := &sd.Snapshot.Element[i]
-		// direct children only
 		rest := strings.TrimPrefix(elem.Path, typeName+".")
-		if rest == elem.Path || strings.Contains(rest, ".") {
+		if rest == elem.Path || rest == "" || len(elem.Type) == 0 || elem.Max == "0" {
 			continue
 		}
-		if len(elem.Type) == 0 || elem.Max == "0" {
+		segs := strings.Split(rest, ".")
+		// Bound the tree: contentReference elements (Questionnaire.item.item) recur, and deep
+		// paths add nothing the constraints need.
+		if len(segs) > 4 {
 			continue
 		}
-		if rest == "id" || rest == "extension" || rest == "modifierExtension" {
-			continue
-		}
-		typeCode := elem.Type[0].Code
-		name := rest
-		if strings.HasSuffix(rest, "[x]") {
-			name = strings.TrimSuffix(rest, "[x]") + strings.ToUpper(typeCode[:1]) + typeCode[1:]
-		}
-		val := syntheticValue(reg, typeCode, depth)
-		if val == "" {
-			continue
-		}
-		if elem.Max == "*" {
-			val = "[" + val + "]"
-		}
-		fields = append(fields, fmt.Sprintf("%q:%s", name, val))
+		insertPath(reg, root, segs, elem, depth)
 	}
-	sort.Strings(fields)
-	return "{" + strings.Join(fields, ",") + "}"
+	out, err := json.Marshal(root)
+	if err != nil {
+		return "{}"
+	}
+	return string(out)
+}
+
+// insertPath places a value for one element at its path inside the tree being built,
+// creating the intermediate backbone objects as it goes.
+func insertPath(reg *registry.Registry, node map[string]any, segs []string, elem *registry.ElementDefinition, depth int) {
+	typeCode := elem.Type[0].Code
+
+	for i, seg := range segs {
+		last := i == len(segs)-1
+		name := seg
+		if last && strings.HasSuffix(seg, "[x]") {
+			name = strings.TrimSuffix(seg, "[x]") + strings.ToUpper(typeCode[:1]) + typeCode[1:]
+		}
+		if name == "id" || name == "extension" || name == "modifierExtension" {
+			return
+		}
+
+		if last {
+			if _, exists := node[name]; exists {
+				return
+			}
+			raw := syntheticValue(reg, typeCode, depth)
+			if raw == "" {
+				return
+			}
+			var v any
+			if json.Unmarshal([]byte(raw), &v) != nil {
+				return
+			}
+			if elem.Max == "*" {
+				v = []any{v}
+			}
+			node[name] = v
+			return
+		}
+
+		// Intermediate segment: descend, creating the container if needed. Arrays keep a
+		// single element, which is all a constraint context needs.
+		child, ok := node[name]
+		if !ok {
+			child = map[string]any{}
+			node[name] = child
+		}
+		if arr, isArr := child.([]any); isArr {
+			if len(arr) == 0 {
+				return
+			}
+			child = arr[0]
+		}
+		m, ok := child.(map[string]any)
+		if !ok {
+			return
+		}
+		node = m
+	}
 }
 
 // syntheticValue renders a value for one type code, using the registry to tell primitives
@@ -136,6 +183,9 @@ func syntheticValue(reg *registry.Registry, typeCode string, depth int) string {
 			return ""
 		}
 		return syntheticInstance(reg, typeSD, depth-1)
+	}
+	if typeSD != nil && typeSD.Kind == "resource" {
+		return ""
 	}
 	// Primitives: the JSON form follows the primitive's own base type in the SD.
 	base := typeCode
@@ -166,6 +216,54 @@ func syntheticValue(reg *registry.Registry, typeCode string, depth int) string {
 	}
 }
 
+// contextFor narrows a type's instance to the node a constraint is declared on. A constraint
+// on the type's root element evaluates against the whole instance; one on a sub-element
+// evaluates against that element's value.
+//
+// Returns false when the sub-element is absent from the synthetic instance, in which case the
+// caller skips the constraint rather than evaluating it against the wrong node.
+func contextFor(e constraintEntry, shape string) (string, bool) {
+	rest := strings.TrimPrefix(e.path, e.sd+".")
+	if rest == e.path || rest == "" {
+		return "", false // declared on the root element
+	}
+	var node any
+	if err := json.Unmarshal([]byte(shape), &node); err != nil {
+		return "", false
+	}
+	for _, seg := range strings.Split(rest, ".") {
+		m, ok := node.(map[string]any)
+		if !ok {
+			return "", false
+		}
+		v, ok := m[seg]
+		if !ok && strings.HasSuffix(seg, "[x]") {
+			base := strings.TrimSuffix(seg, "[x]")
+			for k, kv := range m {
+				if strings.HasPrefix(k, base) && len(k) > len(base) {
+					v, ok = kv, true
+					break
+				}
+			}
+		}
+		if !ok {
+			return "", false
+		}
+		if arr, isArr := v.([]any); isArr {
+			if len(arr) == 0 {
+				return "", false
+			}
+			v = arr[0]
+		}
+		node = v
+	}
+	out, err := json.Marshal(node)
+	if err != nil {
+		return "", false
+	}
+	return string(out), true
+}
+
 // TestAuditEngineExpressionGaps compiles and evaluates every published constraint expression
 // against instances built from the SDs, and groups whatever the engine cannot handle.
 func TestAuditEngineExpressionGaps(t *testing.T) {
@@ -176,9 +274,8 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 	entries := collectConstraints(reg)
 	t.Logf("distinct published constraints: %d", len(entries))
 
-	// One instance per type that declares constraints, built from that type's own SD, plus
-	// the empty object so expressions that need no operands are still exercised.
-	shapes := map[string]string{"empty": "{}"}
+	// One instance per type that declares constraints, built from that type's own SD.
+	shapes := map[string]string{}
 	for _, e := range entries {
 		if _, ok := shapes[e.sd]; ok {
 			continue
@@ -187,11 +284,12 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 			shapes[e.sd] = syntheticInstance(reg, sd, 2)
 		}
 	}
-	t.Logf("synthetic instances built from SDs: %d", len(shapes)-1)
+	t.Logf("synthetic instances built from SDs: %d", len(shapes))
 
 	type failure struct{ key, sd, path, shape, expr, err string }
 	var compileFails, evalFails []failure
 	seen := map[string]bool{}
+	skippedNoContext := 0
 
 	for _, e := range entries {
 		expr, cerr := fhirpath.Compile(e.expr)
@@ -206,10 +304,31 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 		// types it raises a TypeError instead, so a Timing constraint evaluated against a
 		// Patient reports "expected a String, got HumanName" — a fact about the audit, not
 		// about the engine. Reporting those upstream would waste the maintainers' time.
-		for _, shapeName := range []string{e.sd, "empty"} {
+		// Its own type only. The empty object was here to exercise expressions needing no
+		// operands, but `{}` is itself a node: exists() returns true and a function expecting a
+		// primitive receives an object, which reports a type mismatch that is an artifact of
+		// the audit. The type's own instance already exercises those expressions.
+		for _, shapeName := range []string{e.sd} {
 			shape, ok := shapes[shapeName]
 			if !ok {
 				continue
+			}
+			// A constraint is evaluated with the node it is declared on as context. For one
+			// declared on a sub-element — cnl-1 on EvidenceVariable.url — that is the element's
+			// value, not the resource, and evaluating it against the resource reports a type
+			// mismatch that says nothing about the engine.
+			//
+			// When the context cannot be built — the synthetic instance does not model backbone
+			// elements, so Measure.group.linkId has nowhere to point — the constraint is skipped
+			// rather than evaluated against the wrong node. Skipping is counted and reported, so
+			// the coverage gap stays visible instead of passing for a clean result.
+			if strings.Contains(strings.TrimPrefix(e.path, e.sd+"."), ".") || e.path != e.sd {
+				ctxShape, ok := contextFor(e, shape)
+				if !ok {
+					skippedNoContext++
+					continue
+				}
+				shape = ctxShape
 			}
 			ctx := eval.NewContext([]byte(shape))
 			if _, eerr := expr.EvaluateWithContext(ctx); eerr != nil {
@@ -223,6 +342,9 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 		}
 	}
 
+	if skippedNoContext > 0 {
+		t.Logf("=== skipped, declared context not representable in a synthetic instance: %d", skippedNoContext)
+	}
 	t.Logf("=== compile failures: %d", len(compileFails))
 	for _, f := range compileFails {
 		t.Logf("  [%s] %s.%s: %s", f.key, f.sd, f.path, f.err)

@@ -3,7 +3,7 @@
 **For:** the `github.com/gofhir/fhirpath` maintainers
 **From:** the `github.com/gofhir/validator` maintainers
 **Date:** 2026-07-30
-**Engine:** `gofhir/fhirpath v1.5.1` (originally reported against v1.1.0)
+**Engine:** `gofhir/fhirpath v1.6.0` (originally reported against v1.1.0)
 **Compared against:** HL7 `validator_cli` 6.9.12, FHIR R4 (4.0.1)
 
 None of these are worked around on our side. Affected constraints are reported as
@@ -14,43 +14,140 @@ They surfaced now because our constraint engine used to skip any element declari
 one type, which made every constraint of every choice type unreachable — 167 elements in R4.
 With that fixed, these constraints are reached for the first time.
 
-## Status as of v1.5.1 — three of four fixed
+## Status as of v1.6.0
 
-| # | Gap | Constraints | Status |
+Six findings so far, five closed.
+
+| # | Finding | Constraints | Status |
 | --- | --- | --- | --- |
-| 1 | Type-name shadowing | `ref-1` | **fixed in v1.4.0** |
-| 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | **fixed in v1.5.1** |
-| 3 | Published FHIR regex rejected as dangerous | `eld-19` `eld-20` | **open** |
-| 4 | `Quantity` comparison | `rng-2` | **fixed in v1.5.1** |
+| 1 | Type-name shadowing | `ref-1` | fixed in v1.4.0 |
+| 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | fixed in v1.5.1 |
+| 3 | ReDoS guard misidentifies quantifiers | `eld-19` `eld-20` | fixed in v1.5.2 |
+| 4 | `Quantity` comparison | `rng-2` | fixed in v1.5.1 |
+| 5 | `substring()` panics on negative length | R5 `sdf-24` `sdf-25` | **fixed in v1.6.0** (see note) |
+| 6 | `matches()` searches instead of testing the whole string | 32 of 37 R4 patterns | **open** |
 
-Re-running the audit against v1.5.1 leaves **one** evaluation failure class, gap 3. Verified end
-to end that the two newly fixed ones now produce verdicts rather than could-not-evaluate
-warnings:
+With the panic gone, R5 can be audited to completion for the first time — the crash used to cut
+the sweep short, so its earlier "results" were not results at all.
+
+| Version | Constraints | Skipped (no context) | Compile failures | Evaluation failures |
+| --- | --- | --- | --- | --- |
+| R4 4.0.1 | 252 | 5 | 0 | 0 |
+| R4B 4.3.0 | 256 | 8 | 0 | 2 — HL7's, see below |
+| R5 5.0.0 | 330 | 6 | 1 — HL7's, see below | 0 |
+
+Every remaining failure across the three versions belongs to the published specification rather
+than to the engine.
+
+### Note on the v1.6.0 substring fix
+
+The panic is gone, but the return value is inconsistent with the sibling cases: a negative
+length yields a collection holding the empty string, where an out-of-range start yields an empty
+collection.
 
 ```text
-age-1  Condition.onsetAge with a non-UCUM system
-       ERROR  Constraint failed: age-1: 'There SHALL be a code if there is a value ...'
-
-rng-2  MedicationRequest ... doseAndRate[0].doseRange, low 10 mg, high 2 mg
-       ERROR  Constraint failed: rng-2: 'If present, low SHALL have a lower value than high'
+'abc'.substring(0, -1)           => ""      a one-item collection
+'abc'.substring(-1, 2)           => {}      empty
+'abc'.substring(10, 2)           => {}      empty
+'abc'.substring(0, -1).exists()  => true    would be false with {}
+'abc'.substring(10, 2).exists()  => false
 ```
 
-v1.5.1 also picked up `github.com/gofhir/ucum/v4` as a dependency, which is presumably how
-`%ucum` and quantity comparison were closed — the approach suggested at the end of gap 4.
+Practical impact today is nil — the only constraints reaching a negative length are R4B's
+`sdf-24`/`sdf-25`, which are themselves defective — but it is worth mentioning upstream for
+consistency, since constraints branch on `exists()`.
 
-### A correction to how this was measured
+### Two remaining failures that are HL7's, not the engine's
 
-The first v1.5.1 run reported ten failure classes, including `TypeError: expected a String, got
-HumanName` across 30 constraints. Those were **artefacts of the audit, not engine defects**: it
-was cross-evaluating every expression against every synthetic instance, which used to be
-harmless because a mismatched navigation returned empty. Now that the engine is strict about
-types it raises a TypeError instead, so a Timing constraint evaluated against a Patient reports
-a type mismatch that says nothing about the engine.
+**R4B `sdf-24` and `sdf-25`** compute `id.substring(0, $this.length()-10)`. Inside that `where`,
+`$this` is the element — an object — so `.length()` is a type error and the engine is right to
+say so. HL7 corrected it in R5, which is what settles the attribution:
 
-The audit now evaluates each expression only against an instance of its own type. The full
-validator suite passing unchanged on v1.5.1 is what showed those classes were not real.
+```text
+R4B:  id.substring(0, $this.length()-10)
+R5:   path.substring(0, $this.path.length()-…)     navigates to path first
+```
 
-## How this was measured
+**R5 `eld-11`** uses a double-quoted literal, `type.code.contains(":")`. FHIRPath states *"String
+literals are surrounded by single-quotes"*, so the engine is right to reject it. HL7's own
+validator tolerates it.
+
+## New finding: `substring()` panics## Finding 5: `substring()` panics on a negative length — fixed in v1.6.0
+
+The most serious of the new findings, because a panic is not an error a caller can handle — it
+unwinds the process. There is no `recover` on the evaluation path, in the engine or in this
+validator.
+
+```go
+'abc'.substring(0, -1)                  panic: slice bounds out of range [:-1]
+'abc'.substring(0, 'abc'.length()-10)   panic: slice bounds out of range [:-7]
+```
+
+`funcs/strings.go:385`. The neighbouring out-of-range cases are handled correctly, which is what
+makes this look like an oversight rather than a design choice:
+
+```text
+'abc'.substring(-1, 2)    => {}    correct
+'abc'.substring(10, 2)    => {}    correct
+'abc'.substring(0, 2)     => ab    correct
+```
+
+FHIRPath specifies empty for out-of-range arguments — *"If start lies outside the length of the
+string, the function returns empty"* — so a negative length should return `{}` as its siblings do.
+
+**Where it is reachable.** R5's `sdf-24` and `sdf-25` compute a length arithmetically:
+
+```
+id.substring(0, $this.length()-10)
+```
+
+Any `id` shorter than ten characters makes the argument negative, so validating a
+StructureDefinition crashes the process. Our audit hit it on the first R5 run.
+
+R4 and R4B are **not** exposed: their only `substring` use is `ref-1`'s single-argument
+`reference.substring(1)`, and that form is safe at every boundary we tried — `'#'.substring(1)`
+and `''.substring(1)` both return `{}`. Confirmed end to end that a Patient with
+`"reference": "#"` validates normally rather than crashing.
+
+## Finding 6: `matches()` searches instead of testing the whole string — OPEN
+
+Not caught by the audit, which only asks whether an expression evaluates without error. Found by
+checking `eld-19` end to end after v1.5.2 made it evaluable: it evaluates, and returns the wrong
+answer.
+
+```text
+'abc def'.matches('abc')      => true    expected false
+'xabcx'.matches('abc')        => true    expected false
+'abc'.matches('abc')          => true    correct
+```
+
+A partial match makes every validation regex vacuous: any string containing an acceptable
+substring passes. `eld-19` is the case in hand — a `path` of `"Patient has spaces, and #bad
+chars!"` passes, because `Patient` matches the leading character class, where the reference
+reports an error.
+
+Anchored patterns are unaffected, which is why R5's `cnl-1` (`matches('^[^|# ]+$')`) behaves
+correctly — verified returning `false` for a URL containing a pipe.
+
+The specification is not explicit here. It says only *"Returns `true` when the value matches the
+given regular expression"*, without stating whether the whole input is tested. The case for
+anchoring is that the reference implementation behaves that way — HL7's validator reports
+`eld-19` on the path above — and that the alternative empties every regex constraint of meaning.
+Roughly 37 constraints in the R4 corpus use `matches()`.
+
+## R5 `eld-11` does not compile — and that one is HL7's
+
+```text
+lexer errors: token recognition error at: '"' ':' '"'
+eld-11: ... or type.code.contains(":") or ...
+```
+
+The literal is double-quoted. FHIRPath states *"String literals are surrounded by
+single-quotes"*, so `":"` is not a string literal and the engine is right to reject it. This is a
+defect in the published R5 StructureDefinition rather than in the engine, and belongs upstream
+with HL7. Worth knowing that HL7's own validator tolerates it.
+
+## How this was measured## How this was measured
 
 `pkg/constraint/enginegaps_test.go` (run with `FPAUDIT=1`) derives everything from the
 StructureDefinitions in the loaded packages — nothing is enumerated by hand, so it stays
@@ -61,8 +158,19 @@ correct across FHIR versions and package sets:
 - shadowing candidates are found by comparing each element's name against the type
   containing it
 
-Result: **252 distinct published constraints, 0 compile failures.** Every gap below is in
-evaluation. `FPAUDIT_VERSION=4.3.0` or `5.0.0` re-runs it against R4B or R5.
+`FPAUDIT_VERSION=4.3.0` or `5.0.0` re-runs it against R4B or R5.
+
+Two limits worth stating, both learned by getting them wrong:
+
+- Each expression is evaluated **only** against an instance of its own type, and with the node it
+  is declared on as context. Cross-evaluating shapes reported type mismatches that were facts
+  about the audit, not the engine — a Timing constraint against a Patient, `matches()` against
+  the empty object.
+- Where the declared context cannot be built, the constraint is **skipped and counted** rather
+  than evaluated against the wrong node. Instances are now built by walking the full snapshot by
+  path rather than only direct children, which models backbone elements — `Measure.group.linkId`
+  is defined in Measure's snapshot, not in any separate SD. That took skipping from 30 of 252 to
+  **5** in R4 and from 58 of 330 to **6** in R4B. The remainder are unaudited, not clean.
 
 ## Summary
 
