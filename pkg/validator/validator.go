@@ -28,7 +28,7 @@ import (
 	"github.com/gofhir/validator/pkg/terminology"
 	"github.com/gofhir/validator/pkg/ucumvalidator"
 
-	"github.com/gofhir/ucum"
+	"github.com/gofhir/ucum/v4"
 )
 
 func init() {
