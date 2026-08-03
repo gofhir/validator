@@ -3,7 +3,7 @@
 **For:** the `github.com/gofhir/fhirpath` maintainers
 **From:** the `github.com/gofhir/validator` maintainers
 **Date:** 2026-07-30
-**Engine:** `gofhir/fhirpath v1.5.1` (originally reported against v1.1.0)
+**Engine:** `gofhir/fhirpath v1.5.2` (originally reported against v1.1.0)
 **Compared against:** HL7 `validator_cli` 6.9.12, FHIR R4 (4.0.1)
 
 None of these are worked around on our side. Affected constraints are reported as
@@ -14,43 +14,73 @@ They surfaced now because our constraint engine used to skip any element declari
 one type, which made every constraint of every choice type unreachable — 167 elements in R4.
 With that fixed, these constraints are reached for the first time.
 
-## Status as of v1.5.1 — three of four fixed
+## Status as of v1.5.2 — all four original gaps closed, one new finding
 
 | # | Gap | Constraints | Status |
 | --- | --- | --- | --- |
-| 1 | Type-name shadowing | `ref-1` | **fixed in v1.4.0** |
-| 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | **fixed in v1.5.1** |
-| 3 | Published FHIR regex rejected as dangerous | `eld-19` `eld-20` | **open** |
-| 4 | `Quantity` comparison | `rng-2` | **fixed in v1.5.1** |
+| 1 | Type-name shadowing | `ref-1` | fixed in v1.4.0 |
+| 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | fixed in v1.5.1 |
+| 3 | ReDoS guard misidentifies quantifiers | `eld-19` `eld-20` | **fixed in v1.5.2** |
+| 4 | `Quantity` comparison | `rng-2` | fixed in v1.5.1 |
 
-Re-running the audit against v1.5.1 leaves **one** evaluation failure class, gap 3. Verified end
-to end that the two newly fixed ones now produce verdicts rather than could-not-evaluate
-warnings:
+v1.5.2 fixed the guard precisely: the five false positives now pass and the genuinely
+consecutive ones stay rejected.
 
 ```text
-age-1  Condition.onsetAge with a non-UCUM system
-       ERROR  Constraint failed: age-1: 'There SHALL be a code if there is a value ...'
-
-rng-2  MedicationRequest ... doseAndRate[0].doseRange, low 10 mg, high 2 mg
-       ERROR  Constraint failed: rng-2: 'If present, low SHALL have a lower value than high'
+(a+)?  (a*)?  (a+)*  a+?  a*?     accepted   (were rejected)
+a**    a*+                        rejected   (correct — RE2 rejects them unaided)
 ```
 
-v1.5.1 also picked up `github.com/gofhir/ucum/v4` as a dependency, which is presumably how
-`%ucum` and quantity comparison were closed — the approach suggested at the end of gap 4.
+The audit is now clean across three FHIR versions:
 
-### A correction to how this was measured
+| Version | Constraints | Compile failures | Evaluation failures |
+| --- | --- | --- | --- |
+| R4 4.0.1 | 252 | 0 | 0 |
+| R4B 4.3.0 | 256 | 0 | 0 |
+| R5 5.0.0 | 330 | 1 — see below | 0 |
 
-The first v1.5.1 run reported ten failure classes, including `TypeError: expected a String, got
-HumanName` across 30 constraints. Those were **artefacts of the audit, not engine defects**: it
-was cross-evaluating every expression against every synthetic instance, which used to be
-harmless because a mismatched navigation returned empty. Now that the engine is strict about
-types it raises a TypeError instead, so a Timing constraint evaluated against a Patient reports
-a type mismatch that says nothing about the engine.
+The noise this used to generate is gone too: a StructureDefinition that produced 21 issues, 18
+of them the same unevaluatable-constraint warning, now produces 3.
 
-The audit now evaluates each expression only against an instance of its own type. The full
-validator suite passing unchanged on v1.5.1 is what showed those classes were not real.
+## New finding: `matches()` searches instead of testing the whole string
 
-## How this was measured
+Not caught by the audit, which only asks whether an expression evaluates without error. Found by
+checking `eld-19` end to end after v1.5.2 made it evaluable: it evaluates, and returns the wrong
+answer.
+
+```text
+'abc def'.matches('abc')      => true    expected false
+'xabcx'.matches('abc')        => true    expected false
+'abc'.matches('abc')          => true    correct
+```
+
+A partial match makes every validation regex vacuous: any string containing an acceptable
+substring passes. `eld-19` is the case in hand — a `path` of `"Patient has spaces, and #bad
+chars!"` passes, because `Patient` matches the leading character class, where the reference
+reports an error.
+
+Anchored patterns are unaffected, which is why R5's `cnl-1` (`matches('^[^|# ]+$')`) behaves
+correctly — verified returning `false` for a URL containing a pipe.
+
+The specification is not explicit here. It says only *"Returns `true` when the value matches the
+given regular expression"*, without stating whether the whole input is tested. The case for
+anchoring is that the reference implementation behaves that way — HL7's validator reports
+`eld-19` on the path above — and that the alternative empties every regex constraint of meaning.
+Roughly 37 constraints in the R4 corpus use `matches()`.
+
+## R5 `eld-11` does not compile — and that one is HL7's
+
+```text
+lexer errors: token recognition error at: '"' ':' '"'
+eld-11: ... or type.code.contains(":") or ...
+```
+
+The literal is double-quoted. FHIRPath states *"String literals are surrounded by
+single-quotes"*, so `":"` is not a string literal and the engine is right to reject it. This is a
+defect in the published R5 StructureDefinition rather than in the engine, and belongs upstream
+with HL7. Worth knowing that HL7's own validator tolerates it.
+
+## How this was measured## How this was measured
 
 `pkg/constraint/enginegaps_test.go` (run with `FPAUDIT=1`) derives everything from the
 StructureDefinitions in the loaded packages — nothing is enumerated by hand, so it stays
@@ -61,8 +91,17 @@ correct across FHIR versions and package sets:
 - shadowing candidates are found by comparing each element's name against the type
   containing it
 
-Result: **252 distinct published constraints, 0 compile failures.** Every gap below is in
-evaluation. `FPAUDIT_VERSION=4.3.0` or `5.0.0` re-runs it against R4B or R5.
+`FPAUDIT_VERSION=4.3.0` or `5.0.0` re-runs it against R4B or R5.
+
+Two limits worth stating, both learned by getting them wrong:
+
+- Each expression is evaluated **only** against an instance of its own type, and with the node it
+  is declared on as context. Cross-evaluating shapes reported type mismatches that were facts
+  about the audit, not the engine — a Timing constraint against a Patient, `matches()` against
+  the empty object.
+- Where the declared context cannot be built, the constraint is **skipped and counted** rather
+  than evaluated against the wrong node: 30 of 252 in R4, 58 of 330 in R5, all of them declared
+  on backbone elements the synthetic instances do not model. Those are unaudited, not clean.
 
 ## Summary
 

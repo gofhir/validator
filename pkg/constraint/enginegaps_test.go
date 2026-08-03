@@ -1,6 +1,7 @@
 package constraint_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -166,6 +167,55 @@ func syntheticValue(reg *registry.Registry, typeCode string, depth int) string {
 	}
 }
 
+// contextFor narrows a type's instance to the node a constraint is declared on. A constraint
+// on the type's root element evaluates against the whole instance; one on a sub-element
+// evaluates against that element's value.
+//
+// Returns false when the sub-element is absent from the synthetic instance, in which case the
+// caller keeps the full instance rather than inventing a context.
+func contextFor(e constraintEntry, shape string) (string, bool) {
+	rest := strings.TrimPrefix(e.path, e.sd+".")
+	if rest == e.path || rest == "" {
+		return "", false // declared on the root element
+	}
+	var node any
+	if err := json.Unmarshal([]byte(shape), &node); err != nil {
+		return "", false
+	}
+	for _, seg := range strings.Split(rest, ".") {
+		m, ok := node.(map[string]any)
+		if !ok {
+			return "", false
+		}
+		// Choice elements are stored under their concrete name in the instance.
+		v, ok := m[seg]
+		if !ok && strings.HasSuffix(seg, "[x]") {
+			base := strings.TrimSuffix(seg, "[x]")
+			for k, kv := range m {
+				if strings.HasPrefix(k, base) && len(k) > len(base) {
+					v, ok = kv, true
+					break
+				}
+			}
+		}
+		if !ok {
+			return "", false
+		}
+		if arr, isArr := v.([]any); isArr {
+			if len(arr) == 0 {
+				return "", false
+			}
+			v = arr[0]
+		}
+		node = v
+	}
+	out, err := json.Marshal(node)
+	if err != nil {
+		return "", false
+	}
+	return string(out), true
+}
+
 // TestAuditEngineExpressionGaps compiles and evaluates every published constraint expression
 // against instances built from the SDs, and groups whatever the engine cannot handle.
 func TestAuditEngineExpressionGaps(t *testing.T) {
@@ -176,9 +226,8 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 	entries := collectConstraints(reg)
 	t.Logf("distinct published constraints: %d", len(entries))
 
-	// One instance per type that declares constraints, built from that type's own SD, plus
-	// the empty object so expressions that need no operands are still exercised.
-	shapes := map[string]string{"empty": "{}"}
+	// One instance per type that declares constraints, built from that type's own SD.
+	shapes := map[string]string{}
 	for _, e := range entries {
 		if _, ok := shapes[e.sd]; ok {
 			continue
@@ -187,11 +236,12 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 			shapes[e.sd] = syntheticInstance(reg, sd, 2)
 		}
 	}
-	t.Logf("synthetic instances built from SDs: %d", len(shapes)-1)
+	t.Logf("synthetic instances built from SDs: %d", len(shapes))
 
 	type failure struct{ key, sd, path, shape, expr, err string }
 	var compileFails, evalFails []failure
 	seen := map[string]bool{}
+	skippedNoContext := 0
 
 	for _, e := range entries {
 		expr, cerr := fhirpath.Compile(e.expr)
@@ -206,10 +256,31 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 		// types it raises a TypeError instead, so a Timing constraint evaluated against a
 		// Patient reports "expected a String, got HumanName" — a fact about the audit, not
 		// about the engine. Reporting those upstream would waste the maintainers' time.
-		for _, shapeName := range []string{e.sd, "empty"} {
+		// Its own type only. The empty object was here to exercise expressions needing no
+		// operands, but `{}` is itself a node: exists() returns true and a function expecting a
+		// primitive receives an object, which reports a type mismatch that is an artifact of
+		// the audit. The type's own instance already exercises those expressions.
+		for _, shapeName := range []string{e.sd} {
 			shape, ok := shapes[shapeName]
 			if !ok {
 				continue
+			}
+			// A constraint is evaluated with the node it is declared on as context. For one
+			// declared on a sub-element — cnl-1 on EvidenceVariable.url — that is the element's
+			// value, not the resource, and evaluating it against the resource reports a type
+			// mismatch that says nothing about the engine.
+			//
+			// When the context cannot be built — the synthetic instance does not model backbone
+			// elements, so Measure.group.linkId has nowhere to point — the constraint is skipped
+			// rather than evaluated against the wrong node. Skipping is counted and reported, so
+			// the coverage gap stays visible instead of passing for a clean result.
+			if strings.Contains(strings.TrimPrefix(e.path, e.sd+"."), ".") || e.path != e.sd {
+				ctxShape, ok := contextFor(e, shape)
+				if !ok {
+					skippedNoContext++
+					continue
+				}
+				shape = ctxShape
 			}
 			ctx := eval.NewContext([]byte(shape))
 			if _, eerr := expr.EvaluateWithContext(ctx); eerr != nil {
@@ -223,6 +294,9 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 		}
 	}
 
+	if skippedNoContext > 0 {
+		t.Logf("=== skipped, declared context not representable in a synthetic instance: %d", skippedNoContext)
+	}
 	t.Logf("=== compile failures: %d", len(compileFails))
 	for _, f := range compileFails {
 		t.Logf("  [%s] %s.%s: %s", f.key, f.sd, f.path, f.err)
