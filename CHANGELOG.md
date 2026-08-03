@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.20.0](https://github.com/gofhir/validator/compare/v1.19.0...v1.20.0) (2026-08-03)
+
+
+### Features
+
+* **deps:** bump gofhir/fhirpath to v1.4.0, activating ref-1 ([#82](https://github.com/gofhir/validator/issues/82)) ([f5321ad](https://github.com/gofhir/validator/commit/f5321ad39b44195d381e51da5bacbe68149a055c))
+* **deps:** fhirpath v1.5.1 and ucum v4, closing three of four engine gaps ([#84](https://github.com/gofhir/validator/issues/84)) ([5bfe542](https://github.com/gofhir/validator/commit/5bfe542e423e0309c896df93b7575d207a21d503))
+
 ## [1.19.0](https://github.com/gofhir/validator/compare/v1.18.0...v1.19.0) (2026-07-31)
 
 
