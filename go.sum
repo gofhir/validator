@@ -6,6 +6,8 @@ github.com/gofhir/fhirpath v1.5.1 h1:eOS6hE0oUQrdeJxhuhFIpCW9jWzeC4ZG9ZmuxHAEu8E
 github.com/gofhir/fhirpath v1.5.1/go.mod h1:VcFSCvELo0i6VKP0OfR/kBT6IR9NdKJc70EzXeP9zNA=
 github.com/gofhir/fhirpath v1.5.2 h1:gXlCDExi+jOje7ivShCNmC1zrVhIj3InpsRSzduDaqs=
 github.com/gofhir/fhirpath v1.5.2/go.mod h1:VcFSCvELo0i6VKP0OfR/kBT6IR9NdKJc70EzXeP9zNA=
+github.com/gofhir/fhirpath v1.6.0 h1:b0p3mmk0qDd7uMF/20RH/ITNkA/POtXm1aGA/i17tT0=
+github.com/gofhir/fhirpath v1.6.0/go.mod h1:VcFSCvELo0i6VKP0OfR/kBT6IR9NdKJc70EzXeP9zNA=
 github.com/gofhir/ucum/v4 v4.2.0 h1:ougEnTQv42vXQmWkxS7qd7nIaSG7MHm4sHqhO3RFrIM=
 github.com/gofhir/ucum/v4 v4.2.0/go.mod h1:hk/uAUDzD7UFymbMrIglysUzUtfSeqLN5prsmf9yIbM=
 github.com/shopspring/decimal v1.4.0 h1:bxl37RwXBklmTi0C79JfXCEBD1cqqHt0bbgBAGFp81k=

@@ -3,7 +3,7 @@
 **For:** the `github.com/gofhir/fhirpath` maintainers
 **From:** the `github.com/gofhir/validator` maintainers
 **Date:** 2026-07-30
-**Engine:** `gofhir/fhirpath v1.5.2` (originally reported against v1.1.0)
+**Engine:** `gofhir/fhirpath v1.6.0` (originally reported against v1.1.0)
 **Compared against:** HL7 `validator_cli` 6.9.12, FHIR R4 (4.0.1)
 
 None of these are worked around on our side. Affected constraints are reported as
@@ -14,35 +14,65 @@ They surfaced now because our constraint engine used to skip any element declari
 one type, which made every constraint of every choice type unreachable — 167 elements in R4.
 With that fixed, these constraints are reached for the first time.
 
-## Status as of v1.5.2 — all four original gaps closed, one new finding
+## Status as of v1.6.0
 
-| # | Gap | Constraints | Status |
+Six findings so far, five closed.
+
+| # | Finding | Constraints | Status |
 | --- | --- | --- | --- |
 | 1 | Type-name shadowing | `ref-1` | fixed in v1.4.0 |
 | 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | fixed in v1.5.1 |
-| 3 | ReDoS guard misidentifies quantifiers | `eld-19` `eld-20` | **fixed in v1.5.2** |
+| 3 | ReDoS guard misidentifies quantifiers | `eld-19` `eld-20` | fixed in v1.5.2 |
 | 4 | `Quantity` comparison | `rng-2` | fixed in v1.5.1 |
+| 5 | `substring()` panics on negative length | R5 `sdf-24` `sdf-25` | **fixed in v1.6.0** (see note) |
+| 6 | `matches()` searches instead of testing the whole string | 32 of 37 R4 patterns | **open** |
 
-v1.5.2 fixed the guard precisely: the five false positives now pass and the genuinely
-consecutive ones stay rejected.
-
-```text
-(a+)?  (a*)?  (a+)*  a+?  a*?     accepted   (were rejected)
-a**    a*+                        rejected   (correct — RE2 rejects them unaided)
-```
-
-The audit is now clean across three FHIR versions:
+With the panic gone, R5 can be audited to completion for the first time — the crash used to cut
+the sweep short, so its earlier "results" were not results at all.
 
 | Version | Constraints | Skipped (no context) | Compile failures | Evaluation failures |
 | --- | --- | --- | --- | --- |
 | R4 4.0.1 | 252 | 5 | 0 | 0 |
-| R4B 4.3.0 | 256 | 6 | 0 | 2 — `sdf-24` `sdf-25`, unverified |
-| R5 5.0.0 | 330 | — | 1 — not the engine's | crashes, see below |
+| R4B 4.3.0 | 256 | 8 | 0 | 2 — HL7's, see below |
+| R5 5.0.0 | 330 | 6 | 1 — HL7's, see below | 0 |
 
-The noise this used to generate is gone too: a StructureDefinition that produced 21 issues, 18
-of them the same unevaluatable-constraint warning, now produces 3.
+Every remaining failure across the three versions belongs to the published specification rather
+than to the engine.
 
-## New finding: `substring()` panics on a negative length
+### Note on the v1.6.0 substring fix
+
+The panic is gone, but the return value is inconsistent with the sibling cases: a negative
+length yields a collection holding the empty string, where an out-of-range start yields an empty
+collection.
+
+```text
+'abc'.substring(0, -1)           => ""      a one-item collection
+'abc'.substring(-1, 2)           => {}      empty
+'abc'.substring(10, 2)           => {}      empty
+'abc'.substring(0, -1).exists()  => true    would be false with {}
+'abc'.substring(10, 2).exists()  => false
+```
+
+Practical impact today is nil — the only constraints reaching a negative length are R4B's
+`sdf-24`/`sdf-25`, which are themselves defective — but it is worth mentioning upstream for
+consistency, since constraints branch on `exists()`.
+
+### Two remaining failures that are HL7's, not the engine's
+
+**R4B `sdf-24` and `sdf-25`** compute `id.substring(0, $this.length()-10)`. Inside that `where`,
+`$this` is the element — an object — so `.length()` is a type error and the engine is right to
+say so. HL7 corrected it in R5, which is what settles the attribution:
+
+```text
+R4B:  id.substring(0, $this.length()-10)
+R5:   path.substring(0, $this.path.length()-…)     navigates to path first
+```
+
+**R5 `eld-11`** uses a double-quoted literal, `type.code.contains(":")`. FHIRPath states *"String
+literals are surrounded by single-quotes"*, so the engine is right to reject it. HL7's own
+validator tolerates it.
+
+## New finding: `substring()` panics## Finding 5: `substring()` panics on a negative length — fixed in v1.6.0
 
 The most serious of the new findings, because a panic is not an error a caller can handle — it
 unwinds the process. There is no `recover` on the evaluation path, in the engine or in this
@@ -79,7 +109,7 @@ R4 and R4B are **not** exposed: their only `substring` use is `ref-1`'s single-a
 and `''.substring(1)` both return `{}`. Confirmed end to end that a Patient with
 `"reference": "#"` validates normally rather than crashing.
 
-## New finding: `matches()` searches instead of testing the whole string
+## Finding 6: `matches()` searches instead of testing the whole string — OPEN
 
 Not caught by the audit, which only asks whether an expression evaluates without error. Found by
 checking `eld-19` end to end after v1.5.2 made it evaluable: it evaluates, and returns the wrong
