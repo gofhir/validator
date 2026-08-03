@@ -20,7 +20,7 @@ With that fixed, these constraints are reached for the first time.
 | --- | --- | --- | --- |
 | 1 | Type-name shadowing | `ref-1` | **fixed in v1.4.0** |
 | 2 | `%ucum` undefined | `age-1` `cnt-3` `dis-1` `drt-1` `ras-1` | **fixed in v1.5.1** |
-| 3 | Published FHIR regex rejected as dangerous | `eld-19` `eld-20` | **open** |
+| 3 | ReDoS guard misidentifies quantifiers | `eld-19` `eld-20` | **open — bug, see below** |
 | 4 | `Quantity` comparison | `rng-2` | **fixed in v1.5.1** |
 
 Re-running the audit against v1.5.1 leaves **one** evaluation failure class, gap 3. Verified end
@@ -188,46 +188,80 @@ in HL7, and an unevaluatable-constraint warning for us.
 
 ---
 
-## 3. A published FHIR regex is rejected as dangerous
+## 3. The ReDoS guard misidentifies the pattern it is looking for
 
 ```
 InvalidExpressionError: potentially dangerous regex: consecutive quantifiers
 ```
 
-Affects `eld-19` and `eld-20` on `ElementDefinition`, whose patterns are published by HL7 in
-the R4 specification itself:
+This is not a policy that needs relaxing — the guard has an implementation bug and rejects
+valid patterns it was never meant to catch. Its own comment states the intent:
+
+```go
+case '*', '+', '?':
+    quantifierRun++
+    if prevWasQuant {
+        // Consecutive quantifiers like ** or *+ are dangerous
+        return eval.NewEvalError(eval.ErrInvalidExpression,
+            "potentially dangerous regex: consecutive quantifiers")
+    }
+    prevWasQuant = true
+```
+`funcs/regex.go:255`
+
+`prevWasQuant` is cleared only in the `default:` branch. `case '('` and `case ')'` fall through
+without clearing it, so a quantifier, a group close, and another quantifier read as adjacent:
 
 ```
-eld-19: path.matches('[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*')
+(a+)?     +  sets the flag  ->  )  leaves it set  ->  ?  sees it  ->  rejected
 ```
 
-The ReDoS guard is a good idea, but here it rejects a pattern that ships with the
-specification, so `ElementDefinition.path` cannot be validated at all — which matters for
-anyone validating StructureDefinitions, profiles or IG content.
+Two distinct false positives follow, both reproducible in six characters:
 
-Confirmed end to end on a StructureDefinition whose differential declares
-`"path": "Patient has spaces, and #bad chars!"`:
+| Pattern | Verdict | Should be |
+| --- | --- | --- |
+| `(a+)?` | rejected | valid — quantified group, then optional |
+| `(a*)?` | rejected | valid |
+| `(a+)*` | rejected | valid |
+| `a+?` | rejected | valid — `?` here is the lazy modifier, not a second quantifier |
+| `a**` | rejected | correct, and RE2 rejects it unaided |
+| `(a)(b)` | accepted | correct |
+| `a{1,3}(b)?` | accepted | correct — `}` hits `default:` and clears the flag |
 
-```text
-HL7:    Error   @ StructureDefinition.differential.element[1]
-                  Constraint failed: eld-19: 'Element names cannot include some special characters'
-        Warning @ StructureDefinition.differential.element[1]
-                  Constraint failed: eld-20: 'Element names should be simple alphanumerics ...'
+So `a+?`, standard non-greedy syntax, is unusable, and any quantified group followed by a
+quantifier is too. That is what `eld-19` trips over — its `...(\:[^\s\.]+)?)*` ends in exactly
+the `+)?` shape.
 
-ours:   Warning @ StructureDefinition.differential.element[1]
-                  Could not evaluate constraint 'eld-19': potentially dangerous regex
-        Warning @ StructureDefinition.differential.element[1]
-                  Could not evaluate constraint 'eld-20': potentially dangerous regex
-```
+### Why this belongs to the engine rather than to us or to HL7
 
-The `SHALL`-level `eld-19` never produces a verdict, so a malformed element path passes.
+- The rejection is decided in the engine's own code, at the line above. We only pass through the
+  expression the specification publishes, and HL7's validator evaluates the same pattern without
+  complaint.
+- The risk the guard cites does not exist here: the engine compiles with `regexp.Compile` and
+  matches with `re.MatchString` (`funcs/regex.go:79`, `:158`), which is **RE2** — linear time, no
+  backtracking, so catastrophic backtracking is not reachable.
+- RE2 already rejects genuinely malformed patterns on its own: `a**` fails to compile without any
+  help from the guard.
+- A second and effective defence is already in place — `MatchString` runs under a timeout
+  (`DefaultRegexCache` uses 100ms), which bounds any pathological input regardless of shape.
+- We cannot fix it downstream without reimplementing `ElementDefinition.path` validation by hand,
+  which would duplicate a rule the SD already publishes.
 
-Worth considering: Go's `regexp` is RE2, which has no catastrophic backtracking, so the
-consecutive-quantifier heuristic may be guarding against a risk the underlying engine does
-not carry. If the guard is needed for a non-RE2 path, an allowance for patterns coming from
-loaded StructureDefinitions would keep the specification's own regexes working.
+The narrow fix is to clear `prevWasQuant` when crossing `(` and `)`, and to treat `?` following
+another quantifier as the lazy modifier rather than a second quantifier.
 
----
+### What it costs while open
+
+`eld-19` (error) and `eld-20` (warning) are declared on `ElementDefinition`, which in all of R4
+appears in exactly two places: `StructureDefinition.differential.element` and
+`StructureDefinition.snapshot.element`. No clinical resource is affected — only profiles and IG
+content.
+
+The cost is concentrated there and scales with the profile: since the failure is a property of
+the expression rather than of the data, it repeats per element. A StructureDefinition with nine
+elements produces 21 issues of which **18 are this same message**; one with a full snapshot of
+200 elements produces roughly 400. They are warnings, and `-strict` does not promote them, so
+nothing fails — but they bury real findings.
 
 ## 4. Two `Quantity` values cannot be compared — FIXED in v1.5.1
 
@@ -258,13 +292,10 @@ decidable in the common case without claiming unit conversion.
 
 ## What remains
 
-Only the regex guard, affecting `eld-19` and `eld-20`. It blocks a pattern the specification
-itself publishes, so `ElementDefinition.path` cannot be validated and a malformed path passes.
-
-Go's `regexp` is RE2, which has no catastrophic backtracking, so the consecutive-quantifier
-heuristic may be guarding a risk this engine does not carry. If the guard is needed for a
-non-RE2 path, an allowance for patterns coming from loaded StructureDefinitions would keep the
-specification's own regexes working.
+Only gap 3, and it is a bug rather than a policy call: the guard's flag is not cleared when
+crossing `(` or `)`, so `(a+)?` and `a+?` are rejected as "consecutive quantifiers" though
+neither is. Six-character reproductions are in that section, which should make it quick to
+confirm and fix.
 
 ## `gofhir/ucum` — audited, no defects found
 
