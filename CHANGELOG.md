@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.0](https://github.com/gofhir/validator/compare/v1.20.0...v1.21.0) (2026-08-03)
+
+
+### Features
+
+* **deps:** fhirpath v1.6.0 — substring panic fixed, R5 auditable for the first time ([#86](https://github.com/gofhir/validator/issues/86)) ([6738ef5](https://github.com/gofhir/validator/commit/6738ef531f9464a6aaed476dd462fefce745c281))
+
 ## [1.20.0](https://github.com/gofhir/validator/compare/v1.19.0...v1.20.0) (2026-08-03)
 
 
