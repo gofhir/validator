@@ -215,6 +215,39 @@ Worth noting that the reference is not self-consistent here: an unresolvable **C
 warning there, an unresolvable **extension** an error, though in both cases the validator merely
 lacks a definition. We treat both as warnings.
 
+### Unanchored `matches()` in FHIR's own invariants: we evaluate as published, HL7 anchors
+
+FHIRPath defines two functions: `matches(regex)` is true when the pattern is found **within** the
+value, `matchesFull(regex)` when it matches the **entire** value. The official conformance suite
+fixes this, in both the R4 and R5 corpora, with HL7's own test names carrying the distinction:
+
+```text
+testMatchesWithinUrl2      '…/FHIR-ModelInfo|4.0.1'.matches('Library')      => true
+testMatchesFullWithinUrl3  same value and pattern, .matchesFull('Library')  => false
+```
+
+FHIR's published invariants are written as though `matches()` were anchored, so many are weaker
+than their authors intended: **32 of 37** patterns in the R4 corpus are unanchored, including
+`eld-19`, `eld-20`, and the `[A-Z]([A-Za-z0-9_]){0,254}` identifier constraint shared by 30
+canonical resources. A `StructureDefinition` declaring
+`"path": "Patient has spaces, and #bad chars!"` satisfies `eld-19`, because `Patient` is found
+within it.
+
+**We evaluate the invariants as published.** That is the specification-correct reading, and it
+follows this project's first principle — everything comes from the StructureDefinition, and
+rewriting a published constraint to mean something else is the same class of move as hardcoding
+one.
+
+The consequence is a divergence from HL7's validator, which anchors and reports `eld-19` as an
+error. Worth being precise about who departs from what: anchoring makes HL7's validator fail a
+conformance case whose expected value the suite fixes. The defect is in the constraints, and
+belongs upstream with FHIR core.
+
+If a deployment needs to match the reference on these invariants before HL7 corrects them, the
+change is a single substitution of `matchesFull` for `matches` in published expressions. It is
+deliberately not implemented here, and would have to be recorded as a deviation rather than
+presented as the language's behaviour.
+
 ### Example URLs in canonical positions: we say nothing, HL7 errors
 
 HL7 additionally reports `Error @ Patient.extension[0].url — Example URLs are not allowed in this
