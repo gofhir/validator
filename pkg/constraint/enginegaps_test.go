@@ -2,7 +2,6 @@ package constraint_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"sort"
 	"strings"
@@ -84,9 +83,11 @@ func collectConstraints(reg *registry.Registry) []constraintEntry {
 	return out
 }
 
-// syntheticInstance builds a JSON object for a type using its own ElementDefinitions:
-// each direct child is populated with a value of the type the SD declares. The depth
-// argument bounds recursion into complex children.
+// syntheticInstance builds a JSON object for a type from its own snapshot.
+//
+// It walks every element path, not just direct children, so backbone elements are modeled
+// too: Measure.group.linkId is defined in Measure's snapshot rather than in any separate SD,
+// and building only direct children left it with nowhere to point.
 func syntheticInstance(reg *registry.Registry, sd *registry.StructureDefinition, depth int) string {
 	if sd == nil || sd.Snapshot == nil || depth < 0 {
 		return "{}"
@@ -96,36 +97,81 @@ func syntheticInstance(reg *registry.Registry, sd *registry.StructureDefinition,
 		typeName = sd.ID
 	}
 
-	var fields []string
+	root := map[string]any{}
 	for i := range sd.Snapshot.Element {
 		elem := &sd.Snapshot.Element[i]
-		// direct children only
 		rest := strings.TrimPrefix(elem.Path, typeName+".")
-		if rest == elem.Path || strings.Contains(rest, ".") {
+		if rest == elem.Path || rest == "" || len(elem.Type) == 0 || elem.Max == "0" {
 			continue
 		}
-		if len(elem.Type) == 0 || elem.Max == "0" {
+		segs := strings.Split(rest, ".")
+		// Bound the tree: contentReference elements (Questionnaire.item.item) recur, and deep
+		// paths add nothing the constraints need.
+		if len(segs) > 4 {
 			continue
 		}
-		if rest == "id" || rest == "extension" || rest == "modifierExtension" {
-			continue
-		}
-		typeCode := elem.Type[0].Code
-		name := rest
-		if strings.HasSuffix(rest, "[x]") {
-			name = strings.TrimSuffix(rest, "[x]") + strings.ToUpper(typeCode[:1]) + typeCode[1:]
-		}
-		val := syntheticValue(reg, typeCode, depth)
-		if val == "" {
-			continue
-		}
-		if elem.Max == "*" {
-			val = "[" + val + "]"
-		}
-		fields = append(fields, fmt.Sprintf("%q:%s", name, val))
+		insertPath(reg, root, segs, elem, depth)
 	}
-	sort.Strings(fields)
-	return "{" + strings.Join(fields, ",") + "}"
+	out, err := json.Marshal(root)
+	if err != nil {
+		return "{}"
+	}
+	return string(out)
+}
+
+// insertPath places a value for one element at its path inside the tree being built,
+// creating the intermediate backbone objects as it goes.
+func insertPath(reg *registry.Registry, node map[string]any, segs []string, elem *registry.ElementDefinition, depth int) {
+	typeCode := elem.Type[0].Code
+
+	for i, seg := range segs {
+		last := i == len(segs)-1
+		name := seg
+		if last && strings.HasSuffix(seg, "[x]") {
+			name = strings.TrimSuffix(seg, "[x]") + strings.ToUpper(typeCode[:1]) + typeCode[1:]
+		}
+		if name == "id" || name == "extension" || name == "modifierExtension" {
+			return
+		}
+
+		if last {
+			if _, exists := node[name]; exists {
+				return
+			}
+			raw := syntheticValue(reg, typeCode, depth)
+			if raw == "" {
+				return
+			}
+			var v any
+			if json.Unmarshal([]byte(raw), &v) != nil {
+				return
+			}
+			if elem.Max == "*" {
+				v = []any{v}
+			}
+			node[name] = v
+			return
+		}
+
+		// Intermediate segment: descend, creating the container if needed. Arrays keep a
+		// single element, which is all a constraint context needs.
+		child, ok := node[name]
+		if !ok {
+			child = map[string]any{}
+			node[name] = child
+		}
+		if arr, isArr := child.([]any); isArr {
+			if len(arr) == 0 {
+				return
+			}
+			child = arr[0]
+		}
+		m, ok := child.(map[string]any)
+		if !ok {
+			return
+		}
+		node = m
+	}
 }
 
 // syntheticValue renders a value for one type code, using the registry to tell primitives
@@ -137,6 +183,9 @@ func syntheticValue(reg *registry.Registry, typeCode string, depth int) string {
 			return ""
 		}
 		return syntheticInstance(reg, typeSD, depth-1)
+	}
+	if typeSD != nil && typeSD.Kind == "resource" {
+		return ""
 	}
 	// Primitives: the JSON form follows the primitive's own base type in the SD.
 	base := typeCode
@@ -172,7 +221,7 @@ func syntheticValue(reg *registry.Registry, typeCode string, depth int) string {
 // evaluates against that element's value.
 //
 // Returns false when the sub-element is absent from the synthetic instance, in which case the
-// caller keeps the full instance rather than inventing a context.
+// caller skips the constraint rather than evaluating it against the wrong node.
 func contextFor(e constraintEntry, shape string) (string, bool) {
 	rest := strings.TrimPrefix(e.path, e.sd+".")
 	if rest == e.path || rest == "" {
@@ -187,7 +236,6 @@ func contextFor(e constraintEntry, shape string) (string, bool) {
 		if !ok {
 			return "", false
 		}
-		// Choice elements are stored under their concrete name in the instance.
 		v, ok := m[seg]
 		if !ok && strings.HasSuffix(seg, "[x]") {
 			base := strings.TrimSuffix(seg, "[x]")

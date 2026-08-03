@@ -33,14 +33,51 @@ a**    a*+                        rejected   (correct — RE2 rejects them unaid
 
 The audit is now clean across three FHIR versions:
 
-| Version | Constraints | Compile failures | Evaluation failures |
-| --- | --- | --- | --- |
-| R4 4.0.1 | 252 | 0 | 0 |
-| R4B 4.3.0 | 256 | 0 | 0 |
-| R5 5.0.0 | 330 | 1 — see below | 0 |
+| Version | Constraints | Skipped (no context) | Compile failures | Evaluation failures |
+| --- | --- | --- | --- | --- |
+| R4 4.0.1 | 252 | 5 | 0 | 0 |
+| R4B 4.3.0 | 256 | 6 | 0 | 2 — `sdf-24` `sdf-25`, unverified |
+| R5 5.0.0 | 330 | — | 1 — not the engine's | crashes, see below |
 
 The noise this used to generate is gone too: a StructureDefinition that produced 21 issues, 18
 of them the same unevaluatable-constraint warning, now produces 3.
+
+## New finding: `substring()` panics on a negative length
+
+The most serious of the new findings, because a panic is not an error a caller can handle — it
+unwinds the process. There is no `recover` on the evaluation path, in the engine or in this
+validator.
+
+```go
+'abc'.substring(0, -1)                  panic: slice bounds out of range [:-1]
+'abc'.substring(0, 'abc'.length()-10)   panic: slice bounds out of range [:-7]
+```
+
+`funcs/strings.go:385`. The neighbouring out-of-range cases are handled correctly, which is what
+makes this look like an oversight rather than a design choice:
+
+```text
+'abc'.substring(-1, 2)    => {}    correct
+'abc'.substring(10, 2)    => {}    correct
+'abc'.substring(0, 2)     => ab    correct
+```
+
+FHIRPath specifies empty for out-of-range arguments — *"If start lies outside the length of the
+string, the function returns empty"* — so a negative length should return `{}` as its siblings do.
+
+**Where it is reachable.** R5's `sdf-24` and `sdf-25` compute a length arithmetically:
+
+```
+id.substring(0, $this.length()-10)
+```
+
+Any `id` shorter than ten characters makes the argument negative, so validating a
+StructureDefinition crashes the process. Our audit hit it on the first R5 run.
+
+R4 and R4B are **not** exposed: their only `substring` use is `ref-1`'s single-argument
+`reference.substring(1)`, and that form is safe at every boundary we tried — `'#'.substring(1)`
+and `''.substring(1)` both return `{}`. Confirmed end to end that a Patient with
+`"reference": "#"` validates normally rather than crashing.
 
 ## New finding: `matches()` searches instead of testing the whole string
 
@@ -100,8 +137,10 @@ Two limits worth stating, both learned by getting them wrong:
   about the audit, not the engine — a Timing constraint against a Patient, `matches()` against
   the empty object.
 - Where the declared context cannot be built, the constraint is **skipped and counted** rather
-  than evaluated against the wrong node: 30 of 252 in R4, 58 of 330 in R5, all of them declared
-  on backbone elements the synthetic instances do not model. Those are unaudited, not clean.
+  than evaluated against the wrong node. Instances are now built by walking the full snapshot by
+  path rather than only direct children, which models backbone elements — `Measure.group.linkId`
+  is defined in Measure's snapshot, not in any separate SD. That took skipping from 30 of 252 to
+  **5** in R4 and from 58 of 330 to **6** in R4B. The remainder are unaudited, not clean.
 
 ## Summary
 
