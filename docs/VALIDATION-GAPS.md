@@ -230,10 +230,17 @@ We check the form first, because §2.5.0.1 constrains it directly: *"The url SHA
 URN (e.g. not an OID or a UUID)"*. HL7's `Utilities.isAbsoluteUrl` accepts any scheme, URNs
 included, so it never reaches a format complaint and reports the resolution failure instead.
 
-The two only part company on an input nobody has: an extension whose definition **is** loaded under
-a `urn:` canonical would be an error here and valid there. A sweep of the 25 277 JSON files in
-`~/.fhir/packages` (core, expansions, THO, uv.extensions, us.core, xver) found **zero** extension
-StructureDefinitions with a `urn:` canonical, so the case is theoretical for every package we ship.
+The two only part company on an input nobody ships: an extension whose definition **is** loaded
+under a `urn:` canonical would be an error here and valid there. Swept over the packages this
+validator actually embeds (`pkg/specs/{r4,r4b,r5}`: the three cores, `uv.extensions` r4 and r5, THO
+r4 and r5) — 29 572 JSON files, 2 079 Extension StructureDefinition canonicals, **zero** rejected by
+the rule. The 9 extension urls in instances that the rule would reject (`code`, `lang`, `display`,
+`content`, `member`, …) are all children of complex extensions, which never reach the check.
+
+One case the sweep cannot speak for: IGs loaded at runtime through a `ProfileResolver`. An extension
+defined there under a `urn:` canonical is now a hard error before resolution is even attempted, with
+no opt-out. Nothing in the shipped corpus does this, and §2.5.0.1 says such a canonical is not
+conformant, but the failure would be abrupt for whoever hits it.
 
 Worth stating because the rule is an approximation in one direction too: requiring a hierarchical
 part (`//`) also rejects absolute-but-opaque URLs such as `mailto:` or `tag:`. Those are URLs by

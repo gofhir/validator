@@ -121,22 +121,42 @@ func TestComplexExtensionChildrenKeepBareNames(t *testing.T) {
       "gender": "female"
     }`)
 
+	// The control comes first and is the only assertion here that can fail when
+	// children are not walked at all. Everything else in this test is an
+	// absence, and absences are exactly what a skipped code path produces: with
+	// the call to validateNestedExtensions removed, a test built only on them
+	// stays green while the behavior it guards is gone.
+	//
+	// A child named after nothing in the parent's definition has to be reported.
+	// If that diagnostic is missing, the children were never inspected.
+	unknownChild := []byte(`{
+      "resourceType": "Patient",
+      "extension": [{
+        "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+        "extension": [{"url": "no-such-child", "valueString": "x"}]
+      }],
+      "gender": "female"
+    }`)
+	control, err := v.Validate(context.Background(), json.RawMessage(unknownChild))
+	if err != nil {
+		t.Fatalf("Validate (control): %v", err)
+	}
+	if got := issueFor(t, control, issue.DiagExtensionNestedUnknown); got == nil {
+		t.Fatal("an unknown child produced no nested-extension diagnostic, so children are not being walked; " +
+			"the rest of this test would pass vacuously")
+	}
+
 	result, err := v.Validate(context.Background(), json.RawMessage(patient))
 	if err != nil {
 		t.Fatalf("Validate: %v", err)
 	}
 
-	// Positive assertions first, so the test cannot pass by doing nothing: if
-	// the parent ever stopped resolving, it would short-circuit with a warning,
-	// the children would never be walked, and an absence-only test would go
-	// green while the exception it guards went unexercised.
 	if got := issueFor(t, result, issue.DiagExtensionUnknown); got != nil {
 		t.Fatalf("the parent extension did not resolve, so the children were never walked: %s", got.Diagnostics)
 	}
 	if got := issueFor(t, result, issue.DiagExtensionNestedUnknown); got != nil {
-		t.Fatalf("a child was walked but not recognized against the parent's definition: %s", got.Diagnostics)
+		t.Fatalf("a conformant child was not recognized against the parent's definition: %s", got.Diagnostics)
 	}
-
 	if got := issueFor(t, result, issue.DiagExtensionInvalidURL); got != nil {
 		t.Fatalf("a complex extension's child was measured against the absolute-URL rule: %s", got.Diagnostics)
 	}

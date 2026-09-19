@@ -246,10 +246,12 @@ func (v *Validator) validateExtensionArray(ctx context.Context, extensions any, 
 func absoluteURLDefect(url string) string {
 	scheme, rest, found := strings.Cut(url, ":")
 	switch {
-	case !found:
+	case !found, !isValidURIScheme(scheme):
+		// Both are the same defect seen from two angles. Per RFC 3986 a colon
+		// only delimits a scheme when what precedes it is spelled like one, so
+		// `StructureDefinition/my:ext` has no scheme either — calling that an
+		// invalid scheme would name a cause its author never wrote.
 		return "no scheme, so this is a relative reference"
-	case !isValidURIScheme(scheme):
-		return "not a valid scheme per RFC 3986 §3.1"
 	case strings.EqualFold(scheme, "urn"):
 		return "a URN is not a URL"
 	case !strings.HasPrefix(rest, "//"):
