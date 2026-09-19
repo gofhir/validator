@@ -208,9 +208,21 @@ func (v *Validator) validateExtensionArray(ctx context.Context, extensions any, 
 	}
 }
 
-// isAbsoluteURI checks if a URL is an absolute URI per RFC 3986 (has a scheme).
-func isAbsoluteURI(url string) bool {
-	return strings.Contains(url, "://") || strings.HasPrefix(url, "urn:")
+// isAbsoluteURL reports whether an Extension.url satisfies FHIR R4 §2.5.0.1:
+//
+//	"The url SHALL be a URL, not a URN (e.g. not an OID or a UUID), and it SHALL
+//	 be the canonical URL of a StructureDefinition that defines the extension."
+//	"Except for child extensions defined within complex extensions, the URL SHALL
+//	 be an absolute URL."
+//
+// So the bar is an absolute URL, not merely an absolute URI: a `urn:` extension
+// is exactly the case the specification names to exclude, even though RFC 3986
+// would call it a valid absolute URI. Child extensions inside a complex
+// extension are the documented exception and never reach this function — they
+// are resolved by name against the parent's definition in
+// validateNestedExtensions.
+func isAbsoluteURL(url string) bool {
+	return strings.Contains(url, "://")
 }
 
 // validateSingleExtension validates a single extension.
@@ -228,11 +240,11 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 		return
 	}
 
-	// Validate that URL is an absolute URI (FHIR R4 §2.1.0.6).
-	// This rule is stated in the FHIR prose specification and is not expressible
-	// via the StructureDefinition (Extension.url is typed as System.String with
-	// no regex or constraint enforcing absolute URI format).
-	if !isAbsoluteURI(url) {
+	// Validate that the URL is an absolute URL (FHIR R4 §2.5.0.1). The rule lives
+	// in the prose specification and is not expressible via the
+	// StructureDefinition: Extension.url is typed as System.String, with no regex
+	// or constraint carrying it.
+	if !isAbsoluteURL(url) {
 		result.AddErrorWithID(
 			issue.DiagExtensionInvalidURL,
 			map[string]any{"url": url},

@@ -225,7 +225,11 @@ Si la definición de la extension declara el tipo de valor como `CodeableConcept
 
 ## EXTENSION_INVALID_URL
 
-La URL de la extension no es una URI absoluta. Según FHIR R4 §2.1.0.6, las URLs de extensions deben ser URIs absolutas (conteniendo `://` o comenzando con `urn:`). Las URLs relativas no están permitidas.
+La URL de la extension no es una URL absoluta. Según FHIR R4 §2.5.0.1: *"The url SHALL be a URL, not a URN (e.g. not an OID or a UUID), and it SHALL be the canonical URL of a StructureDefinition that defines the extension."* Se rechazan tanto las referencias relativas como las URN.
+
+El requisito es una **URL** absoluta, no una URI absoluta a secas: `urn:uuid:…` y `ex:createdAt` son URIs absolutas válidas según RFC 3986 y ninguna se acepta acá, porque la especificación nombra a las URN como el caso a excluir.
+
+Las extensions hijas dentro de una extension compleja son la excepción documentada (*"Except for child extensions defined within complex extensions, the URL SHALL be an absolute URL"*): se resuelven por nombre contra la definición del padre, así que nunca llegan a esta comprobación.
 
 **Ejemplo -- recurso inválido:**
 
@@ -241,9 +245,9 @@ La URL de la extension no es una URI absoluta. Según FHIR R4 §2.1.0.6, las URL
 }
 ```
 
-La URL `my-custom-extension` es una referencia relativa, no una URI absoluta.
+La URL `my-custom-extension` es una referencia relativa, no una URL absoluta. `urn:oid:1.2.3.4.5` también se rechazaría, por ser una URN.
 
-**Corrección:** Usa la URI absoluta completa:
+**Corrección:** Usa la URL absoluta completa:
 
 ```json
 {
@@ -258,7 +262,9 @@ La URL `my-custom-extension` es una referencia relativa, no una URI absoluta.
 ```
 
 {{< callout type="info" >}}
-Esta validación aplica una regla en prosa de la especificación FHIR (§2.1.0.6). El elemento `Extension.url` en el StructureDefinition está tipado como `System.String` sin un constraint de regex para URIs absolutas, por lo que esta verificación no puede derivarse solo del SD.
+Esta validación aplica una regla en prosa de la especificación FHIR (§2.5.0.1). El elemento `Extension.url` en el StructureDefinition está tipado como `System.String` sin constraint de regex, por lo que esta verificación no puede derivarse solo del SD.
+
+Una extension cuya URL está bien formada pero cuya definición no se puede resolver es un caso *distinto*: ese solo transgrede un `SHOULD` y se reporta como warning, no como error. Ver `docs/VALIDATION-GAPS.md`.
 {{< /callout >}}
 
 ---
