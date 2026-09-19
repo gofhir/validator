@@ -139,7 +139,7 @@ pointing at a disallowed type — an invented defect, while the real one went un
 occurrence now wins. See #79.
 
 The uniqueness rule is prose, not an invariant: no `dom-*` constraint covers it and it is not
-expressible through a StructureDefinition, so it follows the precedent of the absolute-URI
+expressible through a StructureDefinition, so it follows the precedent of the absolute-URL
 check on `Extension.url`.
 
 ---

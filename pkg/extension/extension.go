@@ -215,14 +215,51 @@ func (v *Validator) validateExtensionArray(ctx context.Context, extensions any, 
 //	"Except for child extensions defined within complex extensions, the URL SHALL
 //	 be an absolute URL."
 //
-// So the bar is an absolute URL, not merely an absolute URI: a `urn:` extension
-// is exactly the case the specification names to exclude, even though RFC 3986
-// would call it a valid absolute URI. Child extensions inside a complex
-// extension are the documented exception and never reach this function — they
-// are resolved by name against the parent's definition in
-// validateNestedExtensions.
+// The bar is an absolute URL, not merely an absolute URI: `urn:uuid:…` is a
+// perfectly valid absolute URI under RFC 3986 and is exactly the case the
+// sentence above names to exclude.
+//
+// Three things have to hold, and testing for "://" alone covers none of them
+// properly — `urn:uuid://x` contains it and is still a URN:
+//
+//  1. a scheme, spelled as RFC 3986 §3.1 requires;
+//  2. that scheme is not `urn`;
+//  3. a hierarchical part, i.e. `//` after the colon. This is what separates a
+//     URL from an opaque URI: `ex:createdAt` has a scheme and is not a URL.
+//
+// The scheme itself is deliberately not restricted to http(s): the
+// specification asks for a URL, not for a resolvable one, and an unresolvable
+// extension is a separate (warning-level) matter — see docs/VALIDATION-GAPS.md.
+//
+// Child extensions inside a complex extension are the documented exception and
+// never reach this function: they are resolved by name against the parent's
+// definition in validateNestedExtensions.
 func isAbsoluteURL(url string) bool {
-	return strings.Contains(url, "://")
+	scheme, rest, found := strings.Cut(url, ":")
+	if !found || !isValidURIScheme(scheme) {
+		return false // relative reference, or no scheme at all
+	}
+	if strings.EqualFold(scheme, "urn") {
+		return false // §2.5.0.1: "SHALL be a URL, not a URN"
+	}
+	return strings.HasPrefix(rest, "//")
+}
+
+// isValidURIScheme applies RFC 3986 §3.1: ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ).
+func isValidURIScheme(scheme string) bool {
+	if scheme == "" {
+		return false
+	}
+	for i := 0; i < len(scheme); i++ {
+		c := scheme[i]
+		switch {
+		case c >= 'a' && c <= 'z', c >= 'A' && c <= 'Z':
+		case i > 0 && (c >= '0' && c <= '9' || c == '+' || c == '-' || c == '.'):
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 // validateSingleExtension validates a single extension.

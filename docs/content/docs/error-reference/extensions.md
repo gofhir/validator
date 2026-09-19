@@ -17,7 +17,7 @@ Extension errors occur when FHIR extensions do not conform to their declared Str
 | `EXTENSION_NO_VALUE` | error | Extension at '{path}' has no value[x] |
 | `EXTENSION_MULTIPLE_VALUES` | error | Extension at '{path}' has multiple value[x] elements |
 | `EXTENSION_WRONG_TYPE` | error | Extension '{url}' expects {expected}, got {type} |
-| `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URI: '{url}' |
+| `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URL, not a relative reference or a URN: '{url}' |
 | `MODIFIER_EXTENSION_UNKNOWN` | error | Unknown modifier extension '{url}' |
 
 ---
@@ -247,7 +247,7 @@ Child extensions inside a complex extension are the documented exception (*"Exce
 
 The URL `my-custom-extension` is a relative reference, not an absolute URL. `urn:oid:1.2.3.4.5` would be rejected too, for being a URN.
 
-**Fix:** Use the full absolute URI:
+**Fix:** Use the full absolute URL:
 
 ```json
 {
