@@ -17,7 +17,7 @@ Los errores de extension ocurren cuando las extensions FHIR no se ajustan a sus 
 | `EXTENSION_NO_VALUE` | error | Extension at '{path}' has no value[x] |
 | `EXTENSION_MULTIPLE_VALUES` | error | Extension at '{path}' has multiple value[x] elements |
 | `EXTENSION_WRONG_TYPE` | error | Extension '{url}' expects {expected}, got {type} |
-| `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URL, not a relative reference or a URN: '{url}' |
+| `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URL: '{url}' |
 | `MODIFIER_EXTENSION_UNKNOWN` | error | Unknown modifier extension '{url}' |
 
 ---

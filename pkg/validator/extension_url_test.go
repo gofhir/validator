@@ -119,6 +119,18 @@ func TestComplexExtensionChildrenKeepBareNames(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Validate: %v", err)
 	}
+
+	// Positive assertions first, so the test cannot pass by doing nothing: if
+	// the parent ever stopped resolving, it would short-circuit with a warning,
+	// the children would never be walked, and an absence-only test would go
+	// green while the exception it guards went unexercised.
+	if got := issueFor(t, result, issue.DiagExtensionUnknown); got != nil {
+		t.Fatalf("the parent extension did not resolve, so the children were never walked: %s", got.Diagnostics)
+	}
+	if got := issueFor(t, result, issue.DiagExtensionNestedUnknown); got != nil {
+		t.Fatalf("a child was walked but not recognized against the parent's definition: %s", got.Diagnostics)
+	}
+
 	if got := issueFor(t, result, issue.DiagExtensionInvalidURL); got != nil {
 		t.Fatalf("a complex extension's child was measured against the absolute-URL rule: %s", got.Diagnostics)
 	}
