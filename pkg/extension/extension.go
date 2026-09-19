@@ -21,6 +21,11 @@ const (
 	keyModifierExtension = "modifierExtension"
 	strengthRequired     = "required"
 	strengthExtensible   = "extensible"
+
+	// KeyURL doubles as the JSON key of Extension.url and as the name of the
+	// {url} placeholder in the diagnostic templates. They coincide on purpose:
+	// the placeholder is named after the field it carries.
+	keyURL = "url"
 )
 
 // arrayIndexRegex matches array indices like [0], [123], etc.
@@ -267,7 +272,7 @@ func isValidURIScheme(scheme string) bool {
 // because a system SHALL refuse to process a resource with an unrecognized modifier extension.
 func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]any, extPath, contextPath string, isModifier bool, result *issue.Result) {
 	// Get extension URL
-	url, ok := ext["url"].(string)
+	url, ok := ext[keyURL].(string)
 	if !ok || url == "" {
 		result.AddErrorWithID(
 			issue.DiagExtensionNoURL,
@@ -284,7 +289,7 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 	if !isAbsoluteURL(url) {
 		result.AddErrorWithID(
 			issue.DiagExtensionInvalidURL,
-			map[string]any{"url": url},
+			map[string]any{keyURL: url},
 			extPath,
 		)
 		return
@@ -295,7 +300,7 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 	// this enables on-demand loading of SDs from external sources (DB, IG packages).
 	extSD := v.registry.ResolveByCanonical(ctx, url, "")
 	if extSD == nil {
-		params := map[string]any{"url": url}
+		params := map[string]any{keyURL: url}
 		if isModifier {
 			result.AddErrorWithID(issue.DiagModifierExtensionUnknown, params, extPath)
 		} else {
@@ -337,7 +342,7 @@ func (v *Validator) validateContext(extSD *registry.StructureDefinition, context
 	result.AddErrorWithID(
 		issue.DiagExtensionInvalidContext,
 		map[string]any{
-			"url":     extSD.URL,
+			keyURL:    extSD.URL,
 			"context": contextPath,
 		},
 		extPath,
@@ -630,7 +635,7 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 			result.AddErrorWithID(
 				issue.DiagExtensionValueNotAllowed,
 				map[string]any{
-					"url": extSD.URL,
+					keyURL: extSD.URL,
 				},
 				extPath,
 			)
@@ -644,7 +649,7 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 		result.AddErrorWithID(
 			issue.DiagExtensionValueRequired,
 			map[string]any{
-				"url": extSD.URL,
+				keyURL: extSD.URL,
 			},
 			extPath,
 		)
@@ -665,7 +670,7 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 		result.AddErrorWithID(
 			issue.DiagExtensionInvalidValueType,
 			map[string]any{
-				"url":      extSD.URL,
+				keyURL:     extSD.URL,
 				"provided": valueType,
 				"allowed":  v.allowedTypesString(valueDef.Type),
 			},
@@ -933,7 +938,7 @@ func (v *Validator) validateNestedExtensions(nestedExts any, parentSD *registry.
 		}
 
 		extPath := fmt.Sprintf("%s.extension[%d]", parentPath, i)
-		url, _ := extMap["url"].(string)
+		url, _ := extMap[keyURL].(string)
 
 		// For nested extensions, validate against parent SD's slice definitions
 		nestedDef := v.findNestedExtensionDef(parentSD, url)
@@ -942,7 +947,7 @@ func (v *Validator) validateNestedExtensions(nestedExts any, parentSD *registry.
 			result.AddWarningWithID(
 				issue.DiagExtensionNestedUnknown,
 				map[string]any{
-					"url":    url,
+					keyURL:   url,
 					"parent": parentSD.URL,
 				},
 				extPath,
@@ -994,7 +999,7 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 			result.AddErrorWithID(
 				issue.DiagExtensionValueRequired,
 				map[string]any{
-					"url": parentSD.URL,
+					keyURL: parentSD.URL,
 				},
 				extPath,
 			)
@@ -1007,7 +1012,7 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 		result.AddErrorWithID(
 			issue.DiagExtensionInvalidValueType,
 			map[string]any{
-				"url":      parentSD.URL,
+				keyURL:     parentSD.URL,
 				"provided": valueType,
 				"allowed":  v.allowedTypesString(valueDef.Type),
 			},
