@@ -3,7 +3,6 @@ package validator
 import (
 	"context"
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/issue"
@@ -77,12 +76,19 @@ func TestExtensionURLMustBeAURLNotAURN(t *testing.T) {
 			if got := issueFor(t, result, issue.DiagExtensionInvalidURL); got != nil {
 				t.Errorf("%q was reported as malformed (%s): %s", url, why, got.Diagnostics)
 			}
-			for i := range result.Issues {
-				if result.Issues[i].Severity == issue.SeverityError &&
-					strings.Contains(result.Issues[i].Diagnostics, "xtension") {
-					t.Errorf("%q: an unresolvable extension must stay a warning, got error: %s",
-						url, result.Issues[i].Diagnostics)
-				}
+
+			// None of these resolve to a definition, so each must produce the
+			// unknown-extension diagnostic AS A WARNING. Asserting it is present
+			// — not merely that no error appeared — is what keeps this from
+			// passing when nothing validates the extension at all, and it pins
+			// the severity that the documented divergence rests on.
+			got := issueFor(t, result, issue.DiagExtensionUnknown)
+			if got == nil {
+				t.Fatalf("%q produced no unknown-extension diagnostic, so nothing exercised the extension path", url)
+			}
+			if got.Severity != issue.SeverityWarning {
+				t.Errorf("%q: unresolvable extension reported as %v, want warning (docs/VALIDATION-GAPS.md)",
+					url, got.Severity)
 			}
 		})
 	}

@@ -215,6 +215,30 @@ Worth noting that the reference is not self-consistent here: an unresolvable **C
 warning there, an unresolvable **extension** an error, though in both cases the validator merely
 lacks a definition. We treat both as warnings.
 
+### `Extension.url` that is not a URL: same verdict, different diagnostic
+
+Not a divergence in outcome — both validators reject — but the reason differs, which matters when
+comparing outputs side by side.
+
+| input | ours | HL7 `validator_cli` 6.9.12 |
+| --- | --- | --- |
+| `urn:oid:1.2.3.4.5` | error: not a URL (a URN is not a URL) | error: "could not be found so is not allowed here" |
+| `ex:createdAt` | error: not a URL (an opaque URI is not a URL) | error: same, "could not be found" |
+| `http://unknown.example/x` | **warning**: unknown extension | error: "could not be found" (the divergence above) |
+
+We check the form first, because §2.5.0.1 constrains it directly: *"The url SHALL be a URL, not a
+URN (e.g. not an OID or a UUID)"*. HL7's `Utilities.isAbsoluteUrl` accepts any scheme, URNs
+included, so it never reaches a format complaint and reports the resolution failure instead.
+
+The two only part company on an input nobody has: an extension whose definition **is** loaded under
+a `urn:` canonical would be an error here and valid there. A sweep of the 25 277 JSON files in
+`~/.fhir/packages` (core, expansions, THO, uv.extensions, us.core, xver) found **zero** extension
+StructureDefinitions with a `urn:` canonical, so the case is theoretical for every package we ship.
+
+Worth stating because the rule is an approximation in one direction too: requiring a hierarchical
+part (`//`) also rejects absolute-but-opaque URLs such as `mailto:` or `tag:`. Those are URLs by
+RFC 3986 and the specification does not name them; zero occurrences in the same corpus.
+
 ### Example URLs in canonical positions: we say nothing, HL7 errors
 
 HL7 additionally reports `Error @ Patient.extension[0].url — Example URLs are not allowed in this

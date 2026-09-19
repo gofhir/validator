@@ -42,7 +42,7 @@ func TestExtensionValidation(t *testing.T) {
 		{
 			name:           "invalid-extension-relative-url",
 			file:           "../../testdata/m8-extensions/invalid-extension-relative-url.json",
-			expectErrors:   1, // Extension URL must be absolute URI
+			expectErrors:   1, // Extension URL must be an absolute URL
 			expectWarnings: 1, // dom-6 (no narrative)
 		},
 	}

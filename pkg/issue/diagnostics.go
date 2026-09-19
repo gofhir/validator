@@ -347,7 +347,7 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 	DiagExtensionInvalidURL: {
 		Severity: SeverityError,
 		Code:     CodeValue,
-		Template: "Extension URL must be an absolute URL: '{url}'",
+		Template: "Extension URL must be an absolute URL ({reason}): '{url}'",
 	},
 
 	// Reference (M9)

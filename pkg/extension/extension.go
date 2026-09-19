@@ -22,9 +22,9 @@ const (
 	strengthRequired     = "required"
 	strengthExtensible   = "extensible"
 
-	// KeyURL doubles as the JSON key of Extension.url and as the name of the
-	// {url} placeholder in the diagnostic templates. They coincide on purpose:
-	// the placeholder is named after the field it carries.
+	// The url key doubles as the JSON key of Extension.url and as the name of
+	// the {url} placeholder in the diagnostic templates. They coincide on
+	// purpose: the placeholder is named after the field it carries.
 	keyURL = "url"
 )
 
@@ -213,7 +213,11 @@ func (v *Validator) validateExtensionArray(ctx context.Context, extensions any, 
 	}
 }
 
-// isAbsoluteURL reports whether an Extension.url satisfies FHIR R4 §2.5.0.1:
+// absoluteURLDefect names why an Extension.url is not an absolute URL, or ""
+// when it is. The reason travels into the diagnostic, because a message that
+// lists every possible cause misnames three of them each time it fires.
+//
+// The rule is FHIR R4 §2.5.0.1:
 //
 //	"The url SHALL be a URL, not a URN (e.g. not an OID or a UUID), and it SHALL
 //	 be the canonical URL of a StructureDefinition that defines the extension."
@@ -239,15 +243,20 @@ func (v *Validator) validateExtensionArray(ctx context.Context, extensions any, 
 // Child extensions inside a complex extension are the documented exception and
 // never reach this function: they are resolved by name against the parent's
 // definition in validateNestedExtensions.
-func isAbsoluteURL(url string) bool {
+func absoluteURLDefect(url string) string {
 	scheme, rest, found := strings.Cut(url, ":")
-	if !found || !isValidURIScheme(scheme) {
-		return false // relative reference, or no scheme at all
+	switch {
+	case !found:
+		return "no scheme, so this is a relative reference"
+	case !isValidURIScheme(scheme):
+		return "not a valid scheme per RFC 3986 §3.1"
+	case strings.EqualFold(scheme, "urn"):
+		return "a URN is not a URL"
+	case !strings.HasPrefix(rest, "//"):
+		return "an opaque URI is not a URL"
+	default:
+		return ""
 	}
-	if strings.EqualFold(scheme, "urn") {
-		return false // §2.5.0.1: "SHALL be a URL, not a URN"
-	}
-	return strings.HasPrefix(rest, "//")
 }
 
 // isValidURIScheme applies RFC 3986 §3.1: ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ).
@@ -286,10 +295,10 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 	// in the prose specification and is not expressible via the
 	// StructureDefinition: Extension.url is typed as System.String, with no regex
 	// or constraint carrying it.
-	if !isAbsoluteURL(url) {
+	if defect := absoluteURLDefect(url); defect != "" {
 		result.AddErrorWithID(
 			issue.DiagExtensionInvalidURL,
-			map[string]any{keyURL: url},
+			map[string]any{keyURL: url, "reason": defect},
 			extPath,
 		)
 		return
