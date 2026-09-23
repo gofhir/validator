@@ -17,7 +17,7 @@ Extension errors occur when FHIR extensions do not conform to their declared Str
 | `EXTENSION_NO_VALUE` | error | Extension at '{path}' has no value[x] |
 | `EXTENSION_MULTIPLE_VALUES` | error | Extension at '{path}' has multiple value[x] elements |
 | `EXTENSION_WRONG_TYPE` | error | Extension '{url}' expects {expected}, got {type} |
-| `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URI: '{url}' |
+| `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URL ({reason}): '{url}' |
 | `MODIFIER_EXTENSION_UNKNOWN` | error | Unknown modifier extension '{url}' |
 
 ---
@@ -225,7 +225,11 @@ If the extension definition declares the value type as `CodeableConcept`, provid
 
 ## EXTENSION_INVALID_URL
 
-The extension URL is not an absolute URI. Per FHIR R4 §2.1.0.6, extension URLs must be absolute URIs (containing `://` or starting with `urn:`). Relative URLs are not permitted.
+The extension URL is not an absolute URL. Per FHIR R4 §2.5.0.1: *"The url SHALL be a URL, not a URN (e.g. not an OID or a UUID), and it SHALL be the canonical URL of a StructureDefinition that defines the extension."* Relative references and URNs are both rejected.
+
+Note the bar is an absolute **URL**, not merely an absolute URI: `urn:uuid:…` and `ex:createdAt` are valid absolute URIs under RFC 3986, and neither is accepted here, because the specification names URNs as the case to exclude.
+
+Child extensions inside a complex extension are the documented exception (*"Except for child extensions defined within complex extensions, the URL SHALL be an absolute URL"*) and are resolved by name against the parent's definition, so they never reach this check.
 
 **Example -- invalid resource:**
 
@@ -241,9 +245,9 @@ The extension URL is not an absolute URI. Per FHIR R4 §2.1.0.6, extension URLs 
 }
 ```
 
-The URL `my-custom-extension` is a relative reference, not an absolute URI.
+The URL `my-custom-extension` is a relative reference, not an absolute URL. `urn:oid:1.2.3.4.5` would be rejected too, for being a URN.
 
-**Fix:** Use the full absolute URI:
+**Fix:** Use the full absolute URL:
 
 ```json
 {
@@ -258,7 +262,9 @@ The URL `my-custom-extension` is a relative reference, not an absolute URI.
 ```
 
 {{< callout type="info" >}}
-This validation enforces a FHIR specification prose rule (§2.1.0.6). The `Extension.url` element in the StructureDefinition is typed as `System.String` without a regex constraint for absolute URIs, so this check cannot be derived from the SD alone.
+This validation enforces a FHIR specification prose rule (§2.5.0.1). The `Extension.url` element in the StructureDefinition is typed as `System.String` without a regex constraint, so this check cannot be derived from the SD alone.
+
+An extension whose URL is well-formed but whose definition cannot be resolved is a *different* case: that one only transgresses a `SHOULD` and is reported as a warning, not an error. See `docs/VALIDATION-GAPS.md`.
 {{< /callout >}}
 
 ---

@@ -21,6 +21,11 @@ const (
 	keyModifierExtension = "modifierExtension"
 	strengthRequired     = "required"
 	strengthExtensible   = "extensible"
+
+	// The url key doubles as the JSON key of Extension.url and as the name of
+	// the {url} placeholder in the diagnostic templates. They coincide on
+	// purpose: the placeholder is named after the field it carries.
+	keyURL = "url"
 )
 
 // arrayIndexRegex matches array indices like [0], [123], etc.
@@ -208,9 +213,69 @@ func (v *Validator) validateExtensionArray(ctx context.Context, extensions any, 
 	}
 }
 
-// isAbsoluteURI checks if a URL is an absolute URI per RFC 3986 (has a scheme).
-func isAbsoluteURI(url string) bool {
-	return strings.Contains(url, "://") || strings.HasPrefix(url, "urn:")
+// absoluteURLDefect names why an Extension.url is not an absolute URL, or ""
+// when it is. The reason travels into the diagnostic, because a message that
+// lists every possible cause misnames three of them each time it fires.
+//
+// The rule is FHIR R4 §2.5.0.1:
+//
+//	"The url SHALL be a URL, not a URN (e.g. not an OID or a UUID), and it SHALL
+//	 be the canonical URL of a StructureDefinition that defines the extension."
+//	"Except for child extensions defined within complex extensions, the URL SHALL
+//	 be an absolute URL."
+//
+// The bar is an absolute URL, not merely an absolute URI: `urn:uuid:…` is a
+// perfectly valid absolute URI under RFC 3986 and is exactly the case the
+// sentence above names to exclude.
+//
+// Three things have to hold, and testing for "://" alone covers none of them
+// properly — `urn:uuid://x` contains it and is still a URN:
+//
+//  1. a scheme, spelled as RFC 3986 §3.1 requires;
+//  2. that scheme is not `urn`;
+//  3. a hierarchical part, i.e. `//` after the colon. This is what separates a
+//     URL from an opaque URI: `ex:createdAt` has a scheme and is not a URL.
+//
+// The scheme itself is deliberately not restricted to http(s): the
+// specification asks for a URL, not for a resolvable one, and an unresolvable
+// extension is a separate (warning-level) matter — see docs/VALIDATION-GAPS.md.
+//
+// Child extensions inside a complex extension are the documented exception and
+// never reach this function: they are resolved by name against the parent's
+// definition in validateNestedExtensions.
+func absoluteURLDefect(url string) string {
+	scheme, rest, found := strings.Cut(url, ":")
+	switch {
+	case !found, !isValidURIScheme(scheme):
+		// Both are the same defect seen from two angles. Per RFC 3986 a colon
+		// only delimits a scheme when what precedes it is spelled like one, so
+		// `StructureDefinition/my:ext` has no scheme either — calling that an
+		// invalid scheme would name a cause its author never wrote.
+		return "no scheme, so this is a relative reference"
+	case strings.EqualFold(scheme, "urn"):
+		return "a URN is not a URL"
+	case !strings.HasPrefix(rest, "//"):
+		return "an opaque URI is not a URL"
+	default:
+		return ""
+	}
+}
+
+// isValidURIScheme applies RFC 3986 §3.1: ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ).
+func isValidURIScheme(scheme string) bool {
+	if scheme == "" {
+		return false
+	}
+	for i := 0; i < len(scheme); i++ {
+		c := scheme[i]
+		switch {
+		case c >= 'a' && c <= 'z', c >= 'A' && c <= 'Z':
+		case i > 0 && (c >= '0' && c <= '9' || c == '+' || c == '-' || c == '.'):
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 // validateSingleExtension validates a single extension.
@@ -218,7 +283,7 @@ func isAbsoluteURI(url string) bool {
 // because a system SHALL refuse to process a resource with an unrecognized modifier extension.
 func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]any, extPath, contextPath string, isModifier bool, result *issue.Result) {
 	// Get extension URL
-	url, ok := ext["url"].(string)
+	url, ok := ext[keyURL].(string)
 	if !ok || url == "" {
 		result.AddErrorWithID(
 			issue.DiagExtensionNoURL,
@@ -228,14 +293,14 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 		return
 	}
 
-	// Validate that URL is an absolute URI (FHIR R4 §2.1.0.6).
-	// This rule is stated in the FHIR prose specification and is not expressible
-	// via the StructureDefinition (Extension.url is typed as System.String with
-	// no regex or constraint enforcing absolute URI format).
-	if !isAbsoluteURI(url) {
+	// Validate that the URL is an absolute URL (FHIR R4 §2.5.0.1). The rule lives
+	// in the prose specification and is not expressible via the
+	// StructureDefinition: Extension.url is typed as System.String, with no regex
+	// or constraint carrying it.
+	if defect := absoluteURLDefect(url); defect != "" {
 		result.AddErrorWithID(
 			issue.DiagExtensionInvalidURL,
-			map[string]any{"url": url},
+			map[string]any{keyURL: url, "reason": defect},
 			extPath,
 		)
 		return
@@ -246,7 +311,7 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 	// this enables on-demand loading of SDs from external sources (DB, IG packages).
 	extSD := v.registry.ResolveByCanonical(ctx, url, "")
 	if extSD == nil {
-		params := map[string]any{"url": url}
+		params := map[string]any{keyURL: url}
 		if isModifier {
 			result.AddErrorWithID(issue.DiagModifierExtensionUnknown, params, extPath)
 		} else {
@@ -288,7 +353,7 @@ func (v *Validator) validateContext(extSD *registry.StructureDefinition, context
 	result.AddErrorWithID(
 		issue.DiagExtensionInvalidContext,
 		map[string]any{
-			"url":     extSD.URL,
+			keyURL:    extSD.URL,
 			"context": contextPath,
 		},
 		extPath,
@@ -581,7 +646,7 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 			result.AddErrorWithID(
 				issue.DiagExtensionValueNotAllowed,
 				map[string]any{
-					"url": extSD.URL,
+					keyURL: extSD.URL,
 				},
 				extPath,
 			)
@@ -595,7 +660,7 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 		result.AddErrorWithID(
 			issue.DiagExtensionValueRequired,
 			map[string]any{
-				"url": extSD.URL,
+				keyURL: extSD.URL,
 			},
 			extPath,
 		)
@@ -616,7 +681,7 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 		result.AddErrorWithID(
 			issue.DiagExtensionInvalidValueType,
 			map[string]any{
-				"url":      extSD.URL,
+				keyURL:     extSD.URL,
 				"provided": valueType,
 				"allowed":  v.allowedTypesString(valueDef.Type),
 			},
@@ -884,7 +949,7 @@ func (v *Validator) validateNestedExtensions(nestedExts any, parentSD *registry.
 		}
 
 		extPath := fmt.Sprintf("%s.extension[%d]", parentPath, i)
-		url, _ := extMap["url"].(string)
+		url, _ := extMap[keyURL].(string)
 
 		// For nested extensions, validate against parent SD's slice definitions
 		nestedDef := v.findNestedExtensionDef(parentSD, url)
@@ -893,7 +958,7 @@ func (v *Validator) validateNestedExtensions(nestedExts any, parentSD *registry.
 			result.AddWarningWithID(
 				issue.DiagExtensionNestedUnknown,
 				map[string]any{
-					"url":    url,
+					keyURL:   url,
 					"parent": parentSD.URL,
 				},
 				extPath,
@@ -945,7 +1010,7 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 			result.AddErrorWithID(
 				issue.DiagExtensionValueRequired,
 				map[string]any{
-					"url": parentSD.URL,
+					keyURL: parentSD.URL,
 				},
 				extPath,
 			)
@@ -958,7 +1023,7 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 		result.AddErrorWithID(
 			issue.DiagExtensionInvalidValueType,
 			map[string]any{
-				"url":      parentSD.URL,
+				keyURL:     parentSD.URL,
 				"provided": valueType,
 				"allowed":  v.allowedTypesString(valueDef.Type),
 			},
