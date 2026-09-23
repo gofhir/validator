@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.1](https://github.com/gofhir/validator/compare/v1.21.0...v1.21.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* **extension:** una URL de extensión `urn:` pasaba el control de formato, que la spec prohíbe ([#89](https://github.com/gofhir/validator/issues/89)) ([300d1c6](https://github.com/gofhir/validator/commit/300d1c6068b164d0d7513c04b3816e6c7854db0e))
+
 ## [1.21.0](https://github.com/gofhir/validator/compare/v1.20.0...v1.21.0) (2026-08-03)
 
 
