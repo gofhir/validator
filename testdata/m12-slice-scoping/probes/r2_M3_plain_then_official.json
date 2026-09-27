@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p", "meta": {"profile": ["http://acme-health.test/fhir/StructureDefinition/multi-patient"]}, "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "identifier": [{"system": "http://acme-health.test/mrn", "value": "1"}, {"system": "http://acme-health.test/mrn", "use": "official", "value": "1"}]}

@@ -1,0 +1,136 @@
+SDs analysed: 3061 (with snapshot: 3059)
+
+### R1 orphan (parent id missing): 15
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.relationship:Relationship -> FamilyMemberHistory.relationship
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.sex:Sex -> FamilyMemberHistory.sex
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.born[x]:BornAge -> FamilyMemberHistory.born[x]
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.age[x]:Age -> FamilyMemberHistory.age[x]
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.deceased[x]:DeceasedAge -> FamilyMemberHistory.deceased[x]
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.condition:Condition -> FamilyMemberHistory.condition
+
+### R10 unresolvable profile/targetProfile: 268
+    hl7.fhir.us.qicore#6.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-DeviceRequest.doNotPerform
+    hl7.fhir.us.qicore#6.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-DeviceRequest.doNotPerform
+    hl7.fhir.us.davinci-deqm#5.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData
+    hl7.fhir.us.davinci-deqm#5.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData
+    hl7.fhir.us.davinci-deqm#5.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData
+    hl7.fhir.uv.sdc#4.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.requestedPeriod|0.1.0
+
+### R12 required child of optional parent inside a slice: 2457
+    hl7.fhir.r4.core-4.0.1 :: patient-citizenship :: Extension.extension:code.url
+    hl7.fhir.r4.core-4.0.1 :: patient-citizenship :: Extension.extension:code.value[x]
+    hl7.fhir.r4.core-4.0.1 :: patient-citizenship :: Extension.extension:period.url
+    hl7.fhir.r4.core-4.0.1 :: patient-citizenship :: Extension.extension:period.value[x]
+    hl7.fhir.r4.core-4.0.1 :: servicerequest-geneticsItem :: Extension.extension:geneticsObservation.url
+    hl7.fhir.r4.core-4.0.1 :: servicerequest-geneticsItem :: Extension.extension:geneticsObservation.value[x]
+
+### R12b required child of PROHIBITED parent: 181
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.request.method
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.request.url
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.response.status
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.request.method
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.request.url
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.response.status
+
+### R13 choice slice with != 1 type: 6
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.born[x]:BornAge ['Period', 'date', 'string']
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.age[x]:Age ['Age', 'Range', 'string']
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.deceased[x]:DeceasedAge ['boolean', 'Age', 'Range', 'date', 'string']
+    hl7.fhir.r4b.core-4.3.0 :: familymemberhistory-genetic :: FamilyMemberHistory.born[x]:BornAge ['Period', 'date', 'string']
+    hl7.fhir.r4b.core-4.3.0 :: familymemberhistory-genetic :: FamilyMemberHistory.age[x]:Age ['Age', 'Range', 'string']
+    hl7.fhir.r4b.core-4.3.0 :: familymemberhistory-genetic :: FamilyMemberHistory.deceased[x]:DeceasedAge ['boolean', 'Age', 'Range', 'date', 'string']
+
+### R15 slice with no resolvable discriminator value: 280
+    hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:SystolicBP value:code.coding.code
+    hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:DiastolicBP value:code.coding.code
+    hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:SystolicBP value:code.coding.system
+    hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:DiastolicBP value:code.coding.system
+    hl7.fhir.r4b.core-4.3.0 :: bp :: Observation.component:SystolicBP value:code.coding.code
+    hl7.fhir.r4b.core-4.3.0 :: bp :: Observation.component:DiastolicBP value:code.coding.code
+
+### R17 several slicings share one path (D5): 363
+    hl7.fhir.r4.core-4.0.1 :: codesystem-alternate :: Extension.extension.extension x2
+    hl7.fhir.r4.core-4.0.1 :: relative-date :: Extension.extension.extension x3
+    hl7.fhir.r4.core-4.0.1 :: patient-citizenship :: Extension.extension.extension x2
+    hl7.fhir.r4.core-4.0.1 :: servicerequest-geneticsItem :: Extension.extension.extension x4
+    hl7.fhir.r4.core-4.0.1 :: hla-genotyping-results-haploid :: Extension.extension.extension x3
+    hl7.fhir.r4.core-4.0.1 :: elementdefinition-de :: ElementDefinition.extension.extension x2
+
+### R18 versioned canonical, only another version loaded: 278
+    hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.extension:terminologyServer -> http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer|5.3.0-ballot-tc1
+    hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.extension:versionAlgorithm -> http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm|5.3.0-ballot-tc1
+    hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.extension:copyrightLabel -> http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel|5.3.0-ballot-tc1
+    hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.extension:designNote -> http://hl7.org/fhir/StructureDefinition/designNote|5.3.0-ballot-tc1
+    hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.item.extension:hidden -> http://hl7.org/fhir/StructureDefinition/questionnaire-hidden|5.3.0-ballot-tc1
+    hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.item.extension:terminologyServer -> http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer|5.3.0-ballot-tc1
+
+### R19 slice has inline children AND type.profile: 130
+    hl7.fhir.r4.core-4.0.1 :: elementdefinition-de :: ElementDefinition.extension:Question profile=elementdefinition-question constrainedKids=3
+    hl7.fhir.r4.core-4.0.1 :: elementdefinition-de :: ElementDefinition.extension:AllowedUnits profile=elementdefinition-allowedUnits constrainedKids=3
+    hl7.fhir.r5.core-5.0.0 :: executablevalueset :: ValueSet.extension:usageWarning profile=valueset-warning constrainedKids=3
+    hl7.fhir.us.qicore#6.0.0 :: qicore-devicenotrequested :: DeviceRequest.modifierExtension:doNotPerform profile=extension-DeviceRequest.doNotPerform constrainedKids=3
+    hl7.fhir.us.qicore#6.0.0 :: qicore-devicerequest :: DeviceRequest.modifierExtension:doNotPerform profile=extension-DeviceRequest.doNotPerform constrainedKids=3
+    hl7.fhir.us.davinci-deqm#5.0.0 :: summary-measurereport-deqm :: MeasureReport.extension:supplementalData profile=extension-MeasureReport.supplementalData constrainedKids=3
+
+### R2 slice whose base has no slicing: 15
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.relationship:Relationship
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.sex:Sex
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.born[x]:BornAge
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.age[x]:Age
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.deceased[x]:DeceasedAge
+    hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.condition:Condition
+
+### R21 renamed choice id in SNAPSHOT: 11
+    hl7.fhir.r4.core-4.0.1 :: SubstanceSpecification :: SubstanceSpecification.relationship.amountRatioLowLimit
+    hl7.fhir.r4.core-4.0.1 :: SubstanceSpecification :: SubstanceSpecification.relationship.amountType
+    hl7.fhir.r4.core-4.0.1 :: SubstanceAmount :: SubstanceAmount.amountType
+    hl7.fhir.r4.core-4.0.1 :: SubstanceAmount :: SubstanceAmount.amountText
+    hl7.fhir.r4.core-4.0.1 :: SubstanceReferenceInformation :: SubstanceReferenceInformation.target.amountType
+    hl7.fhir.r4b.core-4.3.0 :: Citation :: Citation.relatesTo.targetClassifier
+
+### R6 absolute contentReference: 720
+    hl7.fhir.r4b.core-4.3.0 :: hdlcholesterol :: Observation.component.referenceRange -> http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange
+    hl7.fhir.r4b.core-4.3.0 :: computableplandefinition :: PlanDefinition.action.action -> http://hl7.org/fhir/StructureDefinition/PlanDefinition#PlanDefinition.action
+    hl7.fhir.r4b.core-4.3.0 :: shareablecodesystem :: CodeSystem.concept.concept -> http://hl7.org/fhir/StructureDefinition/CodeSystem#CodeSystem.concept
+    hl7.fhir.r4b.core-4.3.0 :: ldlcholesterol :: Observation.component.referenceRange -> http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange
+    hl7.fhir.r4b.core-4.3.0 :: oxygensat :: Observation.component.referenceRange -> http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange
+    hl7.fhir.r4b.core-4.3.0 :: devicemetricobservation :: Observation.component.referenceRange -> http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange
+
+### R6 contentReference target inside a slice: 1
+    hl7.fhir.r4.core-4.0.1 :: provenance-relevant-history :: Provenance.entity.agent -> #Provenance.agent:Author
+
+### R7 path uses ofType(): 1
+    de.basisprofil.r4#1.6.0 :: address-de-basis :: Address.country.extension value:value.ofType(Coding).system
+
+### R7 path uses resolve(): 36
+    hl7.fhir.r4.core-4.0.1 :: lipidprofile :: DiagnosticReport.result value:resolve().code
+    hl7.fhir.r4b.core-4.3.0 :: lipidprofile :: DiagnosticReport.result value:resolve().code
+    hl7.fhir.r5.core-5.0.0 :: lipidprofile :: DiagnosticReport.result value:resolve().code
+    hl7.fhir.uv.ips#2.0.1 :: Composition-uv-ips :: Composition.section:sectionProblems.entry profile:resolve()
+    hl7.fhir.uv.ips#2.0.1 :: Composition-uv-ips :: Composition.section:sectionAllergies.entry profile:resolve()
+    hl7.fhir.uv.ips#2.0.1 :: Composition-uv-ips :: Composition.section:sectionMedications.entry profile:resolve()
+
+### R7 type=exists (count): 1
+
+### R7 type=pattern (count): 138
+
+### R7 type=profile (count): 37
+
+### R8 openAtEnd: 1
+    hl7.fhir.r5.core-5.0.0 :: subscription-notification-bundle :: Bundle.entry
+
+### R8 ordered slicing: 8
+    hl7.fhir.r4.core-4.0.1 :: lipidprofile :: DiagnosticReport.result
+    hl7.fhir.r4b.core-4.3.0 :: lipidprofile :: DiagnosticReport.result
+    hl7.fhir.r5.core-5.0.0 :: subscription-notification-bundle :: Bundle.entry
+    hl7.fhir.r5.core-5.0.0 :: lipidprofile :: DiagnosticReport.result
+    ch.fhir.ig.ch-core#6.0.0 :: ch-core-address-ech-11-placeoforigin :: Address.line.extension
+    ch.fhir.ig.ch-core#6.0.0 :: ch-core-address :: Address.line.extension
+
+### R9 multiple type.profile (any-of): 15
+    hl7.fhir.uv.sdc#4.0.0 :: parameters-questionnaireresponse-extract-in :: Parameters.parameter:questionnaire.resource Questionnaire x4
+    hl7.fhir.au.core#2.0.0 :: au-core-practitionerrole :: PractitionerRole.identifier Identifier x4
+    hl7.fhir.au.core#2.0.0 :: au-core-healthcareservice :: HealthcareService.identifier Identifier x3
+    hl7.fhir.au.core#2.0.0 :: au-core-organization :: Organization.identifier Identifier x9
+    hl7.fhir.au.core#2.0.0 :: au-core-organization :: Organization.address Address x2
+    hl7.fhir.au.core#2.0.0 :: au-core-patient :: Patient.identifier Identifier x10

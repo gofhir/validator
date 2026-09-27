@@ -1,0 +1,12 @@
+-- r2_CX_race_no_text.json ----------------------------------------
+  Error @ Patient.extension[0] (line 1, col567): Slice 'Extension.extension:text': a matching slice is required, but not found (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-race|6.1.0). Note that other slices are allowed in addition to this required slice, validating against Base FHIR Standard
+-- r2_M1_one_official.json ----------------------------------------
+  Error @ Patient (line 1, col315): Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/multi-patient|0.1.0). Note that other slices are allowed in addition to this required slice, validating against null v0.1.0
+-- r2_M2_two_official.json ----------------------------------------
+  Error @ Patient (line 1, col391): Patient.identifier:A: max allowed = 1, but found 2 (from http://acme-health.test/fhir/StructureDefinition/multi-patient|0.1.0), validating against null v0.1.0
+  Error @ Patient (line 1, col391): Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/multi-patient|0.1.0). Note that other slices are allowed in addition to this required slice, validating against null v0.1.0
+-- r2_M3_plain_then_official.json ----------------------------------------
+  Error @ Patient (line 1, col372): Patient.identifier:A: max allowed = 1, but found 2 (from http://acme-health.test/fhir/StructureDefinition/multi-patient|0.1.0), validating against null v0.1.0
+  Error @ Patient (line 1, col372): Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/multi-patient|0.1.0). Note that other slices are allowed in addition to this required slice, validating against null v0.1.0
+-- r2_V1_two_messages.json ----------------------------------------
+  Error @ MeasureReport (line 1, col548): MeasureReport.extension:message: max allowed = 1, but found 2 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0), validating against Data Exchange For Quality Measures Implementation Guide v5.0.0
