@@ -1,0 +1,40 @@
+{
+  "comment": "Pairs gofhir diagnostic IDs with HL7 validator message IDs (operationoutcome-message-id) that report the same kind of finding. hl7diff matches a gofhir error to an HL7 error only when both belong to the same family and their locations are related. Constraints are matched by constraint key instead (gofhir 'Constraint failed: <key>:' vs HL7 '<canonical>#<key>'). Entries ending in '*' are prefixes. IDs in no family match only at the identical location.",
+  "families": [
+    {
+      "name": "cardinality",
+      "gofhir": ["CARDINALITY_MIN", "CARDINALITY_MAX", "SLICING_CARDINALITY_MIN", "SLICING_CARDINALITY_MAX", "EXTENSION_VALUE_REQUIRED"],
+      "hl7": ["Validation_VAL_Profile_Minimum*", "Validation_VAL_Profile_Maximum*", "Extension_EXT_Simple_ABSENT"]
+    },
+    {
+      "name": "slicing",
+      "gofhir": ["SLICING_*"],
+      "hl7": ["Validation_VAL_Profile_NotSlice", "Validation_VAL_Profile_MatchMultiple", "Validation_VAL_Profile_SliceOrder", "SLICING_CANNOT_BE_EVALUATED"]
+    },
+    {
+      "name": "fixed-pattern",
+      "gofhir": ["FIXED_*", "PATTERN_*"],
+      "hl7": ["_DT_Fixed_Wrong", "*Pattern*"]
+    },
+    {
+      "name": "extension",
+      "gofhir": ["EXTENSION_*"],
+      "hl7": ["Extension_*"]
+    },
+    {
+      "name": "reference",
+      "gofhir": ["REFERENCE_*"],
+      "hl7": ["Reference_*"]
+    },
+    {
+      "name": "structure",
+      "gofhir": ["STRUCTURE_*"],
+      "hl7": ["structure"]
+    },
+    {
+      "name": "binding",
+      "gofhir": ["BINDING_*"],
+      "hl7": ["Terminology_*", "TERMINOLOGY_*"]
+    }
+  ]
+}
