@@ -1,0 +1,23 @@
+{
+ "resourceType": "Patient",
+ "id": "q5-openatend-wrong",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/open-at-end"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "identifier": [
+  {
+   "system": "http://acme-health.test/fhir/sid/x",
+   "value": "9"
+  },
+  {
+   "system": "http://acme-health.test/fhir/sid/mrn",
+   "value": "1"
+  }
+ ]
+}

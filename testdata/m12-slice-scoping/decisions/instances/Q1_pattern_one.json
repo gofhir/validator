@@ -1,0 +1,20 @@
+{
+ "resourceType": "Patient",
+ "id": "q1-pattern-one",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/mm-pattern"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "identifier": [
+  {
+   "system": "http://acme-health.test/fhir/sid/mrn",
+   "use": "official",
+   "value": "1"
+  }
+ ]
+}

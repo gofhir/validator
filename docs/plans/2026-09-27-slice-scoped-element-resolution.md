@@ -31,7 +31,8 @@ owns whole mechanisms.
 relative to the last release before Release A (v1.21.1 when this was written), anywhere in the
 regression corpus, corresponds to an error that the HL7
 validator reports on the same instance. Every pair that disappears corresponds to an error that HL7
-does not report. The check is mechanized in PR A0.
+does not report. The check is mechanized in PR A0. The only exceptions are the **declared
+divergences** listed under "Decisions" below, where the spec text and HL7 disagree and the spec wins.
 
 ## Principle: everything derives from the StructureDefinitions
 
@@ -129,6 +130,28 @@ The parser is `testdata/m12-slice-scoping/tools/sdparse.py`, and its output is n
 | slice with inline children **and** `type.profile` | 130 (CH Core 40, CRMI 36, SDC 17, EU Lab 17) | Plan B layers them; Plan A uses inline children first |
 | license of every fixture package | CC0-1.0 | fixtures can be committed |
 
+## Decisions (PR A0)
+
+Established with `testdata/m12-slice-scoping/decisions/`: invented profiles in
+`packages/acme.decisions-0.2.0.tgz`, whose snapshots HL7 generates from differentials, so gofhir's
+own generator (D0) is not involved. The HL7 validator is 6.10.4, and the raw output is in
+`decisions/hl7-6.10.4-output.txt`. Spec quotes are from R4 `profiling.html`, `elementdefinition`
+and the `resource-slicing-rules` code system.
+
+| # | Question | HL7 6.10.4 | Spec | Decision |
+| --- | --- | --- | --- | --- |
+| D-1 | An element matches several slices | `value`, `exists`, `type`, `profile`: **error** "Element matches more than one slice", and the element is assigned to the first slice. `pattern`: silent, first slice. | Slices "SHALL describe a distinct set of values"; an element "will never match more than one" slice. No exemption for `pattern`. | Report the error for **every** discriminator type, and assign the element to the first slice for counting. **Declared divergence** for `pattern`, where HL7 is silent. |
+| D-2 | A pinned canonical version is absent while another is loaded | error "Slicing cannot be evaluated", for each element | canonical `\|version` pins a version | **No fallback.** Report "slicing cannot be evaluated" for each element, and never silently use another version. For the 278 corpus cases, the fix is to load the dependency versions the IG declares, not to resolve loosely. |
+| D-3 | A slice profile is unresolvable | when present: "could not be found" + "cannot be evaluated"; when absent: required slice not found | — | Same as HL7. |
+| D-4 | `ordered` slices out of order | error "out of order in ordered slice", at the first misplaced element | "the matching elements have to occur in the same order as defined in the profile" | Same as HL7. |
+| D-5 | `openAtEnd` with unmatched content before a slice (with `ordered: true`) | **silent** | "Additional content is allowed, but only at the end of the list" | Enforce it. **Declared divergence.** |
+| D-6 | Discriminator value given by a required binding | local ValueSet: evaluated correctly. External filter (SNOMED `is-a`) under `-tx n/a`: treated as *not matched*, so the required slice is reported missing. | a required binding is a valid value domain | Same as HL7: evaluate membership through `MemberChecker`, and treat unknown membership as not matched. Also emit one informational issue saying membership could not be determined without terminology, so the resulting error is explainable. |
+
+gofhir v1.21.0 on the same instances misses D-1 (all types), D-2, D-3 (absent), D-4 and D-5. It
+also reports a false positive for D-6 local-in (`Patient.coding:inset`, an invented path). This is
+a baseline observation: those differential-only profiles go through gofhir's own snapshot
+generator.
+
 ## Design
 
 ### Element tree (in `pkg/registry`)
@@ -163,9 +186,9 @@ func (t *ElementTree) Issues() []issue.Issue       // defects found while buildi
 func (r *Registry) ResolveCanonical(canonical string) (*StructureDefinition, Resolution)
 ```
 
-`Resolution` reports whether the resolution was exact, fell back to another version, or failed. What
-to do when the pinned version is absent (278 cases) or the profile is unknown (268 cases) is
-decided by an HL7 probe in PR A0, not assumed. Plan A uses this only inside the matcher; Plan B
+`Resolution` reports whether the resolution was exact, fell back to another version, or failed. When the
+pinned version is absent (278 cases) or the profile is unknown (268 cases), resolution fails
+without fallback (D-2, D-3). Plan A uses this only inside the matcher; Plan B
 moves the other call sites (`walker`, `reference`) to it.
 
 ### Slice matcher (new package `pkg/slicematch`)
@@ -225,12 +248,12 @@ Discriminator evaluation derives everything from the tree:
 
   Nothing is resolved by path suffix.
 - **Value sources**, in the order the spec lists them: fixed, then pattern, then a required binding
-  (via `MemberChecker`). When terminology is disabled, a binding-based discriminator is
-  "undecidable". That is reported once as information, never guessed.
+  (via `MemberChecker`). Unknown membership counts as not matched, with an informational issue
+  (D-6).
 - **Types** come from the `ElementDefinition` and the JSON key, never from the value's shape (M5).
 - **`profile`** is decided by `Conformer`, with a recursion guard on (profile, fhirPath). Results are
   memoized per validation, keyed by `(sd canonical, Def.ID, fhirPath)`.
-- **Multi-match semantics** come from A0's probes, per discriminator type.
+- **Multi-match** is reported for every discriminator type (D-1).
 
 ### Children of a resolved member
 
@@ -281,7 +304,8 @@ declared divergence.
   - IPS minimal has no `entry:composition`/`entry:patient` errors;
   - `bp-ok` has no `SBPCode`/`DBPCode` errors;
   - V1 reports `extension:message` max 1;
-  - IPS all-sections reports multi-match as A0 decided;
+  - IPS all-sections reports multi-match (D-1);
+  - every `decisions/` instance matches its decision row;
   - the acme synthetic profile passes for every discriminator type.
 
 **PR A3: `cardinality` on the tree** (D1b, D2, D6)
@@ -294,7 +318,7 @@ declared divergence.
 **PR A4: `slicing` on the tree** (D1, D5, `ordered`, `openAtEnd`)
 
 - Delete `validateSliceChildren`. Key contexts by `id`, and evaluate them per parent instance.
-  Implement `ordered` and `openAtEnd` as A0 decided.
+  Implement `ordered` (D-4) and `openAtEnd` (D-5).
 - Acceptance:
   - B2 reports one `request.method` error and `bdl-3`;
   - `bp-ok` has 0 errors;
@@ -319,8 +343,8 @@ after, and regressions are reported with numbers.
 - **`Conformer` recursion** (a profile discriminator validates a subtree, which may itself have
   profile discriminators). It is bounded by the recursion guard and the memo. Its cost is measured
   on IPS all-sections (42 entries), which is the worst case in the corpus.
-- **Binding-based discriminators without terminology** become "undecidable" instead of silently
-  unmatched. This is visible, and it is the honest behavior.
+- **Binding-based discriminators without terminology** fail to match, as in HL7 (D-6). The
+  informational issue makes the resulting "required slice missing" error explainable.
 - **Performance:** unmeasured. A1, A2 and A4 gate on benchmarks.
 - **Public API:** `pkg/validator` is unchanged. `slicing.SliceInfo`/`Context` and
   `fixedpattern.DeepEqual`/`ContainsPattern` remain exported.

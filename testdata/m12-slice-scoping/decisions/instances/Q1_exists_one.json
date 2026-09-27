@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "id": "q1-exists-one",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/mm-exists"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "identifier": [
+  {
+   "system": "http://acme-health.test/fhir/sid/mrn",
+   "value": "1",
+   "period": {
+    "start": "2020-01-01"
+   }
+  }
+ ]
+}
