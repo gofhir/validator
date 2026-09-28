@@ -289,8 +289,9 @@ declared divergence.
 - **Decisions: done** (see "Decisions"). HL7 probes with acme fixtures for multi-match per
   discriminator type, a pinned version that is absent, an unresolvable slice profile, `ordered`,
   `openAtEnd`, and a binding-based discriminator under `-tx n/a`.
-- **Re-run** every probe in this plan against the baseline release. The evidence tables were
-  produced with v1.21.0; v1.21.1 (#89) changed extension URL checks.
+- **Re-run against the baseline: done.** The evidence tables were produced with v1.21.0; v1.21.1
+  (#89) changed extension URL checks. All 29 probes give identical issues on both releases
+  (severity, code, message and location), so every table stands for v1.21.1.
 - **The invariant tool: not done.** A first implementation (`hl7diff`, now on the local branch
   `feat/hl7diff-redesign`) was withdrawn after the PR #91 review. It blocked this plan's own correct
   fixes (A3: 4 findings, A4: 18, plan B's B2: `ext-1` ×13 → ×1) and passed injected false errors,
