@@ -291,7 +291,8 @@ declared divergence.
   `openAtEnd`, and a binding-based discriminator under `-tx n/a`.
 - **Re-run against the baseline: done.** The evidence tables were produced with v1.21.0; v1.21.1
   (#89) changed extension URL checks. All 29 probes give identical issues on both releases
-  (severity, code, message and location), so every table stands for v1.21.1.
+  (severity, code, message and location), so every table stands for v1.21.1. Reproduce with
+  `testdata/m12-slice-scoping/tools/run_probes.sh` on each build and `diff -r` the outputs.
 - **The invariant tool: not done.** A first implementation (`hl7diff`, now on the local branch
   `feat/hl7diff-redesign`) was withdrawn after the PR #91 review. It blocked this plan's own correct
   fixes (A3: 4 findings, A4: 18, plan B's B2: `ext-1` ×13 → ×1) and passed injected false errors,
@@ -314,6 +315,7 @@ declared divergence.
   5. **Divergences as expected issues.** Each is scoped by file, location, message ID and
      predicate, and applies to new and removed errors alike.
   6. **Fail closed.** HL7 must cover every compared file, and a run that compares nothing fails.
+     Comparisons never depend on issue order, which varies between gofhir runs.
   7. **Same inputs on both sides.** Packages come from the standard FHIR package cache
      (directories; `loader.DefaultPackagePath`, `WithPackage`) with each IG's full dependency
      closure, as HL7's `-ig` does. Terminology must match HL7's `-tx n/a`, which still evaluates
