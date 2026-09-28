@@ -1,0 +1,124 @@
+package main
+
+import (
+	_ "embed"
+	"encoding/json"
+	"fmt"
+	"regexp"
+	"strings"
+)
+
+//go:embed families.json
+var familiesJSON []byte
+
+// Family is one group of equivalent findings across the two validators.
+type Family struct {
+	Name    string   `json:"name"`
+	Rule    string   `json:"rule"` // "equal" | "parent"
+	GoFHIR  []string `json:"gofhir"`
+	HL7     []string `json:"hl7"`
+	HL7NoID []struct {
+		Code string `json:"code"`
+		Text string `json:"text"`
+		re   *regexp.Regexp
+	} `json:"hl7NoID"`
+}
+
+// Families is the parsed family table.
+type Families struct {
+	List       []Family `json:"families"`
+	Constraint struct {
+		GoFHIR []string `json:"gofhir"`
+	} `json:"constraint"`
+	Unmapped map[string]string `json:"unmapped"`
+
+	byGo map[string]*Family
+}
+
+const constraintRule = "equal"
+
+// LoadFamilies parses the embedded family table.
+func LoadFamilies() (*Families, error) { return ParseFamilies(familiesJSON) }
+
+// ParseFamilies parses a family table and checks it is self-consistent.
+func ParseFamilies(data []byte) (*Families, error) {
+	var f Families
+	if err := json.Unmarshal(data, &f); err != nil {
+		return nil, fmt.Errorf("families: %w", err)
+	}
+	f.byGo = map[string]*Family{}
+	for i := range f.List {
+		fam := &f.List[i]
+		if fam.Rule != "equal" && fam.Rule != "parent" {
+			return nil, fmt.Errorf("family %s: rule %q is not equal or parent", fam.Name, fam.Rule)
+		}
+		for _, id := range fam.GoFHIR {
+			if prev, dup := f.byGo[id]; dup {
+				return nil, fmt.Errorf("gofhir ID %s is in both %s and %s", id, prev.Name, fam.Name)
+			}
+			f.byGo[id] = fam
+		}
+		for j := range fam.HL7NoID {
+			re, err := regexp.Compile(fam.HL7NoID[j].Text)
+			if err != nil {
+				return nil, fmt.Errorf("family %s: %w", fam.Name, err)
+			}
+			fam.HL7NoID[j].re = re
+		}
+	}
+	return &f, nil
+}
+
+var (
+	goConstraintKey  = regexp.MustCompile(`^Constraint failed: ([^:\s]+):`)
+	hl7ConstraintKey = regexp.MustCompile(`#([^#\s]+)$`)
+)
+
+// GoClass returns the family name of a gofhir error and its location rule, or "" when it belongs
+// to no family. FHIRPath constraints get "constraint:<key>".
+func (f *Families) GoClass(g GoIssue) (family, rule string) {
+	for _, id := range f.Constraint.GoFHIR {
+		if g.MessageID == id {
+			if m := goConstraintKey.FindStringSubmatch(g.Diagnostics); m != nil {
+				return "constraint:" + m[1], constraintRule
+			}
+			return "", ""
+		}
+	}
+	if fam := f.byGo[g.MessageID]; fam != nil {
+		return fam.Name, fam.Rule
+	}
+	return "", ""
+}
+
+// HL7Class returns the family name of an HL7 error, or "".
+func (f *Families) HL7Class(h HL7Issue) string {
+	if h.HasID {
+		if m := hl7ConstraintKey.FindStringSubmatch(h.Key); m != nil {
+			return "constraint:" + m[1]
+		}
+		for _, fam := range f.List {
+			for _, p := range fam.HL7 {
+				if idMatches(p, h.Key) {
+					return fam.Name
+				}
+			}
+		}
+		return ""
+	}
+	for _, fam := range f.List {
+		for _, n := range fam.HL7NoID {
+			if n.Code == h.Code && n.re.MatchString(h.Text) {
+				return fam.Name
+			}
+		}
+	}
+	return ""
+}
+
+func idMatches(pattern, id string) bool {
+	if strings.HasSuffix(pattern, "*") {
+		return strings.HasPrefix(id, strings.TrimSuffix(pattern, "*"))
+	}
+	return pattern == id
+}

@@ -1,0 +1,454 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>MedicationRequest.dispenseRequest.quantity</td><td>Business Rule Violation</td><td>Unable to validate code '{tbl}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>MedicationRequest.dispenseRequest.quantity</td><td>Business Rule Violation</td><td>UCUM Codes that contain human readable annotations like {tbl} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked, and the Quantity.unit 'tab' SHOULD contain the annotation (it does not)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MedicationRequest.dispenseRequest.quantity</td><td>Structural Issue</td><td>Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MedicationRequest.dispenseRequest.quantity</td><td>Validation rule failed</td><td>Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity'</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/r3_sqty.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Error_validating_code_running_without_terminology_services"
+       }
+      ],
+      "severity": "warning",
+      "code": "business-rule",
+      "details": {
+       "text": "Unable to validate code '{tbl}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      },
+      "expression": [
+       "MedicationRequest.dispenseRequest.quantity"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_QTY_UCUM_ANNOTATIONS_NOT_IN_UNIT"
+       }
+      ],
+      "severity": "warning",
+      "code": "business-rule",
+      "details": {
+       "text": "UCUM Codes that contain human readable annotations like {tbl} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked, and the Quantity.unit 'tab' SHOULD contain the annotation (it does not)"
+      },
+      "expression": [
+       "MedicationRequest.dispenseRequest.quantity"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Maximum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1)"
+      },
+      "expression": [
+       "MedicationRequest.dispenseRequest.quantity"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity'"
+      },
+      "expression": [
+       "MedicationRequest.dispenseRequest.quantity"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation.component[0].value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mm[Hg]' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Observation</td><td>Informational Note</td><td>Validate Observation against the Blood pressure systolic and diastolic profile (http://hl7.org/fhir/StructureDefinition/bp) which is required by the FHIR specification because the LOINC code 85354-9 was found</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation</td><td>Structural Issue</td><td>Observation.component: minimum required = 2, but only found 1 (from http://hl7.org/fhir/StructureDefinition/bp|4.0.1)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation</td><td>Structural Issue</td><td>Slice 'Observation.component:SystolicBP': a matching slice is required, but not found (from http://hl7.org/fhir/StructureDefinition/bp|4.0.1). Note that other slices are allowed in addition to this required slice</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Observation.code</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Observation.component[0].code</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation.component[0].value.ofType(Quantity)</td><td>Invalid Code</td><td>Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/r4_bp_no_systolic.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Error_validating_code_running_without_terminology_services"
+       }
+      ],
+      "severity": "warning",
+      "code": "business-rule",
+      "details": {
+       "text": "Unable to validate code 'mm[Hg]' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      },
+      "expression": [
+       "Observation.component[0].value.ofType(Quantity)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "VALIDATION_VAL_PROFILE_SIGNPOST_OBS"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "Validate Observation against the Blood pressure systolic and diastolic profile (http://hl7.org/fhir/StructureDefinition/bp) which is required by the FHIR specification because the LOINC code 85354-9 was found"
+      },
+      "expression": [
+       "Observation"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Observation.component: minimum required = 2, but only found 1 (from http://hl7.org/fhir/StructureDefinition/bp|4.0.1)"
+      },
+      "expression": [
+       "Observation"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum_SLICE"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Slice 'Observation.component:SystolicBP': a matching slice is required, but not found (from http://hl7.org/fhir/StructureDefinition/bp|4.0.1). Note that other slices are allowed in addition to this required slice"
+      },
+      "expression": [
+       "Observation"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service"
+      },
+      "expression": [
+       "Observation.code"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service"
+      },
+      "expression": [
+       "Observation.component[0].code"
+      ]
+     },
+     {
+      "extension": [],
+      "severity": "warning",
+      "code": "code-invalid",
+      "details": {
+       "text": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
+      },
+      "expression": [
+       "Observation.component[0].value.ofType(Quantity)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "All_observations_should_have_a_performer"
+       }
+      ],
+      "severity": "warning",
+      "code": "invalid",
+      "details": {
+       "text": "Best Practice Recommendation: In general, all observations should have a performer"
+      },
+      "expression": [
+       "Observation"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation.component[0].value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mm[Hg]' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation.component[1].value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mm[Hg]' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Observation</td><td>Informational Note</td><td>Validate Observation against the Blood pressure systolic and diastolic profile (http://hl7.org/fhir/StructureDefinition/bp) which is required by the FHIR specification because the LOINC code 85354-9 was found</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Observation.code</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Observation.component[0].code</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation.component[0].value.ofType(Quantity)</td><td>Invalid Code</td><td>Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Observation.component[1].code</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation.component[1].value.ofType(Quantity)</td><td>Invalid Code</td><td>Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/r4_bp_ok.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Error_validating_code_running_without_terminology_services"
+       }
+      ],
+      "severity": "warning",
+      "code": "business-rule",
+      "details": {
+       "text": "Unable to validate code 'mm[Hg]' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      },
+      "expression": [
+       "Observation.component[0].value.ofType(Quantity)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Error_validating_code_running_without_terminology_services"
+       }
+      ],
+      "severity": "warning",
+      "code": "business-rule",
+      "details": {
+       "text": "Unable to validate code 'mm[Hg]' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      },
+      "expression": [
+       "Observation.component[1].value.ofType(Quantity)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "VALIDATION_VAL_PROFILE_SIGNPOST_OBS"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "Validate Observation against the Blood pressure systolic and diastolic profile (http://hl7.org/fhir/StructureDefinition/bp) which is required by the FHIR specification because the LOINC code 85354-9 was found"
+      },
+      "expression": [
+       "Observation"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service"
+      },
+      "expression": [
+       "Observation.code"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service"
+      },
+      "expression": [
+       "Observation.component[0].code"
+      ]
+     },
+     {
+      "extension": [],
+      "severity": "warning",
+      "code": "code-invalid",
+      "details": {
+       "text": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
+      },
+      "expression": [
+       "Observation.component[0].value.ofType(Quantity)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|4.0.1 because there is no terminology service"
+      },
+      "expression": [
+       "Observation.component[1].code"
+      ]
+     },
+     {
+      "extension": [],
+      "severity": "warning",
+      "code": "code-invalid",
+      "details": {
+       "text": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
+      },
+      "expression": [
+       "Observation.component[1].value.ofType(Quantity)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "All_observations_should_have_a_performer"
+       }
+      ],
+      "severity": "warning",
+      "code": "invalid",
+      "details": {
+       "text": "Best Practice Recommendation: In general, all observations should have a performer"
+      },
+      "expression": [
+       "Observation"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>Questionnaire.item[0].item[0]</td><td>Structural Issue</td><td>Unrecognized property 'bogusElement'</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Questionnaire.item[0].item[0]</td><td>Validation rule failed</td><td>Constraint failed: que-1: 'Group items must have nested items, display items cannot have nested items' (type: ; item: ) (log:  (type: ; item: ))</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Questionnaire.item[0].item[0]</td><td>Structural Issue</td><td>Questionnaire.item.linkId: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Questionnaire|4.0.1)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Questionnaire.item[0].item[0]</td><td>Structural Issue</td><td>Questionnaire.item.type: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Questionnaire|4.0.1)</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/r4_q_nested.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Unrecognized property 'bogusElement'"
+      },
+      "expression": [
+       "Questionnaire.item[0].item[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/Questionnaire#que-1"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: que-1: 'Group items must have nested items, display items cannot have nested items' (type: ; item: ) (log:  (type: ; item: ))"
+      },
+      "expression": [
+       "Questionnaire.item[0].item[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Questionnaire.item.linkId: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Questionnaire|4.0.1)"
+      },
+      "expression": [
+       "Questionnaire.item[0].item[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Questionnaire.item.type: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Questionnaire|4.0.1)"
+      },
+      "expression": [
+       "Questionnaire.item[0].item[0]"
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}
