@@ -183,17 +183,20 @@ func (r *Registry) ContentReference(sd *StructureDefinition, n *ElementNode) (*E
 
 - The parent of `A.b:s.c` is `A.b:s`. A slice attaches to its base through `Slices`, and a reslice
   (`A.b:s/r`) attaches to `A.b:s`.
-- **`contentReference`:** `#id` resolves in the same SD. `url#id` resolves in the SD at `url`
-  (through `ResolveCanonical`), or in the same SD when `url` is its own URL or any SD in its
-  `baseDefinition` chain, since the SD's snapshot constrains the inherited elements. The tree
-  resolves the same-SD cases it can see without the registry (`#id`, its own URL, its direct base);
-  `Registry.ContentReference` resolves the rest. The redirect goes to **exactly** the id given,
-  including slice ids.
+- **`contentReference`:** `#id`, and `url#id` where `url` is the SD's own (unversioned or with its
+  version), resolve in the same SD; the tree links these while it is built. Any other `url#id`
+  resolves in the SD at `url` through `ResolveCanonical`, **even when `url` is the SD's base or
+  another ancestor**: a contentReference "always reference[s] the non-constrained definition"
+  (ElementDefinition.contentReference), and HL7 6.10.4 resolves locally only when `url` equals the
+  profile's own URL (`ProfileUtilities.getElementById`). About 750 elements in the corpus use the
+  base or ancestor form. `Registry.ContentReference` resolves the rest. The redirect goes to
+  **exactly** the id given, including slice ids.
 - **Tolerance:** an orphan id, or a slice whose base has no `slicing`, is recorded in `Issues()`
   and attached as best the grammar allows. A reslice of a missing slice slices the next element up
   its slice chain (US Core's `Observation.category:us-core/social-history` slices
-  `Observation.category`); any other orphan hangs from its nearest existing ancestor without being
-  listed as its child or slice. The builder never panics and never guesses from `path`.
+  `Observation.category`); any other orphan hangs from the nearest existing element that
+  *contains* it, without being listed as its child or slice. The child `A.b:s.c` of a missing
+  `A.b:s` hangs from `A`, never from `A.b`, whose children are another scope. The builder never panics and never guesses from `path`.
   `TreeIssue` is a registry type, so A1 adds no diagnostic ID. The PR that first surfaces the
   issues (once per SD, as a warning on the profile) maps them to `pkg/issue`.
 
@@ -204,9 +207,12 @@ func (r *Registry) ContentReference(sd *StructureDefinition, n *ElementNode) (*E
 func (r *Registry) ResolveCanonical(canonical string) (*StructureDefinition, Resolution)
 ```
 
-`Resolution` reports whether the resolution was exact, fell back to another version, or failed. When the
-pinned version is absent (64 distinct canonicals) or the profile is unknown (96), resolution fails
-without fallback (D-2, D-3). Plan A uses this only inside the matcher. Plan B moves the other
+`Resolution` is `exact`, `version-missing`, `not-found` or `invalid` (a malformed reference). When
+the pinned version is absent (64 distinct canonicals) or the profile is unknown (96), resolution
+fails without fallback (D-2, D-3). An unversioned canonical resolves to the highest version loaded
+("should pick the latest version", references.html), through its own index, so `GetByCanonical`'s
+first-loaded choice is unchanged. A partial version (`url|1.2` for 1.2.3, allowed by R5) is not
+matched, since R4 does not define it: a documented limitation. Plan A uses this only inside the matcher. Plan B moves the other
 call sites to it: `walker`, `reference`, and the top-level `meta.profile` resolution in
 `pkg/validator` (`ResolveByCanonical` → `GetByCanonical`, registry.go:410-415), which today falls
 back **silently** to any loaded version of the URL, against D-2.

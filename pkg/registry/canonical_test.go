@@ -90,13 +90,14 @@ func TestResolveCanonical(t *testing.T) {
 		wantID    string
 		want      Resolution
 	}{
-		{url, "v1", ResolutionExact}, // no version pinned: the first loaded
-		{url + "|", "v1", ResolutionExact},
+		{url, "v2", ResolutionExact}, // no version pinned: the latest
+		{url + "|", "v2", ResolutionExact},
 		{url + "|1.0.0", "v1", ResolutionExact},
 		{url + "|2.0.0", "v2", ResolutionExact},
 		{url + "|3.0.0", "", ResolutionVersionMissing}, // D-2: never another version
 		{"http://example.org/StructureDefinition/unknown", "", ResolutionNotFound},
 		{"http://example.org/StructureDefinition/unknown|1.0.0", "", ResolutionNotFound},
+		{url + "|1.0", "", ResolutionVersionMissing}, // partial versions are not matched (R4)
 		{"", "", ResolutionNotFound},
 	}
 	for _, tt := range tests {
@@ -113,5 +114,31 @@ func TestResolveCanonical(t *testing.T) {
 				t.Errorf("sd = %q, want %q", gotID, tt.wantID)
 			}
 		})
+	}
+}
+
+// The latest version wins whatever the load order, and the index GetByCanonical uses is unchanged.
+func TestResolveCanonicalLatestIgnoresLoadOrder(t *testing.T) {
+	const url = "http://example.org/StructureDefinition/p"
+	sd := func(v string) string {
+		return `{"resourceType":"StructureDefinition","url":"` + url + `","version":"` + v + `","id":"` + v + `"}`
+	}
+	r := registryWith(t, sd("2.0.0"), sd("10.0.0"), sd("10.0.0-ballot"), sd("9.1.0"))
+	if got, _ := r.ResolveCanonical(url); got == nil || got.ID != "10.0.0" {
+		t.Errorf("latest = %v, want 10.0.0", got)
+	}
+	if got := r.GetByCanonical(url, ""); got == nil || got.ID != "2.0.0" {
+		t.Errorf("GetByCanonical = %v, want the first loaded (unchanged)", got)
+	}
+}
+
+func TestVersionLess(t *testing.T) {
+	ordered := []string{"", "0.9", "1.0", "1.0.0-ballot", "1.0.0-ballot2", "1.0.0", "1.0.1", "1.2", "1.10.0", "2.0.0-snapshot1", "2.0.0", "10.0.0"}
+	for i := range ordered {
+		for j := range ordered {
+			if got, want := versionLess(ordered[i], ordered[j]), i < j; got != want {
+				t.Errorf("versionLess(%q, %q) = %v, want %v", ordered[i], ordered[j], got, want)
+			}
+		}
 	}
 }

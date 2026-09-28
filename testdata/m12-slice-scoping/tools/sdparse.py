@@ -36,7 +36,7 @@ def hit(rule, pkg, sd, detail):
 def parent_id(i):
     last = i.rsplit('.', 1)[-1] if '.' in i else i
     if ':' in last:
-        colon = i.rfind(':')
+        colon = len(i) - len(last) + last.index(':')  # the first ':' of the last segment, as Go
         slash = i.rfind('/')
         if slash > colon:
             return i[:slash]               # reslice a:s/r -> the slice it reslices, a:s

@@ -11,14 +11,20 @@ import (
 	"testing"
 
 	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/pkg/specs"
 )
 
-// loadVersion loads the embedded packages of one FHIR version into a fresh registry.
+// loadVersion loads the embedded packages of one FHIR version into a fresh registry. They are
+// compiled into the module, so failing to load them is a failure, not a reason to skip.
 func loadVersion(t testing.TB, version string) *Registry {
 	t.Helper()
-	packages, err := loader.NewLoader("").LoadVersion(version)
+	data := specs.GetPackages(version)
+	if len(data) == 0 {
+		t.Fatalf("no embedded packages for FHIR %s", version)
+	}
+	packages, err := loader.NewLoader("").LoadFromEmbeddedData(data)
 	if err != nil {
-		t.Skipf("Cannot load FHIR %s packages: %v", version, err)
+		t.Fatalf("Cannot load FHIR %s packages: %v", version, err)
 	}
 	r := New()
 	if err := r.LoadFromPackages(packages); err != nil {
@@ -113,9 +119,15 @@ func checkTree(t *testing.T, sd *StructureDefinition, tree *ElementTree) {
 			if listed[n] != 0 {
 				t.Errorf("%s: the root is listed under another element", sd.ID)
 			}
-		case orphan: // a reslice of a missing slice is attached further up; other orphans are not
-			if listed[n] > 1 {
-				t.Errorf("%s: orphan %s is listed %d times", sd.ID, n.Def.ID, listed[n])
+		case orphan:
+			// Only a reslice of a missing slice is attached (as a slice further up its chain);
+			// every other orphan is listed nowhere.
+			want := 0
+			if n.SliceOf != nil {
+				want = 1
+			}
+			if listed[n] != want {
+				t.Errorf("%s: orphan %s is listed %d times, want %d", sd.ID, n.Def.ID, listed[n], want)
 			}
 		case listed[n] != 1:
 			t.Errorf("%s: %s is listed %d times", sd.ID, n.Def.ID, listed[n])
@@ -239,9 +251,15 @@ func TestTreeDefects(t *testing.T) {
 		"Patient.link.other|->#Nope",  // parent missing, and a dangling contentReference
 		"Patient.identifier:official.system",
 		"Patient.address|slicing",
-		"Patient.address:home/old", // reslice of a missing slice
-		"Patient.telecom:a/b",      // reslice of a missing slice of a missing element
+		"Patient.address:home/old",            // reslice of a missing slice
+		"Patient.telecom:a/b",                 // reslice of a missing slice of a missing element
+		"Patient.communication",               //
+		"Patient.communication:emergency/old", // reslice of a missing slice, attached to an element without slicing
+		"Patient.gender:male.id",              // child of a missing slice
+		"Patient.gender",
 	)
+	// An element without id cannot be written with sdWith.
+	sd.Snapshot.Element = append(sd.Snapshot.Element, ElementDefinition{Path: "Patient.active"})
 	tree := sd.Tree()
 
 	got := map[string]TreeIssueKind{}
@@ -261,6 +279,10 @@ func TestTreeDefects(t *testing.T) {
 		{"Patient.link.other", TreeIssueContentReference},
 		{"Patient.address:home/old", TreeIssueOrphan},
 		{"Patient.telecom:a/b", TreeIssueOrphan},
+		{"Patient.communication:emergency/old", TreeIssueOrphan},
+		{"Patient.communication:emergency/old", TreeIssueSliceWithoutSlicing},
+		{"Patient.gender:male.id", TreeIssueOrphan},
+		{"", TreeIssueMissingID},
 	} {
 		key := fmt.Sprintf("%s %d", want.id, want.kind)
 		if _, ok := got[key]; !ok {
@@ -272,9 +294,21 @@ func TestTreeDefects(t *testing.T) {
 		t.Errorf("unexpected issues: %v", got)
 	}
 
-	// Orphans hang from the nearest existing element, and their own children are still placed.
-	if p := tree.ByID("Patient.contact.name").Parent; p != tree.Root() {
-		t.Errorf("orphan parent = %v", p)
+	// Orphans hang from the nearest existing element, are listed nowhere, and their own children
+	// are still placed.
+	for _, id := range []string{"Patient.contact.name", "Patient.link.other"} {
+		if o := tree.ByID(id); o.Parent != tree.Root() || slices.Contains(tree.Root().Children, o) {
+			t.Errorf("orphan %s: parent %v, listed as a child of the root", id, o.Parent)
+		}
+	}
+	// The child of a missing slice hangs from the element that contains the slice, never from the
+	// unsliced element, whose children are another scope.
+	if o := tree.ByID("Patient.gender:male.id"); o.Parent != tree.Root() || len(tree.ByID("Patient.gender").Children) != 0 {
+		t.Errorf("child of a missing slice: parent %s", o.Parent.Def.ID)
+	}
+	// A duplicate id keeps its first occurrence.
+	if n := tree.ByID("Patient.name"); n.Def != &sd.Snapshot.Element[3] {
+		t.Errorf("duplicate id kept %p, want the first occurrence", n.Def)
 	}
 	official := tree.ByID("Patient.identifier:official")
 	if got := ids(official.Children); !slices.Equal(got, []string{"Patient.identifier:official.system"}) {
@@ -295,6 +329,31 @@ func TestTreeDefects(t *testing.T) {
 	// The slice without slicing is still attached, so its children are reachable.
 	if name := tree.ByID("Patient.name"); !slices.Equal(ids(name.Slices), []string{"Patient.name:official"}) {
 		t.Errorf("name slices = %v", ids(name.Slices))
+	}
+}
+
+func TestTreeRoot(t *testing.T) {
+	// The root is the first element with an id; a snapshot that starts elsewhere has none.
+	sd := sdWith("http://example.org/p", "", "Patient.name", "Patient")
+	tree := sd.Tree()
+	if tree.Root() != nil {
+		t.Errorf("root = %s, want none", tree.Root().Def.ID)
+	}
+	var roots []string
+	for _, is := range tree.Issues() {
+		if is.Kind == TreeIssueRoot {
+			roots = append(roots, is.ElementID)
+		}
+	}
+	if !slices.Equal(roots, []string{"Patient.name", "Patient"}) {
+		t.Errorf("root issues at %v, want both elements", roots)
+	}
+
+	// An element without id before the root does not displace it.
+	sd = sdWith("http://example.org/p", "", "Patient", "Patient.name")
+	sd.Snapshot.Element = append([]ElementDefinition{{Path: "Patient"}}, sd.Snapshot.Element...)
+	if tree := sd.Tree(); tree.Root() == nil || tree.Root().Def.ID != "Patient" || len(tree.Issues()) != 1 {
+		t.Errorf("root %v, issues %v", tree.Root(), tree.Issues())
 	}
 }
 
@@ -344,36 +403,54 @@ func TestContentReference(t *testing.T) {
 			"Questionnaire.item|slicing",
 			"Questionnaire.item:group",
 			"Questionnaire.item.item|->" + ref,
+			"Other.part", // an id that is also in Other: a lookup there must not land here
 		}
 	}
-	other := sdWith(otherURL, "", "Other", "Other.part")
-	other.Version = "1.0.0"
+	profile := func(url, base, ref string) *StructureDefinition {
+		sd := sdWith(url, base, elements(ref)...)
+		sd.Version = "1.0.0"
+		return sd
+	}
 
 	tests := []struct {
 		name    string
 		sd      *StructureDefinition
 		want    string // "" when unresolved
+		in      string // URL of the SD the target must come from
 		wantRes Resolution
 		local   bool // resolved while building the tree
 	}{
-		{"local", sdWith(profileURL, coreURL, elements("#Questionnaire.item")...), "Questionnaire.item", ResolutionExact, true},
-		{"local slice", sdWith(profileURL, coreURL, elements("#Questionnaire.item:group")...), "Questionnaire.item:group", ResolutionExact, true},
-		{"own url", sdWith(profileURL, coreURL, elements(profileURL+"#Questionnaire.item")...), "Questionnaire.item", ResolutionExact, true},
-		{"base url", sdWith(profileURL, coreURL, elements(coreURL+"#Questionnaire.item")...), "Questionnaire.item", ResolutionExact, true},
-		{"ancestor url", sdWith(derivedURL, profileURL, elements(coreURL+"#Questionnaire.item:group")...), "Questionnaire.item:group", ResolutionExact, false},
-		{"other sd", sdWith(profileURL, coreURL, elements(otherURL+"#Other.part")...), "Other.part", ResolutionExact, false},
-		{"other sd pinned", sdWith(profileURL, coreURL, elements(otherURL+"|1.0.0#Other.part")...), "Other.part", ResolutionExact, false},
-		{"other sd version missing", sdWith(profileURL, coreURL, elements(otherURL+"|2.0.0#Other.part")...), "", ResolutionVersionMissing, false},
-		{"other sd id missing", sdWith(profileURL, coreURL, elements(otherURL+"#Other.nope")...), "", ResolutionNotFound, false},
-		{"unknown sd", sdWith(profileURL, coreURL, elements("http://example.org/nope#X.y")...), "", ResolutionNotFound, false},
+		{"local", profile(profileURL, coreURL, "#Questionnaire.item"), "Questionnaire.item", profileURL, ResolutionExact, true},
+		{"local slice", profile(profileURL, coreURL, "#Questionnaire.item:group"), "Questionnaire.item:group", profileURL, ResolutionExact, true},
+		{"own url", profile(profileURL, coreURL, profileURL+"#Questionnaire.item"), "Questionnaire.item", profileURL, ResolutionExact, true},
+		{"own url and version", profile(profileURL, coreURL, profileURL+"|1.0.0#Questionnaire.item"), "Questionnaire.item", profileURL, ResolutionExact, true},
+		// "always reference the non-constrained definition": the base's element, not the profile's.
+		{"base url", profile(profileURL, coreURL, coreURL+"#Questionnaire.item"), "Questionnaire.item", coreURL, ResolutionExact, false},
+		{"ancestor url", profile(derivedURL, profileURL, coreURL+"#Questionnaire.item"), "Questionnaire.item", coreURL, ResolutionExact, false},
+		{"base url, id only in the profile", profile(profileURL, coreURL, coreURL+"#Questionnaire.item:group"), "", "", ResolutionNotFound, false},
+		{"own url, other version", profile(profileURL, coreURL, profileURL+"|2.0.0#Questionnaire.item"), "", "", ResolutionVersionMissing, false},
+		{"other sd", profile(profileURL, coreURL, otherURL+"#Other.part"), "Other.part", otherURL, ResolutionExact, false},
+		{"other sd pinned", profile(profileURL, coreURL, otherURL+"|1.0.0#Other.part"), "Other.part", otherURL, ResolutionExact, false},
+		{"other sd version missing", profile(profileURL, coreURL, otherURL+"|2.0.0#Other.part"), "", "", ResolutionVersionMissing, false},
+		{"other sd id missing", profile(profileURL, coreURL, otherURL+"#Other.nope"), "", "", ResolutionNotFound, false},
+		{"unknown sd", profile(profileURL, coreURL, "http://example.org/nope#X.y"), "", "", ResolutionNotFound, false},
+		{"no id", profile(profileURL, coreURL, otherURL+"#"), "", "", ResolutionInvalid, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			sds := map[string]*StructureDefinition{
+				coreURL:    sdWith(coreURL, "", "Questionnaire", "Questionnaire.item"),
+				profileURL: profile(profileURL, coreURL, "#Questionnaire.item"),
+				otherURL:   sdWith(otherURL, "", "Other", "Other.part"),
+			}
+			sds[otherURL].Version = "1.0.0"
 			r := New()
-			r.byURL[coreURL] = sdWith(coreURL, "", "Questionnaire")
-			r.byURL[profileURL] = sdWith(profileURL, coreURL, "Questionnaire")
-			r.byURL[otherURL] = other
-			r.byURLVersion[otherURL+"|1.0.0"] = other
+			for url, sd := range sds {
+				r.byURL[url] = sd
+				if sd.Version != "" {
+					r.byURLVersion[url+"|"+sd.Version] = sd
+				}
+			}
 
 			node := tt.sd.Tree().ByID("Questionnaire.item.item")
 			if (node.Content != nil) != tt.local {
@@ -383,17 +460,28 @@ func TestContentReference(t *testing.T) {
 			if res != tt.wantRes {
 				t.Fatalf("resolution = %v, want %v", res, tt.wantRes)
 			}
-			got := ""
-			if target != nil {
-				got = target.Def.ID
+			if tt.want == "" {
+				if target != nil {
+					t.Errorf("target = %s, want none", target.Def.ID)
+				}
+				return
 			}
-			if got != tt.want {
-				t.Errorf("target = %q, want %q", got, tt.want)
+			from := tt.sd
+			if tt.in != tt.sd.URL {
+				from = sds[tt.in]
 			}
-			if tt.local && target != tt.sd.Tree().ByID(tt.want) {
-				t.Error("a local target must be the node of the same tree")
+			if target == nil || target != from.Tree().ByID(tt.want) {
+				t.Errorf("target = %v, want %s from %s", target, tt.want, tt.in)
 			}
 		})
+	}
+
+	if _, res := New().ContentReference(nil, nil); res != ResolutionInvalid {
+		t.Errorf("nil node: %v", res)
+	}
+	plain := sdWith(profileURL, "", "Questionnaire")
+	if _, res := New().ContentReference(plain, plain.Tree().Root()); res != ResolutionInvalid {
+		t.Errorf("node without contentReference: %v", res)
 	}
 }
 
@@ -447,20 +535,31 @@ func TestTreeCorpus(t *testing.T) {
 	if len(dirs) == 0 {
 		t.Skip("GOFHIR_SD_CORPUS is not set")
 	}
-	allowed := map[string]bool{
-		"FamilyMemberHistory.relationship:Relationship": true,
-		"FamilyMemberHistory.sex:Sex":                   true,
-		"FamilyMemberHistory.born[x]:BornAge":           true,
-		"FamilyMemberHistory.age[x]:Age":                true,
-		"FamilyMemberHistory.deceased[x]:DeceasedAge":   true,
-		"FamilyMemberHistory.condition:Condition":       true,
-		"Composition.date:IssueDate":                    true,
-		// US Core 5.0.1 names a slice "us-core/social-history", which the id grammar reads as a
-		// reslice of a slice "us-core" that the profile does not define.
-		"Observation.category:us-core/social-history": true,
+	// The parser's R1 findings (tools/sdparse-corpus-2026-09-27.txt), by "url|version id".
+	want := make([]string, 0, 16)
+	for _, version := range []string{"4.0.1", "4.3.0"} {
+		for _, id := range []string{
+			"FamilyMemberHistory.relationship:Relationship",
+			"FamilyMemberHistory.sex:Sex",
+			"FamilyMemberHistory.born[x]:BornAge",
+			"FamilyMemberHistory.age[x]:Age",
+			"FamilyMemberHistory.deceased[x]:DeceasedAge",
+			"FamilyMemberHistory.condition:Condition",
+		} {
+			want = append(want, "http://hl7.org/fhir/StructureDefinition/familymemberhistory-genetic|"+version+" "+id)
+		}
 	}
+	for _, version := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		want = append(want, "http://hl7.org/fhir/StructureDefinition/catalog|"+version+" Composition.date:IssueDate")
+	}
+	// US Core 5.0.1 names a slice "us-core/social-history", which the id grammar reads as a
+	// reslice of a slice "us-core" that the profile does not define.
+	want = append(want, "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-social-history|5.0.1 "+
+		"Observation.category:us-core/social-history")
+
 	seen := map[string]bool{}
-	var trees, orphans int
+	var trees int
+	var got []string
 	for _, dir := range dirs {
 		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil || d.IsDir() {
@@ -487,11 +586,11 @@ func TestTreeCorpus(t *testing.T) {
 			checkTree(t, &sd, tree)
 			trees++
 			for _, is := range tree.Issues() {
-				if is.Kind == TreeIssueOrphan && allowed[is.ElementID] {
-					orphans++
+				if is.Kind != TreeIssueOrphan {
+					t.Errorf("%s (%s): %v issue at %s: %s", sd.ID, path, is.Kind, is.ElementID, is.Message)
 					continue
 				}
-				t.Errorf("%s (%s): %v issue at %s: %s", sd.ID, path, is.Kind, is.ElementID, is.Message)
+				got = append(got, key+" "+is.ElementID)
 			}
 			return nil
 		})
@@ -499,5 +598,13 @@ func TestTreeCorpus(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	t.Logf("%d StructureDefinitions with a snapshot, %d known orphans", trees, orphans)
+	if trees == 0 {
+		t.Fatal("no StructureDefinition with a snapshot under GOFHIR_SD_CORPUS")
+	}
+	slices.Sort(got)
+	slices.Sort(want)
+	if !slices.Equal(got, want) {
+		t.Errorf("orphans:\n got %q\nwant %q", got, want)
+	}
+	t.Logf("%d StructureDefinitions with a snapshot, %d orphans", trees, len(got))
 }

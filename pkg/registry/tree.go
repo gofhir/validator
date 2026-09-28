@@ -28,8 +28,8 @@ type ElementNode struct {
 	Slices []*ElementNode
 
 	// Content is the element a contentReference points to, when it is in the same
-	// StructureDefinition. A contentReference to another StructureDefinition is resolved by
-	// [Registry.ContentReference].
+	// StructureDefinition ("#id", or "url#id" with this StructureDefinition's own URL). Any other
+	// contentReference is resolved by [Registry.ContentReference].
 	Content *ElementNode
 }
 
@@ -180,17 +180,15 @@ func (t *ElementTree) place(n *ElementNode, first bool) {
 		// A reslice whose slice is missing (A.b:s/r without A.b:s) still slices the element above
 		// it in the slice chain, so it is attached there rather than lost: in R4 a sliceName may
 		// contain "/", and published profiles use it without the slice it implies.
-		for up != "" && base == nil {
+		for base == nil {
 			var isSlice bool
 			if up, isSlice = parentID(up); !isSlice {
 				return
 			}
 			base = t.byID[up]
 		}
-		if base == nil {
-			return
-		}
-	} else if base.Def.Slicing == nil {
+	}
+	if base.Def.Slicing == nil {
 		t.issue(TreeIssueSliceWithoutSlicing, id, fmt.Sprintf("slice of %s, which declares no slicing", up))
 	}
 	n.SliceOf = base
@@ -200,38 +198,35 @@ func (t *ElementTree) place(n *ElementNode, first bool) {
 	n.Parent = t.containerOf(up)
 }
 
-// containerOf returns the element that contains the (non-slice or slice) element id, following
-// slices down to the element that is not one.
-func (t *ElementTree) containerOf(id string) *ElementNode {
-	for {
-		up, slice := parentID(id)
-		if up == "" {
-			return nil
-		}
-		if !slice {
-			return t.byID[up]
-		}
-		id = up
+// containerOf returns the element that contains element id, or nil when it is not in the tree.
+func (t *ElementTree) containerOf(id string) *ElementNode { return t.byID[containerID(id)] }
+
+// containerID returns the id of the element that contains element id: its parent, or for a slice
+// the parent of the element it slices. "A.b:s", "A.b:s/r" and "A.b" are all contained by "A".
+func containerID(id string) string {
+	up, slice := parentID(id)
+	for slice {
+		up, slice = parentID(up)
 	}
+	return up
 }
 
-// orphan records an element whose parent or sliced element is missing. It is not attached to any
-// element's Children or Slices, since the element it belongs under does not exist; Parent is the
-// nearest element above it that does, so it is still reachable upwards.
+// orphan records an element whose parent or sliced element is missing. Parent is the nearest
+// existing element that contains it, never a sliced element standing in for a missing slice: the
+// child A.b:s.c of a missing A.b:s hangs from A, not from A.b, whose own children are a different
+// scope. The caller decides whether the orphan is also listed anywhere.
 func (t *ElementTree) orphan(n *ElementNode, missing string) {
 	t.issue(TreeIssueOrphan, n.Def.ID, fmt.Sprintf("%s is not in the snapshot", missing))
-	for id := missing; id != ""; {
+	for id := containerID(n.Def.ID); id != ""; id = containerID(id) {
 		if p := t.byID[id]; p != nil {
 			n.Parent = p
 			return
 		}
-		id, _ = parentID(id)
 	}
 }
 
-// resolveLocalContent links a contentReference that points into the same StructureDefinition:
-// "#id", or "url#id" where url is the StructureDefinition's own URL or its base definition. Other
-// URLs are left to [Registry.ContentReference].
+// resolveLocalContent links a contentReference that points into the same StructureDefinition.
+// Other references are left to [Registry.ContentReference].
 func (t *ElementTree) resolveLocalContent(sd *StructureDefinition, n *ElementNode) {
 	if n.Def.ContentReference == nil {
 		return
@@ -242,7 +237,7 @@ func (t *ElementTree) resolveLocalContent(sd *StructureDefinition, n *ElementNod
 			fmt.Sprintf("contentReference %q has no element id", *n.Def.ContentReference))
 		return
 	}
-	if url != "" && url != sd.URL && url != sd.BaseDefinition {
+	if !isOwnCanonical(sd, url) {
 		return
 	}
 	target := t.byID[id]
@@ -290,27 +285,42 @@ func lastIDSegment(id string) string {
 	return id
 }
 
+// isOwnCanonical reports whether the URL part of a contentReference names sd itself: empty (the
+// "#id" form), or sd's URL, unversioned or pinned to sd's version.
+func isOwnCanonical(sd *StructureDefinition, canonical string) bool {
+	if canonical == "" {
+		return true
+	}
+	url, version := ParseCanonical(canonical)
+	return url == sd.URL && (version == "" || version == sd.Version)
+}
+
 // ContentReference resolves the element n's contentReference points to, n being an element of
 // sd's tree.
 //
-// "#id" resolves in sd. "url#id" resolves in sd when url is sd itself or any StructureDefinition
-// in its baseDefinition chain, since sd's snapshot constrains the inherited elements; otherwise it
-// resolves in the StructureDefinition at url, through [Registry.ResolveCanonical]. The target is
-// exactly the element with that id, slices included. The node is nil unless the resolution is
-// [ResolutionExact]; an existing StructureDefinition without that id is [ResolutionNotFound].
+// "#id", and "url#id" where url is sd's own, resolve in sd. Any other "url#id" resolves in the
+// StructureDefinition at url, through [Registry.ResolveCanonical], even when url is sd's base or
+// another ancestor: a contentReference "always reference[s] the non-constrained definition"
+// (ElementDefinition.contentReference), and the HL7 validator resolves it the same way. The target
+// is exactly the element with that id, slices included.
+//
+// The node is nil unless the resolution is [ResolutionExact]. [ResolutionInvalid] means n has no
+// contentReference or it names no element id; [ResolutionNotFound] means the StructureDefinition
+// is not loaded or has no element with that id. The target's tree comes from its snapshot, so a
+// StructureDefinition loaded without one needs [Registry.EnsureSnapshot] first.
 func (r *Registry) ContentReference(sd *StructureDefinition, n *ElementNode) (*ElementNode, Resolution) {
 	if n == nil || n.Def.ContentReference == nil {
-		return nil, ResolutionNotFound
+		return nil, ResolutionInvalid
 	}
 	if n.Content != nil {
 		return n.Content, ResolutionExact
 	}
 	url, id, ok := SplitContentReference(*n.Def.ContentReference)
 	if !ok {
-		return nil, ResolutionNotFound
+		return nil, ResolutionInvalid
 	}
 	target := sd
-	if url != "" && !r.inBaseChain(sd, url) {
+	if !isOwnCanonical(sd, url) {
 		var res Resolution
 		if target, res = r.ResolveCanonical(url); target == nil {
 			return nil, res
@@ -320,20 +330,4 @@ func (r *Registry) ContentReference(sd *StructureDefinition, n *ElementNode) (*E
 		return node, ResolutionExact
 	}
 	return nil, ResolutionNotFound
-}
-
-// inBaseChain reports whether canonical names sd or a StructureDefinition sd derives from.
-func (r *Registry) inBaseChain(sd *StructureDefinition, canonical string) bool {
-	url, _ := ParseCanonical(canonical)
-	seen := map[*StructureDefinition]bool{}
-	for cur := sd; cur != nil && !seen[cur]; cur = r.GetByURL(cur.BaseDefinition) {
-		seen[cur] = true
-		if cur.URL == url {
-			return true
-		}
-		if cur.BaseDefinition == "" {
-			return false
-		}
-	}
-	return false
 }
