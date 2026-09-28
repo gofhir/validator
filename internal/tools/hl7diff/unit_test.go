@@ -127,3 +127,27 @@ func TestSlicesAgree(t *testing.T) {
 		t.Error("when either side names no slice, slices do not decide")
 	}
 }
+
+func TestVersionLess(t *testing.T) {
+	for _, c := range []struct {
+		a, b string
+		want bool
+	}{{"0.11.0", "0.22.0", true}, {"5.9.0", "5.10.0", true}, {"5.10.0", "5.9.0", false}, {"5.4.0", "5.5.0", true}, {"1.0", "1.0.1", true}} {
+		if got := versionLess(c.a, c.b); got != c.want {
+			t.Errorf("versionLess(%s, %s) = %v, want %v", c.a, c.b, got, c.want)
+		}
+	}
+}
+
+func TestWildcardVersions(t *testing.T) {
+	v, ok := highestMatching("3.3.x", []string{"3.2.0", "3.3.0", "3.3.2", "3.4.0"})
+	if !ok || v != "3.3.2" {
+		t.Errorf("3.3.x -> %q, %v; want 3.3.2", v, ok)
+	}
+	if _, ok := highestMatching("3.5.x", []string{"3.3.0"}); ok {
+		t.Error("no match must be reported")
+	}
+	if !versionMatches("1.0.0", "1.0.0") || versionMatches("1.0.0", "1.0.1") || isWildcard("1.0.0") || !isWildcard("3.x") {
+		t.Error("exact versions must match only themselves")
+	}
+}

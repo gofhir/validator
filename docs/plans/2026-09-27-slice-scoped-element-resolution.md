@@ -293,8 +293,9 @@ declared divergence.
   (#89) changed extension URL checks. All 29 probes give identical issues on both releases
   (severity, code, message and location), so every table stands for v1.21.1. Reproduce with
   `testdata/m12-slice-scoping/tools/run_probes.sh` on each build and `diff -r` the outputs.
-- **The invariant tool: not done.** A first implementation (`hl7diff`, now on the local branch
-  `feat/hl7diff-redesign`) was withdrawn after the PR #91 review. It blocked this plan's own correct
+- **The invariant tool: implemented** in `internal/tools/hl7diff` (see "Status of the tool" below).
+  A first implementation (`hl7diff`, kept on the local branch `feat/hl7diff-redesign`) was
+  withdrawn after the PR #91 review. It blocked this plan's own correct
   fixes (A3: 4 findings, A4: 18, plan B's B2: `ext-1` ×13 → ×1) and passed injected false errors,
   duplications and swaps. The redesign must meet all of the following, and its acceptance suite is
   built from exactly those cases:
@@ -329,6 +330,31 @@ declared divergence.
      `ImplementationGuide-fhir.json` twice, and that file alone takes over 15 minutes. The corpus
      covers the IGs this plan names: DEQM, IPS, US Core, mCODE, AU Core, CH Core, CL Core, and
      core `lipidprofile` for `ordered`.
+
+**Status of the tool** (requirements numbered as above):
+
+- **Met: 1–6 and 8.**
+  - One-to-one matching per file, with a location rule per family. Two errors about different
+    slices never pair.
+  - Identity without loss.
+  - A family table that classifies all 68 gofhir IDs and whose HL7 half is checked against the
+    6.10.4 catalog.
+  - Divergences scoped by side, file, location and message ID.
+  - Fail closed on coverage, on selection and on the manifest.
+  - Caches keyed by content and written atomically, in a per-checkout work directory with a lock.
+- **Acceptance.** The 16 review cases pass, and four injected defects in the model are each caught.
+- **Requirement 9.** The corpus is fetched by package id into the standard cache, with each IG's
+  dependency closure: DEQM, IPS, US Core, mCODE, AU Core, CH Core, CL Core, plus the R4 core
+  examples as a heavy group.
+- **Requirement 7, partly.**
+  - Done: terminology is local on both sides, so element bindings are compared, and the full
+    dependency closure is loaded. Packages gofhir embeds, and older versions of a package the
+    closure also names at a newer version, are left out and listed in the report.
+  - **Pending:** the 5 s constraint budget
+    ([constraint.go:303](../../pkg/constraint/constraint.go)) is not configurable, so gofhir's
+    output can still depend on machine load. It needs a small library option.
+- **Sanity check against v1.21.1**, whose library matches this branch: 13 groups, 689 files,
+  0 findings, and stable across runs.
 
 **PR A1: `jsoncompare`, `ResolveCanonical`, `ElementTree`** (no behavior change)
 

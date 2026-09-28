@@ -17,7 +17,24 @@ recorded output; nothing is asserted by a test yet.
 | `tools/build_acme_decisions.sh` | Rebuilds `decisions/instances` and the `acme.decisions` package: runs the generator, has the HL7 validator generate the snapshots, checks every StructureDefinition has one, and packs the `.tgz`. |
 | `tools/run_probes.sh` | Runs every probe with the packages it needs and writes one JSON file per group, issues sorted. This is the setup behind the evidence tables. |
 | `tools/sdparse.py` | StructureDefinition corpus parser: 19 numbered rules (R1–R15, R17–R19, R21), plus the sub-rules R10b, R12b, R12c, R15b, R17b and R18b. Each rule checks one assumption of the plans. |
+| `corpus.json` | The regression corpus for `hl7diff` (`internal/tools/hl7diff`): groups of instances, each with the packages both validators load. |
+| `declared-divergences.json` | Expected differences from the HL7 validator, where the spec wins (plan A, "Decisions"), each scoped to a file, location and message ID. |
 | `tools/sdparse-corpus-2026-09-27.txt` | Its output on the 25-package corpus the plans cite (3,061 unique StructureDefinitions). |
+
+## Checking the Release A invariant
+
+```bash
+go run ./internal/tools/hl7diff fetch                 # install the corpus's packages and their closure
+go run ./internal/tools/hl7diff run -jar /path/to/validator_cli.jar [-baseline v1.21.1] [-group a,b] [-heavy]
+```
+
+Per file, `hl7diff` matches gofhir's errors one-to-one with equivalent HL7 validator errors (same
+family in `internal/tools/hl7diff/families.json`, the family's location rule, and the same slice
+when both name one). A change passes when it adds no gofhir error without an HL7 equivalent and
+loses no HL7 error the baseline matched. `run` builds `corpusrun` from the working tree and from a
+worktree of the baseline, runs both and the HL7 validator on every group, and writes `report.md`
+in a per-checkout work directory. Groups marked heavy (`r4-core-examples`, 5,307 files) run only
+with `-heavy` or when named with `-group`. A group that cannot run fails the run.
 
 ## Re-running the probes
 

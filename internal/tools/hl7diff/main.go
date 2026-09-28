@@ -6,10 +6,18 @@
 // HL7 errors with no gofhir equivalent (false negatives). A change holds the invariant when it adds
 // neither, relative to a baseline release, except where a divergence is declared.
 //
-//	hl7diff diff -base base.jsonl -head head.jsonl -hl7 hl7.json [-divergences d.json]
+//	hl7diff run   -jar validator_cli.jar [-manifest corpus.json] [-baseline ref] [-group a,b] [-heavy]
+//	hl7diff fetch [-manifest corpus.json] [-heavy]
+//	hl7diff diff  -base base.jsonl -head head.jsonl -hl7 hl7.json [-divergences d.json]
+//
+// "run" produces the three outputs and checks them: it builds corpusrun from the working tree and
+// from a git worktree of the baseline, runs both and the HL7 validator on every group of the
+// manifest, and writes report.md. "fetch" installs the manifest's packages, and their dependency
+// closure, into the standard FHIR package cache. "diff" checks outputs that already exist.
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -31,9 +39,14 @@ func main() {
 
 func dispatch(args []string, out io.Writer) (bool, error) {
 	if len(args) == 0 {
-		return false, errors.New("usage: hl7diff diff [flags]")
+		return false, errors.New("usage: hl7diff run|fetch|diff [flags] (see the package doc)")
 	}
+	ctx := context.Background()
 	switch args[0] {
+	case "run":
+		return cmdRun(ctx, args[1:], out)
+	case "fetch":
+		return cmdFetch(ctx, args[1:], out)
 	case "diff":
 		return cmdDiff(args[1:], out)
 	default:
