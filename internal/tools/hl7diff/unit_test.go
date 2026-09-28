@@ -221,6 +221,10 @@ func TestMatchingChoiceDoesNotDecideVerdict(t *testing.T) {
 }
 
 func TestReadDivergencesRejectsUnscoped(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
 	dir := t.TempDir()
 	for name, body := range map[string]string{
 		"no location": `[{"decision":"D-5","reason":"r","side":"gofhir","file":"x.json","messageId":"SLICING_NO_MATCH"}]`,
@@ -232,7 +236,7 @@ func TestReadDivergencesRejectsUnscoped(t *testing.T) {
 		if err := os.WriteFile(p, []byte(body), 0o600); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := ReadDivergences(p); err == nil {
+		if _, err := ReadDivergences(p, fam); err == nil {
 			t.Errorf("%s: an unscoped divergence must be rejected", name)
 		}
 	}
@@ -256,13 +260,110 @@ func TestAssignIsMaximum(t *testing.T) {
 		t.Fatal(err)
 	}
 	g := func(loc string) GoIssue {
-		return GoIssue{File: "f", Severity: "error", MessageID: "SLICING_NO_MATCH", Expression: []string{loc}}
+		return GoIssue{File: "f", Severity: "error", MessageID: "CARDINALITY_MAX", Expression: []string{loc}}
 	}
 	h := func(loc string) HL7Issue {
-		return HL7Issue{File: "f", Severity: "error", Key: "Validation_VAL_Profile_NotSlice", HasID: true, Location: loc, Text: "not a slice"}
+		return HL7Issue{File: "f", Severity: "error", Key: "Validation_VAL_Profile_Maximum", HasID: true, Location: loc, Text: "Bundle.entry: max allowed = 1, but found 2"}
 	}
 	u := Assign(fam, []GoIssue{g("Bundle.entry"), g("Bundle.entry[0]")}, []HL7Issue{h("Bundle.entry[0]"), h("Bundle.entry[1]")})
 	if len(u.GoFHIR) != 0 || len(u.HL7) != 0 {
 		t.Errorf("want every error paired, got %d gofhir and %d HL7 unpaired", len(u.GoFHIR), len(u.HL7))
 	}
+}
+
+func TestReadDivergencesAcceptsRealIDs(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := t.TempDir() + "/d.json"
+	body := `[{"decision":"D-5","reason":"r","side":"gofhir","file":"x.json","location":"X","messageId":"SLICING_NO_MATCH"},
+	 {"decision":"D-1","reason":"r","side":"hl7","file":"x.json","location":"X","messageId":"Validation_VAL_Profile_MatchMultiple"},
+	 {"decision":"D-9","reason":"r","side":"hl7","file":"x.json","location":"X","messageId":"http://hl7.org/fhir/StructureDefinition/Extension#ext-1"}]`
+	if err := os.WriteFile(p, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if ds, err := ReadDivergences(p, fam); err != nil || len(ds) != 3 {
+		t.Fatalf("real IDs must be accepted: %v", err)
+	}
+}
+
+// The second review of the redesign: each scenario, with the verdict it must get.
+func TestSecondReviewScenarios(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const f = "x.json"
+	cov := map[string]bool{f: true}
+	run := func(gs ...GoIssue) GoRun { return GoRun{Covered: cov, Errors: map[string][]GoIssue{f: gs}} }
+	hl7 := func(hs ...HL7Issue) HL7Run { return HL7Run{Covered: cov, Errors: map[string][]HL7Issue{f: hs}} }
+	g := func(id, loc, diag string) GoIssue {
+		return GoIssue{File: f, Severity: "error", MessageID: id, Expression: []string{loc}, Diagnostics: diag}
+	}
+	h := func(id, loc, text string) HL7Issue {
+		return HL7Issue{File: f, Severity: "error", Key: id, HasID: true, Location: loc, Text: text}
+	}
+	verdict := func(base, head GoRun, x HL7Run) bool {
+		rep, err := Check(fam, base, head, x, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return rep.OK()
+	}
+
+	t.Run("1: a false child error cannot stand for a missing extension value", func(t *testing.T) {
+		x := hl7(h("Extension_EXT_Simple_ABSENT", "MeasureReport.extension[0]", "The Extension 'u' definition is for a simple extension, so it must contain a value"))
+		base := run(g("EXTENSION_VALUE_REQUIRED", "MeasureReport.extension[0]", "requires a value"))
+		head := run(g("CARDINALITY_MIN", "MeasureReport.extension[0].url", "min"))
+		if verdict(base, head, x) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("1: a nested extension's missing value cannot stand for its parent's", func(t *testing.T) {
+		x := hl7(h("Extension_EXT_Simple_ABSENT", "MeasureReport.extension[0]", "The Extension 'u' definition is for a simple extension, so it must contain a value"))
+		base := run(g("EXTENSION_VALUE_REQUIRED", "MeasureReport.extension[0]", "requires a value"))
+		head := run(g("EXTENSION_VALUE_REQUIRED", "MeasureReport.extension[0].extension[1]", "requires a value"))
+		if verdict(base, head, x) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("1: an unknown element is named by HL7", func(t *testing.T) {
+		x := hl7(HL7Issue{File: f, Severity: "error", Key: "structure", Code: "structure", Location: "Questionnaire.item[0]", Text: "Unrecognized property 'bogus'"})
+		base := run(g("STRUCTURE_UNKNOWN_ELEMENT", "Questionnaire.item[0].bogus", "unknown"))
+		head := run(g("STRUCTURE_UNKNOWN_ELEMENT", "Questionnaire.item[0].linkId", "unknown"))
+		if verdict(base, head, x) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("3: a regression on one entry does not cancel an improvement on another", func(t *testing.T) {
+		base := run(g("CARDINALITY_MIN", "Bundle.entry[0].resource.subject", "min"))
+		head := run(g("CARDINALITY_MIN", "Bundle.entry[3].resource.subject", "min"))
+		if verdict(base, head, hl7()) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("4: a swap between slice children at one instance path", func(t *testing.T) {
+		base := run(g("SLICING_CARDINALITY_MIN", "Observation.component[0].system", "Minimum cardinality of 'Observation.component:SystolicBP.system' is 1, but found 0"))
+		head := run(g("SLICING_CARDINALITY_MIN", "Observation.component[0].system", "Minimum cardinality of 'Observation.component:DiastolicBP.system' is 1, but found 0"))
+		if verdict(base, head, hl7()) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("5: an error about another ancestor slice does not pair", func(t *testing.T) {
+		x := hl7(h("Validation_VAL_Profile_Minimum_SLICE", "MeasureReport.extension[0]", "Slice 'MeasureReport.extension:cehrt.value[x]:valueIdentifier': a matching slice is required, but not found"))
+		base := run(g("SLICING_CARDINALITY_MIN", "MeasureReport.extension:cehrt.value[x]:valueIdentifier", "min"))
+		head := run(g("SLICING_CARDINALITY_MIN", "MeasureReport.extension:other.value[x]:valueIdentifier", "min"))
+		if verdict(base, head, x) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("6: a slice location made an instance path still pairs", func(t *testing.T) {
+		x := hl7(h("Validation_VAL_Profile_Maximum", "Bundle", "Bundle.entry:composition: max allowed = 1, but found 2"))
+		base := run(g("SLICING_CARDINALITY_MAX", "Bundle.entry:composition", "max"))
+		head := run(g("SLICING_CARDINALITY_MAX", "Bundle.entry[1]", "max"))
+		if !verdict(base, head, x) {
+			t.Error("must pass")
+		}
+	})
 }

@@ -184,7 +184,7 @@ func newRunEnv(ctx context.Context, root string, m Manifest, jar, work, baseline
 		return nil, nil, err
 	}
 	if m.Divergences != "" {
-		if env.divs, err = ReadDivergences(filepath.Join(root, m.Divergences)); err != nil {
+		if env.divs, err = ReadDivergences(filepath.Join(root, m.Divergences), env.fam); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -311,10 +311,10 @@ func planGroup(env *runEnv, g Group) (*groupPlan, error) {
 	if err := os.MkdirAll(p.dir, 0o750); err != nil {
 		return nil, err
 	}
-	if p.inputs, err = inputsKeyWith(env, p.version, p.closure, p.pkgFiles, p.files, true); err != nil {
+	if p.inputs, err = inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, true); err != nil {
 		return nil, err
 	}
-	if p.instances, err = inputsKeyWith(env, p.version, p.closure, p.pkgFiles, p.files, false); err != nil {
+	if p.instances, err = inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, false); err != nil {
 		return nil, err
 	}
 	return p, nil
@@ -364,7 +364,7 @@ func runHL7(ctx context.Context, env *runEnv, p *groupPlan) (string, error) {
 	// The key hashed the inputs before java read them. If the instances or local packages changed
 	// meanwhile, the output belongs to no key and is discarded. (The package cache listing may
 	// change: the HL7 validator installs missing packages while it runs.)
-	if again, err := inputsKeyWith(env, p.version, p.closure, p.pkgFiles, p.files, false); err != nil || again != p.instances {
+	if again, err := inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, false); err != nil || again != p.instances {
 		_ = os.Remove(tmp)
 		return "", errors.New("inputs changed while the HL7 validator was running; run again")
 	}
@@ -514,22 +514,28 @@ func groupFiles(env *runEnv, g Group) ([]string, error) {
 	return out, nil
 }
 
-// inputsKeyWith hashes everything besides the program that decides a run's output: the FHIR version,
-// the package closure, the local packages' contents, the instances' contents, and the names of
-// every package in the cache (the HL7 validator also loads the latest terminology and extensions
-// packages it finds there, so a newly installed one must invalidate the cache). With withCache
-// false the listing is left out: the HL7 validator installs missing packages into the cache while
-// it runs, so the listing legitimately changes during a run, while the instances and local
-// packages must not.
-func inputsKeyWith(env *runEnv, version string, closure []PackageID, pkgFiles, files []string, withCache bool) (string, error) {
+// inputsKeyWith hashes the inputs that decide a run's output, besides the programs: the FHIR
+// version, the local packages' contents and the instances' contents; and, with withCache, the
+// cached packages too: a fingerprint of every package in the closure and of every package left
+// out of it (the HL7 validator loads those), and the names of every package in the cache (it also
+// loads the latest terminology and extensions packages it finds there). Without withCache only
+// the instances and local packages count: the HL7 validator installs and indexes packages in the
+// cache while it runs, so those legitimately change during a run, while the instances must not.
+func inputsKeyWith(env *runEnv, version string, closure, skipped []PackageID, pkgFiles, files []string, withCache bool) (string, error) {
 	h := sha256.New()
 	_, _ = fmt.Fprintln(h, "version", version, "closure", joinIDs(closure))
-	for _, p := range closure {
-		fp, err := env.cache.Fingerprint(p)
-		if err != nil {
-			return "", err
+	if withCache {
+		for _, p := range append(append([]PackageID(nil), closure...), skipped...) {
+			if _, err := os.Stat(env.cache.Path(p)); err != nil {
+				_, _ = fmt.Fprintln(h, "absent", p) // an embedded package need not be in the cache
+				continue
+			}
+			fp, err := env.cache.Fingerprint(p)
+			if err != nil {
+				return "", err
+			}
+			_, _ = fmt.Fprintln(h, "cached-package", p, fp)
 		}
-		_, _ = fmt.Fprintln(h, "closure-package", p, fp)
 	}
 	for _, p := range pkgFiles {
 		sum, err := fileHash(env.root, p)

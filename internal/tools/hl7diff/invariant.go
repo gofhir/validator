@@ -8,6 +8,12 @@ import (
 	"sort"
 )
 
+// The two sides a divergence can be declared on.
+const (
+	sideGoFHIR = "gofhir"
+	sideHL7    = "hl7"
+)
+
 // Divergence declares an expected difference from the HL7 validator (plan A, "Decisions"), where
 // the spec text and HL7 disagree and the spec wins.
 //
@@ -23,8 +29,11 @@ type Divergence struct {
 	MessageID string `json:"messageId"` // gofhir diagnostic ID or HL7 message ID; required
 }
 
-// ReadDivergences reads a declared-divergence list; an empty path means none.
-func ReadDivergences(path string) ([]Divergence, error) {
+// ReadDivergences reads a declared-divergence list; an empty path means none. Each one must name
+// an ID that exists on its side: a gofhir diagnostic ID the family table knows, or an ID in the
+// HL7 validator's message catalog (or a constraint, "<canonical>#<key>"). A misspelled or
+// code-only ID would otherwise load and silently match nothing.
+func ReadDivergences(path string, fam *Families) ([]Divergence, error) {
 	if path == "" {
 		return nil, nil
 	}
@@ -37,11 +46,17 @@ func ReadDivergences(path string) ([]Divergence, error) {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 	for i, d := range ds {
-		if (d.Side != "gofhir" && d.Side != "hl7") || d.MessageID == "" || d.File == "" || d.Decision == "" || d.Location == "" {
+		if (d.Side != sideGoFHIR && d.Side != sideHL7) || d.MessageID == "" || d.File == "" || d.Decision == "" || d.Location == "" {
 			return nil, fmt.Errorf("%s: divergence %d needs decision, side (gofhir|hl7), file, location and messageId", path, i)
 		}
 		if d.MessageID == "FAILURE" {
 			return nil, fmt.Errorf("%s: divergence %d: a failure to validate cannot be declared", path, i)
+		}
+		if d.Side == sideGoFHIR && !fam.KnowsGo(d.MessageID) {
+			return nil, fmt.Errorf("%s: divergence %d: %q is not a gofhir diagnostic ID", path, i, d.MessageID)
+		}
+		if d.Side == sideHL7 && !hl7Catalog()[d.MessageID] && !hl7ConstraintKey.MatchString(d.MessageID) {
+			return nil, fmt.Errorf("%s: divergence %d: %q is not in the HL7 validator's message catalog", path, i, d.MessageID)
 		}
 		if _, err := filepath.Match(d.File, ""); err != nil {
 			return nil, fmt.Errorf("%s: divergence %d: bad file glob: %w", path, i, err)
@@ -52,12 +67,12 @@ func ReadDivergences(path string) ([]Divergence, error) {
 
 func (d Divergence) coversGo(g GoIssue) bool {
 	ok, _ := filepath.Match(d.File, g.File)
-	return d.Side == "gofhir" && ok && d.MessageID == g.MessageID && d.Location == g.Location()
+	return d.Side == sideGoFHIR && ok && d.MessageID == g.MessageID && d.Location == g.Location()
 }
 
 func (d Divergence) coversHL7(h HL7Issue) bool {
 	ok, _ := filepath.Match(d.File, h.File)
-	return d.Side == "hl7" && ok && h.HasID && d.MessageID == h.Key && d.Location == h.Location
+	return d.Side == sideHL7 && ok && h.HasID && d.MessageID == h.Key && d.Location == h.Location
 }
 
 // Finding is one way the head run is worse than the baseline.

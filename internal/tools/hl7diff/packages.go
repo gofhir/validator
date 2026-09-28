@@ -62,7 +62,9 @@ func (c Cache) Fingerprint(p PackageID) (string, error) {
 		if err != nil {
 			return err
 		}
-		if d.IsDir() {
+		// Index files are written by tools that read the package (the HL7 validator writes
+		// .index.json and .index.db); they are not the package's content.
+		if d.IsDir() || strings.HasPrefix(d.Name(), ".index") {
 			return nil
 		}
 		info, err := d.Info()

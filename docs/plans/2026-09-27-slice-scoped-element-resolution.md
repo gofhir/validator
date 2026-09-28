@@ -335,24 +335,38 @@ declared divergence.
 
 - **Met: 1, 2, 3, 6 and 8.**
   - **Matching:** one-to-one per file. Pairs form only within a family and under its location
-    rule. When HL7 names the element or slice in its message, the gofhir location must end in
-    the same one.
-  - **What is compared:** unpaired errors are compared between runs by class (identity without
-    list indices), so an arbitrary choice between equivalent partners never decides a verdict.
-  - **Identity:** raw location with slice names, message ID, and constraint key; the definition
-    site is not part of it.
+    rule. The "parent" rule applies only where the corpus shows HL7 reporting at the parent:
+    cardinality, slicing, unknown elements and extension value types. Every other family uses
+    "equal". When HL7 names the element or slice in its message (cardinality messages, "Slice
+    '…'", "Unrecognized property '…'"), the gofhir location must end in the same element, and
+    both sides' slices must agree when both name them.
+  - **What is compared:** unpaired errors are compared between runs by class, which is the
+    identity with only the location's final index removed. A choice between items of one list
+    therefore never decides a verdict, and entries of a Bundle stay distinct.
+  - **Identity:** raw location, message ID, the constraint key, and the slices named in a
+    cardinality message (gofhir reports slice children at the instance path). The definition
+    site and the wording are not part of it.
+  - **Known limit, false fail only:** when one gofhir error can pair with two HL7 errors that
+    name the same element at a parent and at its child, the one left unpaired can still depend
+    on order. The worst case is a finding to inspect, never a pass that should have failed.
   - **Fail closed:** on coverage, on group selection and on the manifest.
-  - **Caches:** keyed by the jar, the arguments, the closure (with a fingerprint of every
-    package's files), the local packages and the instances. They are written atomically, and a
+  - **Caches:** keyed by the jar, the arguments, the closure and the packages left out of it
+    (each with a fingerprint of its files, ignoring the index files the HL7 validator writes),
+    the local packages and the instances. They are written atomically, and a
     cached HL7 output that does not cover every file is regenerated. The work directory is per
     checkout and locked.
 - **Partly met: 4, 5, 7 and 9.**
   - **4:** the family table classifies all 68 gofhir IDs, and its HL7 half is checked against the
     6.10.4 catalog. **Pending:** `pkg/fixedpattern` still emits its errors without a diagnostic
     ID, so they cannot be paired with HL7's; giving them IDs is a library change.
-  - **5:** divergences are scoped by side, file (a repository path, or a portable
-    `fhir-cache:/<id>#<version>/…` name for cached examples), exact location and message ID. A
-    divergence without a location, or covering a validation failure, is rejected. There is no
+  - **5:** divergences are scoped by:
+    - side;
+    - file: a repository path, or a portable `fhir-cache:/<id>#<version>/…` name for cached
+      examples. Both `run` and `diff` use these names;
+    - exact location;
+    - message ID, which must exist in its validator's catalog.
+
+    A divergence without a location, or covering a validation failure, is rejected. There is no
     free-form predicate.
   - **7:** terminology is local on both sides, so element bindings are compared, and each IG's
     dependency closure is loaded. Packages gofhir embeds, and older versions of a package the
@@ -363,9 +377,19 @@ declared divergence.
   - **9:** the corpus is fetched by package id into the standard cache, created if missing: DEQM,
     IPS, US Core, mCODE, AU Core, CH Core and CL Core, plus the R4 core examples as a heavy group,
     which has not been run yet.
-- **Acceptance:** the 16 review cases pass, plus the two matching-choice cases from the second
-  review. Each of five injected defects in the model is caught: any ancestor accepted, a
-  non-maximum matching, unsorted input, element names ignored, and exact identities compared.
+- **Acceptance:** the 16 review cases pass, plus the scenarios from the two reviews of the
+  redesign. Each of eleven injected defects is caught:
+  - any ancestor accepted as a location;
+  - a non-maximum matching;
+  - unsorted input;
+  - element names ignored;
+  - exact identities compared;
+  - every index stripped;
+  - no slice-list check;
+  - no slice names in the identity;
+  - unknown properties not named;
+  - value-required under the parent rule;
+  - a strict slice on instance paths.
 - **Sanity check against v1.21.1**, whose library matches this branch: 13 groups, 689 files,
   0 findings.
 

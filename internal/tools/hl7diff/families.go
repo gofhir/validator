@@ -11,6 +11,20 @@ import (
 //go:embed families.json
 var familiesJSON []byte
 
+//go:embed testdata/hl7-message-ids-6.10.4.txt
+var hl7CatalogText string
+
+// hl7Catalog is the set of message IDs in the HL7 validator 6.10.4 catalog.
+func hl7Catalog() map[string]bool {
+	ids := map[string]bool{}
+	for line := range strings.SplitSeq(hl7CatalogText, "\n") {
+		if line = strings.TrimSpace(line); line != "" && !strings.HasPrefix(line, "#") {
+			ids[line] = true
+		}
+	}
+	return ids
+}
+
 // Family is one group of equivalent findings across the two validators.
 type Family struct {
 	Name    string   `json:"name"`
@@ -42,6 +56,19 @@ const (
 )
 
 const constraintRule = ruleEqual
+
+// KnowsGo reports whether id is a gofhir diagnostic ID the table classifies.
+func (f *Families) KnowsGo(id string) bool {
+	if f.byGo[id] != nil || f.Unmapped[id] != "" {
+		return true
+	}
+	for _, c := range f.Constraint.GoFHIR {
+		if c == id {
+			return true
+		}
+	}
+	return false
+}
 
 // LoadFamilies parses the embedded family table.
 func LoadFamilies() (*Families, error) { return ParseFamilies(familiesJSON) }

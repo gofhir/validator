@@ -9,84 +9,173 @@
     "message ID, by issue code and a regular expression on the text.",
     "Every gofhir ID in pkg/issue is either in a family or listed under 'unmapped' with a reason; a test",
     "enforces it. Unmapped and family-less errors never match: they always count as unexplained on their",
-    "side, so a change in them is always visible."
+    "side, so a change in them is always visible.",
+    "Rules are 'parent' only where the corpus shows HL7 reporting at the parent (cardinality, slicing, unknown elements, extension value types) and the finding is named or located precisely enough; everything else is 'equal', which can only make a pair less likely, never a wrong one."
   ],
   "families": [
     {
       "name": "cardinality-min",
       "rule": "parent",
-      "gofhir": ["CARDINALITY_MIN", "SLICING_CARDINALITY_MIN", "EXTENSION_VALUE_REQUIRED"],
-      "hl7": ["Validation_VAL_Profile_Minimum", "Validation_VAL_Profile_Minimum_SLICE", "Validation_VAL_Profile_Minimum_SLICE_EXT", "Extension_EXT_Simple_ABSENT"]
+      "gofhir": [
+        "CARDINALITY_MIN",
+        "SLICING_CARDINALITY_MIN"
+      ],
+      "hl7": [
+        "Validation_VAL_Profile_Minimum",
+        "Validation_VAL_Profile_Minimum_SLICE",
+        "Validation_VAL_Profile_Minimum_SLICE_EXT"
+      ]
     },
     {
       "name": "cardinality-max",
       "rule": "parent",
-      "gofhir": ["CARDINALITY_MAX", "SLICING_CARDINALITY_MAX"],
-      "hl7": ["Validation_VAL_Profile_Maximum"]
+      "gofhir": [
+        "CARDINALITY_MAX",
+        "SLICING_CARDINALITY_MAX"
+      ],
+      "hl7": [
+        "Validation_VAL_Profile_Maximum"
+      ]
+    },
+    {
+      "name": "extension-value-required",
+      "rule": "equal",
+      "gofhir": [
+        "EXTENSION_VALUE_REQUIRED"
+      ],
+      "hl7": [
+        "Extension_EXT_Simple_ABSENT"
+      ]
     },
     {
       "name": "slice-no-match",
-      "rule": "parent",
-      "gofhir": ["SLICING_NO_MATCH"],
-      "hl7": ["Validation_VAL_Profile_NotSlice"]
+      "rule": "equal",
+      "gofhir": [
+        "SLICING_NO_MATCH"
+      ],
+      "hl7": [
+        "Validation_VAL_Profile_NotSlice"
+      ]
     },
     {
       "name": "unknown-element",
       "rule": "parent",
-      "gofhir": ["STRUCTURE_UNKNOWN_ELEMENT"],
-      "hl7NoID": [{"code": "structure", "text": "^Unrecognized property"}]
+      "gofhir": [
+        "STRUCTURE_UNKNOWN_ELEMENT"
+      ],
+      "hl7NoID": [
+        {
+          "code": "structure",
+          "text": "^Unrecognized property"
+        }
+      ]
     },
     {
       "name": "extension-value-type",
       "rule": "parent",
-      "gofhir": ["EXTENSION_INVALID_VALUE_TYPE"],
-      "hl7": ["Extension_EXT_Type"]
+      "gofhir": [
+        "EXTENSION_INVALID_VALUE_TYPE"
+      ],
+      "hl7": [
+        "Extension_EXT_Type"
+      ]
     },
     {
       "name": "extension-unknown",
-      "rule": "parent",
-      "gofhir": ["EXTENSION_UNKNOWN", "EXTENSION_NESTED_UNKNOWN", "MODIFIER_EXTENSION_UNKNOWN"],
-      "hl7": ["Extension_EXT_Unknown", "Extension_EXT_Unknown_NotHere", "Extension_EXT_Url_NotFound"]
+      "rule": "equal",
+      "gofhir": [
+        "EXTENSION_UNKNOWN",
+        "EXTENSION_NESTED_UNKNOWN",
+        "MODIFIER_EXTENSION_UNKNOWN"
+      ],
+      "hl7": [
+        "Extension_EXT_Unknown",
+        "Extension_EXT_Unknown_NotHere",
+        "Extension_EXT_Url_NotFound"
+      ]
     },
     {
       "name": "reference-target",
-      "rule": "parent",
-      "gofhir": ["REFERENCE_INVALID_TARGET", "REFERENCE_TYPE_MISMATCH"],
-      "hl7": ["Reference_REF_BadTargetType", "Reference_REF_BadTargetType2", "Reference_REF_CantMatchChoice", "Reference_REF_CantMatchType", "Reference_REF_WrongTarget"]
+      "rule": "equal",
+      "gofhir": [
+        "REFERENCE_INVALID_TARGET",
+        "REFERENCE_TYPE_MISMATCH"
+      ],
+      "hl7": [
+        "Reference_REF_BadTargetType",
+        "Reference_REF_BadTargetType2",
+        "Reference_REF_CantMatchChoice",
+        "Reference_REF_CantMatchType",
+        "Reference_REF_WrongTarget"
+      ]
     },
     {
       "name": "binding-required",
-      "rule": "parent",
-      "gofhir": ["BINDING_REQUIRED"],
-      "hl7": ["Terminology_TX_NoValid_*"]
+      "rule": "equal",
+      "gofhir": [
+        "BINDING_REQUIRED"
+      ],
+      "hl7": [
+        "Terminology_TX_NoValid_*"
+      ]
     },
     {
       "name": "code-unknown",
-      "rule": "parent",
-      "gofhir": ["CODE_NOT_IN_CODESYSTEM"],
-      "hl7": ["Unknown_Code_in", "Unknown_Code_in_Version", "Unknown_Code_in_Version_SCT"]
+      "rule": "equal",
+      "gofhir": [
+        "CODE_NOT_IN_CODESYSTEM"
+      ],
+      "hl7": [
+        "Unknown_Code_in",
+        "Unknown_Code_in_Version",
+        "Unknown_Code_in_Version_SCT"
+      ]
     },
     {
       "name": "primitive-format",
       "rule": "equal",
       "gofhir": [
-        "TYPE_INVALID_BASE64", "TYPE_INVALID_BOOLEAN", "TYPE_INVALID_CODE", "TYPE_INVALID_DATE",
-        "TYPE_INVALID_DATETIME", "TYPE_INVALID_DECIMAL", "TYPE_INVALID_FORMAT", "TYPE_INVALID_ID",
-        "TYPE_INVALID_INSTANT", "TYPE_INVALID_INTEGER", "TYPE_INVALID_OID", "TYPE_INVALID_POSITIVE_INT",
-        "TYPE_INVALID_STRING", "TYPE_INVALID_TIME", "TYPE_INVALID_UNSIGNED_INT", "TYPE_INVALID_URI",
-        "TYPE_INVALID_URL", "TYPE_INVALID_UUID"
+        "TYPE_INVALID_BASE64",
+        "TYPE_INVALID_BOOLEAN",
+        "TYPE_INVALID_CODE",
+        "TYPE_INVALID_DATE",
+        "TYPE_INVALID_DATETIME",
+        "TYPE_INVALID_DECIMAL",
+        "TYPE_INVALID_FORMAT",
+        "TYPE_INVALID_ID",
+        "TYPE_INVALID_INSTANT",
+        "TYPE_INVALID_INTEGER",
+        "TYPE_INVALID_OID",
+        "TYPE_INVALID_POSITIVE_INT",
+        "TYPE_INVALID_STRING",
+        "TYPE_INVALID_TIME",
+        "TYPE_INVALID_UNSIGNED_INT",
+        "TYPE_INVALID_URI",
+        "TYPE_INVALID_URL",
+        "TYPE_INVALID_UUID"
       ],
-      "hl7": ["Type_Specific_Checks_DT_*"]
+      "hl7": [
+        "Type_Specific_Checks_DT_*"
+      ]
     },
     {
       "name": "bundle-fullurl",
       "rule": "parent",
-      "gofhir": ["BUNDLE_FULLURL_ID_MISMATCH"],
-      "hl7": ["Bundle_BUNDLE_Entry_IdUrlMismatch", "Bundle_BUNDLE_Entry_MismatchIdUrl", "BUNDLE_ENTRY_URL_MATCHES_TYPE_ID", "BUNDLE_ENTRY_URL_MATCHES_NO_ID"]
+      "gofhir": [
+        "BUNDLE_FULLURL_ID_MISMATCH"
+      ],
+      "hl7": [
+        "Bundle_BUNDLE_Entry_IdUrlMismatch",
+        "Bundle_BUNDLE_Entry_MismatchIdUrl",
+        "BUNDLE_ENTRY_URL_MATCHES_TYPE_ID",
+        "BUNDLE_ENTRY_URL_MATCHES_NO_ID"
+      ]
     }
   ],
   "constraint": {
-    "gofhir": ["CONSTRAINT_FAILED"],
+    "gofhir": [
+      "CONSTRAINT_FAILED"
+    ],
     "comment": "The key is read from gofhir's diagnostics ('Constraint failed: <key>:') and from HL7's message ID ('<canonical>#<key>')."
   },
   "unmapped": {
