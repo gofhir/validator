@@ -12,7 +12,6 @@ var (
 	// ...", "Unrecognized property 'bogusElement'".
 	hl7NamedElement = regexp.MustCompile(`^(?:Slice '([^']+)'|([A-Za-z][\w.:\[\]/-]*): (?:minimum required|max allowed)|Unrecognized property '([^']+)')`)
 	indexSuffix     = regexp.MustCompile(`\[\d+\]`)
-	finalIndex      = regexp.MustCompile(`\[\d+\]$`)
 	sliceNamePart   = regexp.MustCompile(`:([^.\[\]]+)`)
 	// The element gofhir's cardinality messages quote: "Minimum cardinality of 'Observation.
 	// component:SystolicBP.system' is 1". Only element paths qualify, not URLs.
@@ -49,11 +48,12 @@ func lastSegment(loc string) string {
 // "Bundle.entry:s.request.method" or "Quantity.comparator", so only the last element is compared,
 // plus the slices: when both sides name slices they must be the same ones, in order. A gofhir
 // location that names no slice (an instance path such as "Bundle.entry[1]") is not held to one.
-func namesAgree(goLoc string, h HL7Issue) bool {
+func namesAgree(g GoIssue, h HL7Issue) bool {
 	m := hl7NamedElement.FindStringSubmatch(h.Text)
 	if m == nil {
 		return true
 	}
+	goLoc := g.Location()
 	id := m[1] + m[2] + m[3]
 	want, got := lastSegment(id), lastSegment(goLoc)
 	if !strings.Contains(got, ":") {
@@ -66,49 +66,46 @@ func namesAgree(goLoc string, h HL7Issue) bool {
 	} else if want != got {
 		return false
 	}
-	if hs, gs := sliceNames(id), sliceNames(goLoc); len(hs) > 0 && len(gs) > 0 {
+	gs := sliceNames(goLoc)
+	if len(gs) == 0 {
+		gs = quotedSlices(g) // a slice child reported at its instance path names the slice in the text
+	}
+	if hs := sliceNames(id); len(hs) > 0 && len(gs) > 0 {
 		return strings.Join(hs, ",") == strings.Join(gs, ",")
 	}
 	return true
 }
 
-// goIdentity identifies a gofhir error: its severity, diagnostic ID, raw location, and the detail
-// that tells two errors at one location apart: the constraint key for a constraint, and the slice
-// names of the element a cardinality message quotes (gofhir reports a slice child at the instance
-// path, Observation.component[0].system, and names the slice only in the text). Other text is
-// not part of it: where a constraint was defined, or how a message is worded, must not make the
-// same failure look new. An error with no diagnostic ID has only its text to tell it apart.
-func goIdentity(g GoIssue) string {
+// GoIdentity identifies a gofhir error: its severity, diagnostic ID, raw location, and the detail
+// that tells two errors at one location apart: the constraint key for a constraint, and for a
+// cardinality error the slices of the element its message quotes (gofhir reports a slice child at
+// the instance path, Observation.component[0].system, and names the slice only in the text).
+// Other text is not part of it: where a constraint was defined, or how a message is worded, must
+// not make the same failure look new. An error with no diagnostic ID has only its text.
+func (f *Families) GoIdentity(g GoIssue) string {
 	detail := g.Diagnostics
 	if g.MessageID != "" {
 		detail = ""
 		if m := goConstraintKey.FindStringSubmatch(g.Diagnostics); m != nil {
 			detail = m[1]
-		} else if m := goQuotedElement.FindStringSubmatch(g.Diagnostics); m != nil {
-			detail = strings.Join(sliceNames(m[1]), ",")
+		} else if f.isCardinality(g) {
+			detail = strings.Join(quotedSlices(g), ",")
 		}
 	}
 	return strings.Join([]string{g.Severity, g.MessageID, g.Location(), detail}, "\x00")
 }
 
+// quotedSlices are the slices of the element a gofhir message quotes, if any.
+func quotedSlices(g GoIssue) []string {
+	if m := goQuotedElement.FindStringSubmatch(g.Diagnostics); m != nil {
+		return sliceNames(m[1])
+	}
+	return nil
+}
+
 // hl7Identity identifies an HL7 error.
 func hl7Identity(h HL7Issue) string {
 	return strings.Join([]string{h.Key, h.Location, h.Text}, "\x00")
-}
-
-// goClassKey and hl7ClassKey are what unexplained errors are compared by between two runs: the
-// identity with the location's final index removed. When one error could pair with either of two
-// items of a list (Bundle.entry against entry[0] or entry[1]), which item stays unpaired is an
-// arbitrary choice of the matching, so it must not decide a verdict; the number unpaired per class
-// does. Inner indices stay: an error on entry[0]'s resource and one on entry[3]'s are different.
-func goClassKey(g GoIssue) string {
-	g.Expression = []string{finalIndex.ReplaceAllString(g.Location(), "")}
-	return goIdentity(g)
-}
-
-func hl7ClassKey(h HL7Issue) string {
-	h.Location = finalIndex.ReplaceAllString(h.Location, "")
-	return hl7Identity(h)
 }
 
 // Unexplained is what a one-to-one assignment leaves over in one file.
@@ -121,10 +118,7 @@ type Unexplained struct {
 // location rule satisfied), and maximizes the number of pairs. Inputs are sorted by identity first,
 // so the result does not depend on the order either validator emitted its issues in.
 func Assign(fam *Families, gos []GoIssue, hls []HL7Issue) Unexplained {
-	gos = append([]GoIssue(nil), gos...)
-	hls = append([]HL7Issue(nil), hls...)
-	sort.SliceStable(gos, func(a, b int) bool { return goIdentity(gos[a]) < goIdentity(gos[b]) })
-	sort.SliceStable(hls, func(a, b int) bool { return hl7Identity(hls[a]) < hl7Identity(hls[b]) })
+	gos, hls = sortedByIdentity(fam, gos), sortedHL7(hls)
 
 	owner := assignOwners(fam, gos, hls)
 
@@ -160,7 +154,7 @@ func assignOwners(fam *Families, gos []GoIssue, hls []HL7Issue) []int {
 		}
 		loc := ComparableGoLocation(g.Location())
 		for j, h := range hls {
-			if hlClass[j] == family && Located(rule, loc, h.Location) && namesAgree(g.Location(), h) {
+			if hlClass[j] == family && Located(rule, loc, h.Location) && namesAgree(g, h) {
 				edges[i] = append(edges[i], j)
 			}
 		}
@@ -190,4 +184,39 @@ func assignOwners(fam *Families, gos []GoIssue, hls []HL7Issue) []int {
 	}
 
 	return owner
+}
+
+// sortedByIdentity returns a copy of gs sorted by identity, computing each identity once.
+func sortedByIdentity(fam *Families, gs []GoIssue) []GoIssue {
+	type keyed struct {
+		k string
+		g GoIssue
+	}
+	ks := make([]keyed, len(gs))
+	for i, g := range gs {
+		ks[i] = keyed{fam.GoIdentity(g), g}
+	}
+	sort.SliceStable(ks, func(a, b int) bool { return ks[a].k < ks[b].k })
+	out := make([]GoIssue, len(ks))
+	for i, k := range ks {
+		out[i] = k.g
+	}
+	return out
+}
+
+func sortedHL7(hs []HL7Issue) []HL7Issue {
+	type keyed struct {
+		k string
+		h HL7Issue
+	}
+	ks := make([]keyed, len(hs))
+	for i, h := range hs {
+		ks[i] = keyed{hl7Identity(h), h}
+	}
+	sort.SliceStable(ks, func(a, b int) bool { return ks[a].k < ks[b].k })
+	out := make([]HL7Issue, len(ks))
+	for i, k := range ks {
+		out[i] = k.h
+	}
+	return out
 }

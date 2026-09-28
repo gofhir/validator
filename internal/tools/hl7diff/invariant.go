@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 )
+
+// hl7ConstraintID is the shape of an HL7 constraint message ID: the defining StructureDefinition's
+// canonical, "#", and the key.
+var hl7ConstraintID = regexp.MustCompile(`^https?://\S+/StructureDefinition/[^\s#]+#[A-Za-z0-9][\w.-]*$`)
 
 // The two sides a divergence can be declared on.
 const (
@@ -55,7 +60,7 @@ func ReadDivergences(path string, fam *Families) ([]Divergence, error) {
 		if d.Side == sideGoFHIR && !fam.KnowsGo(d.MessageID) {
 			return nil, fmt.Errorf("%s: divergence %d: %q is not a gofhir diagnostic ID", path, i, d.MessageID)
 		}
-		if d.Side == sideHL7 && !hl7Catalog()[d.MessageID] && !hl7ConstraintKey.MatchString(d.MessageID) {
+		if d.Side == sideHL7 && !hl7Catalog()[d.MessageID] && !hl7ConstraintID.MatchString(d.MessageID) {
 			return nil, fmt.Errorf("%s: divergence %d: %q is not in the HL7 validator's message catalog", path, i, d.MessageID)
 		}
 		if _, err := filepath.Match(d.File, ""); err != nil {
@@ -133,8 +138,8 @@ func Check(fam *Families, base, head GoRun, hl7 HL7Run, divs []Divergence) (Repo
 	for _, f := range files {
 		b := Assign(fam, base.Errors[f], hl7.Errors[f])
 		h := Assign(fam, head.Errors[f], hl7.Errors[f])
-		bGo, n1 := countGo(b.GoFHIR, divs)
-		hGo, n2 := countGo(h.GoFHIR, divs)
+		bGo, n1 := countGo(fam, b.GoFHIR, divs)
+		hGo, n2 := countGo(fam, h.GoFHIR, divs)
 		bHL7, n3 := countHL7(b.HL7, divs)
 		hHL7, n4 := countHL7(h.HL7, divs)
 		rep.Divergences += n1 + n2 + n3 + n4
@@ -161,7 +166,7 @@ type tally[T any] struct {
 	sample map[string]T
 }
 
-func countGo(gs []GoIssue, divs []Divergence) (t tally[GoIssue], declared int) {
+func countGo(fam *Families, gs []GoIssue, divs []Divergence) (t tally[GoIssue], declared int) {
 	t = tally[GoIssue]{n: map[string]int{}, sample: map[string]GoIssue{}}
 next:
 	for _, g := range gs {
@@ -171,7 +176,7 @@ next:
 				continue next
 			}
 		}
-		k := goClassKey(g)
+		k := fam.GoIdentity(g)
 		t.n[k]++
 		t.sample[k] = g
 	}
@@ -188,7 +193,7 @@ next:
 				continue next
 			}
 		}
-		k := hl7ClassKey(h)
+		k := hl7Identity(h)
 		t.n[k]++
 		t.sample[k] = h
 	}

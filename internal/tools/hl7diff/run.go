@@ -402,7 +402,7 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 	if err != nil {
 		return false, err
 	}
-	env.portable(&base, &head, &hl7)
+	portable(&base, &head, &hl7)
 	rep, err := Check(env.fam, base, head, hl7, env.divs)
 	if err != nil {
 		return false, err
@@ -428,29 +428,32 @@ func coversAll(r HL7Run, files []string) bool {
 }
 
 // cachePrefix names files inside the FHIR package cache portably, so a divergence can target an
-// example on any machine: fhir-cache:/hl7.fhir.us.core#6.1.0/package/example/X.json.
+// example on any machine: fhir-cache:/hl7.fhir.us.core#6.1.0/package/example/X.json. A file is
+// recognized by the cache's own layout (".fhir/packages/"), not by this machine's cache path, so
+// outputs made elsewhere get the same names.
 const cachePrefix = "fhir-cache:/"
 
-func (env *runEnv) portableName(f string) string {
-	if rel, err := filepath.Rel(env.cache.Dir, f); err == nil && filepath.IsAbs(f) && !strings.HasPrefix(rel, "..") {
-		return cachePrefix + filepath.ToSlash(rel)
+func portableName(f string) string {
+	s := filepath.ToSlash(f)
+	if i := strings.LastIndex(s, "/.fhir/packages/"); i >= 0 {
+		return cachePrefix + s[i+len("/.fhir/packages/"):]
 	}
 	return f
 }
 
 // portable renames every file of the three runs with portableName.
-func (env *runEnv) portable(base, head *GoRun, hl7 *HL7Run) {
+func portable(base, head *GoRun, hl7 *HL7Run) {
 	goRename := func(r *GoRun) {
 		errs, cov := map[string][]GoIssue{}, map[string]bool{}
 		for f, gs := range r.Errors {
-			n := env.portableName(f)
+			n := portableName(f)
 			for i := range gs {
 				gs[i].File = n
 			}
 			errs[n] = gs
 		}
 		for f := range r.Covered {
-			cov[env.portableName(f)] = true
+			cov[portableName(f)] = true
 		}
 		r.Errors, r.Covered = errs, cov
 	}
@@ -458,14 +461,14 @@ func (env *runEnv) portable(base, head *GoRun, hl7 *HL7Run) {
 	goRename(head)
 	errs, cov := map[string][]HL7Issue{}, map[string]bool{}
 	for f, hs := range hl7.Errors {
-		n := env.portableName(f)
+		n := portableName(f)
 		for i := range hs {
 			hs[i].File = n
 		}
 		errs[n] = hs
 	}
 	for f := range hl7.Covered {
-		cov[env.portableName(f)] = true
+		cov[portableName(f)] = true
 	}
 	hl7.Errors, hl7.Covered = errs, cov
 }
@@ -515,27 +518,25 @@ func groupFiles(env *runEnv, g Group) ([]string, error) {
 }
 
 // inputsKeyWith hashes the inputs that decide a run's output, besides the programs: the FHIR
-// version, the local packages' contents and the instances' contents; and, with withCache, the
-// cached packages too: a fingerprint of every package in the closure and of every package left
-// out of it (the HL7 validator loads those), and the names of every package in the cache (it also
-// loads the latest terminology and extensions packages it finds there). Without withCache only
-// the instances and local packages count: the HL7 validator installs and indexes packages in the
-// cache while it runs, so those legitimately change during a run, while the instances must not.
+// version, a fingerprint of every package in the closure and of every package left out of it (the
+// HL7 validator loads those), the local packages' contents and the instances' contents; and, with
+// withCache, the names of every package in the cache (the HL7 validator also loads the latest
+// terminology and extensions packages it finds there). That listing is left out of the check made
+// after the HL7 validator runs, because it installs missing packages while it runs; fingerprints
+// ignore the index files it writes, so the packages' contents are still checked.
 func inputsKeyWith(env *runEnv, version string, closure, skipped []PackageID, pkgFiles, files []string, withCache bool) (string, error) {
 	h := sha256.New()
 	_, _ = fmt.Fprintln(h, "version", version, "closure", joinIDs(closure))
-	if withCache {
-		for _, p := range append(append([]PackageID(nil), closure...), skipped...) {
-			if _, err := os.Stat(env.cache.Path(p)); err != nil {
-				_, _ = fmt.Fprintln(h, "absent", p) // an embedded package need not be in the cache
-				continue
-			}
-			fp, err := env.cache.Fingerprint(p)
-			if err != nil {
-				return "", err
-			}
-			_, _ = fmt.Fprintln(h, "cached-package", p, fp)
+	for _, p := range append(append([]PackageID(nil), closure...), skipped...) {
+		if _, err := os.Stat(env.cache.Path(p)); err != nil {
+			_, _ = fmt.Fprintln(h, "absent", p) // an embedded package need not be in the cache
+			continue
 		}
+		fp, err := env.cache.Fingerprint(p)
+		if err != nil {
+			return "", err
+		}
+		_, _ = fmt.Fprintln(h, "cached-package", p, fp)
 	}
 	for _, p := range pkgFiles {
 		sum, err := fileHash(env.root, p)

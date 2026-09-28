@@ -46,7 +46,7 @@ func TestLocated(t *testing.T) {
 		{"parent", "Bundle.entry[0].request.method", "Bundle.entry[0].request", true}, // missing child at its parent
 		{"parent", "Bundle.entry", "Bundle", true},                                    // required slice at the list owner
 		{"parent", "Observation.component", "Observation", true},
-		{"parent", "Bundle.entry", "Bundle.entry[3]", true},                       // index on one side only
+		{"parent", "Bundle.entry", "Bundle.entry[3]", false},                      // an index is not optional
 		{"parent", "MeasureReport.extension[0].value[x]", "MeasureReport", false}, // not an immediate parent
 		{"parent", "Bundle.entry[1]", "Bundle.entry[10]", false},
 		{"equal", "Questionnaire.item[0]", "Questionnaire.item[0].item[0]", false}, // constraints: equal only
@@ -69,7 +69,7 @@ func TestAssignIsOrderIndependent(t *testing.T) {
 	h := HL7Issue{File: "f", Severity: "error", Key: "Validation_VAL_Profile_Minimum", HasID: true, Location: "Observation"}
 	u1 := Assign(fam, []GoIssue{a, b}, []HL7Issue{h})
 	u2 := Assign(fam, []GoIssue{b, a}, []HL7Issue{h})
-	if len(u1.GoFHIR) != 1 || len(u2.GoFHIR) != 1 || goIdentity(u1.GoFHIR[0]) != goIdentity(u2.GoFHIR[0]) {
+	if len(u1.GoFHIR) != 1 || len(u2.GoFHIR) != 1 || fam.GoIdentity(u1.GoFHIR[0]) != fam.GoIdentity(u2.GoFHIR[0]) {
 		t.Fatalf("assignment depends on input order: %+v vs %+v", u1.GoFHIR, u2.GoFHIR)
 	}
 }
@@ -155,7 +155,7 @@ func TestNamesAgree(t *testing.T) {
 		{"Patient.name", "The Extension 'x' definition is for a simple extension, so it must contain a value", true}, // unnamed
 	}
 	for _, c := range cases {
-		if got := namesAgree(c.loc, h(c.text)); got != c.want {
+		if got := namesAgree(GoIssue{Expression: []string{c.loc}}, h(c.text)); got != c.want {
 			t.Errorf("namesAgree(%q, %q) = %v, want %v", c.loc, c.text, got, c.want)
 		}
 	}
@@ -165,7 +165,11 @@ func TestConstraintIdentityIgnoresDefinitionSite(t *testing.T) {
 	a := GoIssue{Severity: "error", MessageID: "CONSTRAINT_FAILED", Expression: []string{"X"}, Diagnostics: "Constraint failed: ext-1: 'Must have...' (defined in http://hl7.org/fhir/StructureDefinition/Extension)"}
 	b := a
 	b.Diagnostics = "Constraint failed: ext-1: 'Must have...'"
-	if goIdentity(a) != goIdentity(b) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fam.GoIdentity(a) != fam.GoIdentity(b) {
 		t.Error("where a constraint was defined must not change its identity")
 	}
 }
@@ -174,8 +178,8 @@ func TestEqualRuleNeedsExactIndices(t *testing.T) {
 	if Located("equal", "Questionnaire.item", "Questionnaire.item[3]") {
 		t.Error("under the equal rule a missing index must not match any index")
 	}
-	if !Located("parent", "Bundle.entry", "Bundle.entry[3]") {
-		t.Error("under the parent rule a missing index matches any index")
+	if Located("parent", "Bundle.entry", "Bundle.entry[3]") {
+		t.Error("a missing index is not a wildcard, under any rule")
 	}
 }
 
@@ -208,13 +212,14 @@ func TestMatchingChoiceDoesNotDecideVerdict(t *testing.T) {
 		t.Error("dropping the true slice error must fail even when an unrelated true error appears")
 	}
 
-	// A location made precise pairs with a different, equivalent HL7 error: not a loss.
+	// A location without an index is not a wildcard: it pairs with no item, so making it precise is
+	// an improvement, never a loss.
 	h2 := HL7Run{Covered: cov, Errors: map[string][]HL7Issue{f: {
-		{File: f, Severity: "error", Key: "Validation_VAL_Profile_NotSlice", HasID: true, Location: "Bundle.entry[0]", Text: "not a slice"},
-		{File: f, Severity: "error", Key: "Validation_VAL_Profile_NotSlice", HasID: true, Location: "Bundle.entry[1]", Text: "not a slice"},
+		{File: f, Severity: "error", Key: "Validation_VAL_Profile_Maximum", HasID: true, Location: "Bundle.entry[0]", Text: "Bundle.entry.x: max allowed = 1, but found 2"},
+		{File: f, Severity: "error", Key: "Validation_VAL_Profile_Maximum", HasID: true, Location: "Bundle.entry[1]", Text: "Bundle.entry.x: max allowed = 1, but found 2"},
 	}}}
-	vague := run(g("SLICING_NO_MATCH", "Bundle.entry"))
-	precise := run(g("SLICING_NO_MATCH", "Bundle.entry[1]"))
+	vague := run(g("CARDINALITY_MAX", "Bundle.entry.x"))
+	precise := run(g("CARDINALITY_MAX", "Bundle.entry[1].x"))
 	if rep, _ := Check(fam, vague, precise, h2, nil); !rep.OK() {
 		t.Errorf("making a location precise must pass: %+v", rep.Findings)
 	}
@@ -243,11 +248,12 @@ func TestReadDivergencesRejectsUnscoped(t *testing.T) {
 }
 
 func TestPortableName(t *testing.T) {
-	env := &runEnv{cache: Cache{Dir: "/home/u/.fhir/packages"}}
-	if got := env.portableName("/home/u/.fhir/packages/hl7.fhir.us.core#6.1.0/package/example/X.json"); got != "fhir-cache:/hl7.fhir.us.core#6.1.0/package/example/X.json" {
-		t.Errorf("cache file: %q", got)
+	for _, f := range []string{"/home/u/.fhir/packages/hl7.fhir.us.core#6.1.0/package/example/X.json", "/Users/v/.fhir/packages/hl7.fhir.us.core#6.1.0/package/example/X.json"} {
+		if got := portableName(f); got != "fhir-cache:/hl7.fhir.us.core#6.1.0/package/example/X.json" {
+			t.Errorf("cache file on any machine: %q", got)
+		}
 	}
-	if got := env.portableName("testdata/m12-slice-scoping/probes/p.json"); got != "testdata/m12-slice-scoping/probes/p.json" {
+	if got := portableName("testdata/m12-slice-scoping/probes/p.json"); got != "testdata/m12-slice-scoping/probes/p.json" {
 		t.Errorf("repository file: %q", got)
 	}
 }
@@ -259,13 +265,16 @@ func TestAssignIsMaximum(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Extension value types use the parent rule and HL7's message names no element. The first
+	// error can pair with the HL7 error at its parent or at itself; the second only with the one
+	// at the parent. Every error pairs only if the first gives way.
 	g := func(loc string) GoIssue {
-		return GoIssue{File: "f", Severity: "error", MessageID: "CARDINALITY_MAX", Expression: []string{loc}}
+		return GoIssue{File: "f", Severity: "error", MessageID: "EXTENSION_INVALID_VALUE_TYPE", Expression: []string{loc}}
 	}
 	h := func(loc string) HL7Issue {
-		return HL7Issue{File: "f", Severity: "error", Key: "Validation_VAL_Profile_Maximum", HasID: true, Location: loc, Text: "Bundle.entry: max allowed = 1, but found 2"}
+		return HL7Issue{File: "f", Severity: "error", Key: "Extension_EXT_Type", HasID: true, Location: loc, Text: "The Extension 'u' definition allows for the types [Identifier] but found type string"}
 	}
-	u := Assign(fam, []GoIssue{g("Bundle.entry"), g("Bundle.entry[0]")}, []HL7Issue{h("Bundle.entry[0]"), h("Bundle.entry[1]")})
+	u := Assign(fam, []GoIssue{g("E.extension[0]"), g("E.x")}, []HL7Issue{h("E"), h("E.extension[0]")})
 	if len(u.GoFHIR) != 0 || len(u.HL7) != 0 {
 		t.Errorf("want every error paired, got %d gofhir and %d HL7 unpaired", len(u.GoFHIR), len(u.HL7))
 	}
@@ -364,6 +373,83 @@ func TestSecondReviewScenarios(t *testing.T) {
 		head := run(g("SLICING_CARDINALITY_MAX", "Bundle.entry[1]", "max"))
 		if !verdict(base, head, x) {
 			t.Error("must pass")
+		}
+	})
+}
+
+// The third review of the redesign: each scenario, with the verdict it must get.
+func TestThirdReviewScenarios(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const f = "x.json"
+	cov := map[string]bool{f: true}
+	run := func(gs ...GoIssue) GoRun { return GoRun{Covered: cov, Errors: map[string][]GoIssue{f: gs}} }
+	hl7 := func(hs ...HL7Issue) HL7Run { return HL7Run{Covered: cov, Errors: map[string][]HL7Issue{f: hs}} }
+	g := func(id, loc, diag string) GoIssue {
+		return GoIssue{File: f, Severity: "error", MessageID: id, Expression: []string{loc}, Diagnostics: diag}
+	}
+	h := func(id, loc, text string) HL7Issue {
+		return HL7Issue{File: f, Severity: "error", Key: id, HasID: true, Location: loc, Text: text}
+	}
+	ok := func(base, head GoRun, x HL7Run) bool {
+		rep, err := Check(fam, base, head, x, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return rep.OK()
+	}
+
+	t.Run("1: a slice named only in gofhir's message still has to match HL7's", func(t *testing.T) {
+		x := hl7(h("Validation_VAL_Profile_Minimum", "Observation.component[0]", "Observation.component:SystolicBP.system: minimum required = 1, but only found 0"))
+		base := run(g("SLICING_CARDINALITY_MIN", "Observation.component[0].system", "Minimum cardinality of 'Observation.component:SystolicBP.system' is 1, but found 0"))
+		head := run(g("SLICING_CARDINALITY_MIN", "Observation.component[0].system", "Minimum cardinality of 'Observation.component:DiastolicBP.system' is 1, but found 0"))
+		if ok(base, head, x) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("2: an HL7 error lost on one entry is not offset by one gained on another", func(t *testing.T) {
+		x := hl7(h("Validation_VAL_Profile_Minimum", "Bundle.entry[0]", "Bundle.entry.request: minimum required = 1, but only found 0"),
+			h("Validation_VAL_Profile_Minimum", "Bundle.entry[3]", "Bundle.entry.request: minimum required = 1, but only found 0"))
+		base := run(g("CARDINALITY_MIN", "Bundle.entry[3].request", "min"))
+		head := run(g("CARDINALITY_MIN", "Bundle.entry[0].request", "min"))
+		if ok(base, head, x) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("2: a false positive moved to another entry is new", func(t *testing.T) {
+		base := run(g("SLICING_NO_MATCH", "Bundle.entry[0]", "no match"))
+		head := run(g("SLICING_NO_MATCH", "Bundle.entry[3]", "no match"))
+		if ok(base, head, hl7()) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("3: a location made precise inside an inner list passes", func(t *testing.T) {
+		x := hl7(h("Validation_VAL_Profile_Minimum", "Bundle.entry[0].resource", "Bundle.entry:composition.resource.subject: minimum required = 1"),
+			h("Validation_VAL_Profile_Minimum", "Bundle.entry[2].resource", "Bundle.entry:composition.resource.subject: minimum required = 1"))
+		base := run(g("CARDINALITY_MIN", "Bundle.entry:composition.resource.subject", "min"))
+		head := run(g("CARDINALITY_MIN", "Bundle.entry[2].resource.subject", "min"))
+		if !ok(base, head, x) {
+			t.Error("must pass")
+		}
+	})
+	t.Run("5: a fullUrl mismatch moved to a child does not pair", func(t *testing.T) {
+		x := hl7(h("Bundle_BUNDLE_Entry_IdUrlMismatch", "Bundle.entry[0]", "fullUrl mismatch"))
+		base := run(g("BUNDLE_FULLURL_ID_MISMATCH", "Bundle.entry[0]", "mismatch"))
+		head := run(g("BUNDLE_FULLURL_ID_MISMATCH", "Bundle.entry[0].resource", "mismatch"))
+		if ok(base, head, x) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("7: a constraint divergence must look like a canonical", func(t *testing.T) {
+		p := t.TempDir() + "/d.json"
+		body := `[{"decision":"D-9","reason":"r","side":"hl7","file":"x.json","location":"X","messageId":"Validation_VAL_Profile_Minmum#x"}]`
+		if err := os.WriteFile(p, []byte(body), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := ReadDivergences(p, fam); err == nil {
+			t.Error("a made-up constraint ID must be rejected")
 		}
 	})
 }

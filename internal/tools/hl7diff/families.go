@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 //go:embed families.json
@@ -14,8 +15,8 @@ var familiesJSON []byte
 //go:embed testdata/hl7-message-ids-6.10.4.txt
 var hl7CatalogText string
 
-// hl7Catalog is the set of message IDs in the HL7 validator 6.10.4 catalog.
-func hl7Catalog() map[string]bool {
+// hl7Catalog is the set of message IDs in the HL7 validator 6.10.4 catalog, parsed once.
+var hl7Catalog = sync.OnceValue(func() map[string]bool {
 	ids := map[string]bool{}
 	for line := range strings.SplitSeq(hl7CatalogText, "\n") {
 		if line = strings.TrimSpace(line); line != "" && !strings.HasPrefix(line, "#") {
@@ -23,7 +24,7 @@ func hl7Catalog() map[string]bool {
 		}
 	}
 	return ids
-}
+})
 
 // Family is one group of equivalent findings across the two validators.
 type Family struct {
@@ -56,6 +57,13 @@ const (
 )
 
 const constraintRule = ruleEqual
+
+// isCardinality reports whether a gofhir error is a cardinality finding (a family whose HL7 side
+// is Validation_VAL_Profile_Minimum/Maximum), whose message quotes the element it is about.
+func (f *Families) isCardinality(g GoIssue) bool {
+	fam := f.byGo[g.MessageID]
+	return fam != nil && (fam.Name == "cardinality-min" || fam.Name == "cardinality-max")
+}
 
 // KnowsGo reports whether id is a gofhir diagnostic ID the table classifies.
 func (f *Families) KnowsGo(id string) bool {

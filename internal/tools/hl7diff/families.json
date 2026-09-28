@@ -160,7 +160,7 @@
     },
     {
       "name": "bundle-fullurl",
-      "rule": "parent",
+      "rule": "equal",
       "gofhir": [
         "BUNDLE_FULLURL_ID_MISMATCH"
       ],

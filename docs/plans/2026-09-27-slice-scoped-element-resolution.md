@@ -335,26 +335,30 @@ declared divergence.
 
 - **Met: 1, 2, 3, 6 and 8.**
   - **Matching:** one-to-one per file. Pairs form only within a family and under its location
-    rule. The "parent" rule applies only where the corpus shows HL7 reporting at the parent:
-    cardinality, slicing, unknown elements and extension value types. Every other family uses
-    "equal". When HL7 names the element or slice in its message (cardinality messages, "Slice
-    '…'", "Unrecognized property '…'"), the gofhir location must end in the same element, and
-    both sides' slices must agree when both name them.
-  - **What is compared:** unpaired errors are compared between runs by class, which is the
-    identity with only the location's final index removed. A choice between items of one list
-    therefore never decides a verdict, and entries of a Bundle stay distinct.
-  - **Identity:** raw location, message ID, the constraint key, and the slices named in a
-    cardinality message (gofhir reports slice children at the instance path). The definition
-    site and the wording are not part of it.
+    rule. "parent" (the same element, or the immediate parent or child) applies only to
+    cardinality, slicing, unknown elements and extension value types, where the corpus shows
+    HL7 reporting at the parent; every other family, `fullUrl` included, uses "equal".
+    Locations compare segment by segment, with the same indices: a location without an index is
+    not a wildcard. On the 689-file corpus no real pair needed one (0 of 55), and allowing it let
+    an arbitrary choice decide verdicts.
+  - **Names and slices:** when HL7 names the element or slice in its message (cardinality
+    messages, "Slice '…'", "Unrecognized property '…'"), the gofhir location must end in the same
+    element. When both sides name slices they must be the same ones, in order; gofhir's slices are
+    read from its location, or from the element its cardinality message quotes.
+  - **What is compared:** each run's unpaired errors, by identity.
+  - **Identity:** raw location, message ID, and the constraint key for constraints or, for
+    cardinality errors only, the slices of the quoted element. Other wording and the definition
+    site are not part of it.
   - **Known limit, false fail only:** when one gofhir error can pair with two HL7 errors that
-    name the same element at a parent and at its child, the one left unpaired can still depend
-    on order. The worst case is a finding to inspect, never a pass that should have failed.
+    name the same element at a parent and at its child, which one stays unpaired depends on sort
+    order. The worst case is a finding to inspect, never a pass that should have failed.
   - **Fail closed:** on coverage, on group selection and on the manifest.
   - **Caches:** keyed by the jar, the arguments, the closure and the packages left out of it
     (each with a fingerprint of its files, ignoring the index files the HL7 validator writes),
-    the local packages and the instances. They are written atomically, and a
-    cached HL7 output that does not cover every file is regenerated. The work directory is per
-    checkout and locked.
+    the local packages and the instances. The check after the HL7 validator runs repeats all of
+    that except the listing of the cache, which the validator itself changes by installing
+    packages. Outputs are written atomically, and a cached HL7 output that does not cover every
+    file is regenerated. The work directory is per checkout and locked.
 - **Partly met: 4, 5, 7 and 9.**
   - **4:** the family table classifies all 68 gofhir IDs, and its HL7 half is checked against the
     6.10.4 catalog. **Pending:** `pkg/fixedpattern` still emits its errors without a diagnostic
@@ -364,7 +368,8 @@ declared divergence.
     - file: a repository path, or a portable `fhir-cache:/<id>#<version>/…` name for cached
       examples. Both `run` and `diff` use these names;
     - exact location;
-    - message ID, which must exist in its validator's catalog.
+    - message ID, which must exist in its validator's catalog (on the HL7 side, a constraint must
+      have the shape `<canonical>/StructureDefinition/<id>#<key>`).
 
     A divergence without a location, or covering a validation failure, is rejected. There is no
     free-form predicate.
@@ -377,19 +382,20 @@ declared divergence.
   - **9:** the corpus is fetched by package id into the standard cache, created if missing: DEQM,
     IPS, US Core, mCODE, AU Core, CH Core and CL Core, plus the R4 core examples as a heavy group,
     which has not been run yet.
-- **Acceptance:** the 16 review cases pass, plus the scenarios from the two reviews of the
-  redesign. Each of eleven injected defects is caught:
+- **Acceptance:** the 16 review cases pass, plus the scenarios from the three reviews of the
+  redesign. Each of twelve injected defects is caught:
   - any ancestor accepted as a location;
   - a non-maximum matching;
   - unsorted input;
   - element names ignored;
-  - exact identities compared;
-  - every index stripped;
   - no slice-list check;
   - no slice names in the identity;
   - unknown properties not named;
   - value-required under the parent rule;
-  - a strict slice on instance paths.
+  - a strict slice on instance paths;
+  - the index wildcard reintroduced;
+  - the quoted slices unused in pairing;
+  - `fullUrl` under the parent rule.
 - **Sanity check against v1.21.1**, whose library matches this branch: 13 groups, 689 files,
   0 findings.
 

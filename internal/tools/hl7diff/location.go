@@ -10,7 +10,6 @@ var (
 	hl7OfType     = regexp.MustCompile(`\.ofType\(([A-Za-z][A-Za-z0-9]*)\)`)
 	goSliceName   = regexp.MustCompile(`:[^.\[\]]+`)
 	goPrimitiveEl = regexp.MustCompile(`\._([A-Za-z])`)
-	trailingIndex = regexp.MustCompile(`\[\d+\]$`)
 )
 
 // NormalizeHL7Location rewrites an HL7 validator location into gofhir's instance-path syntax:
@@ -36,20 +35,12 @@ func ComparableGoLocation(loc string) string {
 	return goPrimitiveEl.ReplaceAllString(loc, ".$1")
 }
 
-// segmentsEqual compares one path segment. Under the "parent" rule an index present on one side
-// only matches any index: gofhir reports slice cardinality at the list (Bundle.entry), HL7 at an
-// item or the owner. Under "equal" (constraints, primitive formats) segments must be identical.
-func segmentsEqual(rule, a, b string) bool {
-	if a == b {
-		return true
-	}
-	return rule == ruleParent && (trailingIndex.ReplaceAllString(a, "") == b || a == trailingIndex.ReplaceAllString(b, ""))
-}
-
 // Located reports whether a gofhir location g and an HL7 location h satisfy a family's rule.
 // "equal" requires the same element. "parent" also accepts one being the immediate parent of the
-// other, which is where HL7 reports a missing child or a required slice. No other ancestor counts:
-// an HL7 error at the resource root must not stand for every error below it.
+// other, which is where HL7 reports a missing child or a required slice. No other ancestor counts
+// (an HL7 error at the resource root must not stand for every error below it), and indices must be
+// the same: a location without an index is not a wildcard for the items of its list. Measured on
+// the corpus, no real pair needed one, and allowing it let an arbitrary choice decide verdicts.
 func Located(rule, g, h string) bool {
 	gs, hs := strings.Split(g, "."), strings.Split(h, ".")
 	same := func(a, b []string) bool {
@@ -57,7 +48,7 @@ func Located(rule, g, h string) bool {
 			return false
 		}
 		for i := range a {
-			if !segmentsEqual(rule, a[i], b[i]) {
+			if a[i] != b[i] {
 				return false
 			}
 		}
