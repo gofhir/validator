@@ -118,15 +118,16 @@ The parser is `testdata/m12-slice-scoping/tools/sdparse.py`, and its output is n
 | orphan ids (slices whose base element is missing), choice slices with ≠ 1 type | 15 / 6, all in core (`familymemberhistory-genetic`, `catalog`) | the tree builder must tolerate malformed SDs |
 | `contentReference` in absolute form `url#id` | 720 (R4B, R5) | parse both forms |
 | `contentReference` whose target is inside a slice | 1 (`#Provenance.agent:Author`) | redirect to exactly the id given |
-| D1 trigger: required element with an optional element between it and its outermost slice | 309 (CRMI 75, CH Core 61, mCODE 27, R5 extensions 24, US Core 16, R5 core 16, …) | D1 is widespread; direct children of a slice are counted correctly and are not triggers |
+| D1 trigger: required element with an optional element between it and its outermost slice, not masked by a required same-name child of that slice | 226 (CH Core 61, CRMI 51, mCODE 27, R5 core 14, US Core 12, …) | D1 is widespread; direct children of a slice are counted correctly and are not triggers |
+| D1b trigger: required `value[x]` below a slice of a resource profile | 243 | always reported missing (literal key `value[x]`); extension definitions carry more, reached once plan B runs slicing inside extensions |
 | the same, with a **prohibited** element in between | 173 (IPS 93, EU Lab 60, R5 core 20) | D1 makes those profiles unsatisfiable |
 | SDs where several slicings share one path | 283 (363 shared paths) | D5 is widespread |
 | discriminator value source, per (slice, discriminator) | inline 1,604; via `type.profile` 1,678; profile unresolvable 153; none of those 129 (121 distinct slices); function path 13 | M3 must add nested slices and required bindings |
 | discriminator paths using `resolve()` / `ofType()` | 36 (IPS 17, Genomics 12) / 1 | cross-resource resolution is needed |
 | discriminator types | `pattern` 138, `profile` 37, `exists` 1, rest `value`/`type` | all five are supported |
 | `ordered: true` / `openAtEnd` | 8 (core `lipidprofile` in R4, R4B and R5; R5 `subscription-notification-bundle`; 4 CH Core address profiles on `Address.line.extension`) / 1 (R5 `subscription-notification-bundle`) | not implemented today; see A4 |
-| versioned canonical where only another version is loaded | 278 (e.g. SDC → `…\|5.3.0-ballot-tc1`) | a fallback policy is needed |
-| unresolvable `profile` / `targetProfile` | 268 (mostly cross-version `http://hl7.org/fhir/5.0/…`) | a policy is needed |
+| versioned canonical where only another version is loaded | 278 element references to 64 distinct canonicals (e.g. SDC → `…\|5.3.0-ballot-tc1`) | a fallback policy is needed |
+| unresolvable `profile` / `targetProfile` | 268 element references to 96 distinct canonicals (mostly cross-version `http://hl7.org/fhir/5.0/…`) | a policy is needed |
 | slice with inline children **and** `type.profile` | 130 (CH Core 40, CRMI 36, SDC 17, EU Lab 17) | Plan B layers them; Plan A uses inline children first |
 | license of every fixture package | CC0-1.0 | fixtures can be committed |
 
@@ -143,7 +144,7 @@ and the `resource-slicing-rules` code system.
 | # | Question | HL7 6.10.4 | Spec | Decision |
 | --- | --- | --- | --- | --- |
 | D-1 | An element matches several slices | `value`, `exists`, `type`, `profile`: **error** "Element matches more than one slice", and the element is assigned to the first slice. `pattern`: silent, first slice. | Slices "SHALL describe a distinct set of values"; an element "will never match more than one" slice. No exemption for `pattern`. | Report the error for **every** discriminator type, and assign the element to the first slice for counting. **Declared divergence** for `pattern`, where HL7 is silent. |
-| D-2 | A pinned canonical version is absent while another is loaded | error "Slicing cannot be evaluated", for each element | canonical `\|version` pins a version | **No fallback.** Report "slicing cannot be evaluated" for each element, and never silently use another version. For the 278 corpus cases, the fix is to load the dependency versions the IG declares, not to resolve loosely. |
+| D-2 | A pinned canonical version is absent while another is loaded | error "Slicing cannot be evaluated", for each element | canonical `\|version` pins a version | **No fallback.** Report "slicing cannot be evaluated" for each element, and never silently use another version. For the 278 corpus references (64 distinct canonicals), the fix is to load the dependency versions the IG declares, not to resolve loosely. |
 | D-3 | A slice profile is unresolvable | when present: "could not be found" + "cannot be evaluated"; when absent: required slice not found | — | Same as HL7. |
 | D-4 | `ordered` slices out of order | error "out of order in ordered slice", at the first misplaced element | "the matching elements have to occur in the same order as defined in the profile" | Same as HL7. |
 | D-5 | `openAtEnd` with unmatched content before a slice (with `ordered: true`) | **silent** | "Additional content is allowed, but only at the end of the list" | Enforce it. **Declared divergence.** |
@@ -192,7 +193,7 @@ func (r *Registry) ResolveCanonical(canonical string) (*StructureDefinition, Res
 ```
 
 `Resolution` reports whether the resolution was exact, fell back to another version, or failed. When the
-pinned version is absent (278 cases) or the profile is unknown (268 cases), resolution fails
+pinned version is absent (64 distinct canonicals) or the profile is unknown (96), resolution fails
 without fallback (D-2, D-3). Plan A uses this only inside the matcher. Plan B moves the other
 call sites to it: `walker`, `reference`, and the top-level `meta.profile` resolution in
 `pkg/validator` (`ResolveByCanonical` → `GetByCanonical`, registry.go:410-415), which today falls

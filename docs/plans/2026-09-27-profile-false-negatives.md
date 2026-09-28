@@ -84,7 +84,8 @@ type Layer struct {
 - **Several `type.profile` values** (15 cases; AU Core `Patient.identifier` declares 10) mean the
   instance must conform to at least one. What HL7 reports when none matches is decided by a probe
   before B4.
-- **Unresolvable profiles** (268) and **absent pinned versions** (278) follow the policy decided in
+- **Unresolvable profiles** (96 distinct canonicals, 268 references) and **absent pinned versions**
+  (64 distinct, 278 references) follow the policy decided in
   Plan A's PR A0. A layer that cannot be resolved is reported, never silently skipped.
 - **Cycles:** layering is guarded against profile recursion on (profile, fhirPath). The corpus graph
   has no `type.profile` cycle today, and the guard makes one harmless.

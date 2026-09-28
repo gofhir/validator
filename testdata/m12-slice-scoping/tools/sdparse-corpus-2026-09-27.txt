@@ -12,7 +12,7 @@ SDs analysed: 3061 (with snapshot: 3059)
     hl7.fhir.r4b.core-4.3.0 :: familymemberhistory-genetic :: FamilyMemberHistory.sex:Sex -> FamilyMemberHistory.sex
     hl7.fhir.r4b.core-4.3.0 :: familymemberhistory-genetic :: FamilyMemberHistory.born[x]:BornAge -> FamilyMemberHistory.born[x]
 
-### R10 unresolvable profile/targetProfile: 268
+### R10 unresolvable profile/targetProfile (element references): 268
     hl7.fhir.us.qicore#6.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-DeviceRequest.doNotPerform
     hl7.fhir.us.qicore#6.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-DeviceRequest.doNotPerform
     hl7.fhir.us.davinci-deqm#5.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData
@@ -24,29 +24,53 @@ SDs analysed: 3061 (with snapshot: 3059)
     hl7.fhir.uv.sdc#4.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.statusReason|0.1.0
     hl7.fhir.uv.sdc#4.0.0 :: http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.input.value|0.1.0
 
-### R12 D1 trigger: required element under an optional element below a slice: 309
-    hl7.fhir.r4.core-4.0.1 :: codesystem-history :: Extension.extension:revision.extension:notes.url (outermost slice Extension.extension:revision)
-    hl7.fhir.r4.core-4.0.1 :: codesystem-history :: Extension.extension:revision.extension:notes.value[x] (outermost slice Extension.extension:revision)
+### R10b distinct unresolvable canonicals: 96
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-DeviceRequest.doNotPerform
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.requestedPeriod|0.1.0
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.requestedPerformer|0.1.0
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.performer|0.1.0
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.statusReason|0.1.0
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.input.value|0.1.0
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-Task.output.value|0.1.0
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.subjectType
+    http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay
+
+### R12 D1 trigger: required element under an optional element below a slice: 226
     hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:SystolicBP.value[x].value (outermost slice Observation.component:SystolicBP)
     hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:SystolicBP.value[x].unit (outermost slice Observation.component:SystolicBP)
     hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:SystolicBP.value[x].system (outermost slice Observation.component:SystolicBP)
-    hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:SystolicBP.value[x].code (outermost slice Observation.component:SystolicBP)
     hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:DiastolicBP.value[x].value (outermost slice Observation.component:DiastolicBP)
     hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:DiastolicBP.value[x].unit (outermost slice Observation.component:DiastolicBP)
     hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:DiastolicBP.value[x].system (outermost slice Observation.component:DiastolicBP)
-    hl7.fhir.r4.core-4.0.1 :: bp :: Observation.component:DiastolicBP.value[x].code (outermost slice Observation.component:DiastolicBP)
+    hl7.fhir.r4b.core-4.3.0 :: bp :: Observation.component:SystolicBP.value[x].value (outermost slice Observation.component:SystolicBP)
+    hl7.fhir.r4b.core-4.3.0 :: bp :: Observation.component:SystolicBP.value[x].unit (outermost slice Observation.component:SystolicBP)
+    hl7.fhir.r4b.core-4.3.0 :: bp :: Observation.component:SystolicBP.value[x].system (outermost slice Observation.component:SystolicBP)
+    hl7.fhir.r4b.core-4.3.0 :: bp :: Observation.component:DiastolicBP.value[x].value (outermost slice Observation.component:DiastolicBP)
 
 ### R12b D1 trigger: required element under a PROHIBITED element below a slice: 173
-    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.request.method
-    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.request.url
-    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.response.status
-    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.request.method
-    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.request.url
-    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.response.status
-    hl7.fhir.r5.core-5.0.0 :: subscription-notification-bundle :: Bundle.entry:first.response.status
-    hl7.fhir.r5.core-5.0.0 :: subscription-notification-bundle :: Bundle.entry:other.response.status
-    hl7.fhir.r5.core-5.0.0 :: transaction-bundle :: Bundle.entry:put.response.status
-    hl7.fhir.r5.core-5.0.0 :: transaction-bundle :: Bundle.entry:post.response.status
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.request.method (outermost slice Bundle.entry:operationOutcome)
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.request.url (outermost slice Bundle.entry:operationOutcome)
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:operationOutcome.response.status (outermost slice Bundle.entry:operationOutcome)
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.request.method (outermost slice Bundle.entry:other)
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.request.url (outermost slice Bundle.entry:other)
+    hl7.fhir.r5.core-5.0.0 :: search-set-bundle :: Bundle.entry:other.response.status (outermost slice Bundle.entry:other)
+    hl7.fhir.r5.core-5.0.0 :: subscription-notification-bundle :: Bundle.entry:first.response.status (outermost slice Bundle.entry:first)
+    hl7.fhir.r5.core-5.0.0 :: subscription-notification-bundle :: Bundle.entry:other.response.status (outermost slice Bundle.entry:other)
+    hl7.fhir.r5.core-5.0.0 :: transaction-bundle :: Bundle.entry:put.response.status (outermost slice Bundle.entry:put)
+    hl7.fhir.r5.core-5.0.0 :: transaction-bundle :: Bundle.entry:post.response.status (outermost slice Bundle.entry:post)
+
+### R12c D1b: required value[x] below a slice of a resource profile (literal key never found): 243
+    hl7.fhir.r5.core-5.0.0 :: executablevalueset :: ValueSet.extension:usageWarning.value[x] (outermost slice ValueSet.extension:usageWarning)
+    hl7.fhir.us.core#6.1.0 :: us-core-observation-occupation :: Observation.component:industry.value[x] (outermost slice Observation.component:industry)
+    hl7.fhir.us.qicore#6.0.0 :: qicore-devicenotrequested :: DeviceRequest.modifierExtension:doNotPerform.value[x] (outermost slice DeviceRequest.modifierExtension:doNotPerform)
+    hl7.fhir.us.qicore#6.0.0 :: qicore-devicerequest :: DeviceRequest.modifierExtension:doNotPerform.value[x] (outermost slice DeviceRequest.modifierExtension:doNotPerform)
+    hl7.fhir.us.davinci-deqm#5.0.0 :: summary-measurereport-deqm :: MeasureReport.extension:supplementalData.value[x] (outermost slice MeasureReport.extension:supplementalData)
+    hl7.fhir.us.davinci-deqm#5.0.0 :: summary-measurereport-deqm :: MeasureReport.extension:cehrt.value[x] (outermost slice MeasureReport.extension:cehrt)
+    hl7.fhir.us.davinci-deqm#5.0.0 :: subjectlist-measurereport-deqm :: MeasureReport.extension:supplementalData.value[x] (outermost slice MeasureReport.extension:supplementalData)
+    hl7.fhir.us.davinci-deqm#5.0.0 :: subjectlist-measurereport-deqm :: MeasureReport.extension:cehrt.value[x] (outermost slice MeasureReport.extension:cehrt)
+    hl7.fhir.us.davinci-deqm#5.0.0 :: parameters-caregap-remark-patch :: Parameters.parameter:operation.part:type.value[x] (outermost slice Parameters.parameter:operation)
+    hl7.fhir.us.davinci-deqm#5.0.0 :: parameters-caregap-remark-patch :: Parameters.parameter:operation.part:path.value[x] (outermost slice Parameters.parameter:operation)
 
 ### R13 choice slice with != 1 type: 6
     hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.born[x]:BornAge ['Period', 'date', 'string']
@@ -152,7 +176,7 @@ SDs analysed: 3061 (with snapshot: 3059)
     hl7.fhir.r4.core-4.0.1 :: goal-relationship :: 1 path(s)
     hl7.fhir.r4.core-4.0.1 :: patient-proficiency :: 1 path(s)
 
-### R18 versioned canonical, only another version loaded: 278
+### R18 versioned canonical, only another version loaded (element references): 278
     hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.extension:terminologyServer -> http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer|5.3.0-ballot-tc1
     hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.extension:versionAlgorithm -> http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm|5.3.0-ballot-tc1
     hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.extension:copyrightLabel -> http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel|5.3.0-ballot-tc1
@@ -163,6 +187,18 @@ SDs analysed: 3061 (with snapshot: 3059)
     hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-pop-obsn :: Questionnaire.item.extension:unit -> http://hl7.org/fhir/StructureDefinition/questionnaire-unit|5.3.0-ballot-tc1
     hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-behave :: Questionnaire.extension:terminologyServer -> http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer|5.3.0-ballot-tc1
     hl7.fhir.uv.sdc#4.0.0 :: sdc-questionnaire-behave :: Questionnaire.extension:versionAlgorithm -> http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm|5.3.0-ballot-tc1
+
+### R18b distinct versioned canonicals with only another version loaded: 64
+    http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/designNote|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/questionnaire-hidden|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/questionnaire-unit|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/targetConstraint|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/cqf-library|5.3.0-ballot-tc1
+    http://hl7.org/fhir/StructureDefinition/variable|5.3.0-ballot-tc1
 
 ### R19 slice has inline children AND type.profile: 130
     hl7.fhir.r4.core-4.0.1 :: elementdefinition-de :: ElementDefinition.extension:Question profile=elementdefinition-question constrainedKids=3

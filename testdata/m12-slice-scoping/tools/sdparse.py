@@ -184,25 +184,41 @@ for pkg, sd in SDS:
                 hit('R9 multiple type.profile (any-of)', pkg, sd, f"{i} {t.get('code')} x{len(ps)}")
             for pr in ps + t.get('targetProfile', []):
                 if not canon_resolvable(pr):
-                    R['R10 unresolvable profile/targetProfile'].append(f"{pkg} :: {pr}")
+                    R['R10 unresolvable profile/targetProfile (element references)'].append(f"{pkg} :: {pr}")
+                    if pr not in R['R10b distinct unresolvable canonicals']:
+                        R['R10b distinct unresolvable canonicals'].append(pr)
                 elif '|' in pr and pr not in URLV:
-                    hit('R18 versioned canonical, only another version loaded', pkg, sd, f"{i} -> {pr}")
-        # R12 D1 triggers. slicing.go's validateSliceChildren counts the last segment of every
-        # descendant of the OUTERMOST enclosing slice on that slice's member, whether or not the
+                    hit('R18 versioned canonical, only another version loaded (element references)', pkg, sd, f"{i} -> {pr}")
+                    if pr not in R['R18b distinct versioned canonicals with only another version loaded']:
+                        R['R18b distinct versioned canonicals with only another version loaded'].append(pr)
+        # R12 D1 triggers. slicing.go's validateSliceChildren looks up the LAST segment of every
+        # descendant of the outermost enclosing slice on that slice's member, whether or not the
         # elements in between are present. A required element is falsely reported missing when
-        # some element between it and that slice is optional (R12) or prohibited (R12b). Direct
-        # children of the slice are counted at the right level and are not triggers.
+        # some element between it and that slice is optional (R12) or prohibited (R12b), unless
+        # the slice has a required direct child with the same name, which is always present and
+        # masks the miscount (e.g. the url of a nested extension). Direct children are counted at
+        # the right level. R12c is D1b: a required value[x] anywhere below a slice is looked up by
+        # the literal key "value[x]", which never exists, so it is always reported missing. R12c
+        # counts resource profiles only: slicing does not run inside extension definitions today
+        # (plan B, D6), so their value[x] leaves are not reached yet.
         if constraint and ':' in i and e.get('min', 0) >= 1 and p and ':' not in i.rsplit('.', 1)[-1]:
             segs = i.split('.')
             k = next(n for n, sg in enumerate(segs) if ':' in sg)
             outer = '.'.join(segs[:k + 1])
-            between = ['.'.join(segs[:m]) for m in range(len(segs) - 1, k + 1, -1)]
-            defs = [byid[b][1] for b in between if b in byid]
-            if any(d.get('max') == '0' for d in defs):
-                hit('R12b D1 trigger: required element under a PROHIBITED element below a slice', pkg, sd, i)
-            elif any(d.get('min', 0) == 0 for d in defs):
-                R['R12 D1 trigger: required element under an optional element below a slice'].append(
-                    f"{pkg} :: {sd.get('id')} :: {i} (outermost slice {outer})")
+            name = segs[-1]
+            entry = f"{pkg} :: {sd.get('id')} :: {i} (outermost slice {outer})"
+            if name.endswith('[x]'):
+                if sd.get('kind') == 'resource':
+                    R['R12c D1b: required value[x] below a slice of a resource profile (literal key never found)'].append(entry)
+            else:
+                between = ['.'.join(segs[:m]) for m in range(len(segs) - 1, k + 1, -1)]
+                defs = [byid[b][1] for b in between if b in byid]
+                twin = byid.get(outer + '.' + name)
+                masked = twin is not None and twin[1].get('min', 0) >= 1
+                if not masked and any(d.get('max') == '0' for d in defs):
+                    R['R12b D1 trigger: required element under a PROHIBITED element below a slice'].append(entry)
+                elif not masked and any(d.get('min', 0) == 0 for d in defs):
+                    R['R12 D1 trigger: required element under an optional element below a slice'].append(entry)
         # R21 renamed choice in a snapshot id: a segment b + Suffix where the snapshot has b[x]
         # and Suffix is the title-cased code of one of b[x]'s types (FHIR choice naming).
         segs = i.split('.')

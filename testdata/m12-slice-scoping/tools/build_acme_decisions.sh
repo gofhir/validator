@@ -9,6 +9,7 @@ set -euo pipefail
 
 VERSION="0.3.0" # keep in step with gen_acme_decisions.py
 JAR="${1:?usage: $0 /path/to/validator_cli.jar}"
+JAR="$(cd "$(dirname "$JAR")" && pwd)/$(basename "$JAR")" # absolute: java runs from a temp dir
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT

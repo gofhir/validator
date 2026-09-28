@@ -15,7 +15,7 @@ recorded output; nothing is asserted by a test yet.
 | `packages/acme.multimatch-0.1.0.tgz` | One invented profile with overlapping `pattern` slices (probes `r2_M*`). Its snapshot was assembled by hand: the core `Patient` snapshot plus two slices. |
 | `tools/gen_acme_decisions.py` | Writes the decision profiles (differentials) and instances into a directory. |
 | `tools/build_acme_decisions.sh` | Rebuilds `decisions/instances` and the `acme.decisions` package: runs the generator, has the HL7 validator generate the snapshots, checks every StructureDefinition has one, and packs the `.tgz`. |
-| `tools/sdparse.py` | StructureDefinition corpus parser: 19 numbered rules (R1–R15, R17–R19, R21), plus the sub-rules R12b, R15b and R17b. Each rule checks one assumption of the plans. |
+| `tools/sdparse.py` | StructureDefinition corpus parser: 19 numbered rules (R1–R15, R17–R19, R21), plus the sub-rules R10b, R12b, R12c, R15b, R17b and R18b. Each rule checks one assumption of the plans. |
 | `tools/sdparse-corpus-2026-09-27.txt` | Its output on the 25-package corpus the plans cite (3,061 unique StructureDefinitions). |
 
 ## Rebuilding the decision package
