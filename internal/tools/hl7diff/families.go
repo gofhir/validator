@@ -28,11 +28,12 @@ var hl7Catalog = sync.OnceValue(func() map[string]bool {
 
 // Family is one group of equivalent findings across the two validators.
 type Family struct {
-	Name    string   `json:"name"`
-	Rule    string   `json:"rule"` // "equal" | "parent"
-	GoFHIR  []string `json:"gofhir"`
-	HL7     []string `json:"hl7"`
-	HL7NoID []struct {
+	Name          string   `json:"name"`
+	Rule          string   `json:"rule"`          // "equal" | "parent"
+	QuotesElement bool     `json:"quotesElement"` // gofhir's message quotes the element it is about
+	GoFHIR        []string `json:"gofhir"`
+	HL7           []string `json:"hl7"`
+	HL7NoID       []struct {
 		Code string `json:"code"`
 		Text string `json:"text"`
 		re   *regexp.Regexp
@@ -58,11 +59,11 @@ const (
 
 const constraintRule = ruleEqual
 
-// isCardinality reports whether a gofhir error is a cardinality finding (a family whose HL7 side
-// is Validation_VAL_Profile_Minimum/Maximum), whose message quotes the element it is about.
-func (f *Families) isCardinality(g GoIssue) bool {
+// quotesElement reports whether a gofhir error's message quotes the element it is about, per the
+// family table.
+func (f *Families) quotesElement(g GoIssue) bool {
 	fam := f.byGo[g.MessageID]
-	return fam != nil && (fam.Name == "cardinality-min" || fam.Name == "cardinality-max")
+	return fam != nil && fam.QuotesElement
 }
 
 // KnowsGo reports whether id is a gofhir diagnostic ID the table classifies.

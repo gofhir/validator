@@ -10,7 +10,8 @@
     "Every gofhir ID in pkg/issue is either in a family or listed under 'unmapped' with a reason; a test",
     "enforces it. Unmapped and family-less errors never match: they always count as unexplained on their",
     "side, so a change in them is always visible.",
-    "Rules are 'parent' only where the corpus shows HL7 reporting at the parent (cardinality, slicing, unknown elements, extension value types) and the finding is named or located precisely enough; everything else is 'equal', which can only make a pair less likely, never a wrong one."
+    "Rules are 'parent' only where the corpus shows HL7 reporting at the parent (cardinality, slicing, unknown elements, extension value types) and the finding is named or located precisely enough; everything else is 'equal', which can only make a pair less likely, never a wrong one.",
+    "quotesElement marks families whose gofhir messages quote the element they are about ('Minimum cardinality of 'X:slice.y''); the slices of that element are part of the error's identity and are compared with HL7's."
   ],
   "families": [
     {
@@ -24,7 +25,8 @@
         "Validation_VAL_Profile_Minimum",
         "Validation_VAL_Profile_Minimum_SLICE",
         "Validation_VAL_Profile_Minimum_SLICE_EXT"
-      ]
+      ],
+      "quotesElement": true
     },
     {
       "name": "cardinality-max",
@@ -35,7 +37,8 @@
       ],
       "hl7": [
         "Validation_VAL_Profile_Maximum"
-      ]
+      ],
+      "quotesElement": true
     },
     {
       "name": "extension-value-required",

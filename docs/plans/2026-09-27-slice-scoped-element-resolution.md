@@ -335,29 +335,40 @@ declared divergence.
 
 - **Met: 1, 2, 3, 6 and 8.**
   - **Matching:** one-to-one per file. Pairs form only within a family and under its location
-    rule. "parent" (the same element, or the immediate parent or child) applies only to
-    cardinality, slicing, unknown elements and extension value types, where the corpus shows
-    HL7 reporting at the parent; every other family, `fullUrl` included, uses "equal".
-    Locations compare segment by segment, with the same indices: a location without an index is
-    not a wildcard. On the 689-file corpus no real pair needed one (0 of 55), and allowing it let
-    an arbitrary choice decide verdicts.
+    rule.
+    - **"parent"** means the same element, or the immediate parent or child *element*. It applies
+      only to cardinality (the slice cardinality IDs included), unknown elements and extension
+      value types, where the corpus shows HL7 reporting at the parent.
+    - **"equal"** is used by every other family, no-slice-match and `fullUrl` included.
+    - **Locations** compare segment by segment, with the same indices. A location without an
+      index is not a wildcard, and a list's owner never pairs with an item of the list (that
+      would be the wildcard one level up).
+    - **Measured on the 689-file corpus:** the 55 real pairs are the same with and without either
+      kind of wildcard, and allowing them let an arbitrary choice decide verdicts.
   - **Names and slices:** when HL7 names the element or slice in its message (cardinality
     messages, "Slice '…'", "Unrecognized property '…'"), the gofhir location must end in the same
-    element. When both sides name slices they must be the same ones, in order; gofhir's slices are
-    read from its location, or from the element its cardinality message quotes.
+    element. When both sides name element slices, they must be the same ones, in order. gofhir's
+    slices are read from its location, or from the element its message quotes for families marked
+    `quotesElement`. Type slices on a choice (`value[x]:valueIdentifier`) name a type, not an
+    element, and are not compared: gofhir quotes the choice without them.
   - **What is compared:** each run's unpaired errors, by identity.
-  - **Identity:** raw location, message ID, and the constraint key for constraints or, for
-    cardinality errors only, the slices of the quoted element. Other wording and the definition
-    site are not part of it.
-  - **Known limit, false fail only:** when one gofhir error can pair with two HL7 errors that
-    name the same element at a parent and at its child, which one stays unpaired depends on sort
-    order. The worst case is a finding to inspect, never a pass that should have failed.
+  - **Identity:** severity, raw location and message ID, plus the constraint key for constraints,
+    or the slices of the quoted element for `quotesElement` families. Other wording and the
+    definition site are not part of it. An error with no message ID is identified by its full
+    text.
+  - **Known limits, false fail only.** Each can only produce a finding to inspect, never a pass
+    that should have failed:
+    - when one gofhir error can pair with two HL7 errors that name the same element at a parent
+      and at its child element, which one stays unpaired depends on sort order;
+    - a finding reported at a list's owner by one validator and at one item by the other is not
+      paired, so moving gofhir's report between those levels is reported.
   - **Fail closed:** on coverage, on group selection and on the manifest.
   - **Caches:** keyed by the jar, the arguments, the closure and the packages left out of it
     (each with a fingerprint of its files, ignoring the index files the HL7 validator writes),
-    the local packages and the instances. The check after the HL7 validator runs repeats all of
-    that except the listing of the cache, which the validator itself changes by installing
-    packages. Outputs are written atomically, and a cached HL7 output that does not cover every
+    the local packages and the instances. The check after the HL7 validator runs repeats this for
+    the closure, the local packages and the instances. It leaves out the cache listing and the
+    packages left out of the closure, which the validator itself installs while it runs. Two
+    distinct files that would get the same portable name are an error. Outputs are written atomically, and a cached HL7 output that does not cover every
     file is regenerated. The work directory is per checkout and locked.
 - **Partly met: 4, 5, 7 and 9.**
   - **4:** the family table classifies all 68 gofhir IDs, and its HL7 half is checked against the
@@ -382,8 +393,10 @@ declared divergence.
   - **9:** the corpus is fetched by package id into the standard cache, created if missing: DEQM,
     IPS, US Core, mCODE, AU Core, CH Core and CL Core, plus the R4 core examples as a heavy group,
     which has not been run yet.
-- **Acceptance:** the 16 review cases pass, plus the scenarios from the three reviews of the
-  redesign. Each of twelve injected defects is caught:
+- **Acceptance:** the review cases pass, on real outputs. That includes both directions of P4,
+  whose true slice error depends on the type-slice rule: the plan's A3 fix passes, and dropping
+  the true error fails. So do the scenarios from the four reviews of the redesign. Each of
+  fourteen injected defects is caught:
   - any ancestor accepted as a location;
   - a non-maximum matching;
   - unsorted input;
@@ -395,7 +408,12 @@ declared divergence.
   - a strict slice on instance paths;
   - the index wildcard reintroduced;
   - the quoted slices unused in pairing;
-  - `fullUrl` under the parent rule.
+  - `fullUrl` under the parent rule;
+  - an owner pairing with an item;
+  - type slices compared.
+- **Every change to matching is also checked pair by pair** against the corpus's real pairs, not
+  only against the tests. A change that kept the set of pairs but moved one partner (P4) is how a
+  regression got through once.
 - **Sanity check against v1.21.1**, whose library matches this branch: 13 groups, 689 files,
   0 findings.
 

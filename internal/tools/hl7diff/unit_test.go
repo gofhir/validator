@@ -142,6 +142,10 @@ func TestWildcardVersions(t *testing.T) {
 }
 
 func TestNamesAgree(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
 	h := func(text string) HL7Issue { return HL7Issue{Text: text} }
 	cases := []struct {
 		loc, text string
@@ -152,10 +156,12 @@ func TestNamesAgree(t *testing.T) {
 		{"Bundle.entry:composition", "Slice 'Bundle.entry:composition': a matching slice is required, but not found", true},
 		{"MedicationRequest.dispenseRequest.quantity.comparator", "Quantity.comparator: max allowed = 0, but found 1", true},
 		{"MeasureReport.extension[0].valueIdentifier", "MeasureReport.extension:cehrt.value[x]: minimum required = 1", true},
-		{"Patient.name", "The Extension 'x' definition is for a simple extension, so it must contain a value", true}, // unnamed
+		{"MeasureReport.extension:cehrt.value[x]", "Slice 'MeasureReport.extension:cehrt.value[x]:valueIdentifier': a matching slice is required", true}, // a type slice is not an element slice
+		{"Observation.component:SystolicBP.code", "Observation.component:DiastolicBP.code: minimum required = 1", false},                                 // slices named in the location differ
+		{"Patient.name", "The Extension 'x' definition is for a simple extension, so it must contain a value", true},                                     // unnamed
 	}
 	for _, c := range cases {
-		if got := namesAgree(GoIssue{Expression: []string{c.loc}}, h(c.text)); got != c.want {
+		if got := namesAgree(fam, GoIssue{Expression: []string{c.loc}}, h(c.text)); got != c.want {
 			t.Errorf("namesAgree(%q, %q) = %v, want %v", c.loc, c.text, got, c.want)
 		}
 	}
@@ -266,15 +272,15 @@ func TestAssignIsMaximum(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Extension value types use the parent rule and HL7's message names no element. The first
-	// error can pair with the HL7 error at its parent or at itself; the second only with the one
-	// at the parent. Every error pairs only if the first gives way.
+	// error (E.a) can pair with the HL7 error at its parent (E) or at itself (E.a); the second (E.b)
+	// only with the one at the parent. Every error pairs only if the first gives way.
 	g := func(loc string) GoIssue {
 		return GoIssue{File: "f", Severity: "error", MessageID: "EXTENSION_INVALID_VALUE_TYPE", Expression: []string{loc}}
 	}
 	h := func(loc string) HL7Issue {
 		return HL7Issue{File: "f", Severity: "error", Key: "Extension_EXT_Type", HasID: true, Location: loc, Text: "The Extension 'u' definition allows for the types [Identifier] but found type string"}
 	}
-	u := Assign(fam, []GoIssue{g("E.extension[0]"), g("E.x")}, []HL7Issue{h("E"), h("E.extension[0]")})
+	u := Assign(fam, []GoIssue{g("E.a"), g("E.b")}, []HL7Issue{h("E"), h("E.a")})
 	if len(u.GoFHIR) != 0 || len(u.HL7) != 0 {
 		t.Errorf("want every error paired, got %d gofhir and %d HL7 unpaired", len(u.GoFHIR), len(u.HL7))
 	}
@@ -329,10 +335,10 @@ func TestSecondReviewScenarios(t *testing.T) {
 			t.Error("must fail")
 		}
 	})
-	t.Run("1: a nested extension's missing value cannot stand for its parent's", func(t *testing.T) {
+	t.Run("1: a missing value reported on a child element cannot stand for the extension's", func(t *testing.T) {
 		x := hl7(h("Extension_EXT_Simple_ABSENT", "MeasureReport.extension[0]", "The Extension 'u' definition is for a simple extension, so it must contain a value"))
 		base := run(g("EXTENSION_VALUE_REQUIRED", "MeasureReport.extension[0]", "requires a value"))
-		head := run(g("EXTENSION_VALUE_REQUIRED", "MeasureReport.extension[0].extension[1]", "requires a value"))
+		head := run(g("EXTENSION_VALUE_REQUIRED", "MeasureReport.extension[0].url", "requires a value"))
 		if verdict(base, head, x) {
 			t.Error("must fail")
 		}
@@ -367,12 +373,15 @@ func TestSecondReviewScenarios(t *testing.T) {
 			t.Error("must fail")
 		}
 	})
-	t.Run("6: a slice location made an instance path still pairs", func(t *testing.T) {
+	t.Run("6: a list-level finding moved to one item is a finding to inspect", func(t *testing.T) {
+		// HL7 reports slice cardinality at the list's owner. An owner never pairs with an item of
+		// its list (it would stand for every item), so moving gofhir's report from the list to one
+		// item cannot be verified and is reported: conservative by design, never a false pass.
 		x := hl7(h("Validation_VAL_Profile_Maximum", "Bundle", "Bundle.entry:composition: max allowed = 1, but found 2"))
 		base := run(g("SLICING_CARDINALITY_MAX", "Bundle.entry:composition", "max"))
 		head := run(g("SLICING_CARDINALITY_MAX", "Bundle.entry[1]", "max"))
-		if !verdict(base, head, x) {
-			t.Error("must pass")
+		if verdict(base, head, x) {
+			t.Error("must fail")
 		}
 	})
 }
@@ -452,4 +461,72 @@ func TestThirdReviewScenarios(t *testing.T) {
 			t.Error("a made-up constraint ID must be rejected")
 		}
 	})
+}
+
+// The fourth review of the redesign.
+func TestFourthReviewScenarios(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const f = "x.json"
+	cov := map[string]bool{f: true}
+	run := func(gs ...GoIssue) GoRun { return GoRun{Covered: cov, Errors: map[string][]GoIssue{f: gs}} }
+	hl7 := func(hs ...HL7Issue) HL7Run { return HL7Run{Covered: cov, Errors: map[string][]HL7Issue{f: hs}} }
+	g := func(id, loc, diag string) GoIssue {
+		return GoIssue{File: f, Severity: "error", MessageID: id, Expression: []string{loc}, Diagnostics: diag}
+	}
+	h := func(id, loc, text string) HL7Issue {
+		return HL7Issue{File: f, Severity: "error", Key: id, HasID: true, Location: loc, Text: text}
+	}
+	ok := func(base, head GoRun, x HL7Run) bool {
+		rep, err := Check(fam, base, head, x, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return rep.OK()
+	}
+	extType := func(loc string) HL7Issue {
+		return h("Extension_EXT_Type", loc, "The Extension 'u' definition allows for the types [Identifier] but found type string")
+	}
+
+	t.Run("2: a location made precise among sibling items passes", func(t *testing.T) {
+		x := hl7(extType("E.extension[0]"), extType("E.extension[1]"))
+		base := run(g("EXTENSION_INVALID_VALUE_TYPE", "E", "type"))
+		head := run(g("EXTENSION_INVALID_VALUE_TYPE", "E.extension[1]", "type"))
+		if !ok(base, head, x) {
+			t.Error("must pass")
+		}
+	})
+	t.Run("4: an unnamed finding moved to the wrong item fails", func(t *testing.T) {
+		x := hl7(extType("P"))
+		base := run(g("EXTENSION_INVALID_VALUE_TYPE", "P.extension[1]", "type"))
+		head := run(g("EXTENSION_INVALID_VALUE_TYPE", "P.extension[0]", "type"))
+		if ok(base, head, x) {
+			// Neither item pairs with the owner, so the move shows as a new false positive.
+			t.Error("must fail")
+		}
+	})
+}
+
+func TestPortableNamesDoNotCollide(t *testing.T) {
+	a := "/home/u/.fhir/packages/p#1/package/example/X.json"
+	b := "/srv/vendored/.fhir/packages/p#1/package/example/X.json"
+	run := func(files ...string) GoRun {
+		r := GoRun{Errors: map[string][]GoIssue{}, Covered: map[string]bool{}}
+		for _, f := range files {
+			r.Covered[f] = true
+		}
+		return r
+	}
+	base, head := run(a, b), run(a, b)
+	hl7 := HL7Run{Errors: map[string][]HL7Issue{}, Covered: map[string]bool{a: true, b: true}}
+	if err := portable(&base, &head, &hl7); err == nil {
+		t.Error("two files with one portable name must be an error")
+	}
+	base, head = run(a), run(a)
+	hl7 = HL7Run{Errors: map[string][]HL7Issue{}, Covered: map[string]bool{a: true}}
+	if err := portable(&base, &head, &hl7); err != nil || !base.Covered["fhir-cache:/p#1/package/example/X.json"] {
+		t.Errorf("one file renames cleanly: %v", err)
+	}
 }

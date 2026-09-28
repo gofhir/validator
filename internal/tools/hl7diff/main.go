@@ -101,7 +101,9 @@ func checkFiles(basePath, headPath, hl7Path, divPath string) (Report, error) {
 		return Report{}, err
 	}
 	// Name cached files as run does, so a divergence means the same in both commands.
-	portable(&base, &head, &hl7)
+	if err := portable(&base, &head, &hl7); err != nil {
+		return Report{}, err
+	}
 	return Check(fam, base, head, hl7, divs)
 }
 

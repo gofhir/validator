@@ -402,7 +402,9 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 	if err != nil {
 		return false, err
 	}
-	portable(&base, &head, &hl7)
+	if err := portable(&base, &head, &hl7); err != nil {
+		return false, err
+	}
 	rep, err := Check(env.fam, base, head, hl7, env.divs)
 	if err != nil {
 		return false, err
@@ -441,8 +443,30 @@ func portableName(f string) string {
 	return f
 }
 
-// portable renames every file of the three runs with portableName.
-func portable(base, head *GoRun, hl7 *HL7Run) {
+// portable renames every file of the three runs with portableName. Two distinct files that would
+// get one name are an error: merging them would lose one file's errors.
+func portable(base, head *GoRun, hl7 *HL7Run) error {
+	seen := map[string]string{}
+	claim := func(f string) error {
+		n := portableName(f)
+		if prev, ok := seen[n]; ok && prev != f {
+			return fmt.Errorf("%s and %s would both be named %s", prev, f, n)
+		}
+		seen[n] = f
+		return nil
+	}
+	for _, r := range []*GoRun{base, head} {
+		for f := range r.Covered {
+			if err := claim(f); err != nil {
+				return err
+			}
+		}
+	}
+	for f := range hl7.Covered {
+		if err := claim(f); err != nil {
+			return err
+		}
+	}
 	goRename := func(r *GoRun) {
 		errs, cov := map[string][]GoIssue{}, map[string]bool{}
 		for f, gs := range r.Errors {
@@ -471,6 +495,7 @@ func portable(base, head *GoRun, hl7 *HL7Run) {
 		cov[portableName(f)] = true
 	}
 	hl7.Errors, hl7.Covered = errs, cov
+	return nil
 }
 
 // groupFiles resolves a group's instances. Globs are matched inside the repository only
@@ -521,13 +546,18 @@ func groupFiles(env *runEnv, g Group) ([]string, error) {
 // version, a fingerprint of every package in the closure and of every package left out of it (the
 // HL7 validator loads those), the local packages' contents and the instances' contents; and, with
 // withCache, the names of every package in the cache (the HL7 validator also loads the latest
-// terminology and extensions packages it finds there). That listing is left out of the check made
-// after the HL7 validator runs, because it installs missing packages while it runs; fingerprints
-// ignore the index files it writes, so the packages' contents are still checked.
+// terminology and extensions packages it finds there). The listing and the packages left out of
+// the closure are not part of the check made after the HL7 validator runs, because it installs
+// missing packages (embedded ones included) while it runs; fingerprints ignore the index files it
+// writes, so the closure's contents are still checked.
 func inputsKeyWith(env *runEnv, version string, closure, skipped []PackageID, pkgFiles, files []string, withCache bool) (string, error) {
 	h := sha256.New()
 	_, _ = fmt.Fprintln(h, "version", version, "closure", joinIDs(closure))
-	for _, p := range append(append([]PackageID(nil), closure...), skipped...) {
+	cached := closure
+	if withCache {
+		cached = append(append([]PackageID(nil), closure...), skipped...)
+	}
+	for _, p := range cached {
 		if _, err := os.Stat(env.cache.Path(p)); err != nil {
 			_, _ = fmt.Fprintln(h, "absent", p) // an embedded package need not be in the cache
 			continue

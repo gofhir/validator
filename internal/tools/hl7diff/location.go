@@ -10,6 +10,7 @@ var (
 	hl7OfType     = regexp.MustCompile(`\.ofType\(([A-Za-z][A-Za-z0-9]*)\)`)
 	goSliceName   = regexp.MustCompile(`:[^.\[\]]+`)
 	goPrimitiveEl = regexp.MustCompile(`\._([A-Za-z])`)
+	itemIndex     = regexp.MustCompile(`\[\d+\]$`) // a list item; "value[x]" is a choice, not an item
 )
 
 // NormalizeHL7Location rewrites an HL7 validator location into gofhir's instance-path syntax:
@@ -58,6 +59,12 @@ func Located(rule, g, h string) bool {
 		return true
 	}
 	if rule != ruleParent {
+		return false
+	}
+	// A child that is an item of a list (E.extension[1]) is not a parent/child pair with the list's
+	// owner (E): the owner would stand for every item, which is the index wildcard one level up.
+	childIsItem := func(child []string) bool { return itemIndex.MatchString(child[len(child)-1]) }
+	if (len(gs) == len(hs)+1 && childIsItem(gs)) || (len(hs) == len(gs)+1 && childIsItem(hs)) {
 		return false
 	}
 	return (len(gs) == len(hs)+1 && same(gs[:len(hs)], hs)) || (len(hs) == len(gs)+1 && same(hs[:len(gs)], gs))

@@ -153,7 +153,15 @@ func TestAcceptance(t *testing.T) {
 			}),
 		}, true},
 
+		{"A3 on P4: the false value[x] minimum is gone, the true cehrt slice error stays", "deqm-probes", []edit{
+			drop("probe_P4_cehrt_string_prof.json", idAt("CARDINALITY_MIN", "MeasureReport.extension[0].value[x]")),
+		}, true},
+
 		// Regressions must fail.
+		{"P4: the true cehrt slice error is dropped", "deqm-probes", []edit{
+			drop("probe_P4_cehrt_string_prof.json", idAt("SLICING_CARDINALITY_MIN", "MeasureReport.extension[0].value[x]")),
+			drop("probe_P4_cehrt_string_prof.json", idAt("CARDINALITY_MIN", "MeasureReport.extension[0].value[x]")),
+		}, false},
 		{"a duplicated error (bdl-3 x1 to x13)", "deqm-probes", []edit{
 			add("probe_B2_request_nomethod.json", "CONSTRAINT_FAILED", "Bundle", "Constraint failed: bdl-3: 'entry.request mandatory for batch/transaction/history, otherwise prohibited'", 12),
 		}, false},

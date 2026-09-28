@@ -12,18 +12,22 @@ var (
 	// ...", "Unrecognized property 'bogusElement'".
 	hl7NamedElement = regexp.MustCompile(`^(?:Slice '([^']+)'|([A-Za-z][\w.:\[\]/-]*): (?:minimum required|max allowed)|Unrecognized property '([^']+)')`)
 	indexSuffix     = regexp.MustCompile(`\[\d+\]`)
-	sliceNamePart   = regexp.MustCompile(`:([^.\[\]]+)`)
 	// The element gofhir's cardinality messages quote: "Minimum cardinality of 'Observation.
 	// component:SystolicBP.system' is 1". Only element paths qualify, not URLs.
 	goQuotedElement = regexp.MustCompile(`'([A-Z][A-Za-z0-9]*(?:[.:][^'\s]+)+)'`)
 )
 
-// sliceNames lists the slice names in an element id or a location, in order.
+// sliceNames lists the element slices in an element id or a location, in order. A slice on a
+// choice element ("value[x]:valueIdentifier") is a type slice: it names the type the value takes,
+// not an element, and gofhir's messages quote the choice without it, so it is left out.
 func sliceNames(loc string) []string {
-	matches := sliceNamePart.FindAllStringSubmatch(loc, -1)
-	out := make([]string, 0, len(matches))
-	for _, m := range matches {
-		out = append(out, m[1])
+	var out []string
+	for seg := range strings.SplitSeq(loc, ".") {
+		name, slice, ok := strings.Cut(seg, ":")
+		if !ok || strings.HasSuffix(indexSuffix.ReplaceAllString(name, ""), "[x]") {
+			continue
+		}
+		out = append(out, indexSuffix.ReplaceAllString(slice, ""))
 	}
 	return out
 }
@@ -48,7 +52,7 @@ func lastSegment(loc string) string {
 // "Bundle.entry:s.request.method" or "Quantity.comparator", so only the last element is compared,
 // plus the slices: when both sides name slices they must be the same ones, in order. A gofhir
 // location that names no slice (an instance path such as "Bundle.entry[1]") is not held to one.
-func namesAgree(g GoIssue, h HL7Issue) bool {
+func namesAgree(fam *Families, g GoIssue, h HL7Issue) bool {
 	m := hl7NamedElement.FindStringSubmatch(h.Text)
 	if m == nil {
 		return true
@@ -67,7 +71,7 @@ func namesAgree(g GoIssue, h HL7Issue) bool {
 		return false
 	}
 	gs := sliceNames(goLoc)
-	if len(gs) == 0 {
+	if len(gs) == 0 && fam.quotesElement(g) {
 		gs = quotedSlices(g) // a slice child reported at its instance path names the slice in the text
 	}
 	if hs := sliceNames(id); len(hs) > 0 && len(gs) > 0 {
@@ -88,7 +92,7 @@ func (f *Families) GoIdentity(g GoIssue) string {
 		detail = ""
 		if m := goConstraintKey.FindStringSubmatch(g.Diagnostics); m != nil {
 			detail = m[1]
-		} else if f.isCardinality(g) {
+		} else if f.quotesElement(g) {
 			detail = strings.Join(quotedSlices(g), ",")
 		}
 	}
@@ -118,7 +122,7 @@ type Unexplained struct {
 // location rule satisfied), and maximizes the number of pairs. Inputs are sorted by identity first,
 // so the result does not depend on the order either validator emitted its issues in.
 func Assign(fam *Families, gos []GoIssue, hls []HL7Issue) Unexplained {
-	gos, hls = sortedByIdentity(fam, gos), sortedHL7(hls)
+	gos, hls = sortedBy(gos, fam.GoIdentity), sortedBy(hls, hl7Identity)
 
 	owner := assignOwners(fam, gos, hls)
 
@@ -154,7 +158,7 @@ func assignOwners(fam *Families, gos []GoIssue, hls []HL7Issue) []int {
 		}
 		loc := ComparableGoLocation(g.Location())
 		for j, h := range hls {
-			if hlClass[j] == family && Located(rule, loc, h.Location) && namesAgree(g, h) {
+			if hlClass[j] == family && Located(rule, loc, h.Location) && namesAgree(fam, g, h) {
 				edges[i] = append(edges[i], j)
 			}
 		}
@@ -186,37 +190,20 @@ func assignOwners(fam *Families, gos []GoIssue, hls []HL7Issue) []int {
 	return owner
 }
 
-// sortedByIdentity returns a copy of gs sorted by identity, computing each identity once.
-func sortedByIdentity(fam *Families, gs []GoIssue) []GoIssue {
+// sortedBy returns a copy of xs sorted by key, computing each key once.
+func sortedBy[T any](xs []T, key func(T) string) []T {
 	type keyed struct {
 		k string
-		g GoIssue
+		x T
 	}
-	ks := make([]keyed, len(gs))
-	for i, g := range gs {
-		ks[i] = keyed{fam.GoIdentity(g), g}
-	}
-	sort.SliceStable(ks, func(a, b int) bool { return ks[a].k < ks[b].k })
-	out := make([]GoIssue, len(ks))
-	for i, k := range ks {
-		out[i] = k.g
-	}
-	return out
-}
-
-func sortedHL7(hs []HL7Issue) []HL7Issue {
-	type keyed struct {
-		k string
-		h HL7Issue
-	}
-	ks := make([]keyed, len(hs))
-	for i, h := range hs {
-		ks[i] = keyed{hl7Identity(h), h}
+	ks := make([]keyed, len(xs))
+	for i, x := range xs {
+		ks[i] = keyed{key(x), x}
 	}
 	sort.SliceStable(ks, func(a, b int) bool { return ks[a].k < ks[b].k })
-	out := make([]HL7Issue, len(ks))
+	out := make([]T, len(ks))
 	for i, k := range ks {
-		out[i] = k.h
+		out[i] = k.x
 	}
 	return out
 }
