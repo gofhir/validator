@@ -36,8 +36,21 @@ def hit(rule, pkg, sd, detail):
 def parent_id(i):
     last = i.rsplit('.', 1)[-1] if '.' in i else i
     if ':' in last:
-        return i[: i.rfind(':')]           # slice -> its base element
+        colon = i.rfind(':')
+        slash = i.rfind('/')
+        if slash > colon:
+            return i[:slash]               # reslice a:s/r -> the slice it reslices, a:s
+        return i[:colon]                   # slice -> its base element
     return i.rsplit('.', 1)[0] if '.' in i else None
+
+
+def sliced_element(i, ids):
+    """The element slice i slices: its parent_id, or, for a reslice of a missing slice
+    (a:s/r without a:s), the next element up the slice chain that exists."""
+    p = parent_id(i)
+    while p is not None and p not in ids and ':' in p.rsplit('.', 1)[-1]:
+        p = parent_id(p)
+    return p
 
 def fixed_or_pattern(e):
     for k, v in e.items():
@@ -125,7 +138,7 @@ for pkg, sd in SDS:
             if idslice != sn:
                 hit('R3 sliceName != id slice segment', pkg, sd, f"{i} sliceName={sn}")
             # A missing base is R1's orphan; R2 is only an existing base without slicing.
-            if p in byid and not byid[p][1].get('slicing') and '/' not in (idslice or ''):
+            if p in byid and not byid[p][1].get('slicing'):
                 hit('R2 slice whose existing base has no slicing', pkg, sd, i)
             if sn.startswith('@'):
                 hit('R14 @default/@ slice (R5)', pkg, sd, i)
@@ -264,7 +277,8 @@ for pkg, sd in SDS:
         sl = e.get('slicing')
         if not sl:
             continue
-        slices = [x for x in snap if x.get('sliceName') and parent_id(x['id']) == e['id']]
+        ids_here = {x['id'] for x in snap}
+        slices = [x for x in snap if x.get('sliceName') and sliced_element(x['id'], ids_here) == e['id']]
         for d in sl.get('discriminator', []):
             if d.get('type') not in ('value', 'pattern'):
                 continue

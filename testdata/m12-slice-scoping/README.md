@@ -77,3 +77,15 @@ mCODE 4.0.0, AU Core 2.0.0, CH Core 6.0.0, CL Core 1.9.4, SDC 4.0.0, CARIN BB 2.
 Genomics Reporting 3.0.0, basisprofil DE 1.6.0, CRMI 2.0.0, CQF Measures 5.0.0, IPA 1.1.0,
 EU Laboratory 2.0.0 and Subscriptions Backport 1.1.0, as published on packages.fhir.org on
 2026-09-27.
+
+## Checking the element tree on the corpus
+
+`pkg/registry`'s `TestTreeCorpus` builds the element tree of every StructureDefinition the parser
+reads, and fails on any defect other than the parser's R1 orphans:
+
+```bash
+GOFHIR_SD_CORPUS=<dir>:<dir> go test ./pkg/registry -run TestTreeCorpus -v
+```
+
+It takes the same directories as the parser. Without the variable it is skipped;
+`TestTreeEmbeddedPackages` covers the packages this repository embeds on every run.

@@ -52,6 +52,9 @@ type StructureDefinition struct {
 	// Concurrent validation across goroutines (e.g. in an embedded HTTP server)
 	// previously raced on the Snapshot field.
 	snapshotMu sync.Mutex
+
+	// tree caches the element hierarchy of Snapshot; see Tree.
+	tree treeCache
 }
 
 // ExtensionContext defines where an extension can be used.

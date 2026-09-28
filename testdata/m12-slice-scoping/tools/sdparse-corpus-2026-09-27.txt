@@ -1,6 +1,6 @@
 SDs analysed: 3061 (with snapshot: 3059)
 
-### R1 orphan (parent id missing): 15
+### R1 orphan (parent id missing): 16
     hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.relationship:Relationship -> FamilyMemberHistory.relationship
     hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.sex:Sex -> FamilyMemberHistory.sex
     hl7.fhir.r4.core-4.0.1 :: familymemberhistory-genetic :: FamilyMemberHistory.born[x]:BornAge -> FamilyMemberHistory.born[x]
