@@ -11,7 +11,8 @@
     "enforces it. Unmapped and family-less errors never match: they always count as unexplained on their",
     "side, so a change in them is always visible.",
     "Rules are 'parent' only where the corpus shows HL7 reporting at the parent (cardinality, slicing, unknown elements, extension value types) and the finding is named or located precisely enough; everything else is 'equal', which can only make a pair less likely, never a wrong one.",
-    "quotesElement marks families whose gofhir messages quote the element they are about ('Minimum cardinality of 'X:slice.y''); the slices of that element are part of the error's identity and are compared with HL7's."
+    "quotesElement marks families whose gofhir messages quote the element they are about ('Minimum cardinality of 'X:slice.y''); the slices of that element are part of the error's identity and are compared with HL7's.",
+    "An ID may be in several families. HL7's 'Slice ... a matching slice is required' (_SLICE) is a required slice and pairs only with gofhir's slice cardinality error, never with an element minimum; HL7's element minimum ('X: minimum required') pairs with either."
   ],
   "families": [
     {
@@ -22,11 +23,21 @@
         "SLICING_CARDINALITY_MIN"
       ],
       "hl7": [
-        "Validation_VAL_Profile_Minimum",
-        "Validation_VAL_Profile_Minimum_SLICE",
-        "Validation_VAL_Profile_Minimum_SLICE_EXT"
+        "Validation_VAL_Profile_Minimum"
       ],
       "quotesElement": true
+    },
+    {
+      "name": "slice-required",
+      "rule": "parent",
+      "quotesElement": true,
+      "gofhir": [
+        "SLICING_CARDINALITY_MIN"
+      ],
+      "hl7": [
+        "Validation_VAL_Profile_Minimum_SLICE",
+        "Validation_VAL_Profile_Minimum_SLICE_EXT"
+      ]
     },
     {
       "name": "cardinality-max",

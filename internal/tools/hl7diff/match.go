@@ -17,17 +17,32 @@ var (
 	goQuotedElement = regexp.MustCompile(`'([A-Z][A-Za-z0-9]*(?:[.:][^'\s]+)+)'`)
 )
 
-// sliceNames lists the element slices in an element id or a location, in order. A slice on a
-// choice element ("value[x]:valueIdentifier") is a type slice: it names the type the value takes,
-// not an element, and gofhir's messages quote the choice without it, so it is left out.
+// splitSlices lists the slices in an element id or a location, in order, split into element slices
+// ("extension:cehrt") and type slices, which name the type a choice takes
+// ("value[x]:valueIdentifier"). A gofhir message quotes a choice without its type slice.
+func splitSlices(loc string) (element, typ []string) {
+	for seg := range strings.SplitSeq(loc, ".") {
+		name, slice, ok := strings.Cut(seg, ":")
+		if !ok {
+			continue
+		}
+		slice = indexSuffix.ReplaceAllString(slice, "")
+		if strings.HasSuffix(indexSuffix.ReplaceAllString(name, ""), "[x]") {
+			typ = append(typ, slice)
+		} else {
+			element = append(element, slice)
+		}
+	}
+	return element, typ
+}
+
+// sliceNames lists every slice, element and type, in order: what an identity keeps.
 func sliceNames(loc string) []string {
 	var out []string
 	for seg := range strings.SplitSeq(loc, ".") {
-		name, slice, ok := strings.Cut(seg, ":")
-		if !ok || strings.HasSuffix(indexSuffix.ReplaceAllString(name, ""), "[x]") {
-			continue
+		if _, slice, ok := strings.Cut(seg, ":"); ok {
+			out = append(out, indexSuffix.ReplaceAllString(slice, ""))
 		}
-		out = append(out, indexSuffix.ReplaceAllString(slice, ""))
 	}
 	return out
 }
@@ -70,12 +85,17 @@ func namesAgree(fam *Families, g GoIssue, h HL7Issue) bool {
 	} else if want != got {
 		return false
 	}
-	gs := sliceNames(goLoc)
-	if len(gs) == 0 && fam.quotesElement(g) {
-		gs = quotedSlices(g) // a slice child reported at its instance path names the slice in the text
+	gElem, gType := splitSlices(goLoc)
+	if len(gElem) == 0 && len(gType) == 0 && fam.quotesElement(g) {
+		gElem, gType = quotedSlices(g) // a slice child reported at its instance path names the slice in the text
 	}
-	if hs := sliceNames(id); len(hs) > 0 && len(gs) > 0 {
-		return strings.Join(hs, ",") == strings.Join(gs, ",")
+	hElem, hType := splitSlices(id)
+	if len(hElem) > 0 && len(gElem) > 0 && strings.Join(hElem, ",") != strings.Join(gElem, ",") {
+		return false
+	}
+	// A type slice is compared only when both sides name one: gofhir quotes a choice without it.
+	if len(hType) > 0 && len(gType) > 0 && strings.Join(hType, ",") != strings.Join(gType, ",") {
+		return false
 	}
 	return true
 }
@@ -93,18 +113,20 @@ func (f *Families) GoIdentity(g GoIssue) string {
 		if m := goConstraintKey.FindStringSubmatch(g.Diagnostics); m != nil {
 			detail = m[1]
 		} else if f.quotesElement(g) {
-			detail = strings.Join(quotedSlices(g), ",")
+			if m := goQuotedElement.FindStringSubmatch(g.Diagnostics); m != nil {
+				detail = strings.Join(sliceNames(m[1]), ",") // every slice, type slices included
+			}
 		}
 	}
 	return strings.Join([]string{g.Severity, g.MessageID, g.Location(), detail}, "\x00")
 }
 
-// quotedSlices are the slices of the element a gofhir message quotes, if any.
-func quotedSlices(g GoIssue) []string {
+// quotedSlices are the element and type slices of the element a gofhir message quotes, if any.
+func quotedSlices(g GoIssue) (element, typ []string) {
 	if m := goQuotedElement.FindStringSubmatch(g.Diagnostics); m != nil {
-		return sliceNames(m[1])
+		return splitSlices(m[1])
 	}
-	return nil
+	return nil, nil
 }
 
 // hl7Identity identifies an HL7 error.
@@ -116,6 +138,7 @@ func hl7Identity(h HL7Issue) string {
 type Unexplained struct {
 	GoFHIR []GoIssue  // gofhir errors with no HL7 equivalent (false positives, or divergences)
 	HL7    []HL7Issue // HL7 errors with no gofhir equivalent (false negatives, or divergences)
+	Paired []GoIssue  // gofhir errors the assignment paired
 }
 
 // Assign matches gofhir errors to HL7 errors one-to-one, pairing only equivalents (same family,
@@ -136,7 +159,9 @@ func Assign(fam *Families, gos []GoIssue, hls []HL7Issue) Unexplained {
 		}
 	}
 	for i, g := range gos {
-		if !matched[i] {
+		if matched[i] {
+			u.Paired = append(u.Paired, g)
+		} else {
 			u.GoFHIR = append(u.GoFHIR, g)
 		}
 	}
@@ -152,14 +177,14 @@ func assignOwners(fam *Families, gos []GoIssue, hls []HL7Issue) []int {
 	}
 	edges := make([][]int, len(gos))
 	for i, g := range gos {
-		family, rule := fam.GoClass(g)
-		if family == "" {
-			continue
-		}
+		classes := fam.GoClasses(g)
 		loc := ComparableGoLocation(g.Location())
 		for j, h := range hls {
-			if hlClass[j] == family && Located(rule, loc, h.Location) && namesAgree(fam, g, h) {
-				edges[i] = append(edges[i], j)
+			for _, c := range classes {
+				if hlClass[j] == c.Name && Located(c.Rule, loc, h.Location) && namesAgree(fam, g, h) {
+					edges[i] = append(edges[i], j)
+					break
+				}
 			}
 		}
 	}

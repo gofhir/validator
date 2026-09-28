@@ -48,8 +48,11 @@ type Families struct {
 	} `json:"constraint"`
 	Unmapped map[string]string `json:"unmapped"`
 
-	byGo map[string]*Family
+	byGo map[string][]*Family
 }
+
+// Class is one family a gofhir error belongs to, with that family's location rule.
+type Class struct{ Name, Rule string }
 
 // Location rules a family can use.
 const (
@@ -62,13 +65,17 @@ const constraintRule = ruleEqual
 // quotesElement reports whether a gofhir error's message quotes the element it is about, per the
 // family table.
 func (f *Families) quotesElement(g GoIssue) bool {
-	fam := f.byGo[g.MessageID]
-	return fam != nil && fam.QuotesElement
+	for _, fam := range f.byGo[g.MessageID] {
+		if fam.QuotesElement {
+			return true
+		}
+	}
+	return false
 }
 
 // KnowsGo reports whether id is a gofhir diagnostic ID the table classifies.
 func (f *Families) KnowsGo(id string) bool {
-	if f.byGo[id] != nil || f.Unmapped[id] != "" {
+	if len(f.byGo[id]) > 0 || f.Unmapped[id] != "" {
 		return true
 	}
 	for _, c := range f.Constraint.GoFHIR {
@@ -88,17 +95,16 @@ func ParseFamilies(data []byte) (*Families, error) {
 	if err := json.Unmarshal(data, &f); err != nil {
 		return nil, fmt.Errorf("families: %w", err)
 	}
-	f.byGo = map[string]*Family{}
+	f.byGo = map[string][]*Family{}
 	for i := range f.List {
 		fam := &f.List[i]
 		if fam.Rule != ruleEqual && fam.Rule != ruleParent {
 			return nil, fmt.Errorf("family %s: rule %q is not equal or parent", fam.Name, fam.Rule)
 		}
+		// An ID may belong to several families: SLICING_CARDINALITY_MIN reports both a required
+		// slice (HL7's _SLICE message) and a required child of a slice (HL7's element message).
 		for _, id := range fam.GoFHIR {
-			if prev, dup := f.byGo[id]; dup {
-				return nil, fmt.Errorf("gofhir ID %s is in both %s and %s", id, prev.Name, fam.Name)
-			}
-			f.byGo[id] = fam
+			f.byGo[id] = append(f.byGo[id], fam)
 		}
 		for j := range fam.HL7NoID {
 			re, err := regexp.Compile(fam.HL7NoID[j].Text)
@@ -116,21 +122,22 @@ var (
 	hl7ConstraintKey = regexp.MustCompile(`#([^#\s]+)$`)
 )
 
-// GoClass returns the family name of a gofhir error and its location rule, or "" when it belongs
-// to no family. FHIRPath constraints get "constraint:<key>".
-func (f *Families) GoClass(g GoIssue) (family, rule string) {
+// GoClasses returns the families a gofhir error belongs to, each with its location rule; none when
+// it belongs to no family. A FHIRPath constraint belongs to "constraint:<key>".
+func (f *Families) GoClasses(g GoIssue) []Class {
 	for _, id := range f.Constraint.GoFHIR {
 		if g.MessageID == id {
 			if m := goConstraintKey.FindStringSubmatch(g.Diagnostics); m != nil {
-				return "constraint:" + m[1], constraintRule
+				return []Class{{"constraint:" + m[1], constraintRule}}
 			}
-			return "", ""
+			return nil
 		}
 	}
-	if fam := f.byGo[g.MessageID]; fam != nil {
-		return fam.Name, fam.Rule
+	var out []Class
+	for _, fam := range f.byGo[g.MessageID] {
+		out = append(out, Class{fam.Name, fam.Rule})
 	}
-	return "", ""
+	return out
 }
 
 // HL7Class returns the family name of an HL7 error, or "".

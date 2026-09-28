@@ -530,3 +530,73 @@ func TestPortableNamesDoNotCollide(t *testing.T) {
 		t.Errorf("one file renames cleanly: %v", err)
 	}
 }
+
+// The fifth review of the redesign.
+func TestFifthReviewScenarios(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const f = "x.json"
+	cov := map[string]bool{f: true}
+	run := func(gs ...GoIssue) GoRun { return GoRun{Covered: cov, Errors: map[string][]GoIssue{f: gs}} }
+	hl7 := func(hs ...HL7Issue) HL7Run { return HL7Run{Covered: cov, Errors: map[string][]HL7Issue{f: hs}} }
+	g := func(id, loc, diag string) GoIssue {
+		return GoIssue{File: f, Severity: "error", MessageID: id, Expression: []string{loc}, Diagnostics: diag}
+	}
+	h := func(id, loc, text string) HL7Issue {
+		return HL7Issue{File: f, Severity: "error", Key: id, HasID: true, Location: loc, Text: text}
+	}
+	ok := func(base, head GoRun, x HL7Run) bool {
+		rep, err := Check(fam, base, head, x, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return rep.OK()
+	}
+
+	t.Run("4: errors differing only in a type slice have different identities", func(t *testing.T) {
+		base := run(g("SLICING_CARDINALITY_MIN", "Observation.value[x].unit", "Minimum cardinality of 'Observation.value[x]:valueQuantity.unit' is 1"))
+		head := run(g("SLICING_CARDINALITY_MIN", "Observation.value[x].unit", "Minimum cardinality of 'Observation.value[x]:valueString.unit' is 1"))
+		if ok(base, head, hl7()) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("5: a different type slice does not pair when both sides name one", func(t *testing.T) {
+		x := hl7(h("Validation_VAL_Profile_Minimum_SLICE", "MeasureReport.extension[0]", "Slice 'MeasureReport.extension:cehrt.value[x]:valueIdentifier': a matching slice is required, but not found"))
+		base := run(g("SLICING_CARDINALITY_MIN", "MeasureReport.extension[0].value[x]", "Minimum cardinality of 'MeasureReport.extension:cehrt.value[x]' is 1, but found 0"))
+		head := run(g("SLICING_CARDINALITY_MIN", "MeasureReport.extension[0].value[x]", "Minimum cardinality of 'MeasureReport.extension:cehrt.value[x]:valueString' is 1, but found 0"))
+		if ok(base, head, x) {
+			t.Error("must fail")
+		}
+	})
+	t.Run("3: dropping a true error the rules could not pair is flagged", func(t *testing.T) {
+		// HL7 reports slice max at the owner; gofhir at an item, which never pairs with an owner.
+		x := hl7(h("Validation_VAL_Profile_Maximum", "Bundle", "Bundle.entry:composition: max allowed = 1, but found 2"))
+		base := run(g("SLICING_CARDINALITY_MAX", "Bundle.entry[1]", "max"))
+		if ok(base, run(), x) {
+			t.Error("an unverifiable removal must be reported")
+		}
+	})
+	t.Run("an element minimum does not stand for a required slice", func(t *testing.T) {
+		x := hl7(h("Validation_VAL_Profile_Minimum_SLICE", "MeasureReport.extension[0]", "Slice 'MeasureReport.extension:cehrt.value[x]:valueIdentifier': a matching slice is required, but not found"))
+		u := Assign(fam, []GoIssue{g("CARDINALITY_MIN", "MeasureReport.extension[0].value[x]", "Minimum cardinality of 'MeasureReport.extension[0].value[x]' is 1")}, x.Errors[f])
+		if len(u.Paired) != 0 {
+			t.Error("CARDINALITY_MIN must not pair with HL7's required-slice message")
+		}
+	})
+}
+
+func TestPortableNamesMergeAcrossMachines(t *testing.T) {
+	ci := "/home/ci/.fhir/packages/p#1/package/example/X.json"
+	laptop := "/Users/me/.fhir/packages/p#1/package/example/X.json"
+	base := GoRun{Errors: map[string][]GoIssue{}, Covered: map[string]bool{ci: true}}
+	head := GoRun{Errors: map[string][]GoIssue{}, Covered: map[string]bool{laptop: true}}
+	hl7 := HL7Run{Errors: map[string][]HL7Issue{}, Covered: map[string]bool{laptop: true}}
+	if err := portable(&base, &head, &hl7); err != nil {
+		t.Fatalf("the same example cached on two machines is one file: %v", err)
+	}
+	if !base.Covered["fhir-cache:/p#1/package/example/X.json"] || !head.Covered["fhir-cache:/p#1/package/example/X.json"] {
+		t.Error("both runs must use the portable name")
+	}
+}

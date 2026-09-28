@@ -118,6 +118,9 @@ func writeReport(w io.Writer, group string, rep Report) error {
 		group, status, rep.Files, len(rep.Findings), rep.Improved, rep.Divergences)
 	for _, f := range rep.Findings {
 		switch {
+		case f.Go != nil && f.HL7 != nil:
+			fmt.Fprintf(&b, "- %s x%d  %s @ %s [%s]\n      %s\n      an unpaired HL7 error of the same kind remains nearby: %s @ %s: %s\n",
+				f.Kind, f.Count, f.File, f.Go.Location(), f.Go.MessageID, f.Go.Diagnostics, f.HL7.Key, f.HL7.Location, f.HL7.Text)
 		case f.Go != nil:
 			fmt.Fprintf(&b, "- %s x%d  %s @ %s [%s]\n      %s\n", f.Kind, f.Count, f.File, f.Go.Location(), f.Go.MessageID, f.Go.Diagnostics)
 		case f.HL7 != nil:

@@ -139,14 +139,6 @@ func cmdFetch(ctx context.Context, args []string, out io.Writer) (bool, error) {
 		return false, err
 	}
 	for _, g := range groups {
-		version := g.Version
-		if version == "" {
-			version = "4.0.1"
-		}
-		embedded, err := EmbeddedNames(version)
-		if err != nil {
-			return false, err
-		}
 		var roots []PackageID
 		for _, s := range append(append([]string(nil), g.IGs...), g.ExamplesOf...) {
 			p, err := ParsePackageID(s)
@@ -155,7 +147,9 @@ func cmdFetch(ctx context.Context, args []string, out io.Writer) (bool, error) {
 			}
 			roots = append(roots, p)
 		}
-		got, err := cache.FetchClosure(ctx, roots, embedded, *registry)
+		// Everything the HL7 validator loads, gofhir's embedded packages included, so a run
+		// never installs packages and changes its own cache key.
+		got, err := cache.FetchClosure(ctx, roots, *registry)
 		if err != nil {
 			return false, fmt.Errorf("group %s: %w", g.Name, err)
 		}
@@ -270,15 +264,15 @@ func selectGroups(m Manifest, only string, heavy bool) ([]Group, error) {
 
 // groupPlan is everything a group's three runs are derived from.
 type groupPlan struct {
-	g         Group
-	version   string
-	files     []string
-	closure   []PackageID
-	skipped   []PackageID
-	pkgFiles  []string
-	dir       string
-	inputs    string // key of all inputs, the package cache listing included
-	instances string // key of the instances and local packages only
+	g            Group
+	version      string
+	files        []string
+	closure      []PackageID
+	skipped      []PackageID
+	pkgFiles     []string
+	dir          string
+	inputs       string // key of the HL7 validator's inputs: gofhir's, plus the packages left out of the closure and the cache listing
+	gofhirInputs string // key of gofhir's inputs: the closure, the local packages and the instances
 }
 
 func planGroup(env *runEnv, g Group) (*groupPlan, error) {
@@ -314,7 +308,7 @@ func planGroup(env *runEnv, g Group) (*groupPlan, error) {
 	if p.inputs, err = inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, true); err != nil {
 		return nil, err
 	}
-	if p.instances, err = inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, false); err != nil {
+	if p.gofhirInputs, err = inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, false); err != nil {
 		return nil, err
 	}
 	return p, nil
@@ -364,7 +358,7 @@ func runHL7(ctx context.Context, env *runEnv, p *groupPlan) (string, error) {
 	// The key hashed the inputs before java read them. If the instances or local packages changed
 	// meanwhile, the output belongs to no key and is discarded. (The package cache listing may
 	// change: the HL7 validator installs missing packages while it runs.)
-	if again, err := inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, false); err != nil || again != p.instances {
+	if again, err := inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, false); err != nil || again != p.gofhirInputs {
 		_ = os.Remove(tmp)
 		return "", errors.New("inputs changed while the HL7 validator was running; run again")
 	}
@@ -376,7 +370,7 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 	if err != nil {
 		return false, err
 	}
-	baseOut := filepath.Join(p.dir, "base-"+hashStrings(filepath.Base(env.baseBin), p.inputs)+".jsonl")
+	baseOut := filepath.Join(p.dir, "base-"+hashStrings(filepath.Base(env.baseBin), p.gofhirInputs)+".jsonl")
 	if _, err := os.Stat(baseOut); err != nil {
 		if err := runGofhir(ctx, env, p, env.baseBin, baseOut); err != nil {
 			return false, err
@@ -443,27 +437,24 @@ func portableName(f string) string {
 	return f
 }
 
-// portable renames every file of the three runs with portableName. Two distinct files that would
-// get one name are an error: merging them would lose one file's errors.
+// portable renames every file of the three runs with portableName. Within one run, two distinct
+// files that would get one name are an error, since merging them would lose one file's errors.
+// Across runs the same name is the point: one example cached under different paths on two
+// machines is one file.
 func portable(base, head *GoRun, hl7 *HL7Run) error {
-	seen := map[string]string{}
-	claim := func(f string) error {
-		n := portableName(f)
-		if prev, ok := seen[n]; ok && prev != f {
-			return fmt.Errorf("%s and %s would both be named %s", prev, f, n)
+	unique := func(files map[string]bool) error {
+		seen := map[string]string{}
+		for f := range files {
+			n := portableName(f)
+			if prev, ok := seen[n]; ok && prev != f {
+				return fmt.Errorf("%s and %s would both be named %s", prev, f, n)
+			}
+			seen[n] = f
 		}
-		seen[n] = f
 		return nil
 	}
-	for _, r := range []*GoRun{base, head} {
-		for f := range r.Covered {
-			if err := claim(f); err != nil {
-				return err
-			}
-		}
-	}
-	for f := range hl7.Covered {
-		if err := claim(f); err != nil {
+	for _, files := range []map[string]bool{base.Covered, head.Covered, hl7.Covered} {
+		if err := unique(files); err != nil {
 			return err
 		}
 	}
@@ -542,19 +533,18 @@ func groupFiles(env *runEnv, g Group) ([]string, error) {
 	return out, nil
 }
 
-// inputsKeyWith hashes the inputs that decide a run's output, besides the programs: the FHIR
-// version, a fingerprint of every package in the closure and of every package left out of it (the
-// HL7 validator loads those), the local packages' contents and the instances' contents; and, with
-// withCache, the names of every package in the cache (the HL7 validator also loads the latest
-// terminology and extensions packages it finds there). The listing and the packages left out of
-// the closure are not part of the check made after the HL7 validator runs, because it installs
-// missing packages (embedded ones included) while it runs; fingerprints ignore the index files it
-// writes, so the closure's contents are still checked.
-func inputsKeyWith(env *runEnv, version string, closure, skipped []PackageID, pkgFiles, files []string, withCache bool) (string, error) {
+// inputsKeyWith hashes the inputs that decide a run's output, besides the programs. For gofhir
+// these are the FHIR version, a fingerprint of every package in the closure, the local packages'
+// contents and the instances' contents. With forHL7 it adds the HL7 validator's: a fingerprint of
+// every package left out of gofhir's closure (it loads those), and the names of every package in
+// the cache (it also loads the latest terminology and extensions packages it finds there). The
+// gofhir key is also the check made after the HL7 validator runs: the validator installs packages
+// while it runs, and fingerprints ignore the index files it writes, so only real changes count.
+func inputsKeyWith(env *runEnv, version string, closure, skipped []PackageID, pkgFiles, files []string, forHL7 bool) (string, error) {
 	h := sha256.New()
 	_, _ = fmt.Fprintln(h, "version", version, "closure", joinIDs(closure))
 	cached := closure
-	if withCache {
+	if forHL7 {
 		cached = append(append([]PackageID(nil), closure...), skipped...)
 	}
 	for _, p := range cached {
@@ -582,7 +572,7 @@ func inputsKeyWith(env *runEnv, version string, closure, skipped []PackageID, pk
 		}
 		_, _ = fmt.Fprintln(h, "file", f, sum)
 	}
-	if withCache {
+	if forHL7 {
 		entries, err := os.ReadDir(env.cache.Dir)
 		if err != nil {
 			return "", err

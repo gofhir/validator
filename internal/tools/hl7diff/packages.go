@@ -336,18 +336,15 @@ func extractTgz(r io.Reader, dst string) error {
 	}
 }
 
-// FetchClosure installs the packages and, transitively, their dependencies, skipping the
-// embedded ones. It returns what it downloaded.
-func (c Cache) FetchClosure(ctx context.Context, roots []PackageID, embedded map[string]bool, registry string) ([]PackageID, error) {
+// FetchClosure installs the packages and, transitively, their dependencies, including those gofhir
+// embeds: the HL7 validator loads them from the cache. It returns what it downloaded.
+func (c Cache) FetchClosure(ctx context.Context, roots []PackageID, registry string) ([]PackageID, error) {
 	var got []PackageID
 	seen := map[string]bool{}
 	queue := append([]PackageID(nil), roots...)
 	for len(queue) > 0 {
 		p := queue[0]
 		queue = queue[1:]
-		if embedded[p.Name] {
-			continue
-		}
 		p, err := c.resolveInstalled(p)
 		if err != nil {
 			if p, err = resolvePublished(ctx, p, registry); err != nil {

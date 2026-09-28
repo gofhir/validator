@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 )
 
 // hl7ConstraintID is the shape of an HL7 constraint message ID: the defining StructureDefinition's
@@ -84,7 +85,8 @@ func (d Divergence) coversHL7(h HL7Issue) bool {
 type Finding struct {
 	File string
 	// Kind is "new false positive" (a gofhir error with no HL7 equivalent that the baseline did not
-	// have) or "lost HL7 error" (an HL7 error the baseline matched and head no longer does).
+	// have), "lost HL7 error" (an HL7 error the baseline matched and head no longer does), or
+	// "unverified removal" (see Check).
 	Kind  string
 	Count int
 	Go    *GoIssue
@@ -156,6 +158,7 @@ func Check(fam *Families, base, head GoRun, hl7 HL7Run, divs []Divergence) (Repo
 				rep.Findings = append(rep.Findings, Finding{File: f, Kind: "lost HL7 error", Count: d, HL7: &x})
 			}
 		}
+		rep.Findings = append(rep.Findings, unverifiedRemovals(fam, f, bGo, hGo, hHL7, newlyPaired(fam, b.Paired, h.Paired))...)
 		rep.Improved += improvement(bGo.n, hGo.n) + improvement(bHL7.n, hHL7.n)
 	}
 	return rep, nil
@@ -198,6 +201,84 @@ next:
 		t.sample[k] = h
 	}
 	return t, declared
+}
+
+// unverifiedRemovals covers what pairing cannot see. A removed gofhir error that was unpaired in
+// the baseline looks like a fixed false positive, but it may have been a true error the rules did
+// not pair (reported at another level, or described differently). When head leaves an HL7 error
+// of one of its families unpaired at a related location (at any depth, whatever the indices or
+// slices) and nothing replaced the removed error there, the removal cannot be verified and is
+// reported for inspection. A replacement is a gofhir error that head pairs and the baseline did
+// not, of the same family and at a related location: a report made precise, HL7-confirmed.
+func unverifiedRemovals(fam *Families, file string, bGo, hGo tally[GoIssue], hHL7 tally[HL7Issue], replacements []GoIssue) []Finding {
+	var out []Finding
+next:
+	for _, k := range sortedKeys(bGo.n) {
+		if bGo.n[k] <= hGo.n[k] {
+			continue
+		}
+		g := bGo.sample[k]
+		for _, r := range replacements {
+			if nearbyGo(fam, g, r) {
+				continue next
+			}
+		}
+		for _, hk := range sortedKeys(hHL7.n) {
+			h := hHL7.sample[hk]
+			if nearby(fam, g, h) {
+				gi, hi := g, h
+				out = append(out, Finding{File: file, Kind: "unverified removal", Count: bGo.n[k] - hGo.n[k], Go: &gi, HL7: &hi})
+				break
+			}
+		}
+	}
+	return out
+}
+
+// nearby is the loose relation used only to flag removals: one of g's families, and locations
+// where one contains the other once indices and slice names are dropped.
+func nearby(fam *Families, g GoIssue, h HL7Issue) bool {
+	hc := fam.HL7Class(h)
+	same := false
+	for _, c := range fam.GoClasses(g) {
+		same = same || c.Name == hc
+	}
+	return same && looselyRelated(g.Location(), h.Location)
+}
+
+// newlyPaired lists head's paired gofhir errors that the baseline did not pair.
+func newlyPaired(fam *Families, base, head []GoIssue) []GoIssue {
+	had := map[string]int{}
+	for _, g := range base {
+		had[fam.GoIdentity(g)]++
+	}
+	var out []GoIssue
+	for _, g := range head {
+		if k := fam.GoIdentity(g); had[k] > 0 {
+			had[k]--
+		} else {
+			out = append(out, g)
+		}
+	}
+	return out
+}
+
+// nearbyGo is nearby between two gofhir errors: a shared family and related locations.
+func nearbyGo(fam *Families, a, b GoIssue) bool {
+	shared := false
+	for _, ca := range fam.GoClasses(a) {
+		for _, cb := range fam.GoClasses(b) {
+			shared = shared || ca.Name == cb.Name
+		}
+	}
+	return shared && looselyRelated(a.Location(), b.Location())
+}
+
+func looselyRelated(x, y string) bool {
+	strip := func(s string) string { return indexSuffix.ReplaceAllString(ComparableGoLocation(s), "") }
+	a, b := strip(x), strip(y)
+	within := func(p, q string) bool { return p == q || strings.HasPrefix(q, p+".") }
+	return within(a, b) || within(b, a)
 }
 
 func improvement(base, head map[string]int) int {

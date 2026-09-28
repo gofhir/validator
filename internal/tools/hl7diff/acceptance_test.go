@@ -158,7 +158,10 @@ func TestAcceptance(t *testing.T) {
 		}, true},
 
 		// Regressions must fail.
-		{"P4: the true cehrt slice error is dropped", "deqm-probes", []edit{
+		{"P4: only the true cehrt slice error is dropped, the false one stays", "deqm-probes", []edit{
+			drop("probe_P4_cehrt_string_prof.json", idAt("SLICING_CARDINALITY_MIN", "MeasureReport.extension[0].value[x]")),
+		}, false},
+		{"P4: both the true and the false error are dropped", "deqm-probes", []edit{
 			drop("probe_P4_cehrt_string_prof.json", idAt("SLICING_CARDINALITY_MIN", "MeasureReport.extension[0].value[x]")),
 			drop("probe_P4_cehrt_string_prof.json", idAt("CARDINALITY_MIN", "MeasureReport.extension[0].value[x]")),
 		}, false},
