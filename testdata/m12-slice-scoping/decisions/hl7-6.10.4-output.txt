@@ -1,37 +1,37 @@
 == Q1_exists_one.json
-  ERROR Patient.identifier[0] :: Profile http://acme-health.test/fhir/StructureDefinition/mm-exists|0.2.0, Element matches more than one slice - A, B
-  ERROR Patient :: Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-exists|0.2.0). Note that other slices are allowed in addition to this required slice
+  ERROR Patient.identifier[0] :: Profile http://acme-health.test/fhir/StructureDefinition/mm-exists|0.3.0, Element matches more than one slice - A, B
+  ERROR Patient :: Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-exists|0.3.0). Note that other slices are allowed in addition to this required slice
 == Q1_pattern_one.json
-  ERROR Patient :: Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-pattern|0.2.0). Note that other slices are allowed in addition to this required slice
+  ERROR Patient :: Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-pattern|0.3.0). Note that other slices are allowed in addition to this required slice
 == Q1_profile_one.json
-  ERROR Bundle.entry[0] :: Profile http://acme-health.test/fhir/StructureDefinition/mm-profile|0.2.0, Element matches more than one slice - A, B
-  ERROR Bundle :: Slice 'Bundle.entry:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-profile|0.2.0). Note that other slices are allowed in addition to this required slice
+  ERROR Bundle.entry[0] :: Profile http://acme-health.test/fhir/StructureDefinition/mm-profile|0.3.0, Element matches more than one slice - A, B
+  ERROR Bundle :: Slice 'Bundle.entry:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-profile|0.3.0). Note that other slices are allowed in addition to this required slice
 == Q1_type_one.json
   WARNING Observation :: Best Practice Recommendation: In general, all observations should have a subject
   WARNING Observation :: Best Practice Recommendation: In general, all observations should have a performer
   WARNING Observation :: Best Practice Recommendation: In general, all observations should have an effective[x] ()
-  ERROR Observation.component[0] :: Profile http://acme-health.test/fhir/StructureDefinition/mm-type|0.2.0, Element matches more than one slice - A, B
-  ERROR Observation :: Slice 'Observation.component:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-type|0.2.0). Note that other slices are allowed in addition to this required slice
+  ERROR Observation.component[0] :: Profile http://acme-health.test/fhir/StructureDefinition/mm-type|0.3.0, Element matches more than one slice - A, B
+  ERROR Observation :: Slice 'Observation.component:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-type|0.3.0). Note that other slices are allowed in addition to this required slice
 == Q1_value_one.json
-  ERROR Patient.identifier[0] :: Profile http://acme-health.test/fhir/StructureDefinition/mm-value|0.2.0, Element matches more than one slice - A, B
-  ERROR Patient :: Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-value|0.2.0). Note that other slices are allowed in addition to this required slice
+  ERROR Patient.identifier[0] :: Profile http://acme-health.test/fhir/StructureDefinition/mm-value|0.3.0, Element matches more than one slice - A, B
+  ERROR Patient :: Slice 'Patient.identifier:B': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/mm-value|0.3.0). Note that other slices are allowed in addition to this required slice
 == Q2_version_two_ext.json
   ERROR Patient.extension[0] :: Slicing cannot be evaluated: Problem with use of resolve() - profile [CanonicalType[http://acme-health.test/fhir/StructureDefinition/ext-a|9.9.9]] on Patient.extension:a could not be resolved (@char 1)
   ERROR Patient.extension[1] :: Slicing cannot be evaluated: Problem with use of resolve() - profile [CanonicalType[http://acme-health.test/fhir/StructureDefinition/ext-a|9.9.9]] on Patient.extension:a could not be resolved (@char 1)
 == Q3_unresolvable_absent.json
-  ERROR Patient :: Slice 'Patient.extension:missing' for extension 'http://acme-health.test/fhir/StructureDefinition/ext-missing': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/unresolvable|0.2.0). Note that other slices are allowed in addition to this required slice
+  ERROR Patient :: Slice 'Patient.extension:missing' for extension 'http://acme-health.test/fhir/StructureDefinition/ext-missing': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/unresolvable|0.3.0). Note that other slices are allowed in addition to this required slice
 == Q3_unresolvable_present.json
   ERROR Patient.extension[0] :: The extension http://acme-health.test/fhir/StructureDefinition/ext-missing could not be found so is not allowed here
   ERROR Patient.extension[0] :: Slicing cannot be evaluated: Problem with use of resolve() - profile [CanonicalType[http://acme-health.test/fhir/StructureDefinition/ext-missing]] on Patient.extension:missing could not be resolved (@char 1)
 == Q4_ordered_right.json
 == Q4_ordered_wrong.json
-  ERROR Patient.identifier[1] :: As specified by profile http://acme-health.test/fhir/StructureDefinition/ordered|0.2.0, Element 'identifier' is out of order in ordered slice
+  ERROR Patient.identifier[1] :: As specified by profile http://acme-health.test/fhir/StructureDefinition/ordered|0.3.0, Element 'identifier' is out of order in ordered slice
 == Q5_openatend_right.json
 == Q5_openatend_wrong.json
 == Q6_binding_external.json
-  ERROR Patient.maritalStatus :: Slice 'Patient.maritalStatus.coding:inset': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/binding-external|0.2.0). Note that other slices are allowed in addition to this required slice
+  ERROR Patient.maritalStatus :: Slice 'Patient.maritalStatus.coding:inset': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/binding-external|0.3.0). Note that other slices are allowed in addition to this required slice
 == Q6_binding_local_in.json
   WARNING Patient.maritalStatus :: None of the codings provided are in the value set 'MaritalStatus' (http://hl7.org/fhir/ValueSet/marital-status|4.0.1), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://acme-health.test/fhir/CodeSystem/kind#a)
 == Q6_binding_local_out.json
   WARNING Patient.maritalStatus :: None of the codings provided are in the value set 'MaritalStatus' (http://hl7.org/fhir/ValueSet/marital-status|4.0.1), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://acme-health.test/fhir/CodeSystem/kind#c)
-  ERROR Patient.maritalStatus :: Slice 'Patient.maritalStatus.coding:inset': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/binding-local|0.2.0). Note that other slices are allowed in addition to this required slice
+  ERROR Patient.maritalStatus :: Slice 'Patient.maritalStatus.coding:inset': a matching slice is required, but not found (from http://acme-health.test/fhir/StructureDefinition/binding-local|0.3.0). Note that other slices are allowed in addition to this required slice

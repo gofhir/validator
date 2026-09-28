@@ -1,0 +1,25 @@
+== instances/Q1_exists_one.json ==
+  ERROR [required] Minimum cardinality of 'Patient.identifier:B' is 1, but found 0 @ Patient.identifier:B
+== instances/Q1_pattern_one.json ==
+  ERROR [required] Minimum cardinality of 'Patient.identifier:B' is 1, but found 0 @ Patient.identifier:B
+== instances/Q1_profile_one.json ==
+  ERROR [required] Minimum cardinality of 'Bundle.entry:B' is 1, but found 0 @ Bundle.entry:B
+== instances/Q1_type_one.json ==
+  ERROR [required] Minimum cardinality of 'Observation.component:B' is 1, but found 0 @ Observation.component:B
+== instances/Q1_value_one.json ==
+  ERROR [required] Minimum cardinality of 'Patient.identifier:B' is 1, but found 0 @ Patient.identifier:B
+== instances/Q2_version_two_ext.json ==
+== instances/Q3_unresolvable_absent.json ==
+== instances/Q3_unresolvable_present.json ==
+  WARN  [extension] Unknown extension 'http://acme-health.test/fhir/StructureDefinition/ext-missing' @ Patient.extension[0]
+  ERROR [required] Minimum cardinality of 'Patient.extension:missing' is 1, but found 0 @ Patient.extension:missing
+== instances/Q4_ordered_right.json ==
+== instances/Q4_ordered_wrong.json ==
+== instances/Q5_openatend_right.json ==
+== instances/Q5_openatend_wrong.json ==
+== instances/Q6_binding_external.json ==
+  ERROR [required] Minimum cardinality of 'Patient.coding:inset' is 1, but found 0 @ Patient.coding:inset
+== instances/Q6_binding_local_in.json ==
+  ERROR [required] Minimum cardinality of 'Patient.coding:inset' is 1, but found 0 @ Patient.coding:inset
+== instances/Q6_binding_local_out.json ==
+  ERROR [required] Minimum cardinality of 'Patient.coding:inset' is 1, but found 0 @ Patient.coding:inset

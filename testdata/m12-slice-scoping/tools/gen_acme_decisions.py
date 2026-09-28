@@ -1,7 +1,9 @@
-"""Generate the Plan A / PR A0 decision probes: differential-only profiles plus instances.
+"""Generate the Plan A / PR A0 decision probes: differential-only definitions plus instances.
 
-Snapshots are NOT written here; they are produced by the HL7 validator (-snapshot) so that the
-probes do not depend on gofhir's own snapshot generator. Every name is invented (acme).
+This script writes <outdir>/defs (differentials) and <outdir>/instances. It does not build the
+package: build_acme_decisions.sh has the HL7 validator generate the snapshots from these
+differentials and packs them, so that neither validator runs its own snapshot generator on the
+probes. Every name is invented (acme).
 
 Usage: python3 gen_acme_decisions.py <outdir>
 """
@@ -10,6 +12,7 @@ import json, os, sys
 OUT = sys.argv[1]
 os.makedirs(f"{OUT}/defs", exist_ok=True)
 os.makedirs(f"{OUT}/instances", exist_ok=True)
+VERSION = "0.3.0"  # keep in step with build_acme_decisions.sh
 B = "http://acme-health.test/fhir"
 SDU = f"{B}/StructureDefinition"
 NARR = {"status": "generated", "div": '<div xmlns="http://www.w3.org/1999/xhtml">x</div>'}
@@ -22,7 +25,7 @@ def write(kind, name, obj):
 
 def profile(pid, base_type, elements, base=None):
     write("defs", f"StructureDefinition-{pid}", {
-        "resourceType": "StructureDefinition", "id": pid, "url": f"{SDU}/{pid}", "version": "0.2.0",
+        "resourceType": "StructureDefinition", "id": pid, "url": f"{SDU}/{pid}", "version": VERSION,
         "name": pid.replace("-", "").title(), "status": "draft", "fhirVersion": "4.0.1",
         "kind": "resource", "abstract": False, "type": base_type,
         "baseDefinition": base or f"http://hl7.org/fhir/StructureDefinition/{base_type}",
@@ -31,7 +34,7 @@ def profile(pid, base_type, elements, base=None):
 
 def extension_def(eid, value_type):
     write("defs", f"StructureDefinition-{eid}", {
-        "resourceType": "StructureDefinition", "id": eid, "url": f"{SDU}/{eid}", "version": "0.2.0",
+        "resourceType": "StructureDefinition", "id": eid, "url": f"{SDU}/{eid}", "version": VERSION,
         "name": eid.replace("-", "").title(), "status": "draft", "fhirVersion": "4.0.1",
         "kind": "complex-type", "abstract": False, "context": [{"type": "element", "expression": "Patient"}],
         "type": "Extension", "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
@@ -161,13 +164,13 @@ patient("Q5_openatend_right", "open-at-end", identifier=[{"system": SYS, "value"
 # ---------------------------------------------------------------- Q6 binding-based discriminator
 CS = f"{B}/CodeSystem/kind"
 write("defs", "CodeSystem-kind", {
-    "resourceType": "CodeSystem", "id": "kind", "url": CS, "version": "0.2.0", "name": "Kind", "status": "draft",
+    "resourceType": "CodeSystem", "id": "kind", "url": CS, "version": VERSION, "name": "Kind", "status": "draft",
     "content": "complete", "concept": [{"code": "a"}, {"code": "b"}, {"code": "c"}]})
 write("defs", "ValueSet-kind-ab", {
-    "resourceType": "ValueSet", "id": "kind-ab", "url": f"{B}/ValueSet/kind-ab", "version": "0.2.0", "name": "KindAB",
+    "resourceType": "ValueSet", "id": "kind-ab", "url": f"{B}/ValueSet/kind-ab", "version": VERSION, "name": "KindAB",
     "status": "draft", "compose": {"include": [{"system": CS, "concept": [{"code": "a"}, {"code": "b"}]}]}})
 write("defs", "ValueSet-snomed-isa", {
-    "resourceType": "ValueSet", "id": "snomed-isa", "url": f"{B}/ValueSet/snomed-isa", "version": "0.2.0",
+    "resourceType": "ValueSet", "id": "snomed-isa", "url": f"{B}/ValueSet/snomed-isa", "version": VERSION,
     "name": "SnomedIsa", "status": "draft",
     "compose": {"include": [{"system": "http://snomed.info/sct", "filter": [{"property": "concept", "op": "is-a", "value": "404684003"}]}]}})
 for pid, vs in (("binding-local", "kind-ab"), ("binding-external", "snomed-isa")):
