@@ -53,9 +53,9 @@ Probes are in `testdata/m12-slice-scoping/probes/`. All runs use `-tx n/a`.
 | --- | --- | --- |
 | L1 | every phase | `type.profile` of non-extension types is never applied (150 `SimpleQuantity` uses in R4 core + US Core). Slicing defined inside a type profile (`Extension.value[x]` in a slice) is never evaluated. |
 | D3 | `fixedpattern.go` | Skips every element whose `id` contains `:`, so fixed/pattern inside slices are never checked. |
-| D4 | `constraint.go` | The main loop skips slice ids (line 194). The 11 constraints declared on slices (`us-core-16..19`, `gic-1/2`, `cgr-1`, `ra-3`) never run. `evaluateTypeConstraints` (line 492) iterates slices, so type constraints run once per slice: `ext-1` ×13. |
+| D4 | `constraint.go` | The main loop skips slice ids (lines 194-196). The 11 constraints declared on slices (`us-core-16..19`, `gic-1/2`, `cgr-1`, `ra-3`) never run. `evaluateTypeConstraints` (line 492) iterates slices, so type constraints run once per slice: `ext-1` ×13. |
 | D6 | `extension.go` `findNestedExtensionDef` | Its own path resolver (the literal `"Extension.extension.url"`, and a guess at the sibling `value[x]` by snapshot proximity `j > i-3 && j < i+3`). It never checks sub-extension slice cardinality. |
-| D7 | `walker` (lines 90, 201, 378), `reference` (line 645) | Exact `GetByURL` on canonicals from content. Versioned `meta.profile` and `targetProfile` resolve to nothing. |
+| D7 | `walker` (lines 90, 201, 378), `reference` (line 645), `validator.go` (lines 878, 894) | Exact `GetByURL` on canonicals from content: versioned `meta.profile` of nested resources and versioned `targetProfile` resolve to nothing. The top-level `meta.profile` goes through `ResolveByCanonical` → `GetByCanonical` (registry.go:410-415), which falls back **silently** to any loaded version, against plan A's D-2. |
 | D9 | `constraint.go` | Never follows `contentReference`, so constraints on recursive structures (`que-1` on nested items) never run. |
 | D0 | `snapshot.go` `findMatchingElement` | Differential matched by `path` + `sliceName`: a slice child overwrites the base element. |
 
@@ -104,7 +104,7 @@ type Layer struct {
 
 ## Implementation
 
-Each PR adds probes with hand-curated expectations and runs Plan A's corpus diff tool. Every new
+Each PR adds probes with hand-curated expectations and runs plan A's invariant tool (PR A0), which must exist first. Every new
 error must have an HL7 equivalent, and the PR description lists the *accept → reject* delta.
 
 **PR B1: `Layers`**. `cardinality` and `slicing` consume it (L1 for min/max and slicing).
@@ -130,10 +130,12 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 - Acceptance: the whole extension package suite passes, plus CX; `pkg/extension` has no element-name
   literals.
 
-**PR B5: `ResolveCanonical` in `walker` and `reference`** (D7)
+**PR B5: `ResolveCanonical` in `walker`, `reference` and the top-level `meta.profile`** (D7)
 
 - Acceptance: a nested resource with a versioned `meta.profile` is validated against that profile;
-  a versioned `targetProfile` is enforced.
+  a versioned `targetProfile` is enforced; a resource whose top-level `meta.profile` pins a version
+  that is not loaded (only another version is) reports it, as D-2 decides, instead of being
+  validated silently against the other version.
 
 **PR B6: audit the remaining phases** (`structural`, `primitive`, `binding`, `ucumvalidator`,
 `registry` getters)
@@ -148,7 +150,8 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 - **Normalization rule:** a differential segment `bSuffix` is rewritten to `b[x]:bSuffix` only when
   **all three** hold:
   1. the base has an element `b[x]`;
-  2. `Suffix`, uncapitalized, is one of that element's `type[].code`;
+  2. `Suffix` equals one of that element's `type[].code` with its first letter capitalized
+     (FHIR choice naming: `valueQuantity` ↔ `Quantity`, `valueString` ↔ `string`);
   3. the base has **no** real element with id `…bSuffix`.
 
   The third condition protects real siblings, such as `SubstanceAmount.amountType` next to

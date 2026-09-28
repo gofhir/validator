@@ -55,7 +55,7 @@ The code **never** names an element path, a resource or datatype name, a slice n
 a cardinality, a fixed/pattern value or a constraint key. The names in this plan are **evidence**,
 not code.
 
-**Baseline debt.** `pkg/slicing` has 31 string literals naming elements or types. Two examples:
+**Baseline debt.** `pkg/slicing` has about 30 string literals naming elements or types (the count depends on the method). Two examples:
 `path == "resource"` at line 488, and "an object with a `url` key is an `Extension`" at line 798.
 The matcher is **not** extracted as-is: removing these literals is part of PR A2.
 
@@ -81,7 +81,7 @@ validator is `validator_cli.jar`, latest release on 2026-09-27, and every run us
 | P5 DEQM `cehrt`, correct | 0 | 2 errors | D2, D1b |
 | **bp-ok** R4 core `bp`, valid blood pressure | 0 | **12 errors**, e.g. `Observation.coding:SBPCode` min 1 | D1, D5 |
 | bp-no-systolic | `component` min 2; `SystolicBP` required | 10 errors | D1, D5 |
-| **IPS minimal** official `Bundle-bundle-minimal` (IPS 2.0.1) | 0 | `entry:composition`, `entry:patient` min 1 found 0 | M2, M3 |
+| **IPS minimal** official `Bundle-bundle-minimal` (IPS 2.0.1) | 0 | `entry:composition`, `entry:patient` min 1 found 0; `translation` extension "not allowed in context" `…coding[0]._display` | M2, M3; the third is an extension-context defect on primitive elements, outside this plan |
 | IPS all-sections official example | "Element matches more than one slice" ×11, `entry:composition` required | 12 false `request`/`response` errors; no multi-match errors | D1, M2, M4 |
 | V1 DEQM, two `cqf-messages` (slice `…\|5.2.0`, max 1) | `extension:message` max 1 | accepted | M1 |
 | Q-nested R4 and R5: `Questionnaire.item.item` without `linkId`/`type` | `linkId` min 1, `type` min 1 (+ `que-1`) | only `bogusElement` | D6 |
@@ -94,11 +94,11 @@ validator is `validator_cli.jar`, latest release on 2026-09-27, and every run us
 | D1 | `slicing.go` `findSliceChildren` / `validateSliceChildren` | Collects all descendants of a slice and counts each one's last path segment on the slice member itself. `entry:x.request.method` becomes `entry.method`. |
 | D1b | `slicing.go` `countElement` | Looks up the literal key `value[x]`, so a required choice child is never counted. |
 | D2 | `cardinality.go` `getDirectChildren` | Dedups children by `path`, and the first one wins, so one slice's children govern every instance. |
-| D5 | `slicing.go` `extractContexts`, `getElementsAtPath` | Contexts are keyed by `path`, so nested slicings with a shared path collide (363 SDs have them), and elements are flattened across parents. Nested per-slice cardinality is evaluated on the wrong set and reported at an invented path. |
+| D5 | `slicing.go` `extractContexts`, `getElementsAtPath` | Contexts are keyed by `path`, so nested slicings with a shared path collide (283 SDs have them), and elements are flattened across parents. Nested per-slice cardinality is evaluated on the wrong set and reported at an invented path. |
 | D6 | `cardinality.go` | Never follows `contentReference`. `structural` follows it, but only in the `#id` form. |
 | M1 | `slicing.go`, `registry.GetByURL` | Versioned canonicals are not resolved. |
 | M2 | `slicing.go` `evaluateProfileDiscriminator` | Membership is decided by `meta.profile` overlap. Spec and HL7 decide it by **conformance** to the profile. There is also a hardcoded `path == "resource"`. |
-| M3 | `slicing.go` `getFixedValueForPath` and siblings | Discriminator values are found by path suffix over all descendants. Two sources are missing: values reached **through nested slices** (`bp`: `code.coding:SBPCode.code`), and **required bindings** (US Core `DocumentReference.category:uscore`). 129 slices in the corpus depend on one of them. |
+| M3 | `slicing.go` `getFixedValueForPath` and siblings | Discriminator values are found by path suffix over all descendants. Two sources are missing: values reached **through nested slices** (`bp`: `code.coding:SBPCode.code`), and **required bindings** (US Core `DocumentReference.category:uscore`). 121 slices in the corpus depend on one of them. |
 | M4 | `slicing.go` `matchElementToSlice` | First match always wins. HL7 reports "matches more than one slice" at least for `profile` discriminators (IPS). |
 | M5 | `slicing.go` `inferElementType` and others | Hardcoded type inference: any object with a `url` key is taken to be an `Extension`. |
 
@@ -115,16 +115,16 @@ The parser is `testdata/m12-slice-scoping/tools/sdparse.py`, and its output is n
 | Fact | Count | Consequence |
 | --- | --- | --- |
 | `sliceName` with `.` / snapshot element without `id` | 0 / 0 | the id tree is sound |
-| orphan ids, slices whose base has no `slicing`, choice slices with ≠ 1 type | 15 / 15 / 6, all in core (`familymemberhistory-genetic`, `catalog`) | the tree builder must tolerate malformed SDs |
+| orphan ids (slices whose base element is missing), choice slices with ≠ 1 type | 15 / 6, all in core (`familymemberhistory-genetic`, `catalog`) | the tree builder must tolerate malformed SDs |
 | `contentReference` in absolute form `url#id` | 720 (R4B, R5) | parse both forms |
 | `contentReference` whose target is inside a slice | 1 (`#Provenance.agent:Author`) | redirect to exactly the id given |
-| required child of an optional parent inside a slice | 2,457 | D1 is endemic |
-| required child of a **prohibited** parent inside a slice | 181 (IPS 93, EU Lab 60, R5 core 24) | D1 makes those profiles unsatisfiable |
-| several slicings sharing one path in an SD | 363 | D5 is endemic |
-| discriminator value source | inline 1,878; via `type.profile` 1,678; profile unresolvable 153; none of those 129; function path 13 | M3 must add nested slices and required bindings |
+| D1 trigger: required element with an optional element between it and its outermost slice | 309 (CRMI 75, CH Core 61, mCODE 27, R5 extensions 24, US Core 16, R5 core 16, …) | D1 is widespread; direct children of a slice are counted correctly and are not triggers |
+| the same, with a **prohibited** element in between | 173 (IPS 93, EU Lab 60, R5 core 20) | D1 makes those profiles unsatisfiable |
+| SDs where several slicings share one path | 283 (363 shared paths) | D5 is widespread |
+| discriminator value source, per (slice, discriminator) | inline 1,604; via `type.profile` 1,678; profile unresolvable 153; none of those 129 (121 distinct slices); function path 13 | M3 must add nested slices and required bindings |
 | discriminator paths using `resolve()` / `ofType()` | 36 (IPS 17, Genomics 12) / 1 | cross-resource resolution is needed |
 | discriminator types | `pattern` 138, `profile` 37, `exists` 1, rest `value`/`type` | all five are supported |
-| `ordered: true` / `openAtEnd` | 8 (CH Core `Address.line`) / 1 | not implemented today; see A4 |
+| `ordered: true` / `openAtEnd` | 8 (core `lipidprofile` in R4, R4B and R5; R5 `subscription-notification-bundle`; 4 CH Core address profiles on `Address.line.extension`) / 1 (R5 `subscription-notification-bundle`) | not implemented today; see A4 |
 | versioned canonical where only another version is loaded | 278 (e.g. SDC → `…\|5.3.0-ballot-tc1`) | a fallback policy is needed |
 | unresolvable `profile` / `targetProfile` | 268 (mostly cross-version `http://hl7.org/fhir/5.0/…`) | a policy is needed |
 | slice with inline children **and** `type.profile` | 130 (CH Core 40, CRMI 36, SDC 17, EU Lab 17) | Plan B layers them; Plan A uses inline children first |
@@ -133,9 +133,11 @@ The parser is `testdata/m12-slice-scoping/tools/sdparse.py`, and its output is n
 ## Decisions (PR A0)
 
 Established with `testdata/m12-slice-scoping/decisions/`: invented profiles in
-`packages/acme.decisions-0.2.0.tgz`, whose snapshots HL7 generates from differentials, so gofhir's
-own generator (D0) is not involved. The HL7 validator is 6.10.4, and the raw output is in
-`decisions/hl7-6.10.4-output.txt`. Spec quotes are from R4 `profiling.html`, `elementdefinition`
+`packages/acme.decisions-0.3.0.tgz`. That package ships snapshots the HL7 validator generated from
+the differentials (`tools/build_acme_decisions.sh`), so both validators consume identical
+definitions and neither snapshot generator (gofhir's has D0) is involved. The HL7 validator is
+6.10.4, and the raw outputs are in `decisions/hl7-6.10.4-output.txt` and
+`decisions/gofhir-v1.21.1-output.txt`. Spec quotes are from R4 `profiling.html`, `elementdefinition`
 and the `resource-slicing-rules` code system.
 
 | # | Question | HL7 6.10.4 | Spec | Decision |
@@ -147,10 +149,13 @@ and the `resource-slicing-rules` code system.
 | D-5 | `openAtEnd` with unmatched content before a slice (with `ordered: true`) | **silent** | "Additional content is allowed, but only at the end of the list" | Enforce it. **Declared divergence.** |
 | D-6 | Discriminator value given by a required binding | local ValueSet: evaluated correctly. External filter (SNOMED `is-a`) under `-tx n/a`: treated as *not matched*, so the required slice is reported missing. | a required binding is a valid value domain | Same as HL7: evaluate membership through `MemberChecker`, and treat unknown membership as not matched. Also emit one informational issue saying membership could not be determined without terminology, so the resulting error is explainable. |
 
-gofhir v1.21.0 on the same instances misses D-1 (all types), D-2, D-3 (absent), D-4 and D-5. It
-also reports a false positive for D-6 local-in (`Patient.coding:inset`, an invented path). This is
-a baseline observation: those differential-only profiles go through gofhir's own snapshot
-generator.
+gofhir v1.21.1 on the same instances and definitions assigns multi-matched elements to the first
+slice for every discriminator type, as HL7 does, but never reports the multi-match itself (D-1).
+It misses D-2, D-3 (absent), D-4 and D-5, and reports a false positive for D-6 local-in
+(`Patient.coding:inset`, an invented path). An earlier revision of this section used a
+differential-only package; gofhir's D0 generator then lost the slice-A children of five profiles,
+which hid the D-1 counting result on `Q1_value_one`. HL7's results are identical with either
+package.
 
 ## Design
 
@@ -188,8 +193,10 @@ func (r *Registry) ResolveCanonical(canonical string) (*StructureDefinition, Res
 
 `Resolution` reports whether the resolution was exact, fell back to another version, or failed. When the
 pinned version is absent (278 cases) or the profile is unknown (268 cases), resolution fails
-without fallback (D-2, D-3). Plan A uses this only inside the matcher; Plan B
-moves the other call sites (`walker`, `reference`) to it.
+without fallback (D-2, D-3). Plan A uses this only inside the matcher. Plan B moves the other
+call sites to it: `walker`, `reference`, and the top-level `meta.profile` resolution in
+`pkg/validator` (`ResolveByCanonical` → `GetByCanonical`, registry.go:410-415), which today falls
+back **silently** to any loaded version of the URL, against D-2.
 
 ### Slice matcher (new package `pkg/slicematch`)
 
@@ -276,26 +283,54 @@ declared divergence.
 
 ## Implementation
 
-**PR A0: decisions and tooling** (no production code)
+**PR A0: decisions and the invariant tool** (no production code)
 
-- HL7 probes, each with an acme fixture:
-  1. multi-match per discriminator type (`value`, `pattern`, `type`, `profile`, `exists`);
-  2. a pinned canonical version that is absent while another is loaded;
-  3. an unresolvable slice profile;
-  4. `ordered` slicing out of order;
-  5. `openAtEnd` with an unmatched element before a slice;
-  6. a binding-based discriminator with `-tx n/a`.
-- The decisions are recorded in this plan.
-- Re-run every probe in this plan against the baseline release. The evidence tables were produced
-  with v1.21.0; v1.21.1 (#89) changed extension URL checks.
-- An **HL7 location normalizer** (`value.ofType(X)` → `valueX`, strip `/*…*/`, etc.) and a
-  **corpus diff tool** that checks the Release A invariant automatically.
+- **Decisions: done** (see "Decisions"). HL7 probes with acme fixtures for multi-match per
+  discriminator type, a pinned version that is absent, an unresolvable slice profile, `ordered`,
+  `openAtEnd`, and a binding-based discriminator under `-tx n/a`.
+- **Re-run** every probe in this plan against the baseline release. The evidence tables were
+  produced with v1.21.0; v1.21.1 (#89) changed extension URL checks.
+- **The invariant tool: not done.** A first implementation (`hl7diff`, now on the local branch
+  `feat/hl7diff-redesign`) was withdrawn after the PR #91 review. It blocked this plan's own correct
+  fixes (A3: 4 findings, A4: 18, plan B's B2: `ext-1` ×13 → ×1) and passed injected false errors,
+  duplications and swaps. The redesign must meet all of the following, and its acceptance suite is
+  built from exactly those cases:
+  1. **Counting.** Per file, a one-to-one assignment between gofhir and HL7 errors (maximum
+     bipartite matching over equivalence). A change is judged by counts against HL7, never by
+     "some HL7 equivalent exists".
+  2. **Location, per family.** Equality for constraints; equality or immediate parent/child for
+     cardinality and slicing; never an arbitrary ancestor. A root-level HL7 error (`subject`
+     required at `MeasureReport`) must not match everything below it. In the review's prototype,
+     this rule removed exactly the 36 known false matches out of 109.
+  3. **Identity without loss.** The raw expression, slice names included, plus the message ID and
+     the constraint key. Normalization (`ofType(T)`, `_element` primitive keys, type codes with
+     digits such as `base64Binary`) is applied only when comparing with HL7.
+  4. **Families from the catalogs, not by hand.** A test classifies every `pkg/issue` diagnostic
+     ID. Every HL7 pattern matches at least one ID in the jar's message catalog. Minimum and
+     maximum are separate families. gofhir findings with no message ID (today all of
+     `pkg/fixedpattern`) get one first.
+  5. **Divergences as expected issues.** Each is scoped by file, location, message ID and
+     predicate, and applies to new and removed errors alike.
+  6. **Fail closed.** HL7 must cover every compared file, and a run that compares nothing fails.
+  7. **Same inputs on both sides.** Packages come from the standard FHIR package cache
+     (directories; `loader.DefaultPackagePath`, `WithPackage`) with each IG's full dependency
+     closure, as HL7's `-ig` does. Terminology must match HL7's `-tx n/a`, which still evaluates
+     local ValueSets, while `WithNoTerminology()` skips element bindings. The 5 s wall-clock
+     constraint budget makes gofhir's output depend on machine load, so it must not be in effect.
+  8. **Caches keyed by everything that changes output** (IG contents, resolved dependency
+     versions including the floating `hl7.terminology`/extensions, the jar, the arguments). They
+     are written atomically, per checkout or with a lock, and every path resolves against one base.
+  9. **A reproducible corpus.** Official examples are fetched by package `id#version`, not from an
+     untracked directory, with duplicates removed. `testdata/hl7-examples` has
+     `ImplementationGuide-fhir.json` twice, and that file alone takes over 15 minutes. The corpus
+     covers the IGs this plan names: DEQM, IPS, US Core, mCODE, AU Core, CH Core, CL Core, and
+     core `lipidprofile` for `ordered`.
 
 **PR A1: `jsoncompare`, `ResolveCanonical`, `ElementTree`** (no behavior change)
 
 - First, `go list` shows no cycle.
 - Tests: the tree over all 25 corpus packages without panics, with `Issues()` exactly matching the
-  parser's R1/R2 findings; both `contentReference` forms; reslices.
+  parser's R1 findings; both `contentReference` forms; reslices.
 
 **PR A2: `slicematch`** (behavior change only through `slicing`, which switches to it here)
 
@@ -325,9 +360,9 @@ declared divergence.
   - `bp-no-systolic` reports exactly HL7's two errors;
   - the IPS all-sections `request`/`response` errors are gone.
 
-**Every PR from A2 on** runs the corpus diff tool over `testdata/hl7-examples`, the official
-examples of DEQM, IPS, US Core, mCODE, AU Core, CH Core and CL Core, and the probes. A new or
-disappeared pair without an HL7 justification blocks the merge. Benchmarks are measured before and
+**Every PR from A2 on** runs the invariant tool (PR A0) over the corpus it defines and the
+probes. A new or disappeared error without an HL7 justification blocks the merge, so A2 cannot
+start before the tool meets its acceptance suite. Benchmarks are measured before and
 after, and regressions are reported with numbers.
 
 **PR A5: release A and note to the server**
