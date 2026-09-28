@@ -2,53 +2,73 @@ package main
 
 import (
 	"regexp"
-	"slices"
 	"sort"
 	"strings"
 )
 
 var (
-	sliceNamePart = regexp.MustCompile(`:([^.\[\]]+)`)
-	hl7SliceID    = regexp.MustCompile(`Slice '([^']+)'`)
+	// HL7's cardinality messages name the element: "Bundle.entry.request.method: minimum required
+	// = 1", "Quantity.comparator: max allowed = 0", "Slice 'Bundle.entry:composition': ...".
+	hl7NamedElement = regexp.MustCompile(`^(?:Slice '([^']+)'|([A-Za-z][\w.:\[\]/-]*): (?:minimum required|max allowed))`)
+	indexSuffix     = regexp.MustCompile(`\[\d+\]`)
 )
 
-// sliceNames lists the slice names in an element id or a gofhir location
-// ("Bundle.entry:composition" -> [composition]).
-func sliceNames(loc string) []string {
-	matches := sliceNamePart.FindAllStringSubmatch(loc, -1)
-	out := make([]string, 0, len(matches))
-	for _, m := range matches {
-		out = append(out, m[1])
+// lastSegment is the final element name of a location or element id, without indices.
+func lastSegment(loc string) string {
+	loc = indexSuffix.ReplaceAllString(loc, "")
+	if i := strings.LastIndex(loc, "."); i >= 0 {
+		return loc[i+1:]
 	}
-	return out
+	return loc
 }
 
-// slicesAgree keeps two errors about different slices apart. Locations cannot, once slice names
-// are dropped for comparison: gofhir names the slice in its location, HL7 in its message
-// ("Slice 'Bundle.entry:composition': a matching slice is required"). When both name one, the
-// names must be the same.
-func slicesAgree(goSlices []string, h HL7Issue) bool {
-	m := hl7SliceID.FindStringSubmatch(h.Text)
-	if m == nil || len(goSlices) == 0 {
+// namesAgree keeps a gofhir error from standing for an HL7 error about another element. When HL7
+// names the element in its message, gofhir's location must end in the same element (a choice
+// "value[x]" matches any "valueX"). HL7 names elements by profile path, as in
+// "Bundle.entry:s.request.method" or "Quantity.comparator", so only the last element is compared.
+func namesAgree(goLoc string, h HL7Issue) bool {
+	m := hl7NamedElement.FindStringSubmatch(h.Text)
+	if m == nil {
 		return true
 	}
-	return slices.Equal(goSlices, sliceNames(m[1]))
+	id := m[1]
+	if id == "" {
+		id = m[2]
+	}
+	want, got := lastSegment(id), lastSegment(goLoc)
+	if base, ok := strings.CutSuffix(want, "[x]"); ok {
+		return strings.HasPrefix(got, base)
+	}
+	return want == got
 }
 
-// Identity of a gofhir error: what must stay the same for two runs to report "the same" error.
-// It keeps the raw location, slice names included, and the constraint key.
+// goIdentity identifies a gofhir error: its severity, diagnostic ID, raw location (slice names
+// included) and, for a constraint, the constraint key. Text that names where a constraint was
+// defined is not part of it: resolving definitions differently must not make the same failure
+// look new. An error with no diagnostic ID has only its text to tell it apart.
 func goIdentity(g GoIssue) string {
-	detail := ""
-	if g.MessageID == "" || strings.HasPrefix(g.Diagnostics, "Constraint failed: ") {
-		detail = g.Diagnostics
+	detail := g.Diagnostics
+	if g.MessageID != "" {
+		detail = ""
+		if m := goConstraintKey.FindStringSubmatch(g.Diagnostics); m != nil {
+			detail = m[1]
+		}
 	}
 	return strings.Join([]string{g.Severity, g.MessageID, g.Location(), detail}, "\x00")
 }
 
-// Identity of an HL7 error.
+// hl7Identity identifies an HL7 error.
 func hl7Identity(h HL7Issue) string {
 	return strings.Join([]string{h.Key, h.Location, h.Text}, "\x00")
 }
+
+// goClassKey and hl7ClassKey are what unexplained errors are compared by between two runs: the
+// identity without list indices. Which of several equivalent errors ends up unpaired (the one at
+// entry[0] or at entry[1]) is an arbitrary choice of the matching, so it must not decide a verdict;
+// the number unpaired per class does.
+func goClassKey(g GoIssue) string { return indexSuffix.ReplaceAllString(goIdentity(g), "") }
+
+func hl7ClassKey(h HL7Issue) string { return indexSuffix.ReplaceAllString(hl7Identity(h), "") }
 
 // Unexplained is what a one-to-one assignment leaves over in one file.
 type Unexplained struct {
@@ -76,9 +96,8 @@ func Assign(fam *Families, gos []GoIssue, hls []HL7Issue) Unexplained {
 			continue
 		}
 		loc := ComparableGoLocation(g.Location())
-		goSlices := sliceNames(g.Location())
 		for j, h := range hls {
-			if hlClass[j] == family && Located(rule, loc, h.Location) && slicesAgree(goSlices, h) {
+			if hlClass[j] == family && Located(rule, loc, h.Location) && namesAgree(g.Location(), h) {
 				edges[i] = append(edges[i], j)
 			}
 		}

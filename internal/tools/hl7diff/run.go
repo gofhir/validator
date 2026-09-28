@@ -134,7 +134,10 @@ func cmdFetch(ctx context.Context, args []string, out io.Writer) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	cache := DefaultCache()
+	cache, err := DefaultCache()
+	if err != nil {
+		return false, err
+	}
 	for _, g := range groups {
 		version := g.Version
 		if version == "" {
@@ -166,8 +169,11 @@ func cmdFetch(ctx context.Context, args []string, out io.Writer) (bool, error) {
 // newRunEnv prepares a run: the jar's identity, the family table and divergences, the locked work
 // directory, and both corpusrun builds.
 func newRunEnv(ctx context.Context, root string, m Manifest, jar, work, baseline string, out io.Writer) (*runEnv, func(), error) {
-	env := &runEnv{root: root, cache: DefaultCache(), out: out, baseline: baseline}
-	var err error
+	cache, err := DefaultCache()
+	if err != nil {
+		return nil, nil, err
+	}
+	env := &runEnv{root: root, cache: cache, out: out, baseline: baseline}
 	if env.jar, err = filepath.Abs(jar); err != nil {
 		return nil, nil, err
 	}
@@ -330,10 +336,11 @@ func runGofhir(ctx context.Context, env *runEnv, p *groupPlan, bin, out string) 
 func runHL7(ctx context.Context, env *runEnv, p *groupPlan) (string, error) {
 	key := hashStrings(env.jarID, p.inputs, strings.Join(p.g.IGs, ","))
 	out := filepath.Join(p.dir, "hl7-"+key+".json")
-	if _, err := ReadHL7(out); err == nil {
+	if prev, err := ReadHL7(out); err == nil && coversAll(prev, p.files) {
 		return out, nil
 	}
-	// Missing, or unreadable (written outside this tool): regenerate rather than fail forever.
+	// Missing, unreadable, or without an outcome for every file: regenerate rather than fail
+	// forever on a bad cached copy.
 	_ = os.Remove(out)
 	// validator_cli picks the output format from the extension, so the temporary name ends in .json.
 	tmp := filepath.Join(p.dir, "hl7-"+key+".partial.json")
@@ -395,12 +402,13 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 	if err != nil {
 		return false, err
 	}
+	env.portable(&base, &head, &hl7)
 	rep, err := Check(env.fam, base, head, hl7, env.divs)
 	if err != nil {
 		return false, err
 	}
 	if len(p.skipped) > 0 {
-		if _, err := fmt.Fprintf(report, "<!-- %s: packages left out of gofhir's closure (embedded, or an older version of a kept package): %s -->\n", g.Name, joinIDs(p.skipped)); err != nil {
+		if _, err := fmt.Fprintf(report, "%s: packages left out of gofhir's closure (embedded, or an older version of a kept package): %s\n\n", g.Name, joinIDs(p.skipped)); err != nil {
 			return false, err
 		}
 	}
@@ -408,6 +416,58 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 		return false, err
 	}
 	return rep.OK(), nil
+}
+
+func coversAll(r HL7Run, files []string) bool {
+	for _, f := range files {
+		if !r.Covered[filepath.Clean(f)] {
+			return false
+		}
+	}
+	return true
+}
+
+// cachePrefix names files inside the FHIR package cache portably, so a divergence can target an
+// example on any machine: fhir-cache:/hl7.fhir.us.core#6.1.0/package/example/X.json.
+const cachePrefix = "fhir-cache:/"
+
+func (env *runEnv) portableName(f string) string {
+	if rel, err := filepath.Rel(env.cache.Dir, f); err == nil && filepath.IsAbs(f) && !strings.HasPrefix(rel, "..") {
+		return cachePrefix + filepath.ToSlash(rel)
+	}
+	return f
+}
+
+// portable renames every file of the three runs with portableName.
+func (env *runEnv) portable(base, head *GoRun, hl7 *HL7Run) {
+	goRename := func(r *GoRun) {
+		errs, cov := map[string][]GoIssue{}, map[string]bool{}
+		for f, gs := range r.Errors {
+			n := env.portableName(f)
+			for i := range gs {
+				gs[i].File = n
+			}
+			errs[n] = gs
+		}
+		for f := range r.Covered {
+			cov[env.portableName(f)] = true
+		}
+		r.Errors, r.Covered = errs, cov
+	}
+	goRename(base)
+	goRename(head)
+	errs, cov := map[string][]HL7Issue{}, map[string]bool{}
+	for f, hs := range hl7.Errors {
+		n := env.portableName(f)
+		for i := range hs {
+			hs[i].File = n
+		}
+		errs[n] = hs
+	}
+	for f := range hl7.Covered {
+		cov[env.portableName(f)] = true
+	}
+	hl7.Errors, hl7.Covered = errs, cov
 }
 
 // groupFiles resolves a group's instances. Globs are matched inside the repository only
@@ -464,6 +524,13 @@ func groupFiles(env *runEnv, g Group) ([]string, error) {
 func inputsKeyWith(env *runEnv, version string, closure []PackageID, pkgFiles, files []string, withCache bool) (string, error) {
 	h := sha256.New()
 	_, _ = fmt.Fprintln(h, "version", version, "closure", joinIDs(closure))
+	for _, p := range closure {
+		fp, err := env.cache.Fingerprint(p)
+		if err != nil {
+			return "", err
+		}
+		_, _ = fmt.Fprintln(h, "closure-package", p, fp)
+	}
 	for _, p := range pkgFiles {
 		sum, err := fileHash(env.root, p)
 		if err != nil {

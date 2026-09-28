@@ -18,8 +18,8 @@ type Divergence struct {
 	Decision  string `json:"decision"`  // e.g. "D-5"
 	Reason    string `json:"reason"`    // one sentence, quoting the spec where possible
 	Side      string `json:"side"`      // "gofhir" | "hl7"
-	File      string `json:"file"`      // glob over repository-relative paths
-	Location  string `json:"location"`  // exact location (gofhir raw, or HL7 normalized); "" = any
+	File      string `json:"file"`      // glob over repository-relative paths, or fhir-cache:/<id>#<version>/...
+	Location  string `json:"location"`  // exact location (gofhir raw, or HL7 normalized); required
 	MessageID string `json:"messageId"` // gofhir diagnostic ID or HL7 message ID; required
 }
 
@@ -37,8 +37,11 @@ func ReadDivergences(path string) ([]Divergence, error) {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 	for i, d := range ds {
-		if (d.Side != "gofhir" && d.Side != "hl7") || d.MessageID == "" || d.File == "" || d.Decision == "" {
-			return nil, fmt.Errorf("%s: divergence %d needs decision, side (gofhir|hl7), file and messageId", path, i)
+		if (d.Side != "gofhir" && d.Side != "hl7") || d.MessageID == "" || d.File == "" || d.Decision == "" || d.Location == "" {
+			return nil, fmt.Errorf("%s: divergence %d needs decision, side (gofhir|hl7), file, location and messageId", path, i)
+		}
+		if d.MessageID == "FAILURE" {
+			return nil, fmt.Errorf("%s: divergence %d: a failure to validate cannot be declared", path, i)
 		}
 		if _, err := filepath.Match(d.File, ""); err != nil {
 			return nil, fmt.Errorf("%s: divergence %d: bad file glob: %w", path, i, err)
@@ -49,12 +52,12 @@ func ReadDivergences(path string) ([]Divergence, error) {
 
 func (d Divergence) coversGo(g GoIssue) bool {
 	ok, _ := filepath.Match(d.File, g.File)
-	return d.Side == "gofhir" && ok && d.MessageID == g.MessageID && (d.Location == "" || d.Location == g.Location())
+	return d.Side == "gofhir" && ok && d.MessageID == g.MessageID && d.Location == g.Location()
 }
 
 func (d Divergence) coversHL7(h HL7Issue) bool {
 	ok, _ := filepath.Match(d.File, h.File)
-	return d.Side == "hl7" && ok && d.MessageID == h.Key && (d.Location == "" || d.Location == h.Location)
+	return d.Side == "hl7" && ok && h.HasID && d.MessageID == h.Key && d.Location == h.Location
 }
 
 // Finding is one way the head run is worse than the baseline.
@@ -153,7 +156,7 @@ next:
 				continue next
 			}
 		}
-		k := goIdentity(g)
+		k := goClassKey(g)
 		t.n[k]++
 		t.sample[k] = g
 	}
@@ -170,7 +173,7 @@ next:
 				continue next
 			}
 		}
-		k := hl7Identity(h)
+		k := hl7ClassKey(h)
 		t.n[k]++
 		t.sample[k] = h
 	}

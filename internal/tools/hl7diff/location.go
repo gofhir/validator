@@ -36,10 +36,14 @@ func ComparableGoLocation(loc string) string {
 	return goPrimitiveEl.ReplaceAllString(loc, ".$1")
 }
 
-// segmentsEqual compares one path segment, where an index present on one side only matches any
-// index: gofhir reports slice cardinality at the list (Bundle.entry), HL7 at an item or the owner.
-func segmentsEqual(a, b string) bool {
-	return a == b || trailingIndex.ReplaceAllString(a, "") == b || a == trailingIndex.ReplaceAllString(b, "")
+// segmentsEqual compares one path segment. Under the "parent" rule an index present on one side
+// only matches any index: gofhir reports slice cardinality at the list (Bundle.entry), HL7 at an
+// item or the owner. Under "equal" (constraints, primitive formats) segments must be identical.
+func segmentsEqual(rule, a, b string) bool {
+	if a == b {
+		return true
+	}
+	return rule == ruleParent && (trailingIndex.ReplaceAllString(a, "") == b || a == trailingIndex.ReplaceAllString(b, ""))
 }
 
 // Located reports whether a gofhir location g and an HL7 location h satisfy a family's rule.
@@ -53,7 +57,7 @@ func Located(rule, g, h string) bool {
 			return false
 		}
 		for i := range a {
-			if !segmentsEqual(a[i], b[i]) {
+			if !segmentsEqual(rule, a[i], b[i]) {
 				return false
 			}
 		}
@@ -62,7 +66,7 @@ func Located(rule, g, h string) bool {
 	if same(gs, hs) {
 		return true
 	}
-	if rule != "parent" {
+	if rule != ruleParent {
 		return false
 	}
 	return (len(gs) == len(hs)+1 && same(gs[:len(hs)], hs)) || (len(hs) == len(gs)+1 && same(hs[:len(gs)], gs))

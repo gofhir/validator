@@ -333,28 +333,41 @@ declared divergence.
 
 **Status of the tool** (requirements numbered as above):
 
-- **Met: 1–6 and 8.**
-  - One-to-one matching per file, with a location rule per family. Two errors about different
-    slices never pair.
-  - Identity without loss.
-  - A family table that classifies all 68 gofhir IDs and whose HL7 half is checked against the
-    6.10.4 catalog.
-  - Divergences scoped by side, file, location and message ID.
-  - Fail closed on coverage, on selection and on the manifest.
-  - Caches keyed by content and written atomically, in a per-checkout work directory with a lock.
-- **Acceptance.** The 16 review cases pass, and four injected defects in the model are each caught.
-- **Requirement 9.** The corpus is fetched by package id into the standard cache, with each IG's
-  dependency closure: DEQM, IPS, US Core, mCODE, AU Core, CH Core, CL Core, plus the R4 core
-  examples as a heavy group.
-- **Requirement 7, partly.**
-  - Done: terminology is local on both sides, so element bindings are compared, and the full
+- **Met: 1, 2, 3, 6 and 8.**
+  - **Matching:** one-to-one per file. Pairs form only within a family and under its location
+    rule. When HL7 names the element or slice in its message, the gofhir location must end in
+    the same one.
+  - **What is compared:** unpaired errors are compared between runs by class (identity without
+    list indices), so an arbitrary choice between equivalent partners never decides a verdict.
+  - **Identity:** raw location with slice names, message ID, and constraint key; the definition
+    site is not part of it.
+  - **Fail closed:** on coverage, on group selection and on the manifest.
+  - **Caches:** keyed by the jar, the arguments, the closure (with a fingerprint of every
+    package's files), the local packages and the instances. They are written atomically, and a
+    cached HL7 output that does not cover every file is regenerated. The work directory is per
+    checkout and locked.
+- **Partly met: 4, 5, 7 and 9.**
+  - **4:** the family table classifies all 68 gofhir IDs, and its HL7 half is checked against the
+    6.10.4 catalog. **Pending:** `pkg/fixedpattern` still emits its errors without a diagnostic
+    ID, so they cannot be paired with HL7's; giving them IDs is a library change.
+  - **5:** divergences are scoped by side, file (a repository path, or a portable
+    `fhir-cache:/<id>#<version>/…` name for cached examples), exact location and message ID. A
+    divergence without a location, or covering a validation failure, is rejected. There is no
+    free-form predicate.
+  - **7:** terminology is local on both sides, so element bindings are compared, and each IG's
     dependency closure is loaded. Packages gofhir embeds, and older versions of a package the
     closure also names at a newer version, are left out and listed in the report.
-  - **Pending:** the 5 s constraint budget
+    **Pending:** the 5 s constraint budget
     ([constraint.go:303](../../pkg/constraint/constraint.go)) is not configurable, so gofhir's
-    output can still depend on machine load. It needs a small library option.
+    output can still depend on machine load. That needs a library option.
+  - **9:** the corpus is fetched by package id into the standard cache, created if missing: DEQM,
+    IPS, US Core, mCODE, AU Core, CH Core and CL Core, plus the R4 core examples as a heavy group,
+    which has not been run yet.
+- **Acceptance:** the 16 review cases pass, plus the two matching-choice cases from the second
+  review. Each of five injected defects in the model is caught: any ancestor accepted, a
+  non-maximum matching, unsorted input, element names ignored, and exact identities compared.
 - **Sanity check against v1.21.1**, whose library matches this branch: 13 groups, 689 files,
-  0 findings, and stable across runs.
+  0 findings.
 
 **PR A1: `jsoncompare`, `ResolveCanonical`, `ElementTree`** (no behavior change)
 

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"strings"
 	"testing"
 )
 
@@ -115,24 +117,11 @@ func TestDivergenceScopes(t *testing.T) {
 	}
 }
 
-func TestSlicesAgree(t *testing.T) {
-	h := HL7Issue{Text: "Slice 'Bundle.entry:composition': a matching slice is required, but not found"}
-	if !slicesAgree(sliceNames("Bundle.entry:composition"), h) {
-		t.Error("the same slice must agree")
-	}
-	if slicesAgree(sliceNames("Bundle.entry:allergyintolerance"), h) {
-		t.Error("a different slice must not stand for the one HL7 names")
-	}
-	if !slicesAgree(sliceNames("Bundle.entry[0].request.method"), h) || !slicesAgree(nil, HL7Issue{Text: "minimum required = 1"}) {
-		t.Error("when either side names no slice, slices do not decide")
-	}
-}
-
 func TestVersionLess(t *testing.T) {
 	for _, c := range []struct {
 		a, b string
 		want bool
-	}{{"0.11.0", "0.22.0", true}, {"5.9.0", "5.10.0", true}, {"5.10.0", "5.9.0", false}, {"5.4.0", "5.5.0", true}, {"1.0", "1.0.1", true}} {
+	}{{"0.11.0", "0.22.0", true}, {"5.9.0", "5.10.0", true}, {"5.10.0", "5.9.0", false}, {"5.4.0", "5.5.0", true}, {"1.0", "1.0.1", true}, {"5.3.0-ballot", "5.3.0", true}, {"5.3.0", "5.3.0-ballot", false}, {"5.3.0-ballot", "5.4.0", true}} {
 		if got := versionLess(c.a, c.b); got != c.want {
 			t.Errorf("versionLess(%s, %s) = %v, want %v", c.a, c.b, got, c.want)
 		}
@@ -149,5 +138,131 @@ func TestWildcardVersions(t *testing.T) {
 	}
 	if !versionMatches("1.0.0", "1.0.0") || versionMatches("1.0.0", "1.0.1") || isWildcard("1.0.0") || !isWildcard("3.x") {
 		t.Error("exact versions must match only themselves")
+	}
+}
+
+func TestNamesAgree(t *testing.T) {
+	h := func(text string) HL7Issue { return HL7Issue{Text: text} }
+	cases := []struct {
+		loc, text string
+		want      bool
+	}{
+		{"Bundle.entry[0].request.method", "Bundle.entry:gaps-composition-deqm.request.method: minimum required = 1, but only found 0", true},
+		{"Bundle.entry:composition", "Bundle.identifier: minimum required = 1, but only found 0", false}, // review finding 1
+		{"Bundle.entry:composition", "Slice 'Bundle.entry:composition': a matching slice is required, but not found", true},
+		{"MedicationRequest.dispenseRequest.quantity.comparator", "Quantity.comparator: max allowed = 0, but found 1", true},
+		{"MeasureReport.extension[0].valueIdentifier", "MeasureReport.extension:cehrt.value[x]: minimum required = 1", true},
+		{"Patient.name", "The Extension 'x' definition is for a simple extension, so it must contain a value", true}, // unnamed
+	}
+	for _, c := range cases {
+		if got := namesAgree(c.loc, h(c.text)); got != c.want {
+			t.Errorf("namesAgree(%q, %q) = %v, want %v", c.loc, c.text, got, c.want)
+		}
+	}
+}
+
+func TestConstraintIdentityIgnoresDefinitionSite(t *testing.T) {
+	a := GoIssue{Severity: "error", MessageID: "CONSTRAINT_FAILED", Expression: []string{"X"}, Diagnostics: "Constraint failed: ext-1: 'Must have...' (defined in http://hl7.org/fhir/StructureDefinition/Extension)"}
+	b := a
+	b.Diagnostics = "Constraint failed: ext-1: 'Must have...'"
+	if goIdentity(a) != goIdentity(b) {
+		t.Error("where a constraint was defined must not change its identity")
+	}
+}
+
+func TestEqualRuleNeedsExactIndices(t *testing.T) {
+	if Located("equal", "Questionnaire.item", "Questionnaire.item[3]") {
+		t.Error("under the equal rule a missing index must not match any index")
+	}
+	if !Located("parent", "Bundle.entry", "Bundle.entry[3]") {
+		t.Error("under the parent rule a missing index matches any index")
+	}
+}
+
+// Review of the redesign, finding 1: which error a matching leaves unpaired must not decide the
+// verdict.
+func TestMatchingChoiceDoesNotDecideVerdict(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const f = "b.json"
+	cov := map[string]bool{f: true}
+	g := func(id, loc string) GoIssue {
+		return GoIssue{File: f, Severity: "error", MessageID: id, Expression: []string{loc}}
+	}
+	hMin := func(text string) HL7Issue {
+		return HL7Issue{File: f, Severity: "error", Key: "Validation_VAL_Profile_Minimum", HasID: true, Location: "Bundle", Text: text}
+	}
+	hl7 := HL7Run{Covered: cov, Errors: map[string][]HL7Issue{f: {
+		hMin("Bundle.identifier: minimum required = 1, but only found 0"),
+		{File: f, Severity: "error", Key: "Validation_VAL_Profile_Minimum_SLICE", HasID: true, Location: "Bundle",
+			Text: "Slice 'Bundle.entry:composition': a matching slice is required, but not found"},
+	}}}
+	run := func(gs ...GoIssue) GoRun { return GoRun{Covered: cov, Errors: map[string][]GoIssue{f: gs}} }
+
+	// The slice error must pair with the slice, not with Bundle.identifier, so losing it is seen.
+	base := run(g("SLICING_CARDINALITY_MIN", "Bundle.entry:composition"))
+	lost := run(g("CARDINALITY_MIN", "Bundle.identifier"))
+	if rep, _ := Check(fam, base, lost, hl7, nil); rep.OK() {
+		t.Error("dropping the true slice error must fail even when an unrelated true error appears")
+	}
+
+	// A location made precise pairs with a different, equivalent HL7 error: not a loss.
+	h2 := HL7Run{Covered: cov, Errors: map[string][]HL7Issue{f: {
+		{File: f, Severity: "error", Key: "Validation_VAL_Profile_NotSlice", HasID: true, Location: "Bundle.entry[0]", Text: "not a slice"},
+		{File: f, Severity: "error", Key: "Validation_VAL_Profile_NotSlice", HasID: true, Location: "Bundle.entry[1]", Text: "not a slice"},
+	}}}
+	vague := run(g("SLICING_NO_MATCH", "Bundle.entry"))
+	precise := run(g("SLICING_NO_MATCH", "Bundle.entry[1]"))
+	if rep, _ := Check(fam, vague, precise, h2, nil); !rep.OK() {
+		t.Errorf("making a location precise must pass: %+v", rep.Findings)
+	}
+}
+
+func TestReadDivergencesRejectsUnscoped(t *testing.T) {
+	dir := t.TempDir()
+	for name, body := range map[string]string{
+		"no location": `[{"decision":"D-5","reason":"r","side":"gofhir","file":"x.json","messageId":"SLICING_NO_MATCH"}]`,
+		"failure":     `[{"decision":"D-5","reason":"r","side":"gofhir","file":"x.json","location":"X","messageId":"FAILURE"}]`,
+		"bad side":    `[{"decision":"D-5","reason":"r","side":"both","file":"x.json","location":"X","messageId":"A"}]`,
+		"bad glob":    `[{"decision":"D-5","reason":"r","side":"hl7","file":"[","location":"X","messageId":"A"}]`,
+	} {
+		p := dir + "/" + strings.ReplaceAll(name, " ", "_") + ".json"
+		if err := os.WriteFile(p, []byte(body), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := ReadDivergences(p); err == nil {
+			t.Errorf("%s: an unscoped divergence must be rejected", name)
+		}
+	}
+}
+
+func TestPortableName(t *testing.T) {
+	env := &runEnv{cache: Cache{Dir: "/home/u/.fhir/packages"}}
+	if got := env.portableName("/home/u/.fhir/packages/hl7.fhir.us.core#6.1.0/package/example/X.json"); got != "fhir-cache:/hl7.fhir.us.core#6.1.0/package/example/X.json" {
+		t.Errorf("cache file: %q", got)
+	}
+	if got := env.portableName("testdata/m12-slice-scoping/probes/p.json"); got != "testdata/m12-slice-scoping/probes/p.json" {
+		t.Errorf("repository file: %q", got)
+	}
+}
+
+// The matching must be maximum: a first error that could pair with either of two HL7 errors must
+// give way when a second error can pair only with the one it took.
+func TestAssignIsMaximum(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := func(loc string) GoIssue {
+		return GoIssue{File: "f", Severity: "error", MessageID: "SLICING_NO_MATCH", Expression: []string{loc}}
+	}
+	h := func(loc string) HL7Issue {
+		return HL7Issue{File: "f", Severity: "error", Key: "Validation_VAL_Profile_NotSlice", HasID: true, Location: loc, Text: "not a slice"}
+	}
+	u := Assign(fam, []GoIssue{g("Bundle.entry"), g("Bundle.entry[0]")}, []HL7Issue{h("Bundle.entry[0]"), h("Bundle.entry[1]")})
+	if len(u.GoFHIR) != 0 || len(u.HL7) != 0 {
+		t.Errorf("want every error paired, got %d gofhir and %d HL7 unpaired", len(u.GoFHIR), len(u.HL7))
 	}
 }

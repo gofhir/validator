@@ -35,7 +35,13 @@ type Families struct {
 	byGo map[string]*Family
 }
 
-const constraintRule = "equal"
+// Location rules a family can use.
+const (
+	ruleEqual  = "equal"
+	ruleParent = "parent"
+)
+
+const constraintRule = ruleEqual
 
 // LoadFamilies parses the embedded family table.
 func LoadFamilies() (*Families, error) { return ParseFamilies(familiesJSON) }
@@ -49,7 +55,7 @@ func ParseFamilies(data []byte) (*Families, error) {
 	f.byGo = map[string]*Family{}
 	for i := range f.List {
 		fam := &f.List[i]
-		if fam.Rule != "equal" && fam.Rule != "parent" {
+		if fam.Rule != ruleEqual && fam.Rule != ruleParent {
 			return nil, fmt.Errorf("family %s: rule %q is not equal or parent", fam.Name, fam.Rule)
 		}
 		for _, id := range fam.GoFHIR {

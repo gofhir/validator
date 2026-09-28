@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,8 +41,40 @@ func ParsePackageID(s string) (PackageID, error) {
 // directories named "<id>#<version>", as the HL7 validator installs them.
 type Cache struct{ Dir string }
 
-// DefaultCache is the cache pkg/loader reads.
-func DefaultCache() Cache { return Cache{loader.DefaultPackagePath()} }
+// DefaultCache is the cache pkg/loader reads, created if it does not exist yet.
+func DefaultCache() (Cache, error) {
+	dir := loader.DefaultPackagePath()
+	if dir == "" {
+		return Cache{}, errors.New("cannot locate the FHIR package cache: no home directory")
+	}
+	if err := os.MkdirAll(dir, 0o750); err != nil {
+		return Cache{}, err
+	}
+	return Cache{dir}, nil
+}
+
+// Fingerprint identifies a package directory's contents without reading them: every file's path,
+// size and modification time. A package replaced under the same id#version changes it.
+func (c Cache) Fingerprint(p PackageID) (string, error) {
+	h := sha256.New()
+	root := c.Path(p)
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		rel, _ := filepath.Rel(root, path)
+		_, _ = fmt.Fprintln(h, rel, info.Size(), info.ModTime().UnixNano())
+		return nil
+	})
+	return hex.EncodeToString(h.Sum(nil)), err
+}
 
 // Path is the package's directory in the cache.
 func (c Cache) Path(p PackageID) string { return filepath.Join(c.Dir, p.String()) }
@@ -162,9 +196,26 @@ func (c Cache) Closure(roots []PackageID, embedded map[string]bool) (closure, sk
 	return closure, skipped, nil
 }
 
-// versionLess orders dotted versions numerically where parts are numbers ("5.10.0" > "5.9.0"),
-// and lexically otherwise ("2024.1.20240120", "5.3.0-ballot").
+// versionLess orders versions as semver does: dotted parts numerically where they are numbers
+// ("5.10.0" > "5.9.0"), and a pre-release before its release ("5.3.0-ballot" < "5.3.0").
 func versionLess(a, b string) bool {
+	amain, apre, _ := strings.Cut(a, "-")
+	bmain, bpre, _ := strings.Cut(b, "-")
+	if amain != bmain {
+		return dottedLess(amain, bmain)
+	}
+	switch {
+	case apre == bpre:
+		return false
+	case apre == "":
+		return false // a release is newer than any of its pre-releases
+	case bpre == "":
+		return true
+	}
+	return dottedLess(apre, bpre)
+}
+
+func dottedLess(a, b string) bool {
 	as, bs := strings.Split(a, "."), strings.Split(b, ".")
 	for i := 0; i < len(as) && i < len(bs); i++ {
 		if as[i] == bs[i] {
