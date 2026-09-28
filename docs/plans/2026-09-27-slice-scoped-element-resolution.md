@@ -289,11 +289,7 @@ declared divergence.
 - Re-run every probe in this plan against the baseline release. The evidence tables were produced
   with v1.21.0; v1.21.1 (#89) changed extension URL checks.
 - An **HL7 location normalizer** (`value.ofType(X)` → `valueX`, strip `/*…*/`, etc.) and a
-  **corpus diff tool** that checks the Release A invariant automatically. Delivered as
-  `internal/tools/hl7diff` (with `internal/tools/corpusrun`), driven by
-  `testdata/m12-slice-scoping/corpus.json`; see `testdata/m12-slice-scoping/README.md`.
-  Pairs are keyed by the gofhir `MessageID`, which the CLI does not print, so `corpusrun` uses the
-  library API. That API is identical in the baseline, so the same source builds against both.
+  **corpus diff tool** that checks the Release A invariant automatically.
 
 **PR A1: `jsoncompare`, `ResolveCanonical`, `ElementTree`** (no behavior change)
 

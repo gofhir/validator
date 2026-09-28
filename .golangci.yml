@@ -130,16 +130,6 @@ linters:
       - linters:
           - godot
         path: cmd/
-      # Development tools that orchestrate validators: they write reports with fmt.Fprint* and,
-      # by design, launch git/go/java with arguments and read paths taken from a manifest.
-      - linters:
-          - errcheck
-        path: internal/tools/
-        text: Error return value of `fmt.Fprint(f|ln)?` is not checked
-      - linters:
-          - gosec
-        path: internal/tools/
-        text: "G204|G304|G703"
       - linters:
           - cyclop
         path: (.+)_test\.go
