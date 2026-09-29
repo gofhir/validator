@@ -58,6 +58,7 @@ Probes are in `testdata/m12-slice-scoping/probes/`. All runs use `-tx n/a`.
 | D7 | `walker` (lines 90, 201, 378), `reference` (line 645), `validator.go` (lines 878, 894) | Exact `GetByURL` on canonicals from content: versioned `meta.profile` of nested resources and versioned `targetProfile` resolve to nothing. The top-level `meta.profile` goes through `ResolveByCanonical` → `GetByCanonical` (registry.go:410-415), which falls back **silently** to any loaded version, against plan A's D-2. |
 | D9 | `constraint.go` | Never follows `contentReference`, so constraints on recursive structures (`que-1` on nested items) never run. |
 | D0 | `snapshot.go` `findMatchingElement` | Differential matched by `path` + `sliceName`: a slice child overwrites the base element. |
+| D10 | `constraint.go` `evaluateWithContext` | FHIRPath is evaluated without a `Model` (`fhirpath.WithModel`), so `gofhir/fhirpath` uses its heuristics. Choice types are guessed from 53 hardcoded suffixes. `as` keeps pre-R5 semantics in every version (`dom-3` depends on it). Type names are not checked against a model (`TypeRegistry`). An absent field also costs about 108 scans of the resource; that part is upstream ([note](2026-09-29-fhirpath-absent-field-cost.md)). |
 
 ## Design: definition layering
 
@@ -160,6 +161,29 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 - Acceptance: the probe from the first review; stripped-and-regenerated DEQM and US Core profiles
   match their published snapshots on `id`, `min` and `max` for every element the differential
   mentions.
+
+**PR B8: a FHIRPath `Model` from the registry** (D10)
+
+- Implement `fhirpath.Model`, and the optional `VersionedModel` and `TypeRegistry`, from the loaded
+  StructureDefinitions only:
+  - `ChoiceTypes` from `type[]` of `[x]` elements;
+  - `TypeOf` and `ReferenceTargets` from `type` / `targetProfile`;
+  - `ParentType` / `IsSubtype` from `baseDefinition`;
+  - `ResolvePath` from `contentReference` (plan A's tree);
+  - `FHIRVersion` from the registry's version.
+
+  There are no hardcoded element names. Pass it in `evaluateWithContext`.
+- It changes semantics (`as` in R5, type-name errors, choice resolution). So the invariant tool runs
+  on every group, and each new or removed error needs its HL7 justification.
+- Acceptance:
+  - an R5 instance where `as` receives several items reports it, as HL7 does;
+  - `Patient.gender.as(string1)` reports an error;
+  - no change on the R4 groups without an HL7 reason.
+- Measure the `r4-core-examples` time before and after. On its own the model does not remove the
+  absent-field cost, which needs the upstream fix, but `ChoiceTypes` narrows the guessing for real
+  choice elements.
+- Updating `gofhir/fhirpath` from v1.6.0 to v1.9.1 halves the absent-field cost. That is a separate
+  dependency change, and it gets the same invariant check.
 
 ## Releases
 
