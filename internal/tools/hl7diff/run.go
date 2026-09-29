@@ -35,6 +35,16 @@ type Group struct {
 	ExamplesOf   []string `json:"examplesOf"`   // package ids whose examples join the group
 	ExamplesDir  string   `json:"examplesDir"`  // where those packages keep them; default package/example
 	Heavy        bool     `json:"heavy"`        // only with -heavy, or when named with -group
+	// Exclude lists files neither validator runs on, each with the reason. It is for inputs the
+	// HL7 validator cannot process at all (a crash aborts its whole batch), never for findings
+	// that disagree: those belong in the declared divergences.
+	Exclude []Exclusion `json:"exclude"`
+}
+
+// Exclusion names one file of a group, by base name, and why it is left out.
+type Exclusion struct {
+	File   string `json:"file"`
+	Reason string `json:"reason"`
 }
 
 type runEnv struct {
@@ -229,6 +239,18 @@ func readManifest(path string) (Manifest, error) {
 		if len(g.Files) == 0 && len(g.ExamplesOf) == 0 {
 			return m, fmt.Errorf("%s: group %s has no files and no examplesOf", path, g.Name)
 		}
+		seen := map[string]bool{}
+		for _, e := range g.Exclude {
+			switch {
+			case e.File == "" || strings.TrimSpace(e.Reason) == "":
+				return m, fmt.Errorf("%s: group %s: an exclusion needs a file and a reason", path, g.Name)
+			case e.File != filepath.Base(e.File):
+				return m, fmt.Errorf("%s: group %s: exclusion %q must be a base name", path, g.Name, e.File)
+			case seen[e.File]:
+				return m, fmt.Errorf("%s: group %s: %s is excluded twice", path, g.Name, e.File)
+			}
+			seen[e.File] = true
+		}
 	}
 	return m, nil
 }
@@ -271,6 +293,7 @@ type groupPlan struct {
 	skipped      []PackageID
 	pkgFiles     []string
 	dir          string
+	excluded     []Exclusion
 	inputs       string // key of the HL7 validator's inputs: gofhir's, plus the packages left out of the closure and the cache listing
 	gofhirInputs string // key of gofhir's inputs: the closure, the local packages and the instances
 }
@@ -282,6 +305,9 @@ func planGroup(env *runEnv, g Group) (*groupPlan, error) {
 	}
 	var err error
 	if p.files, err = groupFiles(env, g); err != nil {
+		return nil, err
+	}
+	if p.files, p.excluded, err = applyExclusions(g.Name, p.files, g.Exclude); err != nil {
 		return nil, err
 	}
 	igs := make([]PackageID, 0, len(g.IGs))
@@ -402,6 +428,11 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 	rep, err := Check(env.fam, base, head, hl7, env.divs)
 	if err != nil {
 		return false, err
+	}
+	for _, e := range p.excluded {
+		if _, err := fmt.Fprintf(report, "%s: excluded %s: %s\n\n", g.Name, e.File, e.Reason); err != nil {
+			return false, err
+		}
 	}
 	if len(p.skipped) > 0 {
 		if _, err := fmt.Fprintf(report, "%s: packages left out of gofhir's closure (embedded, or an older version of a kept package): %s\n\n", g.Name, joinIDs(p.skipped)); err != nil {
@@ -531,6 +562,37 @@ func groupFiles(env *runEnv, g Group) ([]string, error) {
 		out = append(out, f)
 	}
 	return out, nil
+}
+
+// applyExclusions removes the excluded files from a group's files. Each exclusion must match
+// exactly one file by base name: one that matches none is stale (the corpus changed under it), and
+// one that matches several would leave out more than it names.
+func applyExclusions(group string, files []string, exclude []Exclusion) ([]string, []Exclusion, error) {
+	if len(exclude) == 0 {
+		return files, nil, nil
+	}
+	byName := map[string]int{}
+	for _, f := range files {
+		byName[filepath.Base(f)]++
+	}
+	drop := map[string]bool{}
+	for _, e := range exclude {
+		switch n := byName[e.File]; n {
+		case 1:
+			drop[e.File] = true
+		case 0:
+			return nil, nil, fmt.Errorf("group %s: excluded file %s is not in the group", group, e.File)
+		default:
+			return nil, nil, fmt.Errorf("group %s: excluded file %s matches %d files", group, e.File, n)
+		}
+	}
+	kept := make([]string, 0, len(files)-len(drop))
+	for _, f := range files {
+		if !drop[filepath.Base(f)] {
+			kept = append(kept, f)
+		}
+	}
+	return kept, exclude, nil
 }
 
 // inputsKeyWith hashes the inputs that decide a run's output, besides the programs. For gofhir

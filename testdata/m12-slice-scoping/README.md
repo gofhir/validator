@@ -36,6 +36,13 @@ worktree of the baseline, runs both and the HL7 validator on every group, and wr
 in a per-checkout work directory. Groups marked heavy (`r4-core-examples`, 5,307 files) run only
 with `-heavy` or when named with `-group`. A group that cannot run fails the run.
 
+A group's `exclude` list leaves files out of both validators, each with its reason. It is only for
+inputs the HL7 validator cannot process at all: HL7 validates a group in one batch, so a crash on
+one file loses the output of all of them. HL7 6.10.4 crashes on four official R4 examples under
+`-tx n/a` (a `NullPointerException` in `ValueSetValidator`), which `r4-core-examples` excludes.
+An exclusion must match exactly one file by base name, so a stale one fails the run. Disagreeing
+findings never go here; they are declared divergences.
+
 ## Re-running the probes
 
 ```bash

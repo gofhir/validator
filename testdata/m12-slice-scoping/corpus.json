@@ -81,7 +81,13 @@
       "name": "r4-core-examples",
       "heavy": true,
       "examplesOf": ["hl7.fhir.r4.examples#4.0.1"],
-      "examplesDir": "package"
+      "examplesDir": "package",
+      "exclude": [
+        {"file": "Bundle-valuesets.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): ValueSet/media-modality includes an unresolvable ValueSet, and the crash aborts the whole batch"},
+        {"file": "ValueSet-media-modality.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): compose.include.valueSet dicom-cid29 is unresolvable"},
+        {"file": "ValueSet-use-context.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): compose.include.valueSet entries are unresolvable"},
+        {"file": "Bundle-valueset-expansions.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915) when CodeSystem-snomedct.json (content not-present) is in the same batch"}
+      ]
     }
   ]
 }

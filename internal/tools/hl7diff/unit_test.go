@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -598,5 +600,60 @@ func TestPortableNamesMergeAcrossMachines(t *testing.T) {
 	}
 	if !base.Covered["fhir-cache:/p#1/package/example/X.json"] || !head.Covered["fhir-cache:/p#1/package/example/X.json"] {
 		t.Error("both runs must use the portable name")
+	}
+}
+
+func TestApplyExclusions(t *testing.T) {
+	files := []string{"/c/pkg/A.json", "/c/pkg/B.json", "probes/C.json", "/c/other/B2.json"}
+	kept, excluded, err := applyExclusions("g", files, []Exclusion{{File: "B.json", Reason: "crash"}, {File: "C.json", Reason: "crash"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"/c/pkg/A.json", "/c/other/B2.json"}; !slices.Equal(kept, want) {
+		t.Errorf("kept = %v, want %v", kept, want)
+	}
+	if len(excluded) != 2 {
+		t.Errorf("excluded = %v", excluded)
+	}
+	if kept, _, err := applyExclusions("g", files, nil); err != nil || !slices.Equal(kept, files) {
+		t.Errorf("no exclusions: %v, %v", kept, err)
+	}
+
+	// A stale exclusion, or one that would leave out more than it names, is an error.
+	if _, _, err := applyExclusions("g", files, []Exclusion{{File: "gone.json", Reason: "x"}}); err == nil {
+		t.Error("an exclusion that matches no file must fail")
+	}
+	twice := append(slices.Clone(files), "/c/elsewhere/A.json")
+	if _, _, err := applyExclusions("g", twice, []Exclusion{{File: "A.json", Reason: "x"}}); err == nil {
+		t.Error("an exclusion that matches several files must fail")
+	}
+}
+
+func TestReadManifestExclusions(t *testing.T) {
+	dir := t.TempDir()
+	for name, exclude := range map[string]string{
+		"no reason":  `[{"file":"a.json"}]`,
+		"blank":      `[{"file":"a.json","reason":"  "}]`,
+		"no file":    `[{"reason":"x"}]`,
+		"path":       `[{"file":"dir/a.json","reason":"x"}]`,
+		"twice":      `[{"file":"a.json","reason":"x"},{"file":"a.json","reason":"y"}]`,
+		"misspelled": `[{"file":"a.json","reson":"x"}]`,
+	} {
+		path := filepath.Join(dir, "m.json")
+		body := `{"groups":[{"name":"g","files":["*.json"],"exclude":` + exclude + `}]}`
+		if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := readManifest(path); err == nil {
+			t.Errorf("%s: accepted %s", name, exclude)
+		}
+	}
+	path := filepath.Join(dir, "ok.json")
+	if err := os.WriteFile(path, []byte(`{"groups":[{"name":"g","files":["*.json"],"exclude":[{"file":"a.json","reason":"crash"}]}]}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	m, err := readManifest(path)
+	if err != nil || len(m.Groups[0].Exclude) != 1 {
+		t.Errorf("valid exclusion: %v, %v", m, err)
 	}
 }
