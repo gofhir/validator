@@ -546,12 +546,31 @@ declared divergence.
   mix the `coding` slices of the systolic and diastolic components; the matcher alone cannot fix
   them.
 
-**PR A3: `cardinality` on the tree** (D1b, D2, D6)
+**PR A3: `cardinality` on the tree** (D2, D6; D1b was done in A2)
 
 - Acceptance:
   - B1 has 0 structural errors;
   - P1, P5 and P6 have no `value[x]` error;
   - Q-nested reports `linkId` and `type` min 1 in R4 and R5.
+- **Status (2026-09-30): done** on `feat/a3-cardinality-tree`, and every acceptance holds.
+  `hl7diff` against v1.21.1 gives 13 groups, 689 files, 0 findings. It removes 570 errors HL7 does
+  not report, 77 more than A2: DEQM 68 (examples 55, probes 13, among them the P1/P5 `value[x]`
+  errors), core and R5 probes 4, IPS 3, US Core 1, AU Core 1.
+  - `cardinality` walks the instance and the tree together. The children of an element come from
+    the element, the element it slices, its `contentReference` (D6, both forms), or its type's base
+    definition.
+  - An instance under a sliced element is checked against the unsliced definition, so one slice's
+    children no longer govern every instance (D2). The slices are the slicing phase's.
+  - Choice elements are counted under their typed names, and descended into by their type. A
+    primitive present only through `_name` counts.
+- **One error that the baseline found by accident, recovered properly.** P2 (DEQM `measureScoring`
+  without a value) lost `Extension.value[x]` min 1. D2 used to take it from another extension
+  slice. HL7 takes it from the extension's own definition. A slice whose snapshot unrolls no
+  children is now checked against the root of the one profile its type declares
+  (`slicing.memberDefinition`). This is the only place plan A follows a type profile. Plan B's
+  layering generalizes it.
+- Performance: the validation time of the 183 US Core examples, as logged, is unchanged
+  (1,361 ms in A2, 1,343 ms in A3).
 
 **PR A4: `slicing` on the tree** (D5, `ordered`, `openAtEnd`; D1 and D1b were done in A2)
 

@@ -182,7 +182,18 @@ const childProfile = `{"resourceType":"StructureDefinition","url":"https://examp
  {"id":"Patient.extension","path":"Patient.extension","min":0,"max":"*","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"},"type":[{"code":"Extension"}]},
  {"id":"Patient.extension:x","path":"Patient.extension","sliceName":"x","min":0,"max":"1","type":[{"code":"Extension"}]},
  {"id":"Patient.extension:x.url","path":"Patient.extension.url","min":1,"max":"1","fixedUri":"https://example.org/x","type":[{"code":"uri"}]},
- {"id":"Patient.extension:x.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","type":[{"code":"string"},{"code":"Quantity"}]}
+ {"id":"Patient.extension:x.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","type":[{"code":"string"},{"code":"Quantity"}]},
+ {"id":"Patient.extension:y","path":"Patient.extension","sliceName":"y","min":0,"max":"1","type":[{"code":"Extension","profile":["https://example.org/fhir/StructureDefinition/y"]}]}
+]}}`
+
+// extensionY is the definition of the extension:y slice, which the profile does not unroll: its
+// value[x] is required by the extension's own StructureDefinition.
+const extensionY = `{"resourceType":"StructureDefinition","url":"https://example.org/fhir/StructureDefinition/y","name":"Y",
+"type":"Extension","kind":"complex-type","derivation":"constraint","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension",
+"snapshot":{"element":[
+ {"id":"Extension","path":"Extension","min":0,"max":"*"},
+ {"id":"Extension.url","path":"Extension.url","min":1,"max":"1","fixedUri":"https://example.org/y","type":[{"code":"uri"}]},
+ {"id":"Extension.value[x]","path":"Extension.value[x]","min":1,"max":"1","type":[{"code":"code"}]}
 ]}}`
 
 // TestSliceChildCardinality checks the elements inside matched slice instances: a required
@@ -194,7 +205,7 @@ func TestSliceChildCardinality(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	p, err := l.LoadFromResources([][]byte{[]byte(childProfile)})
+	p, err := l.LoadFromResources([][]byte{[]byte(childProfile), []byte(extensionY)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -221,6 +232,8 @@ func TestSliceChildCardinality(t *testing.T) {
 		{"optional parent present, required child present", `{"resourceType":"Patient","contact":[{"gender":"female","period":{"start":"2019"}}]}`, nil},
 		{"choice present under a typed name (D1b)", `{"resourceType":"Patient","extension":[{"url":"https://example.org/x","valueQuantity":{"value":1}}]}`, nil},
 		{"choice missing", `{"resourceType":"Patient","extension":[{"url":"https://example.org/x"}]}`,
+			[]string{"SLICING_CARDINALITY_MIN @ Patient.extension[0].value[x]"}},
+		{"a slice without children is defined by its type's one profile", `{"resourceType":"Patient","extension":[{"url":"https://example.org/y"}]}`,
 			[]string{"SLICING_CARDINALITY_MIN @ Patient.extension[0].value[x]"}},
 		{"primitive present through its extensions", `{"resourceType":"Patient","name":[{"use":"usual","_given":[{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"masked"}]}]}]}`, nil},
 	} {

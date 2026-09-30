@@ -1,4 +1,9 @@
 // Package cardinality provides cardinality validation for FHIR resources.
+//
+// It walks the instance and the StructureDefinition's element tree together
+// ([registry.ElementTree]): the children of an element come from the element itself, from the
+// element it slices, from its contentReference, or from its type's definition. Slices are the
+// slicing phase's; an instance is checked here against the unsliced element's definition.
 package cardinality
 
 import (
@@ -50,14 +55,11 @@ func (v *Validator) Validate(resource []byte, sd *registry.StructureDefinition) 
 func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefinition) *issue.Result {
 	result := issue.GetPooledResult()
 
-	// Get the root type from SD
 	rootType := sd.Type
 	if rootType == "" || sd.Snapshot == nil {
 		return result
 	}
-
-	// Validate cardinality for the root element
-	v.validateElementCardinality(data, rootType, rootType, sd, result)
+	v.validateRoot(data, sd, rootType, result)
 
 	// Walk all nested resources (contained + Bundle entries) using the generic walker.
 	// WalkWithProfiles validates against each declared profile in meta.profile.
@@ -66,220 +68,174 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 		if ctx.FHIRPath == rootType {
 			return true
 		}
-
-		// Validate cardinality in the nested resource using its profile/SD
-		v.validateElementCardinality(ctx.Data, ctx.ResourceType, ctx.FHIRPath, ctx.SD, result)
+		if ctx.SD != nil && ctx.SD.Snapshot != nil {
+			v.validateRoot(ctx.Data, ctx.SD, ctx.FHIRPath, result)
+		}
 		return true
 	})
 
 	return result
 }
 
-// validateElementCardinality validates cardinality for an element and its children.
-func (v *Validator) validateElementCardinality(
+// validateRoot checks a resource (or a datatype value) against the root of sd's tree.
+func (v *Validator) validateRoot(data map[string]any, sd *registry.StructureDefinition, fhirPath string, result *issue.Result) {
+	root := sd.Tree().Root()
+	if root == nil {
+		return
+	}
+	v.validateNode(data, sd, root, "", fhirPath, result)
+}
+
+// validateNode checks the children of one instance of node: their counts against min and max, and
+// recursively the children of those present.
+func (v *Validator) validateNode(
 	data map[string]any,
-	sdPath string,
-	fhirPath string,
 	sd *registry.StructureDefinition,
+	node *registry.ElementNode,
+	typeCode string,
+	fhirPath string,
 	result *issue.Result,
 ) {
-	// Get all direct children ElementDefinitions for this path
-	children := v.getDirectChildren(sd, sdPath)
-
-	// Check required elements (min > 0)
+	childSD, children := v.childrenOf(sd, node, typeCode)
 	for _, child := range children {
-		childName := getElementName(child.Path)
-		if childName == "" {
-			continue
-		}
+		name := child.Name()
+		childPath := fhirPath + "." + name
+		values := childValues(child, data)
+		count := len(values)
 
-		// Handle choice types - extract base name without [x]
-		isChoiceType := strings.HasSuffix(child.Path, "[x]")
-		baseName := childName
-		if isChoiceType {
-			baseName = strings.TrimSuffix(childName, "[x]")
-		}
-
-		// Count occurrences in data
-		count := v.countOccurrences(data, baseName, isChoiceType, &child)
-
-		// Validate min cardinality
-		if child.Min > 0 && count < int(child.Min) {
-			childFHIRPath := fhirPath + "." + childName
+		if child.Def.Min > 0 && count < int(child.Def.Min) {
 			result.AddErrorWithID(
 				issue.DiagCardinalityMin,
-				map[string]any{"path": childFHIRPath, "min": child.Min, "count": count},
-				childFHIRPath,
+				map[string]any{"path": childPath, "min": child.Def.Min, "count": count},
+				childPath,
 			)
 		}
-
-		// Validate max cardinality
-		if child.Max != "" && child.Max != "*" {
-			maxInt, err := strconv.Atoi(child.Max)
-			if err == nil && count > maxInt {
-				childFHIRPath := fhirPath + "." + childName
+		if child.Def.Max != "" && child.Def.Max != "*" {
+			if maxInt, err := strconv.Atoi(child.Def.Max); err == nil && count > maxInt {
 				result.AddErrorWithID(
 					issue.DiagCardinalityMax,
-					map[string]any{"path": childFHIRPath, "max": maxInt, "count": count},
-					childFHIRPath,
+					map[string]any{"path": childPath, "max": maxInt, "count": count},
+					childPath,
 				)
 			}
 		}
 
-		// Recursively validate children for present elements
-		if count > 0 && !isChoiceType {
-			v.validatePresentElement(data, childName, sdPath, fhirPath, sd, result)
+		for i, cv := range values {
+			m, ok := cv.value.(map[string]any)
+			if !ok {
+				continue
+			}
+			// A resource inside an element (Bundle.entry.resource, contained) is validated
+			// against its own definition by the walker.
+			if _, isResource := m[resourceTypeKey]; isResource {
+				continue
+			}
+			p := fhirPath + "." + cv.key
+			if cv.array {
+				p = fmt.Sprintf("%s[%d]", p, i)
+			}
+			v.validateNode(m, childSD, child, cv.typeCode, p, result)
 		}
 	}
 }
 
-// validatePresentElement validates cardinality for elements that are present in data.
-func (v *Validator) validatePresentElement(
-	data map[string]any,
-	elementName string,
-	parentSDPath string,
-	parentFHIRPath string,
-	sd *registry.StructureDefinition,
-	result *issue.Result,
-) {
-	value, exists := data[elementName]
-	if !exists {
-		return
+// resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
+const resourceTypeKey = "resourceType"
+
+// childrenOf returns the child elements of an instance of node, and the StructureDefinition they
+// belong to: node's own children in the snapshot; else those of the element it slices; else those
+// its contentReference points to (D6); else those of its type's base definition. Following a
+// type's profile instead is plan B (definition layering). The instance's type (typeCode) picks
+// the type of a choice element.
+func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string) (*registry.StructureDefinition, []*registry.ElementNode) {
+	if len(node.Children) > 0 {
+		return sd, node.Children
+	}
+	for s := node.SliceOf; s != nil; s = s.SliceOf {
+		if len(s.Children) > 0 {
+			return sd, s.Children
+		}
+	}
+	if ref := node.Def.ContentReference; ref != nil {
+		target, _ := v.registry.ContentReference(sd, node)
+		if target == nil {
+			return nil, nil
+		}
+		tsd := sd
+		if url, _, ok := registry.SplitContentReference(*ref); ok && url != "" && url != sd.URL {
+			if s, _ := v.registry.ResolveCanonical(url); s != nil {
+				tsd = s
+			}
+		}
+		return v.childrenOf(tsd, target, typeCode)
 	}
 
-	elementSDPath := parentSDPath + "." + elementName
-	elementFHIRPath := parentFHIRPath + "." + elementName
-
-	// Get the ElementDefinition for this element
-	elemDef := v.findElementDefinition(sd, elementSDPath)
-	if elemDef == nil {
-		return
+	code := typeCode
+	if code == "" && len(node.Def.Type) == 1 {
+		code = node.Def.Type[0].Code
 	}
-
-	// Get the type to determine if we need to load a different SD
-	typeName := ""
-	if len(elemDef.Type) == 1 {
-		typeName = elemDef.Type[0].Code
+	if code == "" {
+		return nil, nil
 	}
+	typeSD := v.registry.GetByType(code)
+	if typeSD == nil || typeSD.Kind == kindPrimitive || typeSD == sd {
+		return nil, nil
+	}
+	root := typeSD.Tree().Root()
+	if root == nil {
+		return nil, nil
+	}
+	return typeSD, root.Children
+}
 
-	switch val := value.(type) {
-	case map[string]any:
-		// Single complex element
-		v.validateComplexElementCardinality(val, elementSDPath, elementFHIRPath, typeName, sd, result)
+// kindPrimitive is the StructureDefinition.kind of primitive types, whose children (id,
+// extension, value) are not properties of a JSON value.
+const kindPrimitive = "primitive-type"
 
-	case []any:
-		// Array of elements
-		for i, item := range val {
-			arrayFHIRPath := fmt.Sprintf("%s[%d]", elementFHIRPath, i)
-			if itemMap, ok := item.(map[string]any); ok {
-				v.validateComplexElementCardinality(itemMap, elementSDPath, arrayFHIRPath, typeName, sd, result)
+type childValue struct {
+	key      string
+	typeCode string
+	value    any
+	array    bool
+}
+
+// childValues returns the instance values of a child element: under its name, or for a choice
+// element ("value[x]") under each name its types give it, the element name followed by the type
+// code with its first letter capitalized (formats.html#choice). A primitive present only through
+// its "_name" sibling (extensions without a value) is present (json.html#primitive).
+func childValues(child *registry.ElementNode, data map[string]any) []childValue {
+	name := child.Name()
+	type key struct{ name, typeCode string }
+	keys := []key{{name, ""}}
+	if len(child.Def.Type) == 1 {
+		keys[0].typeCode = child.Def.Type[0].Code
+	}
+	if base, ok := strings.CutSuffix(name, "[x]"); ok {
+		keys = keys[:0]
+		for _, t := range child.Def.Type {
+			if t.Code != "" {
+				keys = append(keys, key{base + strings.ToUpper(t.Code[:1]) + t.Code[1:], t.Code})
 			}
 		}
 	}
-}
-
-// validateComplexElementCardinality validates cardinality for a complex element.
-func (v *Validator) validateComplexElementCardinality(
-	data map[string]any,
-	sdPath string,
-	fhirPath string,
-	typeName string,
-	currentSD *registry.StructureDefinition,
-	result *issue.Result,
-) {
-	// Check if the current SD has child elements for this path.
-	// If it does, use the current SD (profile) which may have constraints.
-	// If not, fall back to the type's SD.
-	hasChildrenInCurrentSD := v.hasDirectChildren(currentSD, sdPath)
-
-	var sd *registry.StructureDefinition
-	var effectiveSDPath string
-
-	if hasChildrenInCurrentSD {
-		// Use current SD (profile) - it has the constrained element definitions
-		sd = currentSD
-		effectiveSDPath = sdPath
-	} else if typeName != "" && typeName != "BackboneElement" {
-		// Fall back to the type's SD only if current SD doesn't have children
-		typeSD := v.registry.GetByType(typeName)
-		if typeSD != nil && typeSD.Kind != "primitive-type" {
-			sd = typeSD
-			effectiveSDPath = typeName
-		}
-	}
-
-	if sd == nil {
-		// Last resort: use current SD
-		sd = currentSD
-		effectiveSDPath = sdPath
-	}
-
-	// Validate cardinality of children
-	v.validateElementCardinality(data, effectiveSDPath, fhirPath, sd, result)
-}
-
-// hasDirectChildren checks if the SD has any direct children for the given path.
-func (v *Validator) hasDirectChildren(sd *registry.StructureDefinition, parentPath string) bool {
-	if sd == nil || sd.Snapshot == nil {
-		return false
-	}
-	prefix := parentPath + "."
-	for _, elem := range sd.Snapshot.Element {
-		if strings.HasPrefix(elem.Path, prefix) {
-			remainder := elem.Path[len(prefix):]
-			if !strings.Contains(remainder, ".") {
-				return true
+	var out []childValue
+	for _, k := range keys {
+		val, ok := data[k.name]
+		if !ok {
+			if _, ext := data["_"+k.name]; ext {
+				out = append(out, childValue{key: k.name, typeCode: k.typeCode})
 			}
+			continue
 		}
+		if arr, isArr := val.([]any); isArr {
+			for _, item := range arr {
+				out = append(out, childValue{key: k.name, typeCode: k.typeCode, value: item, array: true})
+			}
+			continue
+		}
+		out = append(out, childValue{key: k.name, typeCode: k.typeCode, value: val})
 	}
-	return false
-}
-
-// getDirectChildren returns ElementDefinitions that are direct children of the given path.
-// It deduplicates slice variations to avoid validating the same element multiple times.
-func (v *Validator) getDirectChildren(sd *registry.StructureDefinition, parentPath string) []registry.ElementDefinition {
-	children := make([]registry.ElementDefinition, 0, len(sd.Snapshot.Element)/4)
-	seenBasePaths := make(map[string]bool)
-
-	prefix := parentPath + "."
-	for _, elem := range sd.Snapshot.Element {
-		if !strings.HasPrefix(elem.Path, prefix) {
-			continue
-		}
-
-		// Check if it's a direct child (no more dots after the prefix)
-		remainder := elem.Path[len(prefix):]
-		if strings.Contains(remainder, ".") {
-			continue
-		}
-
-		// Get the base path (without slice name) for deduplication
-		// E.g., "Bundle.entry:Solicitud" -> "Bundle.entry"
-		basePath := elem.Path
-		if colonIdx := strings.Index(remainder, ":"); colonIdx != -1 {
-			// This is a slice element - extract the base element name
-			baseRemainder := remainder[:colonIdx]
-			basePath = prefix + baseRemainder
-		}
-
-		// Skip if we've already seen this base path
-		if seenBasePaths[basePath] {
-			continue
-		}
-		seenBasePaths[basePath] = true
-
-		// For sliced elements, prefer the base element definition (without slice name)
-		// Skip slice-specific definitions since they will be validated separately
-		if elem.SliceName != nil && *elem.SliceName != "" {
-			// This is a slice definition - check if we have the base element
-			// The base element should come first in the snapshot
-			continue
-		}
-
-		children = append(children, elem)
-	}
-
-	return children
+	return out
 }
 
 // Extracts the element name from a path (e.g., "Patient.name" -> "name").
@@ -289,56 +245,4 @@ func getElementName(path string) string {
 		return ""
 	}
 	return path[lastDot+1:]
-}
-
-// countOccurrences counts how many times an element appears in the data.
-func (v *Validator) countOccurrences(data map[string]any, baseName string, isChoiceType bool, elemDef *registry.ElementDefinition) int {
-	if !isChoiceType {
-		// Simple element - check for exact match
-		value, exists := data[baseName]
-		if !exists {
-			return 0
-		}
-
-		// If it's an array, return the length
-		if arr, ok := value.([]any); ok {
-			return len(arr)
-		}
-
-		// Single value counts as 1
-		return 1
-	}
-
-	// Choice type - look for any matching element
-	for key := range data {
-		if strings.HasPrefix(key, baseName) && len(key) > len(baseName) {
-			// Verify it's a valid choice type suffix
-			suffix := key[len(baseName):]
-			if suffix != "" && suffix[0] >= 'A' && suffix[0] <= 'Z' {
-				// Check if this suffix matches one of the allowed types
-				for _, t := range elemDef.Type {
-					if strings.EqualFold(suffix, t.Code) {
-						// Found a match - count occurrences
-						value := data[key]
-						if arr, ok := value.([]any); ok {
-							return len(arr)
-						}
-						return 1
-					}
-				}
-			}
-		}
-	}
-
-	return 0
-}
-
-// findElementDefinition finds an ElementDefinition by path.
-func (v *Validator) findElementDefinition(sd *registry.StructureDefinition, path string) *registry.ElementDefinition {
-	for i := range sd.Snapshot.Element {
-		if sd.Snapshot.Element[i].Path == path {
-			return &sd.Snapshot.Element[i]
-		}
-	}
-	return nil
 }
