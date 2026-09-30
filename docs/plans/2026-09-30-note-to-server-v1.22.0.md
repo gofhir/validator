@@ -6,7 +6,8 @@
 **Re:** the next release, v1.22.0 (plan A: slice-scoped element resolution)
 
 Your `go.mod` pins `validator v1.21.0` and `fhirpath v1.9.1`. The defects your report isolated are
-fixed, and we checked the fix with your own test rather than a copy of it.
+fixed, and we checked the fix with your own test, at 1fa66be9, with only `knownValidatorDefect`
+changed.
 
 ## 1. Delete `knownValidatorDefect`
 

@@ -701,7 +701,9 @@ after, and regressions are reported with numbers.
   CQF Common). Without them it now reports the unresolvable `crmi-softwaresystem` profile (D-3).
 - Across all 5,990 files, errors fall from 1,197 (v1.21.1) to 648: 608 removed and 59 added, each
   added one with an HL7 equivalent or declared. 36 of the added are nested-item minimums from
-  following `contentReference` (32 in `Questionnaire-qs1`).
+  following `contentReference`, all of them `Questionnaire` items (32 in `Questionnaire-qs1`, 4 in
+  the r4/r5 `q_nested` fixtures); the corpus has no nested `PlanDefinition` or `CodeSystem` item
+  that misses a required child.
 
 - The release notes list the removed false positives (DEQM, IPS, `bp`) and the new HL7-equivalent
   errors (V1, nested `Questionnaire`/`PlanDefinition`/`CodeSystem` items, multi-match).

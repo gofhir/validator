@@ -55,19 +55,25 @@ discriminator cannot be decided without terminology (D-6), and the slice is then
 - **`%resource` of a datatype value in a conformance check:** the resource it sits in
   (fhirpath.html#variables); HL7 roots it at the element.
 - **`resolve()` on a reference with no `targetProfile`:** does not match; HL7 throws.
+- **A missing child required by several layers:** reported once, at the most specific governing
+  definition; HL7 reports it once per layer.
 
 Differences observed, not decided:
 
-- **A missing child required by several layers:** gofhir reports it once; HL7 reports it once per
-  layer.
 - **IPS observations under `-tx n/a`:** HL7 reports multi-matches that come from not evaluating
   enumerated LOINC ValueSets. gofhir evaluates them and does not.
+
+### Known gap
+
+A CodeableConcept that carries only an extension (such as data-absent-reason) under a required
+binding is not reported; HL7 reports it. The binding phase reads the type from the value's shape.
 
 ## Performance
 
 `gofhir/fhirpath` is updated from v1.6.0 to v1.9.5. v1.9.2 makes an absent field cost two reads
-of the object instead of fifty-four; v1.9.5 also ends a single-value function given several values
-with an error, as the FHIRPath specification says. Validation time, as logged:
+of the object instead of fifty-four. As the FHIRPath specification says, a conversion given several
+values now ends with an error (v1.9.2), and so does any other function that takes one value
+(v1.9.5). Validation time, as logged:
 
 | Input | v1.21.1 (fhirpath v1.6.0) | v1.22.0 (fhirpath v1.9.5) |
 | --- | --- | --- |
