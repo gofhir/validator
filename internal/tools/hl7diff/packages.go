@@ -97,17 +97,19 @@ func (c Cache) manifest(p PackageID) (packageJSON, error) {
 	return m, err
 }
 
-// EmbeddedNames are the package names gofhir embeds for a FHIR version, read from the embedded
-// packages themselves. Loading another version of one of them on top would mix two versions of
-// the same definitions, so they are left out of a dependency closure.
-func EmbeddedNames(fhirVersion string) (map[string]bool, error) {
-	names := map[string]bool{}
+// EmbeddedNames are the packages gofhir embeds for a FHIR version, name to version, read from the
+// embedded packages themselves. A dependency closure leaves out an embedded package at that
+// version or an older one, and keeps a newer one: an IG that pins definitions of the newer version
+// needs them loaded, as the HL7 validator loads them, and the registry keeps each version apart by
+// url|version.
+func EmbeddedNames(fhirVersion string) (map[string]string, error) {
+	names := map[string]string{}
 	for _, tgz := range specs.GetPackages(fhirVersion) {
 		m, err := tgzManifest(tgz)
 		if err != nil {
 			return nil, fmt.Errorf("embedded package for %s: %w", fhirVersion, err)
 		}
-		names[m.Name] = true
+		names[m.Name] = m.Version
 	}
 	if len(names) == 0 {
 		return nil, fmt.Errorf("gofhir embeds no packages for FHIR %s", fhirVersion)
@@ -138,24 +140,26 @@ func tgzManifest(tgz []byte) (packageJSON, error) {
 }
 
 // Closure returns the given packages and everything they depend on, transitively, minus the
-// packages gofhir embeds (skipped, returned separately so the report can say so). Every package
-// in the closure must be in the cache.
-func (c Cache) Closure(roots []PackageID, embedded map[string]bool) (closure, skipped []PackageID, err error) {
+// packages gofhir embeds at the same or an older version (skipped, returned separately so the
+// report can say so). Every package in the closure must be in the cache.
+func (c Cache) Closure(roots []PackageID, embedded map[string]string) (closure, skipped []PackageID, err error) {
 	seen := map[string]bool{}
 	var p PackageID
 	queue := append([]PackageID(nil), roots...)
 	for len(queue) > 0 {
 		p = queue[0]
 		queue = queue[1:]
-		if embedded[p.Name] {
-			if !seen[p.String()] {
-				seen[p.String()] = true
-				skipped = append(skipped, p)
+		if ev, isEmbedded := embedded[p.Name]; isEmbedded {
+			installed, err := c.resolveInstalled(p)
+			if err != nil || !versionLess(ev, installed.Version) {
+				if !seen[p.String()] {
+					seen[p.String()] = true
+					skipped = append(skipped, p)
+				}
+				continue
 			}
-			continue
-		}
-		p, err = c.resolveInstalled(p)
-		if err != nil {
+			p = installed
+		} else if p, err = c.resolveInstalled(p); err != nil {
 			return nil, nil, err
 		}
 		if seen[p.String()] {
