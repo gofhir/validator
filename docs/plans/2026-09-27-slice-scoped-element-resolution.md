@@ -697,10 +697,11 @@ after, and regressions are reported with numbers.
   and v1.9.5 makes single-value functions end with an error when given several values. `hl7diff`
   is unchanged on the 13 groups and on `r4-core-examples`.
 - **The server's `knownValidatorDefect` is gone.** Its `TestCareGapsDocumentValidatesAgainstDEQM`
-  passes with no exemptions once the test loads DEQM's declared dependencies (CQF Measures, CRMI,
+  passes with no exemptions once the test loads three of DEQM's dependencies (CQF Measures, CRMI,
   CQF Common). Without them it now reports the unresolvable `crmi-softwaresystem` profile (D-3).
-- Across all 5,990 files, errors fall from 1,197 (v1.21.1) to 648. The release adds 17 errors, each
-  with an HL7 equivalent or declared.
+- Across all 5,990 files, errors fall from 1,197 (v1.21.1) to 648: 608 removed and 59 added, each
+  added one with an HL7 equivalent or declared. 36 of the added are nested-item minimums from
+  following `contentReference` (32 in `Questionnaire-qs1`).
 
 - The release notes list the removed false positives (DEQM, IPS, `bp`) and the new HL7-equivalent
   errors (V1, nested `Questionnaire`/`PlanDefinition`/`CodeSystem` items, multi-match).
