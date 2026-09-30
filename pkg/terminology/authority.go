@@ -142,6 +142,13 @@ type CodeResult struct {
 	// Message is an optional backend diagnostic, suitable for surfacing in the
 	// resulting issue.
 	Message string
+
+	// Assumed reports a Valid answer that was not checked: the ValueSet includes
+	// a code system this registry cannot expand (none is loaded and no provider
+	// answered), and the local path accepts any code of it. Callers that must not
+	// treat unchecked membership as membership (a slice discriminator) read it as
+	// unresolved.
+	Assumed bool
 }
 
 // Authority is the terminology port for hosts that own terminology resolution,
