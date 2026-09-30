@@ -52,6 +52,9 @@ type StructureDefinition struct {
 	// Concurrent validation across goroutines (e.g. in an embedded HTTP server)
 	// previously raced on the Snapshot field.
 	snapshotMu sync.Mutex
+
+	// tree caches the element hierarchy of Snapshot; see Tree.
+	tree treeCache
 }
 
 // ExtensionContext defines where an extension can be used.
@@ -222,6 +225,7 @@ type Registry struct {
 	mu              sync.RWMutex
 	byURL           map[string]*StructureDefinition
 	byURLVersion    map[string]*StructureDefinition // key: "url|version" for version-aware lookup
+	latestByURL     map[string]*StructureDefinition // url -> the highest version loaded (ResolveCanonical)
 	byType          map[string]*StructureDefinition // For base types like "Patient", "HumanName"
 	elementDefCache map[string]*ElementDefinition   // path -> ElementDefinition cache
 
@@ -240,6 +244,7 @@ func New() *Registry {
 	return &Registry{
 		byURL:              make(map[string]*StructureDefinition),
 		byURLVersion:       make(map[string]*StructureDefinition),
+		latestByURL:        make(map[string]*StructureDefinition),
 		byType:             make(map[string]*StructureDefinition),
 		elementDefCache:    make(map[string]*ElementDefinition),
 		domainResources:    make(map[string]bool),
@@ -303,6 +308,7 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) 
 			vKey := sd.URL + "|" + sd.Version
 			if _, exists := r.byURLVersion[vKey]; !exists {
 				r.byURLVersion[vKey] = &sd
+				r.indexLatestUnlocked(&sd)
 			}
 		}
 	}
@@ -459,6 +465,7 @@ func (r *Registry) ResolveByCanonical(ctx context.Context, url, version string) 
 			key := sd.URL + "|" + sd.Version
 			if _, exists := r.byURLVersion[key]; !exists {
 				r.byURLVersion[key] = &sd
+				r.indexLatestUnlocked(&sd)
 			}
 		}
 	}
