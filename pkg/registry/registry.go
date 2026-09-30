@@ -226,7 +226,8 @@ type Constraint struct {
 // Slicing represents slicing rules for an element.
 type Slicing struct {
 	Discriminator []Discriminator `json:"discriminator,omitempty"`
-	Rules         string          `json:"rules"` // open | closed | openAtEnd
+	Ordered       bool            `json:"ordered,omitempty"` // elements must occur in the order of the slices
+	Rules         string          `json:"rules"`             // open | closed | openAtEnd
 }
 
 // Discriminator defines how to match elements to slices.
@@ -514,6 +515,24 @@ func (r *Registry) GetByType(typeName string) *StructureDefinition {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.byType[typeName]
+}
+
+// ChoiceType returns the type a JSON property names for a choice element: for the element base
+// "value" and the property "valueQuantity", "Quantity" (formats.html#choice: the element name
+// followed by the type code with its first letter capitalized). Any type this registry defines
+// counts, allowed at that element or not: a value of a type the element does not allow is present
+// with the wrong type, not absent. It is "" when the property names no type.
+func (r *Registry) ChoiceType(base, key string) string {
+	suffix, ok := strings.CutPrefix(key, base)
+	if !ok || suffix == "" || suffix[0] < 'A' || suffix[0] > 'Z' {
+		return ""
+	}
+	for _, code := range []string{suffix, strings.ToLower(suffix[:1]) + suffix[1:]} {
+		if r.GetByType(code) != nil {
+			return code
+		}
+	}
+	return ""
 }
 
 // IsSubtype reports whether typeName is ancestor or derives from it, through the baseDefinition

@@ -105,10 +105,11 @@ func splitSegments(path string) []string {
 // cursor is a position on the definition side: an element of a StructureDefinition's tree and
 // the types it may have there.
 type cursor struct {
-	sd    *registry.StructureDefinition
-	node  *registry.ElementNode
-	key   string          // JSON property the instance was read from
-	types []registry.Type // nil means node's own types
+	sd       *registry.StructureDefinition
+	node     *registry.ElementNode
+	key      string          // JSON property the instance was read from
+	types    []registry.Type // nil means node's own types
+	typeCode string          // the instance's type when the key names it (a choice)
 }
 
 func (c cursor) allowed() []registry.Type {
@@ -160,7 +161,11 @@ type state struct {
 func (w walker) walk(start cursor, values []any, steps []step) ([]end, error) {
 	var states []state
 	for _, v := range values {
-		states = append(states, state{cur: start, value: v, typeCode: singleTypeCode(start.allowed(), v)})
+		tc := start.typeCode
+		if tc == "" {
+			tc = singleTypeCode(start.allowed(), v)
+		}
+		states = append(states, state{cur: start, value: v, typeCode: tc})
 	}
 	for _, s := range steps {
 		next, err := w.advance(states, s)

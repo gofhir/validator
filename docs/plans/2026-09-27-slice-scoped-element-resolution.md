@@ -626,8 +626,9 @@ concurrency, and 56 mutants. Every fix is re-checked with `hl7diff`, and the res
   a type slice are checked by no phase today, and were not before A2: `bodyweight` with
   `valueQuantity` lacking `unit`, `system` and `code` gives no error, while HL7 reports all three.
   The cause: `getElementsAtPath` looks up the literal key `value[x]`, and `matchElement` passes the
-  element name, not the JSON key. Report locations per instance: a context keyed by path loses the intermediate
-  segments today (`Patient.coding:inset` for `Patient.maritalStatus.coding:inset`).
+  element name, not the JSON key.
+- Report locations per instance. A context keyed by path loses the intermediate segments today
+  (`Patient.coding:inset` for `Patient.maritalStatus.coding:inset`).
 - Acceptance:
   - B2 reports one `request.method` error and `bdl-3`;
   - `bp-ok` has 0 errors, with no `SBPCode`/`DBPCode` errors (moved from A2);
@@ -635,6 +636,29 @@ concurrency, and 56 mutants. Every fix is re-checked with `hl7diff`, and the res
     from A2); `registry.Slicing` gains `ordered`;
   - `bp-no-systolic` reports exactly HL7's two errors;
   - the IPS all-sections `request`/`response` errors are gone.
+
+- **Status (2026-09-30): done** on `feat/a4-slicing-tree`, and every acceptance holds. `hl7diff`
+  against v1.21.1 gives 13 groups, 689 files, 0 findings, and 6 declared divergences (D-5 added).
+  It removes 599 errors HL7 does not report, 29 more than A3.
+  - **B2** reports `request.method` once, plus `bdl-3`. HL7 reports it three times, once per layer.
+    A slice child is checked by the slicing phase only where the slice constrains it more than the
+    unsliced element does, which the cardinality phase already checks.
+  - **`bp-ok`** has 0 errors. **`bp-no-systolic`** reports exactly HL7's two errors. The IPS
+    all-sections `request`/`response` errors are gone.
+  - **Q4** reports `SLICING_ORDER` at `identifier[1]`, as HL7 does (`Validation_VAL_Profile_SliceOrder`).
+    **Q5** reports `SLICING_OPEN_AT_END`, a declared divergence (D-5), since HL7 is silent.
+  - **Choice type slicing:** `bodyweight` with a bare `valueQuantity` reports `unit`, `system` and
+    `code`, exactly as HL7 does.
+- **The slicing phase walks the instance and the tree together.** At each sliced element it takes
+  the values in that parent instance, resolves each with the matcher using its JSON key, checks
+  `closed`, `ordered`, `openAtEnd` and each slice's and reslice's cardinality, and continues under
+  the governing slice. Contexts keyed by path are gone from validation. The exported `Context` and
+  `SliceInfo` types remain.
+- **A choice value of a type the element does not allow** is present with the wrong type, not
+  absent. Every property that names a type the registry defines counts
+  (`Registry.ChoiceType`), in both the cardinality and the slicing phase. Without it, P4
+  (`valueString` where the slice allows `Identifier`) reported a false `value[x]` min 1.
+- Performance is unchanged from A3, on the IPS Bundles and on the 183 US Core examples.
 
 **Every PR from A2 on** runs the invariant tool (PR A0) over the corpus it defines and the
 probes. A new or disappeared error without an HL7 justification blocks the merge, so A2 cannot

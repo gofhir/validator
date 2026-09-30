@@ -9,6 +9,7 @@ package cardinality
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -100,7 +101,7 @@ func (v *Validator) validateNode(
 	for _, child := range children {
 		name := child.Name()
 		childPath := fhirPath + "." + name
-		values := childValues(child, data)
+		values := v.childValues(child, data)
 		count := len(values)
 
 		if child.Def.Min > 0 && count < int(child.Def.Min) {
@@ -209,7 +210,11 @@ type childValue struct {
 // element ("value[x]") under each name its types give it, the element name followed by the type
 // code with its first letter capitalized (formats.html#choice). A primitive present only through
 // its "_name" sibling (extensions without a value) is present (json.html#primitive).
-func childValues(child *registry.ElementNode, data map[string]any) []childValue {
+//
+// A value of a type the element does not allow is present too, with the wrong type (reported by
+// the structural phase), not absent: every property that names a type this registry defines
+// counts (Registry.ChoiceType).
+func (v *Validator) childValues(child *registry.ElementNode, data map[string]any) []childValue {
 	name := child.Name()
 	type key struct{ name, typeCode string }
 	keys := []key{{name, ""}}
@@ -218,10 +223,8 @@ func childValues(child *registry.ElementNode, data map[string]any) []childValue 
 	}
 	if base, ok := strings.CutSuffix(name, "[x]"); ok {
 		keys = keys[:0]
-		for _, t := range child.Def.Type {
-			if t.Code != "" {
-				keys = append(keys, key{base + strings.ToUpper(t.Code[:1]) + t.Code[1:], t.Code})
-			}
+		for _, k := range v.choiceKeys(child, base, data) {
+			keys = append(keys, key{k[0], k[1]})
 		}
 	}
 	var out []childValue
@@ -249,6 +252,30 @@ func childValues(child *registry.ElementNode, data map[string]any) []childValue 
 		out = append(out, childValue{key: k.name, typeCode: k.typeCode, value: val})
 	}
 	return out
+}
+
+// choiceKeys returns the JSON properties of a choice element, with the type each names: those of
+// the types the element allows, then any other in data that names a type this registry defines.
+func (v *Validator) choiceKeys(child *registry.ElementNode, base string, data map[string]any) [][2]string {
+	var out [][2]string
+	seen := map[string]bool{}
+	for _, t := range child.Def.Type {
+		if t.Code != "" {
+			k := base + strings.ToUpper(t.Code[:1]) + t.Code[1:]
+			out = append(out, [2]string{k, t.Code})
+			seen[k] = true
+		}
+	}
+	var others [][2]string
+	for k := range data {
+		if !seen[k] {
+			if code := v.registry.ChoiceType(base, k); code != "" {
+				others = append(others, [2]string{k, code})
+			}
+		}
+	}
+	sort.Slice(others, func(i, j int) bool { return others[i][0] < others[j][0] })
+	return append(out, others...)
 }
 
 // Extracts the element name from a path (e.g., "Patient.name" -> "name").

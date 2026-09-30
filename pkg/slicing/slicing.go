@@ -102,12 +102,8 @@ func (v *Validator) ValidateDataContext(goCtx context.Context, resource map[stri
 		run.scope = slicematch.Scope{Resource: resource, RootResource: resource, Container: resource}
 	}
 
-	// Extract all slicing contexts from the StructureDefinition
-	contexts := v.extractContexts(sd)
-
-	// Validate each slicing context against the resource
-	for _, ctx := range contexts {
-		v.validateContext(run, run.scope, resource, resourceType, resourceType, ctx, result)
+	if root := sd.Tree().Root(); root != nil {
+		v.walk(run, run.scope, sd, root, resource, resourceType, result)
 	}
 
 	// Also validate contained resources
@@ -189,152 +185,17 @@ func (v *Validator) findSliceChildren(sd *registry.StructureDefinition, sliceID 
 	return children
 }
 
-// validateContext validates a single slicing context against resource data.
-func (v *Validator) validateContext(
-	run *validation,
-	scope slicematch.Scope,
-	resource map[string]any,
-	sdPath string,
-	fhirPath string,
-	ctx Context,
-	result *issue.Result,
-) {
-	// Navigate to the sliced element in the resource
-	elements := v.getElementsAtPath(resource, ctx.Path, sdPath)
-	if elements == nil {
-		return // Element not present, cardinality validator handles this
-	}
-
-	// Track which slice each element matches
-	sliceMatches := make(map[int]string) // element index -> slice name
-	sliceCounts := make(map[string]int)  // slice name -> count
-
-	// Match each element to a slice
-	for i, elem := range elements {
-		elemMap, ok := elem.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		elemPath := fmt.Sprintf("%s.%s[%d]", fhirPath, v.lastPathSegment(ctx.Path), i)
-		matchedSlice := v.matchElement(run, scope, ctx, elemMap, elemPath, result)
-		if matchedSlice != "" {
-			sliceMatches[i] = matchedSlice
-			sliceCounts[matchedSlice]++
-		} else if ctx.Rules == rulesClosed {
-			// Element doesn't match any slice in closed slicing
-			result.AddErrorWithID(issue.DiagSlicingNoMatch, nil, elemPath)
-		}
-	}
-
-	// Validate cardinality for each slice
-	for _, slice := range ctx.Slices {
-		count := sliceCounts[slice.Name]
-		slicePath := fmt.Sprintf("%s.%s:%s", fhirPath, v.lastPathSegment(ctx.Path), slice.Name)
-
-		// Check minimum (safe comparison avoiding overflow)
-		if count < 0 || count < int(slice.Min) {
-			result.AddErrorWithID(issue.DiagSlicingCardinalityMin, map[string]any{
-				"path": slicePath, "min": slice.Min, "count": count,
-			}, slicePath)
-		}
-
-		// Check maximum
-		if slice.Max != "*" {
-			maxInt, err := strconv.Atoi(slice.Max)
-			if err == nil && count > maxInt {
-				result.AddErrorWithID(issue.DiagSlicingCardinalityMax, map[string]any{
-					"path": slicePath, "max": maxInt, "count": count,
-				}, slicePath)
-			}
-		}
-	}
-
-	// Validate cardinality of child elements within matched slices
-	v.validateSliceChildren(elements, sliceMatches, ctx, fhirPath, result)
-}
-
-// rulesClosed is the slicing rule that allows no content outside the slices (slicing.rules).
-const rulesClosed = "closed"
-
-// matchElement returns the name of the slice that governs one instance, reporting what the
-// matcher found on the way: an instance matching several slices (D-1), a discriminator that could
-// not be evaluated (D-2, D-3), and unknown ValueSet membership (D-6).
-func (v *Validator) matchElement(run *validation, scope slicematch.Scope, ctx Context, elem map[string]any, elemPath string, result *issue.Result) string {
-	if ctx.sd == nil || ctx.EntryDef == nil {
-		return ""
-	}
-	node := ctx.sd.Tree().ByID(ctx.EntryDef.ID)
+// childNamed returns node's child with this name, or nil.
+func childNamed(node *registry.ElementNode, name string) *registry.ElementNode {
 	if node == nil {
-		return ""
+		return nil
 	}
-	m := v.matcher.Resolve(run.ctx, slicematch.Request{
-		SD: ctx.sd, Node: node, Key: node.Name(), Value: elem, Scope: scope, Resolver: run.opts.Resolver,
-		Containment: run.opts.Containment,
-	})
-	for _, n := range m.Notes {
-		switch n.Kind {
-		case slicematch.NoteMembershipUnknown:
-			result.AddInfoWithID(issue.DiagSlicingMembershipUnknown, map[string]any{"detail": n.Message}, elemPath)
-		default:
-			result.AddErrorWithID(issue.DiagSlicingCannotEvaluate, map[string]any{"detail": n.Message}, elemPath)
+	for _, c := range governedChildren(node) {
+		if c.Name() == name {
+			return c
 		}
 	}
-	if !m.Matched {
-		return ""
-	}
-	// One issue per further slice, naming the slice the element is assigned to and that one, as
-	// the HL7 validator reports it.
-	for _, a := range m.AlsoMatch {
-		result.AddErrorWithID(issue.DiagSlicingMultipleMatch, map[string]any{
-			"path": ctx.EntryDef.ID, "slices": sliceNameOf(m.Node) + ", " + sliceNameOf(a),
-		}, elemPath)
-	}
-	return sliceNameOf(m.Node)
-}
-
-func sliceNameOf(n *registry.ElementNode) string {
-	if n.Def.SliceName != nil {
-		return *n.Def.SliceName
-	}
-	return ""
-}
-
-// validateSliceChildren validates the cardinality of the elements inside each matched slice
-// instance, from the slice's definition in the element tree. A child is checked only where its
-// parent is present in the instance: the children of an optional element that is absent are not
-// required (D1). A choice element is counted under each of its JSON names, the element name
-// followed by a type code with its first letter capitalized (D1b).
-func (v *Validator) validateSliceChildren(
-	elements []any,
-	sliceMatches map[int]string,
-	ctx Context,
-	fhirPath string,
-	result *issue.Result,
-) {
-	if ctx.sd == nil {
-		return
-	}
-	tree := ctx.sd.Tree()
-	sliceByName := make(map[string]*registry.ElementNode, len(ctx.Slices))
-	for i := range ctx.Slices {
-		if def := ctx.Slices[i].Definition; def != nil {
-			if n := tree.ByID(def.ID); n != nil {
-				sliceByName[ctx.Slices[i].Name] = n
-			}
-		}
-	}
-
-	pathSegment := v.lastPathSegment(ctx.Path)
-	for elemIdx, sliceName := range sliceMatches {
-		node := sliceByName[sliceName]
-		elemMap, ok := elements[elemIdx].(map[string]any)
-		if node == nil || !ok {
-			continue
-		}
-		elemPath := fmt.Sprintf("%s.%s[%d]", fhirPath, pathSegment, elemIdx)
-		checkChildren(v.memberDefinition(node), elemMap, elemPath, ctx.Path+":"+sliceName, result)
-	}
+	return nil
 }
 
 // memberDefinition returns the definition whose children govern an instance of a slice: the slice
@@ -357,20 +218,27 @@ func (v *Validator) memberDefinition(slice *registry.ElementNode) *registry.Elem
 
 // checkChildren checks the cardinality of node's children in one instance of node, and recurses
 // into the children that are present.
-func checkChildren(node *registry.ElementNode, inst map[string]any, instPath, defPath string, result *issue.Result) {
+//
+// The cardinality phase already checks every instance against the unsliced element's definition
+// (base), so a child is checked here only where the slice constrains it further: a missing child
+// is reported once, not once per definition that requires it.
+func (v *Validator) checkChildren(node, base *registry.ElementNode, inst map[string]any, instPath, defPath string, result *issue.Result) {
 	for _, child := range node.Children {
 		name := child.Name()
 		childPath := instPath + "." + name
 		childDef := defPath + "." + name
-		values := childValues(child, inst)
+		values := v.childValues(child, inst)
 		count := len(values)
+		baseChild := childNamed(base, name)
+		sameMin := baseChild != nil && baseChild.Def.Min == child.Def.Min
+		sameMax := baseChild != nil && baseChild.Def.Max == child.Def.Max
 
-		if count < int(child.Def.Min) {
+		if !sameMin && count < int(child.Def.Min) {
 			result.AddErrorWithID(issue.DiagSlicingCardinalityMin, map[string]any{
 				"path": childDef, "min": child.Def.Min, "count": count,
 			}, childPath)
 		}
-		if child.Def.Max != "" && child.Def.Max != "*" {
+		if !sameMax && child.Def.Max != "" && child.Def.Max != "*" {
 			if maxInt, err := strconv.Atoi(child.Def.Max); err == nil && count > maxInt {
 				result.AddErrorWithID(issue.DiagSlicingCardinalityMax, map[string]any{
 					"path": childDef, "max": maxInt, "count": count,
@@ -381,16 +249,16 @@ func checkChildren(node *registry.ElementNode, inst map[string]any, instPath, de
 		if len(child.Children) == 0 {
 			continue
 		}
-		for i, v := range values {
-			m, ok := v.value.(map[string]any)
+		for _, cv := range values {
+			m, ok := cv.value.(map[string]any)
 			if !ok {
 				continue
 			}
-			p := instPath + "." + v.key
-			if v.array {
-				p = fmt.Sprintf("%s[%d]", p, i)
+			p := instPath + "." + cv.key
+			if cv.array {
+				p = fmt.Sprintf("%s[%d]", p, cv.index)
 			}
-			checkChildren(child, m, p, childDef, result)
+			v.checkChildren(child, baseChild, m, p, childDef, result)
 		}
 	}
 }
@@ -399,94 +267,7 @@ type childValue struct {
 	key   string
 	value any
 	array bool
-}
-
-// childValues returns the instance values of a child element: under its name, or for a choice
-// element ("value[x]") under each name its types give it. A primitive present only through its
-// "_name" sibling (extensions without a value) is present (json.html#primitive).
-func childValues(child *registry.ElementNode, inst map[string]any) []childValue {
-	name := child.Name()
-	keys := []string{name}
-	if base, ok := strings.CutSuffix(name, "[x]"); ok {
-		keys = keys[:0]
-		for _, t := range child.Def.Type {
-			if t.Code != "" {
-				keys = append(keys, base+strings.ToUpper(t.Code[:1])+t.Code[1:])
-			}
-		}
-	}
-	var out []childValue
-	for _, k := range keys {
-		v, ok := inst[k]
-		if !ok {
-			// A repeating primitive present only through its extensions has one item per entry.
-			switch ext := inst["_"+k].(type) {
-			case nil:
-			case []any:
-				for range ext {
-					out = append(out, childValue{key: k, array: true})
-				}
-			default:
-				out = append(out, childValue{key: k})
-			}
-			continue
-		}
-		if arr, isArr := v.([]any); isArr {
-			for _, item := range arr {
-				out = append(out, childValue{key: k, value: item, array: true})
-			}
-			continue
-		}
-		out = append(out, childValue{key: k, value: v})
-	}
-	return out
-}
-
-// getElementsAtPath extracts elements at a given SD path from the resource.
-func (v *Validator) getElementsAtPath(resource map[string]any, sdPath, resourceType string) []any {
-	// Remove resourceType prefix from path
-	relativePath := strings.TrimPrefix(sdPath, resourceType+".")
-
-	parts := strings.Split(relativePath, ".")
-	current := any(resource)
-
-	for _, part := range parts {
-		switch v := current.(type) {
-		case map[string]any:
-			current = v[part]
-		case []any:
-			// Flatten array elements and continue
-			var results []any
-			for _, item := range v {
-				if m, ok := item.(map[string]any); ok {
-					if val := m[part]; val != nil {
-						results = append(results, val)
-					}
-				}
-			}
-			current = results
-		default:
-			return nil
-		}
-	}
-
-	// Ensure we return a slice
-	if arr, ok := current.([]any); ok {
-		return arr
-	}
-	if current != nil {
-		return []any{current}
-	}
-	return nil
-}
-
-// lastPathSegment returns the last segment of a path.
-func (v *Validator) lastPathSegment(path string) string {
-	parts := strings.Split(path, ".")
-	if len(parts) > 0 {
-		return parts[len(parts)-1]
-	}
-	return path
+	index int // position in the array, when array
 }
 
 // validateContained validates slicing in contained resources.
@@ -516,14 +297,12 @@ func (v *Validator) validateContained(run *validation, resource map[string]any, 
 		if containedSD == nil || containedSD.Snapshot == nil {
 			continue
 		}
-
-		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
-
-		// Extract and validate slicing contexts for contained resource
-		contexts := v.extractContexts(containedSD)
-		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource, Container: run.scope.Container}
-		for _, ctx := range contexts {
-			v.validateContext(run, scope, resourceMap, resourceType, containedFhirPath, ctx, result)
+		root := containedSD.Tree().Root()
+		if root == nil {
+			continue
 		}
+		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
+		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource, Container: run.scope.Container}
+		v.walk(run, scope, containedSD, root, resourceMap, containedFhirPath, result)
 	}
 }

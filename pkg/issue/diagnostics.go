@@ -96,6 +96,11 @@ const (
 	// DiagSlicingMembershipUnknown: a required-binding discriminator could not be decided because
 	// ValueSet membership is unknown (decision D-6); the slice does not match.
 	DiagSlicingMembershipUnknown DiagnosticID = "SLICING_MEMBERSHIP_UNKNOWN"
+	// DiagSlicingOrder: an element of an ordered slicing comes after one of a later slice (D-4).
+	DiagSlicingOrder DiagnosticID = "SLICING_ORDER"
+	// DiagSlicingOpenAtEnd: an element in no slice comes before one in a slice, where the slicing
+	// allows other content only at the end (D-5).
+	DiagSlicingOpenAtEnd DiagnosticID = "SLICING_OPEN_AT_END"
 )
 
 // Diagnostic IDs for $validate mode validation.
@@ -430,6 +435,16 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeProcessing,
 		Template: "Slicing cannot be evaluated: {detail}",
+	},
+	DiagSlicingOrder: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "Element is out of order in the ordered slicing of '{path}'",
+	},
+	DiagSlicingOpenAtEnd: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "Element is in no slice of '{path}', but other content is allowed only at the end of the list",
 	},
 	DiagSlicingMembershipUnknown: {
 		Severity: SeverityInformation,
