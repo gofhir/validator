@@ -1,0 +1,21 @@
+{
+ "resourceType": "Patient",
+ "id": "q6-binding-local-out",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/binding-local"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "maritalStatus": {
+  "coding": [
+   {
+    "system": "http://acme-health.test/fhir/CodeSystem/kind",
+    "code": "c"
+   }
+  ]
+ }
+}

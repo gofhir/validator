@@ -1,0 +1,19 @@
+{
+ "resourceType": "Patient",
+ "id": "q1-value-one",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/mm-value"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "identifier": [
+  {
+   "system": "http://acme-health.test/fhir/sid/mrn",
+   "value": "1"
+  }
+ ]
+}

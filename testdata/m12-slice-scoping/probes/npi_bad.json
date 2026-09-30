@@ -1,0 +1,1 @@
+{"resourceType": "Practitioner", "id": "p", "meta": {"profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"]}, "identifier": [{"system": "http://hl7.org/fhir/sid/us-npi", "value": "1234567890"}], "name": [{"family": "X"}]}

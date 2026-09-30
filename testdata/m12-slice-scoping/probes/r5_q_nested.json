@@ -1,0 +1,1 @@
+{"resourceType": "Questionnaire", "id": "q", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "url": "http://acme-health.test/Questionnaire/q", "name": "Q", "status": "active", "item": [{"linkId": "1", "type": "group", "item": [{"text": "nested without linkId nor type", "bogusElement": 1}]}]}

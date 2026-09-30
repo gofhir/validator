@@ -1,0 +1,19 @@
+{
+ "resourceType": "Patient",
+ "id": "q3-unresolvable-present",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/unresolvable"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "extension": [
+  {
+   "url": "http://acme-health.test/fhir/StructureDefinition/ext-missing",
+   "valueString": "x"
+  }
+ ]
+}

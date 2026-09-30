@@ -1,0 +1,27 @@
+{
+ "resourceType": "Observation",
+ "id": "q1-type-one",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/mm-type"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "component": [
+  {
+   "code": {
+    "text": "c"
+   },
+   "valueQuantity": {
+    "value": 1
+   }
+  }
+ ]
+}

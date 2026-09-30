@@ -1,0 +1,23 @@
+{
+ "resourceType": "Bundle",
+ "id": "q1-profile-one",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/mm-profile"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://acme-health.test/fhir/Patient/p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    }
+   }
+  }
+ ]
+}

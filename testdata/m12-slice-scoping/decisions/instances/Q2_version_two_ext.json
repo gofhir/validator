@@ -1,0 +1,23 @@
+{
+ "resourceType": "Patient",
+ "id": "q2-version-two-ext",
+ "meta": {
+  "profile": [
+   "http://acme-health.test/fhir/StructureDefinition/ver-fallback"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "extension": [
+  {
+   "url": "http://acme-health.test/fhir/StructureDefinition/ext-a",
+   "valueString": "1"
+  },
+  {
+   "url": "http://acme-health.test/fhir/StructureDefinition/ext-a",
+   "valueString": "2"
+  }
+ ]
+}
