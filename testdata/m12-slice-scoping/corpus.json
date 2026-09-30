@@ -1,0 +1,93 @@
+{
+  "divergences": "testdata/m12-slice-scoping/declared-divergences.json",
+  "groups": [
+    {
+      "name": "decisions",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.decisions-0.3.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/decisions/instances/*.json"]
+    },
+    {
+      "name": "multimatch",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.multimatch-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/r2_M*.json"]
+    },
+    {
+      "name": "core-probes",
+      "files": [
+        "testdata/m12-slice-scoping/probes/r3_sqty.json",
+        "testdata/m12-slice-scoping/probes/r4_bp_*.json",
+        "testdata/m12-slice-scoping/probes/r4_q_nested.json"
+      ]
+    },
+    {
+      "name": "r5-probes",
+      "version": "5.0.0",
+      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json"]
+    },
+    {
+      "name": "deqm-probes",
+      "igs": ["hl7.fhir.us.davinci-deqm#5.0.0"],
+      "files": [
+        "testdata/m12-slice-scoping/probes/probe_*.json",
+        "testdata/m12-slice-scoping/probes/r2_V1_two_messages.json"
+      ]
+    },
+    {
+      "name": "deqm-examples",
+      "igs": ["hl7.fhir.us.davinci-deqm#5.0.0"],
+      "examplesOf": ["hl7.fhir.us.davinci-deqm#5.0.0"]
+    },
+    {
+      "name": "uscore-probes",
+      "igs": ["hl7.fhir.us.core#6.1.0"],
+      "files": [
+        "testdata/m12-slice-scoping/probes/npi_*.json",
+        "testdata/m12-slice-scoping/probes/r2_CX_race_no_text.json",
+        "testdata/m12-slice-scoping/probes/r4_docref_ok.json"
+      ]
+    },
+    {
+      "name": "uscore-examples",
+      "igs": ["hl7.fhir.us.core#6.1.0"],
+      "examplesOf": ["hl7.fhir.us.core#6.1.0"]
+    },
+    {
+      "name": "ips",
+      "igs": ["hl7.fhir.uv.ips#2.0.1"],
+      "files": ["testdata/m12-slice-scoping/probes/r4_ips_*.json"],
+      "examplesOf": ["hl7.fhir.uv.ips#2.0.1"]
+    },
+    {
+      "name": "mcode-examples",
+      "igs": ["hl7.fhir.us.mcode#4.0.0"],
+      "examplesOf": ["hl7.fhir.us.mcode#4.0.0"]
+    },
+    {
+      "name": "aucore-examples",
+      "igs": ["hl7.fhir.au.core#2.0.0"],
+      "examplesOf": ["hl7.fhir.au.core#2.0.0"]
+    },
+    {
+      "name": "chcore-examples",
+      "igs": ["ch.fhir.ig.ch-core#6.0.0"],
+      "examplesOf": ["ch.fhir.ig.ch-core#6.0.0"]
+    },
+    {
+      "name": "clcore-examples",
+      "igs": ["hl7.fhir.cl.clcore#1.9.4"],
+      "examplesOf": ["hl7.fhir.cl.clcore#1.9.4"]
+    },
+    {
+      "name": "r4-core-examples",
+      "heavy": true,
+      "examplesOf": ["hl7.fhir.r4.examples#4.0.1"],
+      "examplesDir": "package",
+      "exclude": [
+        {"file": "Bundle-valuesets.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): ValueSet/media-modality includes an unresolvable ValueSet, and the crash aborts the whole batch"},
+        {"file": "ValueSet-media-modality.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): compose.include.valueSet dicom-cid29 is unresolvable"},
+        {"file": "ValueSet-use-context.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): compose.include.valueSet entries are unresolvable"},
+        {"file": "Bundle-valueset-expansions.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915) when CodeSystem-snomedct.json (content not-present) is in the same batch"}
+      ]
+    }
+  ]
+}

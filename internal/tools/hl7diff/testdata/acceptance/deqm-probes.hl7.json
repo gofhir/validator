@@ -1,0 +1,2305 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/</td><td>Required element missing</td><td>The Measure 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130-FHIR|8.0.000' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/.measure</td><td>Invalid Content</td><td>A definition could not be found for Canonical URL 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130-FHIR|8.0.000'</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Bundle.entry[2].resource/*MeasureReport/gaps-indv-measurereport02*/</td><td>Required element missing</td><td>The Measure 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124-FHIR|9.0.000' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[2].resource/*MeasureReport/gaps-indv-measurereport02*/.measure</td><td>Invalid Content</td><td>A definition could not be found for Canonical URL 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124-FHIR|9.0.000'</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[5].resource/*Encounter/gaps-encounter01*/.type[0]</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/us/core/ValueSet/us-core-encounter-type because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[0].extension[0].value.ofType(Coding)</td><td>Unknown User</td><td>The definition for the Code System with URI 'urn:oid:2.16.840.1.113883.6.238' from 'hl7.terminology.r4#6.3.0' doesn't provide any codes so the code cannot be validated</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[0].extension[0].value.ofType(Coding)</td><td>Invalid Code</td><td>Unable to validate code without using server because: Resolved system urn:oid:2.16.840.1.113883.6.238 (v3.0.2), but the definition doesn't include any codes, so the code has not been validated</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[1].extension[0].value.ofType(Coding)</td><td>Unknown User</td><td>The definition for the Code System with URI 'urn:oid:2.16.840.1.113883.6.238' from 'hl7.terminology.r4#6.3.0' doesn't provide any codes so the code cannot be validated</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[1].extension[0].value.ofType(Coding)</td><td>Invalid Code</td><td>Unable to validate code without using server because: Resolved system urn:oid:2.16.840.1.113883.6.238 (v3.0.2), but the definition doesn't include any codes, so the code has not been validated</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Bundle.entry[7].resource/*Organization/gaps-organization-reportingvendor*/.address[0].state</td><td>Invalid Code</td><td>The value provided ('MA') could not be validated in the absence of a terminology server</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Bundle.entry[1]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[2]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[3]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[4]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[5]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[6]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[7]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_B1_official.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130-FHIR|8.0.000' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_CANONICAL_RESOLVE"
+       }
+      ],
+      "severity": "information",
+      "code": "invalid",
+      "details": {
+       "text": "A definition could not be found for Canonical URL 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130-FHIR|8.0.000'"
+      },
+      "expression": [
+       "Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124-FHIR|9.0.000' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "Bundle.entry[2].resource/*MeasureReport/gaps-indv-measurereport02*/"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_CANONICAL_RESOLVE"
+       }
+      ],
+      "severity": "information",
+      "code": "invalid",
+      "details": {
+       "text": "A definition could not be found for Canonical URL 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124-FHIR|9.0.000'"
+      },
+      "expression": [
+       "Bundle.entry[2].resource/*MeasureReport/gaps-indv-measurereport02*/.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/us/core/ValueSet/us-core-encounter-type because there is no terminology service"
+      },
+      "expression": [
+       "Bundle.entry[5].resource/*Encounter/gaps-encounter01*/.type[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_SYSTEM_NOT_USABLE"
+       }
+      ],
+      "severity": "information",
+      "code": "unknown",
+      "details": {
+       "text": "The definition for the Code System with URI 'urn:oid:2.16.840.1.113883.6.238' from 'hl7.terminology.r4#6.3.0' doesn't provide any codes so the code cannot be validated"
+      },
+      "expression": [
+       "Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[0].extension[0].value.ofType(Coding)"
+      ]
+     },
+     {
+      "extension": [],
+      "severity": "warning",
+      "code": "code-invalid",
+      "details": {
+       "text": "Unable to validate code without using server because: Resolved system urn:oid:2.16.840.1.113883.6.238 (v3.0.2), but the definition doesn't include any codes, so the code has not been validated"
+      },
+      "expression": [
+       "Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[0].extension[0].value.ofType(Coding)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_SYSTEM_NOT_USABLE"
+       }
+      ],
+      "severity": "information",
+      "code": "unknown",
+      "details": {
+       "text": "The definition for the Code System with URI 'urn:oid:2.16.840.1.113883.6.238' from 'hl7.terminology.r4#6.3.0' doesn't provide any codes so the code cannot be validated"
+      },
+      "expression": [
+       "Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[1].extension[0].value.ofType(Coding)"
+      ]
+     },
+     {
+      "extension": [],
+      "severity": "warning",
+      "code": "code-invalid",
+      "details": {
+       "text": "Unable to validate code without using server because: Resolved system urn:oid:2.16.840.1.113883.6.238 (v3.0.2), but the definition doesn't include any codes, so the code has not been validated"
+      },
+      "expression": [
+       "Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[1].extension[0].value.ofType(Coding)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Terminology_TX_NoValid_15"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "The value provided ('MA') could not be validated in the absence of a terminology server"
+      },
+      "expression": [
+       "Bundle.entry[7].resource/*Organization/gaps-organization-reportingvendor*/.address[0].state"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[1]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[2]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[3]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[4]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[5]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[6]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[7]"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>Bundle.entry[0].request</td><td>Structural Issue</td><td>Bundle.entry.request.method: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Bundle|4.0.1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/</td><td>Required element missing</td><td>The Measure 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130-FHIR|8.0.000' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/.measure</td><td>Invalid Content</td><td>A definition could not be found for Canonical URL 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130-FHIR|8.0.000'</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Bundle.entry[2].resource/*MeasureReport/gaps-indv-measurereport02*/</td><td>Required element missing</td><td>The Measure 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124-FHIR|9.0.000' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[2].resource/*MeasureReport/gaps-indv-measurereport02*/.measure</td><td>Invalid Content</td><td>A definition could not be found for Canonical URL 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124-FHIR|9.0.000'</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[5].resource/*Encounter/gaps-encounter01*/.type[0]</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/us/core/ValueSet/us-core-encounter-type because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[0].extension[0].value.ofType(Coding)</td><td>Unknown User</td><td>The definition for the Code System with URI 'urn:oid:2.16.840.1.113883.6.238' from 'hl7.terminology.r4#6.3.0' doesn't provide any codes so the code cannot be validated</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[0].extension[0].value.ofType(Coding)</td><td>Invalid Code</td><td>Unable to validate code without using server because: Resolved system urn:oid:2.16.840.1.113883.6.238 (v3.0.2), but the definition doesn't include any codes, so the code has not been validated</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[1].extension[0].value.ofType(Coding)</td><td>Unknown User</td><td>The definition for the Code System with URI 'urn:oid:2.16.840.1.113883.6.238' from 'hl7.terminology.r4#6.3.0' doesn't provide any codes so the code cannot be validated</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[1].extension[0].value.ofType(Coding)</td><td>Invalid Code</td><td>Unable to validate code without using server because: Resolved system urn:oid:2.16.840.1.113883.6.238 (v3.0.2), but the definition doesn't include any codes, so the code has not been validated</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Bundle.entry[7].resource/*Organization/gaps-organization-reportingvendor*/.address[0].state</td><td>Invalid Code</td><td>The value provided ('MA') could not be validated in the absence of a terminology server</td><td/><td>TerminologyEngine</td></tr><tr><td>Error</td><td>Bundle</td><td>Validation rule failed</td><td>Constraint failed: bdl-3: 'entry.request mandatory for batch/transaction/history, otherwise prohibited'</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[1]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[2]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[3]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[4]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[5]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[6]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>Bundle.entry[7]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Bundle.entry[0].request</td><td>Structural Issue</td><td>Bundle.entry:gaps-composition-deqm.request.method: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Bundle.entry[0].request</td><td>Structural Issue</td><td>Bundle.entry.request.method: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_B2_request_nomethod.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Bundle.entry.request.method: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Bundle|4.0.1)"
+      },
+      "expression": [
+       "Bundle.entry[0].request"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130-FHIR|8.0.000' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_CANONICAL_RESOLVE"
+       }
+      ],
+      "severity": "information",
+      "code": "invalid",
+      "details": {
+       "text": "A definition could not be found for Canonical URL 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130-FHIR|8.0.000'"
+      },
+      "expression": [
+       "Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124-FHIR|9.0.000' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "Bundle.entry[2].resource/*MeasureReport/gaps-indv-measurereport02*/"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_CANONICAL_RESOLVE"
+       }
+      ],
+      "severity": "information",
+      "code": "invalid",
+      "details": {
+       "text": "A definition could not be found for Canonical URL 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124-FHIR|9.0.000'"
+      },
+      "expression": [
+       "Bundle.entry[2].resource/*MeasureReport/gaps-indv-measurereport02*/.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/us/core/ValueSet/us-core-encounter-type because there is no terminology service"
+      },
+      "expression": [
+       "Bundle.entry[5].resource/*Encounter/gaps-encounter01*/.type[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_SYSTEM_NOT_USABLE"
+       }
+      ],
+      "severity": "information",
+      "code": "unknown",
+      "details": {
+       "text": "The definition for the Code System with URI 'urn:oid:2.16.840.1.113883.6.238' from 'hl7.terminology.r4#6.3.0' doesn't provide any codes so the code cannot be validated"
+      },
+      "expression": [
+       "Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[0].extension[0].value.ofType(Coding)"
+      ]
+     },
+     {
+      "extension": [],
+      "severity": "warning",
+      "code": "code-invalid",
+      "details": {
+       "text": "Unable to validate code without using server because: Resolved system urn:oid:2.16.840.1.113883.6.238 (v3.0.2), but the definition doesn't include any codes, so the code has not been validated"
+      },
+      "expression": [
+       "Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[0].extension[0].value.ofType(Coding)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TERMINOLOGY_TX_SYSTEM_NOT_USABLE"
+       }
+      ],
+      "severity": "information",
+      "code": "unknown",
+      "details": {
+       "text": "The definition for the Code System with URI 'urn:oid:2.16.840.1.113883.6.238' from 'hl7.terminology.r4#6.3.0' doesn't provide any codes so the code cannot be validated"
+      },
+      "expression": [
+       "Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[1].extension[0].value.ofType(Coding)"
+      ]
+     },
+     {
+      "extension": [],
+      "severity": "warning",
+      "code": "code-invalid",
+      "details": {
+       "text": "Unable to validate code without using server because: Resolved system urn:oid:2.16.840.1.113883.6.238 (v3.0.2), but the definition doesn't include any codes, so the code has not been validated"
+      },
+      "expression": [
+       "Bundle.entry[6].resource/*Patient/gaps-patient01*/.extension[1].extension[0].value.ofType(Coding)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Terminology_TX_NoValid_15"
+       }
+      ],
+      "severity": "information",
+      "code": "code-invalid",
+      "details": {
+       "text": "The value provided ('MA') could not be validated in the absence of a terminology server"
+      },
+      "expression": [
+       "Bundle.entry[7].resource/*Organization/gaps-organization-reportingvendor*/.address[0].state"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: bdl-3: 'entry.request mandatory for batch/transaction/history, otherwise prohibited'"
+      },
+      "expression": [
+       "Bundle"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[1]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[2]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[3]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[4]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[5]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[6]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "Bundle.entry[7]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Bundle.entry:gaps-composition-deqm.request.method: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0)"
+      },
+      "expression": [
+       "Bundle.entry[0].request"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Bundle.entry.request.method: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm|5.0.0)"
+      },
+      "expression": [
+       "Bundle.entry[0].request"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P1_scoring_ok_base.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-2: 'If the measure scoring is specified at the root and the scoring type is 'proportion','ratio', or 'continuous-variable' then the improvementNotation element is required'</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is &gt;=1'</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P1_scoring_ok_prof.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-2"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-2: 'If the measure scoring is specified at the root and the scoring type is 'proportion','ratio', or 'continuous-variable' then the improvementNotation element is required'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-5"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is >=1'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Validation rule failed</td><td>Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>The Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring' definition is for a simple extension, so it must contain a value</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>Slice 'Extension.value[x]:valueCodeableConcept': a matching slice is required, but not found (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring|5.0.0). Note that other slices are allowed in addition to this required slice</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P2_scoring_novalue_base.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/Extension#ext-1"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Extension_EXT_Simple_ABSENT"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "The Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring' definition is for a simple extension, so it must contain a value"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum_SLICE"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Slice 'Extension.value[x]:valueCodeableConcept': a matching slice is required, but not found (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring|5.0.0). Note that other slices are allowed in addition to this required slice"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Validation rule failed</td><td>Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>The Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring' definition is for a simple extension, so it must contain a value</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>Slice 'Extension.value[x]:valueCodeableConcept': a matching slice is required, but not found (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring|5.0.0). Note that other slices are allowed in addition to this required slice</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-2: 'If the measure scoring is specified at the root and the scoring type is 'proportion','ratio', or 'continuous-variable' then the improvementNotation element is required'</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is &gt;=1'</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P2_scoring_novalue_prof.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/Extension#ext-1"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Extension_EXT_Simple_ABSENT"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "The Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring' definition is for a simple extension, so it must contain a value"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum_SLICE"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Slice 'Extension.value[x]:valueCodeableConcept': a matching slice is required, but not found (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-measureScoring|5.0.0). Note that other slices are allowed in addition to this required slice"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-2"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-2: 'If the measure scoring is specified at the root and the scoring type is 'proportion','ratio', or 'continuous-variable' then the improvementNotation element is required'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-5"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is >=1'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.extension[0].value.ofType(Identifier).system</td><td>Invalid Content</td><td>OIDs must be valid (9.9.9)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P3_cehrt_wrongsystem_base.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Type_Specific_Checks_DT_OID_Valid"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "OIDs must be valid (9.9.9)"
+      },
+      "expression": [
+       "MeasureReport.extension[0].value.ofType(Identifier).system"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.extension[0].value.ofType(Identifier).system</td><td>Invalid Content</td><td>OIDs must be valid (9.9.9)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0].value.ofType(Identifier).system</td><td>Element value invalid</td><td>Value is 'urn:oid:9.9.9' but is fixed to 'urn:oid:2.16.840.1.113883.3.2074.1' in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0#MeasureReport.extension:cehrt</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is &gt;=1'</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P3_cehrt_wrongsystem_prof.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Type_Specific_Checks_DT_OID_Valid"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "OIDs must be valid (9.9.9)"
+      },
+      "expression": [
+       "MeasureReport.extension[0].value.ofType(Identifier).system"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "_DT_Fixed_Wrong"
+       }
+      ],
+      "severity": "error",
+      "code": "value",
+      "details": {
+       "text": "Value is 'urn:oid:9.9.9' but is fixed to 'urn:oid:2.16.840.1.113883.3.2074.1' in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0#MeasureReport.extension:cehrt"
+      },
+      "expression": [
+       "MeasureReport.extension[0].value.ofType(Identifier).system"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-5"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is >=1'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>The Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-certificationIdentifier' definition allows for the types [Identifier] but found type string</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_base.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Extension_EXT_Type"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "The Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-certificationIdentifier' definition allows for the types [Identifier] but found type string"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>The Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-certificationIdentifier' definition allows for the types [Identifier] but found type string</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0].value.ofType(string)</td><td>Invalid Content</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0 and slicing is CLOSED: MeasureReport.extension[0].value.ofType(string): Does not match slice 'valueIdentifier' (discriminator: ($this is Identifier))</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>Slice 'MeasureReport.extension:cehrt.value[x]:valueIdentifier': a matching slice is required, but not found (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0). Note that other slices are allowed in addition to this required slice</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0].value.ofType(string)</td><td>Structural Issue</td><td>The Profile 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0' definition allows for the type Identifier but found type string</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is &gt;=1'</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_prof.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Extension_EXT_Type"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "The Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-certificationIdentifier' definition allows for the types [Identifier] but found type string"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_NotSlice"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0 and slicing is CLOSED: MeasureReport.extension[0].value.ofType(string): Does not match slice 'valueIdentifier' (discriminator: ($this is Identifier))"
+      },
+      "expression": [
+       "MeasureReport.extension[0].value.ofType(string)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum_SLICE"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "Slice 'MeasureReport.extension:cehrt.value[x]:valueIdentifier': a matching slice is required, but not found (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0). Note that other slices are allowed in addition to this required slice"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Extension_PROF_Type"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "The Profile 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0' definition allows for the type Identifier but found type string"
+      },
+      "expression": [
+       "MeasureReport.extension[0].value.ofType(string)"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-5"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is >=1'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_base.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is &gt;=1'</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-5"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is >=1'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>The extension http://example.org/ext could not be found so is not allowed here</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0].url</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/ext)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_base.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Extension_EXT_Unknown_NotHere"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "The extension http://example.org/ext could not be found so is not allowed here"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/ext)"
+      },
+      "expression": [
+       "MeasureReport.extension[0].url"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MeasureReport.extension[0]</td><td>Structural Issue</td><td>The extension http://example.org/ext could not be found so is not allowed here</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.extension[0].url</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/ext)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>Example URLs are not allowed in this context (http://example.org/M|1)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Information</td><td>MeasureReport.extension[0]</td><td>Informational Note</td><td>This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is &gt;=1'</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Extension_EXT_Unknown_NotHere"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "The extension http://example.org/ext could not be found so is not allowed here"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/ext)"
+      },
+      "expression": [
+       "MeasureReport.extension[0].url"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE"
+       }
+      ],
+      "severity": "error",
+      "code": "invalid",
+      "details": {
+       "text": "Example URLs are not allowed in this context (http://example.org/M|1)"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://example.org/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Details_for__matching_against_Profile_"
+       }
+      ],
+      "severity": "information",
+      "code": "informational",
+      "details": {
+       "text": "This element does not match any known slice defined in the profile http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)"
+      },
+      "expression": [
+       "MeasureReport.extension[0]"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-5"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is >=1'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "resource": {
+    "resourceType": "OperationOutcome",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Information</td><td>MeasureReport.measure</td><td>Invalid Content</td><td>A definition could not be found for Canonical URL 'http://acme-health.test/M|1'</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>MeasureReport</td><td>Required element missing</td><td>The Measure 'http://acme-health.test/M|1' could not be resolved, so no validation can be performed against the Measure</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.extension:message: max allowed = 1, but found 2 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Structural Issue</td><td>MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>MeasureReport</td><td>Validation rule failed</td><td>Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is &gt;=1'</td><td/><td>InstanceValidator</td></tr></table></div>"
+    },
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+      "valueString": "testdata/m12-slice-scoping/probes/r2_V1_two_messages.json"
+     }
+    ],
+    "issue": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "TYPE_SPECIFIC_CHECKS_DT_CANONICAL_RESOLVE"
+       }
+      ],
+      "severity": "information",
+      "code": "invalid",
+      "details": {
+       "text": "A definition could not be found for Canonical URL 'http://acme-health.test/M|1'"
+      },
+      "expression": [
+       "MeasureReport.measure"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+       }
+      ],
+      "severity": "warning",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Measure_MR_M_NotFound"
+       }
+      ],
+      "severity": "warning",
+      "code": "required",
+      "details": {
+       "text": "The Measure 'http://acme-health.test/M|1' could not be resolved, so no validation can be performed against the Measure"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Maximum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.extension:message: max allowed = 1, but found 2 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.subject: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.date: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "Validation_VAL_Profile_Minimum"
+       }
+      ],
+      "severity": "error",
+      "code": "structure",
+      "details": {
+       "text": "MeasureReport.reporter: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm|5.0.0)"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     },
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+        "valueCode": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm#deqm-5"
+       }
+      ],
+      "severity": "error",
+      "code": "invariant",
+      "details": {
+       "text": "Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is >=1'"
+      },
+      "expression": [
+       "MeasureReport"
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -293,8 +293,9 @@ declared divergence.
   (#89) changed extension URL checks. All 29 probes give identical issues on both releases
   (severity, code, message and location), so every table stands for v1.21.1. Reproduce with
   `testdata/m12-slice-scoping/tools/run_probes.sh` on each build and `diff -r` the outputs.
-- **The invariant tool: not done.** A first implementation (`hl7diff`, now on the local branch
-  `feat/hl7diff-redesign`) was withdrawn after the PR #91 review. It blocked this plan's own correct
+- **The invariant tool: implemented** in `internal/tools/hl7diff` (see "Status of the tool" below).
+  A first implementation (`hl7diff`, kept on the local branch `feat/hl7diff-redesign`) was
+  withdrawn after the PR #91 review. It blocked this plan's own correct
   fixes (A3: 4 findings, A4: 18, plan B's B2: `ext-1` ×13 → ×1) and passed injected false errors,
   duplications and swaps. The redesign must meet all of the following, and its acceptance suite is
   built from exactly those cases:
@@ -329,6 +330,114 @@ declared divergence.
      `ImplementationGuide-fhir.json` twice, and that file alone takes over 15 minutes. The corpus
      covers the IGs this plan names: DEQM, IPS, US Core, mCODE, AU Core, CH Core, CL Core, and
      core `lipidprofile` for `ordered`.
+
+**Status of the tool** (requirements numbered as above):
+
+- **Met: 1, 2, 3, 6 and 8.**
+  - **Matching:** one-to-one per file. Pairs form only within a family and under its location
+    rule.
+    - **"parent"** means the same element, or the immediate parent or child *element*. It applies
+      only to cardinality (the slice cardinality IDs included), unknown elements and extension
+      value types, where the corpus shows HL7 reporting at the parent.
+    - **"equal"** is used by every other family, no-slice-match and `fullUrl` included.
+    - **Locations** compare segment by segment, with the same indices. A location without an
+      index is not a wildcard, and a list's owner never pairs with an item of the list (that
+      would be the wildcard one level up).
+    - **Measured on the 689-file corpus:** the 55 real pairs are the same with and without either
+      kind of wildcard, and allowing them let an arbitrary choice decide verdicts.
+  - **Names and slices:** when HL7 names the element or slice in its message (cardinality
+    messages, "Slice '…'", "Unrecognized property '…'"), the gofhir location must end in the same
+    element. When both sides name element slices, they must be the same ones, in order. gofhir's
+    slices are read from its location, or from the element its message quotes for families marked
+    `quotesElement`. Type slices on a choice (`value[x]:valueIdentifier`) name a type, not an
+    element. They are compared only when both sides name one, since gofhir quotes a choice
+    without its type slice.
+  - **What is compared:** each run's unpaired errors, by identity.
+  - **Identity:** severity, raw location and message ID, plus the constraint key for constraints,
+    or every slice of the quoted element (type slices included) for `quotesElement` families. Other wording and the
+    definition site are not part of it. An error with no message ID is identified by its full
+    text.
+  - **Families:** an ID can belong to several. HL7's "Slice '…': a matching slice is required"
+    (`_SLICE`) is a required slice and pairs only with gofhir's slice cardinality error, never
+    with an element minimum. HL7's element minimum ("X: minimum required") pairs with either.
+  - **Blind spot, and the net that covers it.** Pairing cannot see a true error the rules do not
+    pair (for example one reported at a list's owner by one validator and at an item by the
+    other). HL7's error then stays unpaired in the baseline, and removing the true gofhir error
+    would look like a fixed false positive. So a removed gofhir error that was unpaired in the
+    baseline is reported as an **unverified removal** when two things hold:
+    - head leaves an HL7 error of one of its families unpaired at a related location (at any
+      depth, ignoring indices and slices);
+    - nothing replaced it there, meaning no gofhir error of that family that head pairs and the
+      baseline did not.
+
+    Such a removal is a finding to inspect, not a pass.
+  - **Known limit:** when one gofhir error can pair with two HL7 errors that name the same
+    element at a parent and at its child element, which one stays unpaired depends on sort order.
+    The worst case is a finding to inspect.
+  - **Fail closed:** on coverage, on group selection and on the manifest.
+  - **Caches:** keyed by the jar, the arguments, and each validator's own inputs:
+    - **gofhir's key** (the baseline output): the closure, with a fingerprint of each package's
+      files that ignores the index files the HL7 validator writes; the local packages; and the
+      instances.
+    - **HL7's key:** gofhir's key, plus the packages left out of the closure and the cache
+      listing.
+    - `fetch` also installs everything the HL7 validator loads, embedded packages included, so a
+      run does not change its own key.
+    - After the HL7 validator runs, gofhir's key is checked again.
+
+    Within one run, two distinct files that would get the same portable name are an error.
+    Across runs the same name is intended: one example cached on two machines is one file. Outputs are written atomically, and a cached HL7 output that does not cover every
+    file is regenerated. The work directory is per checkout and locked.
+- **Partly met: 4, 5, 7 and 9.**
+  - **4:** the family table classifies all 68 gofhir IDs, and its HL7 half is checked against the
+    6.10.4 catalog. **Pending:** `pkg/fixedpattern` still emits its errors without a diagnostic
+    ID, so they cannot be paired with HL7's; giving them IDs is a library change.
+  - **5:** divergences are scoped by:
+    - side;
+    - file: a repository path, or a portable `fhir-cache:/<id>#<version>/…` name for cached
+      examples. Both `run` and `diff` use these names;
+    - exact location;
+    - message ID, which must exist in its validator's catalog (on the HL7 side, a constraint must
+      have the shape `<canonical>/StructureDefinition/<id>#<key>`).
+
+    A divergence without a location, or covering a validation failure, is rejected. There is no
+    free-form predicate.
+  - **7:** terminology is local on both sides, so element bindings are compared, and each IG's
+    dependency closure is loaded. Packages gofhir embeds, and older versions of a package the
+    closure also names at a newer version, are left out and listed in the report.
+    **Pending:** the 5 s constraint budget
+    ([constraint.go:303](../../pkg/constraint/constraint.go)) is not configurable, so gofhir's
+    output can still depend on machine load. That needs a library option.
+  - **9:** the corpus is fetched by package id into the standard cache, created if missing: DEQM,
+    IPS, US Core, mCODE, AU Core, CH Core and CL Core, plus the R4 core examples as a heavy group,
+    which has not been run yet.
+- **Acceptance:** the review cases pass on real outputs, including P4 in every direction. The
+  plan's A3 fix passes. Dropping only the true slice error, or both errors, fails. The scenarios
+  from the five reviews of the redesign pass too. Each of eighteen injected defects is caught:
+  - any ancestor accepted as a location;
+  - a non-maximum matching;
+  - unsorted input;
+  - element names ignored;
+  - no element-slice check;
+  - no slice names in the identity;
+  - unknown properties not named;
+  - value-required under the parent rule;
+  - a strict slice on instance paths;
+  - the index wildcard reintroduced;
+  - the quoted slices unused in pairing;
+  - `fullUrl` under the parent rule;
+  - an owner pairing with an item;
+  - type slices not compared when both name one;
+  - type slices dropped from the identity;
+  - an element minimum pairing with a required slice;
+  - no unverified-removal net;
+  - replacements not excused.
+- **Every change to matching is also checked pair by pair** against the corpus's real pairs, not
+  only against the tests. A change that kept the set of pairs but moved one partner (P4) is how a
+  regression got through once. In the last change exactly one pair moved: P4's required slice now
+  pairs with the true error, not the false one.
+- **Sanity check against v1.21.1**, whose library matches this branch: 13 groups, 689 files,
+  0 findings.
 
 **PR A1: `jsoncompare`, `ResolveCanonical`, `ElementTree`** (no behavior change)
 
