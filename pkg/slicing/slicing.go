@@ -3,29 +3,40 @@
 package slicing
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/gofhir/validator/pkg/fixedpattern"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/pkg/slicematch"
 )
-
-// FHIRPath special constants.
-const pathThis = "$this"
 
 // Validator validates slicing constraints for FHIR resources.
 type Validator struct {
 	registry *registry.Registry
+	matcher  *slicematch.Matcher
 }
 
-// New creates a new slicing validator.
+// New creates a new slicing validator. Its matcher cannot check profile conformance or ValueSet
+// membership; use NewWithMatcher to provide one that can.
 func New(reg *registry.Registry) *Validator {
-	return &Validator{
-		registry: reg,
-	}
+	return NewWithMatcher(reg, slicematch.New(reg))
+}
+
+// NewWithMatcher creates a slicing validator that assigns elements to slices with m.
+func NewWithMatcher(reg *registry.Registry, m *slicematch.Matcher) *Validator {
+	return &Validator{registry: reg, matcher: m}
+}
+
+// Options carries what one validation provides to slice matching.
+type Options struct {
+	// Resolver follows references for the resolve() discriminator function.
+	Resolver slicematch.Resolver
+	// Scope holds the resources the validated value sits in, when it is not itself the resource.
+	Scope *slicematch.Scope
 }
 
 // SliceInfo contains information about a defined slice.
@@ -39,6 +50,7 @@ type SliceInfo struct {
 
 // Context contains slicing information for an element path.
 type Context struct {
+	sd             *registry.StructureDefinition
 	Path           string                      // The sliced element path (e.g., "Patient.extension")
 	EntryDef       *registry.ElementDefinition // ElementDefinition with slicing definition
 	Discriminators []registry.Discriminator    // How to match elements to slices
@@ -66,13 +78,26 @@ func (v *Validator) Validate(resourceData json.RawMessage, sd *registry.Structur
 // ValidateData validates slicing constraints for a pre-parsed FHIR resource.
 // This is the preferred method when JSON has already been parsed to avoid redundant parsing.
 func (v *Validator) ValidateData(resource map[string]any, sd *registry.StructureDefinition, result *issue.Result) {
+	v.ValidateDataContext(context.Background(), resource, sd, Options{}, result)
+}
+
+// ValidateDataContext validates slicing constraints of a pre-parsed value against sd: a resource,
+// or a datatype or extension value validated against its own profile.
+func (v *Validator) ValidateDataContext(goCtx context.Context, resource map[string]any, sd *registry.StructureDefinition, opts Options, result *issue.Result) {
 	if sd == nil || sd.Snapshot == nil {
 		return
 	}
 
-	resourceType, _ := resource["resourceType"].(string)
+	resourceType := sd.RootName(resource)
 	if resourceType == "" {
 		return
+	}
+
+	run := &validation{ctx: goCtx, opts: opts}
+	if opts.Scope != nil {
+		run.scope = *opts.Scope
+	} else {
+		run.scope = slicematch.Scope{Resource: resource, RootResource: resource}
 	}
 
 	// Extract all slicing contexts from the StructureDefinition
@@ -80,11 +105,18 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 
 	// Validate each slicing context against the resource
 	for _, ctx := range contexts {
-		v.validateContext(resource, resourceType, resourceType, ctx, result)
+		v.validateContext(run, run.scope, resource, resourceType, resourceType, ctx, result)
 	}
 
 	// Also validate contained resources
-	v.validateContained(resource, resourceType, result)
+	v.validateContained(run, resource, resourceType, result)
+}
+
+// validation is one ValidateDataContext call.
+type validation struct {
+	ctx   context.Context
+	opts  Options
+	scope slicematch.Scope
 }
 
 // extractContexts extracts all slicing definitions from a StructureDefinition.
@@ -123,6 +155,7 @@ func (v *Validator) extractContexts(sd *registry.StructureDefinition) []Context 
 	// Build Contexts from entries and their slices
 	for path, entry := range entryByPath {
 		ctx := Context{
+			sd:       sd,
 			Path:     path,
 			EntryDef: entry,
 			Rules:    entry.Slicing.Rules,
@@ -156,6 +189,8 @@ func (v *Validator) findSliceChildren(sd *registry.StructureDefinition, sliceID 
 
 // validateContext validates a single slicing context against resource data.
 func (v *Validator) validateContext(
+	run *validation,
+	scope slicematch.Scope,
 	resource map[string]any,
 	sdPath string,
 	fhirPath string,
@@ -179,13 +214,13 @@ func (v *Validator) validateContext(
 			continue
 		}
 
-		matchedSlice := v.matchElementToSlice(elemMap, ctx)
+		elemPath := fmt.Sprintf("%s.%s[%d]", fhirPath, v.lastPathSegment(ctx.Path), i)
+		matchedSlice := v.matchElement(run, scope, ctx, elemMap, elemPath, result)
 		if matchedSlice != "" {
 			sliceMatches[i] = matchedSlice
 			sliceCounts[matchedSlice]++
-		} else if ctx.Rules == "closed" {
+		} else if ctx.Rules == rulesClosed {
 			// Element doesn't match any slice in closed slicing
-			elemPath := fmt.Sprintf("%s.%s[%d]", fhirPath, v.lastPathSegment(ctx.Path), i)
 			result.AddErrorWithID(issue.DiagSlicingNoMatch, nil, elemPath)
 		}
 	}
@@ -217,7 +252,56 @@ func (v *Validator) validateContext(
 	v.validateSliceChildren(elements, sliceMatches, ctx, fhirPath, result)
 }
 
-// validateSliceChildren validates cardinality of child elements for each matched slice instance.
+// rulesClosed is the slicing rule that allows no content outside the slices (slicing.rules).
+const rulesClosed = "closed"
+
+// matchElement returns the name of the slice that governs one instance, reporting what the
+// matcher found on the way: an instance matching several slices (D-1), a discriminator that could
+// not be evaluated (D-2, D-3), and unknown ValueSet membership (D-6).
+func (v *Validator) matchElement(run *validation, scope slicematch.Scope, ctx Context, elem map[string]any, elemPath string, result *issue.Result) string {
+	if ctx.sd == nil || ctx.EntryDef == nil {
+		return ""
+	}
+	node := ctx.sd.Tree().ByID(ctx.EntryDef.ID)
+	if node == nil {
+		return ""
+	}
+	m := v.matcher.Resolve(run.ctx, slicematch.Request{
+		SD: ctx.sd, Node: node, Key: node.Name(), Value: elem, Scope: scope, Resolver: run.opts.Resolver,
+	})
+	for _, n := range m.Notes {
+		switch n.Kind {
+		case slicematch.NoteMembershipUnknown:
+			result.AddInfoWithID(issue.DiagSlicingMembershipUnknown, map[string]any{"detail": n.Message}, elemPath)
+		default:
+			result.AddErrorWithID(issue.DiagSlicingCannotEvaluate, map[string]any{"detail": n.Message}, elemPath)
+		}
+	}
+	if !m.Matched {
+		return ""
+	}
+	// One issue per further slice, naming the slice the element is assigned to and that one, as
+	// the HL7 validator reports it.
+	for _, a := range m.AlsoMatch {
+		result.AddErrorWithID(issue.DiagSlicingMultipleMatch, map[string]any{
+			"path": ctx.EntryDef.ID, "slices": sliceNameOf(m.Node) + ", " + sliceNameOf(a),
+		}, elemPath)
+	}
+	return sliceNameOf(m.Node)
+}
+
+func sliceNameOf(n *registry.ElementNode) string {
+	if n.Def.SliceName != nil {
+		return *n.Def.SliceName
+	}
+	return ""
+}
+
+// validateSliceChildren validates the cardinality of the elements inside each matched slice
+// instance, from the slice's definition in the element tree. A child is checked only where its
+// parent is present in the instance: the children of an optional element that is absent are not
+// required (D1). A choice element is counted under each of its JSON names, the element name
+// followed by a type code with its first letter capitalized (D1b).
 func (v *Validator) validateSliceChildren(
 	elements []any,
 	sliceMatches map[int]string,
@@ -225,595 +309,109 @@ func (v *Validator) validateSliceChildren(
 	fhirPath string,
 	result *issue.Result,
 ) {
-	// Build a quick lookup from slice name to SliceInfo
-	sliceByName := make(map[string]*SliceInfo, len(ctx.Slices))
+	if ctx.sd == nil {
+		return
+	}
+	tree := ctx.sd.Tree()
+	sliceByName := make(map[string]*registry.ElementNode, len(ctx.Slices))
 	for i := range ctx.Slices {
-		sliceByName[ctx.Slices[i].Name] = &ctx.Slices[i]
+		if def := ctx.Slices[i].Definition; def != nil {
+			if n := tree.ByID(def.ID); n != nil {
+				sliceByName[ctx.Slices[i].Name] = n
+			}
+		}
 	}
 
 	pathSegment := v.lastPathSegment(ctx.Path)
-
 	for elemIdx, sliceName := range sliceMatches {
-		slice := sliceByName[sliceName]
-		if slice == nil || len(slice.Children) == 0 {
-			continue
-		}
-
+		node := sliceByName[sliceName]
 		elemMap, ok := elements[elemIdx].(map[string]any)
-		if !ok {
+		if node == nil || !ok {
 			continue
 		}
-
 		elemPath := fmt.Sprintf("%s.%s[%d]", fhirPath, pathSegment, elemIdx)
+		checkChildren(node, elemMap, elemPath, ctx.Path+":"+sliceName, result)
+	}
+}
 
-		for _, child := range slice.Children {
-			// Skip children that are themselves slice definitions
-			if child.SliceName != nil && *child.SliceName != "" {
+// checkChildren checks the cardinality of node's children in one instance of node, and recurses
+// into the children that are present.
+func checkChildren(node *registry.ElementNode, inst map[string]any, instPath, defPath string, result *issue.Result) {
+	for _, child := range node.Children {
+		name := child.Name()
+		childPath := instPath + "." + name
+		childDef := defPath + "." + name
+		values := childValues(child, inst)
+		count := len(values)
+
+		if count < int(child.Def.Min) {
+			result.AddErrorWithID(issue.DiagSlicingCardinalityMin, map[string]any{
+				"path": childDef, "min": child.Def.Min, "count": count,
+			}, childPath)
+		}
+		if child.Def.Max != "" && child.Def.Max != "*" {
+			if maxInt, err := strconv.Atoi(child.Def.Max); err == nil && count > maxInt {
+				result.AddErrorWithID(issue.DiagSlicingCardinalityMax, map[string]any{
+					"path": childDef, "max": maxInt, "count": count,
+				}, childPath)
+			}
+		}
+
+		if len(child.Children) == 0 {
+			continue
+		}
+		for i, v := range values {
+			m, ok := v.value.(map[string]any)
+			if !ok {
 				continue
 			}
-
-			// Extract child element name from path (last segment)
-			childName := child.Path[strings.LastIndex(child.Path, ".")+1:]
-
-			// Count occurrences in the resource element
-			count := countElement(elemMap, childName)
-
-			// Check minimum cardinality
-			if count < int(child.Min) {
-				childFHIRPath := fmt.Sprintf("%s.%s", elemPath, childName)
-				sliceChildPath := fmt.Sprintf("%s:%s.%s", ctx.Path, sliceName, childName)
-				result.AddErrorWithID(issue.DiagSlicingCardinalityMin, map[string]any{
-					"path": sliceChildPath, "min": child.Min, "count": count,
-				}, childFHIRPath)
+			p := instPath + "." + v.key
+			if v.array {
+				p = fmt.Sprintf("%s[%d]", p, i)
 			}
-
-			// Check maximum cardinality
-			if child.Max != "" && child.Max != "*" {
-				maxInt, err := strconv.Atoi(child.Max)
-				if err == nil && count > maxInt {
-					childFHIRPath := fmt.Sprintf("%s.%s", elemPath, childName)
-					sliceChildPath := fmt.Sprintf("%s:%s.%s", ctx.Path, sliceName, childName)
-					result.AddErrorWithID(issue.DiagSlicingCardinalityMax, map[string]any{
-						"path": sliceChildPath, "max": maxInt, "count": count,
-					}, childFHIRPath)
-				}
-			}
+			checkChildren(child, m, p, childDef, result)
 		}
 	}
 }
 
-// countElement counts occurrences of a named element in a resource map.
-func countElement(m map[string]any, name string) int {
-	val, ok := m[name]
-	if !ok {
-		return 0
-	}
-	if arr, ok := val.([]any); ok {
-		return len(arr)
-	}
-	return 1
+type childValue struct {
+	key   string
+	value any
+	array bool
 }
 
-// matchElementToSlice finds which slice an element matches based on discriminators.
-func (v *Validator) matchElementToSlice(element map[string]any, ctx Context) string {
-	for _, slice := range ctx.Slices {
-		if v.elementMatchesSlice(element, ctx.Discriminators, slice) {
-			return slice.Name
-		}
-	}
-	return ""
-}
-
-// elementMatchesSlice checks if an element matches a specific slice.
-func (v *Validator) elementMatchesSlice(element map[string]any, discriminators []registry.Discriminator, slice SliceInfo) bool {
-	// All discriminators must match
-	for _, disc := range discriminators {
-		if !v.evaluateDiscriminator(element, disc, slice) {
-			return false
-		}
-	}
-	return true
-}
-
-// evaluateDiscriminator evaluates a single discriminator against an element.
-func (v *Validator) evaluateDiscriminator(element map[string]any, disc registry.Discriminator, slice SliceInfo) bool {
-	switch disc.Type {
-	case "value":
-		return v.evaluateValueDiscriminator(element, disc.Path, slice)
-	case "pattern":
-		return v.evaluatePatternDiscriminator(element, disc.Path, slice)
-	case "type":
-		return v.evaluateTypeDiscriminator(element, disc.Path, slice)
-	case "profile":
-		return v.evaluateProfileDiscriminator(element, disc.Path, slice)
-	case "exists":
-		return v.evaluateExistsDiscriminator(element, disc.Path, slice)
-	default:
-		return true
-	}
-}
-
-// evaluateValueDiscriminator checks if element matches a "value" discriminator.
-// Per the FHIR spec, value discriminators match using fixed[x], pattern[x], or required ValueSet binding.
-func (v *Validator) evaluateValueDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
-	actualValue := v.getValueAtPath(element, path)
-	if actualValue == nil {
-		return false
-	}
-
-	actualJSON, err := json.Marshal(actualValue)
-	if err != nil {
-		return false
-	}
-
-	// Try fixed[x] first (exact match).
-	if fixedVal := v.getFixedValueForPath(slice, path); fixedVal != nil {
-		return fixedpattern.DeepEqual(actualJSON, fixedVal)
-	}
-
-	// Fall back to pattern[x] (pattern match).
-	if patternVal := v.getPatternValueForPath(slice, path); patternVal != nil {
-		return fixedpattern.ContainsPattern(actualJSON, patternVal)
-	}
-
-	// Fall back to fixed/pattern resolved from slice.Type[].Profile[] (FHIR
-	// R4 §profiling.html#discriminator). SUSHI/IG Publisher emit slices like
-	// `extension contains X named Y` without a redundant fixedUri on the slice
-	// — the constraint lives on Extension.url.fixedUri inside the referenced
-	// profile. ANY-of semantics: match if the actual value matches the
-	// constraint contributed by ANY of the referenced profiles.
-	return v.matchAgainstReferencedProfiles(actualJSON, slice, path)
-}
-
-// evaluatePatternDiscriminator checks if element matches a "pattern" discriminator.
-func (v *Validator) evaluatePatternDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
-	var actualValue any
-
-	if path == pathThis {
-		actualValue = element
-	} else {
-		actualValue = v.getValueAtPath(element, path)
-	}
-
-	if actualValue == nil {
-		return false
-	}
-
-	// Find the expected pattern value from the slice's child ElementDefinitions
-	patternValue := v.getPatternValueForPath(slice, path)
-	if patternValue == nil {
-		return false
-	}
-
-	// Compare using pattern matching
-	actualJSON, err := json.Marshal(actualValue)
-	if err != nil {
-		return false
-	}
-
-	return fixedpattern.ContainsPattern(actualJSON, patternValue)
-}
-
-// evaluateExistsDiscriminator checks if element matches an "exists" discriminator.
-// Slices are differentiated by presence or absence of the nominated element.
-func (v *Validator) evaluateExistsDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
-	actualExists := v.getValueAtPath(element, path) != nil
-	expectedExists := v.getExpectedExistence(slice, path)
-	return actualExists == expectedExists
-}
-
-// getExpectedExistence determines whether a slice expects an element to exist or not.
-// Derived from the child ElementDefinition's cardinality: min >= 1 means must exist, max == "0" means must not.
-func (v *Validator) getExpectedExistence(slice SliceInfo, path string) bool {
-	for _, child := range slice.Children {
-		if strings.HasSuffix(child.Path, "."+path) {
-			if child.Max == "0" {
-				return false
-			}
-			if child.Min >= 1 {
-				return true
+// childValues returns the instance values of a child element: under its name, or for a choice
+// element ("value[x]") under each name its types give it. A primitive present only through its
+// "_name" sibling (extensions without a value) is present (json.html#primitive).
+func childValues(child *registry.ElementNode, inst map[string]any) []childValue {
+	name := child.Name()
+	keys := []string{name}
+	if base, ok := strings.CutSuffix(name, "[x]"); ok {
+		keys = keys[:0]
+		for _, t := range child.Def.Type {
+			if t.Code != "" {
+				keys = append(keys, base+strings.ToUpper(t.Code[:1])+t.Code[1:])
 			}
 		}
 	}
-	return true
-}
-
-// evaluateTypeDiscriminator checks if element matches a "type" discriminator.
-func (v *Validator) evaluateTypeDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
-	// Handle "resource" path for Bundle.entry slicing
-	// This is used when slicing Bundle entries by the type of the contained resource
-	if path == "resource" {
-		resourceMap, ok := element["resource"].(map[string]any)
+	var out []childValue
+	for _, k := range keys {
+		v, ok := inst[k]
 		if !ok {
-			return false
-		}
-		actualType, _ := resourceMap["resourceType"].(string)
-		if actualType == "" {
-			return false
-		}
-
-		// Find the expected type from the slice's child ElementDefinitions
-		// Look for the "resource" child element which defines the expected type
-		expectedType := v.getExpectedResourceType(slice)
-		if expectedType == "" {
-			// No specific type constraint, allow match
-			return true
-		}
-
-		return actualType == expectedType
-	}
-
-	if path != pathThis {
-		// For polymorphic elements (value[x], effective[x], etc.), resolve the type
-		// from the JSON key suffix (e.g., "valueQuantity" → "Quantity").
-		if slice.Definition == nil || len(slice.Definition.Type) == 0 {
-			return true
-		}
-		actualType := v.resolvePolymorphicType(element, path)
-		if actualType == "" {
-			return false
-		}
-		for _, t := range slice.Definition.Type {
-			if strings.EqualFold(t.Code, actualType) {
-				return true
+			if _, ext := inst["_"+k]; ext {
+				out = append(out, childValue{key: k})
 			}
-		}
-		return false
-	}
-
-	// For $this, check if the element type matches the slice's allowed types
-	if slice.Definition == nil || len(slice.Definition.Type) == 0 {
-		return true
-	}
-
-	// Infer the type from the element
-	actualType := v.inferElementType(element)
-	if actualType == "" {
-		return false
-	}
-
-	// Check if it matches any of the slice's allowed types
-	for _, t := range slice.Definition.Type {
-		if t.Code == actualType {
-			return true
-		}
-	}
-
-	return false
-}
-
-// evaluateProfileDiscriminator checks if element matches a "profile" discriminator.
-func (v *Validator) evaluateProfileDiscriminator(element map[string]any, path string, slice SliceInfo) bool {
-	// Handle "resource" path for Bundle.entry slicing.
-	if path == "resource" {
-		resourceMap, ok := element["resource"].(map[string]any)
-		if !ok {
-			return false
-		}
-		expectedProfiles := v.getExpectedResourceProfiles(slice)
-		if len(expectedProfiles) == 0 {
-			return true
-		}
-		return v.profilesOverlap(v.getResourceProfiles(resourceMap), expectedProfiles)
-	}
-
-	// Resolve target element for $this or other paths.
-	targetElement := v.resolveTargetElement(element, path)
-	if targetElement == nil {
-		return false
-	}
-
-	expectedProfiles := v.collectExpectedProfiles(slice)
-	if len(expectedProfiles) == 0 {
-		return true
-	}
-
-	return v.matchElementToProfiles(targetElement, expectedProfiles)
-}
-
-// resolveTargetElement resolves the element at a discriminator path.
-func (v *Validator) resolveTargetElement(element map[string]any, path string) map[string]any {
-	if path == pathThis {
-		return element
-	}
-	val, ok := v.getValueAtPath(element, path).(map[string]any)
-	if !ok {
-		return nil
-	}
-	return val
-}
-
-// collectExpectedProfiles gathers profile URLs from a slice definition's type constraints.
-func (v *Validator) collectExpectedProfiles(slice SliceInfo) []string {
-	if slice.Definition == nil {
-		return nil
-	}
-	var profiles []string
-	for _, t := range slice.Definition.Type {
-		profiles = append(profiles, t.Profile...)
-	}
-	return profiles
-}
-
-// matchElementToProfiles checks if an element matches any of the expected profiles.
-func (v *Validator) matchElementToProfiles(element map[string]any, expectedProfiles []string) bool {
-	// For extensions: match url against expected profiles.
-	if url, ok := element["url"].(string); ok {
-		for _, p := range expectedProfiles {
-			if url == p {
-				return true
-			}
-		}
-		return false
-	}
-
-	// For resources: check meta.profile or resourceType via registry.
-	if rt, ok := element["resourceType"].(string); ok {
-		if v.profilesOverlap(v.getResourceProfiles(element), expectedProfiles) {
-			return true
-		}
-		for _, profileURL := range expectedProfiles {
-			if sd := v.registry.GetByURL(profileURL); sd != nil && sd.Type == rt {
-				return true
-			}
-		}
-		return false
-	}
-
-	return false
-}
-
-// profilesOverlap returns true if any actual profile matches any expected profile.
-func (v *Validator) profilesOverlap(actual, expected []string) bool {
-	for _, a := range actual {
-		for _, e := range expected {
-			if a == e {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// getExpectedResourceType returns the expected resource type for a slice.
-// It looks in the slice's Children for the "resource" element and returns its type code.
-func (v *Validator) getExpectedResourceType(slice SliceInfo) string {
-	for _, child := range slice.Children {
-		// Look for path ending in ".resource" (e.g., "Bundle.entry.resource")
-		if strings.HasSuffix(child.Path, ".resource") {
-			if len(child.Type) > 0 {
-				return child.Type[0].Code
-			}
-		}
-	}
-	return ""
-}
-
-// getExpectedResourceProfiles returns the expected profiles for a slice's resource.
-// It looks in the slice's Children for the "resource" element and returns its profile URLs.
-func (v *Validator) getExpectedResourceProfiles(slice SliceInfo) []string {
-	for _, child := range slice.Children {
-		// Look for path ending in ".resource" (e.g., "Bundle.entry.resource")
-		if strings.HasSuffix(child.Path, ".resource") {
-			if len(child.Type) > 0 && len(child.Type[0].Profile) > 0 {
-				return child.Type[0].Profile
-			}
-		}
-	}
-	return nil
-}
-
-// getResourceProfiles extracts the profile URLs from a resource's meta.profile.
-func (v *Validator) getResourceProfiles(resource map[string]any) []string {
-	meta, ok := resource["meta"].(map[string]any)
-	if !ok {
-		return nil
-	}
-
-	profilesRaw, ok := meta["profile"].([]any)
-	if !ok {
-		return nil
-	}
-
-	var profiles []string
-	for _, p := range profilesRaw {
-		if profileStr, ok := p.(string); ok {
-			profiles = append(profiles, profileStr)
-		}
-	}
-	return profiles
-}
-
-// getValueAtPath extracts a value from an element at a given path.
-// Handles arrays by checking if any element matches.
-func (v *Validator) getValueAtPath(element map[string]any, path string) any {
-	if path == pathThis {
-		return element
-	}
-
-	// Handle simple single-segment paths
-	if !strings.Contains(path, ".") {
-		return element[path]
-	}
-
-	// Handle multi-segment paths
-	parts := strings.Split(path, ".")
-	current := any(element)
-
-	for _, part := range parts {
-		switch val := current.(type) {
-		case map[string]any:
-			current = val[part]
-		case []any:
-			// For arrays, try to find a matching value in any element
-			// This is needed for discriminators like "coding.code" where coding is an array
-			for _, item := range val {
-				if m, ok := item.(map[string]any); ok {
-					if v := m[part]; v != nil {
-						return v
-					}
-				}
-			}
-			return nil
-		default:
-			return nil
-		}
-	}
-
-	return current
-}
-
-// getFixedValueForPath finds the fixed[x] value for a discriminator path in a slice.
-func (v *Validator) getFixedValueForPath(slice SliceInfo, path string) json.RawMessage {
-	// First check the slice definition itself
-	if path == pathThis || path == "" {
-		if val, _, has := slice.Definition.GetFixed(); has {
-			return val
-		}
-	}
-
-	// Look in child ElementDefinitions
-	for _, child := range slice.Children {
-		// Match if the child path ends with the discriminator path
-		if strings.HasSuffix(child.Path, "."+path) || (path == "url" && strings.HasSuffix(child.ID, ".url")) {
-			if val, _, has := child.GetFixed(); has {
-				return val
-			}
-		}
-	}
-
-	return nil
-}
-
-// getPatternValueForPath finds the pattern[x] value for a discriminator path in a slice.
-func (v *Validator) getPatternValueForPath(slice SliceInfo, path string) json.RawMessage {
-	// First check the slice definition itself
-	if path == pathThis || path == "" {
-		if val, _, has := slice.Definition.GetPattern(); has {
-			return val
-		}
-	}
-
-	// Look in child ElementDefinitions
-	for _, child := range slice.Children {
-		// Match if the child path ends with the discriminator path
-		if strings.HasSuffix(child.Path, "."+path) {
-			if val, _, has := child.GetPattern(); has {
-				return val
-			}
-		}
-	}
-
-	return nil
-}
-
-// matchAgainstReferencedProfiles compares actualJSON against fixed[x]/pattern[x]
-// emitted by each profile referenced from slice.Definition.Type[].Profile[].
-// FHIR R4 §profiling.html#discriminator allows a slice to inherit its discriminator
-// constraint from a referenced profile rather than carrying it inline (the SUSHI
-// idiom for `extension contains X named Y`).
-//
-// Returns true on first match (ANY-of semantics across multiple profiles). Returns
-// false if no profile is loaded in the registry, none has a snapshot, or none
-// carries a fixed/pattern value at "<refSD.Type>.<path>".
-func (v *Validator) matchAgainstReferencedProfiles(actualJSON json.RawMessage, slice SliceInfo, path string) bool {
-	if slice.Definition == nil || path == "" || path == pathThis {
-		return false
-	}
-	for _, t := range slice.Definition.Type {
-		for _, profileURL := range t.Profile {
-			if v.matchInReferencedProfile(actualJSON, profileURL, path) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// matchInReferencedProfile loads a single referenced profile from the registry and
-// checks whether actualJSON matches the fixed[x]/pattern[x] declared at
-// "<refSD.Type>.<path>" inside its snapshot.
-func (v *Validator) matchInReferencedProfile(actualJSON json.RawMessage, profileURL, path string) bool {
-	refSD := v.registry.GetByURL(profileURL)
-	if refSD == nil || refSD.Snapshot == nil {
-		return false
-	}
-	targetPath := refSD.Type + "." + path
-	for i := range refSD.Snapshot.Element {
-		elem := &refSD.Snapshot.Element[i]
-		if elem.Path != targetPath {
 			continue
 		}
-		if matchElementFixedOrPattern(actualJSON, elem) {
-			return true
-		}
-	}
-	return false
-}
-
-// matchElementFixedOrPattern checks fixed[x] (exact) then pattern[x] (subset) on
-// the given ElementDefinition against actualJSON.
-func matchElementFixedOrPattern(actualJSON json.RawMessage, elem *registry.ElementDefinition) bool {
-	if fixedVal, _, has := elem.GetFixed(); has {
-		if fixedpattern.DeepEqual(actualJSON, fixedVal) {
-			return true
-		}
-	}
-	if patternVal, _, has := elem.GetPattern(); has {
-		if fixedpattern.ContainsPattern(actualJSON, patternVal) {
-			return true
-		}
-	}
-	return false
-}
-
-// inferElementType attempts to infer the FHIR type of an element.
-func (v *Validator) inferElementType(element map[string]any) string {
-	// Check for resourceType (for contained resources or Bundle entries)
-	if rt, ok := element["resourceType"].(string); ok {
-		return rt
-	}
-
-	// Infer from common patterns
-	// This is a simplified heuristic; real implementation might need more context
-	if _, hasSystem := element["system"]; hasSystem {
-		if _, hasCode := element["code"]; hasCode {
-			if _, hasCoding := element["coding"]; hasCoding {
-				return "CodeableConcept"
+		if arr, isArr := v.([]any); isArr {
+			for _, item := range arr {
+				out = append(out, childValue{key: k, value: item, array: true})
 			}
-			return "Coding"
+			continue
 		}
+		out = append(out, childValue{key: k, value: v})
 	}
-
-	if _, hasValue := element["value"]; hasValue {
-		if _, hasUnit := element["unit"]; hasUnit {
-			return "Quantity"
-		}
-	}
-
-	if _, hasReference := element["reference"]; hasReference {
-		return "Reference"
-	}
-
-	if _, hasURL := element["url"]; hasURL {
-		return "Extension"
-	}
-
-	return ""
-}
-
-// resolvePolymorphicType finds the FHIR type of a polymorphic element (e.g., value[x])
-// by inspecting JSON keys. For basePath "value", a key "valueQuantity" yields "Quantity".
-func (v *Validator) resolvePolymorphicType(element map[string]any, basePath string) string {
-	for key := range element {
-		if len(key) > len(basePath) && strings.HasPrefix(key, basePath) {
-			suffix := key[len(basePath):]
-			if suffix != "" && suffix[0] >= 'A' && suffix[0] <= 'Z' {
-				return suffix
-			}
-		}
-	}
-	return ""
+	return out
 }
 
 // getElementsAtPath extracts elements at a given SD path from the resource.
@@ -864,7 +462,7 @@ func (v *Validator) lastPathSegment(path string) string {
 }
 
 // validateContained validates slicing in contained resources.
-func (v *Validator) validateContained(resource map[string]any, baseFhirPath string, result *issue.Result) {
+func (v *Validator) validateContained(run *validation, resource map[string]any, baseFhirPath string, result *issue.Result) {
 	containedRaw, ok := resource["contained"]
 	if !ok {
 		return
@@ -895,8 +493,9 @@ func (v *Validator) validateContained(resource map[string]any, baseFhirPath stri
 
 		// Extract and validate slicing contexts for contained resource
 		contexts := v.extractContexts(containedSD)
+		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource}
 		for _, ctx := range contexts {
-			v.validateContext(resourceMap, resourceType, containedFhirPath, ctx, result)
+			v.validateContext(run, scope, resourceMap, resourceType, containedFhirPath, ctx, result)
 		}
 	}
 }

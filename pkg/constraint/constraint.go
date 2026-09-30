@@ -36,6 +36,12 @@ type ValidateOptions struct {
 	// BundleData is the parsed Bundle JSON, enabling resolve() in FHIRPath.
 	// When non-nil, a resolver is created that can find resources by fullUrl.
 	BundleData map[string]any
+
+	// Resource and RootResource are the resources the validated value sits in, for %resource and
+	// %rootResource, when the value is not a resource itself (a datatype or extension checked
+	// against its profile). Nil means the value is the resource.
+	Resource     json.RawMessage
+	RootResource json.RawMessage
 }
 
 // constraintEvalOpts carries all contextual data for a single constraint evaluation.
@@ -170,7 +176,7 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 		return
 	}
 
-	resourceType, _ := resource["resourceType"].(string)
+	resourceType := sd.RootName(resource)
 	if resourceType == "" {
 		return
 	}
@@ -181,8 +187,20 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 		resourceCollection = nil
 	}
 
-	// Build eval options shared by all constraints in this resource.
-	evalOpts := v.buildEvalOpts(ctx, resourceCollection, resourceCollection, opts)
+	// Build eval options shared by all constraints in this resource. A value that is not a resource
+	// takes %resource and %rootResource from the resources it sits in.
+	resourceVar, rootVar := resourceCollection, resourceCollection
+	if opts != nil && opts.Resource != nil {
+		if col, err := types.JSONToCollection(opts.Resource); err == nil {
+			resourceVar, rootVar = col, col
+		}
+	}
+	if opts != nil && opts.RootResource != nil {
+		if col, err := types.JSONToCollection(opts.RootResource); err == nil {
+			rootVar = col
+		}
+	}
+	evalOpts := v.buildEvalOpts(ctx, resourceVar, rootVar, opts)
 
 	// Evaluate constraints on ALL elements in the snapshot.
 	for i := range sd.Snapshot.Element {

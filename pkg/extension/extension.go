@@ -90,7 +90,7 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 		return
 	}
 
-	resourceType, _ := resource["resourceType"].(string)
+	resourceType := sd.RootName(resource)
 	if resourceType == "" {
 		return
 	}

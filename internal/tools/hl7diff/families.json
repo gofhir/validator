@@ -72,6 +72,26 @@
       ]
     },
     {
+      "name": "slice-multiple-match",
+      "rule": "equal",
+      "gofhir": [
+        "SLICING_MULTIPLE_MATCH"
+      ],
+      "hl7": [
+        "Validation_VAL_Profile_MatchMultiple"
+      ]
+    },
+    {
+      "name": "slicing-cannot-be-evaluated",
+      "rule": "equal",
+      "gofhir": [
+        "SLICING_CANNOT_BE_EVALUATED"
+      ],
+      "hl7": [
+        "SLICING_CANNOT_BE_EVALUATED"
+      ]
+    },
+    {
       "name": "unknown-element",
       "rule": "parent",
       "gofhir": [
@@ -131,6 +151,17 @@
       ],
       "hl7": [
         "Terminology_TX_NoValid_*"
+      ]
+    },
+    {
+      "name": "binding-required-no-code",
+      "rule": "equal",
+      "gofhir": [
+        "BINDING_REQUIRED_NO_CODE"
+      ],
+      "hl7": [
+        "Terminology_TX_Code_ValueSet",
+        "Terminology_TX_Code_ValueSet_MISSING"
       ]
     },
     {
@@ -218,6 +249,7 @@
     "REFERENCE_CONTAINED_NOT_FOUND": "no HL7 counterpart verified yet",
     "REFERENCE_INVALID_FORMAT": "no HL7 counterpart verified yet",
     "REFERENCE_NOT_IN_BUNDLE": "no HL7 counterpart verified yet",
+    "SLICING_MEMBERSHIP_UNKNOWN": "information: ValueSet membership unknown for a binding discriminator (decision D-6); HL7 says nothing",
     "STRUCTURE_CHOICE_MUTUAL_EXCLUSION": "no HL7 counterpart verified yet",
     "STRUCTURE_INVALID_CHOICE_TYPE": "no HL7 counterpart verified yet",
     "STRUCTURE_INVALID_JSON": "input failure; HL7 aborts the whole run instead",

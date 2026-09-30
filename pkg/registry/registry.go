@@ -57,6 +57,21 @@ type StructureDefinition struct {
 	tree treeCache
 }
 
+// RootName returns the name a value validated against sd is rooted at, the first segment of every
+// path reported on it: the value's resourceType, or, for a value that has none validated against a
+// StructureDefinition that does not define a resource (a datatype, an extension or a logical
+// model), sd.Type. It is "" for a resource without resourceType, which is an error to report, not
+// a value to validate.
+func (sd *StructureDefinition) RootName(value map[string]any) string {
+	if rt, _ := value["resourceType"].(string); rt != "" {
+		return rt
+	}
+	if sd != nil && sd.Kind != KindResource {
+		return sd.Type
+	}
+	return ""
+}
+
 // ExtensionContext defines where an extension can be used.
 type ExtensionContext struct {
 	Type       string `json:"type"`       // element, extension, fhirpath

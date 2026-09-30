@@ -46,7 +46,7 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 		return
 	}
 
-	resourceType, _ := resource["resourceType"].(string)
+	resourceType := sd.RootName(resource)
 	if resourceType == "" {
 		return
 	}

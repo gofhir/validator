@@ -238,7 +238,7 @@ func (v *Validator) ValidateDataWithBundle(resource map[string]any, sd *registry
 		return
 	}
 
-	resourceType, _ := resource["resourceType"].(string)
+	resourceType := sd.RootName(resource)
 	if resourceType == "" {
 		return
 	}

@@ -225,8 +225,10 @@ injected by `pkg/validator`, so `slicematch` stays low in the graph:
 ```go
 // Conformer answers whether value conforms to the profile (discriminator type "profile").
 // The implementation runs the full validation pipeline on the value, with a fresh result.
+// scope carries the resources the value sits in (%resource, %rootResource), which
+// constraints such as ref-1 read; a datatype or extension value has no resourceType of its own.
 type Conformer interface {
-    Conforms(ctx context.Context, value any, profile *registry.StructureDefinition) bool
+    Conforms(ctx context.Context, value any, profile *registry.StructureDefinition, scope Scope) bool
 }
 
 // Resolver follows a reference inside the current Bundle or contained resources (resolve()).
@@ -466,13 +468,83 @@ declared divergence.
 **PR A2: `slicematch`** (behavior change only through `slicing`, which switches to it here)
 
 - Build the conformant matcher, with the three injected interfaces and zero element-name literals.
+- **The phases validate values that are not resources**, so `Conformer` can decide a `profile`
+  discriminator on a datatype or extension profile, as HL7 does (decided 2026-09-29). A value
+  without `resourceType` validated against a StructureDefinition whose `kind` is not `resource`
+  is rooted at `sd.Type`. A resource without `resourceType` stays an error. The main entry point
+  always has a resource, so this changes nothing outside `Conformer`.
+- New diagnostic IDs, each in `hl7diff`'s family table:
+  - `SLICING_MULTIPLE_MATCH`, HL7 `Validation_VAL_Profile_MatchMultiple` (D-1). HL7 does not report
+    it for `pattern`, which is a declared divergence.
+  - `SLICING_CANNOT_BE_EVALUATED`, HL7 `SLICING_CANNOT_BE_EVALUATED` (D-2, D-3).
+  - An informational issue for unknown membership (D-6). It has no HL7 equivalent.
 - Acceptance:
   - IPS minimal has no `entry:composition`/`entry:patient` errors;
-  - `bp-ok` has no `SBPCode`/`DBPCode` errors;
   - V1 reports `extension:message` max 1;
-  - IPS all-sections reports multi-match (D-1);
-  - every `decisions/` instance matches its decision row;
-  - the acme synthetic profile passes for every discriminator type.
+  - ~~IPS all-sections reports multi-match (D-1)~~: withdrawn, see below;
+  - the `decisions/` instances Q1, Q2, Q3 and Q6 match their decision rows;
+  - the acme synthetic profile passes for every discriminator type;
+  - a `profile` discriminator on a datatype or extension profile is decided by conformance.
+- **Status (2026-09-30): done** on `feat/a2-slicematch`. `hl7diff` against v1.21.1 gives 13 groups,
+  689 files, 0 findings, with the five D-1 `pattern` divergences declared. The change removes 493
+  errors that HL7 does not report (mCODE 242, AU Core 52, CH Core 52, US Core 50, DEQM 43, IPS 20,
+  CL Core 10, probes and decisions 24).
+- **IPS all-sections multi-match, withdrawn.** HL7 reports 11 multi-matches there, for example
+  `entry[26]` (body weight, LOINC 29463-7) matching the EDD, pregnancy-outcome and vital-signs
+  profiles. The EDD profile binds `Observation.code` required to `edd-method-uv-ips`, which
+  enumerates 11778-8, 11779-6 and 11780-4. The code is not a member, and that is decidable from
+  the ValueSet alone. Under `-tx n/a`, HL7 does not evaluate the binding, so its multi-matches are
+  an artifact of running without terminology. gofhir evaluates enumerated ValueSets locally and
+  finds one match, which is the spec's answer.
+- **Decided while implementing**, each checked against HL7 on the corpus:
+  - **D1 and D1b move here from A4** (decided 2026-09-30). Correct matching assigns Bundle entries
+    to their slices, which exposed 199 false `request.method`/`url` and `response.status` errors
+    under optional parents, the original gofhir/server report. `validateSliceChildren` now works
+    on the tree: a child is checked only where its parent is present, and choice elements are
+    counted under the names their types give them.
+  - **A discriminator that a slice does not constrain matches.** A `value`/`pattern` discriminator
+    with no fixed value, pattern or required binding on the slice, or a `profile` discriminator on
+    a slice that declares no profile, does not tell that slice apart; the other discriminators
+    do. Examples: AU Core `category:specificDiscipline` fixes `coding.system` but not
+    `coding.code`, and the IPS `entry:careplan` declares a type but no profile.
+  - **Values through nested slices.** A `value` discriminator whose path crosses a sliced element
+    takes the values of that element's required slices. Example: `code.coding.code` in the blood
+    pressure profiles, with `coding:DBPCode.code` fixed.
+  - **A type declaring several profiles** is any-of: each profile is an alternative, and the
+    discriminator matches when any alternative matches.
+  - **The `Conformer`:**
+    - a resource conforms only to a profile of its own type;
+    - an entry resource is its own `%rootResource` (fhirpath.html#variables), since only contained
+      resources have another.
+  - **Terminology:** `pkg/terminology` answered `valid` for any code, even `not-a-code`, in a
+    ValueSet that filters a code system it cannot expand (fail-open). `CodeResult.Assumed` now
+    marks those answers, and `WithStrictMembership` turns them into `unresolved` for the slice
+    matcher. Binding validation elsewhere is unchanged. That fail-open still accepts such codes
+    silently, which is a follow-up.
+  - **Binding:** a CodeableConcept under a required binding with no code (text only, or codings
+    without one) is now an error, `BINDING_REQUIRED_NO_CODE`, as in HL7
+    (`Terminology_TX_Code_ValueSet`). It surfaced through conformance, with IPS entries whose
+    `code` has only text. HL7 reports it 0 times at resource level in the corpus.
+  - **`hl7diff`:** a dependency closure now keeps an embedded package's newer version when an IG
+    depends on it (CH Core and IPS pin `hl7.fhir.uv.extensions` 5.3.0), as HL7 loads it.
+- **Performance** (IPS Bundles; v1.21.1 → A2, validation time as logged):
+
+  | Bundle | v1.21.1 | A2 |
+  | --- | --- | --- |
+  | Bundle-01 | 210 ms | 642 ms |
+  | Bundle-with-immunization | 236 ms | 725 ms |
+  | all-sections (42 entries, worst case) | 547 ms | 3,804 ms |
+  | minimal | 88 ms | 170 ms |
+  | no-info-required-sections | 93 ms | 179 ms |
+
+  The cost is conformance: each entry is validated against every candidate profile of its type
+  (about 10 for Observation in IPS). 90 % of that is `gofhir/fhirpath`'s absent-field lookup
+  ([note](2026-09-29-fhirpath-absent-field-cost.md)). Before the `%rootResource` fix, all-sections
+  took 15.8 s.
+- **Moved to A4** (decided 2026-09-29): `bp-ok` without `SBPCode`/`DBPCode` errors, and the Q4
+  (`ordered`) and Q5 (`openAtEnd`) instances. The errors come from contexts keyed by `path`, which
+  mix the `coding` slices of the systolic and diastolic components; the matcher alone cannot fix
+  them.
 
 **PR A3: `cardinality` on the tree** (D1b, D2, D6)
 
@@ -481,13 +553,16 @@ declared divergence.
   - P1, P5 and P6 have no `value[x]` error;
   - Q-nested reports `linkId` and `type` min 1 in R4 and R5.
 
-**PR A4: `slicing` on the tree** (D1, D5, `ordered`, `openAtEnd`)
+**PR A4: `slicing` on the tree** (D5, `ordered`, `openAtEnd`; D1 and D1b were done in A2)
 
-- Delete `validateSliceChildren`. Key contexts by `id`, and evaluate them per parent instance.
-  Implement `ordered` (D-4) and `openAtEnd` (D-5).
+- Key contexts by `id`, and evaluate them per parent instance. Implement `ordered` (D-4) and
+  `openAtEnd` (D-5). Report locations per instance: a context keyed by path loses the intermediate
+  segments today (`Patient.coding:inset` for `Patient.maritalStatus.coding:inset`).
 - Acceptance:
   - B2 reports one `request.method` error and `bdl-3`;
-  - `bp-ok` has 0 errors;
+  - `bp-ok` has 0 errors, with no `SBPCode`/`DBPCode` errors (moved from A2);
+  - the `decisions/` instances Q4 (`ordered`) and Q5 (`openAtEnd`) match their decision rows (moved
+    from A2); `registry.Slicing` gains `ordered`;
   - `bp-no-systolic` reports exactly HL7's two errors;
   - the IPS all-sections `request`/`response` errors are gone.
 
