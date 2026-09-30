@@ -162,3 +162,21 @@ func TestIsSubtype(t *testing.T) {
 		}
 	}
 }
+
+func TestChoiceType(t *testing.T) {
+	r := loadVersion(t, "4.0.1")
+	for _, tt := range []struct{ base, key, want string }{
+		{"value", "valueQuantity", "Quantity"},
+		{"value", "valueBoolean", "boolean"},
+		{"value", "valueDateTime", "dateTime"},
+		{"effective", "effectivePeriod", "Period"},
+		{"value", "value", ""},
+		{"value", "valuestring", ""}, // the type's first letter is capitalized
+		{"value", "valueFoo", ""},    // no such type
+		{"value", "other", ""},
+	} {
+		if got := r.ChoiceType(tt.base, tt.key); got != tt.want {
+			t.Errorf("ChoiceType(%q, %q) = %q, want %q", tt.base, tt.key, got, tt.want)
+		}
+	}
+}

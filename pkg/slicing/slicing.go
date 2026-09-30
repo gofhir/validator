@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
@@ -42,6 +41,9 @@ type Options struct {
 }
 
 // SliceInfo contains information about a defined slice.
+//
+// Deprecated: slicing is evaluated on the element tree (registry.ElementNode); this type is no
+// longer used by the package and is kept for compatibility.
 type SliceInfo struct {
 	Name       string                        // sliceName
 	Definition *registry.ElementDefinition   // The slice's ElementDefinition
@@ -51,8 +53,10 @@ type SliceInfo struct {
 }
 
 // Context contains slicing information for an element path.
+//
+// Deprecated: slicing is evaluated on the element tree, per parent instance, not per path; this
+// type is no longer used by the package and is kept for compatibility.
 type Context struct {
-	sd             *registry.StructureDefinition
 	Path           string                      // The sliced element path (e.g., "Patient.extension")
 	EntryDef       *registry.ElementDefinition // ElementDefinition with slicing definition
 	Discriminators []registry.Discriminator    // How to match elements to slices
@@ -115,74 +119,6 @@ type validation struct {
 	ctx   context.Context
 	opts  Options
 	scope slicematch.Scope
-}
-
-// extractContexts extracts all slicing definitions from a StructureDefinition.
-func (v *Validator) extractContexts(sd *registry.StructureDefinition) []Context {
-	contexts := make([]Context, 0, 8)
-
-	// Map to group elements by their sliced parent path
-	slicesByPath := make(map[string][]SliceInfo)
-	entryByPath := make(map[string]*registry.ElementDefinition)
-
-	for i := range sd.Snapshot.Element {
-		elem := &sd.Snapshot.Element[i]
-
-		// Check if this element defines slicing
-		if elem.Slicing != nil {
-			entryByPath[elem.Path] = elem
-		}
-
-		// Check if this element is a slice (has sliceName)
-		if elem.SliceName != nil && *elem.SliceName != "" {
-			sliceName := *elem.SliceName
-			// Find children of this slice
-			children := v.findSliceChildren(sd, elem.ID)
-
-			sliceInfo := SliceInfo{
-				Name:       sliceName,
-				Definition: elem,
-				Children:   children,
-				Min:        elem.Min,
-				Max:        elem.Max,
-			}
-			slicesByPath[elem.Path] = append(slicesByPath[elem.Path], sliceInfo)
-		}
-	}
-
-	// Build Contexts from entries and their slices
-	for path, entry := range entryByPath {
-		ctx := Context{
-			sd:       sd,
-			Path:     path,
-			EntryDef: entry,
-			Rules:    entry.Slicing.Rules,
-			Slices:   slicesByPath[path],
-		}
-
-		if entry.Slicing.Discriminator != nil {
-			ctx.Discriminators = entry.Slicing.Discriminator
-		}
-
-		contexts = append(contexts, ctx)
-	}
-
-	return contexts
-}
-
-// findSliceChildren finds ElementDefinitions that are children of a slice.
-func (v *Validator) findSliceChildren(sd *registry.StructureDefinition, sliceID string) []*registry.ElementDefinition {
-	var children []*registry.ElementDefinition
-
-	prefix := sliceID + "."
-	for i := range sd.Snapshot.Element {
-		elem := &sd.Snapshot.Element[i]
-		if strings.HasPrefix(elem.ID, prefix) {
-			children = append(children, elem)
-		}
-	}
-
-	return children
 }
 
 // childNamed returns node's child with this name, or nil.
@@ -267,7 +203,8 @@ type childValue struct {
 	key   string
 	value any
 	array bool
-	index int // position in the array, when array
+	index int            // position in the array, when array
+	ext   map[string]any // a primitive's id and extensions, from its "_key" sibling
 }
 
 // validateContained validates slicing in contained resources.

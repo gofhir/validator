@@ -659,6 +659,29 @@ concurrency, and 56 mutants. Every fix is re-checked with `hl7diff`, and the res
   (`Registry.ChoiceType`), in both the cardinality and the slicing phase. Without it, P4
   (`valueString` where the slice allows `Identifier`) reported a false `value[x]` min 1.
 - Performance is unchanged from A3, on the IPS Bundles and on the 183 US Core examples.
+- **Code review (2026-09-30).** Three reviews: the spec with HL7 runs on crafted instances, Go
+  with measurements, and 30 mutants.
+  - **Fixed:**
+    - A panic: openAtEnd with one element in no slice followed by two in slices read past the
+      values. One crafted resource could crash a server.
+    - The walk did not follow `contentReference`, so the slicing of `Questionnaire.item.extension`
+      was not applied to `item.item`. A regression.
+    - A resliced slice's own rules (`closed`, `ordered`, `openAtEnd`) were ignored. A regression.
+      Each level of slicing is now checked over the members assigned to it. A reslice's rules and
+      cardinality apply within its slice, so they are not checked where the slice is absent.
+    - Slicing of a primitive's extensions (`_birthDate`) was never walked, and neither was the
+      sub-extension slicing of a complex extension defined by its own profile (`us-core-race`
+      without `text`). HL7 reports both; both were gaps before A4.
+    - `ordered` now works as in HL7: each element is compared with the one before it, and an
+      element in no slice restarts the comparison.
+    - Dead code (`extractContexts`, `findSliceChildren`) is removed. `Context` and `SliceInfo` are
+      deprecated.
+    - Tests cover every surviving mutant.
+  - **Kept:** the location of a slice's cardinality error stays `<instance>.<element>:<slice>`
+    (`Patient.maritalStatus.coding:inset`), a full instance path that names the slice. Moving it to
+    the parent instance, as HL7 does, gave no pairing gain (`hl7diff` pairs it with the parent
+    rule) and changed the identity of errors the baseline already reported.
+  - `hl7diff` after the fixes: 13 groups, 689 files, 0 findings, 601 errors removed.
 
 **Every PR from A2 on** runs the invariant tool (PR A0) over the corpus it defines and the
 probes. A new or disappeared error without an HL7 justification blocks the merge, so A2 cannot
