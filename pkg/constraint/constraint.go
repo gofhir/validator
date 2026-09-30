@@ -38,10 +38,12 @@ type ValidateOptions struct {
 	BundleData map[string]any
 
 	// Resource and RootResource are the resources the validated value sits in, for %resource and
-	// %rootResource, when the value is not a resource itself (a datatype or extension checked
-	// against its profile). Nil means the value is the resource.
-	Resource     json.RawMessage
-	RootResource json.RawMessage
+	// %rootResource, as FHIRPath collections, when the value is not itself the root of its
+	// variables (a datatype or extension checked against its profile, or a contained resource).
+	// The caller prepares them once, so a large Bundle is not converted per check. Nil means the
+	// value is the resource.
+	Resource     fhirpath.Collection
+	RootResource fhirpath.Collection
 }
 
 // constraintEvalOpts carries all contextual data for a single constraint evaluation.
@@ -191,14 +193,10 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	// takes %resource and %rootResource from the resources it sits in.
 	resourceVar, rootVar := resourceCollection, resourceCollection
 	if opts != nil && opts.Resource != nil {
-		if col, err := types.JSONToCollection(opts.Resource); err == nil {
-			resourceVar, rootVar = col, col
-		}
+		resourceVar, rootVar = opts.Resource, opts.Resource
 	}
 	if opts != nil && opts.RootResource != nil {
-		if col, err := types.JSONToCollection(opts.RootResource); err == nil {
-			rootVar = col
-		}
+		rootVar = opts.RootResource
 	}
 	evalOpts := v.buildEvalOpts(ctx, resourceVar, rootVar, opts)
 

@@ -96,7 +96,7 @@ func (v *Validator) validateNode(
 	fhirPath string,
 	result *issue.Result,
 ) {
-	childSD, children := v.childrenOf(sd, node, typeCode)
+	childSD, children := v.childrenOf(sd, node, typeCode, 0)
 	for _, child := range children {
 		name := child.Name()
 		childPath := fhirPath + "." + name
@@ -143,20 +143,20 @@ func (v *Validator) validateNode(
 const resourceTypeKey = "resourceType"
 
 // childrenOf returns the child elements of an instance of node, and the StructureDefinition they
-// belong to: node's own children in the snapshot; else those of the element it slices; else those
-// its contentReference points to (D6); else those of its type's base definition. Following a
+// belong to: node's own children in the snapshot; else those its contentReference points to (D6);
+// else those of its type's base definition. The node is never a slice: slices are not children. Following a
 // type's profile instead is plan B (definition layering). The instance's type (typeCode) picks
 // the type of a choice element.
-func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string) (*registry.StructureDefinition, []*registry.ElementNode) {
+func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, hops int) (*registry.StructureDefinition, []*registry.ElementNode) {
 	if len(node.Children) > 0 {
 		return sd, node.Children
 	}
-	for s := node.SliceOf; s != nil; s = s.SliceOf {
-		if len(s.Children) > 0 {
-			return sd, s.Children
-		}
-	}
 	if ref := node.Def.ContentReference; ref != nil {
+		// A contentReference whose target is itself a contentReference is followed, up to a bound
+		// that only a malformed cycle reaches.
+		if hops >= maxContentReferenceHops {
+			return nil, nil
+		}
 		target, _ := v.registry.ContentReference(sd, node)
 		if target == nil {
 			return nil, nil
@@ -167,7 +167,7 @@ func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.
 				tsd = s
 			}
 		}
-		return v.childrenOf(tsd, target, typeCode)
+		return v.childrenOf(tsd, target, typeCode, hops+1)
 	}
 
 	code := typeCode
@@ -177,8 +177,10 @@ func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.
 	if code == "" {
 		return nil, nil
 	}
+	// The type's definition is used even when it is the one being walked: Extension.extension is
+	// an Extension. The recursion follows the instance, so it ends with it.
 	typeSD := v.registry.GetByType(code)
-	if typeSD == nil || typeSD.Kind == kindPrimitive || typeSD == sd {
+	if typeSD == nil || typeSD.Kind == kindPrimitive {
 		return nil, nil
 	}
 	root := typeSD.Tree().Root()
@@ -187,6 +189,10 @@ func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.
 	}
 	return typeSD, root.Children
 }
+
+// maxContentReferenceHops bounds a chain of contentReferences (a cycle in a malformed
+// StructureDefinition).
+const maxContentReferenceHops = 8
 
 // kindPrimitive is the StructureDefinition.kind of primitive types, whose children (id,
 // extension, value) are not properties of a JSON value.
@@ -222,7 +228,14 @@ func childValues(child *registry.ElementNode, data map[string]any) []childValue 
 	for _, k := range keys {
 		val, ok := data[k.name]
 		if !ok {
-			if _, ext := data["_"+k.name]; ext {
+			// A repeating primitive present only through its extensions has one item per entry.
+			switch ext := data["_"+k.name].(type) {
+			case nil:
+			case []any:
+				for range ext {
+					out = append(out, childValue{key: k.name, typeCode: k.typeCode, array: true})
+				}
+			default:
 				out = append(out, childValue{key: k.name, typeCode: k.typeCode})
 			}
 			continue

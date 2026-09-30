@@ -143,6 +143,7 @@ type end struct {
 type walker struct {
 	m        *Matcher
 	resolver Resolver
+	scope    Scope
 }
 
 type state struct {
@@ -379,7 +380,7 @@ func (w walker) resolve(st state) ([]state, error) {
 	if ref == "" || w.resolver == nil {
 		return []state{{branch: st.branch, cur: cursor{}, resolved: true, targets: targets}}, nil
 	}
-	res, ok := w.resolver.Resolve(ref)
+	res, ok := w.resolver.Resolve(ref, w.scope)
 	if !ok {
 		return []state{{branch: st.branch, cur: cursor{}, resolved: true, targets: targets}}, nil
 	}
@@ -579,10 +580,10 @@ func (m *Matcher) resourceDefinition(resourceType string, targets []string) *reg
 // tree returns a StructureDefinition's tree, generating its snapshot first when it has only a
 // differential.
 func (m *Matcher) tree(sd *registry.StructureDefinition) (*registry.ElementTree, error) {
-	if sd.Snapshot == nil {
-		if err := m.reg.EnsureSnapshot(context.Background(), sd); err != nil {
-			return nil, err
-		}
+	// EnsureSnapshot takes the definition's lock and returns at once when a snapshot exists;
+	// reading Snapshot here instead would race with a concurrent validation generating it.
+	if err := m.reg.EnsureSnapshot(context.Background(), sd); err != nil {
+		return nil, err
 	}
 	return sd.Tree(), nil
 }

@@ -76,6 +76,7 @@ func TestBindingRequiredNoCode(t *testing.T) {
 	}{
 		{"text only", `{"text":"active"}`, 1},
 		{"coding without code", `{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"}]}`, 1},
+		{"empty coding", `{"coding":[]}`, 1},
 		{"code from the value set", `{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical","code":"active"}]}`, 0},
 	} {
 		t.Run(tt.name, func(t *testing.T) {

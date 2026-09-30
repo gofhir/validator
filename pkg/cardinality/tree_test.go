@@ -78,6 +78,8 @@ func TestCardinalityOnTheTree(t *testing.T) {
 			`{"resourceType":"Patient"}`, []string{"CARDINALITY_MIN @ Patient.deceased[x]"}},
 		{"a required primitive present only through its extensions",
 			`{"resourceType":"Patient","deceasedBoolean":true,"name":[{"_family":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"masked"}]}}]}`, nil},
+		{"a repeating primitive present only through its extensions counts each entry",
+			`{"resourceType":"Patient","deceasedBoolean":true,"name":[{"family":"A","_given":[{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"masked"}]},null]}]}`, nil},
 		{"children of each array item are checked at their index",
 			`{"resourceType":"Patient","deceasedBoolean":true,"name":[{"family":"A"},{"given":["B"]}]}`,
 			[]string{"CARDINALITY_MIN @ Patient.name[1].family"}},
@@ -86,6 +88,33 @@ func TestCardinalityOnTheTree(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := cardinalityErrors(t, v, sd, tt.resource); !slices.Equal(got, tt.want) {
+				t.Errorf("errors %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// Types are walked through their base definitions, the one being walked included.
+func TestCardinalityThroughTypes(t *testing.T) {
+	reg := treeRegistry(t)
+	v := New(reg)
+	patient := reg.GetByType("Patient")
+	for _, tt := range []struct {
+		name, resource string
+		want           []string
+	}{
+		{"a nested extension is an Extension too",
+			`{"resourceType":"Patient","extension":[{"url":"http://example.org/x","extension":[{"valueString":"a"}]}]}`,
+			[]string{"CARDINALITY_MIN @ Patient.extension[0].extension[0].url"}},
+		{"a multi-type choice value is checked against the type its key names",
+			`{"resourceType":"Patient","extension":[{"url":"http://example.org/x","valueSignature":{}}]}`,
+			[]string{"CARDINALITY_MIN @ Patient.extension[0].valueSignature.type", "CARDINALITY_MIN @ Patient.extension[0].valueSignature.when", "CARDINALITY_MIN @ Patient.extension[0].valueSignature.who"}},
+		{"a resource inside an element is left to the walker, and reported once",
+			`{"resourceType":"Patient","contained":[{"resourceType":"Observation","id":"o","code":{"text":"x"}}]}`,
+			[]string{"CARDINALITY_MIN @ Patient.contained[0].status"}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := cardinalityErrors(t, v, patient, tt.resource); !slices.Equal(got, tt.want) {
 				t.Errorf("errors %v, want %v", got, tt.want)
 			}
 		})

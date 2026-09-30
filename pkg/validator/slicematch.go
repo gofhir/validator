@@ -4,7 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+	"strings"
 	"sync"
+
+	"github.com/gofhir/fhirpath"
+	"github.com/gofhir/fhirpath/types"
 
 	"github.com/gofhir/validator/pkg/constraint"
 	"github.com/gofhir/validator/pkg/issue"
@@ -26,6 +30,35 @@ type conformState struct {
 	mu      sync.Mutex
 	memo    map[conformKey]bool
 	running map[conformKey]bool
+	// collections caches a resource's FHIRPath collection, for %resource and %rootResource: the
+	// same Bundle is the scope of every check inside it.
+	collections map[uintptr]fhirpath.Collection
+}
+
+// collection returns the FHIRPath collection of a resource, converting it once per validation.
+func (st *conformState) collection(m map[string]any) fhirpath.Collection {
+	if m == nil {
+		return nil
+	}
+	key := reflect.ValueOf(m).Pointer()
+	st.mu.Lock()
+	col, ok := st.collections[key]
+	st.mu.Unlock()
+	if ok {
+		return col
+	}
+	raw, err := json.Marshal(m)
+	if err != nil {
+		return nil
+	}
+	col, err = types.JSONToCollection(raw)
+	if err != nil {
+		return nil
+	}
+	st.mu.Lock()
+	st.collections[key] = col
+	st.mu.Unlock()
+	return col
 }
 
 type conformKey struct {
@@ -40,7 +73,7 @@ func withConformState(ctx context.Context) context.Context {
 		return ctx
 	}
 	return context.WithValue(ctx, conformStateKey{}, &conformState{
-		memo: map[conformKey]bool{}, running: map[conformKey]bool{},
+		memo: map[conformKey]bool{}, running: map[conformKey]bool{}, collections: map[uintptr]fhirpath.Collection{},
 	})
 }
 
@@ -84,10 +117,10 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 	if rt, _ := data["resourceType"].(string); rt != "" && rt != profile.Type {
 		return false
 	}
-	if profile.Snapshot == nil {
-		if err := c.v.registry.EnsureSnapshot(ctx, profile); err != nil {
-			return false
-		}
+	// EnsureSnapshot takes the definition's lock; reading Snapshot here would race with a
+	// concurrent validation generating it.
+	if err := c.v.registry.EnsureSnapshot(ctx, profile); err != nil {
+		return false
 	}
 	raw, err := json.Marshal(data)
 	if err != nil {
@@ -96,33 +129,41 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 	// A fresh result with its stats, which the phases update.
 	result := issue.NewResult()
 	result.Stats = &issue.Stats{}
-	c.v.validateAgainstProfile(ctx, data, raw, profile, &valueScope{scope: scope}, result)
+	st, _ := ctx.Value(conformStateKey{}).(*conformState)
+	c.v.validateAgainstProfile(ctx, data, raw, profile, &valueScope{scope: scope, state: st}, result)
 	return result.ErrorCount() == 0
 }
 
 // valueScope marks a run of the pipeline on a value inside another resource (a conformance
 // check), with the resources it sits in.
-type valueScope struct{ scope slicematch.Scope }
+type valueScope struct {
+	scope slicematch.Scope
+	state *conformState
+}
 
 // constraintOptions returns the resources a value's constraints read as %resource and
 // %rootResource.
 func (s *valueScope) constraintOptions() *constraint.ValidateOptions {
-	opts := &constraint.ValidateOptions{BundleData: s.scope.RootResource}
-	if s.scope.Resource != nil {
-		opts.Resource, _ = json.Marshal(s.scope.Resource)
-	}
-	if s.scope.RootResource != nil {
-		opts.RootResource, _ = json.Marshal(s.scope.RootResource)
+	opts := &constraint.ValidateOptions{BundleData: s.scope.Container}
+	if s.state != nil {
+		opts.Resource = s.state.collection(s.scope.Resource)
+		opts.RootResource = s.state.collection(s.scope.RootResource)
 	}
 	return opts
 }
 
-// referenceResolver follows references inside the resource being validated, for resolve().
-type referenceResolver struct{ root map[string]any }
+// referenceResolver follows references for resolve(): "#id" among the contained resources of
+// the resource that makes the reference (its %rootResource, which a contained resource shares with
+// its container; references.html#contained), any other reference among the entries of the Bundle
+// being validated.
+type referenceResolver struct{}
 
 // Resolve implements slicematch.Resolver.
-func (r referenceResolver) Resolve(ref string) (map[string]any, bool) {
-	return constraint.ResolveReference(r.root, ref)
+func (referenceResolver) Resolve(ref string, scope slicematch.Scope) (map[string]any, bool) {
+	if id, ok := strings.CutPrefix(ref, "#"); ok {
+		return constraint.ContainedByID(scope.RootResource, id)
+	}
+	return constraint.ResolveInBundle(scope.Container, ref)
 }
 
 // memberChecker answers ValueSet membership with the binding phase itself: the value is checked

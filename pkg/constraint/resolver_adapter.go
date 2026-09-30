@@ -3,6 +3,7 @@ package constraint
 import (
 	"context"
 	"encoding/json"
+	"reflect"
 	"strings"
 )
 
@@ -24,8 +25,7 @@ func (r *fhirpathResolver) Resolve(_ context.Context, reference string) ([]byte,
 
 // ResolveReference finds the resource a reference names inside the resource being validated,
 // root: a fragment reference (#id) among the contained resources of root or of any Bundle entry,
-// and any other reference among the Bundle entries, by fullUrl or by a relative reference that
-// ends it ("Patient/123" for "http://example.org/fhir/Patient/123").
+// and any other reference among the Bundle entries (see ResolveInBundle).
 func ResolveReference(root map[string]any, reference string) (map[string]any, bool) {
 	if reference == "" || root == nil {
 		return nil, false
@@ -43,7 +43,13 @@ func ResolveReference(root map[string]any, reference string) (map[string]any, bo
 		}
 		return nil, false
 	}
-	for _, entry := range bundleEntries(root) {
+	return ResolveInBundle(root, reference)
+}
+
+// ResolveInBundle finds a Bundle entry's resource by fullUrl, or by a relative reference that ends
+// it ("Patient/123" for "http://example.org/fhir/Patient/123"). Any other resource has no entries.
+func ResolveInBundle(bundle map[string]any, reference string) (map[string]any, bool) {
+	for _, entry := range bundleEntries(bundle) {
 		fullURL, _ := entry["fullUrl"].(string)
 		if fullURL == "" {
 			continue
@@ -55,6 +61,29 @@ func ResolveReference(root map[string]any, reference string) (map[string]any, bo
 		}
 	}
 	return nil, false
+}
+
+// ContainedByID returns the contained resource of resource with this id: the target of the
+// fragment reference "#id" made from within it (references.html#contained).
+func ContainedByID(resource map[string]any, id string) (map[string]any, bool) {
+	res := findContainedByID(resource, id)
+	return res, res != nil
+}
+
+// IsContainedIn reports whether resource is one of container's contained resources (the same
+// value, not an equal one).
+func IsContainedIn(container, resource map[string]any) bool {
+	contained, _ := container["contained"].([]any)
+	for _, item := range contained {
+		if m, ok := item.(map[string]any); ok && sameMap(m, resource) {
+			return true
+		}
+	}
+	return false
+}
+
+func sameMap(a, b map[string]any) bool {
+	return len(a) == len(b) && reflect.ValueOf(a).Pointer() == reflect.ValueOf(b).Pointer()
 }
 
 // bundleEntries returns the entries of a Bundle, or none for any other resource.

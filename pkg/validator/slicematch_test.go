@@ -2,8 +2,15 @@ package validator
 
 import (
 	"context"
+	"encoding/json"
+	"os"
+	"slices"
 	"strings"
+	"sync"
 	"testing"
+
+	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/pkg/specs"
 )
 
 // Profiles where only conformance tells two slices apart, for a "profile" discriminator on values
@@ -88,4 +95,230 @@ func TestProfileDiscriminatorOnValuesThatAreNotResources(t *testing.T) {
 			}
 		})
 	}
+}
+
+// A profile discriminator on a Bundle entry checks the entry's resource against its profile, and
+// inside that check references still resolve among the Bundle's entries and among the resource's
+// own contained resources: the Composition's author slice is decided through resolve().
+const (
+	compByAuthor = `{"resourceType":"StructureDefinition","url":"https://example.org/fhir/StructureDefinition/comp","name":"Comp","type":"Composition",
+"kind":"resource","derivation":"constraint","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Composition","differential":{"element":[
+ {"id":"Composition","path":"Composition"},
+ {"id":"Composition.author","path":"Composition.author","slicing":{"discriminator":[{"type":"profile","path":"resolve()"}],"rules":"closed"}},
+ {"id":"Composition.author:pat","path":"Composition.author","sliceName":"pat","min":1,"max":"1","type":[{"code":"Reference","targetProfile":["http://hl7.org/fhir/StructureDefinition/Patient"]}]}]}}`
+	bundleOfComp = `{"resourceType":"StructureDefinition","url":"https://example.org/fhir/StructureDefinition/doc","name":"Doc","type":"Bundle",
+"kind":"resource","derivation":"constraint","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Bundle","differential":{"element":[
+ {"id":"Bundle","path":"Bundle"},
+ {"id":"Bundle.entry","path":"Bundle.entry","slicing":{"discriminator":[{"type":"profile","path":"resource"}],"rules":"open"}},
+ {"id":"Bundle.entry:comp","path":"Bundle.entry","sliceName":"comp","min":1,"max":"1"},
+ {"id":"Bundle.entry:comp.resource","path":"Bundle.entry.resource","min":1,"type":[{"code":"Composition","profile":["https://example.org/fhir/StructureDefinition/comp"]}]}]}}`
+)
+
+func TestProfileDiscriminatorResolvesInsideTheBundle(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{[]byte(compByAuthor), []byte(bundleOfComp)}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc := func(author, contained, second string) []byte {
+		return []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/doc"]},"type":"document",
+"identifier":{"system":"urn:ietf:rfc:3986","value":"urn:uuid:0c3151bd-1cbf-4d64-b04d-cd9187a4c6e0"},"timestamp":"2020-01-01T00:00:00Z",
+"entry":[{"fullUrl":"urn:uuid:c","resource":{"resourceType":"Composition","id":"c",` + contained + `
+ "text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},
+ "status":"final","type":{"text":"x"},"date":"2020","title":"t","author":[{"reference":"` + author + `"}]}},` + second + `]}`)
+	}
+	const (
+		patientEntry = `{"fullUrl":"urn:uuid:p","resource":{"resourceType":"Patient","id":"p","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}}}`
+		orgEntry     = `{"fullUrl":"urn:uuid:o","resource":{"resourceType":"Organization","id":"o","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}}}`
+		containedPat = `"contained":[{"resourceType":"Patient","id":"cp"}],`
+	)
+	for _, tt := range []struct {
+		name string
+		doc  []byte
+		want []string
+	}{
+		{"author is another entry of the Bundle", doc("urn:uuid:p", "", patientEntry), nil},
+		{"author is a contained resource of the Composition", doc("#cp", containedPat, orgEntry), nil},
+		{"author is not a Patient", doc("urn:uuid:o", "", orgEntry), []string{"SLICING_CARDINALITY_MIN @ Bundle.entry:comp"}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := v.Validate(context.Background(), tt.doc)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, is := range res.Issues {
+				if strings.HasPrefix(is.MessageID, "SLICING_") && is.Severity == "error" {
+					got = append(got, is.MessageID+" @ "+strings.Join(is.Expression, ","))
+				}
+			}
+			if strings.Join(got, "|") != strings.Join(tt.want, "|") {
+				t.Errorf("slicing errors %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// The decision instances, validated end to end: what each reports, and at which severity.
+func TestSlicingDecisionDiagnostics(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"), WithPackageTgz("../../testdata/m12-slice-scoping/packages/acme.decisions-0.3.0.tgz"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range []struct {
+		file string
+		want []string // "<severity> <ID> @ <location>", slicing diagnostics only
+	}{
+		// D-1: one issue per further slice, naming the assigned slice and that one.
+		{"Q1_value_one.json", []string{
+			"error SLICING_CARDINALITY_MIN @ Patient.identifier:B",
+			"error SLICING_MULTIPLE_MATCH @ Patient.identifier[0]",
+		}},
+		// D-3: an unknown profile cannot be evaluated, which is an error.
+		{"Q3_unresolvable_present.json", []string{
+			"error SLICING_CANNOT_BE_EVALUATED @ Patient.extension[0]",
+			"error SLICING_CARDINALITY_MIN @ Patient.extension:missing",
+		}},
+		// D-6: unknown membership is information, and the slice is not matched.
+		{"Q6_binding_external.json", []string{
+			"error SLICING_CARDINALITY_MIN @ Patient.coding:inset",
+			"information SLICING_MEMBERSHIP_UNKNOWN @ Patient.coding[0]",
+		}},
+		{"Q6_binding_local_in.json", nil},
+	} {
+		t.Run(tt.file, func(t *testing.T) {
+			data, err := os.ReadFile("../../testdata/m12-slice-scoping/decisions/instances/" + tt.file)
+			if err != nil {
+				t.Fatal(err)
+			}
+			res, err := v.Validate(context.Background(), data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, is := range res.Issues {
+				if strings.HasPrefix(is.MessageID, "SLICING_") {
+					got = append(got, string(is.Severity)+" "+is.MessageID+" @ "+strings.Join(is.Expression, ","))
+					if is.MessageID == "SLICING_MULTIPLE_MATCH" && !strings.HasSuffix(is.Diagnostics, ": A, B") {
+						t.Errorf("multi-match names %q, want the slices A, B", is.Diagnostics)
+					}
+				}
+			}
+			slices.Sort(got)
+			if !slices.Equal(got, tt.want) {
+				t.Errorf("slicing diagnostics\n got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// A resource conforms only to a profile of its own type: a Patient carrying only elements that a
+// Practitioner also has does not match a Practitioner slice.
+func TestConformanceRequiresTheProfilesType(t *testing.T) {
+	people := bundleProfileWithEntrySlices(t, "https://example.org/fhir/StructureDefinition/people", map[string]string{
+		"pr": "http://hl7.org/fhir/StructureDefinition/Practitioner",
+		"pa": "http://hl7.org/fhir/StructureDefinition/Patient",
+	})
+	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{people}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/people"]},"type":"collection",
+"entry":[{"fullUrl":"urn:uuid:p","resource":{"resourceType":"Patient","id":"p","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"name":[{"family":"A"}],"gender":"male"}}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, is := range res.Issues {
+		if strings.HasPrefix(is.MessageID, "SLICING_") {
+			t.Errorf("%s %v: %s", is.MessageID, is.Expression, is.Diagnostics)
+		}
+	}
+}
+
+// bundleProfileWithEntrySlices builds a Bundle profile from the core Bundle snapshot, with entry
+// sliced by the profile of its resource: one slice per name, whose resource has that profile.
+// The snapshot is built here rather than generated, so the test does not depend on the snapshot
+// generator.
+func bundleProfileWithEntrySlices(t *testing.T, url string, sliceProfiles map[string]string) []byte {
+	t.Helper()
+	pkgs, err := loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var core map[string]any
+	for _, p := range pkgs {
+		for _, raw := range p.Resources {
+			var peek struct{ URL string }
+			if json.Unmarshal(raw, &peek) == nil && peek.URL == "http://hl7.org/fhir/StructureDefinition/Bundle" {
+				_ = json.Unmarshal(raw, &core)
+			}
+		}
+	}
+	if core == nil {
+		t.Fatal("core Bundle not found")
+	}
+	base := core["snapshot"].(map[string]any)["element"].([]any)
+	var entryChildren []map[string]any
+	out := make([]any, 0, len(base)*(1+len(sliceProfiles)))
+	for _, e := range base {
+		m := e.(map[string]any)
+		id := m["id"].(string)
+		if id == "Bundle.entry" {
+			m["slicing"] = map[string]any{"discriminator": []any{map[string]any{"type": "profile", "path": "resource"}}, "rules": "open"}
+		}
+		if strings.HasPrefix(id, "Bundle.entry.") {
+			entryChildren = append(entryChildren, m)
+		}
+		out = append(out, m)
+	}
+	names := make([]string, 0, len(sliceProfiles))
+	for n := range sliceProfiles {
+		names = append(names, n)
+	}
+	slices.Sort(names)
+	for _, n := range names {
+		out = append(out, map[string]any{"id": "Bundle.entry:" + n, "path": "Bundle.entry", "sliceName": n, "min": 0, "max": "*",
+			"type": []any{map[string]any{"code": "BackboneElement"}}})
+		for _, c := range entryChildren {
+			cc := map[string]any{}
+			for k, v := range c {
+				cc[k] = v
+			}
+			cc["id"] = strings.Replace(c["id"].(string), "Bundle.entry.", "Bundle.entry:"+n+".", 1)
+			if cc["id"] == "Bundle.entry:"+n+".resource" {
+				profile := sliceProfiles[n]
+				cc["type"] = []any{map[string]any{"code": profile[strings.LastIndex(profile, "/")+1:], "profile": []any{profile}}}
+			}
+			out = append(out, cc)
+		}
+	}
+	sd := map[string]any{"resourceType": "StructureDefinition", "url": url, "name": "P", "type": "Bundle", "kind": "resource",
+		"derivation": "constraint", "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle", "snapshot": map[string]any{"element": out}}
+	b, err := json.Marshal(sd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return b
+}
+
+// Concurrent validations that check conformance against profiles shipped as differentials
+// generate their snapshots once, under the definition's lock (run with -race).
+func TestConformanceGeneratesSnapshotsConcurrently(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{[]byte(compByAuthor), []byte(bundleOfComp)}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc := []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/doc"]},"type":"document",
+"entry":[{"fullUrl":"urn:uuid:c","resource":{"resourceType":"Composition","id":"c","status":"final","type":{"text":"x"},"date":"2020","title":"t","author":[{"reference":"urn:uuid:p"}]}},
+{"fullUrl":"urn:uuid:p","resource":{"resourceType":"Patient","id":"p"}}]}`)
+	var wg sync.WaitGroup
+	for range 16 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := v.Validate(context.Background(), doc); err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+	wg.Wait()
 }

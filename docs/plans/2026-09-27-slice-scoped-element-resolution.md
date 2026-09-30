@@ -546,6 +546,52 @@ declared divergence.
   mix the `coding` slices of the systolic and diastolic components; the matcher alone cannot fix
   them.
 
+**Code review of A2 and A3 (2026-09-30).** Three reviews: the spec and the HL7 source, Go and
+concurrency, and 56 mutants. Every fix is re-checked with `hl7diff`, and the result is unchanged
+(13 groups, 689 files, 0 findings, 570 errors removed).
+
+- **Fixed:**
+  - Nested extensions skipped cardinality: a guard stopped `Extension.extension` inside the
+    Extension definition. That was a regression of A3.
+  - Inside a conformance check, `resolve()` lost the Bundle.
+    - `%rootResource` is the entry, or the container of a contained resource.
+    - References still resolve in the Bundle (`Scope.Container`).
+    - `#id` resolves only among the contained resources of the referencing resource, as
+      references.html#contained requires.
+  - A data race on `Snapshot` for profiles shipped as differentials: `EnsureSnapshot` is now always
+    called, and it takes the lock.
+  - A slice that no discriminator constrains cannot be evaluated, as in HL7's "Could not match
+    discriminator for slice"; it no longer matches every element. The "does not constrain" rules
+    now apply only when another discriminator constrains the slice.
+  - An `exists` slice that neither requires nor prohibits the element cannot be evaluated, as in
+    HL7.
+  - `max = 0` on the path requires the element to be absent, for every discriminator type.
+  - `type` accepts subtypes, as FHIRPath `is` does (`Registry.IsSubtype`, from `baseDefinition`).
+  - A required-binding discriminator needs exactly one value, as FHIRPath `memberOf` does.
+  - Terminology:
+    - An answer that falls back to the wildcard after a provider error is marked `Assumed`.
+    - A ValueSet mixing an unexpandable system with a local one no longer accepts any code of the
+      local system: the global wildcard now applies only to codes without a system.
+  - `BINDING_REQUIRED_NO_CODE` is reported only when the ValueSet resolves, as in HL7.
+  - A repeating primitive present only through `_name` counts each entry.
+  - A `contentReference` chain is bounded, against a cycle in a malformed definition.
+  - Conformance caches, per validation, the FHIRPath collection of the resources in scope. The time
+    is unchanged, because the entry is now its own root.
+  - Tests cover every surviving mutant that is not equivalent; the equivalent ones are a note's
+    severity, which comes from the diagnostic's template, and skipping a nested resource, where the
+    base `Resource` type has no required children.
+- **Declared divergences from HL7:**
+  - **Fixed complex values:** matched by equality ("exactly", elementdefinition.html#fixed[x]). HL7
+    builds a contains test for Coding, CodeableConcept and Identifier.
+  - **A value through a sliced element:** the values of *all* its required slices are required.
+    HL7 walks only the first.
+  - **`%resource` of a datatype value in a conformance check:** the resource it sits in
+    (fhirpath.html#variables). HL7 roots it at the element.
+  - **`resolve()` on a reference with no `targetProfile`:** it does not match. HL7 throws.
+- **Known gap:** a CodeableConcept that carries only an extension (data-absent-reason) under a
+  required binding is not reported, because the binding phase reads the type from the value's
+  shape. HL7 reports it.
+
 **PR A3: `cardinality` on the tree** (D2, D6; D1b was done in A2)
 
 - Acceptance:
@@ -575,7 +621,12 @@ declared divergence.
 **PR A4: `slicing` on the tree** (D5, `ordered`, `openAtEnd`; D1 and D1b were done in A2)
 
 - Key contexts by `id`, and evaluate them per parent instance. Implement `ordered` (D-4) and
-  `openAtEnd` (D-5). Report locations per instance: a context keyed by path loses the intermediate
+  `openAtEnd` (D-5).
+- **Choice type slicing** (`Observation.value[x]:valueQuantity`, `type`/`$this`). The children of
+  a type slice are checked by no phase today, and were not before A2: `bodyweight` with
+  `valueQuantity` lacking `unit`, `system` and `code` gives no error, while HL7 reports all three.
+  The cause: `getElementsAtPath` looks up the literal key `value[x]`, and `matchElement` passes the
+  element name, not the JSON key. Report locations per instance: a context keyed by path loses the intermediate
   segments today (`Patient.coding:inset` for `Patient.maritalStatus.coding:inset`).
 - Acceptance:
   - B2 reports one `request.method` error and `bdl-3`;

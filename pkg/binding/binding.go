@@ -513,6 +513,11 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val m
 // concept from a required value set is a code, and text alone is not one (terminologies.html,
 // "required": "the concept SHALL be from the specified value set").
 func (v *Validator) reportNoCode(binding *registry.Binding, fhirPath string, result *issue.Result) {
+	// Only against a value set that resolves, as the HL7 validator does: an unknown one says
+	// nothing about what the code should have been.
+	if v.termRegistry == nil || v.termRegistry.GetValueSet(binding.ValueSet) == nil {
+		return
+	}
 	result.AddErrorWithID(issue.DiagBindingRequiredNoCode, map[string]any{"valueSet": binding.ValueSet}, fhirPath)
 }
 

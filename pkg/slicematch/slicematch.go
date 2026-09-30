@@ -20,11 +20,14 @@ import (
 	"github.com/gofhir/validator/pkg/registry"
 )
 
-// Scope carries the resources a value sits in. Constraints read them as %resource and
-// %rootResource, and a datatype or extension value has none of its own.
+// Scope carries the resources a value sits in. Constraints read the first two as %resource and
+// %rootResource (fhirpath.html#variables): the resource the value is in, and the resource that
+// contains it when it is a contained resource, else the same one. Container is where references
+// resolve: the Bundle, or the resource, being validated.
 type Scope struct {
 	Resource     map[string]any
 	RootResource map[string]any
+	Container    map[string]any
 }
 
 // Conformer answers whether value conforms to profile (discriminator type "profile"). The
@@ -33,10 +36,10 @@ type Conformer interface {
 	Conforms(ctx context.Context, value any, profile *registry.StructureDefinition, scope Scope) bool
 }
 
-// Resolver follows a reference inside the resource being validated: a Bundle entry or a
-// contained resource (discriminator function resolve()).
+// Resolver follows a reference made from within scope (discriminator function resolve()): a
+// contained resource of the resource that makes it, or an entry of the Bundle being validated.
 type Resolver interface {
-	Resolve(ref string) (map[string]any, bool)
+	Resolve(ref string, scope Scope) (map[string]any, bool)
 }
 
 // Membership is the answer to a ValueSet membership question.
@@ -130,6 +133,8 @@ type Request struct {
 	Scope Scope
 	// Resolver follows references for resolve(); it depends on the resource being validated.
 	Resolver Resolver
+	// Containment reports whether a resource is contained in another, for %rootResource.
+	Containment func(container, resource map[string]any) bool
 }
 
 // Resolve returns the node that governs one instance of a sliced element.
@@ -169,16 +174,33 @@ func (m *Matcher) Resolve(ctx context.Context, req Request) Match {
 // slice.
 func (m *Matcher) sliceMatches(ctx context.Context, req Request, slice *registry.ElementNode) (bool, []Note) {
 	var notes []Note
+	constrained := false
 	for _, d := range req.Node.Def.Slicing.Discriminator {
-		ok, note := m.discriminatorMatches(ctx, req, slice, d)
-		if note != nil {
-			notes = append(notes, *note)
+		v := m.discriminatorMatches(ctx, req, slice, d)
+		if v.note != nil {
+			notes = append(notes, *v.note)
 		}
-		if !ok {
+		if !v.ok {
 			return false, notes
 		}
+		constrained = constrained || v.constrained
+	}
+	// A slice that none of the discriminators constrains cannot be told apart from the others;
+	// the HL7 validator reports it as slicing that cannot be evaluated ("Could not match
+	// discriminator for slice") rather than assigning every element to it.
+	if !constrained {
+		return false, append(notes, Note{Kind: NoteCannotEvaluate, Slice: slice,
+			Message: fmt.Sprintf("%s: no discriminator constrains this slice", slice.Def.ID)})
 	}
 	return true, notes
+}
+
+// verdict is one discriminator's answer for one slice: whether the instance matches, whether the
+// slice constrains the discriminated element at all, and why it could not be decided.
+type verdict struct {
+	ok          bool
+	constrained bool
+	note        *Note
 }
 
 // Discriminator types (ElementDefinition.slicing.discriminator.type).
@@ -190,9 +212,9 @@ const (
 	discProfile = "profile"
 )
 
-func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *registry.ElementNode, d registry.Discriminator) (bool, *Note) {
-	cannot := func(format string, args ...any) (bool, *Note) {
-		return false, &Note{Kind: NoteCannotEvaluate, Slice: slice, Message: fmt.Sprintf(format, args...)}
+func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *registry.ElementNode, d registry.Discriminator) verdict {
+	cannot := func(format string, args ...any) verdict {
+		return verdict{constrained: true, note: &Note{Kind: NoteCannotEvaluate, Slice: slice, Message: fmt.Sprintf(format, args...)}}
 	}
 	steps, err := parsePath(d.Path)
 	if err != nil {
@@ -200,7 +222,7 @@ func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *
 	}
 
 	start := cursor{sd: req.SD, node: slice, key: req.Key}
-	w := walker{m: m, resolver: req.Resolver}
+	w := walker{m: m, resolver: req.Resolver, scope: req.Scope}
 	ends, err := w.walk(start, []any{req.Value}, steps)
 	if err != nil {
 		return cannot("%s: %v", slice.Def.ID, err)
@@ -208,30 +230,54 @@ func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *
 
 	// Each alternative (a type with several profiles) is decided on its own; the instance matches
 	// when it matches any of them.
-	var note *Note
+	var out verdict
 	for _, group := range byBranch(ends) {
-		var ok bool
-		var n *Note
-		switch d.Type {
-		case discValue, discPattern:
-			ok, n = m.valueMatches(ctx, slice, group)
-		case discExists:
-			ok = existsMatches(group)
-		case discType:
-			ok = typeMatches(group)
-		case discProfile:
-			ok, n = m.profileMatches(ctx, req, slice, group)
-		default:
-			return cannot("discriminator type %q is not supported", d.Type)
+		v := m.decide(ctx, req, slice, group, d)
+		if v.ok {
+			return v
 		}
-		if ok {
-			return true, nil
-		}
-		if note == nil {
-			note = n
+		out.constrained = out.constrained || v.constrained
+		if out.note == nil {
+			out.note = v.note
 		}
 	}
-	return false, note
+	return out
+}
+
+// decide evaluates one discriminator on one alternative. A slice that prohibits the element at the
+// path (max 0) requires it to be absent, whatever the discriminator type.
+func (m *Matcher) decide(ctx context.Context, req Request, slice *registry.ElementNode, group []end, d registry.Discriminator) verdict {
+	present := len(instanceValues(group)) > 0
+	for _, e := range group {
+		if e.def != nil && e.def.Def.Max == "0" {
+			return verdict{ok: !present, constrained: true}
+		}
+	}
+	switch d.Type {
+	case discValue, discPattern:
+		return m.valueMatches(ctx, slice, group)
+	case discExists:
+		return existsMatches(slice, group)
+	case discType:
+		if len(allowedTypes(group)) == 0 {
+			return verdict{ok: true}
+		}
+		return verdict{ok: m.typeMatches(group), constrained: true}
+	case discProfile:
+		return m.profileMatches(ctx, req, slice, group)
+	}
+	return verdict{constrained: true, note: &Note{Kind: NoteCannotEvaluate, Slice: slice,
+		Message: fmt.Sprintf("discriminator type %q is not supported", d.Type)}}
+}
+
+// allowedTypes returns the types the slice allows where the walk ended.
+func allowedTypes(group []end) []registry.Type {
+	for _, e := range group {
+		if e.def != nil && len(e.allowed) > 0 {
+			return e.allowed
+		}
+	}
+	return nil
 }
 
 // byBranch groups ends by alternative, keeping the order they were reached in.
@@ -254,40 +300,35 @@ func byBranch(ends []end) [][]end {
 // the spec lists them, from a fixed value, a pattern, or a required binding on the slice's
 // definition of the discriminated element; a fixed or pattern value may also sit on an ancestor
 // that contains the rest of the path.
-func (m *Matcher) valueMatches(ctx context.Context, slice *registry.ElementNode, ends []end) (bool, *Note) {
+func (m *Matcher) valueMatches(ctx context.Context, slice *registry.ElementNode, ends []end) verdict {
 	src, ok := findValueSource(ends)
 	if !ok {
-		// A slice that fixes no value for this discriminator is not constrained by it; the other
-		// discriminators tell the slices apart (as the HL7 validator does, e.g. AU Core
-		// Observation.category:specificDiscipline, which fixes coding.system but not coding.code).
-		return true, nil
+		// A slice that fixes no value for this discriminator is not constrained by it; another
+		// discriminator must tell the slices apart (AU Core Observation.category:specificDiscipline
+		// fixes coding.system but not coding.code). When none does, sliceMatches reports it.
+		return verdict{ok: true}
 	}
 	actual := instanceValues(ends)
 	if src.kind != sourceBinding {
-		return satisfiesAll(actual, src.expect), nil
+		return verdict{ok: satisfiesAll(actual, src.expect), constrained: true}
 	}
-	// Required binding: every value must be in the ValueSet.
-	if len(actual) == 0 {
-		return false, nil
+	// Required binding: the discriminated element is one value, which must be in the ValueSet
+	// (FHIRPath memberOf takes a single item; the HL7 validator matches nothing otherwise).
+	if len(actual) != 1 {
+		return verdict{constrained: true}
 	}
 	if m.members == nil {
-		return false, membershipUnknown(slice, src.valueSet)
+		return verdict{constrained: true, note: membershipUnknown(slice, src.valueSet)}
 	}
-	unknown := false
-	for _, a := range actual {
-		var v any
-		_ = json.Unmarshal(a, &v)
-		switch m.members.InValueSet(ctx, src.valueSet, v) {
-		case MembershipOut:
-			return false, nil
-		case MembershipUnknown:
-			unknown = true
-		}
+	var v any
+	_ = json.Unmarshal(actual[0], &v)
+	switch m.members.InValueSet(ctx, src.valueSet, v) {
+	case MembershipIn:
+		return verdict{ok: true, constrained: true}
+	case MembershipUnknown:
+		return verdict{constrained: true, note: membershipUnknown(slice, src.valueSet)}
 	}
-	if unknown {
-		return false, membershipUnknown(slice, src.valueSet)
-	}
-	return true, nil
+	return verdict{constrained: true}
 }
 
 func membershipUnknown(slice *registry.ElementNode, vs string) *Note {
@@ -320,27 +361,24 @@ func satisfiesAll(actual []json.RawMessage, expect []expectation) bool {
 	return true
 }
 
-// existsMatches decides an exists discriminator: the slice requires the element (min > 0) or
-// prohibits it (max 0). A slice that does neither does not discriminate.
-func existsMatches(ends []end) bool {
+// existsMatches decides an exists discriminator where the slice requires the element (min > 0);
+// a prohibited element (max 0) is decided before this. A slice that does neither cannot be
+// evaluated, as the HL7 validator reports: the discriminator is based on element existence, but
+// the slice neither sets min>=1 nor max=0.
+func existsMatches(slice *registry.ElementNode, ends []end) verdict {
 	present := len(instanceValues(ends)) > 0
 	for _, e := range ends {
-		if e.def == nil {
-			continue
-		}
-		switch {
-		case e.def.Def.Max == "0":
-			return !present
-		case e.def.Def.Min > 0:
-			return present
+		if e.def != nil && e.def.Def.Min > 0 {
+			return verdict{ok: present, constrained: true}
 		}
 	}
-	return true
+	return verdict{constrained: true, note: &Note{Kind: NoteCannotEvaluate, Slice: slice,
+		Message: fmt.Sprintf("%s: an exists discriminator, but the slice neither requires nor prohibits the element", slice.Def.ID)}}
 }
 
 // typeMatches decides a type discriminator: the instance's type must be one of the types the
-// slice allows at the path.
-func typeMatches(ends []end) bool {
+// slice allows at the path, or derive from one (FHIRPath "is", as the HL7 validator tests it).
+func (m *Matcher) typeMatches(ends []end) bool {
 	seen := false
 	for _, e := range ends {
 		if e.value == nil {
@@ -352,7 +390,7 @@ func typeMatches(ends []end) bool {
 		}
 		ok := false
 		for _, t := range e.allowed {
-			if t.Code == e.typeCode {
+			if t.Code == e.typeCode || m.reg.IsSubtype(e.typeCode, t.Code) {
 				ok = true
 				break
 			}
@@ -366,7 +404,21 @@ func typeMatches(ends []end) bool {
 
 // profileMatches decides a profile discriminator: the instance must conform to one of the
 // profiles the slice declares at the path (type.profile, or type.targetProfile after resolve()).
-func (m *Matcher) profileMatches(ctx context.Context, req Request, slice *registry.ElementNode, ends []end) (bool, *Note) {
+func (m *Matcher) profileMatches(ctx context.Context, req Request, slice *registry.ElementNode, ends []end) verdict {
+	declared := false
+	for _, e := range ends {
+		declared = declared || len(e.profiles) > 0
+	}
+	if !declared {
+		// A slice that declares no profile at the path does not constrain it; another
+		// discriminator (typically type) tells the slices apart.
+		return verdict{ok: true}
+	}
+	ok, note := m.profileConforms(ctx, req, slice, ends)
+	return verdict{ok: ok, constrained: true, note: note}
+}
+
+func (m *Matcher) profileConforms(ctx context.Context, req Request, slice *registry.ElementNode, ends []end) (bool, *Note) {
 	seen := false
 	for _, e := range ends {
 		if e.value == nil {
@@ -375,8 +427,6 @@ func (m *Matcher) profileMatches(ctx context.Context, req Request, slice *regist
 		seen = true
 		profiles := e.profiles
 		if len(profiles) == 0 {
-			// A slice that declares no profile at the path does not constrain it; another
-			// discriminator (typically type) tells the slices apart.
 			continue
 		}
 		if m.conformer == nil {
@@ -390,13 +440,18 @@ func (m *Matcher) profileMatches(ctx context.Context, req Request, slice *regist
 				return false, &Note{Kind: NoteCannotEvaluate, Slice: slice,
 					Message: fmt.Sprintf("profile %s on %s could not be resolved (%s)", p, slice.Def.ID, res)}
 			}
-			// A resource value (a Bundle entry's resource) is its own %resource and %rootResource:
-			// %rootResource is the resource a contained resource sits in, and an entry is not
-			// contained (fhirpath.html#variables). A datatype value keeps the resources it sits in.
+			// A resource value is its own %resource. Its %rootResource is the resource containing
+			// it when it is contained there, else itself: a Bundle entry is not contained
+			// (fhirpath.html#variables). References still resolve in the same container. A
+			// datatype value keeps the resources it sits in.
 			scope := req.Scope
 			if res, _ := e.value.(map[string]any); res != nil {
 				if _, isResource := res[resourceTypeKey]; isResource {
-					scope = Scope{Resource: res, RootResource: res}
+					root := res
+					if req.Containment != nil && req.Containment(req.Scope.RootResource, res) {
+						root = req.Scope.RootResource
+					}
+					scope = Scope{Resource: res, RootResource: root, Container: req.Scope.Container}
 				}
 			}
 			if m.conformer.Conforms(ctx, e.value, psd, scope) {

@@ -431,10 +431,10 @@ func (r *Registry) ResolveCodeInValueSet(ctx context.Context, system, code, valu
 		return res, err
 	}
 
-	valid, found := r.validateCodeLocally(ctx, valueSetURL, system, code)
+	valid, found, providerAnswered := r.validateCodeLocallyDetail(ctx, valueSetURL, system, code)
 	res := localCodeResult(valid, found)
 	res.SystemInValueSet = r.localMembership(valueSetURL, system)
-	res.Assumed = res.Resolution == Valid && r.acceptedByWildcard(valueSetURL, system, code)
+	res.Assumed = res.Resolution == Valid && !providerAnswered && r.acceptedByWildcard(valueSetURL, system, code)
 	if res.Assumed && strictMembership(ctx) {
 		return CodeResult{Resolution: Unresolved, SystemInValueSet: res.SystemInValueSet,
 			Message: "membership cannot be checked without the code system"}, nil
@@ -456,12 +456,10 @@ func strictMembership(ctx context.Context) bool {
 	return strict
 }
 
-// acceptedByWildcard reports whether the local answer for a code came only from the wildcard an
-// expansion records for a code system it cannot expand, with no provider to ask.
+// acceptedByWildcard reports whether a local answer for a code could only have come from the
+// wildcard an expansion records for a code system it cannot expand. The caller rules out the
+// answers a provider gave.
 func (r *Registry) acceptedByWildcard(valueSetURL, system, code string) bool {
-	if r.getProvider() != nil {
-		return false
-	}
 	vs := r.GetValueSet(valueSetURL)
 	if vs == nil {
 		return false
@@ -476,7 +474,10 @@ func (r *Registry) acceptedByWildcard(valueSetURL, system, code string) bool {
 	if system != "" {
 		exact = codes[system+"|"+code]
 	}
-	return !exact && (codes["*"] || (system != "" && codes[system+"|*"]))
+	if system == "" {
+		return !exact && codes["*"]
+	}
+	return !exact && codes[system+"|*"]
 }
 
 // localMembership reports whether system is among the ValueSet's declared
@@ -522,6 +523,13 @@ func localCodeResult(valid, found bool) CodeResult {
 // validateCodeLocally answers from the registry's own copies, falling back to a
 // configured Provider.
 func (r *Registry) validateCodeLocally(ctx context.Context, valueSetURL, system, code string) (isValid, found bool) {
+	isValid, found, _ = r.validateCodeLocallyDetail(ctx, valueSetURL, system, code)
+	return isValid, found
+}
+
+// validateCodeLocallyDetail is validateCodeLocally that also reports whether a provider answered:
+// when none did, an answer from the expansion's wildcard is assumed, not checked.
+func (r *Registry) validateCodeLocallyDetail(ctx context.Context, valueSetURL, system, code string) (isValid, found, providerAnswered bool) {
 	// Resolve first: the ValueSet decides the cache key, so two versions of the
 	// same canonical cannot share an expansion. Keying by the version-stripped URL
 	// would let a lookup for one version be answered from another's expansion,
@@ -532,7 +540,8 @@ func (r *Registry) validateCodeLocally(ctx context.Context, valueSetURL, system,
 		// a host that owns terminology can hold ValueSets created after this
 		// registry was populated (e.g. authored over a REST API) — so ask before
 		// reporting the ValueSet unresolvable.
-		return r.validateViaProvider(ctx, system, code, valueSetURL)
+		isValid, found = r.validateViaProvider(ctx, system, code, valueSetURL)
+		return isValid, found, found
 	}
 
 	cacheKey := canonicalOf(vs.URL, vs.Version)
@@ -548,7 +557,8 @@ func (r *Registry) validateCodeLocally(ctx context.Context, valueSetURL, system,
 		r.mu.Unlock()
 	}
 
-	return r.validateWithProvider(ctx, codes, system, code, valueSetURL), true
+	isValid, providerAnswered = r.validateWithProviderDetail(ctx, codes, system, code, valueSetURL)
+	return isValid, true, providerAnswered
 }
 
 // canonicalOf builds the "url|version" key used by the version-scoped caches. A
@@ -560,9 +570,10 @@ func canonicalOf(url, version string) string {
 	return url + "|" + version
 }
 
-// validateWithProvider checks a code against expanded codes, delegating to the
-// external provider for external systems when one is configured.
-func (r *Registry) validateWithProvider(ctx context.Context, codes map[string]bool, system, code, valueSetURL string) bool {
+// validateWithProviderDetail checks a code against expanded codes, delegating to the external
+// provider for external systems when one is configured, and reports whether the provider answered
+// rather than the local expansion.
+func (r *Registry) validateWithProviderDetail(ctx context.Context, codes map[string]bool, system, code, valueSetURL string) (valid, providerAnswered bool) {
 	// The cheap local checks come first so the provider lock is only taken on
 	// the external-system path.
 	if system != "" && r.isExternalSystem(system) {
@@ -570,17 +581,17 @@ func (r *Registry) validateWithProvider(ctx context.Context, codes map[string]bo
 			// Try ValueSet-specific validation first (more precise)
 			valid, vsFound, err := p.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
 			if err == nil && vsFound {
-				return valid
+				return valid, true
 			}
 			// Fall back to system-level validation
 			valid, err = p.ValidateCode(ctx, system, code)
 			if err == nil {
-				return valid
+				return valid, true
 			}
 			// Error from provider → fall through to wildcard (fail-open)
 		}
 	}
-	return r.checkCode(codes, system, code)
+	return r.checkCode(codes, system, code), false
 }
 
 // validateViaProvider answers a ValueSet this registry does not hold by asking
@@ -602,14 +613,10 @@ func (r *Registry) validateViaProvider(ctx context.Context, system, code, valueS
 
 // checkCode checks if a code is in the expanded codes map.
 func (r *Registry) checkCode(codes map[string]bool, system, code string) bool {
-	// Check for wildcard (external system that accepts any value)
-	if codes["*"] {
-		return true
-	}
-
-	// For code elements (no system), just check the code
+	// For code elements (no system), just check the code; the global wildcard stands for an
+	// included system that cannot be expanded, which a code without a system may belong to.
 	if system == "" {
-		return codes[code]
+		return codes["*"] || codes[code]
 	}
 
 	// Check for system-specific wildcard

@@ -274,7 +274,10 @@ func TestPatternSources(t *testing.T) {
 
 type mapResolver map[string]map[string]any
 
-func (r mapResolver) Resolve(ref string) (map[string]any, bool) { v, ok := r[ref]; return v, ok }
+func (r mapResolver) Resolve(ref string, _ Scope) (map[string]any, bool) {
+	v, ok := r[ref]
+	return v, ok
+}
 
 // resolve() follows the reference to the resource and continues in its definition.
 func TestResolve(t *testing.T) {
@@ -404,4 +407,125 @@ func isIdentifierLiteral(lit string) bool {
 		}
 	}
 	return true
+}
+
+// The rules that decide a slice when the discriminated element is a choice, is prohibited, is not
+// constrained, or has several value sources.
+func TestDiscriminatorRules(t *testing.T) {
+	const vs = "https://example.org/fhir/ValueSet/kinds"
+	reg := newRegistry(t, nil, profileWith(
+		// value on a primitive choice: the JSON key is value + String.
+		`{"id":"Patient.extension","path":"Patient.extension","slicing":{"discriminator":[{"type":"value","path":"value"}],"rules":"open"},"type":[{"code":"Extension"}]}`,
+		`{"id":"Patient.extension:s","path":"Patient.extension","sliceName":"s","min":0,"max":"1","type":[{"code":"Extension"}]}`,
+		`{"id":"Patient.extension:s.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","fixedString":"a","type":[{"code":"string"},{"code":"code"}]}`,
+		// value through ofType: only the string alternative counts.
+		`{"id":"Patient.modifierExtension","path":"Patient.modifierExtension","slicing":{"discriminator":[{"type":"value","path":"value.ofType(string)"}],"rules":"open"},"type":[{"code":"Extension"}]}`,
+		`{"id":"Patient.modifierExtension:s","path":"Patient.modifierExtension","sliceName":"s","min":0,"max":"1","type":[{"code":"Extension"}]}`,
+		`{"id":"Patient.modifierExtension:s.value[x]","path":"Patient.modifierExtension.value[x]","min":1,"max":"1","fixedString":"a","type":[{"code":"string"},{"code":"code"}]}`,
+		// a fixed value is the value source even with a required binding beside it.
+		`{"id":"Patient.communication","path":"Patient.communication","slicing":{"discriminator":[{"type":"value","path":"preferred"}],"rules":"open"},"type":[{"code":"BackboneElement"}]}`,
+		`{"id":"Patient.communication:x","path":"Patient.communication","sliceName":"x","min":0,"max":"1","type":[{"code":"BackboneElement"}]}`,
+		`{"id":"Patient.communication:x.preferred","path":"Patient.communication.preferred","min":1,"max":"1","fixedBoolean":true,"binding":{"strength":"required","valueSet":"`+vs+`"},"type":[{"code":"boolean"}]}`,
+		// exists: a prohibited element must be absent; a slice that neither requires nor
+		// prohibits it cannot be evaluated.
+		`{"id":"Patient.identifier","path":"Patient.identifier","slicing":{"discriminator":[{"type":"exists","path":"period"}],"rules":"open"},"type":[{"code":"Identifier"}]}`,
+		`{"id":"Patient.identifier:open","path":"Patient.identifier","sliceName":"open","min":0,"max":"*","type":[{"code":"Identifier"}]}`,
+		`{"id":"Patient.identifier:open.period","path":"Patient.identifier.period","min":0,"max":"0","type":[{"code":"Period"}]}`,
+		`{"id":"Patient.identifier:loose","path":"Patient.identifier","sliceName":"loose","min":0,"max":"*","type":[{"code":"Identifier"}]}`,
+		`{"id":"Patient.identifier:loose.period","path":"Patient.identifier.period","min":0,"max":"1","type":[{"code":"Period"}]}`,
+		// two discriminators, one unconstrained by a slice (AU Core category:specificDiscipline).
+		`{"id":"Patient.maritalStatus","path":"Patient.maritalStatus","type":[{"code":"CodeableConcept"}]}`,
+		`{"id":"Patient.maritalStatus.coding","path":"Patient.maritalStatus.coding","slicing":{"discriminator":[{"type":"value","path":"system"},{"type":"value","path":"code"}],"rules":"open"},"type":[{"code":"Coding"}]}`,
+		`{"id":"Patient.maritalStatus.coding:sys","path":"Patient.maritalStatus.coding","sliceName":"sys","min":0,"max":"1","type":[{"code":"Coding"}]}`,
+		`{"id":"Patient.maritalStatus.coding:sys.system","path":"Patient.maritalStatus.coding.system","min":1,"max":"1","fixedUri":"urn:s","type":[{"code":"uri"}]}`,
+		`{"id":"Patient.maritalStatus.coding:sys.code","path":"Patient.maritalStatus.coding.code","min":0,"max":"1","type":[{"code":"code"}]}`,
+		`{"id":"Patient.maritalStatus.coding:none","path":"Patient.maritalStatus.coding","sliceName":"none","min":0,"max":"1","type":[{"code":"Coding"}]}`,
+		// required and optional slices of a sliced element on the path: only the required ones'
+		// values are required.
+		`{"id":"Patient.contact","path":"Patient.contact","slicing":{"discriminator":[{"type":"value","path":"relationship.coding.code"}],"rules":"open"},"type":[{"code":"BackboneElement"}]}`,
+		`{"id":"Patient.contact:next","path":"Patient.contact","sliceName":"next","min":0,"max":"1","type":[{"code":"BackboneElement"}]}`,
+		`{"id":"Patient.contact:next.relationship","path":"Patient.contact.relationship","min":1,"max":"*","type":[{"code":"CodeableConcept"}]}`,
+		`{"id":"Patient.contact:next.relationship.coding","path":"Patient.contact.relationship.coding","slicing":{"discriminator":[{"type":"value","path":"code"}],"rules":"open"},"min":0,"max":"*","type":[{"code":"Coding"}]}`,
+		`{"id":"Patient.contact:next.relationship.coding:n","path":"Patient.contact.relationship.coding","sliceName":"n","min":1,"max":"1","type":[{"code":"Coding"}]}`,
+		`{"id":"Patient.contact:next.relationship.coding:n.code","path":"Patient.contact.relationship.coding.code","min":1,"max":"1","fixedCode":"N","type":[{"code":"code"}]}`,
+		`{"id":"Patient.contact:next.relationship.coding:o","path":"Patient.contact.relationship.coding","sliceName":"o","min":0,"max":"1","type":[{"code":"Coding"}]}`,
+		`{"id":"Patient.contact:next.relationship.coding:o.code","path":"Patient.contact.relationship.coding.code","min":1,"max":"1","fixedCode":"O","type":[{"code":"code"}]}`,
+		`{"id":"Patient.contact:next.relationship.coding:m","path":"Patient.contact.relationship.coding","sliceName":"m","min":1,"max":"1","type":[{"code":"Coding"}]}`,
+		`{"id":"Patient.contact:next.relationship.coding:m.code","path":"Patient.contact.relationship.coding.code","min":1,"max":"1","fixedCode":"M","type":[{"code":"code"}]}`,
+	))
+	m := New(reg, WithMemberChecker(stubMembers{"true": MembershipIn, "false": MembershipIn}))
+	for _, tt := range []struct {
+		name, id, value, want string
+		notes                 []NoteKind
+	}{
+		{"primitive choice key", "Patient.extension", `{"url":"x","valueString":"a"}`, "Patient.extension:s", nil},
+		{"primitive choice, other value", "Patient.extension", `{"url":"x","valueString":"b"}`, "", nil},
+		{"ofType keeps its type", "Patient.modifierExtension", `{"url":"x","valueString":"a"}`, "Patient.modifierExtension:s", nil},
+		{"ofType drops other types", "Patient.modifierExtension", `{"url":"x","valueCode":"a"}`, "", nil},
+		{"fixed before binding", "Patient.communication", `{"language":{"text":"x"},"preferred":false}`, "", nil},
+		{"fixed value", "Patient.communication", `{"language":{"text":"x"},"preferred":true}`, "Patient.communication:x", nil},
+		{"prohibited and absent", "Patient.identifier", `{"system":"s"}`, "Patient.identifier:open", []NoteKind{NoteCannotEvaluate}},
+		{"prohibited and present", "Patient.identifier", `{"system":"s","period":{"start":"2020"}}`, "", []NoteKind{NoteCannotEvaluate}},
+		{"one discriminator unconstrained", "Patient.maritalStatus.coding", `{"system":"urn:s","code":"any"}`, "Patient.maritalStatus.coding:sys", []NoteKind{NoteCannotEvaluate}},
+		{"every required slice's value present", "Patient.contact", `{"relationship":[{"coding":[{"code":"N"},{"code":"M"}]}]}`, "Patient.contact:next", nil},
+		{"one required slice's value missing", "Patient.contact", `{"relationship":[{"coding":[{"code":"N"}]}]}`, "", nil},
+		{"only the optional slice's value", "Patient.contact", `{"relationship":[{"coding":[{"code":"O"},{"code":"M"}]}]}`, "", nil},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			got := resolveAt(t, m, reg, prof, tt.id, obj(t, tt.value), nil)
+			if id, _ := sliceIDs(got); id != tt.want {
+				t.Errorf("matched %q, want %q (notes %v)", id, tt.want, got.Notes)
+			}
+			if kinds := noteKinds(got); !slices.Equal(kinds, tt.notes) {
+				t.Errorf("notes %v (%v), want %v", kinds, got.Notes, tt.notes)
+			}
+		})
+	}
+}
+
+// With type and profile discriminators (the IPS Bundle), a slice that declares no profile is told
+// apart by its type alone.
+func TestProfileDiscriminatorWithoutAProfile(t *testing.T) {
+	const bundle = "https://example.org/fhir/StructureDefinition/tp"
+	reg := newRegistry(t, nil, `{"resourceType":"StructureDefinition","url":"`+bundle+`","name":"TP","type":"Bundle","kind":"resource",
+	"derivation":"constraint","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Bundle","snapshot":{"element":[
+	 {"id":"Bundle","path":"Bundle","min":0,"max":"*"},
+	 {"id":"Bundle.entry","path":"Bundle.entry","min":0,"max":"*","slicing":{"discriminator":[{"type":"type","path":"resource"},{"type":"profile","path":"resource"}],"rules":"open"},"type":[{"code":"BackboneElement"}]},
+	 {"id":"Bundle.entry:careplan","path":"Bundle.entry","sliceName":"careplan","min":0,"max":"*","type":[{"code":"BackboneElement"}]},
+	 {"id":"Bundle.entry:careplan.resource","path":"Bundle.entry.resource","min":1,"max":"1","type":[{"code":"CarePlan"}]}]}}`)
+	m := New(reg, WithConformer(stubConformer{}))
+	for value, want := range map[string]string{
+		`{"resource":{"resourceType":"CarePlan"}}`: "Bundle.entry:careplan",
+		`{"resource":{"resourceType":"Patient"}}`:  "",
+	} {
+		got := resolveAt(t, m, reg, bundle, "Bundle.entry", obj(t, value), nil)
+		if id, _ := sliceIDs(got); id != want {
+			t.Errorf("%s: matched %q, want %q (notes %v)", value, id, want, got.Notes)
+		}
+	}
+}
+
+// A type discriminator on a resource element reads the resource's type from resourceType.
+func TestTypeDiscriminatorOnAResource(t *testing.T) {
+	const bundle = "https://example.org/fhir/StructureDefinition/b"
+	reg := newRegistry(t, nil, `{"resourceType":"StructureDefinition","url":"`+bundle+`","name":"B","type":"Bundle","kind":"resource",
+	"derivation":"constraint","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Bundle","snapshot":{"element":[
+	 {"id":"Bundle","path":"Bundle","min":0,"max":"*"},
+	 {"id":"Bundle.entry","path":"Bundle.entry","min":0,"max":"*","slicing":{"discriminator":[{"type":"type","path":"resource"}],"rules":"open"},"type":[{"code":"BackboneElement"}]},
+	 {"id":"Bundle.entry:p","path":"Bundle.entry","sliceName":"p","min":0,"max":"*","type":[{"code":"BackboneElement"}]},
+	 {"id":"Bundle.entry:p.resource","path":"Bundle.entry.resource","min":1,"max":"1","type":[{"code":"Patient"}]},
+	 {"id":"Bundle.entry:dom","path":"Bundle.entry","sliceName":"dom","min":0,"max":"*","type":[{"code":"BackboneElement"}]},
+	 {"id":"Bundle.entry:dom.resource","path":"Bundle.entry.resource","min":1,"max":"1","type":[{"code":"DomainResource"}]},
+	 {"id":"Bundle.entry:any","path":"Bundle.entry","sliceName":"any","min":0,"max":"*","type":[{"code":"BackboneElement"}]},
+	 {"id":"Bundle.entry:any.resource","path":"Bundle.entry.resource","min":1,"max":"1","type":[{"code":"Resource"}]}]}}`)
+	m := New(reg)
+	for value, want := range map[string]string{
+		`{"resource":{"resourceType":"Patient"}}`:     "Bundle.entry:p",
+		`{"resource":{"resourceType":"Observation"}}`: "Bundle.entry:dom", // a DomainResource
+		`{"resource":{"resourceType":"Bundle"}}`:      "Bundle.entry:any", // a Resource, not a DomainResource
+	} {
+		if id, _ := sliceIDs(resolveAt(t, m, reg, bundle, "Bundle.entry", obj(t, value), nil)); id != want {
+			t.Errorf("%s: matched %q, want %q", value, id, want)
+		}
+	}
 }

@@ -771,9 +771,9 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	result.Stats.PhasesRun++
 
 	// Phase 9: Slicing validation
-	sliceOpts := slicing.Options{Resolver: referenceResolver{root: data}}
+	sliceOpts := slicing.Options{Resolver: referenceResolver{}, Containment: constraint.IsContainedIn}
 	if vs != nil {
-		sliceOpts = slicing.Options{Resolver: referenceResolver{root: vs.scope.RootResource}, Scope: &vs.scope}
+		sliceOpts.Scope = &vs.scope
 	}
 	v.slicingValidator.ValidateDataContext(ctx, data, sd, sliceOpts, result)
 	result.Stats.PhasesRun++
