@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.0](https://github.com/gofhir/validator/compare/v1.21.1...v1.22.0) (2026-09-30)
+
+
+### Features
+
+* **registry:** element tree by id, exact canonical resolution, jsoncompare (A1) ([#93](https://github.com/gofhir/validator/issues/93)) ([9ac6e84](https://github.com/gofhir/validator/commit/9ac6e846fd5cbfeb434ec88ea324a95978e5db73))
+
 ## [1.21.1](https://github.com/gofhir/validator/compare/v1.21.0...v1.21.1) (2026-09-23)
 
 
