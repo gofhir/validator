@@ -435,20 +435,19 @@ func (v *Validator) model() *registry.FHIRPathModel {
 	return v.registry.FHIRPathModel()
 }
 
-// focus reads the element a constraint is evaluated on. An object is given the type the model
-// assigns its definition path, so its fields resolve: a resource or a data type by its own name,
-// an element by the type of its definition.
+// focus reads the element a constraint is evaluated on as the type the model assigns its
+// definition path: a resource or a data type by its own name, an element by the type of its
+// definition, so an object's fields resolve and a primitive is read as its FHIR type
+// ("2019-12-08" at a dateTime is a dateTime, not a date).
 func focus(model *registry.FHIRPathModel, data json.RawMessage, defPath string) fhirpath.Collection {
-	if model != nil && defPath != "" && len(data) > 0 && data[0] == '{' {
-		typ := model.TypeOf(defPath)
+	var typ string
+	if model != nil && defPath != "" {
+		typ = model.TypeOf(defPath)
 		if typ == "" && model.HasType(defPath) {
 			typ = defPath
 		}
-		if typ != "" {
-			return fhirpath.Collection{types.NewObjectValueWithType(data, typ)}
-		}
 	}
-	col, _ := types.JSONToCollection(data)
+	col, _ := types.JSONToCollectionWithType(data, typ)
 	return col
 }
 
