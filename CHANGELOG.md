@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.25.0](https://github.com/gofhir/validator/compare/v1.24.0...v1.25.0) (2026-10-01)
+
+
+### Features
+
+* **slicing:** slicing on the element tree, per parent instance (A4) + fhirpath v1.9.2 ([#96](https://github.com/gofhir/validator/issues/96)) ([b2e9cc6](https://github.com/gofhir/validator/commit/b2e9cc639969bc43897d6fe3e56a57f19d7d249a))
+
 ## [1.24.0](https://github.com/gofhir/validator/compare/v1.23.0...v1.24.0) (2026-10-01)
 
 
