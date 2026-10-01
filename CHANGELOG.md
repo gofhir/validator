@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.25.1](https://github.com/gofhir/validator/compare/v1.25.0...v1.25.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* **deps:** fhirpath v1.9.5, plan A release notes and the note to the server (A5) ([#97](https://github.com/gofhir/validator/issues/97)) ([4eac0ca](https://github.com/gofhir/validator/commit/4eac0cafe48078b5fb03aba204b3b4180431c32b))
+
 ## [1.25.0](https://github.com/gofhir/validator/compare/v1.24.0...v1.25.0) (2026-10-01)
 
 
