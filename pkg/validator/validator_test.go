@@ -2,11 +2,8 @@ package validator
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"testing"
-
-	"github.com/gofhir/validator/pkg/terminology"
 )
 
 // Shared validator instance for tests to avoid repeated package loading.
@@ -423,55 +420,8 @@ func TestValidateWithPerCallProfile(t *testing.T) {
 }
 
 func TestValidateMaxZeroWithProfile(t *testing.T) {
-	v := getSharedValidator(t)
-
-	// Build a profile SD that prohibits Patient.photo (max="0").
-	// We copy the base Patient SD snapshot and override photo's max cardinality.
-	baseSD := v.Registry().GetByURL("http://hl7.org/fhir/StructureDefinition/Patient")
-	if baseSD == nil || baseSD.Snapshot == nil {
-		t.Fatal("Patient StructureDefinition not found")
-	}
-
-	profileURL := "http://example.org/StructureDefinition/no-photo-patient"
-
-	// Build snapshot elements JSON with photo max="0"
-	elements := baseSD.Snapshot.Element
-	elemJSON := make([]string, 0, len(elements))
-	for _, elem := range elements {
-		elemMax := elem.Max
-		if elem.Path == "Patient.photo" {
-			elemMax = "0"
-		}
-		elemJSON = append(elemJSON, fmt.Sprintf(
-			`{"id":%q,"path":%q,"min":%d,"max":%q}`,
-			elem.ID, elem.Path, elem.Min, elemMax,
-		))
-	}
-
-	profileJSON := fmt.Sprintf(`{
-		"resourceType": "StructureDefinition",
-		"url": "%s",
-		"name": "NoPhotoPatient",
-		"status": "active",
-		"kind": "resource",
-		"abstract": false,
-		"type": "Patient",
-		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
-		"derivation": "constraint",
-		"snapshot": {"element": [%s]}
-	}`, profileURL, joinStrings(elemJSON, ","))
-
-	// Create a new validator with the custom profile loaded
-	v2, err := New(
-		WithConformanceResources([][]byte{[]byte(profileJSON)}),
-		// Terminology is not under test here; an authority skips parsing the base
-		// ValueSets/CodeSystems, the dominant cost of building a validator under
-		// -race and coverage.
-		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
-	)
-	if err != nil {
-		t.Fatalf("Failed to create validator: %v", err)
-	}
+	v2 := profileValidator(t)
+	profileURL := noPhotoProfileURL
 
 	t.Run("photo present violates max=0 profile", func(t *testing.T) {
 		patient := `{
@@ -531,37 +481,8 @@ func TestValidateMaxZeroWithProfile(t *testing.T) {
 }
 
 func TestValidateWithDifferentialOnlyProfile(t *testing.T) {
-	profileURL := "http://example.org/StructureDefinition/diff-only-patient"
-
-	// Profile with ONLY a differential (no snapshot) — requires identifier.
-	profileJSON := fmt.Sprintf(`{
-		"resourceType": "StructureDefinition",
-		"url": "%s",
-		"name": "DiffOnlyPatient",
-		"status": "active",
-		"kind": "resource",
-		"abstract": false,
-		"type": "Patient",
-		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
-		"derivation": "constraint",
-		"differential": {
-			"element": [
-				{"id": "Patient", "path": "Patient"},
-				{"id": "Patient.identifier", "path": "Patient.identifier", "min": 1}
-			]
-		}
-	}`, profileURL)
-
-	v, err := New(
-		WithConformanceResources([][]byte{[]byte(profileJSON)}),
-		// Terminology is not under test here; an authority skips parsing the base
-		// ValueSets/CodeSystems, the dominant cost of building a validator under
-		// -race and coverage.
-		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
-	)
-	if err != nil {
-		t.Fatalf("Failed to create validator: %v", err)
-	}
+	v := profileValidator(t)
+	profileURL := diffOnlyProfileURL
 
 	t.Run("missing identifier fails against differential-only profile", func(t *testing.T) {
 		patient := `{
@@ -607,16 +528,4 @@ func TestValidateWithDifferentialOnlyProfile(t *testing.T) {
 			t.Errorf("Expected 0 errors with identifier present, got %d", errCount)
 		}
 	})
-}
-
-// joinStrings joins string elements with a separator (avoids importing strings in test).
-func joinStrings(elems []string, sep string) string {
-	result := ""
-	for i, e := range elems {
-		if i > 0 {
-			result += sep
-		}
-		result += e
-	}
-	return result
 }

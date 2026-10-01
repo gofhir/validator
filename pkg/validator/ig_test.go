@@ -3,8 +3,6 @@ package validator
 import (
 	"context"
 	"testing"
-
-	"github.com/gofhir/validator/pkg/terminology"
 )
 
 func TestValidateWithIGUnknownPackage(t *testing.T) {
@@ -122,39 +120,12 @@ func TestGetProfilesByPackage(t *testing.T) {
 // WithConformanceResources all collapsed under PackageID="custom#0.0.0",
 // breaking IG-scoped validation.
 func TestWithConformancePackage_PackageIDPreserved(t *testing.T) {
-	const profileURL = "https://example.org/fhir/StructureDefinition/test-patient-profile"
+	const profileURL = igPatientProfileURL
 	const pkgName = "test.ig"
 	const pkgVersion = "1.0.0"
 	const pkgID = pkgName + "#" + pkgVersion
 
-	profileJSON := []byte(`{
-		"resourceType": "StructureDefinition",
-		"url": "` + profileURL + `",
-		"name": "TestPatientProfile",
-		"type": "Patient",
-		"kind": "resource",
-		"abstract": false,
-		"derivation": "constraint",
-		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
-		"differential": {
-			"element": [
-				{"id": "Patient", "path": "Patient"},
-				{"id": "Patient.identifier", "path": "Patient.identifier", "min": 1}
-			]
-		}
-	}`)
-
-	v, err := New(
-		WithVersion("4.0.1"),
-		WithConformancePackage(pkgName, pkgVersion, [][]byte{profileJSON}),
-		// Terminology is not under test here; an authority skips parsing the base
-		// ValueSets/CodeSystems, the dominant cost of building a validator under
-		// -race and coverage.
-		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
-	)
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
+	v := profileValidator(t)
 
 	sd := v.Registry().GetByURL(profileURL)
 	if sd == nil {
@@ -183,33 +154,9 @@ func TestWithConformancePackage_PackageIDPreserved(t *testing.T) {
 // ValidateWithIG resolves to the profiles loaded via WithConformancePackage and
 // applies them to the resource (the failing path on go-fhir-server v0.13.0).
 func TestWithConformancePackage_ValidateWithIGScopesProfiles(t *testing.T) {
-	const profileURL = "https://example.org/fhir/StructureDefinition/strict-patient"
 	const pkgID = "test.strict.ig#2.0.0"
 
-	profileJSON := []byte(`{
-		"resourceType": "StructureDefinition",
-		"url": "` + profileURL + `",
-		"name": "StrictPatient",
-		"type": "Patient",
-		"kind": "resource",
-		"abstract": false,
-		"derivation": "constraint",
-		"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
-		"differential": {
-			"element": [
-				{"id": "Patient", "path": "Patient"},
-				{"id": "Patient.identifier", "path": "Patient.identifier", "min": 1}
-			]
-		}
-	}`)
-
-	v, err := New(
-		WithVersion("4.0.1"),
-		WithConformancePackage("test.strict.ig", "2.0.0", [][]byte{profileJSON}),
-	)
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
+	v := profileValidator(t)
 
 	// Patient with NO identifier — must fail under the strict profile.
 	resource := []byte(`{"resourceType": "Patient", "active": true}`)
