@@ -4,6 +4,7 @@ package constraint
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -366,7 +367,14 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 			if opts.ctx.Err() != nil {
 				return // the validation was canceled; that says nothing about the instance
 			}
-			// An invariant that cannot be evaluated is not satisfied. It fails at its own
+			if hitTimeLimit(err) {
+				// The evaluation stopped at this validator's own time limit, which says nothing
+				// about the instance: a processing notice, not a failed invariant.
+				result.AddWarningWithID(issue.DiagConstraintEvalError,
+					map[string]any{"key": c.Key, "error": err.Error()}, fhirPath)
+				continue
+			}
+			// Any other error leaves the invariant unsatisfied. It fails at its own
 			// severity, as in the HL7 validator, whose checkInvariant takes an exception from
 			// the FHIRPath engine as a failed invariant.
 			v.addConstraintViolation(c, fhirPath, err, result)
@@ -377,6 +385,12 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 			v.addConstraintViolation(c, fhirPath, nil, result)
 		}
 	}
+}
+
+// hitTimeLimit reports whether an evaluation error is the time limit set in buildEvalOpts.
+func hitTimeLimit(err error) bool {
+	var evalErr *eval.EvalError
+	return errors.Is(err, context.DeadlineExceeded) || (errors.As(err, &evalErr) && evalErr.Type == eval.ErrTimeout)
 }
 
 // evaluateWithContext builds an eval.Context with all services wired and evaluates the expression.

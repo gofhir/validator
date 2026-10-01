@@ -60,7 +60,7 @@ func TestConstraintThatCannotBeEvaluatedFails(t *testing.T) {
 			}
 			var got []string
 			for _, is := range res.Issues {
-				if is.MessageID == "CONSTRAINT_EVAL_ERROR" { // the deprecated ID must not come back
+				if is.MessageID == string(issue.DiagConstraintEvalError) {
 					t.Errorf("%s reported: %s", is.MessageID, is.Diagnostics)
 				}
 				if is.MessageID != string(issue.DiagConstraintFailed) || !strings.Contains(is.Diagnostics, "eval-") {

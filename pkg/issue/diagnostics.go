@@ -80,8 +80,9 @@ const (
 const (
 	DiagConstraintFailed       DiagnosticID = "CONSTRAINT_FAILED"
 	DiagConstraintCompileError DiagnosticID = "CONSTRAINT_COMPILE_ERROR"
-	// Deprecated: no longer reported. A constraint that cannot be evaluated is reported as
-	// DiagConstraintFailed, at the constraint's severity, as the HL7 validator does.
+	// DiagConstraintEvalError is reported only when evaluation stops at the validator's own time
+	// limit. Any other evaluation error is DiagConstraintFailed, at the constraint's severity, as
+	// in the HL7 validator.
 	DiagConstraintEvalError DiagnosticID = "CONSTRAINT_EVAL_ERROR"
 )
 
