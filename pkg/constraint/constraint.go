@@ -216,14 +216,14 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 
 		if elem.Path == resourceType {
 			// Root element: evaluate against full resource.
-			v.evaluateConstraintsWithCtx(resourceData, elem.Constraint, resourceType, evalOpts, result)
+			v.evaluateConstraintsWithCtx(resourceData, elem.Constraint, resourceType, elem.Path, evalOpts, result)
 			continue
 		}
 
 		// Nested element: extract instances and evaluate each.
 		instances := extractElementInstances(resource, elem.Path, resourceType, resourceType)
 		for _, inst := range instances {
-			v.evaluateConstraintsWithCtx(inst.data, elem.Constraint, inst.fhirPath, evalOpts, result)
+			v.evaluateConstraintsWithCtx(inst.data, elem.Constraint, inst.fhirPath, concretePath(elem.Path, inst.fhirPath), evalOpts, result)
 		}
 	}
 
@@ -298,14 +298,14 @@ func (v *Validator) validateContainedConstraints(ctx context.Context, resource m
 			}
 
 			if elem.Path == resourceType {
-				v.evaluateConstraintsWithCtx(containedJSON, elem.Constraint, containedFhirPath, evalOpts, result)
+				v.evaluateConstraintsWithCtx(containedJSON, elem.Constraint, containedFhirPath, elem.Path, evalOpts, result)
 				continue
 			}
 
 			// Nested element in contained resource.
 			instances := extractElementInstances(resourceMap, elem.Path, resourceType, containedFhirPath)
 			for _, inst := range instances {
-				v.evaluateConstraintsWithCtx(inst.data, elem.Constraint, inst.fhirPath, evalOpts, result)
+				v.evaluateConstraintsWithCtx(inst.data, elem.Constraint, inst.fhirPath, concretePath(elem.Path, inst.fhirPath), evalOpts, result)
 			}
 		}
 	}
@@ -335,8 +335,10 @@ func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResource
 
 // evaluateConstraintsWithCtx evaluates all constraints on an element using eval.Context.
 // This is the unified method that handles both root and nested element constraints,
-// wiring resolve(), memberOf(), %resource, %rootResource, and timeout.
-func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints []registry.Constraint, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+// wiring resolve(), memberOf(), %resource, %rootResource, and timeout. The definition path
+// defPath names a choice element as the instance does ("Observation.valueQuantity"); the model
+// types the focus from it.
+func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints []registry.Constraint, fhirPath, defPath string, opts *constraintEvalOpts, result *issue.Result) {
 	for _, c := range constraints {
 		if c.Expression == "" {
 			continue
@@ -359,7 +361,7 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 			continue
 		}
 
-		evalResult, err := v.evaluateWithContext(expr, data, opts)
+		evalResult, err := v.evaluateWithContext(expr, data, defPath, opts)
 		if err != nil {
 			result.AddWarningWithID(
 				issue.DiagConstraintEvalError,
@@ -379,8 +381,15 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 }
 
 // evaluateWithContext builds an eval.Context with all services wired and evaluates the expression.
-func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.RawMessage, opts *constraintEvalOpts) (fhirpath.Collection, error) {
-	evalCtx := eval.NewContext(data)
+func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.RawMessage, defPath string, opts *constraintEvalOpts) (fhirpath.Collection, error) {
+	model := v.model()
+	evalCtx := eval.NewContextForRoot(focus(model, data, defPath))
+	if model != nil {
+		// The types come from the loaded definitions, not from the engine's guesses: without them
+		// a string that begins with four digits is read as a date.
+		evalCtx.SetModel(model)
+		evalCtx.SetPath(defPath)
+	}
 
 	// Wire Go context with timeout.
 	goCtx := opts.ctx
@@ -416,6 +425,49 @@ func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.Raw
 	}
 
 	return expr.EvaluateWithContext(evalCtx)
+}
+
+// model is the FHIRPath model of the validator's registry, or nil without a registry.
+func (v *Validator) model() *registry.FHIRPathModel {
+	if v.registry == nil {
+		return nil
+	}
+	return v.registry.FHIRPathModel()
+}
+
+// focus reads the element a constraint is evaluated on. An object is given the type the model
+// assigns its definition path, so its fields resolve: a resource or a data type by its own name,
+// an element by the type of its definition.
+func focus(model *registry.FHIRPathModel, data json.RawMessage, defPath string) fhirpath.Collection {
+	if model != nil && defPath != "" && len(data) > 0 && data[0] == '{' {
+		typ := model.TypeOf(defPath)
+		if typ == "" && model.HasType(defPath) {
+			typ = defPath
+		}
+		if typ != "" {
+			return fhirpath.Collection{types.NewObjectValueWithType(data, typ)}
+		}
+	}
+	col, _ := types.JSONToCollection(data)
+	return col
+}
+
+// concretePath is the definition path of an element instance: defPath, except that a choice
+// element ("Observation.value[x]") is named by the property the instance at fhirPath uses
+// ("Observation.valueQuantity").
+func concretePath(defPath, fhirPath string) string {
+	parent, ok := strings.CutSuffix(defPath, "[x]")
+	if !ok {
+		return defPath
+	}
+	if i := strings.LastIndexByte(parent, '.'); i >= 0 {
+		parent = parent[:i]
+	}
+	key := fhirPath[strings.LastIndexByte(fhirPath, '.')+1:]
+	if i := strings.IndexByte(key, '['); i >= 0 {
+		key = key[:i]
+	}
+	return parent + "." + key
 }
 
 // getCompiledExpression returns a cached compiled expression or compiles a new one.
@@ -545,7 +597,7 @@ func (v *Validator) evaluateTypeSDConstraints(instances []elementInstance, typeS
 			// Root element of the type: evaluate its constraints against each instance.
 			if len(typeElem.Constraint) > 0 {
 				for _, inst := range instances {
-					v.evaluateConstraintsWithCtx(inst.data, typeElem.Constraint, inst.fhirPath, evalOpts, result)
+					v.evaluateConstraintsWithCtx(inst.data, typeElem.Constraint, inst.fhirPath, typeElem.Path, evalOpts, result)
 				}
 			}
 			continue
@@ -581,14 +633,14 @@ func (v *Validator) evaluateSubElementConstraints(instances []elementInstance, t
 		if rawVal, ok := instData[suffix]; ok {
 			rawJSON, err := json.Marshal(rawVal)
 			if err == nil {
-				v.evaluateConstraintsWithCtx(rawJSON, typeElem.Constraint, subFhirPath, evalOpts, result)
+				v.evaluateConstraintsWithCtx(rawJSON, typeElem.Constraint, subFhirPath, typeElem.Path, evalOpts, result)
 				continue
 			}
 		}
 		// Fallback: use extractElementInstances for complex sub-paths.
 		subInstances := extractElementInstances(instData, typeElem.Path, typeCode, inst.fhirPath)
 		for _, sub := range subInstances {
-			v.evaluateConstraintsWithCtx(sub.data, typeElem.Constraint, sub.fhirPath, evalOpts, result)
+			v.evaluateConstraintsWithCtx(sub.data, typeElem.Constraint, sub.fhirPath, concretePath(typeElem.Path, sub.fhirPath), evalOpts, result)
 		}
 	}
 }
