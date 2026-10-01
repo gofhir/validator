@@ -690,6 +690,24 @@ after, and regressions are reported with numbers.
 
 **PR A5: release A and note to the server**
 
+- **Release:** plan A ships one step per release (v1.22.0 = A1, v1.23.0 = A2, v1.24.0 = A3). The
+  release notes and the note to the server name the release that completes it without a number,
+  which is set when A5 ships.
+- **Status (2026-09-30): drafted** on `feat/a5-release`:
+  - the release notes are in [2026-09-30-release-notes-plan-a.md](2026-09-30-release-notes-plan-a.md);
+  - the note to the server is in [2026-09-30-note-to-server-plan-a.md](2026-09-30-note-to-server-plan-a.md).
+- **`gofhir/fhirpath` goes to v1.9.5.** v1.9.3 fixes a regression of v1.9.2 when a model is passed,
+  and v1.9.5 makes single-value functions end with an error when given several values. `hl7diff`
+  is unchanged on the 13 groups and on `r4-core-examples`.
+- **The server's `knownValidatorDefect` is gone.** Its `TestCareGapsDocumentValidatesAgainstDEQM`
+  passes with no exemptions once the test loads three of DEQM's dependencies (CQF Measures, CRMI,
+  CQF Common). Without them it now reports the unresolvable `crmi-softwaresystem` profile (D-3).
+- Across all 5,990 files, errors fall from 1,197 (v1.21.1) to 648: 608 removed and 59 added, each
+  added one with an HL7 equivalent or declared. 36 of the added are nested-item minimums from
+  following `contentReference`, all of them `Questionnaire` items (32 in `Questionnaire-qs1`, 4 in
+  the r4/r5 `q_nested` fixtures); the corpus has no nested `PlanDefinition` or `CodeSystem` item
+  that misses a required child.
+
 - The release notes list the removed false positives (DEQM, IPS, `bp`) and the new HL7-equivalent
   errors (V1, nested `Questionnaire`/`PlanDefinition`/`CodeSystem` items, multi-match).
 - The note to gofhir/server lists the `knownValidatorDefect` entries that can be deleted, and
