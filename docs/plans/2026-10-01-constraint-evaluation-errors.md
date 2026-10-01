@@ -1,7 +1,7 @@
 # Constraint evaluation errors fail the invariant
 
-**Status (2026-10-01):** implemented on `fix/constraint-eval-error-fails`; waits for plan B's PR B8
-(a FHIRPath `Model` from the registry) before it is merged.
+**Status (2026-10-01):** implemented on `fix/constraint-eval-fails-v2`, on top of plan B's PR B8
+(#107, a FHIRPath `Model` from the registry) and gofhir/fhirpath v1.9.7 (#109), which it needed.
 
 ## The change
 
@@ -15,15 +15,22 @@ Two exceptions, neither about the instance:
   and the result is still a `CONSTRAINT_EVAL_ERROR` warning.
 - **A canceled validation**: nothing is reported.
 
-## A defect it exposed
+## What it needed first
 
-The main constraint loop evaluated a constraint on a primitive element on `{"__value__": v}`, not
-on `v`. Expressions on the value (`startsWith`, `matches`, `length`) saw an object: they answered
-empty, which passes, or raised an error, which was a warning. Fixed on the same branch.
+Each of these became a false error once an evaluation error fails the invariant, so each was
+fixed first, in its own PR:
 
-- CH Core `ch-core-doc-1` and `ch-core-doc-2` raised errors on every `fullUrl` and identifier.
-  With the error now failing the invariant, that was 35 false errors.
-- AU Core `au-core-obs-02` failed on two observations that HL7 accepts. Those 2 errors go.
+- **A primitive's focus (#106).** The main constraint loop evaluated a constraint on a primitive
+  element on `{"__value__": v}`, not on `v`. CH Core's `ch-core-doc-1` and `ch-core-doc-2` raised
+  errors on every `fullUrl` and identifier, which would have been 35 false errors.
+- **Types from the definitions (#107, B8).** Without a `Model`, gofhir/fhirpath types a JSON string
+  that begins with four digits as a date. `dom-3` computes `'#' + id`, which failed for contained
+  resources with id `1111` in the R4 examples `PlanDefinition-KDN5` and `RequestGroup-kdn5-example`.
+- **A typed resource in `Resource` (gofhir/fhirpath v1.9.6, in #107).** With a model, a resource
+  held by an element declared `Resource` was typed `Resource`, and `bdl-11` failed on every
+  document Bundle.
+- **A typed primitive root (gofhir/fhirpath v1.9.7, #109).** A primitive root was typed from its
+  shape, and AU Core's `au-core-obs-02` failed on dateTimes of day precision.
 
 ## Decision C-1: an error the FHIRPath specification requires is a failure
 
@@ -38,24 +45,15 @@ gofhir/fhirpath raises the error, so the invariant fails. HL7 6.10.4's engine sh
 accepts the timing. This is a declared divergence (`C-1`, for CH Core
 `MedicationRequest-2-6-MedReqNorvasc`).
 
-## What waits for B8
-
-Without a `Model`, gofhir/fhirpath types a JSON string that begins with four digits as a date
-(`types/object.go`, `tryParseTemporalString`, "heuristic type detection when no Model is
-available"). `dom-3` computes `'#' + id`, which fails for a contained resource with id `1111`, as
-in the R4 examples `PlanDefinition-KDN5` and `RequestGroup-kdn5-example`. With the error now
-failing the invariant, those are 2 false errors that HL7 does not report.
-
-This is not an fhirpath defect: the engine guesses because it is given no types. PR B8 gives it
-the types from the StructureDefinitions, so `id` is a string. This branch is rebased onto B8 and
-`hl7diff` is run again before it is merged.
-
 ## Verification (against v1.25.1, HL7 validator 6.10.4)
 
 | Group | Result |
 | --- | --- |
-| 13 light groups | PASS. CH Core has 1 declared divergence (C-1), and AU Core has 2 false errors removed. |
-| `r4-core-examples` (5,301 files) | 2 findings: the two `dom-3` cases above, which wait for B8 |
+| 13 light groups | PASS, 0 findings. CH Core has 1 declared divergence (C-1). AU Core has 7 false errors removed, which come from #106, #107 and #109. |
+| `r4-core-examples` (5,301 files) | PASS, 0 findings. The 8 `tst-5` false errors removed come from #107. |
+
+Measured on this branch on top of `main` at #109, so the false errors removed are those of the
+prerequisites; this change itself adds no error HL7 does not report, except C-1.
 
 ## Related, not in this change
 
