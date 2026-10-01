@@ -364,7 +364,7 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 		evalResult, err := v.evaluateWithContext(expr, data, defPath, opts)
 		if err != nil {
 			if opts.ctx.Err() != nil {
-				return // the validation was cancelled; that says nothing about the instance
+				return // the validation was canceled; that says nothing about the instance
 			}
 			// An invariant that cannot be evaluated is not satisfied. It fails at its own
 			// severity, as in the HL7 validator, whose checkInvariant takes an exception from
@@ -508,8 +508,8 @@ func (v *Validator) constraintPassed(result fhirpath.Collection) bool {
 	return b
 }
 
-// addConstraintViolation adds an issue for a failed constraint. evalErr, when not nil, is why the
-// constraint could not be evaluated.
+// addConstraintViolation adds an issue for a failed constraint. When evalErr is not nil, it is
+// why the constraint could not be evaluated.
 func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath string, evalErr error, result *issue.Result) {
 	diag := fmt.Sprintf("Constraint failed: %s: '%s'", c.Key, c.Human)
 	if c.Source != "" {
