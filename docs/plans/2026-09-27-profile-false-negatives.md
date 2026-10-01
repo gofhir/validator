@@ -164,6 +164,19 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 
 **PR B8: a FHIRPath `Model` from the registry** (D10)
 
+- **Status (2026-10-01): implemented** on `feat/b8-fhirpath-model`, and **blocked on
+  gofhir/fhirpath**.
+  - The model matches the generated `gofhir/models/r4` model on all 8,415 paths, except where
+    that model departs from the definitions.
+  - With any model, the engine types a resource held by an element declared `Resource` as
+    `Resource`, not by its `resourceType`. `bdl-11` then fails on every document Bundle (13 false
+    errors in DEQM, IPS and CH Core).
+  - 147 elements in R4 and 162 in R5 are affected: every `contained`, `Bundle.entry.resource`
+    and `Parameters.parameter.resource`.
+  - Reported upstream. B8 is merged after the fhirpath release with the fix and an `hl7diff` run
+    on every group. The branch `fix/constraint-eval-error-fails` (constraint evaluation errors
+    fail the invariant) waits for B8.
+
 - Implement `fhirpath.Model`, and the optional `VersionedModel` and `TypeRegistry`, from the loaded
   StructureDefinitions only:
   - `ChoiceTypes` from `type[]` of `[x]` elements;
