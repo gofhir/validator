@@ -516,6 +516,23 @@ func (r *Registry) GetByType(typeName string) *StructureDefinition {
 	return r.byType[typeName]
 }
 
+// IsSubtype reports whether typeName is ancestor or derives from it, through the baseDefinition
+// chain of the type's definition ("Patient" is a "DomainResource" and a "Resource"): the FHIRPath
+// "is" test on FHIR types.
+func (r *Registry) IsSubtype(typeName, ancestor string) bool {
+	seen := map[*StructureDefinition]bool{}
+	for sd := r.GetByType(typeName); sd != nil && !seen[sd]; sd = r.GetByURL(sd.BaseDefinition) {
+		seen[sd] = true
+		if sd.Type == ancestor {
+			return true
+		}
+		if sd.BaseDefinition == "" {
+			break
+		}
+	}
+	return typeName == ancestor
+}
+
 // GetElementDefinition returns the ElementDefinition for a given path.
 // The path should be in the format "ResourceType.element.subelement".
 func (r *Registry) GetElementDefinition(path string) *ElementDefinition {

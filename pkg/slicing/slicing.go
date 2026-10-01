@@ -37,6 +37,8 @@ type Options struct {
 	Resolver slicematch.Resolver
 	// Scope holds the resources the validated value sits in, when it is not itself the resource.
 	Scope *slicematch.Scope
+	// Containment reports whether a resource is contained in another, for %rootResource.
+	Containment func(container, resource map[string]any) bool
 }
 
 // SliceInfo contains information about a defined slice.
@@ -97,7 +99,7 @@ func (v *Validator) ValidateDataContext(goCtx context.Context, resource map[stri
 	if opts.Scope != nil {
 		run.scope = *opts.Scope
 	} else {
-		run.scope = slicematch.Scope{Resource: resource, RootResource: resource}
+		run.scope = slicematch.Scope{Resource: resource, RootResource: resource, Container: resource}
 	}
 
 	// Extract all slicing contexts from the StructureDefinition
@@ -268,6 +270,7 @@ func (v *Validator) matchElement(run *validation, scope slicematch.Scope, ctx Co
 	}
 	m := v.matcher.Resolve(run.ctx, slicematch.Request{
 		SD: ctx.sd, Node: node, Key: node.Name(), Value: elem, Scope: scope, Resolver: run.opts.Resolver,
+		Containment: run.opts.Containment,
 	})
 	for _, n := range m.Notes {
 		switch n.Kind {
@@ -330,8 +333,26 @@ func (v *Validator) validateSliceChildren(
 			continue
 		}
 		elemPath := fmt.Sprintf("%s.%s[%d]", fhirPath, pathSegment, elemIdx)
-		checkChildren(node, elemMap, elemPath, ctx.Path+":"+sliceName, result)
+		checkChildren(v.memberDefinition(node), elemMap, elemPath, ctx.Path+":"+sliceName, result)
 	}
+}
+
+// memberDefinition returns the definition whose children govern an instance of a slice: the slice
+// itself when the snapshot unrolls its children, else the root of the one profile its type
+// declares (an extension slice is defined by its extension's StructureDefinition). A type with no
+// profile, or several, leaves the slice's own (empty) children.
+func (v *Validator) memberDefinition(slice *registry.ElementNode) *registry.ElementNode {
+	if len(slice.Children) > 0 || len(slice.Def.Type) != 1 || len(slice.Def.Type[0].Profile) != 1 {
+		return slice
+	}
+	psd, _ := v.registry.ResolveCanonical(slice.Def.Type[0].Profile[0])
+	if psd == nil || v.registry.EnsureSnapshot(context.Background(), psd) != nil {
+		return slice
+	}
+	if root := psd.Tree().Root(); root != nil {
+		return root
+	}
+	return slice
 }
 
 // checkChildren checks the cardinality of node's children in one instance of node, and recurses
@@ -398,7 +419,14 @@ func childValues(child *registry.ElementNode, inst map[string]any) []childValue 
 	for _, k := range keys {
 		v, ok := inst[k]
 		if !ok {
-			if _, ext := inst["_"+k]; ext {
+			// A repeating primitive present only through its extensions has one item per entry.
+			switch ext := inst["_"+k].(type) {
+			case nil:
+			case []any:
+				for range ext {
+					out = append(out, childValue{key: k, array: true})
+				}
+			default:
 				out = append(out, childValue{key: k})
 			}
 			continue
@@ -493,7 +521,7 @@ func (v *Validator) validateContained(run *validation, resource map[string]any, 
 
 		// Extract and validate slicing contexts for contained resource
 		contexts := v.extractContexts(containedSD)
-		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource}
+		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource, Container: run.scope.Container}
 		for _, ctx := range contexts {
 			v.validateContext(run, scope, resourceMap, resourceType, containedFhirPath, ctx, result)
 		}

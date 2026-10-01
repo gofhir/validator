@@ -142,3 +142,23 @@ func TestVersionLess(t *testing.T) {
 		}
 	}
 }
+
+func TestIsSubtype(t *testing.T) {
+	r := loadVersion(t, "4.0.1")
+	for _, tt := range []struct {
+		child, ancestor string
+		want            bool
+	}{
+		{"Patient", "Patient", true},
+		{"Patient", "DomainResource", true},
+		{"Patient", "Resource", true},
+		{"Bundle", "DomainResource", false},
+		{"Age", "Quantity", true},
+		{"Quantity", "Age", false},
+		{"Patient", "Observation", false},
+	} {
+		if got := r.IsSubtype(tt.child, tt.ancestor); got != tt.want {
+			t.Errorf("IsSubtype(%s, %s) = %v, want %v", tt.child, tt.ancestor, got, tt.want)
+		}
+	}
+}
