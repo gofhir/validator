@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/loader"
@@ -29,6 +30,29 @@ func loadVersion(t testing.TB, version string) *Registry {
 	r := New()
 	if err := r.LoadFromPackages(packages); err != nil {
 		t.Fatalf("LoadFromPackages: %v", err)
+	}
+	return r
+}
+
+// sharedVersions holds one registry per FHIR version for the tests that only read it: loading
+// one costs tens of seconds under -race, and pkg/registry runs under go test's 10-minute limit.
+var sharedVersions sync.Map // version -> func() (*Registry, error)
+
+// sharedVersion is loadVersion's registry, loaded once per version and shared by every test that
+// does not change it.
+func sharedVersion(t testing.TB, version string) *Registry {
+	t.Helper()
+	load, _ := sharedVersions.LoadOrStore(version, sync.OnceValues(func() (*Registry, error) {
+		packages, err := loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages(version))
+		if err != nil {
+			return nil, err
+		}
+		r := New()
+		return r, r.LoadFromPackages(packages)
+	}))
+	r, err := load.(func() (*Registry, error))()
+	if err != nil {
+		t.Fatalf("Cannot load FHIR %s packages: %v", version, err)
 	}
 	return r
 }
@@ -55,7 +79,7 @@ func TestTreeEmbeddedPackages(t *testing.T) {
 
 	for version, wantIssues := range want {
 		t.Run(version, func(t *testing.T) {
-			r := loadVersion(t, version)
+			r := sharedVersion(t, version)
 			var got []string
 			for _, url := range r.AllURLs() {
 				sd := r.GetByURL(url)

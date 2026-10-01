@@ -12,7 +12,7 @@ import (
 func TestFHIRPathModel(t *testing.T) {
 	for _, version := range []string{"4.0.1", "5.0.0"} {
 		t.Run(version, func(t *testing.T) {
-			m := loadVersion(t, version).FHIRPathModel()
+			m := sharedVersion(t, version).FHIRPathModel()
 			if got := m.FHIRVersion(); got != version {
 				t.Errorf("FHIRVersion = %q, want %q", got, version)
 			}
@@ -63,7 +63,7 @@ func TestFHIRPathModel(t *testing.T) {
 
 // A logical model is not a type an instance can have.
 func TestFHIRPathModelLeavesOutLogicalModels(t *testing.T) {
-	r := loadVersion(t, "4.0.1")
+	r := sharedVersion(t, "4.0.1")
 	sd := r.GetByType("FiveWs")
 	if sd == nil || sd.Kind != KindLogical {
 		t.Skip("no logical model FiveWs in this package")
@@ -79,7 +79,7 @@ func TestFHIRPathModelInTheEngine(t *testing.T) {
 "contained":[{"resourceType":"Patient","id":"2020"}]}`)
 	models := map[string]*FHIRPathModel{}
 	for _, version := range []string{"4.0.1", "5.0.0"} {
-		models[version] = loadVersion(t, version).FHIRPathModel()
+		models[version] = sharedVersion(t, version).FHIRPathModel()
 	}
 	for _, tt := range []struct {
 		version, expr, want string

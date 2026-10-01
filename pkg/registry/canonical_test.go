@@ -144,7 +144,7 @@ func TestVersionLess(t *testing.T) {
 }
 
 func TestIsSubtype(t *testing.T) {
-	r := loadVersion(t, "4.0.1")
+	r := sharedVersion(t, "4.0.1")
 	for _, tt := range []struct {
 		child, ancestor string
 		want            bool
@@ -164,7 +164,7 @@ func TestIsSubtype(t *testing.T) {
 }
 
 func TestChoiceType(t *testing.T) {
-	r := loadVersion(t, "4.0.1")
+	r := sharedVersion(t, "4.0.1")
 	for _, tt := range []struct{ base, key, want string }{
 		{"value", "valueQuantity", "Quantity"},
 		{"value", "valueBoolean", "boolean"},
