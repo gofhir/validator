@@ -82,6 +82,16 @@
       ]
     },
     {
+      "name": "slice-order",
+      "rule": "equal",
+      "gofhir": [
+        "SLICING_ORDER"
+      ],
+      "hl7": [
+        "Validation_VAL_Profile_SliceOrder"
+      ]
+    },
+    {
       "name": "slicing-cannot-be-evaluated",
       "rule": "equal",
       "gofhir": [
@@ -249,6 +259,7 @@
     "REFERENCE_CONTAINED_NOT_FOUND": "no HL7 counterpart verified yet",
     "REFERENCE_INVALID_FORMAT": "no HL7 counterpart verified yet",
     "REFERENCE_NOT_IN_BUNDLE": "no HL7 counterpart verified yet",
+    "SLICING_OPEN_AT_END": "D-5, declared divergence: HL7 6.10.4 does not report content before a slice when the slicing is openAtEnd",
     "SLICING_MEMBERSHIP_UNKNOWN": "information: ValueSet membership unknown for a binding discriminator (decision D-6); HL7 says nothing",
     "STRUCTURE_CHOICE_MUTUAL_EXCLUSION": "no HL7 counterpart verified yet",
     "STRUCTURE_INVALID_CHOICE_TYPE": "no HL7 counterpart verified yet",

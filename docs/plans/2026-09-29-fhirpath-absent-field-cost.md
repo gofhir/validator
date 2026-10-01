@@ -1,8 +1,9 @@
 # gofhir/fhirpath: an absent field costs about 108 scans of the resource
 
-Status: **draft, not filed**. This note is for `github.com/gofhir/fhirpath`, where the defect lives. Per this
-project's rule for dependency bugs, it is reported upstream with a minimal case and a sweep, not
-patched here. The issue text is at the end.
+Status: **fixed upstream in v1.9.2** (gofhir/fhirpath#50: "an absent field costs two reads of the
+object, not fifty-four"), and adopted here (`build(deps)` on `feat/a4-slicing-tree`). With it, the
+IPS all-sections Bundle validates in 281 ms instead of 4,132 ms, and `ImplementationGuide-fhir` in
+46 s instead of about 40 minutes. The rest of this note is the analysis that led to the fix.
 
 ## Impact here
 

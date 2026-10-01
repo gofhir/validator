@@ -38,5 +38,13 @@
     "file": "testdata/m12-slice-scoping/probes/r2_M3_plain_then_official.json",
     "location": "Patient.identifier[1]",
     "messageId": "SLICING_MULTIPLE_MATCH"
+  },
+  {
+    "decision": "D-5",
+    "reason": "openAtEnd allows other content only at the end of the list (\"Additional content is allowed, but only at the end of the list\", ElementDefinition.slicing.rules); HL7 6.10.4 does not report content before a slice.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/decisions/instances/Q5_openatend_wrong.json",
+    "location": "Patient.identifier[0]",
+    "messageId": "SLICING_OPEN_AT_END"
   }
 ]

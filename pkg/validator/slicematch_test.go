@@ -197,8 +197,8 @@ func TestSlicingDecisionDiagnostics(t *testing.T) {
 		}},
 		// D-6: unknown membership is information, and the slice is not matched.
 		{"Q6_binding_external.json", []string{
-			"error SLICING_CARDINALITY_MIN @ Patient.coding:inset",
-			"information SLICING_MEMBERSHIP_UNKNOWN @ Patient.coding[0]",
+			"error SLICING_CARDINALITY_MIN @ Patient.maritalStatus.coding:inset",
+			"information SLICING_MEMBERSHIP_UNKNOWN @ Patient.maritalStatus.coding[0]",
 		}},
 		{"Q6_binding_local_in.json", nil},
 	} {

@@ -74,6 +74,8 @@ func TestCardinalityOnTheTree(t *testing.T) {
 			`{"resourceType":"Patient","deceasedBoolean":false,"contact":[{"gender":"male"}]}`, nil},
 		{"a required choice is present under a typed name",
 			`{"resourceType":"Patient","deceasedDateTime":"2020"}`, nil},
+		{"a required choice with a value of a type it does not allow is present (the wrong type is another phase's)",
+			`{"resourceType":"Patient","deceasedString":"x"}`, nil},
 		{"a required choice is missing",
 			`{"resourceType":"Patient"}`, []string{"CARDINALITY_MIN @ Patient.deceased[x]"}},
 		{"a required primitive present only through its extensions",
