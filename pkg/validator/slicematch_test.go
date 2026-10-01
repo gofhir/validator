@@ -3,15 +3,11 @@ package validator
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"os"
 	"slices"
 	"strings"
 	"sync"
 	"testing"
-
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/specs"
 )
 
 // Profiles where only conformance tells two slices apart, for a "profile" discriminator on values
@@ -253,21 +249,9 @@ func TestConformanceRequiresTheProfilesType(t *testing.T) {
 // The snapshot is built here rather than generated, so the test does not depend on the snapshot
 // generator.
 func bundleProfileWithEntrySlices(url string, sliceProfiles map[string]string) ([]byte, error) {
-	pkgs, err := loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
+	core, err := coreDefinition("http://hl7.org/fhir/StructureDefinition/Bundle")
 	if err != nil {
 		return nil, err
-	}
-	var core map[string]any
-	for _, p := range pkgs {
-		for _, raw := range p.Resources {
-			var peek struct{ URL string }
-			if json.Unmarshal(raw, &peek) == nil && peek.URL == "http://hl7.org/fhir/StructureDefinition/Bundle" {
-				_ = json.Unmarshal(raw, &core)
-			}
-		}
-	}
-	if core == nil {
-		return nil, errors.New("core Bundle not found")
 	}
 	base := core["snapshot"].(map[string]any)["element"].([]any)
 	var entryChildren []map[string]any
