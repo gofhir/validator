@@ -48,7 +48,10 @@ func sharedVersion(t testing.TB, version string) *Registry {
 			return nil, err
 		}
 		r := New()
-		return r, r.LoadFromPackages(packages)
+		if err := r.LoadFromPackages(packages); err != nil {
+			return nil, err
+		}
+		return r, nil
 	}))
 	r, err := load.(func() (*Registry, error))()
 	if err != nil {
