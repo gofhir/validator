@@ -3,6 +3,7 @@ package validator
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"slices"
 	"strings"
@@ -48,13 +49,39 @@ const (
  {"id":"Patient.identifier:tax","path":"Patient.identifier","sliceName":"tax","min":0,"max":"1","type":[{"code":"Identifier","profile":["https://example.org/fhir/StructureDefinition/id-tax"]}]}]}}`
 )
 
-func TestProfileDiscriminatorOnValuesThatAreNotResources(t *testing.T) {
-	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{
-		[]byte(extS), []byte(extQ), []byte(idMRN), []byte(idTax), []byte(byProfile),
-	}))
+// conformanceValidator is one validator for every test in this file: building one costs tens of
+// seconds under -race. Each test's profiles have their own URLs, so they do not interact.
+var conformanceValidator = sync.OnceValues(func() (*Validator, error) {
+	people, err := bundleProfileWithEntrySlices("https://example.org/fhir/StructureDefinition/people", map[string]string{
+		"pr": "http://hl7.org/fhir/StructureDefinition/Practitioner",
+		"pa": "http://hl7.org/fhir/StructureDefinition/Patient",
+	})
+	if err != nil {
+		return nil, err
+	}
+	return New(WithVersion("4.0.1"),
+		WithPackageTgz("../../testdata/m12-slice-scoping/packages/acme.decisions-0.3.0.tgz"),
+		WithConformanceResources([][]byte{
+			[]byte(extS), []byte(extQ), []byte(idMRN), []byte(idTax), []byte(byProfile),
+			[]byte(compByAuthor), []byte(bundleOfComp),
+			// The concurrency test's own copies, whose snapshots no other test generates.
+			[]byte(strings.ReplaceAll(compByAuthor, "/comp", "/comp-concurrent")),
+			[]byte(strings.ReplaceAll(strings.ReplaceAll(bundleOfComp, "/comp", "/comp-concurrent"), "/doc", "/doc-concurrent")),
+			people,
+		}))
+})
+
+func sharedConformanceValidator(t *testing.T) *Validator {
+	t.Helper()
+	v, err := conformanceValidator()
 	if err != nil {
 		t.Fatal(err)
 	}
+	return v
+}
+
+func TestProfileDiscriminatorOnValuesThatAreNotResources(t *testing.T) {
+	v := sharedConformanceValidator(t)
 	patient := func(ext, ids string) []byte {
 		return []byte(`{"resourceType":"Patient","meta":{"profile":["https://example.org/fhir/StructureDefinition/by-profile"]},` +
 			`"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},` +
@@ -115,10 +142,7 @@ const (
 )
 
 func TestProfileDiscriminatorResolvesInsideTheBundle(t *testing.T) {
-	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{[]byte(compByAuthor), []byte(bundleOfComp)}))
-	if err != nil {
-		t.Fatal(err)
-	}
+	v := sharedConformanceValidator(t)
 	doc := func(author, contained, second string) []byte {
 		return []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/doc"]},"type":"document",
 "identifier":{"system":"urn:ietf:rfc:3986","value":"urn:uuid:0c3151bd-1cbf-4d64-b04d-cd9187a4c6e0"},"timestamp":"2020-01-01T00:00:00Z",
@@ -160,10 +184,7 @@ func TestProfileDiscriminatorResolvesInsideTheBundle(t *testing.T) {
 
 // The decision instances, validated end to end: what each reports, and at which severity.
 func TestSlicingDecisionDiagnostics(t *testing.T) {
-	v, err := New(WithVersion("4.0.1"), WithPackageTgz("../../testdata/m12-slice-scoping/packages/acme.decisions-0.3.0.tgz"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	v := sharedConformanceValidator(t)
 	for _, tt := range []struct {
 		file string
 		want []string // "<severity> <ID> @ <location>", slicing diagnostics only
@@ -214,14 +235,7 @@ func TestSlicingDecisionDiagnostics(t *testing.T) {
 // A resource conforms only to a profile of its own type: a Patient carrying only elements that a
 // Practitioner also has does not match a Practitioner slice.
 func TestConformanceRequiresTheProfilesType(t *testing.T) {
-	people := bundleProfileWithEntrySlices(t, "https://example.org/fhir/StructureDefinition/people", map[string]string{
-		"pr": "http://hl7.org/fhir/StructureDefinition/Practitioner",
-		"pa": "http://hl7.org/fhir/StructureDefinition/Patient",
-	})
-	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{people}))
-	if err != nil {
-		t.Fatal(err)
-	}
+	v := sharedConformanceValidator(t)
 	res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/people"]},"type":"collection",
 "entry":[{"fullUrl":"urn:uuid:p","resource":{"resourceType":"Patient","id":"p","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"name":[{"family":"A"}],"gender":"male"}}]}`))
 	if err != nil {
@@ -238,11 +252,10 @@ func TestConformanceRequiresTheProfilesType(t *testing.T) {
 // sliced by the profile of its resource: one slice per name, whose resource has that profile.
 // The snapshot is built here rather than generated, so the test does not depend on the snapshot
 // generator.
-func bundleProfileWithEntrySlices(t *testing.T, url string, sliceProfiles map[string]string) []byte {
-	t.Helper()
+func bundleProfileWithEntrySlices(url string, sliceProfiles map[string]string) ([]byte, error) {
 	pkgs, err := loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 	var core map[string]any
 	for _, p := range pkgs {
@@ -254,7 +267,7 @@ func bundleProfileWithEntrySlices(t *testing.T, url string, sliceProfiles map[st
 		}
 	}
 	if core == nil {
-		t.Fatal("core Bundle not found")
+		return nil, errors.New("core Bundle not found")
 	}
 	base := core["snapshot"].(map[string]any)["element"].([]any)
 	var entryChildren []map[string]any
@@ -293,21 +306,14 @@ func bundleProfileWithEntrySlices(t *testing.T, url string, sliceProfiles map[st
 	}
 	sd := map[string]any{"resourceType": "StructureDefinition", "url": url, "name": "P", "type": "Bundle", "kind": "resource",
 		"derivation": "constraint", "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle", "snapshot": map[string]any{"element": out}}
-	b, err := json.Marshal(sd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return b
+	return json.Marshal(sd)
 }
 
 // Concurrent validations that check conformance against profiles shipped as differentials
 // generate their snapshots once, under the definition's lock (run with -race).
 func TestConformanceGeneratesSnapshotsConcurrently(t *testing.T) {
-	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{[]byte(compByAuthor), []byte(bundleOfComp)}))
-	if err != nil {
-		t.Fatal(err)
-	}
-	doc := []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/doc"]},"type":"document",
+	v := sharedConformanceValidator(t)
+	doc := []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/doc-concurrent"]},"type":"document",
 "entry":[{"fullUrl":"urn:uuid:c","resource":{"resourceType":"Composition","id":"c","status":"final","type":{"text":"x"},"date":"2020","title":"t","author":[{"reference":"urn:uuid:p"}]}},
 {"fullUrl":"urn:uuid:p","resource":{"resourceType":"Patient","id":"p"}}]}`)
 	var wg sync.WaitGroup
