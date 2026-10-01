@@ -261,7 +261,7 @@ type Registry struct {
 
 // New creates a new empty Registry.
 func New() *Registry {
-	return &Registry{
+	r := &Registry{
 		byURL:              make(map[string]*StructureDefinition),
 		byURLVersion:       make(map[string]*StructureDefinition),
 		latestByURL:        make(map[string]*StructureDefinition),
@@ -271,6 +271,8 @@ func New() *Registry {
 		canonicalResources: make(map[string]bool),
 		metadataResources:  make(map[string]bool),
 	}
+	r.model = &FHIRPathModel{reg: r}
+	return r
 }
 
 // LoadFromPackages loads StructureDefinitions from a slice of packages.
@@ -290,7 +292,7 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 	// Build type classification caches after all SDs are loaded
 	r.buildTypeClassificationCaches()
-	r.model = nil // built again, from the definitions now loaded
+	r.model = &FHIRPathModel{reg: r} // built on first use, from the definitions now loaded
 
 	return nil
 }

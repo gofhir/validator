@@ -40,6 +40,11 @@ func TestFHIRPathModel(t *testing.T) {
 			if got := m.ReferenceTargets("Observation.subject"); !slices.Contains(got, "Patient") {
 				t.Errorf("ReferenceTargets(Observation.subject) = %v", got)
 			}
+			for path, targets := range m.targets {
+				if len(slices.Compact(slices.Sorted(slices.Values(targets)))) != len(targets) {
+					t.Errorf("ReferenceTargets(%s) = %v, repeats a type", path, targets)
+				}
+			}
 			if got := m.ParentType("Patient"); got != "DomainResource" {
 				t.Errorf("ParentType(Patient) = %q", got)
 			}

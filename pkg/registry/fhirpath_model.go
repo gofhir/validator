@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"slices"
 	"strings"
 	"sync"
 )
@@ -26,13 +27,10 @@ type FHIRPathModel struct {
 }
 
 // FHIRPathModel returns the registry's FHIRPath model. It is built on first use, from the
-// definitions loaded by then, and shared afterwards.
+// definitions loaded by then, and shared afterwards; loading packages starts a new one.
 func (r *Registry) FHIRPathModel() *FHIRPathModel {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if r.model == nil {
-		r.model = &FHIRPathModel{reg: r}
-	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	return r.model
 }
 
@@ -111,7 +109,7 @@ func (m *FHIRPathModel) addElements(sd *StructureDefinition) {
 		m.path[e.Path] = e.Type[0].Code
 		for _, url := range e.Type[0].TargetProfile {
 			canonical, _ := ParseCanonical(url)
-			if target := m.reg.GetByURL(canonical); target != nil {
+			if target := m.reg.GetByURL(canonical); target != nil && !slices.Contains(m.targets[e.Path], target.Type) {
 				m.targets[e.Path] = append(m.targets[e.Path], target.Type)
 			}
 		}

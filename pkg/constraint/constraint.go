@@ -382,8 +382,9 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 
 // evaluateWithContext builds an eval.Context with all services wired and evaluates the expression.
 func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.RawMessage, defPath string, opts *constraintEvalOpts) (fhirpath.Collection, error) {
-	evalCtx := eval.NewContextForRoot(v.focus(data, defPath))
-	if model := v.model(); model != nil {
+	model := v.model()
+	evalCtx := eval.NewContextForRoot(focus(model, data, defPath))
+	if model != nil {
 		// The types come from the loaded definitions, not from the engine's guesses: without them
 		// a string that begins with four digits is read as a date.
 		evalCtx.SetModel(model)
@@ -437,8 +438,8 @@ func (v *Validator) model() *registry.FHIRPathModel {
 // focus reads the element a constraint is evaluated on. An object is given the type the model
 // assigns its definition path, so its fields resolve: a resource or a data type by its own name,
 // an element by the type of its definition.
-func (v *Validator) focus(data json.RawMessage, defPath string) fhirpath.Collection {
-	if model := v.model(); model != nil && defPath != "" && len(data) > 0 && data[0] == '{' {
+func focus(model *registry.FHIRPathModel, data json.RawMessage, defPath string) fhirpath.Collection {
+	if model != nil && defPath != "" && len(data) > 0 && data[0] == '{' {
 		typ := model.TypeOf(defPath)
 		if typ == "" && model.HasType(defPath) {
 			typ = defPath
