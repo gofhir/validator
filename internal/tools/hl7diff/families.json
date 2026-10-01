@@ -247,7 +247,7 @@
     "CODING_NO_CODE": "no HL7 counterpart verified yet",
     "CODING_NO_SYSTEM": "no HL7 counterpart verified yet",
     "CONSTRAINT_COMPILE_ERROR": "an engine failure, not a finding about the instance",
-    "CONSTRAINT_EVAL_ERROR": "an engine failure, not a finding about the instance",
+    "CONSTRAINT_EVAL_ERROR": "no longer reported: a constraint that cannot be evaluated is CONSTRAINT_FAILED",
     "CONTAINED_DUPLICATE_ID": "no HL7 counterpart verified yet",
     "EXTENSION_INVALID_CONTEXT": "no HL7 counterpart verified yet; gofhir's report on primitive _display is a known false positive",
     "EXTENSION_INVALID_URL": "no HL7 counterpart verified yet",

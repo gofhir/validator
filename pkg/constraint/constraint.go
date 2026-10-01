@@ -363,19 +363,18 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 
 		evalResult, err := v.evaluateWithContext(expr, data, defPath, opts)
 		if err != nil {
-			result.AddWarningWithID(
-				issue.DiagConstraintEvalError,
-				map[string]any{
-					"key":   c.Key,
-					"error": err.Error(),
-				},
-				fhirPath,
-			)
+			if opts.ctx.Err() != nil {
+				return // the validation was cancelled; that says nothing about the instance
+			}
+			// An invariant that cannot be evaluated is not satisfied. It fails at its own
+			// severity, as in the HL7 validator, whose checkInvariant takes an exception from
+			// the FHIRPath engine as a failed invariant.
+			v.addConstraintViolation(c, fhirPath, err, result)
 			continue
 		}
 
 		if !v.constraintPassed(evalResult) {
-			v.addConstraintViolation(c, fhirPath, result)
+			v.addConstraintViolation(c, fhirPath, nil, result)
 		}
 	}
 }
@@ -509,11 +508,15 @@ func (v *Validator) constraintPassed(result fhirpath.Collection) bool {
 	return b
 }
 
-// addConstraintViolation adds an issue for a failed constraint.
-func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath string, result *issue.Result) {
+// addConstraintViolation adds an issue for a failed constraint. evalErr, when not nil, is why the
+// constraint could not be evaluated.
+func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath string, evalErr error, result *issue.Result) {
 	diag := fmt.Sprintf("Constraint failed: %s: '%s'", c.Key, c.Human)
 	if c.Source != "" {
 		diag += fmt.Sprintf(" (defined in %s)", c.Source)
+	}
+	if evalErr != nil {
+		diag += fmt.Sprintf(" (could not be evaluated: %s)", evalErr)
 	}
 	if c.Severity == "warning" {
 		diag += " (Best Practice Recommendation)"
