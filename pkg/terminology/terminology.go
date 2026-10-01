@@ -434,7 +434,49 @@ func (r *Registry) ResolveCodeInValueSet(ctx context.Context, system, code, valu
 	valid, found := r.validateCodeLocally(ctx, valueSetURL, system, code)
 	res := localCodeResult(valid, found)
 	res.SystemInValueSet = r.localMembership(valueSetURL, system)
+	res.Assumed = res.Resolution == Valid && r.acceptedByWildcard(valueSetURL, system, code)
+	if res.Assumed && strictMembership(ctx) {
+		return CodeResult{Resolution: Unresolved, SystemInValueSet: res.SystemInValueSet,
+			Message: "membership cannot be checked without the code system"}, nil
+	}
 	return res, nil
+}
+
+type strictMembershipKey struct{}
+
+// WithStrictMembership returns a context in which ResolveCodeInValueSet reports an Assumed answer
+// (a code accepted only because its code system cannot be expanded) as Unresolved. A slice
+// discriminator given by a required binding needs to know membership, not assume it.
+func WithStrictMembership(ctx context.Context) context.Context {
+	return context.WithValue(ctx, strictMembershipKey{}, true)
+}
+
+func strictMembership(ctx context.Context) bool {
+	strict, _ := ctx.Value(strictMembershipKey{}).(bool)
+	return strict
+}
+
+// acceptedByWildcard reports whether the local answer for a code came only from the wildcard an
+// expansion records for a code system it cannot expand, with no provider to ask.
+func (r *Registry) acceptedByWildcard(valueSetURL, system, code string) bool {
+	if r.getProvider() != nil {
+		return false
+	}
+	vs := r.GetValueSet(valueSetURL)
+	if vs == nil {
+		return false
+	}
+	r.mu.RLock()
+	codes, cached := r.expansionCache[canonicalOf(vs.URL, vs.Version)]
+	r.mu.RUnlock()
+	if !cached {
+		return false
+	}
+	exact := codes[code]
+	if system != "" {
+		exact = codes[system+"|"+code]
+	}
+	return !exact && (codes["*"] || (system != "" && codes[system+"|*"]))
 }
 
 // localMembership reports whether system is among the ValueSet's declared

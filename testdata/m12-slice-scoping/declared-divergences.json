@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "decision": "D-1",
+    "reason": "An element that matches more than one slice is an error for every discriminator type (profiling.html: slices \"SHALL describe a distinct set of values\", and an element \"will never match more than one\"); HL7 6.10.4 does not report it for pattern discriminators.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/decisions/instances/Q1_pattern_one.json",
+    "location": "Patient.identifier[0]",
+    "messageId": "SLICING_MULTIPLE_MATCH"
+  },
+  {
+    "decision": "D-1",
+    "reason": "An element that matches more than one slice is an error for every discriminator type (profiling.html: slices \"SHALL describe a distinct set of values\", and an element \"will never match more than one\"); HL7 6.10.4 does not report it for pattern discriminators.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/r2_M1_one_official.json",
+    "location": "Patient.identifier[0]",
+    "messageId": "SLICING_MULTIPLE_MATCH"
+  },
+  {
+    "decision": "D-1",
+    "reason": "An element that matches more than one slice is an error for every discriminator type (profiling.html: slices \"SHALL describe a distinct set of values\", and an element \"will never match more than one\"); HL7 6.10.4 does not report it for pattern discriminators.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/r2_M2_two_official.json",
+    "location": "Patient.identifier[0]",
+    "messageId": "SLICING_MULTIPLE_MATCH"
+  },
+  {
+    "decision": "D-1",
+    "reason": "An element that matches more than one slice is an error for every discriminator type (profiling.html: slices \"SHALL describe a distinct set of values\", and an element \"will never match more than one\"); HL7 6.10.4 does not report it for pattern discriminators.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/r2_M2_two_official.json",
+    "location": "Patient.identifier[1]",
+    "messageId": "SLICING_MULTIPLE_MATCH"
+  },
+  {
+    "decision": "D-1",
+    "reason": "An element that matches more than one slice is an error for every discriminator type (profiling.html: slices \"SHALL describe a distinct set of values\", and an element \"will never match more than one\"); HL7 6.10.4 does not report it for pattern discriminators.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/r2_M3_plain_then_official.json",
+    "location": "Patient.identifier[1]",
+    "messageId": "SLICING_MULTIPLE_MATCH"
+  }
+]

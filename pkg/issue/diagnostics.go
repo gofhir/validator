@@ -37,12 +37,15 @@ const (
 	DiagBindingExtensibleNoCoding DiagnosticID = "BINDING_EXTENSIBLE_NO_CODING"
 	DiagBindingDisplayMismatch    DiagnosticID = "BINDING_DISPLAY_MISMATCH"
 	DiagBindingTextOnlyWarning    DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
-	DiagBindingCannotValidate     DiagnosticID = "BINDING_CANNOT_VALIDATE"
-	DiagBindingValueSetNotFound   DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
-	DiagCodeNotInCodeSystem       DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
-	DiagCodeSystemNotFound        DiagnosticID = "CODESYSTEM_NOT_FOUND"
-	DiagCodingNoSystem            DiagnosticID = "CODING_NO_SYSTEM"
-	DiagCodingNoCode              DiagnosticID = "CODING_NO_CODE"
+	// DiagBindingRequiredNoCode: a CodeableConcept under a required binding carries no code at all
+	// (only text, or no coding with a code), so it cannot be from the value set.
+	DiagBindingRequiredNoCode   DiagnosticID = "BINDING_REQUIRED_NO_CODE"
+	DiagBindingCannotValidate   DiagnosticID = "BINDING_CANNOT_VALIDATE"
+	DiagBindingValueSetNotFound DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
+	DiagCodeNotInCodeSystem     DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
+	DiagCodeSystemNotFound      DiagnosticID = "CODESYSTEM_NOT_FOUND"
+	DiagCodingNoSystem          DiagnosticID = "CODING_NO_SYSTEM"
+	DiagCodingNoCode            DiagnosticID = "CODING_NO_CODE"
 )
 
 // Diagnostic IDs for extension validation (M8).
@@ -85,6 +88,14 @@ const (
 	DiagSlicingNoMatch        DiagnosticID = "SLICING_NO_MATCH"
 	DiagSlicingCardinalityMin DiagnosticID = "SLICING_CARDINALITY_MIN"
 	DiagSlicingCardinalityMax DiagnosticID = "SLICING_CARDINALITY_MAX"
+	// DiagSlicingMultipleMatch: an element matches more than one slice (plan A, decision D-1).
+	DiagSlicingMultipleMatch DiagnosticID = "SLICING_MULTIPLE_MATCH"
+	// DiagSlicingCannotEvaluate: a discriminator could not be evaluated for a slice, e.g. its
+	// profile could not be resolved (decisions D-2, D-3); the slice does not match.
+	DiagSlicingCannotEvaluate DiagnosticID = "SLICING_CANNOT_BE_EVALUATED"
+	// DiagSlicingMembershipUnknown: a required-binding discriminator could not be decided because
+	// ValueSet membership is unknown (decision D-6); the slice does not match.
+	DiagSlicingMembershipUnknown DiagnosticID = "SLICING_MEMBERSHIP_UNKNOWN"
 )
 
 // Diagnostic IDs for $validate mode validation.
@@ -254,6 +265,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Code:     CodeCodeInvalid,
 		Template: "Display '{provided}' for code '{code}' does not match expected '{expected}'",
 	},
+	DiagBindingRequiredNoCode: {
+		Severity: SeverityError,
+		Code:     CodeCodeInvalid,
+		Template: "No code provided, and a code is required from the value set '{valueSet}'",
+	},
 	DiagBindingTextOnlyWarning: {
 		Severity: SeverityWarning,
 		Code:     CodeCodeInvalid,
@@ -404,6 +420,21 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeBusinessRule,
 		Template: "Maximum cardinality of '{path}' is {max}, but found {count}",
+	},
+	DiagSlicingMultipleMatch: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "Element matches more than one slice of '{path}': {slices}",
+	},
+	DiagSlicingCannotEvaluate: {
+		Severity: SeverityError,
+		Code:     CodeProcessing,
+		Template: "Slicing cannot be evaluated: {detail}",
+	},
+	DiagSlicingMembershipUnknown: {
+		Severity: SeverityInformation,
+		Code:     CodeInformational,
+		Template: "Slice not matched: {detail}",
 	},
 
 	// Constraint (M10)

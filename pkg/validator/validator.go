@@ -22,6 +22,7 @@ import (
 	"github.com/gofhir/validator/pkg/primitive"
 	"github.com/gofhir/validator/pkg/reference"
 	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/pkg/slicematch"
 	"github.com/gofhir/validator/pkg/slicing"
 	"github.com/gofhir/validator/pkg/specs"
 	"github.com/gofhir/validator/pkg/structural"
@@ -517,7 +518,10 @@ func New(opts ...Option) (*Validator, error) {
 	}
 	v.constraintValidator = constraint.New(reg, constraintTermReg)
 	v.fixedPatternValidator = fixedpattern.New(reg)
-	v.slicingValidator = slicing.New(reg)
+	v.slicingValidator = slicing.NewWithMatcher(reg, slicematch.New(reg,
+		slicematch.WithConformer(conformer{v: v}),
+		slicematch.WithMemberChecker(memberChecker{v: v}),
+	))
 
 	v.ucumValidator = initUCUMValidator(reg)
 
@@ -680,9 +684,10 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	// Validate against ALL profiles
 	// According to FHIR spec, resource must be valid against all claimed profiles
 	// Pass parsed data to avoid re-parsing JSON in each phase
-	for i, sd := range profilesToValidate {
-		profileURL := profileURLsToValidate[i]
-		v.validateAgainstProfile(ctx, data, resource, sd, profileURL, result)
+	// Conformance checks made by slice matching share one memo for this validation.
+	ctx = withConformState(ctx)
+	for _, sd := range profilesToValidate {
+		v.validateAgainstProfile(ctx, data, resource, sd, nil, result)
 	}
 
 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
@@ -707,7 +712,9 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 
 // ValidateAgainstProfile runs all validation phases against a single profile.
 // Data is the pre-parsed JSON map, rawJSON is kept for phases that need raw bytes (constraint/fhirpath).
-func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]any, rawJSON []byte, sd *registry.StructureDefinition, _ string, result *issue.Result) {
+// The value scope is nil for the resource being validated, and set for a value checked for
+// conformance inside it (a slice's profile discriminator), which may be a datatype or an extension.
+func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]any, rawJSON []byte, sd *registry.StructureDefinition, vs *valueScope, result *issue.Result) {
 	// Phase 1: Structural validation (uses cached element indexes)
 	structResult := v.structValidator.ValidateData(data, sd)
 	result.Merge(structResult)
@@ -753,6 +760,9 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
 		constraintOpts = &constraint.ValidateOptions{BundleData: data}
 	}
+	if vs != nil {
+		constraintOpts = vs.constraintOptions()
+	}
 	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
 	result.Stats.PhasesRun++
 
@@ -761,7 +771,11 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	result.Stats.PhasesRun++
 
 	// Phase 9: Slicing validation
-	v.slicingValidator.ValidateData(data, sd, result)
+	sliceOpts := slicing.Options{Resolver: referenceResolver{root: data}}
+	if vs != nil {
+		sliceOpts = slicing.Options{Resolver: referenceResolver{root: vs.scope.RootResource}, Scope: &vs.scope}
+	}
+	v.slicingValidator.ValidateDataContext(ctx, data, sd, sliceOpts, result)
 	result.Stats.PhasesRun++
 
 	// Phase 10: UCUM validation (Quantity.code syntax)

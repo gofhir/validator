@@ -104,7 +104,7 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 		return
 	}
 
-	resourceType, _ := resource["resourceType"].(string)
+	resourceType := sd.RootName(resource)
 	if resourceType == "" {
 		return
 	}
@@ -438,8 +438,13 @@ func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, 
 	}
 
 	// CodeableConcept with only text, no coding key
-	if val["text"] != nil && binding.Strength == strengthExtensible {
-		v.emitTextOnlyWarning(binding.ValueSet, fhirPath, result)
+	if val["text"] != nil {
+		switch binding.Strength {
+		case strengthExtensible:
+			v.emitTextOnlyWarning(binding.ValueSet, fhirPath, result)
+		case strengthRequired:
+			v.reportNoCode(binding, fhirPath, result)
+		}
 		return
 	}
 
@@ -470,10 +475,19 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val m
 	}
 
 	if !isList || len(codings) == 0 {
+		if binding.Strength == strengthRequired {
+			v.reportNoCode(binding, fhirPath, result)
+		}
 		return
 	}
 
 	anyValidInVS, anyDecided, codeLabels := v.validateCodings(ctx, codings, binding, fhirPath, result)
+
+	// A required binding needs a code; codings without one carry none.
+	if len(codeLabels) == 0 && binding.Strength == strengthRequired {
+		v.reportNoCode(binding, fhirPath, result)
+		return
+	}
 
 	// Nothing could be decided for any coding: the binding is unresolvable, which
 	// is not the same as "none of the codings are members".
@@ -493,6 +507,13 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val m
 			fhirPath,
 		)
 	}
+}
+
+// reportNoCode reports a CodeableConcept that carries no code under a required binding: a
+// concept from a required value set is a code, and text alone is not one (terminologies.html,
+// "required": "the concept SHALL be from the specified value set").
+func (v *Validator) reportNoCode(binding *registry.Binding, fhirPath string, result *issue.Result) {
+	result.AddErrorWithID(issue.DiagBindingRequiredNoCode, map[string]any{"valueSet": binding.ValueSet}, fhirPath)
 }
 
 // validateCodingInCC validates a Coding within a CodeableConcept context.
