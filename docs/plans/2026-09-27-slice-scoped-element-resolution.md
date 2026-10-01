@@ -690,11 +690,12 @@ after, and regressions are reported with numbers.
 
 **PR A5: release A and note to the server**
 
-- **Release:** v1.22.0 shipped with only A1 merged (API additions, no change in results). Plan A
-  ships as v1.23.0, once A2–A5 are merged; release-please PRs wait until then.
+- **Release:** plan A ships one step per release (v1.22.0 = A1, v1.23.0 = A2, v1.24.0 = A3). The
+  release notes and the note to the server name the release that completes it without a number,
+  which is set when A5 ships.
 - **Status (2026-09-30): drafted** on `feat/a5-release`:
   - the release notes are in [2026-09-30-release-notes-plan-a.md](2026-09-30-release-notes-plan-a.md);
-  - the note to the server is in [2026-09-30-note-to-server-v1.23.0.md](2026-09-30-note-to-server-v1.23.0.md).
+  - the note to the server is in [2026-09-30-note-to-server-plan-a.md](2026-09-30-note-to-server-plan-a.md).
 - **`gofhir/fhirpath` goes to v1.9.5.** v1.9.3 fixes a regression of v1.9.2 when a model is passed,
   and v1.9.5 makes single-value functions end with an error when given several values. `hl7diff`
   is unchanged on the 13 groups and on `r4-core-examples`.
