@@ -50,11 +50,14 @@ var typedProfiles = [][]byte{[]byte(`{
 	"differential": {"element": [
 		{"id": "Observation", "path": "Observation"},
 		{"id": "Observation.value[x]", "path": "Observation.value[x]", "constraint": [{"key": "typed-choice", "severity": "error",
-			"human": "a choice root takes the type its property names", "expression": "$this.type().name = 'Quantity' and value.type().name = 'decimal'", "source": "` + typedObservationURL + `"}]}
+			"human": "a choice root takes the type its property names", "expression": "$this.type().name = 'Quantity' and value.type().name = 'decimal'", "source": "` + typedObservationURL + `"}]},
+		{"id": "Observation.effective[x]", "path": "Observation.effective[x]", "constraint": [{"key": "typed-primitive", "severity": "error",
+			"human": "a primitive root is its FHIR type", "expression": "$this is dateTime", "source": "` + typedObservationURL + `"}]}
 	]}}`)}
 
 // The focus of a constraint is typed from its definition path: a data type by its type, a
-// backbone element through its path, a choice element by the property the instance uses.
+// backbone element through its path, a choice element by the property the instance uses, and a
+// primitive as its FHIR type ("2019-12-08" at a dateTime is a dateTime, not a date).
 func TestConstraintFocusIsTyped(t *testing.T) {
 	v := profileValidator(t)
 	for name, resource := range map[string]string{
@@ -63,7 +66,7 @@ func TestConstraintFocusIsTyped(t *testing.T) {
 			`"name":[{"family":"2020"}],"contact":[{"name":{"family":"1999"}}]}`,
 		"observation": `{"resourceType":"Observation","meta":{"profile":["` + typedObservationURL + `"]},` +
 			`"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},` +
-			`"status":"final","code":{"text":"x"},"valueQuantity":{"value":1}}`,
+			`"status":"final","code":{"text":"x"},"valueQuantity":{"value":1},"effectiveDateTime":"2019-12-08"}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			res, err := v.Validate(context.Background(), []byte(resource))
