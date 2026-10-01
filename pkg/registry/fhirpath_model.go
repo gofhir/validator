@@ -8,8 +8,8 @@ import (
 
 // FHIRPathModel is the type information a FHIRPath engine needs about the FHIR types, read from
 // the base definitions loaded in a registry: the StructureDefinitions that define a type
-// (derivation other than constraint, kind other than logical), never a profile. It satisfies gofhir/fhirpath's Model,
-// VersionedModel and TypeRegistry interfaces by their method sets.
+// (derivation other than constraint, kind other than logical), never a profile. It satisfies
+// gofhir/fhirpath's Model, VersionedModel and TypeRegistry interfaces by their method sets.
 //
 // Without it the engine guesses: a string that begins with four digits is read as a date, and a
 // choice element is matched against a fixed list of type suffixes.
