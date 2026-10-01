@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.24.0](https://github.com/gofhir/validator/compare/v1.23.0...v1.24.0) (2026-10-01)
+
+
+### Features
+
+* **cardinality:** cardinality on the element tree (A3) + A2 review fixes ([#95](https://github.com/gofhir/validator/issues/95)) ([764a456](https://github.com/gofhir/validator/commit/764a4569156cb84875e14e6627fdea14b0f7b65c))
+
 ## [1.23.0](https://github.com/gofhir/validator/compare/v1.22.0...v1.23.0) (2026-10-01)
 
 
