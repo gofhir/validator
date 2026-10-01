@@ -14,6 +14,7 @@ import (
 // StructureDefinition.Kind constants.
 const (
 	KindResource = "resource"
+	KindLogical  = "logical"
 )
 
 // StructureDefinition.Derivation constants.
@@ -34,6 +35,7 @@ type StructureDefinition struct {
 	BaseDefinition string `json:"baseDefinition"` // URL of the base SD
 	Derivation     string `json:"derivation"`     // specialization | constraint
 	Version        string `json:"version"`        // Business version (e.g., "4.0.1", "2.0.0")
+	FHIRVersion    string `json:"fhirVersion"`    // FHIR version the definition is written for
 
 	// Context defines where an extension can be used
 	Context []ExtensionContext `json:"context,omitempty"`
@@ -253,6 +255,8 @@ type Registry struct {
 	domainResources    map[string]bool // types that inherit from DomainResource
 	canonicalResources map[string]bool // types with 'url' element
 	metadataResources  map[string]bool // canonical + name/status/experimental
+
+	model *FHIRPathModel // see FHIRPathModel
 }
 
 // New creates a new empty Registry.
@@ -286,6 +290,7 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 	// Build type classification caches after all SDs are loaded
 	r.buildTypeClassificationCaches()
+	r.model = nil // built again, from the definitions now loaded
 
 	return nil
 }
