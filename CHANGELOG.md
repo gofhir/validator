@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.0](https://github.com/gofhir/validator/compare/v1.22.0...v1.23.0) (2026-10-01)
+
+
+### Features
+
+* **slicematch:** conformant slice matcher on the element tree (A2) ([#94](https://github.com/gofhir/validator/issues/94)) ([d85fc3d](https://github.com/gofhir/validator/commit/d85fc3df2e1c93b11e2562618213c4e4e0707157))
+
 ## [1.22.0](https://github.com/gofhir/validator/compare/v1.21.1...v1.22.0) (2026-09-30)
 
 
