@@ -690,9 +690,9 @@ after, and regressions are reported with numbers.
 
 **PR A5: release A and note to the server**
 
-- **Release:** plan A ships one step per release (v1.22.0 = A1, v1.23.0 = A2, v1.24.0 = A3). The
-  release notes and the note to the server name the release that completes it without a number,
-  which is set when A5 ships.
+- **Release:** plan A shipped one step per release: v1.22.0 = A1, v1.23.0 = A2, v1.24.0 = A3,
+  v1.25.0 = A4, v1.25.1 = A5. The release notes are the body for v1.25.1, and the note to the
+  server points it to v1.25.1.
 - **Status (2026-09-30): drafted** on `feat/a5-release`:
   - the release notes are in [2026-09-30-release-notes-plan-a.md](2026-09-30-release-notes-plan-a.md);
   - the note to the server is in [2026-09-30-note-to-server-plan-a.md](2026-09-30-note-to-server-plan-a.md).

@@ -1,12 +1,11 @@
 # Release notes: slice-scoped element resolution (plan A)
 
-Draft for the GitHub release body of the release that completes plan A (the version is set when
-it ships). release-please writes the changelog from the commits; this text explains what they mean
+Draft for the GitHub release body of v1.25.1, the release that completes plan A. release-please writes the changelog from the commits; this text explains what they mean
 for users.
 
-Plan A ships one step per release: v1.22.0 is A1 (API additions, no change in results), v1.23.0 is
-A2, v1.24.0 is A3. Each step passed `hl7diff` on its own. The figures below compare v1.21.1 with
-the release that completes it.
+Plan A shipped one step per release: v1.22.0 is A1 (API additions, no change in results), v1.23.0
+is A2, v1.24.0 is A3, v1.25.0 is A4 (with fhirpath v1.9.2), and v1.25.1 is A5 (fhirpath v1.9.5 and
+these notes). Each step passed `hl7diff` on its own. The figures below compare v1.21.1 with v1.25.1.
 
 ## In one paragraph
 
@@ -80,7 +79,7 @@ of the object instead of fifty-four. As the FHIRPath specification says, a conve
 values now ends with an error (v1.9.2), and so does any other function that takes one value
 (v1.9.5). Validation time, as logged:
 
-| Input | v1.21.1 (fhirpath v1.6.0) | plan A release (fhirpath v1.9.5) |
+| Input | v1.21.1 (fhirpath v1.6.0) | v1.25.1 (fhirpath v1.9.5) |
 | --- | --- | --- |
 | IPS all-sections Bundle | 591 ms | 265 ms |
 | IPS Bundle-01 | 225 ms | 80 ms |

@@ -1,16 +1,15 @@
-# Plan A release: `knownValidatorDefect` can go, and three things to apply
+# v1.21.0 → v1.25.1: `knownValidatorDefect` can go, and three things to apply
 
 **For:** GoFHIR Server (`$care-gaps`, DEQM conformance)
 **From:** the `github.com/gofhir/validator` maintainers
 **Date:** 2026-09-30
-**Re:** the release that completes plan A (slice-scoped element resolution)
+**Re:** v1.25.1, the release that completes plan A (slice-scoped element resolution)
 
-Your `go.mod` pins `validator v1.21.0` and `fhirpath v1.9.1`. Plan A ships one step per release
-(v1.22.0 is A1, v1.23.0 is A2, v1.24.0 is A3); move to the release that completes it, named in
-this note as "the plan A release", not to one in between. Only that release has everything below,
-and only it was checked with your test. The defects your report isolated are
-fixed, and we checked the fix with your own test, at 1fa66be9, with only `knownValidatorDefect`
-changed.
+Your `go.mod` pins `validator v1.21.0` and `fhirpath v1.9.1`. Plan A shipped one step per release
+(v1.22.0 is A1, v1.23.0 is A2, v1.24.0 is A3, v1.25.0 is A4, v1.25.1 is A5). Move to v1.25.1, not
+to one in between: v1.25.0 already has every fix below, and v1.25.1 adds fhirpath v1.9.5 (see 3).
+The defects your report isolated are fixed, and we checked the fix with your own test, at
+1fa66be9, with only `knownValidatorDefect` changed.
 
 ## 1. Delete `knownValidatorDefect`
 
@@ -27,12 +26,12 @@ Both of its entries are validator defects, now fixed:
 | Validator | Result |
 | --- | --- |
 | v1.21.0 | FAIL: the five errors the function exempts |
-| the plan A release, the packages your test loads today | FAIL: one new error, see 2 |
-| the plan A release, plus three of DEQM's dependencies (see 2) | **PASS**, with no exemptions |
+| v1.25.1, the packages your test loads today | FAIL: one new error, see 2 |
+| v1.25.1, plus three of DEQM's dependencies (see 2) | **PASS**, with no exemptions |
 
 ## 2. Load DEQM's dependencies in the test
 
-The plan A release reports a slice whose profile cannot be resolved (decision D-3, as the HL7 validator
+v1.25.1 reports a slice whose profile cannot be resolved (decision D-3, as the HL7 validator
 does). Before, the slice silently matched nothing. Your test loads DEQM, QI-Core and US Core, but
 DEQM also declares `hl7.fhir.us.cqfmeasures#5.0.0` and `fhir.cqf.common#4.0.1`, and CQF Measures
 brings `hl7.fhir.uv.crmi#1.0.0`. Without them, it reports:
@@ -52,7 +51,7 @@ than DEQM declares, the same error will appear there; install the full closure.
 
 ## 3. `fhirpath` moves to v1.9.5
 
-The plan A release requires `gofhir/fhirpath v1.9.5`, so your build moves from v1.9.1.
+v1.25.1 requires `gofhir/fhirpath v1.9.5`, so your build moves from v1.9.1.
 
 - **Performance:** v1.9.2 makes an absent field cost two reads of the object instead of
   fifty-four. The IPS all-sections Bundle validates in 265 ms instead of 591 ms, and the R4
