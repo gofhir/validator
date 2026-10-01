@@ -28,6 +28,7 @@ type elementInstance struct {
 // jsonNode is a parsed JSON object with its FHIRPath location, used during element extraction.
 type jsonNode struct {
 	data     map[string]any
+	value    json.RawMessage // a primitive's JSON value, set instead of data
 	fhirPath string
 }
 
@@ -575,8 +576,7 @@ func (v *Validator) evaluateSubElementConstraints(instances []elementInstance, t
 		if err := json.Unmarshal(inst.data, &instData); err != nil {
 			continue
 		}
-		// For primitive sub-elements, extract the raw JSON value directly
-		// since extractElementInstances wraps them in __value__ objects.
+		// A primitive sub-element is evaluated on its JSON value.
 		subFhirPath := inst.fhirPath + "." + suffix
 		if rawVal, ok := instData[suffix]; ok {
 			rawJSON, err := json.Marshal(rawVal)
@@ -694,6 +694,10 @@ func matchChoiceType(n jsonNode, baseName string, isLast bool) []jsonNode {
 func nodesToInstances(nodes []jsonNode) []elementInstance {
 	instances := make([]elementInstance, 0, len(nodes))
 	for _, n := range nodes {
+		if n.value != nil {
+			instances = append(instances, elementInstance{data: n.value, fhirPath: n.fhirPath})
+			continue
+		}
 		raw, err := json.Marshal(n.data)
 		if err != nil {
 			continue
@@ -704,7 +708,8 @@ func nodesToInstances(nodes []jsonNode) []elementInstance {
 }
 
 // resolveValue handles array expansion and type assertion for JSON navigation.
-// When isLast is true, primitive values are also wrapped as single-key maps.
+// When isLast is true, primitive values are kept too, as their JSON value: a constraint on a
+// primitive element is evaluated with the value as its focus.
 func resolveValue(val any, fhirPath string, isLast bool) []jsonNode {
 	switch v := val.(type) {
 	case map[string]any:
@@ -717,26 +722,18 @@ func resolveValue(val any, fhirPath string, isLast bool) []jsonNode {
 			case map[string]any:
 				nodes = append(nodes, jsonNode{data: it, fhirPath: itemPath})
 			default:
-				if isLast {
-					raw, err := json.Marshal(it)
-					if err == nil {
-						nodes = append(nodes, jsonNode{
-							data:     map[string]any{"__value__": json.RawMessage(raw)},
-							fhirPath: itemPath,
-						})
+				if isLast && it != nil {
+					if raw, err := json.Marshal(it); err == nil {
+						nodes = append(nodes, jsonNode{value: raw, fhirPath: itemPath})
 					}
 				}
 			}
 		}
 		return nodes
 	default:
-		if isLast {
-			raw, err := json.Marshal(v)
-			if err == nil {
-				return []jsonNode{{
-					data:     map[string]any{"__value__": json.RawMessage(raw)},
-					fhirPath: fhirPath,
-				}}
+		if isLast && v != nil {
+			if raw, err := json.Marshal(v); err == nil {
+				return []jsonNode{{value: raw, fhirPath: fhirPath}}
 			}
 		}
 	}
