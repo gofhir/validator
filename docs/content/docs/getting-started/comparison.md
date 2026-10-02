@@ -30,7 +30,7 @@ Both tools follow similar command-line conventions. The table below maps the mos
 
 | gofhir-validator | HL7 validator | Description |
 |------------------|---------------|-------------|
-| `-version r4` | `-version 4.0.1` | FHIR version |
+| `-version 4.0.1` | `-version 4.0.1` | FHIR version (4.0.1, 4.3.0, 5.0.0) |
 | `-ig <url>` | `-ig <url>` | Profile / Implementation Guide |
 | `-output json` | `-output` | Output format |
 | `-tx n/a` | `-tx n/a` | No terminology server: codes are checked against the definitions loaded |

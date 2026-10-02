@@ -29,7 +29,7 @@ Usage:
 
 Examples:
   gofhir-validator patient.json
-  gofhir-validator -version r4 patient.json
+  gofhir-validator -version 4.0.1 patient.json
   gofhir-validator -ig http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient patient.json
   gofhir-validator -output json patient.json
   gofhir-validator -tx n/a patient.json            (no terminology server, as in the HL7 validator)

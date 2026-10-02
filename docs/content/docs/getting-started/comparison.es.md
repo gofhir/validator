@@ -30,7 +30,7 @@ Ambas herramientas siguen convenciones de linea de comandos similares. La tabla 
 
 | gofhir-validator | HL7 validator | Descripcion |
 |------------------|---------------|-------------|
-| `-version r4` | `-version 4.0.1` | Version FHIR |
+| `-version 4.0.1` | `-version 4.0.1` | Version FHIR (4.0.1, 4.3.0, 5.0.0) |
 | `-ig <url>` | `-ig <url>` | Perfil / Guia de Implementacion |
 | `-output json` | `-output` | Formato de salida |
 | `-tx n/a` | `-tx n/a` | Sin servidor de terminologia: los codigos se validan contra las definiciones cargadas |
