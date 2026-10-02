@@ -10,6 +10,12 @@ package registry
 
 const fhirTypeExtension = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type"
 
+// The FHIR primitive types the corrections name.
+const (
+	primitiveID     = "id"
+	primitiveString = "string"
+)
+
 // typeErratum corrects the FHIR type an element declares through the structuredefinition-fhir-type
 // extension on a FHIRPath System type, for the element at path and every element derived from it.
 type typeErratum struct {
@@ -23,12 +29,16 @@ type typeErratum struct {
 var typeErrata = []typeErratum{{
 	// R4 types a resource's logical id as string, while the R4 specification gives it the id type
 	// (resource.html: "id : id"), and R5 declares it so.
-	fhirVersion: "4.0.1", path: "Resource.id", published: "string", corrected: "id",
+	fhirVersion: "4.0.1", path: "Resource.id", published: primitiveString, corrected: primitiveID,
 	source: "hl7.fhir.r5.core#5.0.0 StructureDefinition/Resource, Resource.id",
 }, {
-	// R5 types ElementDefinition.id as id, which no id with a slice or a choice ("Patient.deceased[x]")
+	// R5 (and R4B, below) types ElementDefinition.id as id, which no id with a slice or a choice ("Patient.deceased[x]")
 	// can satisfy; the element's own definition says "any string value that does not contain spaces".
-	fhirVersion: "5.0.0", path: "ElementDefinition.id", published: "id", corrected: "string",
+	fhirVersion: "5.0.0", path: "ElementDefinition.id", published: primitiveID, corrected: primitiveString,
+	source: "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, ElementDefinition.id",
+}, {
+	// R4B publishes the same defect as R5.
+	fhirVersion: "4.3.0", path: "ElementDefinition.id", published: primitiveID, corrected: primitiveString,
 	source: "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, ElementDefinition.id",
 }}
 

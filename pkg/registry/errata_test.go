@@ -42,6 +42,8 @@ func TestErrataInTheLoadedDefinitions(t *testing.T) {
 		{"5.0.0", "ElementDefinition", "ElementDefinition.id", "string"}, // corrected
 		{"5.0.0", "Patient", "Patient.id", "id"},                         // R5 publishes it right
 		{"5.0.0", "Coding", "Coding.id", "id"},                           // as published, and as HL7 checks it
+		{"4.3.0", "ElementDefinition", "ElementDefinition.id", "string"}, // corrected
+		{"4.3.0", "Patient", "Patient.id", "id"},                         // R4B publishes it right
 	} {
 		t.Run(tt.version+" "+tt.element, func(t *testing.T) {
 			if got := fhirTypeOf(t, sharedVersion(t, tt.version), core+tt.sd, tt.element); got != tt.want {
