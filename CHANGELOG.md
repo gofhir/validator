@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.26.0](https://github.com/gofhir/validator/compare/v1.25.1...v1.26.0) (2026-10-02)
+
+
+### Features
+
+* **constraint:** evaluate FHIRPath with a model from the registry (plan B, PR B8) ([#107](https://github.com/gofhir/validator/issues/107)) ([dbc6bff](https://github.com/gofhir/validator/commit/dbc6bff1da54e4a8bff29c6897a1b45489edbb89))
+
+
+### Bug Fixes
+
+* **constraint:** a constraint on a primitive is evaluated on its value ([#106](https://github.com/gofhir/validator/issues/106)) ([3e9e207](https://github.com/gofhir/validator/commit/3e9e20735403b8c5cd298fdc411727b2981d10c4))
+* **constraint:** a primitive focus is read as its FHIR type ([#109](https://github.com/gofhir/validator/issues/109)) ([2020228](https://github.com/gofhir/validator/commit/20202289af8234be8cdcd88c830c8588866a4066))
+* **constraint:** an invariant that cannot be evaluated fails ([#110](https://github.com/gofhir/validator/issues/110)) ([ecd0bdf](https://github.com/gofhir/validator/commit/ecd0bdf64ea8f7f71bd40c1eb978571032b890b8))
+
 ## [1.25.1](https://github.com/gofhir/validator/compare/v1.25.0...v1.25.1) (2026-10-01)
 
 
