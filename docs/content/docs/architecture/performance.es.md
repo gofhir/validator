@@ -199,14 +199,14 @@ Si no hay un servidor de terminologia disponible, deshabilita la validacion de t
 
 ```go
 v, err := validator.New(
-    validator.WithTerminologyDisabled(),
+    validator.WithNoTerminology(),
 )
 ```
 
 O via la CLI:
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 {{< callout type="info" >}}

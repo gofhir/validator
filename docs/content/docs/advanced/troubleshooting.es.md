@@ -127,7 +127,7 @@ result, _ = v.Validate(ctx, resource2)
 
 - **Reutiliza el validador.** No crees una nueva instancia de `Validator` para cada recurso. Cada instancia carga su propia copia del registro.
 - **Carga solo los paquetes que necesitas.** Evita cargar IGs que no son necesarios para tu validacion.
-- **Deshabilita la terminologia si no es necesaria.** Los registros de terminologia consumen memoria para la expansion de ValueSets. Usa `WithNoTerminology()` o `-tx n/a` si no necesitas validacion de terminologia.
+- **Deshabilita la terminologia si no es necesaria.** Los registros de terminologia consumen memoria para la expansion de ValueSets. Usa `WithNoTerminology()` o `-no-terminology` si no necesitas validacion de terminologia.
 
 ```go
 // INCORRECTO: Crea un nuevo validador (y registro) por solicitud
@@ -191,7 +191,7 @@ Las extensiones desconocidas producen **advertencias**, no errores. El recurso a
 Para suprimir completamente la validacion de terminologia:
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 ```go

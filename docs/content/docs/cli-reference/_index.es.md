@@ -30,7 +30,8 @@ cat resource.json | gofhir-validator -
 | `-package-url` | URL(s) remota(s) de paquete `.tgz` (separadas por coma) | -- |
 | `-output` | Formato de salida: `text` o `json` | `text` |
 | `-strict` | Tratar warnings como errores | `false` |
-| `-tx n/a` | Deshabilitar validacion de terminologia | `false` |
+| `-tx` | Servidor de terminologia, como en el HL7 validator: `n/a` para ninguno. Los codigos se validan contra las ValueSets y CodeSystems cargados, igual que sin `-tx`; no se admite la URL de un servidor | -- |
+| `-no-terminology` | Omitir toda la validacion de terminologia y bindings | `false` |
 | `-quiet` | Mostrar solo errores y warnings | `false` |
 | `-verbose` | Mostrar salida detallada | `false` |
 | `-v` | Mostrar version | -- |
@@ -163,14 +164,16 @@ gofhir-validator -strict patient.json
 
 ### Deshabilitar Validacion de Terminologia
 
-Omitir verificaciones de terminologia cuando no hay un servidor de terminologia disponible:
+Omitir por completo las verificaciones de terminologia y bindings, para una validacion solo estructural:
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
+`-tx n/a` no hace esto. Como en el HL7 validator, solo indica que no hay servidor de terminologia, y los codigos se siguen validando contra las ValueSets y CodeSystems cargados.
+
 {{< callout type="tip" >}}
-**Integracion CI/CD** -- Usa `-output json` combinado con `jq` para analizar los resultados de validacion programaticamente. Configura `-tx n/a` si tu entorno CI no tiene acceso a un servidor de terminologia. El codigo de salida (`0` para valido, `1` para invalido) se integra directamente con las condiciones de fallo de los pipelines CI.
+**Integracion CI/CD** -- Usa `-output json` combinado con `jq` para analizar los resultados de validacion programaticamente. `-tx n/a` indica que no se usa servidor de terminologia, como en el HL7 validator; los codigos se siguen validando contra las definiciones cargadas. El codigo de salida (`0` para valido, `1` para invalido) se integra directamente con las condiciones de fallo de los pipelines CI.
 
 ```bash
 gofhir-validator -output json -tx n/a patient.json | jq '.[0].valid'

@@ -33,7 +33,8 @@ Ambas herramientas siguen convenciones de linea de comandos similares. La tabla 
 | `-version r4` | `-version 4.0.1` | Version FHIR |
 | `-ig <url>` | `-ig <url>` | Perfil / Guia de Implementacion |
 | `-output json` | `-output` | Formato de salida |
-| `-tx n/a` | `-tx n/a` | Deshabilitar validacion de terminologia |
+| `-tx n/a` | `-tx n/a` | Sin servidor de terminologia: los codigos se validan contra las definiciones cargadas |
+| `-no-terminology` | -- | Omitir toda la validacion de terminologia y bindings |
 | `-strict` | -- | Tratar warnings como errores |
 
 ### Ejemplos Lado a Lado

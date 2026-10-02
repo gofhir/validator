@@ -33,7 +33,8 @@ Both tools follow similar command-line conventions. The table below maps the mos
 | `-version r4` | `-version 4.0.1` | FHIR version |
 | `-ig <url>` | `-ig <url>` | Profile / Implementation Guide |
 | `-output json` | `-output` | Output format |
-| `-tx n/a` | `-tx n/a` | Disable terminology validation |
+| `-tx n/a` | `-tx n/a` | No terminology server: codes are checked against the definitions loaded |
+| `-no-terminology` | -- | Skip all terminology and binding validation |
 | `-strict` | -- | Treat warnings as errors |
 
 ### Examples Side by Side

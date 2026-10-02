@@ -271,7 +271,7 @@ v, _ := validator.New(
 func WithNoTerminology() Option
 ```
 
-Disables all terminology and binding validation. Equivalent to the HL7 Validator's `-tx n/a` flag.
+Disables all terminology and binding validation; the CLI's `-no-terminology`. This is not the HL7 Validator's `-tx n/a`, which only leaves out a terminology server and still checks codes against the ValueSets and CodeSystems loaded, as this validator does by default (and with `-tx n/a`).
 
 ```go
 v, _ := validator.New(

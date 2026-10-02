@@ -115,7 +115,7 @@ Si solo necesitas validacion estructural, deshabilita la verificacion de termino
 **CLI:**
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 **API Go:**

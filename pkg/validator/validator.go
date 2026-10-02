@@ -254,8 +254,9 @@ func WithDisplayLanguage(lang string) Option {
 	}
 }
 
-// WithNoTerminology disables all terminology/binding validation.
-// This is equivalent to the HL7 Validator's "-tx n/a" flag.
+// WithNoTerminology disables all terminology/binding validation (the CLI's -no-terminology).
+// It is not the HL7 Validator's "-tx n/a", which only leaves out a terminology server and still
+// checks codes against the ValueSets and CodeSystems loaded, as this validator does by default.
 func WithNoTerminology() Option {
 	return func(c *Config) {
 		c.NoTerminology = true
