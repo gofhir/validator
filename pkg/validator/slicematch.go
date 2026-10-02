@@ -55,6 +55,8 @@ func (st *conformState) collection(m map[string]any) fhirpath.Collection {
 	if err != nil {
 		return nil
 	}
+	// The state belongs to one validation, which evaluates in one goroutine.
+	constraint.EnableCaching(col)
 	st.mu.Lock()
 	st.collections[key] = col
 	st.mu.Unlock()

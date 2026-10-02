@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+
+	"github.com/gofhir/fhirpath"
 )
 
 // fhirTypeOf is the fhir-type an element declares, as loaded.
@@ -133,5 +135,33 @@ func TestEveryErratumHasASource(t *testing.T) {
 		if er.source == "" || er.fhirVersion == "" || er.path == "" || er.published == er.corrected {
 			t.Errorf("incomplete erratum %+v", er)
 		}
+	}
+	for _, er := range constraintErrata {
+		if er.source == "" || er.fhirVersion == "" || er.from == "" || er.key == "" || er.published == er.corrected {
+			t.Errorf("incomplete erratum %+v", er)
+		}
+	}
+}
+
+// R5's eld-11 is corrected wherever it is inherited, and the corrected expression compiles.
+func TestConstraintErratum(t *testing.T) {
+	sd := sharedVersion(t, "5.0.0").GetByURL("http://hl7.org/fhir/StructureDefinition/ElementDefinition")
+	found := 0
+	for _, e := range sd.Snapshot.Element {
+		for _, c := range e.Constraint {
+			if c.Key != "eld-11" {
+				continue
+			}
+			found++
+			if c.Expression != constraintErrata[0].corrected {
+				t.Errorf("%s: eld-11 is %q", e.ID, c.Expression)
+			}
+			if _, err := fhirpath.Compile(c.Expression); err != nil {
+				t.Errorf("corrected eld-11 does not compile: %v", err)
+			}
+		}
+	}
+	if found == 0 {
+		t.Fatal("no eld-11 in R5 ElementDefinition")
 	}
 }

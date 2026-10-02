@@ -5,7 +5,8 @@ package registry
 // StructureDefinition is loaded, to that FHIR version only, and only where the published value is
 // exactly the defective one: a definition that differs is left as it is.
 //
-// The HL7 validator corrects the same definitions in code (InstanceValidator's id checks). Keeping
+// The HL7 validator corrects the same definitions in code (InstanceValidator's id checks, and
+// FHIRPathExpressionFixer for eld-11). Keeping
 // them here, as data with their sources, keeps every validation phase reading the definitions alone.
 
 const fhirTypeExtension = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type"
@@ -42,6 +43,24 @@ var typeErrata = []typeErratum{{
 	source: "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, ElementDefinition.id",
 }}
 
+// constraintErratum corrects a constraint expression that is not valid FHIRPath as published.
+type constraintErratum struct {
+	fhirVersion string // StructureDefinition.fhirVersion the defect is published in
+	from        string // Constraint.source of the constraint
+	key         string
+	published   string // the defective expression, corrected only if this is what is published
+	corrected   string
+	source      string // the official definition that corrects it
+}
+
+var constraintErrata = []constraintErratum{{
+	// R5's eld-11 quotes a string with double quotes, which is not FHIRPath.
+	fhirVersion: "5.0.0", from: "http://hl7.org/fhir/StructureDefinition/ElementDefinition", key: "eld-11",
+	published: `binding.empty() or type.code.empty() or type.code.contains(":") or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()`,
+	corrected: `binding.empty() or type.code.empty() or type.code.contains(':') or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()`,
+	source:    "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, eld-11",
+}}
+
 // applyErrata corrects sd's elements, in its snapshot and its differential.
 func applyErrata(sd *StructureDefinition) {
 	correctElements(sd.FHIRVersion, snapshotElements(sd))
@@ -59,6 +78,16 @@ func correctElements(fhirVersion string, elems []ElementDefinition) {
 }
 
 func correctElement(fhirVersion string, e *ElementDefinition) {
+	for _, er := range constraintErrata {
+		if er.fhirVersion != fhirVersion {
+			continue
+		}
+		for c := range e.Constraint {
+			if cn := &e.Constraint[c]; cn.Key == er.key && cn.Source == er.from && cn.Expression == er.published {
+				cn.Expression = er.corrected
+			}
+		}
+	}
 	for _, er := range typeErrata {
 		if er.fhirVersion != fhirVersion || (e.Path != er.path && (e.Base == nil || e.Base.Path != er.path)) {
 			continue
