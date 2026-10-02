@@ -16,7 +16,8 @@
       "files": [
         "testdata/m12-slice-scoping/probes/r3_sqty.json",
         "testdata/m12-slice-scoping/probes/r4_bp_*.json",
-        "testdata/m12-slice-scoping/probes/r4_q_nested.json"
+        "testdata/m12-slice-scoping/probes/r4_q_nested.json",
+        "testdata/m12-slice-scoping/probes/e*_*.json"
       ]
     },
     {
@@ -31,7 +32,12 @@
     {
       "name": "r5-probes",
       "version": "5.0.0",
-      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json"]
+      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json", "testdata/m12-slice-scoping/probes/e*_*.json"]
+    },
+    {
+      "name": "r4b-probes",
+      "version": "4.3.0",
+      "files": ["testdata/m12-slice-scoping/probes/r4b_sd_minimal.json"]
     },
     {
       "name": "deqm-probes",

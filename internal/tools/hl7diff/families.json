@@ -210,7 +210,9 @@
         "TYPE_INVALID_UUID"
       ],
       "hl7": [
-        "Type_Specific_Checks_DT_*"
+        "Type_Specific_Checks_DT_*",
+        "Resource_RES_ID_Malformed_Chars",
+        "Resource_RES_ID_Malformed_Length"
       ]
     },
     {
