@@ -34,6 +34,13 @@ fixed first, in its own PR:
 
 ## Decision C-1: an error the FHIRPath specification requires is a failure
 
+**Resolved (2026-10-02).** gofhir/fhirpath v1.9.8 no longer evaluates the right operand of `and`,
+`or` and `implies` when the left one decides (gofhir/fhirpath#69), as the HL7 validator's
+`FHIRPathEngine.preOperate` does and FHIRPath 6.5 allows. `tim-9` holds on a timing with two `when`
+values and no `offset`, and the declared divergence is removed. The same change lets R5's `eld-11`,
+corrected in `registry/errata.go`, hold on choice elements. What follows is the record of the
+decision as it stood.
+
 `tim-9` (core R4) is `offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' |
 'CV')).not()))`. On a timing with two `when` values and no `offset`, `in` raises an error:
 

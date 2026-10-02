@@ -15,6 +15,7 @@ import (
 	"github.com/gofhir/fhirpath/eval"
 	"github.com/gofhir/fhirpath/types"
 
+	"github.com/gofhir/validator/internal/fhirpathcache"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
 	"github.com/gofhir/validator/pkg/terminology"
@@ -190,6 +191,7 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	if err != nil {
 		resourceCollection = nil
 	}
+	fhirpathcache.Enable(resourceCollection)
 
 	// Build eval options shared by all constraints in this resource. A value that is not a resource
 	// takes %resource and %rootResource from the resources it sits in.
@@ -254,6 +256,7 @@ func (v *Validator) validateContainedConstraints(ctx context.Context, resource m
 
 	// Build root resource collection for %rootResource.
 	rootResourceCol, _ := types.JSONToCollection(rootResourceData)
+	fhirpathcache.Enable(rootResourceCol)
 
 	for i, item := range contained {
 		resourceMap, ok := item.(map[string]any)
@@ -280,6 +283,7 @@ func (v *Validator) validateContainedConstraints(ctx context.Context, resource m
 
 		// Build resource collection for the contained resource itself (%resource).
 		containedCollection, _ := types.JSONToCollection(containedJSON)
+		fhirpathcache.Enable(containedCollection)
 
 		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
 
