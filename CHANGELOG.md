@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.26.1](https://github.com/gofhir/validator/compare/v1.26.0...v1.26.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **cli:** -tx takes its value, as in the HL7 validator ([#111](https://github.com/gofhir/validator/issues/111)) ([150a428](https://github.com/gofhir/validator/commit/150a4289ecb02fd5d617b15f4a2a4ff1d003f6aa))
+* **constraint:** an expression that does not compile is an error ([#112](https://github.com/gofhir/validator/issues/112)) ([3ad7975](https://github.com/gofhir/validator/commit/3ad7975e49d7db12f869fbcaadac403d6aa2eaff))
+
 ## [1.26.0](https://github.com/gofhir/validator/compare/v1.25.1...v1.26.0) (2026-10-02)
 
 
