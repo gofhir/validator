@@ -25,6 +25,9 @@ func TestParseArgs(t *testing.T) {
 		{name: "flags after the file, as HL7 puts them", args: []string{"p.json", "-version", "5.0.0", "q.json"},
 			files: []string{"p.json", "q.json"}, version: "5.0.0"},
 		{name: "stdin", args: []string{"-quiet", "-"}, files: []string{"-"}, version: "4.0.1"},
+		{name: "after --, everything is a file", args: []string{"-quiet", "--", "-a.json", "-version"},
+			files: []string{"-a.json", "-version"}, version: "4.0.1"},
+		{name: "an unknown flag", args: []string{"-bogus", "p.json"}, err: "-bogus"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			c, err := parseArgs(tt.args)

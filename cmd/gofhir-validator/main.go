@@ -145,16 +145,24 @@ func parseArgs(args []string) (*Config, error) {
 		fmt.Fprint(os.Stderr, usage)
 		fs.SetOutput(os.Stderr)
 		fs.PrintDefaults()
+		fs.SetOutput(io.Discard)
 	}
 	fs.Usage = printUsage
+	fs.SetOutput(io.Discard) // a parse error is reported once, by main
 
 	// Flags may come before or after the files, as in the HL7 validator, whose usage puts the file
 	// first (validator_cli.jar resource.json -version 4.0.1). The flag package stops at the first
-	// argument that is not a flag, so parsing resumes after each file.
+	// argument that is not a flag, so parsing resumes after each file; after "--", everything is a
+	// file.
 	var files []string
 	for rest := args; ; {
 		if err := fs.Parse(rest); err != nil {
 			return nil, err
+		}
+		consumed := len(rest) - len(fs.Args())
+		if consumed > 0 && rest[consumed-1] == "--" {
+			files = append(files, fs.Args()...)
+			break
 		}
 		rest = fs.Args()
 		if len(rest) == 0 {
