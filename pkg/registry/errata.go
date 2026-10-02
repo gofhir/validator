@@ -34,13 +34,17 @@ var typeErrata = []typeErratum{{
 
 // applyErrata corrects sd's elements, in its snapshot and its differential.
 func applyErrata(sd *StructureDefinition) {
-	if sd.FHIRVersion == "" {
+	correctElements(sd.FHIRVersion, snapshotElements(sd))
+	correctElements(sd.FHIRVersion, differentialElements(sd))
+}
+
+// correctElements corrects elements of a definition written for fhirVersion.
+func correctElements(fhirVersion string, elems []ElementDefinition) {
+	if fhirVersion == "" {
 		return
 	}
-	for _, elems := range [][]ElementDefinition{snapshotElements(sd), differentialElements(sd)} {
-		for i := range elems {
-			correctElement(sd.FHIRVersion, &elems[i])
-		}
+	for i := range elems {
+		correctElement(fhirVersion, &elems[i])
 	}
 }
 

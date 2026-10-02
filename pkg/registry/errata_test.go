@@ -1,6 +1,10 @@
 package registry
 
-import "testing"
+import (
+	"context"
+	"encoding/json"
+	"testing"
+)
 
 // fhirTypeOf is the fhir-type an element declares, as loaded.
 func fhirTypeOf(t *testing.T, r *Registry, sdURL, elementID string) string {
@@ -68,5 +72,55 @@ func TestErrataLeaveOtherValues(t *testing.T) {
 	}
 	if got := other.Snapshot.Element[0].Type[0].Extension[0].ValueURL; got != "string" {
 		t.Errorf("another FHIR version: %s, want it left as string", got)
+	}
+}
+
+// A snapshot generated from a differential keeps the corrections, on the elements the
+// differential changes too.
+func TestErrataInAGeneratedSnapshot(t *testing.T) {
+	r := sharedVersion(t, "4.0.1")
+	sd := &StructureDefinition{
+		URL: "https://example.org/fhir/StructureDefinition/id-required", Type: "Patient", Kind: KindResource,
+		FHIRVersion: "4.0.1", Derivation: DerivationConstraint, BaseDefinition: "http://hl7.org/fhir/StructureDefinition/Patient",
+		Differential: &Differential{Element: []ElementDefinition{{ID: "Patient.id", Path: "Patient.id", Min: 1}}},
+	}
+	for i := range sd.Differential.Element {
+		raw, _ := json.Marshal(sd.Differential.Element[i])
+		sd.Differential.Element[i].SetRaw(raw)
+	}
+	if err := r.EnsureSnapshot(context.Background(), sd); err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range sd.Snapshot.Element {
+		if e.ID != "Patient.id" {
+			continue
+		}
+		for _, x := range e.Type[0].Extension {
+			if x.URL == fhirTypeExtension && x.ValueURL != "id" {
+				t.Errorf("Patient.id fhir-type %s in the generated snapshot, want id", x.ValueURL)
+			}
+		}
+		return
+	}
+	t.Fatal("no Patient.id in the generated snapshot")
+}
+
+type rawResolver []byte
+
+func (r rawResolver) ResolveProfile(context.Context, string, string) ([]byte, error) { return r, nil }
+
+// A definition fetched through a profile resolver is corrected as a loaded one is.
+func TestErrataInAResolvedDefinition(t *testing.T) {
+	r := New()
+	r.SetResolver(rawResolver(`{"resourceType":"StructureDefinition","url":"https://example.org/p","type":"Patient",
+"kind":"resource","fhirVersion":"4.0.1","derivation":"constraint","snapshot":{"element":[
+{"id":"Patient.id","path":"Patient.id","base":{"path":"Resource.id","min":0,"max":"1"},
+ "type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":"` + fhirTypeExtension + `","valueUrl":"string"}]}]}]}}`))
+	sd := r.ResolveByCanonical(context.Background(), "https://example.org/p", "")
+	if sd == nil {
+		t.Fatal("not resolved")
+	}
+	if got := sd.Snapshot.Element[0].Type[0].Extension[0].ValueURL; got != "id" {
+		t.Errorf("fhir-type %s, want id", got)
 	}
 }

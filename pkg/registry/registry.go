@@ -483,6 +483,7 @@ func (r *Registry) ResolveByCanonical(ctx context.Context, url, version string) 
 		return nil
 	}
 	sd.raw = data
+	applyErrata(&sd)
 
 	// 5. Cache in registry (check-then-set for race protection)
 	r.mu.Lock()

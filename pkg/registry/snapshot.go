@@ -61,6 +61,14 @@ func (r *Registry) EnsureSnapshot(ctx context.Context, sd *StructureDefinition) 
 		return fmt.Errorf("cannot generate snapshot for %s: %w", sd.URL, err)
 	}
 
+	// The merge rebuilds a changed element from its base's published JSON, so the corrections are
+	// applied again, for the profile's FHIR version, or its base's when it declares none.
+	version := sd.FHIRVersion
+	if version == "" {
+		version = baseSD.FHIRVersion
+	}
+	correctElements(version, snapshot.Element)
+
 	sd.Snapshot = snapshot
 	return nil
 }
