@@ -4,6 +4,7 @@ package constraint
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -363,21 +364,33 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 
 		evalResult, err := v.evaluateWithContext(expr, data, defPath, opts)
 		if err != nil {
-			result.AddWarningWithID(
-				issue.DiagConstraintEvalError,
-				map[string]any{
-					"key":   c.Key,
-					"error": err.Error(),
-				},
-				fhirPath,
-			)
+			if opts.ctx.Err() != nil {
+				return // the validation was canceled; that says nothing about the instance
+			}
+			if hitTimeLimit(err) {
+				// The evaluation stopped at this validator's own time limit, which says nothing
+				// about the instance: a processing notice, not a failed invariant.
+				result.AddWarningWithID(issue.DiagConstraintEvalError,
+					map[string]any{"key": c.Key, "error": err.Error()}, fhirPath)
+				continue
+			}
+			// Any other error leaves the invariant unsatisfied. It fails at its own
+			// severity, as in the HL7 validator, whose checkInvariant takes an exception from
+			// the FHIRPath engine as a failed invariant.
+			v.addConstraintViolation(c, fhirPath, err, result)
 			continue
 		}
 
 		if !v.constraintPassed(evalResult) {
-			v.addConstraintViolation(c, fhirPath, result)
+			v.addConstraintViolation(c, fhirPath, nil, result)
 		}
 	}
+}
+
+// hitTimeLimit reports whether an evaluation error is the time limit set in buildEvalOpts.
+func hitTimeLimit(err error) bool {
+	var evalErr *eval.EvalError
+	return errors.Is(err, context.DeadlineExceeded) || (errors.As(err, &evalErr) && evalErr.Type == eval.ErrTimeout)
 }
 
 // evaluateWithContext builds an eval.Context with all services wired and evaluates the expression.
@@ -509,11 +522,15 @@ func (v *Validator) constraintPassed(result fhirpath.Collection) bool {
 	return b
 }
 
-// addConstraintViolation adds an issue for a failed constraint.
-func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath string, result *issue.Result) {
+// addConstraintViolation adds an issue for a failed constraint. When evalErr is not nil, it is
+// why the constraint could not be evaluated.
+func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath string, evalErr error, result *issue.Result) {
 	diag := fmt.Sprintf("Constraint failed: %s: '%s'", c.Key, c.Human)
 	if c.Source != "" {
 		diag += fmt.Sprintf(" (defined in %s)", c.Source)
+	}
+	if evalErr != nil {
+		diag += fmt.Sprintf(" (could not be evaluated: %s)", evalErr)
 	}
 	if c.Severity == "warning" {
 		diag += " (Best Practice Recommendation)"

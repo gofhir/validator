@@ -80,7 +80,10 @@ const (
 const (
 	DiagConstraintFailed       DiagnosticID = "CONSTRAINT_FAILED"
 	DiagConstraintCompileError DiagnosticID = "CONSTRAINT_COMPILE_ERROR"
-	DiagConstraintEvalError    DiagnosticID = "CONSTRAINT_EVAL_ERROR"
+	// DiagConstraintEvalError is reported only when evaluation stops at the validator's own time
+	// limit. Any other evaluation error is DiagConstraintFailed, at the constraint's severity, as
+	// in the HL7 validator.
+	DiagConstraintEvalError DiagnosticID = "CONSTRAINT_EVAL_ERROR"
 )
 
 // Diagnostic IDs for slicing validation.
