@@ -64,7 +64,7 @@ type Validator struct {
 	termRegistry *terminology.Registry
 
 	// Cache of compiled FHIRPath expressions.
-	exprCache   map[string]*fhirpath.Expression
+	exprCache   map[string]compiledExpr
 	exprCacheMu sync.RWMutex
 
 	// Cache of which complex types carry constraints worth descending into, keyed by
@@ -80,7 +80,7 @@ func New(reg *registry.Registry, termReg *terminology.Registry) *Validator {
 	return &Validator{
 		registry:            reg,
 		termRegistry:        termReg,
-		exprCache:           make(map[string]*fhirpath.Expression),
+		exprCache:           make(map[string]compiledExpr),
 		typeConstraintCache: make(map[string]*registry.StructureDefinition),
 	}
 }
@@ -508,24 +508,26 @@ func concretePath(defPath, fhirPath string) string {
 // getCompiledExpression returns a cached compiled expression or compiles a new one.
 func (v *Validator) getCompiledExpression(expr string) (*fhirpath.Expression, error) {
 	v.exprCacheMu.RLock()
-	compiled, ok := v.exprCache[expr]
+	cached, ok := v.exprCache[expr]
 	v.exprCacheMu.RUnlock()
 	if ok {
-		return compiled, nil
+		return cached.expr, cached.err
 	}
 
-	// Compile the expression.
+	// Compile the expression. A failure is cached too: an expression that does not parse is
+	// otherwise parsed again on every element and every validation it applies to.
 	compiled, err := fhirpath.Compile(expr)
-	if err != nil {
-		return nil, err
-	}
-
-	// Cache it.
 	v.exprCacheMu.Lock()
-	v.exprCache[expr] = compiled
+	v.exprCache[expr] = compiledExpr{compiled, err}
 	v.exprCacheMu.Unlock()
 
-	return compiled, nil
+	return compiled, err
+}
+
+// compiledExpr is a compiled expression, or why it does not compile.
+type compiledExpr struct {
+	expr *fhirpath.Expression
+	err  error
 }
 
 // constraintPassed checks if a FHIRPath result indicates the constraint passed.

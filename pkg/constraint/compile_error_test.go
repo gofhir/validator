@@ -3,6 +3,7 @@ package constraint
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/issue"
@@ -43,5 +44,16 @@ func TestConstraintThatDoesNotCompile(t *testing.T) {
 				t.Errorf("issues %+v, want one %s %s", result.Issues, tt.want, issue.DiagConstraintCompileError)
 			}
 		})
+	}
+}
+
+// An expression that does not compile is compiled once: the failure is cached like a success.
+func TestCompileFailureIsCached(t *testing.T) {
+	v := New(nil, nil)
+	const bad = "name.where(family = )"
+	_, first := v.getCompiledExpression(bad)
+	_, second := v.getCompiledExpression(bad)
+	if first == nil || !errors.Is(second, first) {
+		t.Fatalf("errors %v and %v, want the same cached error", first, second)
 	}
 }
