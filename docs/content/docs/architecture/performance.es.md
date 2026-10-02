@@ -195,7 +195,7 @@ v, err := validator.New(
 
 ### Omitir la Terminologia Cuando No Es Necesaria
 
-El validador no hace llamadas de red por terminologia salvo que configures un proveedor con `WithTerminologyProvider`. Si ese proveedor puede no estar disponible, o solo necesitas validacion estructural, omite la validacion de terminologia y bindings:
+El validador no hace llamadas de red por terminologia salvo que configures `WithTerminologyProvider` o `WithTerminologyAuthority`. Si ese backend puede no estar disponible, o solo necesitas validacion estructural, omite la validacion de terminologia y bindings:
 
 ```go
 v, err := validator.New(

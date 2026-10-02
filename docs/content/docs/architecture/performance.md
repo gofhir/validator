@@ -195,7 +195,7 @@ v, err := validator.New(
 
 ### Skip Terminology When It Is Not Needed
 
-The validator makes no network calls for terminology unless you configure a provider with `WithTerminologyProvider`. If that provider may be unreachable, or you need structural validation only, skip terminology and binding validation:
+The validator makes no network calls for terminology unless you configure `WithTerminologyProvider` or `WithTerminologyAuthority`. If that backend may be unreachable, or you need structural validation only, skip terminology and binding validation:
 
 ```go
 v, err := validator.New(
