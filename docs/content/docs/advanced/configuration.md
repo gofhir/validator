@@ -115,7 +115,7 @@ If you only need structural validation, disable terminology checking to skip Val
 **CLI:**
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 **Go API:**

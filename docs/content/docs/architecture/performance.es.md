@@ -193,20 +193,20 @@ v, err := validator.New(
 )
 ```
 
-### Deshabilitar Terminologia Sin Conexion
+### Omitir la Terminologia Cuando No Es Necesaria
 
-Si no hay un servidor de terminologia disponible, deshabilita la validacion de terminologia explicitamente para evitar retrasos por timeout:
+El validador no hace llamadas de red por terminologia salvo que configures `WithTerminologyProvider` o `WithTerminologyAuthority`. Si ese backend puede no estar disponible, o solo necesitas validacion estructural, omite la validacion de terminologia y bindings:
 
 ```go
 v, err := validator.New(
-    validator.WithTerminologyDisabled(),
+    validator.WithNoTerminology(),
 )
 ```
 
-O via la CLI:
+La CLI no tiene proveedor de terminologia, asi que nunca espera por uno; `-no-terminology` solo omite las verificaciones:
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 {{< callout type="info" >}}

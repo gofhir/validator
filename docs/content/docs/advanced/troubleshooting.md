@@ -127,7 +127,7 @@ result, _ = v.Validate(ctx, resource2)
 
 - **Reuse the validator.** Do not create a new `Validator` instance for each resource. Each instance loads its own copy of the registry.
 - **Load only the packages you need.** Avoid loading IGs that are not required for your validation.
-- **Disable terminology if not needed.** Terminology registries consume memory for ValueSet expansion. Use `WithNoTerminology()` or `-tx n/a` if you do not need terminology validation.
+- **Disable terminology if not needed.** Terminology registries consume memory for ValueSet expansion. Use `WithNoTerminology()` or `-no-terminology` if you do not need terminology validation.
 
 ```go
 // WRONG: Creates a new validator (and registry) per request
@@ -191,7 +191,7 @@ Unknown extensions produce **warnings**, not errors. The resource is still valid
 To suppress terminology validation entirely:
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 ```go

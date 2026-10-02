@@ -274,7 +274,8 @@ cat patient.json | gofhir-validator -
 | `-version 4.0.1` | `-version 4.0.1` | Versión FHIR (acepta 4.0.1, 4.3.0, 5.0.0) |
 | `-ig <url>` | `-ig <url>` | Profile/IG |
 | `-output json` | `-output` | Formato salida |
-| `-tx n/a` | `-tx n/a` | Deshabilitar terminología |
+| `-tx n/a` | `-tx n/a` | Sin servidor de terminología: valida contra las ValueSets cargadas |
+| `-no-terminology` | - | Omitir toda la validación de terminología y bindings |
 | `-strict` | - | Warnings como errors |
 
 ---

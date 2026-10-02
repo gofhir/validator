@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -28,10 +29,11 @@ Usage:
 
 Examples:
   gofhir-validator patient.json
-  gofhir-validator -version r4 patient.json
+  gofhir-validator -version 4.0.1 patient.json
   gofhir-validator -ig http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient patient.json
   gofhir-validator -output json patient.json
-  gofhir-validator -tx n/a patient.json
+  gofhir-validator -tx n/a patient.json            (no terminology server, as in the HL7 validator)
+  gofhir-validator -no-terminology patient.json    (skip terminology and bindings)
   gofhir-validator *.json
   cat patient.json | gofhir-validator -
 
@@ -85,7 +87,14 @@ type IssueOutput struct {
 }
 
 func main() {
-	config := parseFlags()
+	config, err := parseArgs(os.Args[1:])
+	if errors.Is(err, flag.ErrHelp) {
+		os.Exit(0) // -h: the flag package has printed the usage
+	}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(2)
+	}
 
 	if config.ShowVersion {
 		fmt.Printf("gofhir-validator v%s\n", version)
@@ -93,7 +102,7 @@ func main() {
 	}
 
 	if config.Help || len(config.Files) == 0 {
-		flag.Usage()
+		printUsage()
 		os.Exit(0)
 	}
 
@@ -101,35 +110,73 @@ func main() {
 	os.Exit(exitCode)
 }
 
-func parseFlags() *Config {
+// printUsage prints the usage text and the flags; parseArgs sets it.
+var printUsage = func() {}
+
+// parseArgs reads the command line (without the program name) into a Config.
+func parseArgs(args []string) (*Config, error) {
 	config := &Config{
 		Version: "4.0.1",
 		Output:  OutputText,
 	}
+	fs := flag.NewFlagSet("gofhir-validator", flag.ContinueOnError)
 
 	// Define flags compatible with HL7 validator
-	var profiles, packages, packageFiles, packageURLs string
+	var profiles, packages, packageFiles, packageURLs, tx string
 	var output string
 
-	flag.StringVar(&config.Version, "version", "4.0.1", "FHIR version (4.0.1, 4.3.0, 5.0.0)")
-	flag.StringVar(&profiles, "ig", "", "Profile URL(s) to validate against (comma-separated)")
-	flag.StringVar(&packages, "package", "", "Additional FHIR package(s) to load (e.g., hl7.fhir.us.core#6.1.0)")
-	flag.StringVar(&packageFiles, "package-file", "", "Local .tgz package file(s) to load (comma-separated)")
-	flag.StringVar(&packageURLs, "package-url", "", "Remote .tgz package URL(s) to load (comma-separated)")
-	flag.StringVar(&output, "output", "text", "Output format: text, json")
-	flag.BoolVar(&config.Strict, "strict", false, "Treat warnings as errors")
-	flag.BoolVar(&config.NoTerminology, "tx", false, "Disable terminology validation (use '-tx n/a')")
-	flag.BoolVar(&config.Quiet, "quiet", false, "Only show errors and warnings")
-	flag.BoolVar(&config.Verbose, "verbose", false, "Show detailed output")
-	flag.BoolVar(&config.ShowVersion, "v", false, "Show version")
-	flag.BoolVar(&config.Help, "help", false, "Show help")
+	fs.StringVar(&config.Version, "version", "4.0.1", "FHIR version (4.0.1, 4.3.0, 5.0.0)")
+	fs.StringVar(&profiles, "ig", "", "Profile URL(s) to validate against (comma-separated)")
+	fs.StringVar(&packages, "package", "", "Additional FHIR package(s) to load (e.g., hl7.fhir.us.core#6.1.0)")
+	fs.StringVar(&packageFiles, "package-file", "", "Local .tgz package file(s) to load (comma-separated)")
+	fs.StringVar(&packageURLs, "package-url", "", "Remote .tgz package URL(s) to load (comma-separated)")
+	fs.StringVar(&output, "output", "text", "Output format: text, json")
+	fs.StringVar(&tx, "tx", "", "Terminology server, as in the HL7 validator: 'n/a' for none. Codes are then\n"+
+		"checked against the ValueSets and CodeSystems loaded, which is what happens without -tx too.\n"+
+		"A server URL is not supported")
+	fs.BoolVar(&config.NoTerminology, "no-terminology", false, "Skip all terminology and binding validation")
+	fs.BoolVar(&config.Strict, "strict", false, "Treat warnings as errors")
+	fs.BoolVar(&config.Quiet, "quiet", false, "Only show errors and warnings")
+	fs.BoolVar(&config.Verbose, "verbose", false, "Show detailed output")
+	fs.BoolVar(&config.ShowVersion, "v", false, "Show version")
+	fs.BoolVar(&config.Help, "help", false, "Show help")
 
-	flag.Usage = func() {
+	printUsage = func() {
 		fmt.Fprint(os.Stderr, usage)
-		flag.PrintDefaults()
+		fs.SetOutput(os.Stderr)
+		fs.PrintDefaults()
+		fs.SetOutput(io.Discard)
+	}
+	fs.Usage = printUsage
+	fs.SetOutput(io.Discard) // a parse error is reported once, by main
+
+	// Flags may come before or after the files, as in the HL7 validator, whose usage puts the file
+	// first (validator_cli.jar resource.json -version 4.0.1). The flag package stops at the first
+	// argument that is not a flag, so parsing resumes after each file; after "--", everything is a
+	// file.
+	var files []string
+	for rest := args; ; {
+		if err := fs.Parse(rest); err != nil {
+			return nil, err
+		}
+		consumed := len(rest) - len(fs.Args())
+		if consumed > 0 && rest[consumed-1] == "--" {
+			files = append(files, fs.Args()...)
+			break
+		}
+		rest = fs.Args()
+		if len(rest) == 0 {
+			break
+		}
+		files = append(files, rest[0])
+		rest = rest[1:]
 	}
 
-	flag.Parse()
+	// -tx names a terminology server. This validator has no client for one: codes are always
+	// checked against the definitions loaded, which is the HL7 validator's -tx n/a.
+	if tx != "" && tx != "n/a" {
+		return nil, fmt.Errorf("-tx %s: a terminology server is not supported; use -tx n/a, or leave -tx out", tx)
+	}
 
 	// Parse profiles
 	if profiles != "" {
@@ -159,17 +206,9 @@ func parseFlags() *Config {
 		config.Output = OutputText
 	}
 
-	// Handle -tx n/a style flag
-	for _, arg := range os.Args {
-		if arg == "n/a" {
-			config.NoTerminology = true
-		}
-	}
+	config.Files = files
 
-	// Remaining arguments are files
-	config.Files = flag.Args()
-
-	return config
+	return config, nil
 }
 
 func run(config *Config) int {
@@ -287,7 +326,7 @@ func processFiles(v *validator.Validator, config *Config) ([]ValidationOutput, b
 }
 
 func validateFile(v *validator.Validator, path string, config *Config) (ValidationOutput, bool) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //nolint:gosec // G703: the file the user named on the command line is the one to read
 	if err != nil {
 		output := ValidationOutput{
 			Resource: path,

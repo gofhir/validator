@@ -227,4 +227,4 @@ The severity of terminology errors depends on the binding strength declared in t
 The binding strength is read from `ElementDefinition.binding.strength` in the StructureDefinition. The validator never hardcodes which elements have which binding strength -- it is always derived from the profile.
 {{< /callout >}}
 
-When terminology validation is disabled (using `-tx n/a` in the CLI or `WithTerminologyDisabled()` in the API), all terminology-related errors are suppressed.
+When terminology validation is disabled (using `-no-terminology` in the CLI or `WithNoTerminology()` in the API), all terminology-related errors are suppressed.

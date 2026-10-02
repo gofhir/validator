@@ -193,20 +193,20 @@ v, err := validator.New(
 )
 ```
 
-### Disable Terminology When Offline
+### Skip Terminology When It Is Not Needed
 
-If no terminology server is available, disable terminology validation explicitly to avoid timeout delays:
+The validator makes no network calls for terminology unless you configure `WithTerminologyProvider` or `WithTerminologyAuthority`. If that backend may be unreachable, or you need structural validation only, skip terminology and binding validation:
 
 ```go
 v, err := validator.New(
-    validator.WithTerminologyDisabled(),
+    validator.WithNoTerminology(),
 )
 ```
 
-Or via the CLI:
+The CLI has no terminology provider, so it never waits on one; `-no-terminology` only skips the checks:
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 {{< callout type="info" >}}

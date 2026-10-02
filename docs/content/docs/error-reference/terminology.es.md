@@ -227,4 +227,4 @@ La severidad de los errores de terminología depende de la fuerza de binding dec
 La fuerza de binding se lee desde `ElementDefinition.binding.strength` en el StructureDefinition. El validador nunca hardcodea qué elementos tienen qué fuerza de binding -- siempre se deriva del perfil.
 {{< /callout >}}
 
-Cuando la validación de terminología está deshabilitada (usando `-tx n/a` en el CLI o `WithTerminologyDisabled()` en la API), todos los errores relacionados con terminología se suprimen.
+Cuando la validación de terminología está deshabilitada (usando `-no-terminology` en el CLI o `WithNoTerminology()` en la API), todos los errores relacionados con terminología se suprimen.

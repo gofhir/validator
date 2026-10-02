@@ -142,17 +142,17 @@ v, err := validator.New(
 
 ## Disabling Terminology Validation
 
-In some scenarios you may want to skip terminology validation entirely -- for example, when testing structural conformance without loading terminology resources. Use the `-tx n/a` flag with the CLI:
+In some scenarios you may want to skip terminology validation entirely -- for example, when testing structural conformance without loading terminology resources. Use the `-no-terminology` flag with the CLI (`-tx n/a`, as in the HL7 validator, only leaves out a terminology server):
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 Or programmatically:
 
 ```go
 v, err := validator.New(
-    validator.WithTerminologyDisabled(),
+    validator.WithNoTerminology(),
 )
 ```
 

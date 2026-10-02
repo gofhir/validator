@@ -142,17 +142,17 @@ v, err := validator.New(
 
 ## Deshabilitar la Validación de Terminología
 
-En algunos escenarios puedes querer omitir la validación de terminología por completo -- por ejemplo, al probar conformancia estructural sin cargar recursos de terminología. Usa el flag `-tx n/a` con el CLI:
+En algunos escenarios puedes querer omitir la validación de terminología por completo -- por ejemplo, al probar conformancia estructural sin cargar recursos de terminología. Usa el flag `-no-terminology` con el CLI (`-tx n/a`, como en el HL7 validator, solo prescinde de un servidor de terminología):
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
 O programáticamente:
 
 ```go
 v, err := validator.New(
-    validator.WithTerminologyDisabled(),
+    validator.WithNoTerminology(),
 )
 ```
 

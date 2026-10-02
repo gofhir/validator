@@ -30,7 +30,8 @@ cat resource.json | gofhir-validator -
 | `-package-url` | Remote `.tgz` package URL(s) (comma-separated) | -- |
 | `-output` | Output format: `text` or `json` | `text` |
 | `-strict` | Treat warnings as errors | `false` |
-| `-tx n/a` | Disable terminology validation | `false` |
+| `-tx` | Terminology server, as in the HL7 validator: `n/a` for none. Codes are checked against the ValueSets and CodeSystems loaded, as without `-tx`; a server URL is not supported | -- |
+| `-no-terminology` | Skip all terminology and binding validation | `false` |
 | `-quiet` | Only show errors and warnings | `false` |
 | `-verbose` | Show detailed output | `false` |
 | `-v` | Show version | -- |
@@ -163,14 +164,16 @@ gofhir-validator -strict patient.json
 
 ### Disabling Terminology Validation
 
-Skip terminology checks when no terminology server is available:
+Skip terminology and binding checks entirely, for structural validation only:
 
 ```bash
-gofhir-validator -tx n/a patient.json
+gofhir-validator -no-terminology patient.json
 ```
 
+`-tx n/a` does not do this. As in the HL7 validator, it only says there is no terminology server, and codes are still checked against the ValueSets and CodeSystems loaded.
+
 {{< callout type="tip" >}}
-**CI/CD integration** -- Use `-output json` combined with `jq` to parse validation results programmatically. Set `-tx n/a` if your CI environment does not have access to a terminology server. The exit code (`0` for valid, `1` for invalid) integrates directly with CI pipeline failure conditions.
+**CI/CD integration** -- Use `-output json` combined with `jq` to parse validation results programmatically. `-tx n/a` states that no terminology server is used, as in the HL7 validator; codes are still checked against the definitions loaded. The exit code (`0` for valid, `1` for invalid) integrates directly with CI pipeline failure conditions.
 
 ```bash
 gofhir-validator -output json -tx n/a patient.json | jq '.[0].valid'
