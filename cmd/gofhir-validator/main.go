@@ -326,7 +326,7 @@ func processFiles(v *validator.Validator, config *Config) ([]ValidationOutput, b
 }
 
 func validateFile(v *validator.Validator, path string, config *Config) (ValidationOutput, bool) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //nolint:gosec // G703: the file the user named on the command line is the one to read
 	if err != nil {
 		output := ValidationOutput{
 			Resource: path,
