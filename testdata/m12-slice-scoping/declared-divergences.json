@@ -49,7 +49,7 @@
   },
   {
     "decision": "C-1",
-    "reason": "An invariant that raises an error is not satisfied, as in the HL7 validator's own checkInvariant; tim-9's 'when in (...)' raises one on two 'when' values (\"If the left operand has multiple items, an exception is thrown\", fhirpath 6.4.2), and short-circuit evaluation cannot be relied on (fhirpath 6.5). HL7 6.10.4's engine short-circuits and does not raise.",
+    "reason": "An invariant that raises an error is not satisfied, as in the HL7 validator's own checkInvariant; tim-9's 'when in (...)' raises one on two 'when' values (\"If the left operand has multiple items, an exception is thrown\", fhirpath 6.4.2), and short-circuit evaluation cannot be relied on (fhirpath 6.5). HL7 6.10.4 accepts the timing because FHIRPathExpressionFixer.fixExpr replaces this R4 expression with one using when.select($this in ...).allFalse(); gofhir evaluates the published expression.",
     "side": "gofhir",
     "file": "fhir-cache:/ch.fhir.ig.ch-core#6.0.0/package/example/MedicationRequest-2-6-MedReqNorvasc.json",
     "location": "MedicationRequest.dosageInstruction[0].timing.repeat",

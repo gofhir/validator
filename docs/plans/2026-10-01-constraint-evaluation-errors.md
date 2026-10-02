@@ -34,15 +34,18 @@ fixed first, in its own PR:
 
 ## Decision C-1: an error the FHIRPath specification requires is a failure
 
-`tim-9` (core R4) is `offset.exists() implies (when.exists() and ((when in ('C' | 'CM' | 'CD' |
+`tim-9` (core R4) is `offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' |
 'CV')).not()))`. On a timing with two `when` values and no `offset`, `in` raises an error:
 
 - `in`: "If the left operand has multiple items, an exception is thrown" (fhirpath 6.4.2);
 - implementations need not short-circuit, and "if short-circuit evaluation is needed to avoid
   effects (e.g. runtime exceptions), use the iif() function" (fhirpath 6.5).
 
-gofhir/fhirpath raises the error, so the invariant fails. HL7 6.10.4's engine short-circuits and
-accepts the timing. This is a declared divergence (`C-1`, for CH Core
+gofhir/fhirpath raises the error, so the invariant fails. HL7 6.10.4 accepts the timing because it
+does not evaluate the published expression: `FHIRPathExpressionFixer.fixExpr` replaces this exact
+R4 expression with `offset.empty() or (when.exists() and when.select($this in ('C' | 'CM' | 'CD' |
+'CV')).allFalse())`. gofhir evaluates invariants as the StructureDefinitions publish them and keeps
+no table of rewritten expressions. This is a declared divergence (`C-1`, for CH Core
 `MedicationRequest-2-6-MedReqNorvasc`).
 
 ## Verification (against v1.25.1, HL7 validator 6.10.4)
@@ -61,8 +64,14 @@ prerequisites; this change itself adds no error HL7 does not report, except C-1.
   not parse as an error, whatever the constraint's severity (`PROBLEM_PROCESSING_EXPRESSION`).
   `CONSTRAINT_COMPILE_ERROR` was a warning; it is now an error, paired with HL7's in `hl7diff`,
   and covered by the `constraint-probes` corpus group.
-- **An empty result:** HL7's `convertToBoolean` takes an empty collection as false, so the
-  invariant fails. gofhir takes it as satisfied.
+- **An empty result (not changed, measured):** an invariant's expression "must evaluate to true
+  when run on the element" (conformance-rules.html#constraints), and HL7's `convertToBoolean`
+  takes an empty result as false. gofhir takes it as satisfied. Following the specification gave
+  58 false errors on the corpus, all `ref-1` (R4) on logical references, which evaluate to empty.
+  HL7 does not report them only because `fixExpr` rewrites `ref-1` to start with
+  `reference.exists() implies`. HL7 rewrites about thirty published invariants this way (`ref-1`,
+  `bdl-8`, `dom-6`, `con-3`, `tim-9` and others). Doing the same would hardcode invariants, which
+  this validator does not do. Empty stays satisfied, as a known divergence.
 - **gofhir/fhirpath:** its collection-size limit raises the same error type
   (`ErrInvalidExpression`) as a real error. A distinct type would let the validator treat it as a
   limit, like the time limit.
