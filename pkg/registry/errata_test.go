@@ -126,3 +126,12 @@ func TestErrataInAResolvedDefinition(t *testing.T) {
 		t.Errorf("fhir-type %s, want id", got)
 	}
 }
+
+// Every correction names the official definition it is taken from, and applies to one FHIR version.
+func TestEveryErratumHasASource(t *testing.T) {
+	for _, er := range typeErrata {
+		if er.source == "" || er.fhirVersion == "" || er.path == "" || er.published == er.corrected {
+			t.Errorf("incomplete erratum %+v", er)
+		}
+	}
+}

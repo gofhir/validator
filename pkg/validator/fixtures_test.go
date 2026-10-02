@@ -142,7 +142,7 @@ func TestM3Fixtures(t *testing.T) {
 		{
 			name:        "invalid-patient-id-format",
 			file:        "invalid-patient-id-format.json",
-			expectError: true, // a resource id is an id, as the R4 specification says; R4's StructureDefinition says string (corrected, see registry/errata.go)
+			expectError: true, // a resource id is an id (R4 resource.html); see registry/errata.go
 		},
 		{
 			name:        "invalid-patient-uri-whitespace",
