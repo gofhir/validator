@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.26.2](https://github.com/gofhir/validator/compare/v1.26.1...v1.26.2) (2026-10-02)
+
+
+### Bug Fixes
+
+* **registry:** correct the id types the published definitions get wrong ([#114](https://github.com/gofhir/validator/issues/114)) ([c80ad0c](https://github.com/gofhir/validator/commit/c80ad0ca891ebcd26e66bff6f1de45a01b07c349))
+
+
+### Performance Improvements
+
+* **constraint:** fhirpath v1.9.8, and cache the resource constraints share ([#116](https://github.com/gofhir/validator/issues/116)) ([ac63ab1](https://github.com/gofhir/validator/commit/ac63ab156866b92b6e438d93f078ddccc9b7d1ea))
+
 ## [1.26.1](https://github.com/gofhir/validator/compare/v1.26.0...v1.26.1) (2026-10-02)
 
 
