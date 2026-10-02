@@ -10,6 +10,7 @@ import (
 	"github.com/gofhir/fhirpath"
 	"github.com/gofhir/fhirpath/types"
 
+	"github.com/gofhir/validator/internal/fhirpathcache"
 	"github.com/gofhir/validator/pkg/constraint"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
@@ -56,7 +57,7 @@ func (st *conformState) collection(m map[string]any) fhirpath.Collection {
 		return nil
 	}
 	// The state belongs to one validation, which evaluates in one goroutine.
-	constraint.EnableCaching(col)
+	fhirpathcache.Enable(col)
 	st.mu.Lock()
 	st.collections[key] = col
 	st.mu.Unlock()

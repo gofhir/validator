@@ -15,6 +15,7 @@ import (
 	"github.com/gofhir/fhirpath/eval"
 	"github.com/gofhir/fhirpath/types"
 
+	"github.com/gofhir/validator/internal/fhirpathcache"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
 	"github.com/gofhir/validator/pkg/terminology"
@@ -190,7 +191,7 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	if err != nil {
 		resourceCollection = nil
 	}
-	EnableCaching(resourceCollection)
+	fhirpathcache.Enable(resourceCollection)
 
 	// Build eval options shared by all constraints in this resource. A value that is not a resource
 	// takes %resource and %rootResource from the resources it sits in.
@@ -255,7 +256,7 @@ func (v *Validator) validateContainedConstraints(ctx context.Context, resource m
 
 	// Build root resource collection for %rootResource.
 	rootResourceCol, _ := types.JSONToCollection(rootResourceData)
-	EnableCaching(rootResourceCol)
+	fhirpathcache.Enable(rootResourceCol)
 
 	for i, item := range contained {
 		resourceMap, ok := item.(map[string]any)
@@ -282,7 +283,7 @@ func (v *Validator) validateContainedConstraints(ctx context.Context, resource m
 
 		// Build resource collection for the contained resource itself (%resource).
 		containedCollection, _ := types.JSONToCollection(containedJSON)
-		EnableCaching(containedCollection)
+		fhirpathcache.Enable(containedCollection)
 
 		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
 
@@ -464,20 +465,6 @@ func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.Raw
 	}
 
 	return expr.EvaluateWithContext(evalCtx)
-}
-
-// EnableCaching makes a resource keep what FHIRPath reads from it. The same collection is
-// %resource and %rootResource for every constraint on the resource, so what one evaluation
-// navigates is what the next starts from: without it, ref-1 on each of the 12,085 references of
-// the R4 ImplementationGuide-fhir example reads its 2.7 MB root again. A cached object must not be
-// read from two goroutines at once; each validation builds its own collections and evaluates them
-// in one goroutine.
-func EnableCaching(col fhirpath.Collection) {
-	for _, v := range col {
-		if obj, ok := v.(*types.ObjectValue); ok {
-			obj.EnableCaching()
-		}
-	}
 }
 
 // model is the FHIRPath model of the validator's registry, or nil without a registry.
