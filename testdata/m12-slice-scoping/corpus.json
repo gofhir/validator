@@ -31,7 +31,7 @@
     {
       "name": "r5-probes",
       "version": "5.0.0",
-      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json"]
+      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json"]
     },
     {
       "name": "deqm-probes",

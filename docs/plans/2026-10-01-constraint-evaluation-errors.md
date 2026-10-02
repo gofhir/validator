@@ -63,7 +63,12 @@ prerequisites; this change itself adds no error HL7 does not report, except C-1.
 - **Compile errors (done, `fix/constraint-compile-error`):** HL7 reports an expression that does
   not parse as an error, whatever the constraint's severity (`PROBLEM_PROCESSING_EXPRESSION`).
   `CONSTRAINT_COMPILE_ERROR` was a warning; it is now an error, paired with HL7's in `hl7diff`,
-  and covered by the `constraint-probes` corpus group.
+  and covered by the `constraint-probes` corpus group. One exception: a constraint whose source is
+  a base definition (derivation other than `constraint`) stays a warning, since a specification
+  defect is not the instance's. Compiling every constraint in the package cache (591 distinct
+  expressions) finds one: R5's `eld-11`, which quotes a string with double quotes. As an error it
+  gave 73 false errors on the R5 Patient StructureDefinition, where HL7, whose `fixExpr` rewrites
+  `eld-11`, gives none. `r5-probes` now holds a minimal R5 StructureDefinition that catches it.
 - **An empty result (not changed, measured):** an invariant's expression "must evaluate to true
   when run on the element" (conformance-rules.html#constraints), and HL7's `convertToBoolean`
   takes an empty result as false. gofhir takes it as satisfied. Following the specification gave

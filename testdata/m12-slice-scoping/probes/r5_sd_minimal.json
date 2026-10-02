@@ -1,0 +1,20 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "r5-sd-minimal",
+  "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},
+  "url": "https://example.org/fhir/StructureDefinition/r5-sd-minimal",
+  "name": "R5SdMinimal",
+  "status": "draft",
+  "fhirVersion": "5.0.0",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Patient",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {"id": "Patient", "path": "Patient"},
+      {"id": "Patient.gender", "path": "Patient.gender", "min": 1}
+    ]
+  }
+}

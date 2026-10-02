@@ -351,17 +351,18 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 
 		expr, err := v.getCompiledExpression(c.Expression)
 		if err != nil {
-			// An expression that does not parse cannot hold, whatever the constraint's severity.
-			// The HL7 validator reports it the same way, as an error (checkInvariant,
+			params := map[string]any{"key": c.Key, "error": err.Error()}
+			if v.definedByBaseType(c) {
+				// A constraint of the specification's own definitions that does not parse is a
+				// defect of the specification, not of the instance (R5's eld-11 quotes a string
+				// with double quotes): a processing warning.
+				result.AddWarningWithID(issue.DiagConstraintCompileError, params, fhirPath)
+				continue
+			}
+			// Any other expression that does not parse cannot hold, whatever the constraint's
+			// severity. The HL7 validator reports it the same way, as an error (checkInvariant,
 			// PROBLEM_PROCESSING_EXPRESSION).
-			result.AddErrorWithID(
-				issue.DiagConstraintCompileError,
-				map[string]any{
-					"key":   c.Key,
-					"error": err.Error(),
-				},
-				fhirPath,
-			)
+			result.AddErrorWithID(issue.DiagConstraintCompileError, params, fhirPath)
 			continue
 		}
 
@@ -388,6 +389,19 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 			v.addConstraintViolation(c, fhirPath, nil, result)
 		}
 	}
+}
+
+// definedByBaseType reports whether c comes from a definition that defines a type rather than
+// constraining one (StructureDefinition.derivation other than constraint), as the specification's
+// own resource and data type definitions do. A constraint whose source is not loaded is taken as a
+// profile's.
+func (v *Validator) definedByBaseType(c registry.Constraint) bool {
+	if v.registry == nil || c.Source == "" {
+		return false
+	}
+	url, _ := registry.ParseCanonical(c.Source)
+	sd := v.registry.GetByURL(url)
+	return sd != nil && sd.Derivation != registry.DerivationConstraint
 }
 
 // hitTimeLimit reports whether an evaluation error is the time limit set in buildEvalOpts.
