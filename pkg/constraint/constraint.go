@@ -351,7 +351,10 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 
 		expr, err := v.getCompiledExpression(c.Expression)
 		if err != nil {
-			result.AddWarningWithID(
+			// An expression that does not parse cannot hold, whatever the constraint's severity.
+			// The HL7 validator reports it the same way, as an error (checkInvariant,
+			// PROBLEM_PROCESSING_EXPRESSION).
+			result.AddErrorWithID(
 				issue.DiagConstraintCompileError,
 				map[string]any{
 					"key":   c.Key,

@@ -57,8 +57,10 @@ prerequisites; this change itself adds no error HL7 does not report, except C-1.
 
 ## Related, not in this change
 
-- **Compile errors:** HL7 reports an expression that does not parse as an error
-  (`PROBLEM_PROCESSING_EXPRESSION`). gofhir reports it as a `CONSTRAINT_COMPILE_ERROR` warning.
+- **Compile errors (done, `fix/constraint-compile-error`):** HL7 reports an expression that does
+  not parse as an error, whatever the constraint's severity (`PROBLEM_PROCESSING_EXPRESSION`).
+  `CONSTRAINT_COMPILE_ERROR` was a warning; it is now an error, paired with HL7's in `hl7diff`,
+  and covered by the `constraint-probes` corpus group.
 - **An empty result:** HL7's `convertToBoolean` takes an empty collection as false, so the
   invariant fails. gofhir takes it as satisfied.
 - **gofhir/fhirpath:** its collection-size limit raises the same error type

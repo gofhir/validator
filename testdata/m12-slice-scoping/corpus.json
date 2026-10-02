@@ -20,6 +20,15 @@
       ]
     },
     {
+      "name": "constraint-probes",
+      "packageFiles": [
+        "testdata/m12-slice-scoping/packages/acme.constraints-0.1.0.tgz"
+      ],
+      "files": [
+        "testdata/m12-slice-scoping/probes/c*_*.json"
+      ]
+    },
+    {
       "name": "r5-probes",
       "version": "5.0.0",
       "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json"]

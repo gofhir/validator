@@ -462,7 +462,7 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Template: "{details}",
 	},
 	DiagConstraintCompileError: {
-		Severity: SeverityWarning,
+		Severity: SeverityError,
 		Code:     CodeProcessing,
 		Template: "Could not compile constraint '{key}': {error}",
 	},
