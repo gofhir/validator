@@ -351,7 +351,7 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 
 		expr, err := v.getCompiledExpression(c.Expression)
 		if err != nil {
-			params := map[string]any{"key": c.Key, "error": err.Error()}
+			params := failureParams(c, err)
 			if v.definedByBaseType(c) {
 				// A constraint of the specification's own definitions that does not parse is a
 				// defect of the specification, not of the instance (R5's eld-11 quotes a string
@@ -375,7 +375,7 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 				// The evaluation stopped at this validator's own time limit, which says nothing
 				// about the instance: a processing notice, not a failed invariant.
 				result.AddWarningWithID(issue.DiagConstraintEvalError,
-					map[string]any{"key": c.Key, "error": err.Error()}, fhirPath)
+					failureParams(c, err), fhirPath)
 				continue
 			}
 			// Any other error leaves the invariant unsatisfied. It fails at its own
@@ -389,6 +389,12 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 			v.addConstraintViolation(c, fhirPath, nil, result)
 		}
 	}
+}
+
+// failureParams are the template parameters of a constraint the engine could not compile or
+// evaluate.
+func failureParams(c registry.Constraint, err error) map[string]any {
+	return map[string]any{"key": c.Key, "error": err.Error()}
 }
 
 // definedByBaseType reports whether c comes from a definition that defines a type rather than
