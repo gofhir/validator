@@ -143,6 +143,7 @@ type ElementDefinition struct {
 	Binding    *Binding     `json:"binding,omitempty"`
 	Constraint []Constraint `json:"constraint,omitempty"`
 	Slicing    *Slicing     `json:"slicing,omitempty"`
+	Base       *ElementBase `json:"base,omitempty"`
 
 	// ContentReference references another element's definition for recursive structures.
 	// Format: "#ElementPath" (e.g., "#Questionnaire.item" for Questionnaire.item.item)
@@ -151,6 +152,12 @@ type ElementDefinition struct {
 	// Raw JSON for dynamic access to fixed[x] and pattern[x] without hardcoding types.
 	// This allows support for all 45+ FHIR types without explicit fields.
 	raw json.RawMessage
+}
+
+// ElementBase is ElementDefinition.base: the element of the base resource or type that an element
+// derives from ("Resource.id" for Patient.id).
+type ElementBase struct {
+	Path string `json:"path"`
 }
 
 // SetRaw stores the raw JSON for this ElementDefinition.
@@ -317,6 +324,7 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) 
 	}
 	sd.raw = data
 	sd.PackageID = packageID
+	applyErrata(&sd)
 
 	// Index by URL
 	if sd.URL != "" {

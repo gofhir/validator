@@ -14,7 +14,8 @@
   "differential": {
     "element": [
       {"id": "Patient", "path": "Patient"},
-      {"id": "Patient.gender", "path": "Patient.gender", "min": 1}
+      {"id": "Patient.gender", "path": "Patient.gender", "min": 1},
+      {"id": "Patient.deceased[x]", "path": "Patient.deceased[x]", "max": "0"}
     ]
   }
 }
