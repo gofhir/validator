@@ -225,6 +225,16 @@
         "BUNDLE_ENTRY_URL_MATCHES_TYPE_ID",
         "BUNDLE_ENTRY_URL_MATCHES_NO_ID"
       ]
+    },
+    {
+      "name": "constraint-compile-error",
+      "rule": "equal",
+      "gofhir": [
+        "CONSTRAINT_COMPILE_ERROR"
+      ],
+      "hl7": [
+        "Problem_processing_expression__in_profile__path__"
+      ]
     }
   ],
   "constraint": {
@@ -246,7 +256,6 @@
     "CODESYSTEM_NOT_FOUND": "processing notice",
     "CODING_NO_CODE": "no HL7 counterpart verified yet",
     "CODING_NO_SYSTEM": "no HL7 counterpart verified yet",
-    "CONSTRAINT_COMPILE_ERROR": "an engine failure, not a finding about the instance",
     "CONSTRAINT_EVAL_ERROR": "processing notice: the evaluation hit the validator's time limit",
     "CONTAINED_DUPLICATE_ID": "no HL7 counterpart verified yet",
     "EXTENSION_INVALID_CONTEXT": "no HL7 counterpart verified yet; gofhir's report on primitive _display is a known false positive",
