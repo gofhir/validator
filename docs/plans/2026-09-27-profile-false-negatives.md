@@ -111,6 +111,26 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 
 **PR B1: `Layers`**. `cardinality` and `slicing` consume it (L1 for min/max and slicing).
 
+- **Status (2026-10-02): B1a implemented** on `feat/b1a-type-profile`.
+  - **Already done by plan A (A4):** P4 and CX, the slicing of an extension slice's own
+    definition.
+  - **B1a:** an element with no children of its own in the snapshot follows the one profile its
+    type declares for the value's type (`Registry.TypeProfile`; for a choice, the type the JSON
+    property names) instead of the type's base definition, in `cardinality` and `slicing`.
+    - SQ reports `comparator` max 0. `sqty-1` is a constraint (B2).
+    - A profile that cannot be used is `TYPE_PROFILE_NOT_FOUND`, reported by `cardinality` alone,
+      and the value is not checked against the base type instead, as in the HL7 validator
+      (`Validation_VAL_Unknown_Profile`).
+    - 344 elements of the corpus IGs declare one datatype profile with no children of their own
+      (230 `SimpleQuantity`).
+    - A resource in an element (`Bundle.entry.resource`) is still validated by the walker, not
+      through its container's type profile; that is B5.
+  - **Still open:**
+    - **B1b:** an element with children of its own *and* a type profile.
+    - **Several profiles:** 14 elements, which need the B4 probe.
+    - **A primitive whose type profile cannot be used** is not reported: `cardinality` walks
+      objects only. HL7 reports it. The corpus has no primitive type profile.
+
 - Acceptance: SQ reports `comparator` max 0; P4 reports the closed `value[x]` slice; CX reports the
   missing `text` sub-extension.
 - The same checks pass for an invented datatype profile and an invented complex extension (acme).

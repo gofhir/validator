@@ -102,6 +102,16 @@
       ]
     },
     {
+      "name": "type-profile-not-found",
+      "rule": "equal",
+      "gofhir": [
+        "TYPE_PROFILE_NOT_FOUND"
+      ],
+      "hl7": [
+        "Validation_VAL_Unknown_Profile"
+      ]
+    },
+    {
       "name": "unknown-element",
       "rule": "parent",
       "gofhir": [

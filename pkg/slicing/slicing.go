@@ -107,7 +107,7 @@ func (v *Validator) ValidateDataContext(goCtx context.Context, resource map[stri
 	}
 
 	if root := sd.Tree().Root(); root != nil {
-		v.walk(run, run.scope, sd, root, resource, resourceType, result)
+		v.walk(run, run.scope, sd, root, "", resource, resourceType, result)
 	}
 
 	// Also validate contained resources
@@ -240,6 +240,6 @@ func (v *Validator) validateContained(run *validation, resource map[string]any, 
 		}
 		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
 		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource, Container: run.scope.Container}
-		v.walk(run, scope, containedSD, root, resourceMap, containedFhirPath, result)
+		v.walk(run, scope, containedSD, root, "", resourceMap, containedFhirPath, result)
 	}
 }

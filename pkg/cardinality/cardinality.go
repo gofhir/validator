@@ -7,6 +7,7 @@
 package cardinality
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -97,7 +98,16 @@ func (v *Validator) validateNode(
 	fhirPath string,
 	result *issue.Result,
 ) {
-	childSD, children := v.childrenOf(sd, node, typeCode, 0)
+	childSD, children, missing := v.childrenOf(sd, node, typeCode, 0)
+	if missing.canonical != "" {
+		// The value's type declares a profile that cannot be resolved: it cannot be checked, and is
+		// not checked against the base type instead (as in the HL7 validator, which reports the
+		// profile as unknown). Reported here only, not again by the slicing phase.
+		result.AddErrorWithID(issue.DiagTypeProfileNotFound,
+			map[string]any{"profile": missing.canonical, "type": missing.typeCode, "reason": missing.reason},
+			fhirPath)
+		return
+	}
 	for _, child := range children {
 		name := child.Name()
 		childPath := fhirPath + "." + name
@@ -143,24 +153,32 @@ func (v *Validator) validateNode(
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
 const resourceTypeKey = "resourceType"
 
+// unresolvedProfile is the profile an instance's type declares when it cannot be resolved.
+type unresolvedProfile struct {
+	canonical string
+	typeCode  string
+	reason    string
+}
+
 // childrenOf returns the child elements of an instance of node, and the StructureDefinition they
 // belong to: node's own children in the snapshot; else those its contentReference points to (D6);
-// else those of its type's base definition. The node is never a slice: slices are not children. Following a
-// type's profile instead is plan B (definition layering). The instance's type (typeCode) picks
-// the type of a choice element.
-func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, hops int) (*registry.StructureDefinition, []*registry.ElementNode) {
+// else those of the one profile its type declares (type.profile, plan B L1); else those of its
+// type's base definition. The node is never a slice: slices are not children. The instance's type
+// (typeCode) picks the type of a choice element. A declared profile that does not resolve is
+// returned as missing, with no children.
+func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, hops int) (*registry.StructureDefinition, []*registry.ElementNode, unresolvedProfile) {
 	if len(node.Children) > 0 {
-		return sd, node.Children
+		return sd, node.Children, unresolvedProfile{}
 	}
 	if ref := node.Def.ContentReference; ref != nil {
 		// A contentReference whose target is itself a contentReference is followed, up to a bound
 		// that only a malformed cycle reaches.
 		if hops >= maxContentReferenceHops {
-			return nil, nil
+			return nil, nil, unresolvedProfile{}
 		}
 		target, _ := v.registry.ContentReference(sd, node)
 		if target == nil {
-			return nil, nil
+			return nil, nil, unresolvedProfile{}
 		}
 		tsd := sd
 		if url, _, ok := registry.SplitContentReference(*ref); ok && url != "" && url != sd.URL {
@@ -171,24 +189,31 @@ func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.
 		return v.childrenOf(tsd, target, typeCode, hops+1)
 	}
 
+	if tp := v.registry.TypeProfile(context.Background(), node, typeCode); tp.Canonical != "" {
+		if tp.SD == nil {
+			return nil, nil, unresolvedProfile{tp.Canonical, tp.TypeCode, tp.Reason}
+		}
+		return tp.SD, tp.SD.Tree().Root().Children, unresolvedProfile{}
+	}
+
 	code := typeCode
 	if code == "" && len(node.Def.Type) == 1 {
 		code = node.Def.Type[0].Code
 	}
 	if code == "" {
-		return nil, nil
+		return nil, nil, unresolvedProfile{}
 	}
 	// The type's definition is used even when it is the one being walked: Extension.extension is
 	// an Extension. The recursion follows the instance, so it ends with it.
 	typeSD := v.registry.GetByType(code)
 	if typeSD == nil || typeSD.Kind == kindPrimitive {
-		return nil, nil
+		return nil, nil, unresolvedProfile{}
 	}
 	root := typeSD.Tree().Root()
 	if root == nil {
-		return nil, nil
+		return nil, nil, unresolvedProfile{}
 	}
-	return typeSD, root.Children
+	return typeSD, root.Children, unresolvedProfile{}
 }
 
 // maxContentReferenceHops bounds a chain of contentReferences (a cycle in a malformed
