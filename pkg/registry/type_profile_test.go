@@ -62,10 +62,13 @@ func TestTypeProfile(t *testing.T) {
 		{"no snapshot can be generated", "https://example.org/nosnapshot", "Observation.value[x]", "Quantity", "https://example.org/qty-no-base", "", "cannot generate snapshot"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			canonical, sd, reason := r.TypeProfile(context.Background(), node(tt.url, tt.id), tt.typeCode)
-			got := ""
-			if sd != nil {
-				got = sd.URL
+			tp := r.TypeProfile(context.Background(), node(tt.url, tt.id), tt.typeCode)
+			canonical, reason, got := tp.Canonical, tp.Reason, ""
+			if tp.SD != nil {
+				got = tp.SD.URL
+			}
+			if tp.Canonical != "" && tp.TypeCode != "Quantity" {
+				t.Errorf("type %q, want Quantity", tp.TypeCode)
 			}
 			if canonical != tt.canonical || got != tt.sd || !strings.Contains(reason, tt.reason) || (tt.reason == "" && reason != "") {
 				t.Errorf("got (%q, %q, %q), want (%q, %q, %q)", canonical, got, reason, tt.canonical, tt.sd, tt.reason)

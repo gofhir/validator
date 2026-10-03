@@ -189,11 +189,11 @@ func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.
 		return v.childrenOf(tsd, target, typeCode, hops+1)
 	}
 
-	if canonical, psd, reason := v.registry.TypeProfile(context.Background(), node, typeCode); canonical != "" {
-		if psd == nil {
-			return nil, nil, unresolvedProfile{canonical, profileTypeCode(node, typeCode), reason}
+	if tp := v.registry.TypeProfile(context.Background(), node, typeCode); tp.Canonical != "" {
+		if tp.SD == nil {
+			return nil, nil, unresolvedProfile{tp.Canonical, tp.TypeCode, tp.Reason}
 		}
-		return psd, psd.Tree().Root().Children, unresolvedProfile{}
+		return tp.SD, tp.SD.Tree().Root().Children, unresolvedProfile{}
 	}
 
 	code := typeCode
@@ -214,14 +214,6 @@ func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.
 		return nil, nil, unresolvedProfile{}
 	}
 	return typeSD, root.Children, unresolvedProfile{}
-}
-
-// profileTypeCode is the type a value of node has: typeCode for a choice, else the only type.
-func profileTypeCode(node *registry.ElementNode, typeCode string) string {
-	if typeCode == "" && len(node.Def.Type) == 1 {
-		return node.Def.Type[0].Code
-	}
-	return typeCode
 }
 
 // maxContentReferenceHops bounds a chain of contentReferences (a cycle in a malformed

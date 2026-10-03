@@ -93,8 +93,8 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, node *registr
 	}
 	ref := node.Def.ContentReference
 	if ref == nil {
-		if _, psd, _ := v.registry.TypeProfile(context.Background(), node, typeCode); psd != nil {
-			return psd, psd.Tree().Root().Children
+		if tp := v.registry.TypeProfile(context.Background(), node, typeCode); tp.SD != nil {
+			return tp.SD, tp.SD.Tree().Root().Children
 		}
 		return sd, nil
 	}

@@ -128,6 +128,8 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
   - **Still open:**
     - **B1b:** an element with children of its own *and* a type profile.
     - **Several profiles:** 14 elements, which need the B4 probe.
+    - **A primitive whose type profile cannot be used** is not reported: `cardinality` walks
+      objects only. HL7 reports it. The corpus has no primitive type profile.
 
 - Acceptance: SQ reports `comparator` max 0; P4 reports the closed `value[x]` slice; CX reports the
   missing `text` sub-extension.
