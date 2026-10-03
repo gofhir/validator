@@ -1,6 +1,7 @@
 package slicing
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strconv"
@@ -24,8 +25,11 @@ const (
 //
 // A primitive is walked through its "_key" sibling, which holds its id and extensions
 // (json.html#primitive), so the slicing of a primitive's extensions is checked too.
-func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, inst map[string]any, fhirPath string, result *issue.Result) {
-	childSD, children := v.walkChildren(sd, node, 0)
+//
+// The instance's type, typeCode, picks the profile a choice element's type declares; it is ""
+// for any other element.
+func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, result *issue.Result) {
+	childSD, children := v.walkChildren(sd, node, typeCode, 0)
 	for _, child := range children {
 		values := v.childValues(child, inst)
 		governing := make([]*registry.ElementNode, len(values))
@@ -49,7 +53,7 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 				continue
 			}
 			nextSD, next := v.memberTree(childSD, governing[i])
-			v.walk(run, scope, nextSD, next, m, cv.path(fhirPath), result)
+			v.walk(run, scope, nextSD, next, v.valueType(child, cv.key), m, cv.path(fhirPath), result)
 		}
 	}
 }
@@ -79,13 +83,22 @@ const maxContentReferenceHops = 8
 
 // walkChildren returns the children that govern an instance of node and the StructureDefinition
 // they belong to: node's own in the snapshot; those of the element it slices, when the snapshot
-// does not unroll the slice; or those its contentReference points to.
-func (v *Validator) walkChildren(sd *registry.StructureDefinition, node *registry.ElementNode, hops int) (*registry.StructureDefinition, []*registry.ElementNode) {
+// does not unroll the slice; those its contentReference points to; or those of the one profile its
+// type declares (type.profile, plan B L1), whose slicing applies to the value. A type's base
+// definition has no slicing of its own to check, and a profile that does not resolve is reported
+// by the cardinality phase.
+func (v *Validator) walkChildren(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, hops int) (*registry.StructureDefinition, []*registry.ElementNode) {
 	if c := governedChildren(node); len(c) > 0 {
 		return sd, c
 	}
 	ref := node.Def.ContentReference
-	if ref == nil || hops >= maxContentReferenceHops {
+	if ref == nil {
+		if _, psd, _ := v.registry.TypeProfile(context.Background(), node, typeCode); psd != nil {
+			return psd, psd.Tree().Root().Children
+		}
+		return sd, nil
+	}
+	if hops >= maxContentReferenceHops {
 		return sd, nil
 	}
 	target, _ := v.registry.ContentReference(sd, node)
@@ -98,7 +111,17 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, node *registr
 			tsd = s
 		}
 	}
-	return v.walkChildren(tsd, target, hops+1)
+	return v.walkChildren(tsd, target, typeCode, hops+1)
+}
+
+// valueType is the type of a value of child read from the JSON property key: for a choice element
+// ("value[x]"), the type the property names (valueQuantity: Quantity); "" otherwise.
+func (v *Validator) valueType(child *registry.ElementNode, key string) string {
+	base, ok := strings.CutSuffix(child.Name(), "[x]")
+	if !ok {
+		return ""
+	}
+	return v.registry.ChoiceType(base, key)
 }
 
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).

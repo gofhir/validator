@@ -138,6 +138,10 @@ const (
 	DiagTypeInvalidUnsignedInt DiagnosticID = "TYPE_INVALID_UNSIGNED_INT"
 	DiagTypeWrongJSONType      DiagnosticID = "TYPE_WRONG_JSON_TYPE"
 	DiagTypeInvalidFormat      DiagnosticID = "TYPE_INVALID_FORMAT"
+	// DiagTypeProfileNotFound: the one profile an element's type declares (type.profile) is not
+	// loaded, not in the version it pins, or has no snapshot, so the value cannot be checked
+	// against it.
+	DiagTypeProfileNotFound DiagnosticID = "TYPE_PROFILE_NOT_FOUND"
 )
 
 // DiagnosticTemplate defines the structure for a diagnostic message.
@@ -433,6 +437,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "Element matches more than one slice of '{path}': {slices}",
+	},
+	DiagTypeProfileNotFound: {
+		Severity: SeverityError,
+		Code:     CodeNotFound,
+		Template: "Profile '{profile}' of type {type} cannot be used: {reason}",
 	},
 	DiagSlicingCannotEvaluate: {
 		Severity: SeverityError,

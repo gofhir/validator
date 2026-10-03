@@ -682,7 +682,7 @@ func requiredSliceValues(f frame) []expectation {
 	}
 	var sliced *registry.ElementNode
 	for _, c := range f.node.Children {
-		if c.Name() == f.after[0] {
+		if namedAs(c, f.after[0]) {
 			sliced = c
 			break
 		}
@@ -717,7 +717,7 @@ func valueWithin(n *registry.ElementNode, path []string) []expectation {
 		return nil
 	}
 	for _, c := range n.Children {
-		if c.Name() == path[0] {
+		if namedAs(c, path[0]) {
 			return valueWithin(c, path[1:])
 		}
 	}
@@ -750,4 +750,10 @@ func extract(raw json.RawMessage, path []string) []json.RawMessage {
 func asMap(v any) map[string]any {
 	m, _ := v.(map[string]any)
 	return m
+}
+
+// namedAs reports whether a path names the element c: by its name, or for a choice element
+// ("value[x]") by its name without the suffix, as a discriminator path names it ("value").
+func namedAs(c *registry.ElementNode, name string) bool {
+	return c.Name() == name || c.Name() == name+"[x]"
 }

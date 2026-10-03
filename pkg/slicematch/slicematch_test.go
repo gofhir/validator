@@ -252,6 +252,17 @@ func TestPatternSources(t *testing.T) {
 		`{"id":"Patient.contact:next.relationship.coding","path":"Patient.contact.relationship.coding","slicing":{"discriminator":[{"type":"value","path":"code"}],"rules":"open"},"min":0,"max":"*","type":[{"code":"Coding"}]}`,
 		`{"id":"Patient.contact:next.relationship.coding:n","path":"Patient.contact.relationship.coding","sliceName":"n","min":1,"max":"1","type":[{"code":"Coding"}]}`,
 		`{"id":"Patient.contact:next.relationship.coding:n.code","path":"Patient.contact.relationship.coding.code","min":1,"max":"1","fixedCode":"N","type":[{"code":"code"}]}`,
+		// The value sits in the required type slice of a choice element, which the discriminator
+		// path names without [x] (as in CH Core's address line types: value[x]:valueCode).
+		`{"id":"Patient.extension","path":"Patient.extension","slicing":{"discriminator":[{"type":"value","path":"url"},{"type":"value","path":"value"}],"rules":"open"},"type":[{"code":"Extension"}]}`,
+		`{"id":"Patient.extension:a","path":"Patient.extension","sliceName":"a","min":0,"max":"1","type":[{"code":"Extension"}]}`,
+		`{"id":"Patient.extension:a.url","path":"Patient.extension.url","min":1,"max":"1","fixedUri":"`+extA+`","type":[{"code":"uri"}]}`,
+		`{"id":"Patient.extension:a.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","slicing":{"discriminator":[{"type":"type","path":"$this"}],"rules":"closed"},"type":[{"code":"code"}]}`,
+		`{"id":"Patient.extension:a.value[x]:valueCode","path":"Patient.extension.value[x]","sliceName":"valueCode","min":1,"max":"1","fixedCode":"a","type":[{"code":"code"}]}`,
+		`{"id":"Patient.extension:b","path":"Patient.extension","sliceName":"b","min":0,"max":"1","type":[{"code":"Extension"}]}`,
+		`{"id":"Patient.extension:b.url","path":"Patient.extension.url","min":1,"max":"1","fixedUri":"`+extA+`","type":[{"code":"uri"}]}`,
+		`{"id":"Patient.extension:b.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","slicing":{"discriminator":[{"type":"type","path":"$this"}],"rules":"closed"},"type":[{"code":"code"}]}`,
+		`{"id":"Patient.extension:b.value[x]:valueCode","path":"Patient.extension.value[x]","sliceName":"valueCode","min":1,"max":"1","fixedCode":"b","type":[{"code":"code"}]}`,
 	))
 	m := New(reg)
 	for _, tt := range []struct {
@@ -264,6 +275,9 @@ func TestPatternSources(t *testing.T) {
 		{"Patient.name", `{"family":"Garcia"}`, ""},
 		{"Patient.communication", `{"language":{"coding":[{"system":"urn:ietf:bcp:47","code":"es"}]}}`, "Patient.communication:es"},
 		{"Patient.communication", `{"language":{"coding":[{"system":"urn:ietf:bcp:47","code":"en"}]}}`, ""},
+		{"Patient.extension", `{"url":"` + extA + `","valueCode":"a"}`, "Patient.extension:a"},
+		{"Patient.extension", `{"url":"` + extA + `","valueCode":"b"}`, "Patient.extension:b"},
+		{"Patient.extension", `{"url":"` + extA + `","valueCode":"c"}`, ""},
 	} {
 		got := resolveAt(t, m, reg, prof, tt.id, obj(t, tt.value), nil)
 		if id, _ := sliceIDs(got); id != tt.want {
