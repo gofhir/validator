@@ -9,11 +9,10 @@ package cardinality
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/gofhir/validator/internal/elementvalues"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
 	"github.com/gofhir/validator/pkg/walker"
@@ -111,7 +110,7 @@ func (v *Validator) validateNode(
 	for _, child := range children {
 		name := child.Name()
 		childPath := fhirPath + "." + name
-		values := v.childValues(child, data)
+		values := elementvalues.Of(child, data, v.registry.ChoiceType)
 		count := len(values)
 
 		if child.Def.Min > 0 && count < int(child.Def.Min) {
@@ -131,8 +130,8 @@ func (v *Validator) validateNode(
 			}
 		}
 
-		for i, cv := range values {
-			m, ok := cv.value.(map[string]any)
+		for _, cv := range values {
+			m, ok := cv.Value.(map[string]any)
 			if !ok {
 				continue
 			}
@@ -141,11 +140,7 @@ func (v *Validator) validateNode(
 			if _, isResource := m[resourceTypeKey]; isResource {
 				continue
 			}
-			p := fhirPath + "." + cv.key
-			if cv.array {
-				p = fmt.Sprintf("%s[%d]", p, i)
-			}
-			v.validateNode(m, childSD, child, cv.typeCode, p, result)
+			v.validateNode(m, childSD, child, cv.TypeCode, cv.Path(fhirPath), result)
 		}
 	}
 }
@@ -223,85 +218,6 @@ const maxContentReferenceHops = 8
 // kindPrimitive is the StructureDefinition.kind of primitive types, whose children (id,
 // extension, value) are not properties of a JSON value.
 const kindPrimitive = "primitive-type"
-
-type childValue struct {
-	key      string
-	typeCode string
-	value    any
-	array    bool
-}
-
-// childValues returns the instance values of a child element: under its name, or for a choice
-// element ("value[x]") under each name its types give it, the element name followed by the type
-// code with its first letter capitalized (formats.html#choice). A primitive present only through
-// its "_name" sibling (extensions without a value) is present (json.html#primitive).
-//
-// A value of a type the element does not allow is present too, with the wrong type (reported by
-// the structural phase), not absent: every property that names a type this registry defines
-// counts (Registry.ChoiceType).
-func (v *Validator) childValues(child *registry.ElementNode, data map[string]any) []childValue {
-	name := child.Name()
-	type key struct{ name, typeCode string }
-	keys := []key{{name, ""}}
-	if len(child.Def.Type) == 1 {
-		keys[0].typeCode = child.Def.Type[0].Code
-	}
-	if base, ok := strings.CutSuffix(name, "[x]"); ok {
-		keys = keys[:0]
-		for _, k := range v.choiceKeys(child, base, data) {
-			keys = append(keys, key{k[0], k[1]})
-		}
-	}
-	var out []childValue
-	for _, k := range keys {
-		val, ok := data[k.name]
-		if !ok {
-			// A repeating primitive present only through its extensions has one item per entry.
-			switch ext := data["_"+k.name].(type) {
-			case nil:
-			case []any:
-				for range ext {
-					out = append(out, childValue{key: k.name, typeCode: k.typeCode, array: true})
-				}
-			default:
-				out = append(out, childValue{key: k.name, typeCode: k.typeCode})
-			}
-			continue
-		}
-		if arr, isArr := val.([]any); isArr {
-			for _, item := range arr {
-				out = append(out, childValue{key: k.name, typeCode: k.typeCode, value: item, array: true})
-			}
-			continue
-		}
-		out = append(out, childValue{key: k.name, typeCode: k.typeCode, value: val})
-	}
-	return out
-}
-
-// choiceKeys returns the JSON properties of a choice element, with the type each names: those of
-// the types the element allows, then any other in data that names a type this registry defines.
-func (v *Validator) choiceKeys(child *registry.ElementNode, base string, data map[string]any) [][2]string {
-	var out [][2]string
-	seen := map[string]bool{}
-	for _, t := range child.Def.Type {
-		if t.Code != "" {
-			k := base + strings.ToUpper(t.Code[:1]) + t.Code[1:]
-			out = append(out, [2]string{k, t.Code})
-			seen[k] = true
-		}
-	}
-	var others [][2]string
-	for k := range data {
-		if !seen[k] {
-			if code := v.registry.ChoiceType(base, k); code != "" {
-				others = append(others, [2]string{k, code})
-			}
-		}
-	}
-	sort.Slice(others, func(i, j int) bool { return others[i][0] < others[j][0] })
-	return append(out, others...)
-}
 
 // Extracts the element name from a path (e.g., "Patient.name" -> "name").
 func getElementName(path string) string {

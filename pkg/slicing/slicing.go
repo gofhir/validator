@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/gofhir/validator/internal/elementvalues"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
 	"github.com/gofhir/validator/pkg/slicematch"
@@ -163,7 +164,7 @@ func (v *Validator) checkChildren(node, base *registry.ElementNode, inst map[str
 		name := child.Name()
 		childPath := instPath + "." + name
 		childDef := defPath + "." + name
-		values := v.childValues(child, inst)
+		values := elementvalues.Of(child, inst, v.registry.ChoiceType)
 		count := len(values)
 		baseChild := childNamed(base, name)
 		sameMin := baseChild != nil && baseChild.Def.Min == child.Def.Min
@@ -186,26 +187,18 @@ func (v *Validator) checkChildren(node, base *registry.ElementNode, inst map[str
 			continue
 		}
 		for _, cv := range values {
-			m, ok := cv.value.(map[string]any)
+			m, ok := cv.Value.(map[string]any)
 			if !ok {
 				continue
 			}
-			p := instPath + "." + cv.key
-			if cv.array {
-				p = fmt.Sprintf("%s[%d]", p, cv.index)
-			}
+			p := cv.Path(instPath)
 			v.checkChildren(child, baseChild, m, p, childDef, result)
 		}
 	}
 }
 
-type childValue struct {
-	key   string
-	value any
-	array bool
-	index int            // position in the array, when array
-	ext   map[string]any // a primitive's id and extensions, from its "_key" sibling
-}
+// childValue is one value of an element in an instance.
+type childValue = elementvalues.Value
 
 // validateContained validates slicing in contained resources.
 func (v *Validator) validateContained(run *validation, resource map[string]any, baseFhirPath string, result *issue.Result) {
