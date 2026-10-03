@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.27.0](https://github.com/gofhir/validator/compare/v1.26.2...v1.27.0) (2026-10-03)
+
+
+### Features
+
+* **cardinality,slicing:** follow the profile a type declares (plan B, PR B1a) ([#117](https://github.com/gofhir/validator/issues/117)) ([27fef75](https://github.com/gofhir/validator/commit/27fef750f76dcc1aa161f5157101115ca73c9635))
+
 ## [1.26.2](https://github.com/gofhir/validator/compare/v1.26.1...v1.26.2) (2026-10-02)
 
 
