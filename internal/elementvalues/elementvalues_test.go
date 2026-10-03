@@ -56,6 +56,8 @@ func TestOf(t *testing.T) {
 			[]string{`P.given[0] string null {"id":"x"}`, `P.given[1] string null {"id":"y"}`}},
 		{"a choice of a type it allows", node("O.value[x]", "Quantity", "string"), `{"valueQuantity":{"value":1}}`,
 			[]string{`P.valueQuantity Quantity {"value":1} null`}},
+		{"a primitive choice present only through its extensions", node("O.value[x]", "Quantity", "string"), `{"_valueString":{"id":"x"}}`,
+			[]string{`P.valueString string null {"id":"x"}`}},
 		{"a choice of a type it does not allow is present, with that type", node("O.value[x]", "Quantity"), `{"valuePeriod":{}}`,
 			[]string{`P.valuePeriod Period {} null`}},
 		{"declared types first, then others by name", node("O.value[x]", "string"), `{"valuePeriod":{},"valueQuantity":{},"valueString":"s"}`,
