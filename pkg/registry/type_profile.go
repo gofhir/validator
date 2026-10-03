@@ -9,8 +9,8 @@ import "context"
 //
 // The value's type, typeCode, picks the type entry of a choice element; "" stands for the only
 // type of an element that has one. The canonical is "" when the entry declares no profile or
-// several. A type with several profiles is left to
-// the caller: the value must conform to one of them, which is not a single definition to walk.
+// several. A type with several profiles is left to the caller: the value must conform to one of
+// them, which is not a single definition to walk.
 func (r *Registry) TypeProfile(ctx context.Context, node *ElementNode, typeCode string) TypeProfile {
 	if node == nil {
 		return TypeProfile{}
