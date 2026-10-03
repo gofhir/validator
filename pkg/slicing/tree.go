@@ -2,11 +2,9 @@ package slicing
 
 import (
 	"context"
-	"fmt"
-	"sort"
 	"strconv"
-	"strings"
 
+	"github.com/gofhir/validator/internal/elementvalues"
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
 	"github.com/gofhir/validator/pkg/slicematch"
@@ -31,7 +29,7 @@ const (
 func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, result *issue.Result) {
 	childSD, children := v.walkChildren(sd, node, typeCode, 0)
 	for _, child := range children {
-		values := v.childValues(child, inst)
+		values := elementvalues.Of(child, inst, v.registry.ChoiceType)
 		governing := make([]*registry.ElementNode, len(values))
 		for i := range values {
 			governing[i] = child
@@ -40,9 +38,9 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 			governing = v.checkSlicing(run, scope, childSD, child, values, fhirPath, result)
 		}
 		for i, cv := range values {
-			m, ok := cv.value.(map[string]any)
+			m, ok := cv.Value.(map[string]any)
 			if !ok {
-				m = cv.ext
+				m = cv.Ext
 			}
 			if m == nil {
 				continue
@@ -53,7 +51,7 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 				continue
 			}
 			nextSD, next := v.memberTree(childSD, governing[i])
-			v.walk(run, scope, nextSD, next, v.valueType(child, cv.key), m, cv.path(fhirPath), result)
+			v.walk(run, scope, nextSD, next, cv.TypeCode, m, cv.Path(fhirPath), result)
 		}
 	}
 }
@@ -114,16 +112,6 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, node *registr
 	return v.walkChildren(tsd, target, typeCode, hops+1)
 }
 
-// valueType is the type of a value of child read from the JSON property key: for a choice element
-// ("value[x]"), the type the property names (valueQuantity: Quantity); "" otherwise.
-func (v *Validator) valueType(child *registry.ElementNode, key string) string {
-	base, ok := strings.CutSuffix(child.Name(), "[x]")
-	if !ok {
-		return ""
-	}
-	return v.registry.ChoiceType(base, key)
-}
-
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
 const resourceTypeKey = "resourceType"
 
@@ -149,9 +137,9 @@ func (v *Validator) checkSlicing(run *validation, scope slicematch.Scope, sd *re
 	governing := make([]*registry.ElementNode, len(values))
 	for i, cv := range values {
 		governing[i] = node
-		if slice := v.matchValue(run, scope, sd, node, cv, cv.path(fhirPath), result); slice != nil {
+		if slice := v.matchValue(run, scope, sd, node, cv, cv.Path(fhirPath), result); slice != nil {
 			governing[i] = slice
-			v.checkMember(node, slice, cv, cv.path(fhirPath), result)
+			v.checkMember(node, slice, cv, cv.Path(fhirPath), result)
 		}
 	}
 	all := make([]int, len(values))
@@ -197,7 +185,7 @@ func checkRules(level *registry.ElementNode, members []int, values []childValue,
 	previous := -1
 	firstOutside, reported := -1, false
 	for _, i := range members {
-		itemPath := values[i].path(fhirPath)
+		itemPath := values[i].Path(fhirPath)
 		s := sliceAt(level, governing[i])
 		if s == nil {
 			if slicing.Rules == rulesClosed {
@@ -217,7 +205,7 @@ func checkRules(level *registry.ElementNode, members []int, values []childValue,
 		}
 		if slicing.Rules == rulesOpenAtEnd && firstOutside >= 0 && !reported {
 			result.AddErrorWithID(issue.DiagSlicingOpenAtEnd, map[string]any{"path": level.Def.ID},
-				values[firstOutside].path(fhirPath))
+				values[firstOutside].Path(fhirPath))
 			reported = true
 		}
 	}
@@ -256,7 +244,7 @@ func checkSliceCount(s *registry.ElementNode, count int, elementPath string, res
 // base the cardinality phase checks against; a slice defined by its type's profile has no such
 // base here.
 func (v *Validator) checkMember(node, slice *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) {
-	m, ok := cv.value.(map[string]any)
+	m, ok := cv.Value.(map[string]any)
 	if !ok {
 		return
 	}
@@ -273,7 +261,7 @@ func (v *Validator) checkMember(node, slice *registry.ElementNode, cv childValue
 // and unknown ValueSet membership (D-6).
 func (v *Validator) matchValue(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) *registry.ElementNode {
 	m := v.matcher.Resolve(run.ctx, slicematch.Request{
-		SD: sd, Node: node, Key: cv.key, Value: cv.value, Scope: scope,
+		SD: sd, Node: node, Key: cv.Key, Value: cv.Value, Scope: scope,
 		Resolver: run.opts.Resolver, Containment: run.opts.Containment,
 	})
 	for _, n := range m.Notes {
@@ -295,104 +283,6 @@ func (v *Validator) matchValue(run *validation, scope slicematch.Scope, sd *regi
 		}, itemPath)
 	}
 	return m.Node
-}
-
-// path returns the location of a child value inside the instance at parent.
-func (cv childValue) path(parent string) string {
-	p := parent + "." + cv.key
-	if cv.array {
-		p = fmt.Sprintf("%s[%d]", p, cv.index)
-	}
-	return p
-}
-
-// childValues returns the instance values of a child element: under its name, or for a choice
-// element ("value[x]") under each name its types give it, the element name followed by the type
-// code with its first letter capitalized (formats.html#choice). A primitive present only through
-// its "_name" sibling (extensions without a value) is present, once per entry of a repeating one
-// (json.html#primitive).
-func (v *Validator) childValues(child *registry.ElementNode, inst map[string]any) []childValue {
-	return choiceValues(child, inst, v.registry.ChoiceType)
-}
-
-// choiceValues is childValues with the lookup that tells which properties name a type: a value of
-// a type the element does not allow is present, with the wrong type, not absent.
-func choiceValues(child *registry.ElementNode, inst map[string]any, choiceType func(base, key string) string) []childValue {
-	keys := propertyNames(child, inst, choiceType)
-	out := make([]childValue, 0, len(keys))
-	for _, k := range keys {
-		out = append(out, valuesOf(inst, k)...)
-	}
-	return out
-}
-
-// propertyNames returns the JSON properties an element can be read from: its name, or for a
-// choice element the name of each type it allows followed by any other property in inst that
-// names a type (formats.html#choice).
-func propertyNames(child *registry.ElementNode, inst map[string]any, choiceType func(base, key string) string) []string {
-	name := child.Name()
-	base, ok := strings.CutSuffix(name, "[x]")
-	if !ok {
-		return []string{name}
-	}
-	var keys []string
-	seen := map[string]bool{}
-	for _, t := range child.Def.Type {
-		if t.Code != "" {
-			k := base + strings.ToUpper(t.Code[:1]) + t.Code[1:]
-			keys = append(keys, k)
-			seen[k] = true
-		}
-	}
-	var others []string
-	for k := range inst {
-		if !seen[k] && choiceType(base, k) != "" {
-			others = append(others, k)
-		}
-	}
-	sort.Strings(others)
-	return append(keys, others...)
-}
-
-// valuesOf returns the values of one property, each with its "_key" sibling (a primitive's id and
-// extensions); a primitive present only through that sibling is present, once per entry of a
-// repeating one (json.html#primitive).
-func valuesOf(inst map[string]any, k string) []childValue {
-	val, ok := inst[k]
-	ext := inst["_"+k]
-	if !ok {
-		switch e := ext.(type) {
-		case nil:
-			return nil
-		case []any:
-			out := make([]childValue, 0, len(e))
-			for i, item := range e {
-				out = append(out, childValue{key: k, array: true, index: i, ext: asMap(item)})
-			}
-			return out
-		default:
-			return []childValue{{key: k, ext: asMap(e)}}
-		}
-	}
-	arr, isArr := val.([]any)
-	if !isArr {
-		return []childValue{{key: k, value: val, ext: asMap(ext)}}
-	}
-	extArr, _ := ext.([]any)
-	out := make([]childValue, 0, len(arr))
-	for i, item := range arr {
-		cv := childValue{key: k, value: item, array: true, index: i}
-		if i < len(extArr) {
-			cv.ext = asMap(extArr[i])
-		}
-		out = append(out, cv)
-	}
-	return out
-}
-
-func asMap(v any) map[string]any {
-	m, _ := v.(map[string]any)
-	return m
 }
 
 func sliceNameOf(n *registry.ElementNode) string {
