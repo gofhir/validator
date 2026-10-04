@@ -210,8 +210,13 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 - **Still open in B4:**
   - **B4b, the context of use:** a definition with no context; contexts of type `fhirpath` and
     `extension`, which today reject the extension; and the HL7 message to pair with.
-  - **`findNestedExtensionDef`:** a sub-extension the definition does not declare is a warning
-    where HL7 reports an error (`xd3`, `xd7`).
+- **Sub-extensions (2026-10-04, `fix/b4-subextension-severity`):** a part with a relative url its
+  definition does not declare is an error, `EXTENSION_SUBEXTENSION_INVALID`, as HL7 reports
+  `Extension_EXT_SubExtension_Invalid` (`xd3`, `xd7`, `xd12`): parts are "local/relative to the
+  reference to the extension definition" (extensibility.html). A part with an absolute url is an
+  extension defined separately, validated against its own definition (`xd13`, `xd14`), where it
+  was reported as an unknown part. `findNestedExtensionDef` finds a declared part by element ids
+  instead of snapshot proximity (D6).
 
 **PR B5: `ResolveCanonical` in `walker`, `reference` and the top-level `meta.profile`** (D7)
 

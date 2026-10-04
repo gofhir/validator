@@ -63,8 +63,14 @@ const (
 	DiagExtensionValueRequired    DiagnosticID = "EXTENSION_VALUE_REQUIRED"
 	DiagExtensionValueNotAllowed  DiagnosticID = "EXTENSION_VALUE_NOT_ALLOWED"
 	DiagExtensionInvalidValueType DiagnosticID = "EXTENSION_INVALID_VALUE_TYPE"
-	DiagExtensionNestedUnknown    DiagnosticID = "EXTENSION_NESTED_UNKNOWN"
-	DiagExtensionInvalidURL       DiagnosticID = "EXTENSION_INVALID_URL"
+	// DiagExtensionSubExtensionInvalid: a complex extension holds an extension whose relative url
+	// names no part its definition declares.
+	DiagExtensionSubExtensionInvalid DiagnosticID = "EXTENSION_SUBEXTENSION_INVALID"
+	// Deprecated: no longer reported. A part of a complex extension its definition does not declare
+	// is DiagExtensionSubExtensionInvalid when its url is relative, and is validated as any
+	// extension when it is absolute.
+	DiagExtensionNestedUnknown DiagnosticID = "EXTENSION_NESTED_UNKNOWN"
+	DiagExtensionInvalidURL    DiagnosticID = "EXTENSION_INVALID_URL"
 )
 
 // Diagnostic IDs for reference validation (M9).
@@ -383,10 +389,10 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Code:     CodeValue,
 		Template: "Extension '{url}' has invalid value type '{provided}'. Allowed: {allowed}",
 	},
-	DiagExtensionNestedUnknown: {
-		Severity: SeverityWarning,
-		Code:     CodeExtension,
-		Template: "Unknown nested extension '{url}' in parent '{parent}'",
+	DiagExtensionSubExtensionInvalid: {
+		Severity: SeverityError,
+		Code:     CodeInvalid,
+		Template: "Sub-extension url '{url}' is not defined by the extension '{parent}'",
 	},
 	DiagExtensionInvalidURL: {
 		Severity: SeverityError,

@@ -18,6 +18,7 @@ Los errores de extension ocurren cuando las extensions FHIR no se ajustan a sus 
 | `EXTENSION_MULTIPLE_VALUES` | error | Extension at '{path}' has multiple value[x] elements |
 | `EXTENSION_WRONG_TYPE` | error | Extension '{url}' expects {expected}, got {type} |
 | `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URL ({reason}): '{url}' |
+| `EXTENSION_SUBEXTENSION_INVALID` | error | Sub-extension url '{url}' is not defined by the extension '{parent}' |
 | `MODIFIER_EXTENSION_UNKNOWN` | error | Unknown modifier extension '{url}' |
 
 ---
@@ -229,7 +230,7 @@ La URL de la extension no es una URL absoluta. Según FHIR R4 §2.5.0.1: *"The u
 
 El requisito es una **URL** absoluta, no una URI absoluta a secas: `urn:uuid:…` y `ex:createdAt` son URIs absolutas válidas según RFC 3986 y ninguna se acepta acá, porque la especificación nombra a las URN como el caso a excluir.
 
-Las extensions hijas dentro de una extension compleja son la excepción documentada (*"Except for child extensions defined within complex extensions, the URL SHALL be an absolute URL"*): se resuelven por nombre contra la definición del padre, así que nunca llegan a esta comprobación.
+Las extensions hijas dentro de una extension compleja son la excepción documentada (*"Except for child extensions defined within complex extensions, the URL SHALL be an absolute URL"*): una url relativa se resuelve por nombre contra la definición del padre, y una que el padre no declara es `EXTENSION_SUBEXTENSION_INVALID`.
 
 **Ejemplo -- recurso inválido:**
 
@@ -266,6 +267,30 @@ Esta validación aplica una regla en prosa de la especificación FHIR (§2.5.0.1
 
 Una extension cuya URL está bien formada pero cuya definición no se puede resolver es un caso *distinto*: ese solo transgrede un `SHOULD` y se reporta como warning, no como error. Ver `docs/VALIDATION-GAPS.md`.
 {{< /callout >}}
+
+---
+
+## EXTENSION_SUBEXTENSION_INVALID
+
+Una extensión compleja contiene una parte cuya `url` relativa su definición no declara. Las partes de una extensión compleja son *"locales/relativas a la referencia a la definición de la extensión"* (extensibility.html): una `url` relativa solo puede nombrar una parte que la definición declara, así que una que no declara no tiene significado. El validador de HL7 reporta el mismo error (`Extension_EXT_SubExtension_Invalid`).
+
+Una parte con `url` absoluta es una extensión definida por separado, que una extensión compleja también puede contener: se valida contra su propia definición, como cualquier extensión.
+
+**Ejemplo -- recurso inválido:**
+
+```json
+{
+  "resourceType": "Patient",
+  "extension": [{
+    "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+    "extension": [{"url": "nope", "valueString": "x"}]
+  }]
+}
+```
+
+`patient-nationality` declara las partes `code` y `period`; `nope` no es ninguna de ellas.
+
+**Solución:** Usa una parte que la definición declare, o una extensión definida por separado, con su URL absoluta.
 
 ---
 

@@ -135,11 +135,20 @@
       ]
     },
     {
+      "name": "subextension-invalid",
+      "rule": "equal",
+      "gofhir": [
+        "EXTENSION_SUBEXTENSION_INVALID"
+      ],
+      "hl7": [
+        "Extension_EXT_SubExtension_Invalid"
+      ]
+    },
+    {
       "name": "extension-unknown",
       "rule": "equal",
       "gofhir": [
         "EXTENSION_UNKNOWN",
-        "EXTENSION_NESTED_UNKNOWN",
         "MODIFIER_EXTENSION_UNKNOWN"
       ],
       "hl7": [
@@ -272,6 +281,7 @@
     "CODING_NO_SYSTEM": "no HL7 counterpart verified yet",
     "CONSTRAINT_EVAL_ERROR": "processing notice: the evaluation hit the validator's time limit",
     "CONTAINED_DUPLICATE_ID": "no HL7 counterpart verified yet",
+    "EXTENSION_NESTED_UNKNOWN": "deprecated: no longer reported (EXTENSION_SUBEXTENSION_INVALID)",
     "EXTENSION_INVALID_CONTEXT": "no HL7 counterpart verified yet; gofhir's report on primitive _display is a known false positive",
     "EXTENSION_INVALID_URL": "no HL7 counterpart verified yet",
     "EXTENSION_NO_URL": "no HL7 counterpart verified yet",
