@@ -517,12 +517,15 @@ func New(opts ...Option) (*Validator, error) {
 	if config.NoTerminology {
 		constraintTermReg = nil
 	}
-	v.constraintValidator = constraint.New(reg, constraintTermReg)
-	v.fixedPatternValidator = fixedpattern.New(reg)
-	v.slicingValidator = slicing.NewWithMatcher(reg, slicematch.New(reg,
+	// One slice matcher for the phases that tell the slice a value belongs to, so that they
+	// assign it to the same one.
+	matcher := slicematch.New(reg,
 		slicematch.WithConformer(conformer{v: v}),
 		slicematch.WithMemberChecker(memberChecker{v: v}),
-	))
+	)
+	v.constraintValidator = constraint.New(reg, constraintTermReg, constraint.WithMatcher(matcher))
+	v.fixedPatternValidator = fixedpattern.New(reg)
+	v.slicingValidator = slicing.NewWithMatcher(reg, matcher)
 
 	v.ucumValidator = initUCUMValidator(reg)
 
@@ -752,13 +755,17 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 
 	// Phase 7: Constraint validation (FHIRPath, uses cached expressions)
 	// Build constraint options: pass Bundle data for resolve() support.
-	var constraintOpts *constraint.ValidateOptions
+	constraintOpts := &constraint.ValidateOptions{}
 	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
-		constraintOpts = &constraint.ValidateOptions{BundleData: data}
+		constraintOpts.BundleData = data
 	}
 	if vs != nil {
 		constraintOpts = vs.constraintOptions()
 	}
+	// Slice matching shares what it learns about a value with the slicing phase by the value's
+	// identity: both read the same parse.
+	constraintOpts.Data = data
+	constraintOpts.Resolver, constraintOpts.Containment = referenceResolver{}, constraint.IsContainedIn
 	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
 	result.Stats.PhasesRun++
 

@@ -15,6 +15,7 @@ import (
 
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/pkg/slicematch"
 	"github.com/gofhir/validator/pkg/terminology"
 )
 
@@ -31,6 +32,18 @@ type ValidateOptions struct {
 	// value is the resource.
 	Resource     fhirpath.Collection
 	RootResource fhirpath.Collection
+
+	// Data is the instance resourceData holds, already parsed by the caller. Slice matching, which
+	// tells the slice a value belongs to, keeps what it learns about a value (its conformance to a
+	// profile) by the value's identity, so the phases that share a parse share that too. Nil means
+	// resourceData is parsed here.
+	Data map[string]any
+
+	// Scope, Resolver and Containment are what slice matching reads (slicematch.Request). A nil
+	// Scope means the instance is its own resource, root resource and container.
+	Scope       *slicematch.Scope
+	Resolver    slicematch.Resolver
+	Containment func(container, resource map[string]any) bool
 }
 
 // constraintEvalOpts carries all contextual data for a single constraint evaluation.
@@ -41,6 +54,11 @@ type constraintEvalOpts struct {
 	resolver        eval.Resolver       // For resolve() in FHIRPath.
 	termService     eval.TerminologyService
 	timeout         time.Duration
+
+	// What slice matching reads: the resources the value is in, and how references resolve.
+	scope         slicematch.Scope
+	sliceResolver slicematch.Resolver
+	containment   func(container, resource map[string]any) bool
 }
 
 // Validator validates constraints defined in ElementDefinitions.
@@ -51,16 +69,34 @@ type Validator struct {
 	// Cache of compiled FHIRPath expressions.
 	exprCache   map[string]compiledExpr
 	exprCacheMu sync.RWMutex
+
+	// matcher tells the slice a value of a sliced element belongs to.
+	matcher *slicematch.Matcher
 }
+
+// Option configures a Validator.
+type Option func(*Validator)
+
+// WithMatcher sets the slice matcher, the one the slicing phase uses, so that both assign a value
+// to the same slice. Without it, the validator's matcher cannot check profile conformance or
+// ValueSet membership, and a value only those decide is in no slice.
+func WithMatcher(m *slicematch.Matcher) Option { return func(v *Validator) { v.matcher = m } }
 
 // New creates a new constraint Validator.
 // The termRegistry may be nil to disable memberOf() support (e.g., when -tx n/a is set).
-func New(reg *registry.Registry, termReg *terminology.Registry) *Validator {
-	return &Validator{
+func New(reg *registry.Registry, termReg *terminology.Registry, opts ...Option) *Validator {
+	v := &Validator{
 		registry:     reg,
 		termRegistry: termReg,
 		exprCache:    make(map[string]compiledExpr),
 	}
+	for _, o := range opts {
+		o(v)
+	}
+	if v.matcher == nil {
+		v.matcher = slicematch.New(reg)
+	}
+	return v
 }
 
 // Validate validates all constraints in a resource, or in a datatype value checked against its
@@ -70,7 +106,9 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 		return
 	}
 	var resource map[string]any
-	if err := json.Unmarshal(resourceData, &resource); err != nil {
+	if opts != nil && opts.Data != nil {
+		resource = opts.Data
+	} else if err := json.Unmarshal(resourceData, &resource); err != nil {
 		return
 	}
 	root := sd.Tree().Root()
@@ -89,6 +127,9 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 		rootVar = opts.RootResource
 	}
 	evalOpts := v.buildEvalOpts(ctx, resourceVar, rootVar, opts)
+	if evalOpts.scope.Resource == nil {
+		evalOpts.scope = slicematch.Scope{Resource: resource, RootResource: resource, Container: resource}
+	}
 
 	v.walk(sd, root, "", resource, resourceData, sd.RootName(resource), evalOpts, result)
 }
@@ -110,6 +151,12 @@ func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResource
 	// Wire resolver if Bundle data is available.
 	if vopts != nil && vopts.BundleData != nil {
 		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData}
+	}
+	if vopts != nil {
+		opts.sliceResolver, opts.containment = vopts.Resolver, vopts.Containment
+		if vopts.Scope != nil {
+			opts.scope = *vopts.Scope
+		}
 	}
 
 	return opts

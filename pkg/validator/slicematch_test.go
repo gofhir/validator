@@ -76,8 +76,13 @@ var conformanceValidator = sync.OnceValues(func() (*Validator, error) {
 	if err != nil {
 		return nil, err
 	}
+	sliceConstraints, err := sliceConstraintProfiles()
+	if err != nil {
+		return nil, err
+	}
 	return New(WithVersion("4.0.1"),
 		WithPackageTgz("../../testdata/m12-slice-scoping/packages/acme.decisions-0.3.0.tgz"),
+		WithConformanceResources(sliceConstraints),
 		WithConformanceResources([][]byte{
 			[]byte(extS), []byte(extQ), []byte(idMRN), []byte(idTax), []byte(byProfile),
 			[]byte(compByAuthor), []byte(bundleOfComp),
@@ -367,7 +372,13 @@ const (
 // patientProfile builds a Patient profile from the core Patient snapshot: edit changes an element
 // in place and returns the elements to insert after it.
 func patientProfile(url string, edit func(map[string]any) []any) ([]byte, error) {
-	core, err := coreDefinition("http://hl7.org/fhir/StructureDefinition/Patient")
+	return coreProfile("Patient", url, edit)
+}
+
+// coreProfile builds a profile of a core type from its snapshot: edit changes an element in place
+// and returns the elements to insert after it.
+func coreProfile(typ, url string, edit func(map[string]any) []any) ([]byte, error) {
+	core, err := coreDefinition("http://hl7.org/fhir/StructureDefinition/" + typ)
 	if err != nil {
 		return nil, err
 	}
@@ -379,7 +390,7 @@ func patientProfile(url string, edit func(map[string]any) []any) ([]byte, error)
 		out = append(out, edit(m)...)
 	}
 	core["url"], core["name"], core["derivation"] = url, url[strings.LastIndexByte(url, '/')+1:], "constraint"
-	core["baseDefinition"] = "http://hl7.org/fhir/StructureDefinition/Patient"
+	core["baseDefinition"] = "http://hl7.org/fhir/StructureDefinition/" + typ
 	core["snapshot"] = map[string]any{"element": out}
 	delete(core, "differential")
 	delete(core, "id")
