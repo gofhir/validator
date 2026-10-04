@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.28.0](https://github.com/gofhir/validator/compare/v1.27.0...v1.28.0) (2026-10-04)
+
+
+### Features
+
+* **cardinality,slicing:** check an extension's structure against the definition its url names (plan B, PR B4c) ([#125](https://github.com/gofhir/validator/issues/125)) ([ebd808d](https://github.com/gofhir/validator/commit/ebd808d9676f869a463f926a2553b3aaef4326ef))
+* **constraint:** check an extension against the invariants of the definition its url names (plan B, PR B4a) ([#123](https://github.com/gofhir/validator/issues/123)) ([7eed079](https://github.com/gofhir/validator/commit/7eed0790b1c81725417150187e44baaf3d23cf49))
+* **validator,registry:** load a guide's dependencies and resolve canonicals across the versions loaded (plan B, B-D6) ([#126](https://github.com/gofhir/validator/issues/126)) ([bbf0d4f](https://github.com/gofhir/validator/commit/bbf0d4f32f914aebfe4bd8b6399fe9f9c011db8b))
+
+
+### Performance Improvements
+
+* **loader,terminology:** read a package's value sets and code systems when needed ([#127](https://github.com/gofhir/validator/issues/127)) ([b8c3ba1](https://github.com/gofhir/validator/commit/b8c3ba1994791230f1d033b3d1cea7a6d2f756dd))
+
 ## [1.27.0](https://github.com/gofhir/validator/compare/v1.26.2...v1.27.0) (2026-10-04)
 
 
