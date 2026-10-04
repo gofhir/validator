@@ -1,6 +1,7 @@
 package location
 
 import (
+	"strconv"
 	"testing"
 )
 
@@ -28,6 +29,12 @@ func TestFind(t *testing.T) {
 		wantColumn int
 		wantNil    bool
 	}{
+		{
+			name:       "the resource itself",
+			fhirPath:   "Patient",
+			wantLine:   1,
+			wantColumn: 2,
+		},
 		{
 			name:       "root field",
 			fhirPath:   "Patient.resourceType",
@@ -71,10 +78,11 @@ func TestFind(t *testing.T) {
 			wantColumn: 17,
 		},
 		{
+			// At the item, not at the comma before it.
 			name:       "nested array second element",
 			fhirPath:   "Patient.name[0].given[1]",
 			wantLine:   12,
-			wantColumn: 23,
+			wantColumn: 25,
 		},
 		{
 			name:     "non-existent field",
@@ -148,7 +156,7 @@ func TestParseFHIRPath(t *testing.T) {
 	}
 }
 
-func TestOffsetToLineCol(t *testing.T) {
+func TestLineCols(t *testing.T) {
 	input := []byte("line1\nline2\nline3")
 	//                01234 5 67890 1 23456
 
@@ -166,11 +174,18 @@ func TestOffsetToLineCol(t *testing.T) {
 		{17, 3, 6},
 	}
 
+	offsets := map[string]int{}
 	for _, tt := range tests {
-		line, col := offsetToLineCol(input, tt.offset)
-		if line != tt.wantLine || col != tt.wantCol {
-			t.Errorf("offsetToLineCol(_, %d) = (%d, %d), want (%d, %d)",
-				tt.offset, line, col, tt.wantLine, tt.wantCol)
+		offsets[strconv.Itoa(tt.offset)] = tt.offset
+	}
+	got := map[string]lineCol{}
+	for _, lc := range lineCols(input, offsets) {
+		got[lc.key] = lc
+	}
+	for _, tt := range tests {
+		lc := got[strconv.Itoa(tt.offset)]
+		if lc.line != tt.wantLine || lc.col != tt.wantCol {
+			t.Errorf("offset %d at (%d, %d), want (%d, %d)", tt.offset, lc.line, lc.col, tt.wantLine, tt.wantCol)
 		}
 	}
 }
@@ -184,6 +199,7 @@ func TestFindMinifiedJSON(t *testing.T) {
 		wantLine   int
 		wantColumn int
 	}{
+		{"Patient", 1, 2},
 		{"Patient.resourceType", 1, 16},
 		{"Patient.identifier", 1, 39},
 		{"Patient.identifier[0]", 1, 41},
@@ -243,5 +259,91 @@ func TestFindBundleEntry(t *testing.T) {
 				t.Errorf("Find(%q).Line = %d, want %d", tt.fhirPath, loc.Line, tt.wantLine)
 			}
 		})
+	}
+}
+
+// A path names a property of the object it is in: not a string value equal to its name, and not
+// a property of the same name in an object nested before it.
+func TestFindNamesTheProperty(t *testing.T) {
+	jsonData := []byte(`{
+  "resourceType": "Patient",
+  "meta": {"id": "m1"},
+  "id": "p1",
+  "telecom": [{"use": "name"}],
+  "contact": [{"relationship": [{"text": "name"}]}],
+  "name": [{"family": "A"}]
+}`)
+	for _, tt := range []struct {
+		path      string
+		line, col int
+	}{
+		{"Patient.id", 4, 7},
+		{"Patient.meta.id", 3, 16},
+		{"Patient.name", 7, 9},
+		{"Patient.name[0].family", 7, 21},
+		{"Patient.name:official", 7, 9},
+	} {
+		loc := Find(jsonData, tt.path)
+		if loc == nil || loc.Line != tt.line || loc.Column != tt.col {
+			t.Errorf("Find(%q) = %+v, want line %d col %d", tt.path, loc, tt.line, tt.col)
+		}
+	}
+}
+
+// FindAll locates each path where Find does, in one pass, and leaves out the paths it cannot find.
+func TestFindAll(t *testing.T) {
+	jsonData := []byte(`{
+  "resourceType": "Bundle",
+  "entry": [
+    {"fullUrl": "urn:uuid:1", "resource": {"resourceType": "Patient", "name": [{"given": ["A", "B"]}]}},
+    {"fullUrl": "urn:uuid:2", "resource": {"resourceType": "Patient", "contact": [{"gender": "male"}]}}
+  ]
+}`)
+	paths := []string{
+		"Bundle.entry", "Bundle.entry[1]", "Bundle.entry[0].resource.name[0].given[1]",
+		"Bundle.entry[1].resource.contact[0]", "Bundle.entry[1].resource", "Bundle.entry[0].resource.name[0].given[1]",
+		"Bundle.entry[2]", "Bundle.entry[0].resource.contact", "Observation.value[x]", "", "Bundle",
+	}
+	got := FindAll(jsonData, paths)
+	for _, p := range paths {
+		want := Find(jsonData, p)
+		if (got[p] == nil) != (want == nil) || (want != nil && *got[p] != *want) {
+			t.Errorf("FindAll[%q] = %+v, Find = %+v", p, got[p], want)
+		}
+	}
+	if len(got) != 6 {
+		t.Errorf("located %d paths, want the 6 that exist: %v", len(got), got)
+	}
+	if loc := got["Bundle.entry[1].resource.contact[0]"]; loc == nil || loc.Line != 5 {
+		t.Errorf("Bundle.entry[1].resource.contact[0] at %+v, want line 5", loc)
+	}
+}
+
+// An array item after the first is located at the item, on its own line, not at the comma that
+// ends the line before it.
+func TestFindItemAfterAComma(t *testing.T) {
+	jsonData := []byte(`{
+  "resourceType": "Patient",
+  "name": [
+    {
+      "family": "A"
+    },
+    {
+      "family": "B"
+    } , {"family": "C"}
+  ]
+}`)
+	for _, tt := range []struct {
+		path      string
+		line, col int
+	}{
+		{"Patient.name[0]", 4, 5},
+		{"Patient.name[1]", 7, 5},
+		{"Patient.name[2]", 9, 9},
+	} {
+		loc := Find(jsonData, tt.path)
+		if loc == nil || loc.Line != tt.line || loc.Column != tt.col {
+			t.Errorf("Find(%q) = %+v, want line %d col %d", tt.path, loc, tt.line, tt.col)
+		}
 	}
 }
