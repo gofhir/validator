@@ -16,9 +16,25 @@ import (
 
 // Validator validates slicing constraints for FHIR resources.
 type Validator struct {
-	registry *registry.Registry
-	matcher  *slicematch.Matcher
+	registry    *registry.Registry
+	matcher     *slicematch.Matcher
+	definitions DefinitionSource
 }
+
+// DefinitionSource names the definition a value declares for itself, which governs the value
+// wherever it is used: an extension's url names the definition the extension conforms to
+// (extensibility.html). It returns nil for a value that declares none. The definition has a
+// snapshot.
+type DefinitionSource interface {
+	DefinitionOf(ctx context.Context, typeCode string, value map[string]any) *registry.StructureDefinition
+}
+
+// Option configures a Validator.
+type Option func(*Validator)
+
+// WithDefinitions sets the source of the definitions values declare for themselves. Without it, a
+// value's slicing is checked against the definitions of the element that holds it only.
+func WithDefinitions(d DefinitionSource) Option { return func(v *Validator) { v.definitions = d } }
 
 // New creates a new slicing validator. Its matcher cannot check profile conformance or ValueSet
 // membership; use NewWithMatcher to provide one that can.
@@ -27,8 +43,12 @@ func New(reg *registry.Registry) *Validator {
 }
 
 // NewWithMatcher creates a slicing validator that assigns elements to slices with m.
-func NewWithMatcher(reg *registry.Registry, m *slicematch.Matcher) *Validator {
-	return &Validator{registry: reg, matcher: m}
+func NewWithMatcher(reg *registry.Registry, m *slicematch.Matcher, opts ...Option) *Validator {
+	v := &Validator{registry: reg, matcher: m}
+	for _, o := range opts {
+		o(v)
+	}
+	return v
 }
 
 // Options carries what one validation provides to slice matching.
@@ -122,19 +142,6 @@ type validation struct {
 	scope slicematch.Scope
 }
 
-// childNamed returns node's child with this name, or nil.
-func childNamed(node *registry.ElementNode, name string) *registry.ElementNode {
-	if node == nil {
-		return nil
-	}
-	for _, c := range governedChildren(node) {
-		if c.Name() == name {
-			return c
-		}
-	}
-	return nil
-}
-
 // memberDefinition returns the definition whose children govern an instance of a slice: the slice
 // itself when the snapshot unrolls its children, else the root of the one profile its type
 // declares (an extension slice is defined by its extension's StructureDefinition). A type with no
@@ -156,17 +163,17 @@ func (v *Validator) memberDefinition(slice *registry.ElementNode) *registry.Elem
 // checkChildren checks the cardinality of node's children in one instance of node, and recurses
 // into the children that are present.
 //
-// The cardinality phase already checks every instance against the unsliced element's definition
+// The cardinality phase already checks every instance against the children that govern it there
 // (base), so a child is checked here only where the slice constrains it further: a missing child
 // is reported once, not once per definition that requires it.
-func (v *Validator) checkChildren(node, base *registry.ElementNode, inst map[string]any, instPath, defPath string, result *issue.Result) {
+func (v *Validator) checkChildren(ctx context.Context, node *registry.ElementNode, base registry.InstanceChildren, inst map[string]any, instPath, defPath string, result *issue.Result) {
 	for _, child := range node.Children {
 		name := child.Name()
 		childPath := instPath + "." + name
 		childDef := defPath + "." + name
 		values := elementvalues.Of(child, inst, v.registry.ChoiceType)
 		count := len(values)
-		baseChild := childNamed(base, name)
+		baseChild := named(base.Nodes, name)
 		sameMin := baseChild != nil && baseChild.Def.Min == child.Def.Min
 		sameMax := baseChild != nil && baseChild.Def.Max == child.Def.Max
 
@@ -191,10 +198,23 @@ func (v *Validator) checkChildren(node, base *registry.ElementNode, inst map[str
 			if !ok {
 				continue
 			}
-			p := cv.Path(instPath)
-			v.checkChildren(child, baseChild, m, p, childDef, result)
+			var next registry.InstanceChildren
+			if baseChild != nil {
+				next = v.registry.ChildrenOf(ctx, base.SD, baseChild, cv.TypeCode, v.selfDefinitions(ctx, m))
+			}
+			v.checkChildren(ctx, child, next, m, cv.Path(instPath), childDef, result)
 		}
 	}
+}
+
+// named returns the node of nodes with this name, or nil.
+func named(nodes []*registry.ElementNode, name string) *registry.ElementNode {
+	for _, n := range nodes {
+		if n.Name() == name {
+			return n
+		}
+	}
+	return nil
 }
 
 // childValue is one value of an element in an instance.

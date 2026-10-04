@@ -1,0 +1,19 @@
+{
+ "resourceType": "Patient",
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/ext-req",
+   "valueString": "v",
+   "extension": [
+    {
+     "url": "a",
+     "valueString": "1"
+    }
+   ]
+  }
+ ]
+}

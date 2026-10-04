@@ -501,7 +501,6 @@ func New(opts ...Option) (*Validator, error) {
 
 	// Initialize phase validators
 	v.structValidator = structural.New(reg)
-	v.cardValidator = cardinality.New(reg)
 	v.primValidator = primitive.New(reg)
 	v.bindValidator = binding.New(reg, termReg)
 	v.bindValidator.SetUnresolvedPolicy(config.UnresolvedPolicy)
@@ -510,6 +509,9 @@ func New(opts ...Option) (*Validator, error) {
 	// Extension values are bound like any other element, so they are validated by
 	// the same code rather than a second copy of it.
 	v.extValidator.SetBindingValidator(v.bindValidator)
+	// An extension is checked against the definition its url names by the phases that walk
+	// definitions, as by the element that holds it.
+	v.cardValidator = cardinality.New(reg, cardinality.WithDefinitions(v.extValidator))
 	v.refValidator = reference.New(reg)
 	// Pass termRegistry to constraint validator for memberOf() support.
 	// When NoTerminology is set, pass nil to disable terminology in FHIRPath.
@@ -526,7 +528,7 @@ func New(opts ...Option) (*Validator, error) {
 	v.constraintValidator = constraint.New(reg, constraintTermReg, constraint.WithMatcher(matcher),
 		constraint.WithDefinitions(v.extValidator))
 	v.fixedPatternValidator = fixedpattern.New(reg)
-	v.slicingValidator = slicing.NewWithMatcher(reg, matcher)
+	v.slicingValidator = slicing.NewWithMatcher(reg, matcher, slicing.WithDefinitions(v.extValidator))
 
 	v.ucumValidator = initUCUMValidator(reg)
 

@@ -60,6 +60,16 @@ Probes are in `testdata/m12-slice-scoping/probes/`. All runs use `-tx n/a`.
 | D0 | `snapshot.go` `findMatchingElement` | Differential matched by `path` + `sliceName`: a slice child overwrites the base element. |
 | D10 | `constraint.go` `evaluateWithContext` | FHIRPath is evaluated without a `Model` (`fhirpath.WithModel`), so `gofhir/fhirpath` uses its heuristics. Choice types are guessed from 53 hardcoded suffixes. `as` keeps pre-R5 semantics in every version (`dom-3` depends on it). Type names are not checked against a model (`TypeRegistry`). An absent field also costs about 108 scans of the resource; that part is upstream ([note](2026-09-29-fhirpath-absent-field-cost.md)). |
 
+## Decisions
+
+Established with probes against the HL7 validator 6.10.4. Where HL7 departs from the
+specification, gofhir follows the specification, and the divergence is declared in
+`testdata/m12-slice-scoping/declared-divergences.json`.
+
+| # | Question | HL7 6.10.4 | Spec | Decision |
+| --- | --- | --- | --- | --- |
+| B-D1 | A profile requires a primitive's value (`Patient.birthDate.value` min 1) | Reported missing when the primitive has a value (`"birthDate": "2000-01-01"`), and when it has only extensions | json.html#primitive: the value is the JSON property itself; its id and extensions are in the `_key` sibling | Count the value: missing only when the primitive has no value (`pe4`). **Declared divergence** where HL7 reports it on a primitive that has one (`pe5`). |
+
 ## Design: definition layering
 
 ```go
@@ -176,16 +186,31 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
   the constraint walk evaluates it as a layer. The `extension-probes` group (`acme.extdefs`, probes
   `xd*`) pairs the five invariants HL7 reports: on a resource, a data type, a primitive, a Bundle
   entry, and a complex extension.
+- **B4c (2026-10-04): the structure the definition gives.** Without a profile, HL7 also checks an
+  extension's cardinality and slicing against its definition: `us-core-race` with no `text`
+  sub-extension on a Patient with no profile reports "Slice 'Extension.extension:text': a matching
+  slice is required". Cardinality and slicing now consume the same `DefinitionOf` layer, after the
+  profile a type declares and before the type's definition. A slice whose profile is the
+  definition the url names no longer reports the members' children the cardinality phase already
+  checks against it (DEQM `extension-measureScoring` with no value: `value[x]` min once, as HL7).
+  Both phases take a value's children from one function, `Registry.ChildrenOf`, and a slice checks
+  its members only where it constrains them further than what that function gives the
+  cardinality phase: a slice's `family` max 1, which `HumanName.family` already has, is reported
+  once, by cardinality, not twice as on v1.27.0.
+  The slicing phase now walks through a type's base definition, which has no slicing of its own,
+  and cardinality through a primitive's `_key` sibling, so an extension is checked wherever it is:
+  in a data type with no profile (`name[0].extension`) and on a primitive (`_birthDate`)
+  (`xd10`, `xd11`). A profile that requires an extension on a primitive (`birthDate.extension` min
+  1, or a required `patient-birthTime` slice) is checked even when the primitive has no `_key`
+  sibling, as HL7 does (`primitive-extension-probes`); v1.27.0 did not. A primitive's value is
+  checked as the child the primitive type defines for it (its base is a primitive type's element,
+  not `Element`'s), so a profile that requires or forbids the value is met as json.html#primitive
+  says (decision B-D1).
 - **Still open in B4:**
-  - **B4c, the structure the definition gives:** without a profile, HL7 also checks an
-    extension's cardinality and slicing against its definition. `us-core-race` with no `text`
-    sub-extension on a Patient with no profile reports "Slice 'Extension.extension:text': a
-    matching slice is required"; gofhir reports nothing. Cardinality and slicing should consume
-    the same `DefinitionOf` layer.
   - **B4b, the context of use:** a definition with no context; contexts of type `fhirpath` and
     `extension`, which today reject the extension; and the HL7 message to pair with.
-  - **`findNestedExtensionDef`:** a sub-extension the definition declares is reported unknown
-    (`xd4`), and an undefined one is a warning where HL7 reports an error (`xd3`).
+  - **`findNestedExtensionDef`:** a sub-extension the definition does not declare is a warning
+    where HL7 reports an error (`xd3`, `xd7`).
 
 **PR B5: `ResolveCanonical` in `walker`, `reference` and the top-level `meta.profile`** (D7)
 
@@ -201,6 +226,14 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
   Migrate the phase only if the probe diverges from HL7.
 
 **PR B7: snapshot generation, scoped** (D0)
+
+- **Found in B4c (2026-10-04):** a slice the differential does not type is generated with no type,
+  and so are some of its children (`ext-pair`: `Extension.extension:a` and `:b`, and `:b.url`),
+  where HL7 copies the base element's type (`Extension`). Slice matching then cannot evaluate the
+  slice ("the type is ambiguous (0 types)"), and the extension phase reports declared
+  sub-extensions as unknown. Published IGs ship snapshots, and `acme.extdefs` ships the snapshots
+  HL7 generates (`-snapshot`). Removing the snapshot from `ext-pair` reproduces the defect: B7's
+  probe.
 
 - Scope: do not overwrite base elements; place slices and their children correctly; normalize
   renamed-choice ids before matching.

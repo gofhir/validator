@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gofhir/validator/internal/elementvalues"
 	"github.com/gofhir/validator/pkg/issue"
@@ -20,16 +21,37 @@ import (
 
 // Validator performs cardinality validation of FHIR resources.
 type Validator struct {
-	registry *registry.Registry
-	walker   *walker.Walker
+	registry    *registry.Registry
+	walker      *walker.Walker
+	definitions DefinitionSource
+	shapes      sync.Map // *registry.StructureDefinition -> primitiveShape
 }
 
+// DefinitionSource names the definition a value declares for itself, which governs the value
+// wherever it is used: an extension's url names the definition the extension conforms to
+// (extensibility.html). It returns nil for a value that declares none. The definition has a
+// snapshot.
+type DefinitionSource interface {
+	DefinitionOf(ctx context.Context, typeCode string, value map[string]any) *registry.StructureDefinition
+}
+
+// Option configures a Validator.
+type Option func(*Validator)
+
+// WithDefinitions sets the source of the definitions values declare for themselves. Without it, a
+// value is checked against the definitions of the element that holds it only.
+func WithDefinitions(d DefinitionSource) Option { return func(v *Validator) { v.definitions = d } }
+
 // New creates a new cardinality Validator.
-func New(reg *registry.Registry) *Validator {
-	return &Validator{
+func New(reg *registry.Registry, opts ...Option) *Validator {
+	v := &Validator{
 		registry: reg,
 		walker:   walker.New(reg),
 	}
+	for _, o := range opts {
+		o(v)
+	}
+	return v
 }
 
 // Validate validates the cardinality of a FHIR resource against its StructureDefinition.
@@ -97,7 +119,7 @@ func (v *Validator) validateNode(
 	fhirPath string,
 	result *issue.Result,
 ) {
-	childSD, children, missing := v.childrenOf(sd, node, typeCode, 0)
+	childSD, children, missing := v.childrenOf(sd, node, typeCode, data)
 	if missing.canonical != "" {
 		// The value's type declares a profile that cannot be resolved: it cannot be checked, and is
 		// not checked against the base type instead (as in the HL7 validator, which reports the
@@ -107,6 +129,12 @@ func (v *Validator) validateNode(
 			fhirPath)
 		return
 	}
+	v.validateChildren(data, childSD, children, fhirPath, result)
+}
+
+// validateChildren checks children in one instance, data, held at fhirPath: their counts against
+// min and max, and recursively the children of those present.
+func (v *Validator) validateChildren(data map[string]any, childSD *registry.StructureDefinition, children []*registry.ElementNode, fhirPath string, result *issue.Result) {
 	for _, child := range children {
 		name := child.Name()
 		childPath := fhirPath + "." + name
@@ -133,6 +161,7 @@ func (v *Validator) validateNode(
 		for _, cv := range values {
 			m, ok := cv.Value.(map[string]any)
 			if !ok {
+				v.validatePrimitiveElement(cv.Value, cv.Ext, childSD, child, cv.TypeCode, cv.Path(fhirPath), result)
 				continue
 			}
 			// A resource inside an element (Bundle.entry.resource, contained) is validated
@@ -145,6 +174,89 @@ func (v *Validator) validateNode(
 	}
 }
 
+// validatePrimitiveElement checks one primitive value against the children of its element: those
+// the snapshot unrolls for it (a profile that requires an extension on it), else those of the
+// primitive's type definition. In JSON a primitive's value is its own property, and its id and
+// extensions are in its "_key" sibling, ext (json.html#primitive): the value is checked as the child
+// the primitive type defines for it, the others against the sibling, even when there is none.
+func (v *Validator) validatePrimitiveElement(value any, ext map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, result *issue.Result) {
+	code := typeCode
+	if code == "" && len(node.Def.Type) == 1 {
+		code = node.Def.Type[0].Code
+	}
+	typeSD := v.registry.GetByType(code)
+	if typeSD == nil || typeSD.Kind != kindPrimitive {
+		return
+	}
+	typeRoot := typeSD.Tree().Root()
+	if typeRoot == nil {
+		return
+	}
+	childSD, children := sd, node.Children
+	if len(children) == 0 {
+		if ext == nil && v.primitiveShape(typeSD).holdsAnyValue {
+			return // the type's definition requires nothing of a value with no sibling
+		}
+		childSD, children = typeSD, typeRoot.Children
+	}
+	inst := make(map[string]any, len(ext)+1)
+	for k, x := range ext {
+		inst[k] = x
+	}
+	if value != nil {
+		for _, name := range v.primitiveShape(typeSD).valueNames {
+			inst[name] = value
+		}
+	}
+	v.validateChildren(inst, childSD, children, fhirPath, result)
+}
+
+// primitiveShape is what a primitive type's definition says about the JSON of its values.
+type primitiveShape struct {
+	// valueNames are the children that hold the primitive's value: those a primitive type defines
+	// (their base is a primitive type's element: date.value, or string.value for code), not those
+	// every element has (Element.id, Element.extension), which the "_key" sibling holds.
+	valueNames []string
+	// holdsAnyValue is whether every value with no "_key" sibling meets the children's
+	// cardinality: none requires an id or an extension, and none forbids the value.
+	holdsAnyValue bool
+}
+
+// primitiveShape returns the shape of primitive type typeSD's values, read from its definition.
+func (v *Validator) primitiveShape(typeSD *registry.StructureDefinition) primitiveShape {
+	if cached, ok := v.shapes.Load(typeSD); ok {
+		if shape, ok := cached.(primitiveShape); ok {
+			return shape
+		}
+	}
+	shape := primitiveShape{holdsAnyValue: true}
+	if root := typeSD.Tree().Root(); root != nil {
+		for _, child := range root.Children {
+			if v.definedByPrimitive(child) {
+				shape.valueNames = append(shape.valueNames, child.Name())
+				if child.Def.Max == "0" {
+					shape.holdsAnyValue = false
+				}
+			} else if child.Def.Min > 0 {
+				shape.holdsAnyValue = false
+			}
+		}
+	}
+	v.shapes.Store(typeSD, shape)
+	return shape
+}
+
+// definedByPrimitive reports whether an element is first defined by a primitive type: its base
+// is an element of a StructureDefinition whose kind is primitive-type.
+func (v *Validator) definedByPrimitive(n *registry.ElementNode) bool {
+	if n.Def.Base == nil {
+		return false
+	}
+	typeName, _, _ := strings.Cut(n.Def.Base.Path, ".")
+	base := v.registry.GetByType(typeName)
+	return base != nil && base.Kind == kindPrimitive
+}
+
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
 const resourceTypeKey = "resourceType"
 
@@ -155,65 +267,27 @@ type unresolvedProfile struct {
 	reason    string
 }
 
-// childrenOf returns the child elements of an instance of node, and the StructureDefinition they
-// belong to: node's own children in the snapshot; else those its contentReference points to (D6);
-// else those of the one profile its type declares (type.profile, plan B L1); else those of its
-// type's base definition. The node is never a slice: slices are not children. The instance's type
-// (typeCode) picks the type of a choice element. A declared profile that does not resolve is
-// returned as missing, with no children.
-func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, hops int) (*registry.StructureDefinition, []*registry.ElementNode, unresolvedProfile) {
-	if len(node.Children) > 0 {
-		return sd, node.Children, unresolvedProfile{}
+// childrenOf returns the child elements of an instance of node, inst, and the StructureDefinition
+// they belong to (Registry.ChildrenOf), with the definition the instance declares for itself (an
+// extension's url, plan B B4c). A declared type profile that does not resolve is returned as
+// missing, with no children. The node is never a slice: slices are not children.
+func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any) (*registry.StructureDefinition, []*registry.ElementNode, unresolvedProfile) {
+	c := v.registry.ChildrenOf(context.Background(), sd, node, typeCode, v.selfDefinitions(inst))
+	if tp := c.Unresolved; tp.Canonical != "" {
+		return nil, nil, unresolvedProfile{tp.Canonical, tp.TypeCode, tp.Reason}
 	}
-	if ref := node.Def.ContentReference; ref != nil {
-		// A contentReference whose target is itself a contentReference is followed, up to a bound
-		// that only a malformed cycle reaches.
-		if hops >= maxContentReferenceHops {
-			return nil, nil, unresolvedProfile{}
-		}
-		target, _ := v.registry.ContentReference(sd, node)
-		if target == nil {
-			return nil, nil, unresolvedProfile{}
-		}
-		tsd := sd
-		if url, _, ok := registry.SplitContentReference(*ref); ok && url != "" && url != sd.URL {
-			if s, _ := v.registry.ResolveCanonical(url); s != nil {
-				tsd = s
-			}
-		}
-		return v.childrenOf(tsd, target, typeCode, hops+1)
-	}
-
-	if tp := v.registry.TypeProfile(context.Background(), node, typeCode); tp.Canonical != "" {
-		if tp.SD == nil {
-			return nil, nil, unresolvedProfile{tp.Canonical, tp.TypeCode, tp.Reason}
-		}
-		return tp.SD, tp.SD.Tree().Root().Children, unresolvedProfile{}
-	}
-
-	code := typeCode
-	if code == "" && len(node.Def.Type) == 1 {
-		code = node.Def.Type[0].Code
-	}
-	if code == "" {
-		return nil, nil, unresolvedProfile{}
-	}
-	// The type's definition is used even when it is the one being walked: Extension.extension is
-	// an Extension. The recursion follows the instance, so it ends with it.
-	typeSD := v.registry.GetByType(code)
-	if typeSD == nil || typeSD.Kind == kindPrimitive {
-		return nil, nil, unresolvedProfile{}
-	}
-	root := typeSD.Tree().Root()
-	if root == nil {
-		return nil, nil, unresolvedProfile{}
-	}
-	return typeSD, root.Children, unresolvedProfile{}
+	return c.SD, c.Nodes, unresolvedProfile{}
 }
 
-// maxContentReferenceHops bounds a chain of contentReferences (a cycle in a malformed
-// StructureDefinition).
-const maxContentReferenceHops = 8
+// selfDefinitions returns, for an instance, the definition it declares for itself for a type.
+func (v *Validator) selfDefinitions(inst map[string]any) func(string) *registry.StructureDefinition {
+	if v.definitions == nil {
+		return nil
+	}
+	return func(typeCode string) *registry.StructureDefinition {
+		return v.definitions.DefinitionOf(context.Background(), typeCode, inst)
+	}
+}
 
 // kindPrimitive is the StructureDefinition.kind of primitive types, whose children (id,
 // extension, value) are not properties of a JSON value.
