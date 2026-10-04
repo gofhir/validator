@@ -693,13 +693,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 
 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
 
-	// Enrich issues with line/column information from source JSON
-	result.EnrichLocations(func(expr string) *issue.Location {
-		if loc := location.Find(resource, expr); loc != nil {
-			return &issue.Location{Line: loc.Line, Column: loc.Column}
-		}
-		return nil
-	})
+	enrichLocations(resource, result)
 
 	logger.Info("Validated %s in %.3fms: %d errors, %d warnings",
 		resourceType,
@@ -784,6 +778,24 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 		v.ucumValidator.ValidateData(data, sd, result)
 	}
 	result.Stats.PhasesRun++
+}
+
+// enrichLocations adds each issue's line and column in the source JSON, locating every issue in
+// one reading of it.
+func enrichLocations(resource []byte, result *issue.Result) {
+	paths := make([]string, 0, len(result.Issues))
+	for i := range result.Issues {
+		if is := &result.Issues[i]; len(is.Expression) > 0 && is.Location == nil {
+			paths = append(paths, is.Expression[0])
+		}
+	}
+	located := location.FindAll(resource, paths)
+	result.EnrichLocations(func(expr string) *issue.Location {
+		if loc := located[expr]; loc != nil {
+			return &issue.Location{Line: loc.Line, Column: loc.Column}
+		}
+		return nil
+	})
 }
 
 // validateMode applies mode-specific validation rules.
