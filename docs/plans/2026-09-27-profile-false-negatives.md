@@ -255,6 +255,28 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 - Acceptance: the probe from the first review; stripped-and-regenerated DEQM and US Core profiles
   match their published snapshots on `id`, `min` and `max` for every element the differential
   mentions.
+- **Status (2026-10-05, `fix/b7-snapshot-generation`): implemented.** Snapshot generation places
+  each differential element by id (`ensure`): a slice is a copy of the element it slices (types,
+  base, min 0, no slicing) after that element's subtree; children of an element the base does not
+  expand are unrolled from the sliced element, the profile its one type declares, its type, or its
+  contentReference (a slice of a contentReference element takes the referenced type), keeping the
+  base their source declares. A differential without ids is placed by its paths and the slices
+  named before them.
+  - **Renamed choices** follow the normalization rule above: `valueQuantity` is the type slice
+    `value[x]:valueQuantity`; the choice is sliced by type (`$this`), and when the differential
+    types or requires the slice, the choice is restricted to that type, closed, with the slice's
+    cardinality, as HL7 generates them at the top level. Inside a new slice HL7 restricts the choice
+    without a slice (`component:systolic.value[x]`); gofhir keeps the type slice, with the same
+    constraints.
+  - **Extension elements** a differential slices without defining their slicing get the slicing
+    every extension element has (value `url`, open), and the minimum their required slices add up
+    to (`MeasureReport.extension` 1..*).
+  - Acceptance: the 59 US Core 6.1.0 and 26 DEQM 5.0.0 profiles match on id, min, max and types for
+    every element their differential names (132 mismatches before), and every element of the
+    `acme.extdefs` definitions matches HL7's snapshot (`TestRegeneratedExtensionSnapshots`, the
+    probe). DEQM's `extension-MeasureReport.supplementalData`, an R5 cross-version extension
+    (versions.html), resolves from `hl7.fhir.uv.xver-r5.r4`, which gofhir does not load unless a
+    guide declares it; HL7 loads its cross-version extensions itself.
 
 **PR B8: a FHIRPath `Model` from the registry** (D10)
 
