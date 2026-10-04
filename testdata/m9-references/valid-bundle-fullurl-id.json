@@ -7,6 +7,7 @@
       "fullUrl": "http://example.org/fhir/Patient/patient-123",
       "resource": {
         "resourceType": "Patient",
+        "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},
         "id": "patient-123",
         "name": [{"family": "Test"}]
       }
@@ -15,6 +16,7 @@
       "fullUrl": "http://example.org/fhir/Observation/obs-456",
       "resource": {
         "resourceType": "Observation",
+        "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},
         "id": "obs-456",
         "status": "final",
         "code": {

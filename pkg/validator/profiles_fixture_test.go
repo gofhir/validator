@@ -99,6 +99,7 @@ var profileFixture = sync.OnceValues(func() (*Validator, error) {
 		WithConformancePackage("test.strict.ig", "2.0.0", [][]byte{requireIdentifier(strictPatientProfileURL, "StrictPatient")}),
 		WithConformancePackage("test.profiles", "0.0.1", [][]byte{noPhoto, requireIdentifier(diffOnlyProfileURL, "DiffOnlyPatient"), bornProfile, evalProfile}),
 		WithConformancePackage("test.typed", "0.0.1", typedProfiles),
+		WithConformancePackage("test.tree", "0.0.1", treeProfiles),
 		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
 	)
 })

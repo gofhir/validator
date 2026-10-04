@@ -53,7 +53,17 @@ Las referencias FHIR (`Reference.reference`, `Reference.type`) deben conformar c
 
 ### 7. Constraint
 
-Los StructureDefinitions pueden declarar invariantes FHIRPath mediante `ElementDefinition.constraint`. Esta fase evalúa cada expresión de constraint contra el recurso y reporta las violaciones. Por ejemplo, el recurso `Patient` tiene un constraint `name.exists() or identifier.exists()`.
+Los StructureDefinitions pueden declarar invariantes FHIRPath mediante `ElementDefinition.constraint`. Esta fase recorre el recurso junto con el árbol de elementos de su StructureDefinition y evalúa, sobre cada valor, los constraints de cada definición que lo rige:
+
+- el elemento mismo (`pat-1` en cada `Patient.contact`);
+- el elemento al que apunta su `contentReference` (`Questionnaire.item.item` se verifica como un `Questionnaire.item`);
+- el perfil que declara su tipo (`ElementDefinition.type.profile`) o, si no declara uno, la definición del tipo (`per-1` en cada `Period`). Un perfil declarado que no se resuelve se reporta, y el valor se sigue verificando contra la definición de su tipo.
+
+Un constraint que comparten dos de estas definiciones se evalúa una vez por valor.
+
+Un recurso contenido en un elemento (`Bundle.entry.resource`, `contained`, `Parameters.parameter.resource`) se verifica como un recurso propio, contra los perfiles que declara su `meta.profile` o, si no declara ninguno que se resuelva, contra la definición de su tipo. `%resource` es ese recurso; `%rootResource` es su contenedor en un recurso de `contained`, y el recurso mismo en los demás casos.
+
+Un constraint que no se cumple, o cuya evaluación falla, se reporta con su propia severidad; una evaluación que detiene el límite de tiempo del validador es un warning. Una expresión que no compila es un error, salvo en las definiciones de la propia especificación, donde es un warning. Los constraints que agrega un slice (incluidos los del perfil de una extensión con slicing) todavía no se evalúan.
 
 ### 8. Fixed/Pattern
 
@@ -70,7 +80,7 @@ Cuando un recurso incluye una declaración `meta.profile`, el validador sigue es
 1. **Cargar perfiles declarados** -- Cada URL en `meta.profile` se resuelve a un StructureDefinition.
 2. **Resolver la cadena de perfiles** -- El validador recorre los enlaces `baseDefinition` hasta el tipo de recurso base, construyendo el conjunto completo de restricciones.
 3. **Ejecutar las 9 fases** -- El pipeline se ejecuta contra cada perfil declarado. Un recurso con múltiples perfiles se valida contra cada uno.
-4. **Fusionar issues** -- Todos los issues de todas las validaciones de perfiles se recopilan en un único resultado.
+4. **Fusionar issues** -- Todos los issues de todas las validaciones de perfiles se recopilan en un único resultado. Un constraint que falla en una ubicación se reporta una sola vez, aunque lo evalúen varios de los perfiles, como lo reporta el validador de HL7.
 
 ```text
 Resource (meta.profile: "http://example.org/MyPatient")

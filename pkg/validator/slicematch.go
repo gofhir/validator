@@ -133,7 +133,8 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 	result := issue.NewResult()
 	result.Stats = &issue.Stats{}
 	st, _ := ctx.Value(conformStateKey{}).(*conformState)
-	c.v.validateAgainstProfile(ctx, data, raw, profile, &valueScope{scope: scope, state: st}, result)
+	// The check's issues are discarded: it reports into a scope of its own.
+	c.v.validateAgainstProfile(constraint.WithReportScope(ctx), data, raw, profile, &valueScope{scope: scope, state: st}, result)
 	return result.ErrorCount() == 0
 }
 

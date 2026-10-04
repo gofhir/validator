@@ -6,7 +6,7 @@ package registry
 // exactly the defective one: a definition that differs is left as it is.
 //
 // The HL7 validator corrects the same definitions in code (InstanceValidator's id checks, and
-// FHIRPathExpressionFixer for eld-11). Keeping
+// FHIRPathExpressionFixer for eld-11 and que-7). Keeping
 // them here, as data with their sources, keeps every validation phase reading the definitions alone.
 
 const fhirTypeExtension = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type"
@@ -43,10 +43,13 @@ var typeErrata = []typeErratum{{
 	source: "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, ElementDefinition.id",
 }}
 
-// constraintErratum corrects a constraint expression that is not valid FHIRPath as published.
+// constraintErratum corrects a constraint expression that is wrong as published. The constraint is
+// named by its Constraint.source (from) or, where the version does not publish sources, by the
+// element it is defined on (path), which names every element derived from it too (base.path).
 type constraintErratum struct {
 	fhirVersion string // StructureDefinition.fhirVersion the defect is published in
 	from        string // Constraint.source of the constraint
+	path        string // the element's path, or ElementDefinition.base.path of the elements derived from it
 	key         string
 	published   string // the defective expression, corrected only if this is what is published
 	corrected   string
@@ -59,6 +62,14 @@ var constraintErrata = []constraintErratum{{
 	published: `binding.empty() or type.code.empty() or type.code.contains(":") or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()`,
 	corrected: `binding.empty() or type.code.empty() or type.code.contains(':') or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()`,
 	source:    "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, eld-11",
+}, {
+	// R4's que-7 tests the answer against System.Boolean, which no FHIR boolean is
+	// (fhirpath.html#types: a FHIR primitive is of its FHIR type), so it fails on every enableWhen
+	// with operator 'exists'. R4B and R5 test it against the FHIR type boolean.
+	fhirVersion: "4.0.1", path: "Questionnaire.item.enableWhen", key: "que-7",
+	published: `operator = 'exists' implies (answer is Boolean)`,
+	corrected: `operator = 'exists' implies (answer is boolean)`,
+	source:    "hl7.fhir.r4b.core#4.3.0 StructureDefinition/Questionnaire, que-7",
 }}
 
 // applyErrata corrects sd's elements, in its snapshot and its differential.
@@ -83,13 +94,13 @@ func correctElement(fhirVersion string, e *ElementDefinition) {
 			continue
 		}
 		for c := range e.Constraint {
-			if cn := &e.Constraint[c]; cn.Key == er.key && cn.Source == er.from && cn.Expression == er.published {
+			if cn := &e.Constraint[c]; cn.Key == er.key && er.names(e, cn) && cn.Expression == er.published {
 				cn.Expression = er.corrected
 			}
 		}
 	}
 	for _, er := range typeErrata {
-		if er.fhirVersion != fhirVersion || (e.Path != er.path && (e.Base == nil || e.Base.Path != er.path)) {
+		if er.fhirVersion != fhirVersion || !elementAt(e, er.path) {
 			continue
 		}
 		for t := range e.Type {
@@ -101,6 +112,19 @@ func correctElement(fhirVersion string, e *ElementDefinition) {
 			}
 		}
 	}
+}
+
+// names reports whether c, a constraint of e, is the one the erratum corrects.
+func (er constraintErratum) names(e *ElementDefinition, c *Constraint) bool {
+	if er.from != "" {
+		return c.Source == er.from
+	}
+	return elementAt(e, er.path)
+}
+
+// elementAt reports whether e is the element at path or derives from it.
+func elementAt(e *ElementDefinition, path string) bool {
+	return e.Path == path || (e.Base != nil && e.Base.Path == path)
 }
 
 func snapshotElements(sd *StructureDefinition) []ElementDefinition {

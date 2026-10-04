@@ -1,0 +1,21 @@
+{
+ "resourceType": "Patient",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/StructureDefinition/r-prim-ext"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "http://example.org/x",
+    "valueString": "a"
+   }
+  ]
+ }
+}

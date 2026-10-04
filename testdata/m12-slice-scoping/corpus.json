@@ -30,6 +30,24 @@
       ]
     },
     {
+      "name": "nested-resource-probes",
+      "packageFiles": [
+        "testdata/m12-slice-scoping/packages/acme.multiprofile-0.1.0.tgz"
+      ],
+      "files": [
+        "testdata/m12-slice-scoping/probes/nr*_*.json"
+      ]
+    },
+    {
+      "name": "review-probes",
+      "packageFiles": [
+        "testdata/m12-slice-scoping/packages/acme.review-0.1.0.tgz"
+      ],
+      "files": [
+        "testdata/m12-slice-scoping/probes/rv*_*.json"
+      ]
+    },
+    {
       "name": "constraint-probes",
       "packageFiles": [
         "testdata/m12-slice-scoping/packages/acme.constraints-0.1.0.tgz"

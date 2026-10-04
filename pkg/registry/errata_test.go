@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/gofhir/fhirpath"
@@ -137,7 +138,7 @@ func TestEveryErratumHasASource(t *testing.T) {
 		}
 	}
 	for _, er := range constraintErrata {
-		if er.source == "" || er.fhirVersion == "" || er.from == "" || er.key == "" || er.published == er.corrected {
+		if er.source == "" || er.fhirVersion == "" || (er.from == "") == (er.path == "") || er.key == "" || er.published == er.corrected {
 			t.Errorf("incomplete erratum %+v", er)
 		}
 	}
@@ -163,5 +164,47 @@ func TestConstraintErratum(t *testing.T) {
 	}
 	if found == 0 {
 		t.Fatal("no eld-11 in R5 ElementDefinition")
+	}
+}
+
+// R4's que-7, published without a source, is corrected on the element it is defined on and in the
+// profiles derived from it, and nowhere else.
+func TestConstraintErratumByElement(t *testing.T) {
+	const core = "http://hl7.org/fhir/StructureDefinition/"
+	want := map[string]string{
+		"4.0.1 Questionnaire":     constraintErrata[1].corrected,
+		"4.0.1 cqf-questionnaire": constraintErrata[1].corrected,
+		"4.3.0 Questionnaire":     constraintErrata[1].corrected, // as published
+	}
+	for k, w := range want {
+		version, name, _ := strings.Cut(k, " ")
+		sd := sharedVersion(t, version).GetByURL(core + name)
+		if sd == nil || sd.Snapshot == nil {
+			t.Fatalf("%s not loaded", k)
+		}
+		found := 0
+		for _, e := range sd.Snapshot.Element {
+			for _, c := range e.Constraint {
+				if c.Key == "que-7" {
+					found++
+					if c.Expression != w {
+						t.Errorf("%s %s: que-7 is %q", k, e.ID, c.Expression)
+					}
+				}
+			}
+		}
+		if found == 0 {
+			t.Errorf("%s: no que-7", k)
+		}
+	}
+
+	// The same key and expression on another element is not R4's que-7.
+	sd := &StructureDefinition{FHIRVersion: "4.0.1", Snapshot: &Snapshot{Element: []ElementDefinition{{
+		ID: "Basic.extension", Path: "Basic.extension", Base: &ElementBase{Path: "DomainResource.extension"},
+		Constraint: []Constraint{{Key: "que-7", Expression: constraintErrata[1].published}},
+	}}}}
+	applyErrata(sd)
+	if got := sd.Snapshot.Element[0].Constraint[0].Expression; got != constraintErrata[1].published {
+		t.Errorf("que-7 on another element corrected to %q", got)
 	}
 }
