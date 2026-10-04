@@ -534,7 +534,7 @@ func TestApplyDifferential_EmptyDiff(t *testing.T) {
 	}
 	diff := &Differential{Element: []ElementDefinition{}}
 
-	result, err := New().applyDifferential(context.Background(), base, diff)
+	result, _, err := New().applyDifferential(context.Background(), base, diff)
 	if err != nil {
 		t.Fatalf("applyDifferential failed: %v", err)
 	}

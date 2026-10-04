@@ -659,7 +659,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 
 	// Collect and resolve all profiles to validate against
 	customProfiles := v.collectProfilesToValidate(vc.profiles, metaProfiles)
-	resolvedProfiles, profileURLs, profilesNotFound := v.resolveProfiles(ctx, vc.canonicalProfiles, customProfiles)
+	resolvedProfiles, profileURLs, profilesNotFound, profilesUnusable := v.resolveProfiles(ctx, vc.canonicalProfiles, customProfiles)
 
 	// Emit warnings for profiles not found
 	for _, notFound := range profilesNotFound {
@@ -668,6 +668,17 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 			Code:        issue.CodeNotFound,
 			Diagnostics: fmt.Sprintf("Profile '%s' not found in registry", notFound),
 		})
+	}
+	// A profile that is loaded but whose snapshot cannot be generated was not validated against, as
+	// the HL7 validator reports it (Validation_VAL_Profile_NoSnapshot); one whose differential names
+	// elements its base does not have is validated without them.
+	for _, u := range profilesUnusable {
+		result.AddErrorWithID(issue.DiagProfileSnapshotFailed, map[string]any{"url": u.url, "reason": u.reason}, resourceType)
+	}
+	for i, sd := range resolvedProfiles {
+		for _, note := range sd.SnapshotNotes() {
+			result.AddWarningWithID(issue.DiagProfileDifferentialIgnored, map[string]any{"url": profileURLs[i], "detail": note}, resourceType)
+		}
 	}
 
 	// Determine which profiles to validate against
@@ -931,7 +942,7 @@ func (v *Validator) Version() string {
 
 // resolveProfiles resolves canonical and plain URL profiles using version-aware lookup
 // with optional resolver fallback. Returns resolved SDs, their URLs, and unresolved profile strings.
-func (v *Validator) resolveProfiles(ctx context.Context, canonicals []canonicalRef, plainURLs []string) (resolved []*registry.StructureDefinition, urls, notFound []string) {
+func (v *Validator) resolveProfiles(ctx context.Context, canonicals []canonicalRef, plainURLs []string) (resolved []*registry.StructureDefinition, urls, notFound []string, unusable []unusableProfile) {
 	// Canonical profiles (url|version) from per-call options
 	for _, cp := range canonicals {
 		sd := v.registry.ResolveByCanonical(ctx, cp.url, cp.version)
@@ -969,15 +980,19 @@ func (v *Validator) resolveProfiles(ctx context.Context, canonicals []canonicalR
 	withSnapshotURLs := make([]string, 0, len(resolved))
 	for i, sd := range resolved {
 		if err := v.registry.EnsureSnapshot(ctx, sd); err != nil {
-			logger.Warn("Snapshot generation failed for %s: %v", urls[i], err)
-			notFound = append(notFound, urls[i])
+			unusable = append(unusable, unusableProfile{url: urls[i], reason: err.Error()})
 			continue
 		}
 		withSnapshots = append(withSnapshots, sd)
 		withSnapshotURLs = append(withSnapshotURLs, urls[i])
 	}
 
-	return withSnapshots, withSnapshotURLs, notFound
+	return withSnapshots, withSnapshotURLs, notFound, unusable
+}
+
+// unusableProfile is a profile that resolves but whose snapshot cannot be generated, and why.
+type unusableProfile struct {
+	url, reason string
 }
 
 // collectProfilesToValidate returns the ordered list of profiles to validate against.

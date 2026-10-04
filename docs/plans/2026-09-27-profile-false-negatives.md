@@ -255,28 +255,49 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 - Acceptance: the probe from the first review; stripped-and-regenerated DEQM and US Core profiles
   match their published snapshots on `id`, `min` and `max` for every element the differential
   mentions.
-- **Status (2026-10-05, `fix/b7-snapshot-generation`): implemented.** Snapshot generation places
-  each differential element by id (`ensure`): a slice is a copy of the element it slices (types,
-  base, min 0, no slicing) after that element's subtree; children of an element the base does not
-  expand are unrolled from the sliced element, the profile its one type declares, its type, or its
-  contentReference (a slice of a contentReference element takes the referenced type), keeping the
-  base their source declares. A differential without ids is placed by its paths and the slices
-  named before them.
-  - **Renamed choices** follow the normalization rule above: `valueQuantity` is the type slice
-    `value[x]:valueQuantity`; the choice is sliced by type (`$this`), and when the differential
-    types or requires the slice, the choice is restricted to that type, closed, with the slice's
-    cardinality, as HL7 generates them at the top level. Inside a new slice HL7 restricts the choice
-    without a slice (`component:systolic.value[x]`); gofhir keeps the type slice, with the same
-    constraints.
-  - **Extension elements** a differential slices without defining their slicing get the slicing
-    every extension element has (value `url`, open), and the minimum their required slices add up
-    to (`MeasureReport.extension` 1..*).
-  - Acceptance: the 59 US Core 6.1.0 and 26 DEQM 5.0.0 profiles match on id, min, max and types for
-    every element their differential names (132 mismatches before), and every element of the
-    `acme.extdefs` definitions matches HL7's snapshot (`TestRegeneratedExtensionSnapshots`, the
-    probe). DEQM's `extension-MeasureReport.supplementalData`, an R5 cross-version extension
-    (versions.html), resolves from `hl7.fhir.uv.xver-r5.r4`, which gofhir does not load unless a
-    guide declares it; HL7 loads its cross-version extensions itself.
+- **Status (2026-10-05, `fix/b7-snapshot-generation`): implemented**, then corrected after an
+  adversarial review that regenerated every guide in the package cache. Each differential element
+  is placed by its id (`ensure`), creating what it needs first:
+  - **Slices.** A slice is a copy of the element it slices as constrained so far (types, base,
+    min 0, no slicing), after that element's subtree. A slice of a contentReference element takes
+    the referenced type, and its children come from it. A slice a type profile already brings is
+    not made twice.
+  - **Unrolled children.** The children of an element the snapshot does not expand come from the
+    sliced element, the profile its one type declares, its type (for a choice, the children all
+    its types have; for a FHIRPath system type, Element's), or its contentReference, which the
+    element then resolves to. They keep the base their source declares.
+  - **Choices.** A renamed choice (`valueQuantity`) is the type slice `value[x]:valueQuantity` of a
+    choice sliced by type; inside a new slice, where the base has no such choice, it restricts the
+    copied choice without a slice, and named only as the parent of an element, a choice that has that
+    one type is the choice, as HL7 6.10 generates them. A type slice restricts the choice to its
+    type, closed, when it is required and the choice holds one value, or when the differential named
+    it as a renamed choice and typed it; closed type slicing restricts the choice to its slices'
+    types. A choice named without `[x]` is the choice.
+  - **Cardinality from types.** When the differential changes an element's type or profiles it,
+    its minimum is the type's or profile's root minimum (and a single profile's lower maximum),
+    never below `base.min` nor what the element's source set.
+  - **Extension elements** a differential slices without defining their slicing get the slicing by
+    `url` every extension element has.
+  - **Robustness.** An id that does not follow the convention is placed by its path. A
+    differential element that names nothing the base has is left out, as HL7 leaves it out, and
+    reported as a warning (`PROFILE_DIFFERENTIAL_IGNORED`); what trying to place it made is undone.
+    Generation is serialized by one lock per registry, held once per call chain, so a snapshot made
+    is never made again and profiles that need each other cannot wait on each other; a cycle of
+    type profiles is cut in the chain, and a snapshot made while cutting one is kept only for the
+    definition asked for, so the result does not depend on order. Only failures that cannot change
+    are kept. A profile without a snapshot (its base cannot be had) is `PROFILE_SNAPSHOT_FAILED`,
+    an error, as HL7 reports `Validation_VAL_Profile_NoSnapshot`.
+  - **Acceptance.** Stripped and regenerated, the profiles of 17 guides (US Core 6.1.0 and 5.0.1,
+    DEQM, QI-Core, mCODE, IPS, AU Core and Base, CH Core, CL Core, SDC, Genomics Reporting, CQF
+    Measures, IPA, CPG, CRMI, extensions.r4) match their published snapshots on id, min, max, types
+    and slicing for every element their differential names, with no duplicated id. Four SDC
+    elements are published from older extension definitions; HL7 6.10 generates them as gofhir does.
+    Every element of `acme.extdefs` matches HL7's snapshot. Elements the differential does not name
+    are not all unrolled as HL7 unrolls them (children of new slices); the validator takes them
+    from their types.
+  - DEQM's `extension-MeasureReport.supplementalData`, an R5 cross-version extension (versions.html),
+    resolves from `hl7.fhir.uv.xver-r5.r4`, which gofhir does not load unless a guide declares it;
+    HL7 loads its cross-version extensions itself.
 
 **PR B8: a FHIRPath `Model` from the registry** (D10)
 

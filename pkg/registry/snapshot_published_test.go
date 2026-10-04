@@ -91,10 +91,13 @@ func snapshotMismatchesOf(t *testing.T, r *Registry, packageID string, all bool)
 			want[published.Snapshot.Element[i].ID] = &published.Snapshot.Element[i]
 		}
 		got := map[string]*ElementDefinition{}
+		name := sd.URL[strings.LastIndex(sd.URL, "/")+1:]
 		for i := range sd.Snapshot.Element {
+			if got[sd.Snapshot.Element[i].ID] != nil {
+				mismatches = append(mismatches, fmt.Sprintf("%s %s: twice", name, sd.Snapshot.Element[i].ID))
+			}
 			got[sd.Snapshot.Element[i].ID] = &sd.Snapshot.Element[i]
 		}
-		name := sd.URL[strings.LastIndex(sd.URL, "/")+1:]
 		for id, g := range got {
 			if g.Base == nil {
 				mismatches = append(mismatches, fmt.Sprintf("%s %s: no base", name, id))
@@ -119,14 +122,20 @@ func snapshotMismatchesOf(t *testing.T, r *Registry, packageID string, all bool)
 			if w == nil {
 				continue // the published snapshot names it otherwise
 			}
+			if reason, ok := stalePublished[name+" "+d.ID]; ok {
+				t.Logf("%s %s: not compared: %s", name, d.ID, reason)
+				continue
+			}
 			g := got[d.ID]
 			switch {
 			case g == nil:
 				mismatches = append(mismatches, fmt.Sprintf("%s %s: missing", name, d.ID))
 			case g.Min != w.Min || g.Max != w.Max:
 				mismatches = append(mismatches, fmt.Sprintf("%s %s: %d..%s, published %d..%s", name, d.ID, g.Min, g.Max, w.Min, w.Max))
-			case !slices.Equal(typeCodes(g), typeCodes(w)):
+			case !slices.Equal(typeCodes(g), typeCodes(w)) && definesTypes(r, w):
 				mismatches = append(mismatches, fmt.Sprintf("%s %s: types %v, published %v", name, d.ID, typeCodes(g), typeCodes(w)))
+			case (g.Slicing == nil) != (w.Slicing == nil):
+				mismatches = append(mismatches, fmt.Sprintf("%s %s: sliced %v, published %v", name, d.ID, g.Slicing != nil, w.Slicing != nil))
 			}
 		}
 	}
@@ -195,4 +204,49 @@ func sharedVersionCopy(t *testing.T) *Registry {
 		t.Fatal(err)
 	}
 	return r
+}
+
+// Every guide in the package cache with profiles that ship a snapshot and a differential: their
+// snapshots stripped and regenerated match the published ones (see snapshotMismatches). Guides
+// missing from the cache are skipped.
+func TestRegeneratedSnapshotsAcrossGuides(t *testing.T) {
+	for _, guide := range [][2]string{
+		{"hl7.fhir.us.qicore", "6.0.0"}, {"hl7.fhir.us.mcode", "4.0.0"}, {"hl7.fhir.uv.ips", "2.0.1"},
+		{"hl7.fhir.au.core", "2.0.0"}, {"hl7.fhir.au.base", "6.0.0"}, {"ch.fhir.ig.ch-core", "6.0.0"},
+		{"hl7.fhir.cl.clcore", "1.9.4"}, {"hl7.fhir.uv.sdc", "3.0.0"}, {"hl7.fhir.uv.genomics-reporting", "2.0.0"},
+		{"hl7.fhir.us.cqfmeasures", "5.0.0"}, {"hl7.fhir.uv.ipa", "1.1.0"}, {"hl7.fhir.us.core", "5.0.1"},
+		{"hl7.fhir.uv.cpg", "1.0.0"}, {"hl7.fhir.uv.crmi", "1.0.0"}, {"hl7.fhir.uv.extensions.r4", "5.2.0"},
+	} {
+		t.Run(guide[0], func(t *testing.T) {
+			r := guideRegistry(t, guide[0], guide[1])
+			profiles, mismatches := snapshotMismatches(t, r, guide[0]+"#"+guide[1])
+			for _, m := range mismatches {
+				t.Error(m)
+			}
+			t.Logf("%d profiles, %d mismatches", profiles, len(mismatches))
+		})
+	}
+}
+
+// definesTypes reports whether the registry's FHIR version defines every type of the element. A
+// published snapshot whose element lists a type the version does not define was not generated for
+// it (hl7.fhir.uv.extensions.r4 5.2.0 lists R5's types on Extension.value[x]), so its types are not
+// compared.
+func definesTypes(r *Registry, e *ElementDefinition) bool {
+	for _, t := range e.Type {
+		if !strings.HasPrefix(t.Code, fhirPathSystemTypes) && r.GetByType(t.Code) == nil {
+			return false
+		}
+	}
+	return true
+}
+
+// stalePublished are published snapshot elements older than the definitions they were generated
+// from: the HL7 validator 6.10 generates them as gofhir does (java -jar validator_cli.jar
+// -snapshot), not as published.
+var stalePublished = map[string]string{
+	"sdc-questionnaire-behave Questionnaire.item.extension:minValue.value[x]": "minValue now allows Quantity (hl7.fhir.uv.extensions.r4)",
+	"sdc-questionnaire-behave Questionnaire.item.extension:maxValue.value[x]": "maxValue now allows Quantity (hl7.fhir.uv.extensions.r4)",
+	"sdc-questionnaire-modular Questionnaire.item.extension:subQuestionnaire": "subQuestionnaire's root is 0..1",
+	"sdc-questionnaire-search Questionnaire.extension:assembledFrom":          "assembledFrom's root is 0..1",
 }

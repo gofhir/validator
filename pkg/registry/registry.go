@@ -55,6 +55,14 @@ type StructureDefinition struct {
 	// Concurrent validation across goroutines (e.g. in an embedded HTTP server)
 	// previously raced on the Snapshot field.
 	snapshotMu sync.Mutex
+	// snapshotErr is why generating the snapshot failed, kept so that it is not attempted again,
+	// when the failure cannot change (see EnsureSnapshot).
+	snapshotErr error
+	// snapshotNotes are the differential elements the generated snapshot leaves out, and why.
+	snapshotNotes []string
+	// snapshotCyclic reports a snapshot generated while a cycle of type profiles was cut: it is kept
+	// for this StructureDefinition, and generated again where another needs it as a type.
+	snapshotCyclic bool
 
 	// tree caches the element hierarchy of Snapshot; see Tree.
 	tree treeCache
@@ -159,6 +167,8 @@ type ElementDefinition struct {
 // derives from ("Resource.id" for Patient.id).
 type ElementBase struct {
 	Path string `json:"path"`
+	Min  uint32 `json:"min"`
+	Max  string `json:"max"`
 }
 
 // SetRaw stores the raw JSON for this ElementDefinition.
@@ -249,6 +259,9 @@ type Discriminator struct {
 // Registry holds loaded StructureDefinitions indexed by URL.
 type Registry struct {
 	mu sync.RWMutex
+	// snapshotGen serializes snapshot generation (EnsureSnapshot): it is held once per call chain,
+	// which generates the snapshots it needs under it.
+	snapshotGen sync.Mutex
 	// all holds every definition loaded, in load order: several versions of a URL may be loaded.
 	all []*StructureDefinition
 	// byURL holds the version of each URL an unversioned canonical resolves to; see preferred.
