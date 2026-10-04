@@ -55,6 +55,27 @@ var conformanceValidator = sync.OnceValues(func() (*Validator, error) {
 	if err != nil {
 		return nil, err
 	}
+	containedByProfile, err := patientProfile(containedByProfileURL, func(m map[string]any) []any {
+		if m["id"] != "Patient.contained" {
+			return nil
+		}
+		m["slicing"] = map[string]any{"discriminator": []any{map[string]any{"type": "profile", "path": "$this"}}, "rules": "open"}
+		return []any{map[string]any{"id": "Patient.contained:named", "path": "Patient.contained", "sliceName": "named", "min": 0, "max": "*",
+			"type": []any{map[string]any{"code": "Resource", "profile": []any{namedPatientURL}}}}}
+	})
+	if err != nil {
+		return nil, err
+	}
+	namedPatient, err := patientProfile(namedPatientURL, func(m map[string]any) []any {
+		if m["id"] == "Patient" {
+			m["constraint"] = append(m["constraint"].([]any), map[string]any{
+				"key": "named-1", "severity": "error", "human": "named-1", "expression": "name.exists()", "source": namedPatientURL})
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
 	return New(WithVersion("4.0.1"),
 		WithPackageTgz("../../testdata/m12-slice-scoping/packages/acme.decisions-0.3.0.tgz"),
 		WithConformanceResources([][]byte{
@@ -63,7 +84,7 @@ var conformanceValidator = sync.OnceValues(func() (*Validator, error) {
 			// The concurrency test's own copies, whose snapshots no other test generates.
 			[]byte(strings.ReplaceAll(compByAuthor, "/comp", "/comp-concurrent")),
 			[]byte(strings.ReplaceAll(strings.ReplaceAll(bundleOfComp, "/comp", "/comp-concurrent"), "/doc", "/doc-concurrent")),
-			people,
+			people, containedByProfile, namedPatient,
 		}))
 })
 
@@ -311,4 +332,56 @@ func TestConformanceGeneratesSnapshotsConcurrently(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+}
+
+// A constraint that fails while slice matching checks a value's conformance is still reported by
+// the validation itself: the check's issues are discarded, so it reports into a scope of its own.
+// Validating against contained-by-profile, slice matching checks the contained Patient against
+// named-patient, walking it from "Patient": named-1 fails there, at the location the container's
+// own named-1 is reported at when the container is validated against named-patient next.
+func TestConformanceCheckDoesNotHideAFailure(t *testing.T) {
+	v := sharedConformanceValidator(t)
+	res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Patient",
+"meta":{"profile":["`+containedByProfileURL+`","`+namedPatientURL+`"]},
+"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},
+"contained":[{"resourceType":"Patient","id":"c"}],"link":[{"other":{"reference":"#c"},"type":"seealso"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, is := range res.Issues {
+		if strings.Contains(is.Diagnostics, "named-1:") {
+			got = append(got, strings.Join(is.Expression, ","))
+		}
+	}
+	if want := []string{"Patient"}; !slices.Equal(got, want) {
+		t.Errorf("named-1 reported at %q, want %q", got, want)
+	}
+}
+
+const (
+	containedByProfileURL = "https://example.org/fhir/StructureDefinition/contained-by-profile"
+	namedPatientURL       = "https://example.org/fhir/StructureDefinition/named-patient"
+)
+
+// patientProfile builds a Patient profile from the core Patient snapshot: edit changes an element
+// in place and returns the elements to insert after it.
+func patientProfile(url string, edit func(map[string]any) []any) ([]byte, error) {
+	core, err := coreDefinition("http://hl7.org/fhir/StructureDefinition/Patient")
+	if err != nil {
+		return nil, err
+	}
+	base := core["snapshot"].(map[string]any)["element"].([]any)
+	out := make([]any, 0, len(base)+1)
+	for _, e := range base {
+		m := e.(map[string]any)
+		out = append(out, m)
+		out = append(out, edit(m)...)
+	}
+	core["url"], core["name"], core["derivation"] = url, url[strings.LastIndexByte(url, '/')+1:], "constraint"
+	core["baseDefinition"] = "http://hl7.org/fhir/StructureDefinition/Patient"
+	core["snapshot"] = map[string]any{"element": out}
+	delete(core, "differential")
+	delete(core, "id")
+	return json.Marshal(core)
 }

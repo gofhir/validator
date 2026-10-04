@@ -687,6 +687,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	// Pass parsed data to avoid re-parsing JSON in each phase
 	// Conformance checks made by slice matching share one memo for this validation.
 	ctx = withConformState(ctx)
+	ctx = constraint.WithReportScope(ctx)
 	for _, sd := range profilesToValidate {
 		v.validateAgainstProfile(ctx, data, resource, sd, nil, result)
 	}

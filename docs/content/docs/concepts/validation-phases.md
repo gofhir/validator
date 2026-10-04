@@ -53,7 +53,17 @@ FHIR references (`Reference.reference`, `Reference.type`) must conform to the al
 
 ### 7. Constraint
 
-StructureDefinitions can declare FHIRPath invariants via `ElementDefinition.constraint`. This phase evaluates each constraint expression against the resource and reports violations. For example, the `Patient` resource has a constraint `name.exists() or identifier.exists()`.
+StructureDefinitions can declare FHIRPath invariants via `ElementDefinition.constraint`. This phase walks the resource together with its StructureDefinition's element tree and evaluates, on every value, the constraints of each definition that governs it:
+
+- the element itself (`pat-1` on each `Patient.contact`);
+- the element its `contentReference` points to (`Questionnaire.item.item` is checked as a `Questionnaire.item`);
+- the profile its type declares (`ElementDefinition.type.profile`), or else the type's own definition (`per-1` on every `Period`). A declared profile that does not resolve is reported, and the value is still checked against its type's definition.
+
+A constraint that two of these definitions share is evaluated once per value.
+
+A resource held in an element (`Bundle.entry.resource`, `contained`, `Parameters.parameter.resource`) is checked as a resource of its own, against the profiles its `meta.profile` declares or else its type's definition when none of them resolves. `%resource` is that resource; `%rootResource` is its container for a contained resource, and the resource itself otherwise.
+
+A constraint that does not hold, or whose evaluation fails, is reported at its own severity; an evaluation stopped by the validator's time limit is a warning. An expression that does not compile is an error, except in the specification's own definitions, where it is a warning. Constraints that a slice adds (including those of a sliced extension's profile) are not evaluated yet.
 
 ### 8. Fixed/Pattern
 
@@ -70,7 +80,7 @@ When a resource includes a `meta.profile` declaration, the validator follows thi
 1. **Load declared profiles** -- Each URL in `meta.profile` is resolved to a StructureDefinition.
 2. **Resolve the profile chain** -- The validator walks `baseDefinition` links up to the base resource type, building the full set of constraints.
 3. **Run all 9 phases** -- The pipeline executes against each declared profile. A resource with multiple profiles is validated against each one.
-4. **Merge issues** -- All issues from all profile validations are collected into a single result.
+4. **Merge issues** -- All issues from all profile validations are collected into a single result. A constraint that fails at one location is reported once, however many of the profiles evaluate it, as the HL7 validator reports it.
 
 ```text
 Resource (meta.profile: "http://example.org/MyPatient")
