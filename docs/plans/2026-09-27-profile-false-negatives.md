@@ -137,6 +137,16 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 
 **PR B2: `constraint` on layers** (D4, D9, L1 for constraints)
 
+- **Status (2026-10-03): implemented.**
+  - **B2a (#121):** the constraint phase walks the element tree: contentReference (D9), the type
+    profile (L1), and nested resources, reporting a failure once per location across profiles.
+  - **B2b:** a value of a sliced element is checked against the slice slice matching assigns it
+    to, with the same matcher as the slicing phase (D4): NPI-bad reports `us-core-17`, NPI-ok stays
+    clean, and `TestConstraintsOfSlices` shows a slice's constraint is not evaluated on another
+    slice's values.
+  - **Still open:** the profile an entry slice declares for its `resource` (B5), and constraints on
+    a primitive element, which do not see the extensions in its `_x` element.
+
 - Acceptance: NPI-bad reports `us-core-17`; NPI-ok stays clean; P2 reports `ext-1` once; SQ reports
   `sqty-1`; Q-nested reports `que-1`. A fixture shows that a constraint on one slice is not
   evaluated on members of another.
@@ -151,6 +161,18 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
   HL7.
 - Acceptance: the whole extension package suite passes, plus CX; `pkg/extension` has no element-name
   literals.
+- **Found in B2b's review (2026-10-03):** the HL7 validator checks every extension against the
+  definition its `url` names, with or without a profile ("validating against Base FHIR Standard"):
+  - it reports the definition's invariants: on a Patient with no profile, `xp-1` on
+    `Patient.extension[0]` and `sx-1` on `Patient.name[0].extension[0].value`;
+  - it reports an extension whose definition declares no context as "not allowed to be used at
+    this point".
+
+  gofhir reports neither: the extension phase resolves the definition but evaluates no constraint,
+  and the constraint walk reaches an extension's definition only through a slice that declares
+  it. B4 exposes the definition the extension phase resolves as a layer that the constraint walk
+  evaluates. B4 adds the probe to the corpus: two invented extensions with an invariant each and
+  no context, used on a Patient with no profile.
 
 **PR B5: `ResolveCanonical` in `walker`, `reference` and the top-level `meta.profile`** (D7)
 

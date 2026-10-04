@@ -55,15 +55,16 @@ Las referencias FHIR (`Reference.reference`, `Reference.type`) deben conformar c
 
 Los StructureDefinitions pueden declarar invariantes FHIRPath mediante `ElementDefinition.constraint`. Esta fase recorre el recurso junto con el árbol de elementos de su StructureDefinition y evalúa, sobre cada valor, los constraints de cada definición que lo rige:
 
+- el slice al que pertenece, según lo asigna el matching de slices, y cada slice del que ese slice es un reslice (`us-core-17` en el identificador NPI de un Practitioner de US Core, y en ningún otro identificador);
 - el elemento mismo (`pat-1` en cada `Patient.contact`);
 - el elemento al que apunta su `contentReference` (`Questionnaire.item.item` se verifica como un `Questionnaire.item`);
-- el perfil que declara su tipo (`ElementDefinition.type.profile`) o, si no declara uno, la definición del tipo (`per-1` en cada `Period`). Un perfil declarado que no se resuelve se reporta, y el valor se sigue verificando contra la definición de su tipo.
+- el perfil que declara su tipo (`ElementDefinition.type.profile`), primero en el slice (el perfil de un slice de extensión) o, si no declara uno, la definición del tipo (`per-1` en cada `Period`). Un perfil declarado que no se resuelve se reporta, y el valor se sigue verificando contra la definición de su tipo.
 
 Un constraint que comparten dos de estas definiciones se evalúa una vez por valor.
 
 Un recurso contenido en un elemento (`Bundle.entry.resource`, `contained`, `Parameters.parameter.resource`) se verifica como un recurso propio, contra los perfiles que declara su `meta.profile` o, si no declara ninguno que se resuelva, contra la definición de su tipo. `%resource` es ese recurso; `%rootResource` es su contenedor en un recurso de `contained`, y el recurso mismo en los demás casos.
 
-Un constraint que no se cumple, o cuya evaluación falla, se reporta con su propia severidad; una evaluación que detiene el límite de tiempo del validador es un warning. Una expresión que no compila es un error, salvo en las definiciones de la propia especificación, donde es un warning. Los constraints que agrega un slice (incluidos los del perfil de una extensión con slicing) todavía no se evalúan.
+Un constraint que no se cumple, o cuya evaluación falla, se reporta con su propia severidad; una evaluación que detiene el límite de tiempo del validador es un warning. Una expresión que no compila es un error, salvo en las definiciones de la propia especificación, donde es un warning.
 
 ### 8. Fixed/Pattern
 

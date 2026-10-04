@@ -55,15 +55,16 @@ FHIR references (`Reference.reference`, `Reference.type`) must conform to the al
 
 StructureDefinitions can declare FHIRPath invariants via `ElementDefinition.constraint`. This phase walks the resource together with its StructureDefinition's element tree and evaluates, on every value, the constraints of each definition that governs it:
 
+- the slice it belongs to, as slice matching assigns it, and each slice that slice reslices (`us-core-17` on the NPI identifier of a US Core Practitioner, and on no other identifier);
 - the element itself (`pat-1` on each `Patient.contact`);
 - the element its `contentReference` points to (`Questionnaire.item.item` is checked as a `Questionnaire.item`);
-- the profile its type declares (`ElementDefinition.type.profile`), or else the type's own definition (`per-1` on every `Period`). A declared profile that does not resolve is reported, and the value is still checked against its type's definition.
+- the profile its type declares (`ElementDefinition.type.profile`), on the slice first (an extension slice's profile), or else the type's own definition (`per-1` on every `Period`). A declared profile that does not resolve is reported, and the value is still checked against its type's definition.
 
 A constraint that two of these definitions share is evaluated once per value.
 
 A resource held in an element (`Bundle.entry.resource`, `contained`, `Parameters.parameter.resource`) is checked as a resource of its own, against the profiles its `meta.profile` declares or else its type's definition when none of them resolves. `%resource` is that resource; `%rootResource` is its container for a contained resource, and the resource itself otherwise.
 
-A constraint that does not hold, or whose evaluation fails, is reported at its own severity; an evaluation stopped by the validator's time limit is a warning. An expression that does not compile is an error, except in the specification's own definitions, where it is a warning. Constraints that a slice adds (including those of a sliced extension's profile) are not evaluated yet.
+A constraint that does not hold, or whose evaluation fails, is reported at its own severity; an evaluation stopped by the validator's time limit is a warning. An expression that does not compile is an error, except in the specification's own definitions, where it is a warning.
 
 ### 8. Fixed/Pattern
 

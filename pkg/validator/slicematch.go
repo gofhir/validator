@@ -148,7 +148,7 @@ type valueScope struct {
 // constraintOptions returns the resources a value's constraints read as %resource and
 // %rootResource.
 func (s *valueScope) constraintOptions() *constraint.ValidateOptions {
-	opts := &constraint.ValidateOptions{BundleData: s.scope.Container}
+	opts := &constraint.ValidateOptions{BundleData: s.scope.Container, Scope: &s.scope}
 	if s.state != nil {
 		opts.Resource = s.state.collection(s.scope.Resource)
 		opts.RootResource = s.state.collection(s.scope.RootResource)
