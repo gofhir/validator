@@ -58,7 +58,8 @@ Los StructureDefinitions pueden declarar invariantes FHIRPath mediante `ElementD
 - el slice al que pertenece, según lo asigna el matching de slices, y cada slice del que ese slice es un reslice (`us-core-17` en el identificador NPI de un Practitioner de US Core, y en ningún otro identificador);
 - el elemento mismo (`pat-1` en cada `Patient.contact`);
 - el elemento al que apunta su `contentReference` (`Questionnaire.item.item` se verifica como un `Questionnaire.item`);
-- el perfil que declara su tipo (`ElementDefinition.type.profile`), primero en el slice (el perfil de un slice de extensión) o, si no declara uno, la definición del tipo (`per-1` en cada `Period`). Un perfil declarado que no se resuelve se reporta, y el valor se sigue verificando contra la definición de su tipo.
+- el perfil que declara su tipo (`ElementDefinition.type.profile`), primero en el slice (el perfil de un slice de extensión) o, si no declara uno, la definición del tipo (`per-1` en cada `Period`);
+- la definición que nombra el `url` de una extensión, dondequiera que se use, con o sin perfil. Un perfil declarado que no se resuelve se reporta, y el valor se sigue verificando contra la definición de su tipo.
 
 Un constraint que comparten dos de estas definiciones se evalúa una vez por valor.
 

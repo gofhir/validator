@@ -66,9 +66,16 @@ func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.Elemen
 		layerSD, layer, hops = tsd, target, hops+1
 	}
 
-	typeSD, typeRoot := v.typeLayer(opts.ctx, node, layer, typeCode)
+	self := v.selfDefinition(opts.ctx, layer, typeCode, value)
+	typeSD, typeRoot := v.typeLayer(opts.ctx, node, layer, typeCode, self)
 	if typeRoot != nil && typeSD.Kind != kindPrimitive {
 		v.evaluate(typeRoot, typeRoot.Def.Path, value, &raw, fhirPath, seen, opts, result)
+	}
+	if self != nil && self != typeSD {
+		// The slice's profile governs the value, and so does the definition it declares itself.
+		if root := self.Tree().Root(); root != nil {
+			v.evaluate(root, root.Def.Path, value, &raw, fhirPath, seen, opts, result)
+		}
 	}
 
 	if obj, ok := value.(map[string]any); ok {
@@ -113,7 +120,7 @@ func (v *Validator) governing(sd *registry.StructureDefinition, node *registry.E
 // walkPrimitiveExtensions walks a primitive's "_key" sibling (its id and extensions) against the
 // children of the primitive's type definition.
 func (v *Validator) walkPrimitiveExtensions(node *registry.ElementNode, typeCode string, ext map[string]any, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
-	typeSD, typeRoot := v.typeLayer(opts.ctx, node, node, typeCode)
+	typeSD, typeRoot := v.typeLayer(opts.ctx, node, node, typeCode, nil)
 	if typeRoot == nil || typeSD.Kind != kindPrimitive {
 		return
 	}
@@ -198,10 +205,11 @@ func (v *Validator) nestedDefinitions(ctx context.Context, res map[string]any) [
 
 // typeLayer is the definition that governs a value through its type: the one profile that the type
 // of node, or of an element node slices, declares for typeCode, the most specific first; else the
-// type's own definition, as layer (node, or the element its contentReference points to) declares
-// it; with its root element. A declared profile that does not resolve (reported by the cardinality
-// phase) leaves the value under its type's definition, as the HL7 validator checks it.
-func (v *Validator) typeLayer(ctx context.Context, node, layer *registry.ElementNode, typeCode string) (*registry.StructureDefinition, *registry.ElementNode) {
+// definition the value declares itself (self); else the type's own definition, as layer (node, or
+// the element its contentReference points to) declares it; with its root element. A declared
+// profile that does not resolve (reported by the cardinality phase) leaves the value under its
+// type's definition, as the HL7 validator checks it.
+func (v *Validator) typeLayer(ctx context.Context, node, layer *registry.ElementNode, typeCode string, self *registry.StructureDefinition) (*registry.StructureDefinition, *registry.ElementNode) {
 	for n := node; n != nil; n = n.SliceOf {
 		if tp := v.registry.TypeProfile(ctx, n, typeCode); tp.SD != nil {
 			return tp.SD, tp.SD.Tree().Root()
@@ -212,10 +220,12 @@ func (v *Validator) typeLayer(ctx context.Context, node, layer *registry.Element
 			return tp.SD, tp.SD.Tree().Root()
 		}
 	}
-	code := typeCode
-	if code == "" && len(layer.Def.Type) == 1 {
-		code = layer.Def.Type[0].Code
+	if self != nil {
+		if root := self.Tree().Root(); root != nil {
+			return self, root
+		}
 	}
+	code := valueType(layer, typeCode)
 	if code == "" {
 		return nil, nil
 	}
@@ -228,6 +238,27 @@ func (v *Validator) typeLayer(ctx context.Context, node, layer *registry.Element
 		return nil, nil
 	}
 	return sd, root
+}
+
+// valueType is the type of a value of layer: typeCode, the type a choice element's value has, or
+// else the element's only type.
+func valueType(layer *registry.ElementNode, typeCode string) string {
+	if typeCode == "" && len(layer.Def.Type) == 1 {
+		return layer.Def.Type[0].Code
+	}
+	return typeCode
+}
+
+// selfDefinition is the definition a value of layer declares for itself, which governs it wherever
+// it is used: an extension's url names the definition the extension conforms to
+// (extensibility.html). The DefinitionSource knows which values declare one; without it, none
+// does.
+func (v *Validator) selfDefinition(ctx context.Context, layer *registry.ElementNode, typeCode string, value any) *registry.StructureDefinition {
+	obj, ok := value.(map[string]any)
+	if !ok || v.definitions == nil {
+		return nil
+	}
+	return v.definitions.DefinitionOf(ctx, valueType(layer, typeCode), obj)
 }
 
 // contentTarget is the element node's contentReference points to, with the definition it is in.

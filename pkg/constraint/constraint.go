@@ -72,6 +72,17 @@ type Validator struct {
 
 	// matcher tells the slice a value of a sliced element belongs to.
 	matcher *slicematch.Matcher
+
+	// definitions names the definition a value declares for itself.
+	definitions DefinitionSource
+}
+
+// DefinitionSource names the definition a value declares for itself, which governs the value
+// wherever it is used, besides the definitions of the element that holds it: an extension's url
+// names the definition the extension conforms to (extensibility.html). It returns nil for a value
+// that declares none, or whose definition cannot be used. The definition has a snapshot.
+type DefinitionSource interface {
+	DefinitionOf(ctx context.Context, typeCode string, value map[string]any) *registry.StructureDefinition
 }
 
 // Option configures a Validator.
@@ -81,6 +92,10 @@ type Option func(*Validator)
 // to the same slice. Without it, the validator's matcher cannot check profile conformance or
 // ValueSet membership, and a value only those decide is in no slice.
 func WithMatcher(m *slicematch.Matcher) Option { return func(v *Validator) { v.matcher = m } }
+
+// WithDefinitions sets the source of the definitions values declare for themselves. Without it, a
+// value is checked against the definitions of the element that holds it only.
+func WithDefinitions(d DefinitionSource) Option { return func(v *Validator) { v.definitions = d } }
 
 // New creates a new constraint Validator.
 // The termRegistry may be nil to disable memberOf() support (e.g., when -tx n/a is set).

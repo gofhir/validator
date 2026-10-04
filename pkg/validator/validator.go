@@ -523,7 +523,8 @@ func New(opts ...Option) (*Validator, error) {
 		slicematch.WithConformer(conformer{v: v}),
 		slicematch.WithMemberChecker(memberChecker{v: v}),
 	)
-	v.constraintValidator = constraint.New(reg, constraintTermReg, constraint.WithMatcher(matcher))
+	v.constraintValidator = constraint.New(reg, constraintTermReg, constraint.WithMatcher(matcher),
+		constraint.WithDefinitions(v.extValidator))
 	v.fixedPatternValidator = fixedpattern.New(reg)
 	v.slicingValidator = slicing.NewWithMatcher(reg, matcher)
 

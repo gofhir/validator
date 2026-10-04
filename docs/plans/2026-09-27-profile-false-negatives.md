@@ -168,11 +168,24 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
   - it reports an extension whose definition declares no context as "not allowed to be used at
     this point".
 
-  gofhir reports neither: the extension phase resolves the definition but evaluates no constraint,
-  and the constraint walk reaches an extension's definition only through a slice that declares
-  it. B4 exposes the definition the extension phase resolves as a layer that the constraint walk
-  evaluates. B4 adds the probe to the corpus: two invented extensions with an invariant each and
-  no context, used on a Patient with no profile.
+  gofhir reported neither: the extension phase resolved the definition but evaluated no
+  constraint, and the constraint walk reached an extension's definition only through a slice that
+  declares it.
+- **B4a (2026-10-04): the invariants.** The extension phase exposes the definition an extension's
+  url names (`DefinitionOf`: a url that names a StructureDefinition of the value's own type), and
+  the constraint walk evaluates it as a layer. The `extension-probes` group (`acme.extdefs`, probes
+  `xd*`) pairs the five invariants HL7 reports: on a resource, a data type, a primitive, a Bundle
+  entry, and a complex extension.
+- **Still open in B4:**
+  - **B4c, the structure the definition gives:** without a profile, HL7 also checks an
+    extension's cardinality and slicing against its definition. `us-core-race` with no `text`
+    sub-extension on a Patient with no profile reports "Slice 'Extension.extension:text': a
+    matching slice is required"; gofhir reports nothing. Cardinality and slicing should consume
+    the same `DefinitionOf` layer.
+  - **B4b, the context of use:** a definition with no context; contexts of type `fhirpath` and
+    `extension`, which today reject the extension; and the HL7 message to pair with.
+  - **`findNestedExtensionDef`:** a sub-extension the definition declares is reported unknown
+    (`xd4`), and an undefined one is a warning where HL7 reports an error (`xd3`).
 
 **PR B5: `ResolveCanonical` in `walker`, `reference` and the top-level `meta.profile`** (D7)
 

@@ -48,6 +48,15 @@
       ]
     },
     {
+      "name": "extension-probes",
+      "packageFiles": [
+        "testdata/m12-slice-scoping/packages/acme.extdefs-0.1.0.tgz"
+      ],
+      "files": [
+        "testdata/m12-slice-scoping/probes/xd*_*.json"
+      ]
+    },
+    {
       "name": "constraint-probes",
       "packageFiles": [
         "testdata/m12-slice-scoping/packages/acme.constraints-0.1.0.tgz"
