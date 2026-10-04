@@ -17,6 +17,27 @@ When the validator runs as a standalone CLI tool, it pre-loads all StructureDefi
 
 The GoFHIR Validator supports all of these scenarios through two extension points: `ProfileResolver` and `TerminologyProvider`.
 
+## Loading an IG and Its Dependencies
+
+A server that installs Implementation Guides already knows which packages it holds, and in which versions: it resolves a guide's dependencies when it installs it. Pass the validator the guide **and** its dependencies, each in the exact version the server publishes, so that both validate against the same definitions:
+
+```go
+// The server's installed packages: the guide and every package it depends on.
+var packages [][]byte // .tgz bytes, e.g. read from the server's storage
+
+opts := []validator.Option{validator.WithVersion("4.0.1")}
+for _, tgz := range packages {
+    opts = append(opts, validator.WithPackageData(tgz))
+}
+v, err := validator.New(opts...)
+```
+
+- A dependency already passed is not looked for, so the validator reads nothing else and downloads nothing. The library downloads only with `WithPackageRegistry`.
+- If the server keeps packages in a FHIR package cache on disk, `WithPackagePath` plus `WithPackage` for the guide has the same effect: the dependencies are read from that cache.
+- If the server stores conformance resources in a database (`WithConformancePackage`), there is no `package.json`: pass the dependencies' resources too.
+
+A guide's dependencies can be large: US Core 6.1.0 depends on VSAC (28,646 value sets) and PHIN VADS. If the server already serves terminology, answer the validator's terminology questions with `WithTerminologyAuthority` instead of loading those packages, and profiles with a `ProfileResolver` (below): the validator then holds no second copy, and asks only for what a validation needs.
+
 ## ProfileResolver
 
 A `ProfileResolver` allows the validator to load StructureDefinitions on demand when they are not found in the in-memory registry. This is the recommended integration point for FHIR servers that store conformance resources in a database.

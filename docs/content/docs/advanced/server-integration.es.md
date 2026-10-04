@@ -17,6 +17,27 @@ Cuando el validador se ejecuta como herramienta CLI independiente, precarga todo
 
 El GoFHIR Validator soporta todos estos escenarios a traves de dos puntos de extension: `ProfileResolver` y `TerminologyProvider`.
 
+## Carga de una IG y sus Dependencias
+
+Un servidor que instala Implementation Guides ya sabe qué paquetes tiene, y en qué versiones: resuelve las dependencias de una guía al instalarla. Pásale al validador la guía **y** sus dependencias, cada una en la versión exacta que publica el servidor, para que ambos validen con las mismas definiciones:
+
+```go
+// Los paquetes instalados en el servidor: la guía y cada paquete del que depende.
+var packages [][]byte // bytes .tgz, por ejemplo leídos del almacenamiento del servidor
+
+opts := []validator.Option{validator.WithVersion("4.0.1")}
+for _, tgz := range packages {
+    opts = append(opts, validator.WithPackageData(tgz))
+}
+v, err := validator.New(opts...)
+```
+
+- Una dependencia ya pasada no se busca, así que el validador no lee nada más ni descarga nada. La biblioteca solo descarga con `WithPackageRegistry`.
+- Si el servidor guarda los paquetes en un cache de paquetes FHIR en disco, `WithPackagePath` más `WithPackage` para la guía tiene el mismo efecto: las dependencias se leen de ese cache.
+- Si el servidor guarda los recursos de conformidad en una base de datos (`WithConformancePackage`), no hay `package.json`: pasa también los recursos de las dependencias.
+
+Las dependencias de una guía pueden ser grandes: US Core 6.1.0 depende de VSAC (28.646 value sets) y PHIN VADS. Si el servidor ya resuelve terminología, responde las consultas de terminología del validador con `WithTerminologyAuthority` en vez de cargar esos paquetes, y los perfiles con un `ProfileResolver` (más abajo): así el validador no guarda una segunda copia y pide solo lo que una validación necesita.
+
 ## ProfileResolver
 
 Un `ProfileResolver` permite al validador cargar StructureDefinitions bajo demanda cuando no se encuentran en el registro en memoria. Este es el punto de integracion recomendado para servidores FHIR que almacenan recursos de conformidad en una base de datos.
