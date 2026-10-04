@@ -49,6 +49,8 @@ type Package struct {
 	Canonical    string                     // the manifest's canonical: the base of the URLs the package publishes
 	Dependencies map[string]string          // the packages it depends on, name to version
 	Resources    map[string]json.RawMessage // URL or resourceType/id -> raw JSON
+	// Deferred are resources read only when needed (see OpenPackage).
+	Deferred []DeferredResource
 }
 
 // PackageManifest represents the package.json of a FHIR NPM package.

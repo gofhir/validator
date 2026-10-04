@@ -414,7 +414,7 @@ func New(opts ...Option) (*Validator, error) {
 			logger.Warn("Could not load additional package %s#%s: %v", pkgSpec.Name, pkgSpec.Version, err)
 			continue
 		}
-		pkg, err := l.LoadPackage(pkgSpec.Name, version)
+		pkg, err := l.OpenPackage(pkgSpec.Name, version)
 		if err != nil {
 			logger.Warn("Could not load additional package %s#%s: %v", pkgSpec.Name, pkgSpec.Version, err)
 			continue
@@ -468,8 +468,8 @@ func New(opts ...Option) (*Validator, error) {
 	// Log loaded packages
 	totalResources := 0
 	for _, pkg := range packages {
-		logger.Info("  Loaded %s#%s (%d resources)", pkg.Name, pkg.Version, len(pkg.Resources))
-		totalResources += len(pkg.Resources)
+		logger.Info("  Loaded %s#%s (%d resources, %d read when needed)", pkg.Name, pkg.Version, len(pkg.Resources), len(pkg.Deferred))
+		totalResources += len(pkg.Resources) + len(pkg.Deferred)
 	}
 	afterLoadMem := getMemUsage()
 	logger.Info("  Total: %d resources from %d packages in %v", totalResources, len(packages), loadDuration.Round(time.Millisecond))
@@ -1053,7 +1053,7 @@ func loadBase(l *loader.Loader, config *Config) ([]*loader.Package, error) {
 func loadBasePackages(l *loader.Loader, base []PackageSpec) ([]*loader.Package, error) {
 	packages := make([]*loader.Package, 0, len(base))
 	for _, spec := range base {
-		pkg, err := l.LoadPackage(spec.Name, spec.Version)
+		pkg, err := l.OpenPackage(spec.Name, spec.Version)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load base package %s#%s: %w", spec.Name, spec.Version, err)
 		}
