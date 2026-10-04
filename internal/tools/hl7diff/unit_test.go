@@ -11,13 +11,14 @@ import (
 func TestNormalizeHL7Location(t *testing.T) {
 	// Inputs are locations observed in HL7 validator 6.10.x output.
 	cases := map[string]string{
-		"Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/":                  "Bundle.entry[1].resource",
-		"Bundle.entry[6].resource/*Patient/p*/.extension[0].extension[0].value.ofType(Coding)": "Bundle.entry[6].resource.extension[0].extension[0].valueCoding",
-		"MeasureReport.extension[0].value.ofType(Identifier).system":                           "MeasureReport.extension[0].valueIdentifier.system",
-		"MeasureReport.extension[0].value.ofType(string)":                                      "MeasureReport.extension[0].valueString",
-		"Patient.extension[0].value.ofType(base64Binary)":                                      "Patient.extension[0].valueBase64Binary",
-		"Observation.value.ofType(integer64)":                                                  "Observation.valueInteger64",
-		"Bundle.entry[0].request":                                                              "Bundle.entry[0].request",
+		"Bundle.entry[1].resource/*MeasureReport/gaps-indv-measurereport01*/":                    "Bundle.entry[1].resource",
+		"Bundle.entry[6].resource/*Patient/p*/.extension[0].extension[0].value.ofType(Coding)":   "Bundle.entry[6].resource.extension[0].extension[0].valueCoding",
+		"MeasureReport.extension[0].value.ofType(Identifier).system":                             "MeasureReport.extension[0].valueIdentifier.system",
+		"MeasureReport.extension[0].value.ofType(string)":                                        "MeasureReport.extension[0].valueString",
+		"Patient.extension[0].value.ofType(base64Binary)":                                        "Patient.extension[0].valueBase64Binary",
+		"Observation.value.ofType(integer64)":                                                    "Observation.valueInteger64",
+		"Bundle.entry[0].request":                                                                "Bundle.entry[0].request",
+		"Bundle.entry[0].resource/*DiagnosticReport/null*/.extension[1].extension[1][url='uri']": "Bundle.entry[0].resource.extension[1].extension[1]",
 	}
 	for in, want := range cases {
 		if got := NormalizeHL7Location(in); got != want {

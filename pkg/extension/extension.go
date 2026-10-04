@@ -329,7 +329,7 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 
 	// Validate nested extensions
 	if nestedExts, ok := ext[keyExtension]; ok {
-		v.validateNestedExtensions(nestedExts, extSD, extPath, result)
+		v.validateNestedExtensions(ctx, nestedExts, extSD, extPath, result)
 	}
 }
 
@@ -958,8 +958,14 @@ func (v *Validator) allowedTypesString(types []registry.Type) string {
 	return strings.Join(names, ", ")
 }
 
-// validateNestedExtensions validates nested extensions against the parent SD.
-func (v *Validator) validateNestedExtensions(nestedExts any, parentSD *registry.StructureDefinition, parentPath string, result *issue.Result) {
+// validateNestedExtensions validates the extensions inside a complex extension. A relative url names
+// a part of the parent's definition (extensibility.html: "the identity of the parts of the
+// extension are local/relative to the reference to the extension definition"): it must be one the
+// definition declares, as the HL7 validator requires (Extension_EXT_SubExtension_Invalid). An
+// absolute url names an extension defined separately, which the slicing of Extension.extension
+// (open) allows: one the parent does not declare is validated as any extension, against its own
+// definition.
+func (v *Validator) validateNestedExtensions(ctx context.Context, nestedExts any, parentSD *registry.StructureDefinition, parentPath string, result *issue.Result) {
 	extArray, ok := nestedExts.([]any)
 	if !ok {
 		return
@@ -974,51 +980,47 @@ func (v *Validator) validateNestedExtensions(nestedExts any, parentSD *registry.
 		extPath := fmt.Sprintf("%s.extension[%d]", parentPath, i)
 		url, _ := extMap[keyURL].(string)
 
-		// For nested extensions, validate against parent SD's slice definitions
-		nestedDef := v.findNestedExtensionDef(parentSD, url)
-		if nestedDef == nil {
-			// Unknown nested extension
-			result.AddWarningWithID(
-				issue.DiagExtensionNestedUnknown,
-				map[string]any{
-					keyURL:   url,
-					"parent": parentSD.URL,
-				},
-				extPath,
-			)
+		if nestedDef := findNestedExtensionDef(parentSD, url); nestedDef != nil {
+			v.validateNestedExtensionValue(extMap, nestedDef, parentSD, extPath, result)
 			continue
 		}
-
-		// Validate value type for nested extension
-		v.validateNestedExtensionValue(extMap, nestedDef, parentSD, extPath, result)
+		if url != "" && absoluteURLDefect(url) == "" {
+			v.validateSingleExtension(ctx, extMap, extPath, "Extension", false, result)
+			continue
+		}
+		result.AddErrorWithID(
+			issue.DiagExtensionSubExtensionInvalid,
+			map[string]any{keyURL: url, "parent": parentSD.URL},
+			extPath,
+		)
 	}
 }
 
-// findNestedExtensionDef finds the ElementDefinition for a nested extension by URL.
-func (v *Validator) findNestedExtensionDef(parentSD *registry.StructureDefinition, url string) *registry.ElementDefinition {
-	if parentSD.Snapshot == nil {
+// findNestedExtensionDef returns the value[x] element of the slice of Extension.extension whose url
+// is fixed to url in the parent's definition, or nil when the parent declares no such slice. The
+// slice's elements are found by their ids ("Extension.extension:a.url").
+func findNestedExtensionDef(parentSD *registry.StructureDefinition, url string) *registry.ElementDefinition {
+	if parentSD.Snapshot == nil || url == "" {
 		return nil
 	}
-
-	// Look for Extension.extension with fixedUri matching the URL
-	for i := range parentSD.Snapshot.Element {
-		elem := &parentSD.Snapshot.Element[i]
-		if elem.Path == "Extension.extension.url" {
-			// Use dynamic GetFixed() to extract fixedUri without hardcoding
-			fixedValue, typeSuffix, hasFixed := elem.GetFixed()
-			if hasFixed && typeSuffix == "Uri" {
-				// Parse the fixed URI value
-				var fixedURI string
-				if err := json.Unmarshal(fixedValue, &fixedURI); err == nil && fixedURI == url {
-					// Found the URL definition, now get the parent extension slice
-					// Look for the corresponding value[x] definition
-					for j := range parentSD.Snapshot.Element {
-						valElem := &parentSD.Snapshot.Element[j]
-						if valElem.Path == "Extension.extension.value[x]" && j > i-3 && j < i+3 {
-							return valElem
-						}
-					}
-				}
+	elems := parentSD.Snapshot.Element
+	for i := range elems {
+		elem := &elems[i]
+		slice, isURL := strings.CutSuffix(elem.ID, ".url")
+		if !isURL || elem.Path != "Extension.extension.url" || !strings.HasPrefix(slice, "Extension.extension:") {
+			continue
+		}
+		fixed, suffix, ok := elem.GetFixed()
+		if !ok || suffix != "Uri" {
+			continue
+		}
+		var fixedURI string
+		if json.Unmarshal(fixed, &fixedURI) != nil || fixedURI != url {
+			continue
+		}
+		for j := range elems {
+			if elems[j].ID == slice+".value[x]" {
+				return &elems[j]
 			}
 		}
 	}

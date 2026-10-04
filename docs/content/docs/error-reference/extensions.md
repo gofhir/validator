@@ -18,6 +18,7 @@ Extension errors occur when FHIR extensions do not conform to their declared Str
 | `EXTENSION_MULTIPLE_VALUES` | error | Extension at '{path}' has multiple value[x] elements |
 | `EXTENSION_WRONG_TYPE` | error | Extension '{url}' expects {expected}, got {type} |
 | `EXTENSION_INVALID_URL` | error | Extension URL must be an absolute URL ({reason}): '{url}' |
+| `EXTENSION_SUBEXTENSION_INVALID` | error | Sub-extension url '{url}' is not defined by the extension '{parent}' |
 | `MODIFIER_EXTENSION_UNKNOWN` | error | Unknown modifier extension '{url}' |
 
 ---
@@ -229,7 +230,7 @@ The extension URL is not an absolute URL. Per FHIR R4 §2.5.0.1: *"The url SHALL
 
 Note the bar is an absolute **URL**, not merely an absolute URI: `urn:uuid:…` and `ex:createdAt` are valid absolute URIs under RFC 3986, and neither is accepted here, because the specification names URNs as the case to exclude.
 
-Child extensions inside a complex extension are the documented exception (*"Except for child extensions defined within complex extensions, the URL SHALL be an absolute URL"*) and are resolved by name against the parent's definition, so they never reach this check.
+Child extensions inside a complex extension are the documented exception (*"Except for child extensions defined within complex extensions, the URL SHALL be an absolute URL"*): a relative url is resolved by name against the parent's definition, and one the parent does not declare is `EXTENSION_SUBEXTENSION_INVALID`.
 
 **Example -- invalid resource:**
 
@@ -266,6 +267,30 @@ This validation enforces a FHIR specification prose rule (§2.5.0.1). The `Exten
 
 An extension whose URL is well-formed but whose definition cannot be resolved is a *different* case: that one only transgresses a `SHOULD` and is reported as a warning, not an error. See `docs/VALIDATION-GAPS.md`.
 {{< /callout >}}
+
+---
+
+## EXTENSION_SUBEXTENSION_INVALID
+
+A complex extension holds a part whose relative `url` its definition does not declare. The parts of a complex extension are *"local/relative to the reference to the extension definition"* (extensibility.html): a relative `url` can only name a part the definition declares, so one it does not declare has no meaning. The HL7 validator reports the same error (`Extension_EXT_SubExtension_Invalid`).
+
+A part with an absolute `url` is an extension defined separately, which a complex extension may also hold: it is validated against its own definition, like any extension.
+
+**Example -- invalid resource:**
+
+```json
+{
+  "resourceType": "Patient",
+  "extension": [{
+    "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+    "extension": [{"url": "nope", "valueString": "x"}]
+  }]
+}
+```
+
+`patient-nationality` declares the parts `code` and `period`; `nope` is neither.
+
+**Fix:** Use a part the definition declares, or an extension defined separately, with its absolute URL.
 
 ---
 

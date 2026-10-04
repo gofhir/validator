@@ -141,7 +141,7 @@ func TestComplexExtensionChildrenKeepBareNames(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Validate (control): %v", err)
 	}
-	if got := issueFor(t, control, issue.DiagExtensionNestedUnknown); got == nil {
+	if got := issueFor(t, control, issue.DiagExtensionSubExtensionInvalid); got == nil {
 		t.Fatal("an unknown child produced no nested-extension diagnostic, so children are not being walked; " +
 			"the rest of this test would pass vacuously")
 	}
@@ -154,7 +154,7 @@ func TestComplexExtensionChildrenKeepBareNames(t *testing.T) {
 	if got := issueFor(t, result, issue.DiagExtensionUnknown); got != nil {
 		t.Fatalf("the parent extension did not resolve, so the children were never walked: %s", got.Diagnostics)
 	}
-	if got := issueFor(t, result, issue.DiagExtensionNestedUnknown); got != nil {
+	if got := issueFor(t, result, issue.DiagExtensionSubExtensionInvalid); got != nil {
 		t.Fatalf("a conformant child was not recognized against the parent's definition: %s", got.Diagnostics)
 	}
 	if got := issueFor(t, result, issue.DiagExtensionInvalidURL); got != nil {

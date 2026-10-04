@@ -135,11 +135,20 @@
       ]
     },
     {
+      "name": "subextension-invalid",
+      "rule": "equal",
+      "gofhir": [
+        "EXTENSION_SUBEXTENSION_INVALID"
+      ],
+      "hl7": [
+        "Extension_EXT_SubExtension_Invalid"
+      ]
+    },
+    {
       "name": "extension-unknown",
       "rule": "equal",
       "gofhir": [
         "EXTENSION_UNKNOWN",
-        "EXTENSION_NESTED_UNKNOWN",
         "MODIFIER_EXTENSION_UNKNOWN"
       ],
       "hl7": [

@@ -8,6 +8,7 @@ import (
 var (
 	hl7Comment    = regexp.MustCompile(`/\*.*?\*/`)
 	hl7OfType     = regexp.MustCompile(`\.ofType\(([A-Za-z][A-Za-z0-9]*)\)`)
+	hl7URLFilter  = regexp.MustCompile(`\[url='[^']*'\]`)
 	goSliceName   = regexp.MustCompile(`:[^.\[\]]+`)
 	goPrimitiveEl = regexp.MustCompile(`\._([A-Za-z])`)
 	itemIndex     = regexp.MustCompile(`\[\d+\]$`) // a list item; "value[x]" is a choice, not an item
@@ -18,8 +19,12 @@ var (
 //	Bundle.entry[1].resource/*MeasureReport/x*/.extension[0] -> Bundle.entry[1].resource.extension[0]
 //	MeasureReport.extension[0].value.ofType(Identifier)      -> MeasureReport.extension[0].valueIdentifier
 //	Patient.extension[0].value.ofType(base64Binary)          -> Patient.extension[0].valueBase64Binary
+//	Patient.extension[0].extension[1][url='c']               -> Patient.extension[0].extension[1]
+//
+// The last is the url filter HL7 appends to a sub-extension it names by index already.
 func NormalizeHL7Location(loc string) string {
 	loc = hl7Comment.ReplaceAllString(loc, "")
+	loc = hl7URLFilter.ReplaceAllString(loc, "")
 	loc = hl7OfType.ReplaceAllStringFunc(loc, func(m string) string {
 		t := hl7OfType.FindStringSubmatch(m)[1]
 		return strings.ToUpper(t[:1]) + t[1:]
