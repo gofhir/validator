@@ -44,8 +44,14 @@ const (
 	DiagBindingValueSetNotFound DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
 	DiagCodeNotInCodeSystem     DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
 	DiagCodeSystemNotFound      DiagnosticID = "CODESYSTEM_NOT_FOUND"
-	DiagCodingNoSystem          DiagnosticID = "CODING_NO_SYSTEM"
-	DiagCodingNoCode            DiagnosticID = "CODING_NO_CODE"
+	// DiagCodeSystemNoCodes: the CodeSystem includes none of its codes (content not-present), so
+	// a code cannot be checked against it.
+	DiagCodeSystemNoCodes DiagnosticID = "CODESYSTEM_NO_CODES"
+	// DiagCodeNotInPartialCodeSystem: the code is not among those a CodeSystem that includes only
+	// some of its codes (content fragment or example) includes, so it may still be one of its codes.
+	DiagCodeNotInPartialCodeSystem DiagnosticID = "CODE_NOT_IN_PARTIAL_CODESYSTEM"
+	DiagCodingNoSystem             DiagnosticID = "CODING_NO_SYSTEM"
+	DiagCodingNoCode               DiagnosticID = "CODING_NO_CODE"
 )
 
 // Diagnostic IDs for extension validation (M8).
@@ -314,6 +320,16 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeProcessing,
 		Template: "CodeSystem is unknown and can't be validated: {system} for '{systemCode}'",
+	},
+	DiagCodeSystemNoCodes: {
+		Severity: SeverityInformation,
+		Code:     CodeUnknown,
+		Template: "The CodeSystem '{codeSystem}' includes none of its codes (content '{content}'), so the code '{code}' cannot be validated",
+	},
+	DiagCodeNotInPartialCodeSystem: {
+		Severity: SeverityWarning,
+		Code:     CodeCodeInvalid,
+		Template: "The code '{code}' is not among the codes the CodeSystem '{codeSystem}' includes, which are only some of its codes (content '{content}'), so it cannot be validated",
 	},
 	DiagBindingExtensibleNoCoding: {
 		Severity: SeverityWarning,

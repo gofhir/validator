@@ -85,10 +85,10 @@ func TestGetByCanonical_VersionMatch(t *testing.T) {
 		t.Error("expected non-nil for empty version")
 	}
 
-	// Non-existent version — falls back to byURL
+	// Non-existent version — never another version
 	got = reg.GetByCanonical("http://example.org/SD/test", "9.9.9")
-	if got == nil {
-		t.Error("expected fallback to byURL for unknown version")
+	if got != nil {
+		t.Errorf("version 9.9.9 resolves to %v, want nil", got)
 	}
 
 	// Non-existent URL
@@ -253,4 +253,29 @@ func TestResolveBaseChain_CycleProtection(_ *testing.T) {
 
 	// Should not hang or panic — cycle protection breaks the loop
 	reg.ResolveBaseChain(context.Background(), sdA)
+}
+
+// A canonical that names a version not loaded resolves through the resolver, to that version only:
+// never to another version loaded, nor to another the resolver returns.
+func TestResolveByCanonical_PinnedVersion(t *testing.T) {
+	reg := New()
+	loaded := &StructureDefinition{URL: "http://example.org/SD/p", Version: "1.0.0"}
+	reg.mu.Lock()
+	reg.indexUnlocked(loaded)
+	reg.mu.Unlock()
+	resolver := &mockResolver{profiles: map[string][]byte{
+		"http://example.org/SD/p|2.0.0": makeSDJSON("http://example.org/SD/p", "2.0.0", "Patient"),
+		"http://example.org/SD/p|3.0.0": makeSDJSON("http://example.org/SD/p", "2.5.0", "Patient"), // not the one asked
+	}}
+	reg.SetResolver(resolver)
+
+	if got := reg.ResolveByCanonical(context.Background(), "http://example.org/SD/p", "2.0.0"); got == nil || got.Version != "2.0.0" {
+		t.Errorf("2.0.0 resolves to %v, want the resolver's 2.0.0", got)
+	}
+	if got := reg.ResolveByCanonical(context.Background(), "http://example.org/SD/p", "3.0.0"); got != nil {
+		t.Errorf("3.0.0 resolves to %v (version %s), want nil", got, got.Version)
+	}
+	if got := reg.ResolveByCanonical(context.Background(), "http://example.org/SD/p", "9.9.9"); got != nil {
+		t.Errorf("9.9.9 resolves to %v, want nil", got)
+	}
 }

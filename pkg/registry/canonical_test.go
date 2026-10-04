@@ -117,7 +117,7 @@ func TestResolveCanonical(t *testing.T) {
 	}
 }
 
-// The latest version wins whatever the load order, and the index GetByCanonical uses is unchanged.
+// The latest version wins whatever the load order, for every lookup without a version.
 func TestResolveCanonicalLatestIgnoresLoadOrder(t *testing.T) {
 	const url = "http://example.org/StructureDefinition/p"
 	sd := func(v string) string {
@@ -125,20 +125,86 @@ func TestResolveCanonicalLatestIgnoresLoadOrder(t *testing.T) {
 	}
 	r := registryWith(t, sd("2.0.0"), sd("10.0.0"), sd("10.0.0-ballot"), sd("9.1.0"))
 	if got, _ := r.ResolveCanonical(url); got == nil || got.ID != "10.0.0" {
-		t.Errorf("latest = %v, want 10.0.0", got)
+		t.Errorf("ResolveCanonical = %v, want 10.0.0", got)
 	}
-	if got := r.GetByCanonical(url, ""); got == nil || got.ID != "2.0.0" {
-		t.Errorf("GetByCanonical = %v, want the first loaded (unchanged)", got)
+	if got := r.GetByCanonical(url, ""); got == nil || got.ID != "10.0.0" {
+		t.Errorf("GetByCanonical = %v, want 10.0.0", got)
+	}
+	if got := r.GetByURL(url); got == nil || got.ID != "10.0.0" {
+		t.Errorf("GetByURL = %v, want 10.0.0", got)
+	}
+	if got := r.GetByCanonical(url, "9.1.0"); got == nil || got.ID != "9.1.0" {
+		t.Errorf("GetByCanonical 9.1.0 = %v, want 9.1.0", got)
 	}
 }
 
-func TestVersionLess(t *testing.T) {
-	ordered := []string{"", "0.9", "1.0", "1.0.0-ballot", "1.0.0-ballot2", "1.0.0", "1.0.1", "1.2", "1.10.0", "2.0.0-snapshot1", "2.0.0", "10.0.0"}
-	for i := range ordered {
-		for j := range ordered {
-			if got, want := versionLess(ordered[i], ordered[j]), i < j; got != want {
-				t.Errorf("versionLess(%q, %q) = %v, want %v", ordered[i], ordered[j], got, want)
+// Among the versions of a URL, those written for the FHIR version validated come first: an R5
+// flavor of a guide does not replace the R4 one when R4 is validated, even at a higher version.
+func TestResolveCanonicalPrefersTheFHIRVersionValidated(t *testing.T) {
+	const url = "http://example.org/StructureDefinition/p"
+	sd := func(id, v, fhir string) string {
+		return `{"resourceType":"StructureDefinition","url":"` + url + `","version":"` + v + `","id":"` + id +
+			`","fhirVersion":"` + fhir + `","type":"P","derivation":"specialization"}`
+	}
+	r := registryWith(t, sd("r4", "1.0.0", "4.0.1"), sd("r5", "2.0.0", "5.0.0"), sd("r5same", "1.0.0", "5.0.0"),
+		sd("r40", "1.5.0", "4.0.0"))
+	if got := r.GetByURL(url); got == nil || got.ID != "r5" {
+		t.Errorf("no FHIR version set: %v, want the highest version, r5", got)
+	}
+
+	r.SetFHIRVersion("4.0.1")
+	for _, tt := range []struct{ canonical, want string }{
+		{url, "r4"},            // written for 4.0.1, although lower than the others
+		{url + "|1.0.0", "r4"}, // the same version in two flavors: the R4 one
+		{url + "|2.0.0", "r5"}, // pinned: exactly that one, whatever it is written for
+		{url + "|1.5.0", "r40"},
+	} {
+		if got, _ := r.ResolveCanonical(tt.canonical); got == nil || got.ID != tt.want {
+			t.Errorf("ResolveCanonical(%s) = %v, want %s", tt.canonical, got, tt.want)
+		}
+	}
+	if got := r.GetByType("P"); got == nil || got.ID != "r4" {
+		t.Errorf("GetByType = %v, want r4", got)
+	}
+
+	// One that states no FHIR version is not taken for another's.
+	unstated := `{"resourceType":"StructureDefinition","url":"` + url + `","version":"3.0.0","id":"unstated"}`
+	r = registryWith(t, sd("r4", "1.0.0", "4.0.1"), unstated, sd("r5", "4.0.0", "5.0.0"))
+	r.SetFHIRVersion("4.0.1")
+	if got := r.GetByURL(url); got == nil || got.ID != "unstated" {
+		t.Errorf("GetByURL = %v, want unstated", got)
+	}
+
+	// Without one for 4.0.1, the same release (4.0) comes before another.
+	r = registryWith(t, sd("r5", "2.0.0", "5.0.0"), sd("r40", "1.5.0", "4.0.0"))
+	r.SetFHIRVersion("4.0.1")
+	if got := r.GetByURL(url); got == nil || got.ID != "r40" {
+		t.Errorf("GetByURL = %v, want r40", got)
+	}
+}
+
+// The R4 core package's copy of a definition another package loaded publishes ranks below that
+// package's, although its version is higher, whatever the order they are loaded in.
+func TestCoreCopyRanksBelowThePublisher(t *testing.T) {
+	const url = "http://terminology.hl7.org/StructureDefinition/p"
+	sd := func(v string) map[string]json.RawMessage {
+		return map[string]json.RawMessage{"sd": json.RawMessage(`{"resourceType":"StructureDefinition","url":"` + url + `","version":"` + v + `","id":"` + v + `"}`)}
+	}
+	core := &loader.Package{Name: "hl7.fhir.r4.core", Version: "4.0.1", Type: "fhir.core", Canonical: "http://hl7.org/fhir", Resources: sd("4.0.1")}
+	tho := &loader.Package{Name: "hl7.terminology.r4", Version: "7.4.0", Type: "IG", Canonical: "http://terminology.hl7.org", Resources: sd("3.0.1")}
+	for _, order := range [][][]*loader.Package{{{core, tho}}, {{tho, core}}, {{core}, {tho}}, {{tho}, {core}}} {
+		r := New()
+		r.SetFHIRVersion("4.0.1")
+		for _, packages := range order {
+			if err := r.LoadFromPackages(packages); err != nil {
+				t.Fatal(err)
 			}
+		}
+		if got, _ := r.ResolveCanonical(url); got == nil || got.Version != "3.0.1" {
+			t.Errorf("ResolveCanonical = %v, want the publisher's 3.0.1", got)
+		}
+		if got, _ := r.ResolveCanonical(url + "|4.0.1"); got == nil || got.Version != "4.0.1" {
+			t.Errorf("ResolveCanonical|4.0.1 = %v, want the copy", got)
 		}
 	}
 }

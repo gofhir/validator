@@ -352,6 +352,20 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 
 	switch res.Resolution {
 	case terminology.Unresolved:
+		// A CodeSystem that does not include all its codes cannot tell the code is not one.
+		if p := res.Partial; p != nil {
+			codeSystem := system
+			if p.Version != "" {
+				codeSystem += "|" + p.Version
+			}
+			params := map[string]any{"code": code, "system": system, "codeSystem": codeSystem, "content": p.Content}
+			if p.Content == "not-present" {
+				result.AddInfoWithID(issue.DiagCodeSystemNoCodes, params, fhirPath)
+			} else {
+				result.AddWarningWithID(issue.DiagCodeNotInPartialCodeSystem, params, fhirPath)
+			}
+			return
+		}
 		// Unchecked rather than wrong, and the two reasons deserve different weight.
 		//
 		// A known external vocabulary — SNOMED, LOINC, RxNorm — is expected to need a

@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -39,31 +40,60 @@ func (p PackageRef) String() string {
 
 // Package represents a loaded FHIR package.
 type Package struct {
-	Name        string
-	Version     string
-	Path        string
-	FHIRVersion string
-	Resources   map[string]json.RawMessage // URL or resourceType/id -> raw JSON
+	Name         string
+	Version      string
+	Path         string
+	FHIRVersion  string
+	FHIRVersions []string                   // the manifest's fhirVersions: the FHIR versions the package is for
+	Type         string                     // the manifest's type: "fhir.core" (or "Core") for a core package
+	Canonical    string                     // the manifest's canonical: the base of the URLs the package publishes
+	Dependencies map[string]string          // the packages it depends on, name to version
+	Resources    map[string]json.RawMessage // URL or resourceType/id -> raw JSON
 }
 
 // PackageManifest represents the package.json of a FHIR NPM package.
 type PackageManifest struct {
 	Name         string            `json:"name"`
 	Version      string            `json:"version"`
+	Type         string            `json:"type,omitempty"`
+	Canonical    string            `json:"canonical,omitempty"`
 	FHIRVersion  string            `json:"fhirVersion,omitempty"`
+	FHIRVersions []string          `json:"fhirVersions,omitempty"`
 	Dependencies map[string]string `json:"dependencies,omitempty"`
+}
+
+// IsCore reports whether the manifest is a FHIR core package's: its type is "fhir.core", or "Core"
+// in older packages (the NPM package specification).
+func (m *PackageManifest) IsCore() bool { return isCoreType(m.Type) }
+
+// IsFor reports whether the package is written for the FHIR version given; see
+// [PackageManifest.IsFor].
+func (p *Package) IsFor(fhirVersion string) bool {
+	return p.FHIRVersion == fhirVersion || slices.Contains(p.FHIRVersions, fhirVersion)
+}
+
+// IsCore reports whether the package is a FHIR core package; see [PackageManifest.IsCore].
+func (p *Package) IsCore() bool { return isCoreType(p.Type) }
+
+func isCoreType(t string) bool {
+	return strings.EqualFold(t, "fhir.core") || strings.EqualFold(t, "core")
+}
+
+// IsFor reports whether the package is written for the FHIR version given.
+func (m *PackageManifest) IsFor(fhirVersion string) bool {
+	return m.FHIRVersion == fhirVersion || slices.Contains(m.FHIRVersions, fhirVersion)
 }
 
 // DefaultPackages maps FHIR versions to their default package configurations.
 // Based on latest stable versions as of January 2025.
 var DefaultPackages = map[string][]PackageRef{
-	"4.0.1": {
-		{Name: "hl7.fhir.r4.core", Version: "4.0.1"},
+	fhirR4: {
+		{Name: "hl7.fhir.r4.core", Version: fhirR4},
 		{Name: "hl7.terminology.r4", Version: "7.0.1"},
 		{Name: "hl7.fhir.uv.extensions.r4", Version: "5.2.0"},
 	},
-	"4.3.0": {
-		{Name: "hl7.fhir.r4b.core", Version: "4.3.0"},
+	fhirR4B: {
+		{Name: "hl7.fhir.r4b.core", Version: fhirR4B},
 		{Name: "hl7.terminology.r4", Version: "7.0.1"},
 		// R4B has no stable extensions package, use R4 as fallback
 		{Name: "hl7.fhir.uv.extensions.r4", Version: "5.2.0"},
@@ -115,11 +145,15 @@ func (l *Loader) LoadPackage(name, version string) (*Package, error) {
 	}
 
 	pkg := &Package{
-		Name:        name,
-		Version:     version,
-		Path:        pkgDir,
-		FHIRVersion: manifest.FHIRVersion,
-		Resources:   make(map[string]json.RawMessage),
+		Name:         name,
+		Version:      version,
+		Path:         pkgDir,
+		FHIRVersion:  manifest.FHIRVersion,
+		FHIRVersions: manifest.FHIRVersions,
+		Type:         manifest.Type,
+		Canonical:    manifest.Canonical,
+		Dependencies: manifest.Dependencies,
+		Resources:    make(map[string]json.RawMessage),
 	}
 
 	// Load all JSON resources from package directory
@@ -365,6 +399,10 @@ func (l *Loader) loadFromTgzReader(reader io.Reader, source string) (*Package, e
 	pkg.Name = manifest.Name
 	pkg.Version = manifest.Version
 	pkg.FHIRVersion = manifest.FHIRVersion
+	pkg.FHIRVersions = manifest.FHIRVersions
+	pkg.Type = manifest.Type
+	pkg.Canonical = manifest.Canonical
+	pkg.Dependencies = manifest.Dependencies
 	pkg.Path = source
 
 	return pkg, nil

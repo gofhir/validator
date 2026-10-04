@@ -4,11 +4,13 @@ package terminology
 import (
 	"context"
 	"encoding/json"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/gofhir/validator/internal/versionorder"
 	"github.com/gofhir/validator/pkg/loader"
 )
 
@@ -86,10 +88,23 @@ type CodeSystemProperty struct {
 // Registry holds loaded ValueSets and CodeSystems indexed by URL.
 type Registry struct {
 	mu sync.RWMutex
-	// valueSets and codeSystems are keyed by canonical URL and hold whichever
-	// version was loaded last, which is what an unversioned lookup resolves to.
+	// valueSets and codeSystems are keyed by canonical URL and hold the version an
+	// unversioned lookup resolves to: the publisher's rather than a copy
+	// (loader.Publishers), then one from a package for the FHIR version validated
+	// (SetFHIRVersion), then the highest version (references.html#canonical:
+	// "should pick the latest version"); between equals, the one loaded first.
 	valueSets   map[string]*ValueSet
 	codeSystems map[string]*CodeSystem
+	// loadedValueSets and loadedCodeSystems hold every version loaded, with its
+	// package, so the choice above can be made again when publishers changes.
+	loadedValueSets   []loaded[*ValueSet]
+	loadedCodeSystems []loaded[*CodeSystem]
+	// valueSetPackage and codeSystemPackage hold, by URL and by "url|version", the
+	// entry the maps above hold, with its package, to compare with the next one loaded.
+	valueSetPackage   map[string]loaded[*ValueSet]
+	codeSystemPackage map[string]loaded[*CodeSystem]
+	publishers        loader.Publishers
+	fhirVersion       string
 	// valueSetsByVersion and codeSystemsByVersion are keyed "url|version", so a
 	// versioned request resolves to that exact version when it was loaded. Without
 	// these a canonical could only ever have one version, and honoring a requested
@@ -147,6 +162,8 @@ func NewRegistry() *Registry {
 		codeSystems:          make(map[string]*CodeSystem),
 		valueSetsByVersion:   make(map[string]*ValueSet),
 		codeSystemsByVersion: make(map[string]*CodeSystem),
+		valueSetPackage:      make(map[string]loaded[*ValueSet]),
+		codeSystemPackage:    make(map[string]loaded[*CodeSystem]),
 		expansionCache:       make(map[string]map[string]bool),
 		hierarchyCache:       make(map[string]map[string][]string),
 		unresolved:           make(map[string]time.Time),
@@ -240,12 +257,49 @@ func (r *Registry) authorityFor() (a Authority, authoritative bool) {
 	return r.authority, r.authoritative && r.authority != nil
 }
 
+// loaded is a ValueSet or CodeSystem loaded, with the package ("name#version") it came from and
+// the FHIR versions that package is for.
+type loaded[T any] struct {
+	resource     T
+	url, version string
+	packageID    string
+	fhirVersions []string
+}
+
+// SetFHIRVersion sets the FHIR version validated ("4.0.1"). Where several versions of a URL are
+// loaded, an unversioned lookup prefers those from packages for that FHIR version, then for its
+// release (4.0), then any. It chooses again among the resources already loaded.
+func (r *Registry) SetFHIRVersion(fhirVersion string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.fhirVersion = fhirVersion
+	r.reselectUnlocked()
+}
+
 // LoadFromPackages loads ValueSets and CodeSystems from packages.
 func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	// Which resources are copies depends on every package loaded, so the packages are recorded
+	// before their resources are indexed, and the choice is made again if it changes.
+	changed := false
 	for _, pkg := range packages {
+		changed = r.publishers.Add(pkg) || changed
+	}
+	if changed {
+		r.reselectUnlocked()
+	}
+	// The resources loaded may change the version of a URL expansions and hierarchies were built
+	// from.
+	r.clearDerivedUnlocked()
+
+	for _, pkg := range packages {
+		packageID := pkg.Name + "#" + pkg.Version
+		fhirVersions := pkg.FHIRVersions
+		if pkg.FHIRVersion != "" {
+			fhirVersions = append([]string{pkg.FHIRVersion}, fhirVersions...)
+		}
 		for _, data := range pkg.Resources {
 			var peek struct {
 				ResourceType string `json:"resourceType"`
@@ -256,9 +310,9 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 			switch peek.ResourceType {
 			case "ValueSet":
-				r.indexValueSetUnlocked(data)
+				r.indexValueSetUnlocked(data, packageID, fhirVersions)
 			case "CodeSystem":
-				r.indexCodeSystemUnlocked(data)
+				r.indexCodeSystemUnlocked(data, packageID, fhirVersions)
 			}
 		}
 	}
@@ -268,34 +322,115 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 // indexValueSetUnlocked adds a ValueSet to both indexes. Must be called with the
 // write lock held.
-func (r *Registry) indexValueSetUnlocked(data json.RawMessage) {
+func (r *Registry) indexValueSetUnlocked(data json.RawMessage, packageID string, fhirVersions []string) {
 	var vs ValueSet
 	if err := json.Unmarshal(data, &vs); err != nil || vs.URL == "" {
 		return
 	}
-	r.valueSets[vs.URL] = &vs
-	if vs.Version != "" {
-		r.valueSetsByVersion[vs.URL+"|"+vs.Version] = &vs
-	}
+	entry := loaded[*ValueSet]{&vs, vs.URL, vs.Version, packageID, fhirVersions}
+	r.loadedValueSets = append(r.loadedValueSets, entry)
+	r.selectValueSetUnlocked(entry)
 }
 
 // indexCodeSystemUnlocked adds a CodeSystem to both indexes. Must be called with
 // the write lock held.
-func (r *Registry) indexCodeSystemUnlocked(data json.RawMessage) {
+func (r *Registry) indexCodeSystemUnlocked(data json.RawMessage, packageID string, fhirVersions []string) {
 	var cs CodeSystem
 	if err := json.Unmarshal(data, &cs); err != nil || cs.URL == "" {
 		return
 	}
-	r.codeSystems[cs.URL] = &cs
-	if cs.Version != "" {
-		r.codeSystemsByVersion[cs.URL+"|"+cs.Version] = &cs
+	entry := loaded[*CodeSystem]{&cs, cs.URL, cs.Version, packageID, fhirVersions}
+	r.loadedCodeSystems = append(r.loadedCodeSystems, entry)
+	r.selectCodeSystemUnlocked(entry)
+}
+
+// selectValueSetUnlocked makes a ValueSet loaded the one lookups of its URL, and of its URL and
+// version, resolve to when it supersedes the one held. Must be called with the write lock held.
+func (r *Registry) selectValueSetUnlocked(e loaded[*ValueSet]) {
+	pick(r, r.valueSets, r.valueSetPackage, e.url, e)
+	if e.version != "" {
+		pick(r, r.valueSetsByVersion, r.valueSetPackage, e.url+"|"+e.version, e)
+	}
+}
+
+// selectCodeSystemUnlocked is selectValueSetUnlocked for a CodeSystem.
+func (r *Registry) selectCodeSystemUnlocked(e loaded[*CodeSystem]) {
+	pick(r, r.codeSystems, r.codeSystemPackage, e.url, e)
+	if e.version != "" {
+		pick(r, r.codeSystemsByVersion, r.codeSystemPackage, e.url+"|"+e.version, e)
+	}
+}
+
+// pick makes e what key ("url" or "url|version") resolves to in held when it supersedes the entry
+// recorded for key in entries. For "url|version", two packages carry the same version: only the
+// publisher's, or one from a package for the FHIR version validated, replaces the one loaded first.
+func pick[T any](r *Registry, held map[string]T, entries map[string]loaded[T], key string, e loaded[T]) {
+	if cur, ok := entries[key]; ok && !r.supersedes(e.url, e.version, cur.version, e.packageID, cur.packageID,
+		e.fhirVersions, cur.fhirVersions) {
+		return
+	}
+	held[key] = e.resource
+	entries[key] = e
+}
+
+// supersedes reports whether version a of url replaces version b, for unversioned lookups: the
+// publisher's rather than a copy, then one from a package for the FHIR version validated, then the
+// higher version; between equals, b, the one loaded first.
+func (r *Registry) supersedes(url, versionA, versionB, pkgA, pkgB string, fhirA, fhirB []string) bool {
+	if ca, cb := r.publishers.IsCopy(pkgA, url), r.publishers.IsCopy(pkgB, url); ca != cb {
+		return cb
+	}
+	if ra, rb := r.fhirRank(fhirA), r.fhirRank(fhirB); ra != rb {
+		return ra > rb
+	}
+	return versionorder.Less(versionB, versionA)
+}
+
+// fhirRank ranks how closely the FHIR versions a package is for match the one validated: 2 that
+// version (or none stated), 1 its release (4.0.0 for 4.0.1), 0 another.
+func (r *Registry) fhirRank(fhirVersions []string) int {
+	if r.fhirVersion == "" || len(fhirVersions) == 0 || slices.Contains(fhirVersions, r.fhirVersion) {
+		return 2
+	}
+	for _, v := range fhirVersions {
+		if versionorder.SameRelease(v, r.fhirVersion) {
+			return 1
+		}
+	}
+	return 0
+}
+
+// clearDerivedUnlocked drops the expansions and hierarchies built from the resources chosen. Must
+// be called with the write lock held.
+func (r *Registry) clearDerivedUnlocked() {
+	clear(r.expansionCache)
+	r.hierarchyMu.Lock()
+	clear(r.hierarchyCache)
+	r.hierarchyMu.Unlock()
+}
+
+// reselectUnlocked makes again the choice of the version unversioned lookups resolve to, in load
+// order. Must be called with the write lock held.
+func (r *Registry) reselectUnlocked() {
+	clear(r.valueSets)
+	clear(r.codeSystems)
+	clear(r.valueSetsByVersion)
+	clear(r.codeSystemsByVersion)
+	clear(r.valueSetPackage)
+	clear(r.codeSystemPackage)
+	r.clearDerivedUnlocked()
+	for _, e := range r.loadedValueSets {
+		r.selectValueSetUnlocked(e)
+	}
+	for _, e := range r.loadedCodeSystems {
+		r.selectCodeSystemUnlocked(e)
 	}
 }
 
 // GetValueSet returns a ValueSet by URL.
 //
 // A "url|version" canonical resolves to that exact version when it was loaded,
-// and otherwise falls back to whichever version is held for the URL.
+// and otherwise falls back to the highest version held for the URL.
 func (r *Registry) GetValueSet(url string) *ValueSet {
 	if base, version := splitCanonical(url); version != "" {
 		return r.GetValueSetVersion(base, version)
@@ -309,7 +444,7 @@ func (r *Registry) GetValueSet(url string) *ValueSet {
 // GetCodeSystem returns a CodeSystem by URL.
 //
 // A "url|version" canonical resolves to that exact version when it was loaded,
-// and otherwise falls back to whichever version is held for the URL.
+// and otherwise falls back to the highest version held for the URL.
 func (r *Registry) GetCodeSystem(url string) *CodeSystem {
 	if base, version := splitCanonical(url); version != "" {
 		return r.GetCodeSystemVersion(base, version)
@@ -780,6 +915,12 @@ func (r *Registry) expandFromCodeSystem(codes map[string]bool, inc *Include) {
 	} else {
 		r.applyFilters(codes, cs, inc.System, inc.Filter)
 	}
+	// The codes of a CodeSystem that does not include all of them cannot be told apart from codes
+	// that are not its own: any code of the system is accepted, unchecked, as for an external one.
+	if cs.partial() {
+		codes["*"] = true
+		codes[inc.System+"|*"] = true
+	}
 }
 
 // expandNestedValueSets recursively expands nested ValueSets.
@@ -1144,7 +1285,9 @@ func (r *Registry) IsSystemInValueSet(valueSetURL, system string) bool {
 // ValidateCodeInCodeSystem checks if a code exists in a CodeSystem.
 // Returns (isValid, codeSystemFound) where:
 //   - isValid: true if the code exists in the CodeSystem
-//   - codeSystemFound: true if the CodeSystem was loaded
+//   - codeSystemFound: true if the CodeSystem was loaded and decided the code: a
+//     CodeSystem that does not include all its codes (content not-present,
+//     fragment or example) cannot tell a code it lacks is not one of them
 //
 // This is used to validate that codes exist in their declared CodeSystems,
 // regardless of any ValueSet binding.
@@ -1195,6 +1338,13 @@ func (r *Registry) ResolveCodeInCodeSystem(ctx context.Context, system, code str
 
 	valid, found := r.validateCodeInCodeSystemLocally(ctx, lookupSystem, code)
 	res := localCodeResult(valid, found)
+	// A system that needs a terminology server (SNOMED CT, whose R4 core CodeSystem is not-present)
+	// is reported as such, not as a CodeSystem lacking codes.
+	if bare, _ := splitCanonical(lookupSystem); res.Resolution == Unresolved && !r.isExternalSystem(bare) {
+		if cs := r.GetCodeSystem(lookupSystem); cs != nil && cs.partial() {
+			res.Partial = &PartialCodeSystem{Content: cs.Content, Version: cs.Version}
+		}
+	}
 
 	// Carry the display so callers can validate a Coding.display without a second
 	// lookup. Only the CodeSystem's own display is parsed — designations are not —
@@ -1261,7 +1411,31 @@ func (r *Registry) validateCodeInCodeSystemLocally(ctx context.Context, system, 
 		return false
 	}
 
-	return findCode(cs.Concept), true
+	if findCode(cs.Concept) {
+		return true, true
+	}
+	// A CodeSystem that does not include all its codes cannot tell a code is not one of them; a
+	// configured provider may.
+	if cs.partial() {
+		if p := r.getProvider(); p != nil {
+			if valid, err := p.ValidateCode(ctx, bareSystem, code); err == nil {
+				return valid, true
+			}
+		}
+		return false, false
+	}
+	return false, true
+}
+
+// partial reports whether the CodeSystem does not include all its codes: its content is
+// not-present, fragment or example (codesystem-content-mode). Only a complete CodeSystem (or a
+// supplement, which is not checked against) tells that a code is not one of its codes.
+func (cs *CodeSystem) partial() bool {
+	switch cs.Content {
+	case "not-present", "fragment", "example":
+		return true
+	}
+	return false
 }
 
 // findConcept returns the concept declaring code anywhere in the concept tree,
