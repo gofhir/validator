@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.27.0](https://github.com/gofhir/validator/compare/v1.26.2...v1.27.0) (2026-10-04)
+
+
+### Features
+
+* **cardinality,slicing:** follow the profile a type declares (plan B, PR B1a) ([#117](https://github.com/gofhir/validator/issues/117)) ([27fef75](https://github.com/gofhir/validator/commit/27fef750f76dcc1aa161f5157101115ca73c9635))
+* **constraint:** check a value against the slice it belongs to (plan B, PR B2b) ([#122](https://github.com/gofhir/validator/issues/122)) ([65db7ec](https://github.com/gofhir/validator/commit/65db7ec0b3f033029c7589ed2462eaa1c9e11696))
+* **constraint:** walk the element tree, nested resources included (plan B, PR B2a) ([#121](https://github.com/gofhir/validator/issues/121)) ([8b6f2e9](https://github.com/gofhir/validator/commit/8b6f2e9809a7d49ff78343ca59a83ab5ede633db))
+
+
+### Bug Fixes
+
+* **location:** locate every issue in one reading of the source, and locate it right ([#120](https://github.com/gofhir/validator/issues/120)) ([3bb8544](https://github.com/gofhir/validator/commit/3bb8544e775a9e28aefb1ea8e6358271d25f4a82))
+
 ## [1.26.2](https://github.com/gofhir/validator/compare/v1.26.1...v1.26.2) (2026-10-02)
 
 
