@@ -333,6 +333,29 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 	}
 }
 
+// DefinitionOf returns the definition a value declares for itself, which governs it wherever it is
+// used (implements constraint.DefinitionSource): the one an extension's url names, which the
+// extension conforms to (extensibility.html). A value declares one when its url names a
+// StructureDefinition of the value's own type, typeCode; no other url does: an Attachment's names
+// no definition, and a canonical resource's names one of another type.
+//
+// The lookup is in memory: this phase has already resolved the url, through the external resolver
+// too, and the registry keeps what it resolves. A relative url (a sub-extension's) names none.
+func (v *Validator) DefinitionOf(ctx context.Context, typeCode string, value map[string]any) *registry.StructureDefinition {
+	url, _ := value[keyURL].(string)
+	if url == "" || typeCode == "" {
+		return nil
+	}
+	sd, _ := v.registry.ResolveCanonical(url)
+	if sd == nil || sd.Type != typeCode {
+		return nil
+	}
+	if err := v.registry.EnsureSnapshot(ctx, sd); err != nil {
+		return nil
+	}
+	return sd
+}
+
 // validateContext validates that the extension is allowed in the current context.
 func (v *Validator) validateContext(extSD *registry.StructureDefinition, contextPath, extPath string, result *issue.Result) {
 	if len(extSD.Context) == 0 {

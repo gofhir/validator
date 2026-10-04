@@ -58,7 +58,8 @@ StructureDefinitions can declare FHIRPath invariants via `ElementDefinition.cons
 - the slice it belongs to, as slice matching assigns it, and each slice that slice reslices (`us-core-17` on the NPI identifier of a US Core Practitioner, and on no other identifier);
 - the element itself (`pat-1` on each `Patient.contact`);
 - the element its `contentReference` points to (`Questionnaire.item.item` is checked as a `Questionnaire.item`);
-- the profile its type declares (`ElementDefinition.type.profile`), on the slice first (an extension slice's profile), or else the type's own definition (`per-1` on every `Period`). A declared profile that does not resolve is reported, and the value is still checked against its type's definition.
+- the profile its type declares (`ElementDefinition.type.profile`), on the slice first (an extension slice's profile), or else the type's own definition (`per-1` on every `Period`);
+- the definition an extension's `url` names, wherever the extension is used, with or without a profile. A declared profile that does not resolve is reported, and the value is still checked against its type's definition.
 
 A constraint that two of these definitions share is evaluated once per value.
 

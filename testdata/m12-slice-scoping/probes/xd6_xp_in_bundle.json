@@ -1,0 +1,22 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:9b6b1d38-3f5f-4c1e-9d3e-6a4b8f0c2e11",
+   "resource": {
+    "resourceType": "Patient",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/ext-xp",
+      "valueString": "y"
+     }
+    ]
+   }
+  }
+ ]
+}
