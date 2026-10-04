@@ -26,6 +26,7 @@ cat resource.json | gofhir-validator -
 | `-version` | Version de FHIR (`4.0.1`, `4.3.0`, `5.0.0`) | `4.0.1` |
 | `-ig` | URL(s) de perfil contra los cuales validar (separados por coma) | -- |
 | `-package` | Paquete(s) FHIR adicional(es) a cargar desde el cache (`name#version`) | -- |
+| `-base-package` | Paquete(s) base a cargar desde el cache en lugar de los embebidos para la versión (`name#version`, separados por coma) | el núcleo, la terminología y las extensiones embebidos |
 | `-package-file` | Archivo(s) de paquete `.tgz` local(es) (separados por coma) | -- |
 | `-package-url` | URL(s) remota(s) de paquete `.tgz` (separadas por coma) | -- |
 | `-output` | Formato de salida: `text` o `json` | `text` |
@@ -145,6 +146,18 @@ gofhir-validator \
     -ig http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient \
     patient.json
 ```
+
+### Paquetes base
+
+El validador embebe, para cada versión de FHIR, el paquete núcleo, el de terminología (THO) y el de extensiones. `-base-package` carga desde el cache los paquetes que indiques **en su lugar**: para validar contra otras versiones de ellos, por ejemplo las que usa otro validador.
+
+```bash
+gofhir-validator -version 4.0.1 \
+    -base-package hl7.fhir.r4.core#4.0.1,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.3.0 \
+    patient.json
+```
+
+Un paquete cargado en dos versiones se rechaza, porque cuál de sus definiciones aplica dependería del orden de carga. `-package hl7.terminology.r4#6.2.0` sola, sobre el paquete de terminología embebido, falla: reemplaza el conjunto base con `-base-package`.
 
 ### Salida JSON
 

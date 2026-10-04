@@ -47,3 +47,14 @@ func TestParseArgs(t *testing.T) {
 		})
 	}
 }
+
+// -base-package replaces the base packages the CLI loads, each as name#version.
+func TestBasePackageFlag(t *testing.T) {
+	c, err := parseArgs([]string{"-base-package", "hl7.fhir.r4.core#4.0.1,hl7.terminology.r4#6.2.0", "p.json"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"hl7.fhir.r4.core#4.0.1", "hl7.terminology.r4#6.2.0"}; !slices.Equal(c.BasePackages, want) {
+		t.Errorf("base packages %v, want %v", c.BasePackages, want)
+	}
+}
