@@ -8,7 +8,10 @@
 // Terminology stays local, as with the HL7 validator's "-tx n/a": bindings are checked against the
 // ValueSets and CodeSystems in the loaded packages, and no server is contacted.
 //
-//	corpusrun -version 4.0.1 -package id#ver[,id#ver] [-package-file a.tgz] -out out.jsonl file.json...
+//	corpusrun -version 4.0.1 [-base-package id#ver,...] -package id#ver[,id#ver] [-package-file a.tgz] -out out.jsonl file.json...
+//
+// -base-package replaces the base packages gofhir embeds for the version (built with the
+// basepackages tag, against a library that can).
 package main
 
 import (
@@ -45,6 +48,7 @@ func main() {
 func run() error {
 	version := flag.String("version", "4.0.1", "FHIR version")
 	packages := flag.String("package", "", "comma-separated package ids (id#version) from the FHIR package cache")
+	basePackages := flag.String("base-package", "", "comma-separated base package ids (id#version) to load instead of the embedded ones")
 	packageFiles := flag.String("package-file", "", "comma-separated local .tgz packages")
 	out := flag.String("out", "", "output .jsonl file (required)")
 	flag.Parse()
@@ -53,6 +57,21 @@ func run() error {
 	}
 
 	opts := []validator.Option{validator.WithVersion(*version)}
+	if base := splitList(*basePackages); len(base) > 0 {
+		specs := make([]validator.PackageSpec, 0, len(base))
+		for _, spec := range base {
+			name, ver, ok := strings.Cut(spec, "#")
+			if !ok || name == "" || ver == "" {
+				return fmt.Errorf("base package %q: want id#version", spec)
+			}
+			specs = append(specs, validator.PackageSpec{Name: name, Version: ver})
+		}
+		opt, err := baseOption(specs)
+		if err != nil {
+			return err
+		}
+		opts = append(opts, opt)
+	}
 	for _, spec := range splitList(*packages) {
 		name, ver, ok := strings.Cut(spec, "#")
 		if !ok || name == "" || ver == "" {

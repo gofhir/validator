@@ -80,7 +80,9 @@ type Config struct {
 	Profiles             []string                 // Additional profiles to validate against
 	StrictMode           bool                     // Treat warnings as errors
 	PackagePath          string                   // Path to FHIR package cache
+	BasePackages         []PackageSpec            // The base packages to load instead of the version's embedded set
 	AdditionalPackages   []PackageSpec            // Additional packages to load (e.g., US Core)
+	PackageRegistry      string                   // Package registry to download missing packages from; empty downloads none
 	PackageTgzPaths      []string                 // Paths to local .tgz package files
 	PackageURLs          []string                 // URLs to remote .tgz package files
 	PackageData          [][]byte                 // In-memory .tgz package bytes (e.g., from //go:embed)
@@ -128,6 +130,26 @@ func WithStrictMode(strict bool) Option {
 	}
 }
 
+// WithBasePackages sets the base packages to load, from the package cache, instead of the set the
+// validator embeds for its FHIR version (the core package, terminology and extensions): to validate
+// against given versions of them, such as the ones another validator uses. Any package missing
+// from the set is not loaded.
+func WithBasePackages(packages ...PackageSpec) Option {
+	return func(c *Config) {
+		c.BasePackages = append(c.BasePackages, packages...)
+	}
+}
+
+// WithPackageRegistry sets the package registry (such as loader.DefaultRegistry) that packages
+// missing from the package cache are downloaded from, into the cache: the packages added with
+// WithPackage and the packages they depend on. Without it, nothing is downloaded, and a dependency
+// missing from the cache is reported and not loaded.
+func WithPackageRegistry(url string) Option {
+	return func(c *Config) {
+		c.PackageRegistry = url
+	}
+}
+
 // WithPackagePath sets the FHIR package cache path.
 func WithPackagePath(path string) Option {
 	return func(c *Config) {
@@ -135,7 +157,9 @@ func WithPackagePath(path string) Option {
 	}
 }
 
-// WithPackage adds an additional FHIR package to load (e.g., US Core, IPS).
+// WithPackage adds an additional FHIR package to load (e.g., US Core, IPS), from the package cache.
+// The packages it depends on are loaded too, transitively, in the versions it declares; see
+// WithPackageRegistry for those missing from the cache.
 func WithPackage(name, version string) Option {
 	return func(c *Config) {
 		c.AdditionalPackages = append(c.AdditionalPackages, PackageSpec{Name: name, Version: version})
@@ -376,22 +400,21 @@ func New(opts ...Option) (*Validator, error) {
 	// Load packages for the specified FHIR version (embedded-first, fallback to disk)
 	logger.Info("Loading FHIR packages...")
 	loadStart := time.Now()
-	var packages []*loader.Package //nolint:prealloc // assigned from branch, not built by appending
-	var err error
-	if embeddedData := specs.GetPackages(config.FHIRVersion); len(embeddedData) > 0 {
-		logger.Info("  Using embedded specs for %s", config.FHIRVersion)
-		packages, err = l.LoadFromEmbeddedData(embeddedData)
-	} else {
-		logger.Info("  Loading specs from disk for %s", config.FHIRVersion)
-		packages, err = l.LoadVersion(config.FHIRVersion)
-	}
+	packages, err := loadBase(l, config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load FHIR packages: %w", err)
 	}
 
+	base := len(packages)
+
 	// Load additional packages (e.g., US Core, IPS)
 	for _, pkgSpec := range config.AdditionalPackages {
-		pkg, err := l.LoadPackage(pkgSpec.Name, pkgSpec.Version)
+		version, err := dependencyVersion(l, config, pkgSpec.Name, pkgSpec.Version)
+		if err != nil {
+			logger.Warn("Could not load additional package %s#%s: %v", pkgSpec.Name, pkgSpec.Version, err)
+			continue
+		}
+		pkg, err := l.LoadPackage(pkgSpec.Name, version)
 		if err != nil {
 			logger.Warn("Could not load additional package %s#%s: %v", pkgSpec.Name, pkgSpec.Version, err)
 			continue
@@ -435,6 +458,11 @@ func New(opts ...Option) (*Validator, error) {
 	// Load conformance resources from memory (raw + IG-tagged).
 	packages = loadConformanceResources(l, config, packages)
 
+	// A package added once, and one core package, the version validated's; then the packages those
+	// added depend on.
+	packages = append(packages[:base], addedPackages(packages[:base], packages[base:], config.FHIRVersion)...)
+	packages = append(packages, loadDependencies(l, config, packages, packages[base:])...)
+
 	loadDuration := time.Since(loadStart)
 
 	// Log loaded packages
@@ -451,6 +479,7 @@ func New(opts ...Option) (*Validator, error) {
 	logger.Info("Building StructureDefinition registry...")
 	registryStart := time.Now()
 	reg := registry.New()
+	reg.SetFHIRVersion(config.FHIRVersion)
 	if err := reg.LoadFromPackages(packages); err != nil {
 		return nil, fmt.Errorf("failed to load StructureDefinitions: %w", err)
 	}
@@ -463,6 +492,7 @@ func New(opts ...Option) (*Validator, error) {
 	// Create and populate the terminology registry
 	logger.Debug("Building terminology registry...")
 	termReg := terminology.NewRegistry()
+	termReg.SetFHIRVersion(config.FHIRVersion)
 
 	if config.TerminologyAuthority != nil {
 		// The host owns terminology resolution, so parsing our own copy of the
@@ -1002,4 +1032,32 @@ func loadConformanceResources(l *loader.Loader, config *Config, packages []*load
 		packages = append(packages, pkg)
 	}
 	return packages
+}
+
+// loadBase loads the base packages: those config gives, from the package cache; else the set
+// embedded for its FHIR version, or that set from the cache when none is embedded.
+func loadBase(l *loader.Loader, config *Config) ([]*loader.Package, error) {
+	if len(config.BasePackages) > 0 {
+		logger.Info("  Using the base packages given for %s", config.FHIRVersion)
+		return loadBasePackages(l, config.BasePackages)
+	}
+	if embeddedData := specs.GetPackages(config.FHIRVersion); len(embeddedData) > 0 {
+		logger.Info("  Using embedded specs for %s", config.FHIRVersion)
+		return l.LoadFromEmbeddedData(embeddedData)
+	}
+	logger.Info("  Loading specs from disk for %s", config.FHIRVersion)
+	return l.LoadVersion(config.FHIRVersion)
+}
+
+// loadBasePackages loads the base packages given, from the package cache, in their order.
+func loadBasePackages(l *loader.Loader, base []PackageSpec) ([]*loader.Package, error) {
+	packages := make([]*loader.Package, 0, len(base))
+	for _, spec := range base {
+		pkg, err := l.LoadPackage(spec.Name, spec.Version)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load base package %s#%s: %w", spec.Name, spec.Version, err)
+		}
+		packages = append(packages, pkg)
+	}
+	return packages, nil
 }

@@ -25,7 +25,10 @@ cat resource.json | gofhir-validator -
 |--------|-------------|---------|
 | `-version` | Version de FHIR (`4.0.1`, `4.3.0`, `5.0.0`) | `4.0.1` |
 | `-ig` | URL(s) de perfil contra los cuales validar (separados por coma) | -- |
-| `-package` | Paquete(s) FHIR adicional(es) a cargar desde el cache (`name#version`) | -- |
+| `-package` | Paquete(s) FHIR adicional(es) a cargar desde el cache (`name#version`), con los paquetes de los que depende | -- |
+| `-package-registry` | Registro de paquetes desde el que se descargan los paquetes que faltan en el cache | `https://packages.fhir.org` |
+| `-no-download` | No descargar paquetes: una dependencia que falta en el cache se informa y no se carga | `false` |
+| `-base-package` | Paquete(s) base a cargar desde el cache en lugar de los embebidos para la versión (`name#version`, separados por coma) | el núcleo, la terminología y las extensiones embebidos |
 | `-package-file` | Archivo(s) de paquete `.tgz` local(es) (separados por coma) | -- |
 | `-package-url` | URL(s) remota(s) de paquete `.tgz` (separadas por coma) | -- |
 | `-output` | Formato de salida: `text` o `json` | `text` |
@@ -123,6 +126,10 @@ gofhir-validator -package hl7.fhir.us.core#6.1.0 \
     patient.json
 ```
 
+Los paquetes de los que depende un paquete (las `dependencies` de su `package.json`) también se cargan, de forma transitiva, en las versiones que declara. Un paquete que falta en el cache, indicado con `-package` o del que se depende, se descarga al cache desde el registro de paquetes (`-package-registry`; los paquetes base indicados con `-base-package` deben estar en el cache); `-no-download` lo desactiva, y entonces una dependencia que falta en el cache se informa y no se carga.
+
+Se pueden cargar varias versiones de un paquete, por ejemplo una guía que depende de un paquete de terminología más antiguo que el base. Un canónico que indica versión resuelve a esa versión; uno que no la indica resuelve a la mayor versión cargada entre las definiciones escritas para la versión de FHIR validada. Los paquetes núcleo de R4 y R4B traen copias de los CodeSystem y ValueSet de HL7 Terminology, versionadas como la versión de FHIR (`4.0.1`): si el paquete de HL7 Terminology está cargado, se usan sus definiciones, cualquiera sea su versión. Se carga un solo paquete núcleo, el de la versión de FHIR validada: una dependencia del núcleo de otra versión de FHIR se informa y no se carga.
+
 Cargar un paquete desde un archivo `.tgz` local:
 
 ```bash
@@ -145,6 +152,18 @@ gofhir-validator \
     -ig http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient \
     patient.json
 ```
+
+### Paquetes base
+
+El validador embebe, para cada versión de FHIR, el paquete núcleo, el de terminología (THO) y el de extensiones. `-base-package` carga desde el cache los paquetes que indiques **en su lugar**: para validar contra otras versiones de ellos, por ejemplo las que usa otro validador.
+
+```bash
+gofhir-validator -version 4.0.1 \
+    -base-package hl7.fhir.r4.core#4.0.1,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.3.0 \
+    patient.json
+```
+
+`-package hl7.terminology.r4#6.2.0`, en cambio, agrega esa versión al paquete de terminología embebido: los canónicos que no indican versión resuelven a la mayor de las dos.
 
 ### Salida JSON
 

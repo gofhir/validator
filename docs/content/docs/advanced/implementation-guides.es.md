@@ -177,6 +177,24 @@ func createValidator() (*validator.Validator, error) {
 }
 ```
 
+## Dependencias y Versiones
+
+Un paquete declara los paquetes con que fue construido en las `dependencies` de su `package.json`. Sus perfiles se enlazan a los value sets de esos paquetes y usan sus extensiones, así que para validar contra la guía hay que cargarlos, en esas versiones. El validador los carga por ti:
+
+- **De forma transitiva, en las versiones declaradas.** Un comodín (`3.3.x`) toma la mayor versión publicada que coincide.
+- **Solo lo que falta.** Una dependencia que ya cumple un paquete cargado (uno base, o uno que pasaste) no se busca.
+- **Desde el cache de paquetes** (`WithPackagePath`). Una dependencia que falta se informa y no se carga, salvo que configures `WithPackageRegistry` (por ejemplo `loader.DefaultRegistry`, `https://packages.fhir.org`): entonces se descarga al cache. La biblioteca nunca descarga si no se lo pides; la CLI sí, por defecto.
+- **Un solo paquete núcleo**, el de la versión de FHIR validada. Una dependencia del núcleo de otra versión de FHIR se informa y no se carga.
+
+Qué fuentes traen dependencias:
+
+| Fuente | Se cargan sus dependencias |
+| --- | --- |
+| `WithPackage`, `WithPackageTgz`, `WithPackageURL`, `WithPackageData` | Sí: el paquete incluye su `package.json` |
+| `WithConformanceResources`, `WithConformancePackage` | No: los recursos no traen la lista de dependencias, así que pasa también los recursos de las dependencias |
+
+Se pueden cargar varias versiones de un paquete a la vez, por ejemplo una guía que depende de un paquete de terminología más antiguo que el base. Un canónico que indica versión (`url|1.0.0`) resuelve solo a esa versión. Uno que no la indica resuelve a la mayor versión cargada, prefiriendo las definiciones escritas para la versión de FHIR validada (la variante R5 de un paquete no reemplaza a la R4). En R4 y R4B, las copias que trae el paquete núcleo de los CodeSystem y ValueSet de HL7 Terminology quedan por debajo de las de HL7 Terminology.
+
 ## Estructura del Cache de Paquetes
 
 El cache de paquetes FHIR sigue una estructura de directorio estandar. Por defecto, los paquetes se almacenan en `~/.fhir/packages/`:

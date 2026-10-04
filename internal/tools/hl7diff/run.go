@@ -29,7 +29,7 @@ type Manifest struct {
 type Group struct {
 	Name         string   `json:"name"`
 	Version      string   `json:"version"`      // FHIR version; default 4.0.1
-	IGs          []string `json:"igs"`          // package ids (id#version): HL7 -ig, gofhir the closure
+	IGs          []string `json:"igs"`          // package ids (id#version): HL7 -ig, gofhir -package (both load their dependencies)
 	PackageFiles []string `json:"packageFiles"` // local .tgz packages, repository-relative
 	Files        []string `json:"files"`        // repository-relative globs
 	ExamplesOf   []string `json:"examplesOf"`   // package ids whose examples join the group
@@ -59,6 +59,10 @@ type runEnv struct {
 	headBin  string
 	baseline string
 	out      io.Writer
+	registry string // where base packages missing from the cache are fetched from
+	// baseReplaces is whether the baseline's library can replace the base packages it embeds
+	// (validator.WithBasePackages): a baseline that cannot runs with its own.
+	baseReplaces bool
 }
 
 func cmdRun(ctx context.Context, args []string, out io.Writer) (bool, error) {
@@ -69,6 +73,7 @@ func cmdRun(ctx context.Context, args []string, out io.Writer) (bool, error) {
 	work := flags.String("work", "", "work directory (default: per checkout, under the user cache directory)")
 	heavy := flags.Bool("heavy", false, "also run the groups marked heavy")
 	only := flags.String("group", "", "run only these groups (comma-separated); unknown names are an error")
+	registry := flags.String("registry", "https://packages.fhir.org", "FHIR package registry, for the base packages the HL7 validator uses that are not in the cache")
 	if err := flags.Parse(args); err != nil {
 		return false, err
 	}
@@ -91,7 +96,7 @@ func cmdRun(ctx context.Context, args []string, out io.Writer) (bool, error) {
 		return false, err
 	}
 
-	env, unlock, err := newRunEnv(ctx, root, m, *jar, *work, *baseline, out)
+	env, unlock, err := newRunEnv(ctx, root, m, *jar, *work, *baseline, *registry, out)
 	if err != nil {
 		return false, err
 	}
@@ -172,12 +177,12 @@ func cmdFetch(ctx context.Context, args []string, out io.Writer) (bool, error) {
 
 // newRunEnv prepares a run: the jar's identity, the family table and divergences, the locked work
 // directory, and both corpusrun builds.
-func newRunEnv(ctx context.Context, root string, m Manifest, jar, work, baseline string, out io.Writer) (*runEnv, func(), error) {
+func newRunEnv(ctx context.Context, root string, m Manifest, jar, work, baseline, registry string, out io.Writer) (*runEnv, func(), error) {
 	cache, err := DefaultCache()
 	if err != nil {
 		return nil, nil, err
 	}
-	env := &runEnv{root: root, cache: cache, out: out, baseline: baseline}
+	env := &runEnv{root: root, cache: cache, out: out, baseline: baseline, registry: registry}
 	if env.jar, err = filepath.Abs(jar); err != nil {
 		return nil, nil, err
 	}
@@ -296,6 +301,7 @@ type groupPlan struct {
 	excluded     []Exclusion
 	inputs       string // key of the HL7 validator's inputs: gofhir's, plus the packages left out of the closure and the cache listing
 	gofhirInputs string // key of gofhir's inputs: the closure, the local packages and the instances
+	igs          []PackageID
 }
 
 func planGroup(env *runEnv, g Group) (*groupPlan, error) {
@@ -318,6 +324,7 @@ func planGroup(env *runEnv, g Group) (*groupPlan, error) {
 		}
 		igs = append(igs, id)
 	}
+	p.igs = igs
 	embedded, err := EmbeddedNames(p.version)
 	if err != nil {
 		return nil, err
@@ -340,11 +347,15 @@ func planGroup(env *runEnv, g Group) (*groupPlan, error) {
 	return p, nil
 }
 
-// runGofhir runs one corpusrun build on the group, writing out.
-func runGofhir(ctx context.Context, env *runEnv, p *groupPlan, bin, out string) error {
+// runGofhir runs one corpusrun build on the group, writing out, with the base packages given (none:
+// those it embeds) and the packages given.
+func runGofhir(ctx context.Context, env *runEnv, p *groupPlan, bin, out string, base, packages []PackageID) error {
 	args := []string{"-version", p.version, "-out", out}
-	if len(p.closure) > 0 {
-		args = append(args, "-package", joinIDs(p.closure))
+	if len(base) > 0 {
+		args = append(args, "-base-package", joinIDs(base))
+	}
+	if len(packages) > 0 {
+		args = append(args, "-package", joinIDs(packages))
 	}
 	if len(p.pkgFiles) > 0 {
 		args = append(args, "-package-file", strings.Join(p.pkgFiles, ","))
@@ -352,12 +363,19 @@ func runGofhir(ctx context.Context, env *runEnv, p *groupPlan, bin, out string) 
 	return runQuiet(ctx, env.root, bin, append(args, p.files...)...)
 }
 
-// runHL7 returns the HL7 validator's output for the group, from the cache when its key matches.
-func runHL7(ctx context.Context, env *runEnv, p *groupPlan) (string, error) {
+// runHL7 returns the HL7 validator's output for the group and the packages it loaded, from the
+// cache when its key matches. The packages are read from its log ("Package Summary") and kept
+// beside its output.
+func runHL7(ctx context.Context, env *runEnv, p *groupPlan) (string, []PackageID, error) {
 	key := hashStrings(env.jarID, p.inputs, strings.Join(p.g.IGs, ","))
 	out := filepath.Join(p.dir, "hl7-"+key+".json")
+	summaryPath := filepath.Join(p.dir, "hl7-"+key+".packages")
 	if prev, err := ReadHL7(out); err == nil && coversAll(prev, p.files) {
-		return out, nil
+		if data, err := os.ReadFile(summaryPath); err == nil { //nolint:gosec // G304: a path inside the tool's own work directory
+			if loaded, err := ParsePackageSummary(string(data)); err == nil {
+				return out, loaded, nil
+			}
+		}
 	}
 	// Missing, unreadable, or without an outcome for every file: regenerate rather than fail
 	// forever on a bad cached copy.
@@ -373,22 +391,30 @@ func runHL7(ctx context.Context, env *runEnv, p *groupPlan) (string, error) {
 	}
 	// validator_cli exits non-zero when instances have errors; the run succeeded when it wrote a
 	// readable output.
-	runErr := runQuiet(ctx, env.root, "java", append(args, p.files...)...)
+	log, runErr := runCapture(ctx, env.root, "java", append(args, p.files...)...)
 	if _, err := ReadHL7(tmp); err != nil {
 		_ = os.Remove(tmp)
 		if runErr != nil {
-			return "", runErr
+			return "", nil, runErr
 		}
-		return "", err
+		return "", nil, err
+	}
+	loaded, err := ParsePackageSummary(log)
+	if err != nil {
+		_ = os.Remove(tmp)
+		return "", nil, err
 	}
 	// The key hashed the inputs before java read them. If the instances or local packages changed
 	// meanwhile, the output belongs to no key and is discarded. (The package cache listing may
 	// change: the HL7 validator installs missing packages while it runs.)
 	if again, err := inputsKeyWith(env, p.version, p.closure, p.skipped, p.pkgFiles, p.files, false); err != nil || again != p.gofhirInputs {
 		_ = os.Remove(tmp)
-		return "", errors.New("inputs changed while the HL7 validator was running; run again")
+		return "", nil, errors.New("inputs changed while the HL7 validator was running; run again")
 	}
-	return out, os.Rename(tmp, out)
+	if err := writeAtomic(summaryPath, []byte("Package Summary: ["+joinIDs(loaded)+"]\n")); err != nil {
+		return "", nil, err
+	}
+	return out, loaded, os.Rename(tmp, out)
 }
 
 func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool, error) {
@@ -396,18 +422,29 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 	if err != nil {
 		return false, err
 	}
-	baseOut := filepath.Join(p.dir, "base-"+hashStrings(filepath.Base(env.baseBin), p.gofhirInputs)+".jsonl")
+	// The HL7 validator runs first: the packages it loads are the versions gofhir is run with.
+	hl7Out, loaded, err := runHL7(ctx, env, p)
+	if err != nil {
+		return false, err
+	}
+	basePkgs, err := alignBase(ctx, env, p, loaded)
+	if err != nil {
+		return false, err
+	}
+	// gofhir is given the guides and loads what they depend on; the baseline, whose library may not,
+	// is given that closure.
+	var baselineBase []PackageID
+	if env.baseReplaces {
+		baselineBase = basePkgs
+	}
+	baseOut := filepath.Join(p.dir, "base-"+hashStrings(filepath.Base(env.baseBin), p.gofhirInputs, joinIDs(baselineBase))+".jsonl")
 	if _, err := os.Stat(baseOut); err != nil {
-		if err := runGofhir(ctx, env, p, env.baseBin, baseOut); err != nil {
+		if err := runGofhir(ctx, env, p, env.baseBin, baseOut, baselineBase, p.closure); err != nil {
 			return false, err
 		}
 	}
 	headOut := filepath.Join(p.dir, "head.jsonl")
-	if err := runGofhir(ctx, env, p, env.headBin, headOut); err != nil {
-		return false, err
-	}
-	hl7Out, err := runHL7(ctx, env, p)
-	if err != nil {
+	if err := runGofhir(ctx, env, p, env.headBin, headOut, basePkgs, p.igs); err != nil {
 		return false, err
 	}
 	base, err := ReadGo(baseOut)
@@ -434,8 +471,16 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 			return false, err
 		}
 	}
+	baselineUses := "the same"
+	if !env.baseReplaces {
+		baselineUses = "its embedded ones (its library cannot replace them)"
+	}
+	if _, err := fmt.Fprintf(report, "%s: packages: the HL7 validator loaded %s; gofhir ran with the base packages %s, the baseline with %s\n\n",
+		g.Name, joinIDs(loaded), joinIDs(basePkgs), baselineUses); err != nil {
+		return false, err
+	}
 	if len(p.skipped) > 0 {
-		if _, err := fmt.Fprintf(report, "%s: packages left out of gofhir's closure (embedded, or an older version of a kept package): %s\n\n", g.Name, joinIDs(p.skipped)); err != nil {
+		if _, err := fmt.Fprintf(report, "%s: packages left out of the closure (base packages, or core packages): %s\n\n", g.Name, joinIDs(p.skipped)); err != nil {
 			return false, err
 		}
 	}
@@ -685,22 +730,38 @@ func jarIdentity(ctx context.Context, jar string) (string, error) {
 // buildHead compiles corpusrun from the working tree.
 func buildHead(ctx context.Context, env *runEnv) (string, error) {
 	bin := filepath.Join(env.work, "corpusrun-head")
-	return bin, run(ctx, env.root, "go", "build", "-o", bin, "./internal/tools/corpusrun")
+	return bin, run(ctx, env.root, "go", "build", "-tags", "basepackages", "-o", bin, "./internal/tools/corpusrun")
 }
 
 // buildBaseline compiles the working tree's corpusrun against the baseline's library, in a
-// temporary git worktree. The binary is keyed by the baseline commit, the corpusrun source and
-// the Go toolchain, and is written to an absolute path outside the worktree.
+// temporary git worktree. The binary is keyed by the baseline commit, the corpusrun sources and
+// the Go toolchain, and is written to an absolute path outside the worktree. It is built with the
+// basepackages tag when the baseline's library can replace the base packages it embeds; without,
+// its runs use those (env.baseReplaces).
 func buildBaseline(ctx context.Context, env *runEnv) (string, error) {
 	sha, err := gitOutput(ctx, env.root, "rev-parse", env.baseline+"^{commit}")
 	if err != nil {
 		return "", err
 	}
-	src, err := os.ReadFile(filepath.Join(env.root, "internal", "tools", "corpusrun", "main.go")) //nolint:gosec // G703: the repository root comes from git
+	srcDir := filepath.Join(env.root, "internal", "tools", "corpusrun")
+	sources, err := corpusrunSources(srcDir)
 	if err != nil {
 		return "", err
 	}
-	bin := filepath.Join(env.work, "corpusrun-base-"+sha[:12]+"-"+hashStrings(string(src), runtime.Version()))
+	keyParts := []string{runtime.Version()}
+	for _, name := range sourceNames(sources) {
+		keyParts = append(keyParts, name, string(sources[name]))
+	}
+	library, err := gitOutput(ctx, env.root, "show", sha+":pkg/validator/validator.go")
+	if err != nil {
+		return "", err
+	}
+	env.baseReplaces = strings.Contains(library, "func WithBasePackages(")
+	tags := ""
+	if env.baseReplaces {
+		tags = "basepackages"
+	}
+	bin := filepath.Join(env.work, "corpusrun-base-"+sha[:12]+"-"+hashStrings(append(keyParts, tags)...))
 	if _, err := os.Stat(bin); err == nil { //nolint:gosec // G703: a path inside the tool's own work directory
 		return bin, nil
 	}
@@ -717,16 +778,50 @@ func buildBaseline(ctx context.Context, env *runEnv) (string, error) {
 		_ = run(ctx, env.root, "git", "worktree", "prune")
 	}()
 	dst := filepath.Join(wt, "internal", "tools", "corpusrun")
+	_ = os.RemoveAll(dst)
 	if err := os.MkdirAll(dst, 0o750); err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(filepath.Join(dst, "main.go"), src, 0o600); err != nil { //nolint:gosec // G703: a path inside the tool's own work directory
-		return "", err
+	for name, src := range sources {
+		if err := os.WriteFile(filepath.Join(dst, name), src, 0o600); err != nil { //nolint:gosec // G703: a path inside the tool's own work directory
+			return "", err
+		}
 	}
-	if err := run(ctx, wt, "go", "build", "-o", bin+".tmp", "./internal/tools/corpusrun"); err != nil {
+	if err := run(ctx, wt, "go", "build", "-tags", tags, "-o", bin+".tmp", "./internal/tools/corpusrun"); err != nil {
 		return "", err
 	}
 	return bin, os.Rename(bin+".tmp", bin) //nolint:gosec // G703: a path inside the tool's own work directory
+}
+
+// corpusrunSources reads corpusrun's Go sources, tests left out.
+func corpusrunSources(dir string) (map[string][]byte, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	sources := map[string][]byte{}
+	for _, e := range entries {
+		name := e.Name()
+		if e.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, name)) //nolint:gosec // G304: the repository's own sources
+		if err != nil {
+			return nil, err
+		}
+		sources[name] = data
+	}
+	return sources, nil
+}
+
+// sourceNames are the names of sources, in order.
+func sourceNames(m map[string][]byte) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // defaultWorkDir is per checkout, so two worktrees never share outputs or binaries.
@@ -782,6 +877,49 @@ func gitOutput(ctx context.Context, dir string, args ...string) (string, error) 
 		return "", fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
 	}
 	return strings.TrimSpace(string(out)), nil
+}
+
+// alignBase returns the base packages gofhir runs the group with, the versions the HL7 validator
+// used (EffectiveBase), fetching those missing from the cache, and recomputes gofhir's closure and
+// inputs key against them. A base package that cannot be had makes the comparison invalid: it
+// would compare gofhir's embedded versions with others.
+func alignBase(ctx context.Context, env *runEnv, p *groupPlan, loaded []PackageID) ([]PackageID, error) {
+	embedded, err := EmbeddedNames(p.version)
+	if err != nil {
+		return nil, err
+	}
+	base := EffectiveBase(embedded, loaded)
+	names := make(map[string]string, len(base))
+	for _, b := range base {
+		if _, err := env.cache.Fetch(ctx, b, env.registry); err != nil {
+			return nil, fmt.Errorf("%s: the comparison is invalid: base package %s, the version the HL7 validator uses, cannot be had: %w", p.g.Name, b, err)
+		}
+		names[b.Name] = b.Version
+	}
+	if p.closure, p.skipped, err = env.cache.Closure(p.igs, names); err != nil {
+		return nil, err
+	}
+	key, err := inputsKeyWith(env, p.version, append(append([]PackageID(nil), base...), p.closure...), nil, p.pkgFiles, p.files, false)
+	if err != nil {
+		return nil, err
+	}
+	p.gofhirInputs = key
+	return base, nil
+}
+
+// runCapture runs a command and returns its combined output, which a failure includes too.
+func runCapture(ctx context.Context, dir, name string, args ...string) (string, error) {
+	cmd := exec.CommandContext(ctx, name, args...) //nolint:gosec // G204: java, launched by design
+	cmd.Dir = dir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		tail := strings.ToValidUTF8(string(out), "")
+		if len(tail) > 2000 {
+			tail = tail[len(tail)-2000:]
+		}
+		return string(out), fmt.Errorf("%s %s: %w\n%s", filepath.Base(name), strings.Join(args[:min(len(args), 3)], " "), err, tail)
+	}
+	return string(out), nil
 }
 
 func run(ctx context.Context, dir, name string, args ...string) error {

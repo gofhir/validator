@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gofhir/validator/internal/versionorder"
 	"github.com/gofhir/validator/pkg/loader"
 )
 
@@ -247,12 +248,22 @@ type Discriminator struct {
 
 // Registry holds loaded StructureDefinitions indexed by URL.
 type Registry struct {
-	mu              sync.RWMutex
-	byURL           map[string]*StructureDefinition
-	byURLVersion    map[string]*StructureDefinition // key: "url|version" for version-aware lookup
-	latestByURL     map[string]*StructureDefinition // url -> the highest version loaded (ResolveCanonical)
+	mu sync.RWMutex
+	// all holds every definition loaded, in load order: several versions of a URL may be loaded.
+	all []*StructureDefinition
+	// byURL holds the version of each URL an unversioned canonical resolves to; see preferred.
+	byURL map[string]*StructureDefinition
+	// byURLVersion is keyed "url|version"; when two packages define the same version (an R4 and an
+	// R5 flavor of a guide), the one for the validated FHIR version.
+	byURLVersion    map[string]*StructureDefinition
 	byType          map[string]*StructureDefinition // For base types like "Patient", "HumanName"
 	elementDefCache map[string]*ElementDefinition   // path -> ElementDefinition cache
+
+	// fhirVersion is the FHIR version validated ("4.0.1"): a definition written for it is preferred
+	// over another version of the same URL written for another. Empty prefers none.
+	fhirVersion string
+	// publishers tells which definitions are copies of another package's (loader.Publishers).
+	publishers loader.Publishers
 
 	// Optional external profile resolver for on-demand SD loading.
 	// When nil, the registry works exclusively with pre-loaded SDs (standalone mode).
@@ -271,7 +282,6 @@ func New() *Registry {
 	r := &Registry{
 		byURL:              make(map[string]*StructureDefinition),
 		byURLVersion:       make(map[string]*StructureDefinition),
-		latestByURL:        make(map[string]*StructureDefinition),
 		byType:             make(map[string]*StructureDefinition),
 		elementDefCache:    make(map[string]*ElementDefinition),
 		domainResources:    make(map[string]bool),
@@ -282,13 +292,22 @@ func New() *Registry {
 	return r
 }
 
-// LoadFromPackages loads StructureDefinitions from a slice of packages.
-// For extension definitions, contexts are MERGED from all packages to support
-// both R4 naming (from core) and expanded contexts (from extension packages).
-// See ADR-001 for rationale.
+// LoadFromPackages loads StructureDefinitions from a slice of packages. Several versions of a
+// definition may be loaded, from several packages; which one a canonical resolves to is told by
+// [Registry.ResolveCanonical].
 func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
+	// Which definitions are copies depends on every package loaded, so the packages are recorded
+	// before their definitions are indexed, and those indexed before are re-indexed if it changes.
+	changed := false
+	for _, pkg := range packages {
+		changed = r.publishers.Add(pkg) || changed
+	}
+	if changed && len(r.all) > 0 {
+		r.reindexUnlocked()
+	}
 
 	for _, pkg := range packages {
 		packageID := pkg.Name + "#" + pkg.Version
@@ -297,11 +316,21 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 		}
 	}
 
-	// Build type classification caches after all SDs are loaded
-	r.buildTypeClassificationCaches()
-	r.model = &FHIRPathModel{reg: r} // built on first use, from the definitions now loaded
-
+	// The definitions loaded may change which version of a URL or type is used.
+	r.refreshDerivedUnlocked()
 	return nil
+}
+
+// refreshDerivedUnlocked rebuilds what is derived from the definitions indexed: the element and
+// type classification caches, and the FHIRPath model (built on first use). Must be called while the
+// write lock is held.
+func (r *Registry) refreshDerivedUnlocked() {
+	clear(r.elementDefCache)
+	clear(r.domainResources)
+	clear(r.canonicalResources)
+	clear(r.metadataResources)
+	r.buildTypeClassificationCaches()
+	r.model = &FHIRPathModel{reg: r}
 }
 
 // loadResourceUnlocked parses and indexes a single resource if it is a StructureDefinition.
@@ -326,20 +355,49 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) 
 	sd.PackageID = packageID
 	applyErrata(&sd)
 
-	// Index by URL
+	r.indexUnlocked(&sd)
+}
+
+// SetFHIRVersion sets the FHIR version validated ("4.0.1"). Where several versions of a URL are
+// loaded, an unversioned canonical resolves to the highest version among the definitions written
+// for that FHIR version, and only when none is, among those of the same release (4.0), and then
+// among all. It re-indexes the definitions already loaded.
+func (r *Registry) SetFHIRVersion(fhirVersion string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.fhirVersion = fhirVersion
+	r.reindexUnlocked()
+}
+
+// reindexUnlocked indexes again the definitions loaded, after what decides which version of a URL
+// is preferred changed. Must be called while the write lock is held.
+func (r *Registry) reindexUnlocked() {
+	all := r.all
+	r.all = nil
+	clear(r.byURL)
+	clear(r.byURLVersion)
+	clear(r.byType)
+	for _, sd := range all {
+		r.indexUnlocked(sd)
+	}
+	r.refreshDerivedUnlocked()
+}
+
+// indexUnlocked indexes a definition loaded. Must be called while the write lock is held.
+func (r *Registry) indexUnlocked(sd *StructureDefinition) {
+	r.all = append(r.all, sd)
 	if sd.URL != "" {
-		if existing, exists := r.byURL[sd.URL]; exists {
-			// Merge extension contexts from multiple package definitions
-			r.mergeExtensionContexts(existing, &sd)
-		} else {
-			r.byURL[sd.URL] = &sd
-		}
-		// Version-aware index for canonical|version lookups
 		if sd.Version != "" {
-			vKey := sd.URL + "|" + sd.Version
-			if _, exists := r.byURLVersion[vKey]; !exists {
-				r.byURLVersion[vKey] = &sd
-				r.indexLatestUnlocked(&sd)
+			key := sd.URL + "|" + sd.Version
+			if cur := r.byURLVersion[key]; cur == nil || r.fhirRank(sd) > r.fhirRank(cur) {
+				r.byURLVersion[key] = sd
+			}
+		}
+		if prev := r.byURL[sd.URL]; prev == nil || r.preferred(sd, prev) {
+			r.byURL[sd.URL] = sd
+			// A type defined in several versions is the preferred one's.
+			if prev != nil && r.byType[sd.Type] == prev && sd.Derivation != DerivationConstraint {
+				r.byType[sd.Type] = sd
 			}
 		}
 	}
@@ -347,9 +405,36 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) 
 	// Index by type for base definitions - first definition wins
 	if sd.Type != "" && sd.Derivation != DerivationConstraint {
 		if _, exists := r.byType[sd.Type]; !exists {
-			r.byType[sd.Type] = &sd
+			r.byType[sd.Type] = sd
 		}
 	}
+}
+
+// preferred reports whether a is the version of a URL to resolve to rather than b: the publisher's
+// definition rather than a copy (loader.Publishers), then the one written for the FHIR version
+// validated, then the highest version (references.html#canonical: "should pick the latest
+// version"); between equals, the one loaded first.
+func (r *Registry) preferred(a, b *StructureDefinition) bool {
+	if ca, cb := r.publishers.IsCopy(a.PackageID, a.URL), r.publishers.IsCopy(b.PackageID, b.URL); ca != cb {
+		return cb
+	}
+	if ra, rb := r.fhirRank(a), r.fhirRank(b); ra != rb {
+		return ra > rb
+	}
+	return versionorder.Less(b.Version, a.Version)
+}
+
+// fhirRank ranks how closely the FHIR version a definition is written for matches the one
+// validated: 2 the same version (or none stated: the definition does not say it is for another),
+// 1 the same release (4.0.0 for 4.0.1), 0 another.
+func (r *Registry) fhirRank(sd *StructureDefinition) int {
+	switch {
+	case r.fhirVersion == "" || sd.FHIRVersion == "" || sd.FHIRVersion == r.fhirVersion:
+		return 2
+	case versionorder.SameRelease(sd.FHIRVersion, r.fhirVersion):
+		return 1
+	}
+	return 0
 }
 
 // buildTypeClassificationCaches pre-computes type classifications for O(1) lookups.
@@ -381,30 +466,6 @@ func (r *Registry) buildTypeClassificationCaches() {
 	}
 }
 
-// mergeExtensionContexts adds unique contexts from newSD to existingSD.
-// This enables extensions to work in contexts defined by either the core package
-// or the extensions package, matching HL7 Validator behavior.
-func (r *Registry) mergeExtensionContexts(existing, newSD *StructureDefinition) {
-	if len(newSD.Context) == 0 {
-		return
-	}
-
-	// Build set of existing contexts
-	existingContexts := make(map[string]bool)
-	for _, ctx := range existing.Context {
-		key := ctx.Type + ":" + ctx.Expression
-		existingContexts[key] = true
-	}
-
-	// Add unique contexts from new definition
-	for _, ctx := range newSD.Context {
-		key := ctx.Type + ":" + ctx.Expression
-		if !existingContexts[key] {
-			existing.Context = append(existing.Context, ctx)
-		}
-	}
-}
-
 // SetResolver configures an external profile resolver for on-demand SD loading.
 // When set, the registry falls back to this resolver for profiles not found in memory.
 func (r *Registry) SetResolver(resolver ProfileResolver) {
@@ -413,7 +474,8 @@ func (r *Registry) SetResolver(resolver ProfileResolver) {
 	r.resolver = resolver
 }
 
-// GetByURL returns a StructureDefinition by its canonical URL.
+// GetByURL returns a StructureDefinition by its canonical URL. Where several versions are loaded,
+// it is the one an unversioned canonical resolves to (see [Registry.SetFHIRVersion]).
 func (r *Registry) GetByURL(url string) *StructureDefinition {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -428,7 +490,7 @@ func (r *Registry) GetProfilesByPackage(packageID string) []*StructureDefinition
 	defer r.mu.RUnlock()
 
 	var profiles []*StructureDefinition
-	for _, sd := range r.byURL {
+	for _, sd := range r.all {
 		if sd.PackageID == packageID && sd.Derivation == DerivationConstraint {
 			profiles = append(profiles, sd)
 		}
@@ -437,17 +499,16 @@ func (r *Registry) GetProfilesByPackage(packageID string) []*StructureDefinition
 }
 
 // GetByCanonical returns a StructureDefinition by canonical URL and optional version.
-// When version is empty, falls back to any loaded version of that URL.
-// When version is specified, tries exact version match first, then any version.
-// This is a pure in-memory lookup — it does not consult the external resolver.
+// When version is empty, it is the version an unversioned canonical resolves to.
+// When version is specified, it is that version, or nil when it is not loaded: a canonical that
+// names a version refers to that version, never to another (references.html#canonical, decision
+// D-2). This is a pure in-memory lookup — it does not consult the external resolver.
 func (r *Registry) GetByCanonical(url, version string) *StructureDefinition {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	if version != "" {
-		if sd := r.byURLVersion[url+"|"+version]; sd != nil {
-			return sd
-		}
+		return r.byURLVersion[url+"|"+version]
 	}
 	return r.byURL[url]
 }
@@ -477,9 +538,12 @@ func (r *Registry) ResolveByCanonical(ctx context.Context, url, version string) 
 		return nil
 	}
 
-	// 4. Parse the resolved SD
+	// 4. Parse the resolved SD, which must be the one asked for
 	var sd StructureDefinition
 	if err := json.Unmarshal(data, &sd); err != nil {
+		return nil
+	}
+	if (sd.URL != "" && sd.URL != url) || (version != "" && sd.Version != version) {
 		return nil
 	}
 	sd.raw = data
@@ -490,15 +554,17 @@ func (r *Registry) ResolveByCanonical(ctx context.Context, url, version string) 
 	defer r.mu.Unlock()
 
 	if sd.URL != "" {
-		if _, exists := r.byURL[sd.URL]; !exists {
-			r.byURL[sd.URL] = &sd
+		// Resolved meanwhile, by another call: the one indexed is kept.
+		if sd.Version != "" && r.byURLVersion[sd.URL+"|"+sd.Version] != nil {
+			return r.byURLVersion[sd.URL+"|"+sd.Version]
 		}
-		if sd.Version != "" {
-			key := sd.URL + "|" + sd.Version
-			if _, exists := r.byURLVersion[key]; !exists {
-				r.byURLVersion[key] = &sd
-				r.indexLatestUnlocked(&sd)
-			}
+		if sd.Version == "" && r.byURL[sd.URL] != nil {
+			return r.byURL[sd.URL]
+		}
+		typeDef := r.byType[sd.Type]
+		r.indexUnlocked(&sd)
+		if r.byType[sd.Type] != typeDef {
+			r.refreshDerivedUnlocked() // a type is defined now
 		}
 	}
 
@@ -593,8 +659,11 @@ func (r *Registry) GetElementDefinition(path string) *ElementDefinition {
 	for i := range sd.Snapshot.Element {
 		elem := &sd.Snapshot.Element[i]
 		if elem.Path == path {
+			// Cached only if the type is still defined by sd: a load meanwhile may have changed it.
 			r.mu.Lock()
-			r.elementDefCache[path] = elem
+			if r.byType[rootType] == sd {
+				r.elementDefCache[path] = elem
+			}
 			r.mu.Unlock()
 			return elem
 		}
@@ -603,11 +672,11 @@ func (r *Registry) GetElementDefinition(path string) *ElementDefinition {
 	return nil
 }
 
-// Count returns the number of loaded StructureDefinitions.
+// Count returns the number of loaded StructureDefinitions, every version of a URL counted.
 func (r *Registry) Count() int {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	return len(r.byURL)
+	return len(r.all)
 }
 
 // TypeCount returns the number of indexed types.

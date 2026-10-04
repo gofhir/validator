@@ -177,6 +177,24 @@ func createValidator() (*validator.Validator, error) {
 }
 ```
 
+## Dependencies and Versions
+
+A package declares the packages it was built with in the `dependencies` of its `package.json`. Its profiles bind to their value sets and use their extensions, so validating against a guide needs them loaded, in those versions. The validator loads them for you:
+
+- **Transitively, in the versions declared.** A wildcard (`3.3.x`) takes the highest matching release.
+- **Only what is missing.** A dependency satisfied by a package already loaded (a base package, or one you passed) is not looked for.
+- **From the package cache** (`WithPackagePath`). A dependency missing from it is reported and not loaded, unless you set `WithPackageRegistry` (for example `loader.DefaultRegistry`, `https://packages.fhir.org`): then it is downloaded into the cache. The library never downloads unless asked; the CLI does by default.
+- **One core package**, the one for the FHIR version validated. A dependency on the core package of another FHIR version is reported and not loaded.
+
+Which sources carry dependencies:
+
+| Source | Dependencies loaded |
+| --- | --- |
+| `WithPackage`, `WithPackageTgz`, `WithPackageURL`, `WithPackageData` | Yes: the package includes its `package.json` |
+| `WithConformanceResources`, `WithConformancePackage` | No: resources carry no dependency list, so pass the dependencies' resources too |
+
+Several versions of a package can be loaded side by side, for example a guide that depends on an older terminology package than the base one. A canonical that names a version (`url|1.0.0`) resolves to that version only. One that names none resolves to the highest version loaded, preferring definitions written for the FHIR version validated (an R5 flavor of a package does not replace the R4 one). In R4 and R4B, the core package's copies of HL7 Terminology code systems and value sets rank below HL7 Terminology's own.
+
 ## Package Cache Structure
 
 The FHIR package cache follows a standard directory layout. By default, packages are stored under `~/.fhir/packages/`:

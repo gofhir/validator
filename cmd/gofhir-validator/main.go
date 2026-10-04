@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gofhir/validator/pkg/issue"
+	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/validator"
 )
 
@@ -55,6 +56,9 @@ type Config struct {
 	Version       string
 	Profiles      []string
 	Packages      []string
+	BasePackages  []string
+	Registry      string
+	NoDownload    bool
 	PackageFiles  []string
 	PackageURLs   []string
 	Output        OutputFormat
@@ -122,12 +126,17 @@ func parseArgs(args []string) (*Config, error) {
 	fs := flag.NewFlagSet("gofhir-validator", flag.ContinueOnError)
 
 	// Define flags compatible with HL7 validator
-	var profiles, packages, packageFiles, packageURLs, tx string
+	var profiles, packages, basePackages, packageFiles, packageURLs, tx string
 	var output string
 
 	fs.StringVar(&config.Version, "version", "4.0.1", "FHIR version (4.0.1, 4.3.0, 5.0.0)")
 	fs.StringVar(&profiles, "ig", "", "Profile URL(s) to validate against (comma-separated)")
-	fs.StringVar(&packages, "package", "", "Additional FHIR package(s) to load (e.g., hl7.fhir.us.core#6.1.0)")
+	fs.StringVar(&packages, "package", "", "Additional FHIR package(s) to load, with the packages they depend on (e.g., hl7.fhir.us.core#6.1.0)")
+	fs.StringVar(&basePackages, "base-package", "", "Base package(s) to load from the package cache instead of the ones embedded for the\n"+
+		"version, comma-separated (e.g., hl7.fhir.r4.core#4.0.1,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.3.0)")
+	fs.StringVar(&config.Registry, "package-registry", loader.DefaultRegistry, "Package registry that packages missing from the package cache are downloaded from:\n"+
+		"the packages given with -package and the packages they depend on (not -base-package)")
+	fs.BoolVar(&config.NoDownload, "no-download", false, "Download no package: a dependency missing from the package cache is reported and not loaded")
 	fs.StringVar(&packageFiles, "package-file", "", "Local .tgz package file(s) to load (comma-separated)")
 	fs.StringVar(&packageURLs, "package-url", "", "Remote .tgz package URL(s) to load (comma-separated)")
 	fs.StringVar(&output, "output", "text", "Output format: text, json")
@@ -186,6 +195,11 @@ func parseArgs(args []string) (*Config, error) {
 	// Parse packages
 	if packages != "" {
 		config.Packages = strings.Split(packages, ",")
+	}
+
+	// Parse base packages
+	if basePackages != "" {
+		config.BasePackages = strings.Split(basePackages, ",")
 	}
 
 	// Parse package files (.tgz)
@@ -258,6 +272,20 @@ func buildOptions(config *Config) []validator.Option {
 		if len(parts) == 2 {
 			opts = append(opts, validator.WithPackage(parts[0], parts[1]))
 		}
+	}
+
+	var base []validator.PackageSpec
+	for _, pkg := range config.BasePackages {
+		if name, version, ok := strings.Cut(strings.TrimSpace(pkg), "#"); ok {
+			base = append(base, validator.PackageSpec{Name: name, Version: version})
+		}
+	}
+	if len(base) > 0 {
+		opts = append(opts, validator.WithBasePackages(base...))
+	}
+
+	if !config.NoDownload && config.Registry != "" {
+		opts = append(opts, validator.WithPackageRegistry(config.Registry))
 	}
 
 	for _, tgzPath := range config.PackageFiles {

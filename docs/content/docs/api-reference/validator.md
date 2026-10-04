@@ -168,12 +168,45 @@ v, _ := validator.New(
 func WithPackage(name, version string) Option
 ```
 
-Loads an additional FHIR package from the NPM package cache. The package must already be installed in the cache directory. Can be called multiple times.
+Loads an additional FHIR package from the NPM package cache, and the packages it depends on, transitively, in the versions its `package.json` declares (see [Dependencies and Versions](../../advanced/implementation-guides/#dependencies-and-versions)). The package must be installed in the cache directory, unless `WithPackageRegistry` is set. Can be called multiple times.
 
 ```go
 v, _ := validator.New(
     validator.WithPackage("hl7.fhir.us.core", "6.1.0"),
     validator.WithPackage("hl7.fhir.uv.ips", "1.1.0"),
+)
+```
+
+### WithPackageRegistry
+
+```go
+func WithPackageRegistry(url string) Option
+```
+
+Sets the package registry that packages missing from the package cache are downloaded from, into the cache: the packages added with `WithPackage` and the packages they depend on. Without it nothing is downloaded, and a dependency missing from the cache is reported and not loaded.
+
+```go
+v, _ := validator.New(
+    validator.WithPackageRegistry(loader.DefaultRegistry), // https://packages.fhir.org
+    validator.WithPackage("hl7.fhir.us.core", "6.1.0"),
+)
+```
+
+### WithBasePackages
+
+```go
+func WithBasePackages(packages ...PackageSpec) Option
+```
+
+Loads the given base packages from the package cache instead of the set embedded for the FHIR version (core, terminology and extensions packages): to validate against other versions of them.
+
+```go
+v, _ := validator.New(
+    validator.WithBasePackages(
+        validator.PackageSpec{Name: "hl7.fhir.r4.core", Version: "4.0.1"},
+        validator.PackageSpec{Name: "hl7.terminology.r4", Version: "6.2.0"},
+        validator.PackageSpec{Name: "hl7.fhir.uv.extensions.r4", Version: "5.3.0"},
+    ),
 )
 ```
 
@@ -329,7 +362,9 @@ type Config struct {
     Profiles             []string                 // Profiles to validate against
     StrictMode           bool                     // Treat warnings as errors
     PackagePath          string                   // Path to FHIR package cache
-    AdditionalPackages   []PackageSpec            // Additional packages to load
+    BasePackages         []PackageSpec            // Base packages to load instead of the embedded set
+    AdditionalPackages   []PackageSpec            // Additional packages to load, with their dependencies
+    PackageRegistry      string                   // Registry to download missing packages from; empty downloads none
     PackageTgzPaths      []string                 // Paths to local .tgz files
     PackageURLs          []string                 // URLs to remote .tgz files
     PackageData          [][]byte                 // In-memory .tgz bytes

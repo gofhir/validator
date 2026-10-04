@@ -149,6 +149,18 @@ type CodeResult struct {
 	// treat unchecked membership as membership (a slice discriminator) read it as
 	// unresolved.
 	Assumed bool
+
+	// Partial is set on an Unresolved answer of ResolveCodeInCodeSystem when the
+	// CodeSystem is held but does not include all its codes, and the code is not
+	// among those it includes: its content ("not-present", "fragment" or
+	// "example") and version. The code may still be one of its codes.
+	Partial *PartialCodeSystem
+}
+
+// PartialCodeSystem describes a CodeSystem that does not include all its codes.
+type PartialCodeSystem struct {
+	Content string // the CodeSystem's content: not-present, fragment or example
+	Version string
 }
 
 // Authority is the terminology port for hosts that own terminology resolution,
