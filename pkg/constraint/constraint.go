@@ -279,14 +279,12 @@ func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.Raw
 		evalCtx.SetPath(defPath)
 	}
 
-	// Wire Go context with timeout.
-	goCtx := opts.ctx
+	// The caller's context, and the time limit as a deadline: no timer per evaluation.
+	evalCtx.SetContext(opts.ctx)
 	if opts.timeout > 0 {
-		var cancel context.CancelFunc
-		goCtx, cancel = context.WithTimeout(goCtx, opts.timeout)
-		defer cancel()
+		release := evalCtx.SetDeadline(time.Now().Add(opts.timeout))
+		defer release()
 	}
-	evalCtx.SetContext(goCtx)
 
 	// Set safety limits.
 	evalCtx.SetLimit("maxDepth", 100)
@@ -336,6 +334,13 @@ func focus(model *registry.FHIRPathModel, data json.RawMessage, defPath string) 
 		}
 	}
 	col, _ := types.JSONToCollectionWithType(data, typ)
+	// The focus is read for one evaluation, in one goroutine: it may keep what it works out about
+	// itself (its type, the fields read) rather than work it out again.
+	for _, v := range col {
+		if obj, ok := v.(*types.ObjectValue); ok {
+			obj.MarkPrivate()
+		}
+	}
 	return col
 }
 
