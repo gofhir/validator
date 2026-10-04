@@ -1,0 +1,19 @@
+{
+ "resourceType": "Questionnaire",
+ "status": "draft",
+ "item": [
+  {
+   "linkId": "1",
+   "type": "string",
+   "maxLength": 5,
+   "_maxLength": {
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/v-t-pos",
+      "valueString": "x"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Observation/o1",
+   "resource": {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "id": "o1",
+    "contained": [
+     {
+      "resourceType": "Patient",
+      "id": "p",
+      "name": [
+       {
+        "family": "a",
+        "extension": [
+         {
+          "url": "https://example.org/fhir/StructureDefinition/z-rr",
+          "valueString": "x"
+         }
+        ]
+       }
+      ]
+     }
+    ],
+    "subject": {
+     "reference": "#p"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueCodeableConcept": {
+  "coding": [
+   {
+    "system": "http://x",
+    "code": "a"
+   }
+  ],
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/z-ccis",
+    "valueString": "x"
+   }
+  ]
+ }
+}

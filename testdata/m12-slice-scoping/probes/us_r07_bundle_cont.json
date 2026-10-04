@@ -1,0 +1,62 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Observation/o1",
+   "resource": {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "id": "o1",
+    "subject": {
+     "reference": "#p1"
+    },
+    "contained": [
+     {
+      "resourceType": "Patient",
+      "id": "p1",
+      "name": [
+       {
+        "family": "x",
+        "given": [
+         "abc"
+        ],
+        "_given": [
+         {
+          "extension": [
+           {
+            "url": "https://example.org/fhir/StructureDefinition/q-contsel",
+            "valueString": "x"
+           },
+           {
+            "url": "https://example.org/fhir/StructureDefinition/q-cgivenfp",
+            "valueString": "x"
+           },
+           {
+            "url": "https://example.org/fhir/StructureDefinition/q-cprim",
+            "valueString": "x"
+           }
+          ]
+         }
+        ],
+        "extension": [
+         {
+          "url": "https://example.org/fhir/StructureDefinition/q-resid",
+          "valueString": "x"
+         },
+         {
+          "url": "https://example.org/fhir/StructureDefinition/q-rootis",
+          "valueString": "x"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

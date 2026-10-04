@@ -1,0 +1,20 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "given": [
+    "zbc"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/p-invprim",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

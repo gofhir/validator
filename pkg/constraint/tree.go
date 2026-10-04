@@ -169,6 +169,7 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 		opts.rootResourceCol = parent.resourceCol
 		opts.scope.RootResource = parent.scope.Resource
 	}
+	opts.resolver = resolverWithin(opts.resolver, opts.scope.RootResource, nil)
 
 	for _, sd := range v.nestedDefinitions(opts.ctx, res) {
 		if root := sd.Tree().Root(); root != nil {

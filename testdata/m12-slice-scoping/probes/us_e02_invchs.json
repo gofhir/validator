@@ -1,0 +1,16 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abc",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/r-invchs",
+    "valueString": "x"
+   }
+  ]
+ }
+}

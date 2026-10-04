@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","type":"collection","entry":[{"fullUrl":"urn:uuid:11111111-1111-1111-1111-111111111111","resource":{"resourceType":"Pati\u0065nt","id":"a","name":[{"family":"A","extension":[{"url": "https://example.org/fhir/StructureDefinition/r7-fpall", "valueString": "x"}]}]}}]}

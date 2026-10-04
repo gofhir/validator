@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "n-negz",
+ "url": "https://example.org/fhir/StructureDefinition/n-negz",
+ "version": "0.1.0",
+ "name": "n_negz",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/n-negz"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Quantity"
+  }
+ ],
+ "contextInvariant": [
+  "value = 0"
+ ]
+}

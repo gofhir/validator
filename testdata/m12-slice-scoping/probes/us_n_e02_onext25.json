@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p1","extension":[{"url":"https://example.org/fhir/StructureDefinition/n-host","valueDecimal":2.5,"extension":[{"url":"https://example.org/fhir/StructureDefinition/n-onext","valueString":"a"}]}]}

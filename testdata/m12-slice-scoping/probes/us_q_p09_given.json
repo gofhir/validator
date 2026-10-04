@@ -1,0 +1,50 @@
+{
+ "resourceType": "Parameters",
+ "parameter": [
+  {
+   "name": "a",
+   "part": [
+    {
+     "name": "x",
+     "part": [
+      {
+       "name": "y",
+       "resource": {
+        "resourceType": "Patient",
+        "id": "p",
+        "name": [
+         {
+          "given": [
+           "a",
+           null,
+           "c"
+          ],
+          "_given": [
+           null,
+           {
+            "extension": [
+             {
+              "url": "https://example.org/fhir/StructureDefinition/r7-fpgiven",
+              "valueString": "x"
+             }
+            ]
+           },
+           {
+            "extension": [
+             {
+              "url": "https://example.org/fhir/StructureDefinition/r7-fpgiven",
+              "valueString": "x"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

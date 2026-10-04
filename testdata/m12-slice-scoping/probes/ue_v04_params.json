@@ -1,0 +1,28 @@
+{
+ "resourceType": "Parameters",
+ "parameter": [
+  {
+   "name": "p",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "meta": {
+     "profile": [
+      "http://hl7.org/fhir/StructureDefinition/Patient"
+     ]
+    },
+    "name": [
+     {
+      "family": "x",
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/c-none",
+        "valueString": "x"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

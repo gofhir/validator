@@ -1,0 +1,1 @@
+{"resourceType": "NamingSystem", "id": "x", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "extension": [{"url": "https://example.org/fhir/StructureDefinition/p-metadataresource", "valueString": "v"}, {"url": "https://example.org/fhir/StructureDefinition/p-canonicalresource", "valueString": "v"}]}

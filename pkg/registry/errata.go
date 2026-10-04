@@ -11,6 +11,13 @@ package registry
 
 const fhirTypeExtension = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type"
 
+// The FHIR versions the corrections are published in (StructureDefinition.fhirVersion).
+const (
+	fhirR4  = "4.0.1"
+	fhirR4B = "4.3.0"
+	fhirR5  = "5.0.0"
+)
+
 // The FHIR primitive types the corrections name.
 const (
 	primitiveID     = "id"
@@ -30,16 +37,16 @@ type typeErratum struct {
 var typeErrata = []typeErratum{{
 	// R4 types a resource's logical id as string, while the R4 specification gives it the id type
 	// (resource.html: "id : id"), and R5 declares it so.
-	fhirVersion: "4.0.1", path: "Resource.id", published: primitiveString, corrected: primitiveID,
+	fhirVersion: fhirR4, path: "Resource.id", published: primitiveString, corrected: primitiveID,
 	source: "hl7.fhir.r5.core#5.0.0 StructureDefinition/Resource, Resource.id",
 }, {
 	// R5 (and R4B, below) types ElementDefinition.id as id, which no id with a slice or a choice ("Patient.deceased[x]")
 	// can satisfy; the element's own definition says "any string value that does not contain spaces".
-	fhirVersion: "5.0.0", path: "ElementDefinition.id", published: primitiveID, corrected: primitiveString,
+	fhirVersion: fhirR5, path: "ElementDefinition.id", published: primitiveID, corrected: primitiveString,
 	source: "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, ElementDefinition.id",
 }, {
 	// R4B publishes the same defect as R5.
-	fhirVersion: "4.3.0", path: "ElementDefinition.id", published: primitiveID, corrected: primitiveString,
+	fhirVersion: fhirR4B, path: "ElementDefinition.id", published: primitiveID, corrected: primitiveString,
 	source: "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, ElementDefinition.id",
 }}
 
@@ -58,7 +65,7 @@ type constraintErratum struct {
 
 var constraintErrata = []constraintErratum{{
 	// R5's eld-11 quotes a string with double quotes, which is not FHIRPath.
-	fhirVersion: "5.0.0", from: "http://hl7.org/fhir/StructureDefinition/ElementDefinition", key: "eld-11",
+	fhirVersion: fhirR5, from: "http://hl7.org/fhir/StructureDefinition/ElementDefinition", key: "eld-11",
 	published: `binding.empty() or type.code.empty() or type.code.contains(":") or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()`,
 	corrected: `binding.empty() or type.code.empty() or type.code.contains(':') or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()`,
 	source:    "hl7.fhir.core 6.0.0-snapshot1 StructureDefinition/ElementDefinition, eld-11",
@@ -66,16 +73,73 @@ var constraintErrata = []constraintErratum{{
 	// R4's que-7 tests the answer against System.Boolean, which no FHIR boolean is
 	// (fhirpath.html#types: a FHIR primitive is of its FHIR type), so it fails on every enableWhen
 	// with operator 'exists'. R4B and R5 test it against the FHIR type boolean.
-	fhirVersion: "4.0.1", path: "Questionnaire.item.enableWhen", key: "que-7",
+	fhirVersion: fhirR4, path: "Questionnaire.item.enableWhen", key: "que-7",
 	published: `operator = 'exists' implies (answer is Boolean)`,
 	corrected: `operator = 'exists' implies (answer is boolean)`,
 	source:    "hl7.fhir.r4b.core#4.3.0 StructureDefinition/Questionnaire, que-7",
 }}
 
-// applyErrata corrects sd's elements, in its snapshot and its differential.
+// contextErratum adds a context of use to an extension whose published contexts leave out a target
+// the specification itself uses it on.
+type contextErratum struct {
+	fhirVersion string           // StructureDefinition.fhirVersion the defect is published in
+	url         string           // the extension's canonical url
+	published   []string         // its element contexts as published, corrected only if exactly these
+	add         ExtensionContext // the context the specification uses it in
+	source      string           // the definitions of that version that use it there
+}
+
+// regexPublished are the element contexts regex is published with: Questionnaire.item and
+// ElementDefinition, which leave out ElementDefinition.type.
+var regexPublished = []string{"Questionnaire.item", "ElementDefinition"}
+
+var contextErrata = []contextErratum{{
+	// R4 puts regex on ElementDefinition.type of each primitive type's value element (19 elements:
+	// string.value, boolean.value, ...), a target its own contexts do not name. The HL7 validator
+	// accepts it there, and only there.
+	fhirVersion: fhirR4, url: regexExtension, published: regexPublished,
+	add:    regexOnType,
+	source: "hl7.fhir.r4.core#4.0.1 StructureDefinition/string, string.value type: extension regex",
+}, {
+	fhirVersion: fhirR4B, url: regexExtension, published: regexPublished,
+	add:    regexOnType,
+	source: "hl7.fhir.r4b.core#4.3.0 StructureDefinition/string, string.value type: extension regex",
+}, {
+	fhirVersion: fhirR5, url: regexExtension, published: regexPublished,
+	add:    regexOnType,
+	source: "hl7.fhir.r5.core#5.0.0 StructureDefinition/string, string.value type: extension regex",
+}}
+
+const regexExtension = "http://hl7.org/fhir/StructureDefinition/regex"
+
+// regexOnType is the context the specification uses regex in that its definition leaves out.
+var regexOnType = ExtensionContext{Type: "element", Expression: "ElementDefinition.type"}
+
+// applyErrata corrects sd: its elements, in its snapshot and its differential, and the contexts of
+// use it publishes.
 func applyErrata(sd *StructureDefinition) {
 	correctElements(sd.FHIRVersion, snapshotElements(sd))
 	correctElements(sd.FHIRVersion, differentialElements(sd))
+	correctContexts(sd)
+}
+
+// correctContexts adds the context of use an erratum names, where sd publishes exactly the
+// defective contexts.
+func correctContexts(sd *StructureDefinition) {
+	for _, er := range contextErrata {
+		if er.fhirVersion != sd.FHIRVersion || er.url != sd.URL || len(sd.Context) != len(er.published) {
+			continue
+		}
+		match := true
+		for i, c := range sd.Context {
+			if c.Type != "element" || c.Expression != er.published[i] {
+				match = false
+			}
+		}
+		if match {
+			sd.Context = append(sd.Context, er.add)
+		}
+	}
 }
 
 // correctElements corrects elements of a definition written for fhirVersion.

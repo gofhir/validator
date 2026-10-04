@@ -1,0 +1,42 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:33333333-3333-3333-3333-333333333333",
+   "resource": {
+    "resourceType": "Bundle",
+    "type": "collection",
+    "entry": [
+     {
+      "fullUrl": "urn:uuid:22222222-2222-2222-2222-222222222222",
+      "resource": {
+       "resourceType": "Observation",
+       "id": "o",
+       "status": "final",
+       "code": {
+        "text": "t"
+       },
+       "subject": {
+        "reference": "urn:uuid:44444444-4444-4444-4444-444444444444",
+        "extension": [
+         {
+          "url": "https://example.org/fhir/StructureDefinition/r7-res",
+          "valueString": "x"
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:44444444-4444-4444-4444-444444444444",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "po"
+   }
+  }
+ ]
+}

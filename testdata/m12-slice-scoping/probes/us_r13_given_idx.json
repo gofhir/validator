@@ -1,0 +1,23 @@
+{
+ "resourceType": "Patient",
+ "id": "p1",
+ "name": [
+  {
+   "given": [
+    "zz",
+    "abc"
+   ],
+   "_given": [
+    null,
+    {
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/q-cprim",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

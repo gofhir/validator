@@ -1,0 +1,19 @@
+{
+ "resourceType": "Patient",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-x3",
+    "valueString": "x"
+   }
+  ]
+ },
+ "_deceasedBoolean": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-x4",
+    "valueString": "x"
+   }
+  ]
+ }
+}

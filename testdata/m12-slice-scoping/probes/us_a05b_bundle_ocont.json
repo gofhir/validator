@@ -1,0 +1,36 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:11111111-1111-1111-1111-111111111111",
+   "resource": {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "#p1"
+    },
+    "contained": [
+     {
+      "resourceType": "Patient",
+      "id": "p1",
+      "name": [
+       {
+        "family": "x",
+        "extension": [
+         {
+          "url": "https://example.org/fhir/StructureDefinition/r-ocont",
+          "valueString": "x"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

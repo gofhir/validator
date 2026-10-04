@@ -1,0 +1,22 @@
+{
+ "resourceType": "Parameters",
+ "parameter": [
+  {
+   "name": "p",
+   "resource": {
+    "resourceType": "Patient",
+    "name": [
+     {
+      "family": "x",
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/p-name",
+        "valueString": "x"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

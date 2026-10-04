@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","name":[{"family":"A"}],"name":[{"family":"B","extension":[{"url": "https://example.org/fhir/StructureDefinition/r7-fpa", "valueString": "x"}]}]}

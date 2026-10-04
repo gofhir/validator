@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/r-invparent",
+   "valueString": "x"
+  }
+ ],
+ "name": [
+  {
+   "family": "x",
+   "_family": {
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/r-invparent",
+      "valueString": "x"
+     }
+    ]
+   }
+  }
+ ]
+}

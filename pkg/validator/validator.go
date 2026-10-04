@@ -579,6 +579,8 @@ func New(opts ...Option) (*Validator, error) {
 	)
 	v.constraintValidator = constraint.New(reg, constraintTermReg, constraint.WithMatcher(matcher),
 		constraint.WithDefinitions(v.extValidator))
+	// An extension's context invariants are evaluated as the profiles' invariants are.
+	v.extValidator.SetFHIRPathEvaluator(contextScopes{v.constraintValidator})
 	v.fixedPatternValidator = fixedpattern.New(reg)
 	v.slicingValidator = slicing.NewWithMatcher(reg, matcher, slicing.WithDefinitions(v.extValidator))
 
@@ -757,6 +759,8 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	// Conformance checks made by slice matching share one memo for this validation.
 	ctx = withConformState(ctx)
 	ctx = constraint.WithReportScope(ctx)
+	ctx = withExtensionScope(ctx)
+	ctx = withExact(ctx, data, resource)
 	for _, sd := range profilesToValidate {
 		v.validateAgainstProfile(ctx, data, resource, sd, nil, result)
 	}
@@ -804,8 +808,12 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	}
 	result.Stats.PhasesRun++
 
-	// Phase 5: Extension validation
-	v.extValidator.ValidateData(ctx, data, sd, result)
+	// Phase 5: Extension validation. What it checks depends on no profile: an extension against its
+	// own definition, and where it is used. It runs once per instance in a validation, not once per
+	// declared profile.
+	if firstExtensionCheck(ctx, data) {
+		v.extValidator.ValidateDataWith(ctx, v.extensionData(ctx, data, rawJSON, vs), sd, result)
+	}
 	result.Stats.PhasesRun++
 
 	// Phase 6: Reference validation

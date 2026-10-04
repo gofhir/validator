@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "text": "t",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/p-invfam",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

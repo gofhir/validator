@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "p1"
+  }
+ ],
+ "subject": {
+  "reference": "#p1",
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/z-res",
+    "valueString": "x"
+   }
+  ]
+ }
+}

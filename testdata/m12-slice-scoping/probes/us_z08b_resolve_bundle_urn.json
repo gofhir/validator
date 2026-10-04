@@ -1,0 +1,31 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:1b4e28ba-2fa1-11d2-883f-0016d3cca427",
+   "resource": {
+    "resourceType": "Patient"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:2b4e28ba-2fa1-11d2-883f-0016d3cca427",
+   "resource": {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "urn:uuid:1b4e28ba-2fa1-11d2-883f-0016d3cca427",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/z-res",
+       "valueString": "x"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

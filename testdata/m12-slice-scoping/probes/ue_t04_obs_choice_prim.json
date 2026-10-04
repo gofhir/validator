@@ -1,0 +1,16 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "s",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/p-obsvalue",
+    "valueString": "x"
+   }
+  ]
+ }
+}

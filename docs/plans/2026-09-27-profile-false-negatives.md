@@ -69,7 +69,13 @@ specification, gofhir follows the specification, and the divergence is declared 
 | # | Question | HL7 6.10.4 | Spec | Decision |
 | --- | --- | --- | --- | --- |
 | B-D1 | A profile requires a primitive's value (`Patient.birthDate.value` min 1) | Reported missing when the primitive has a value (`"birthDate": "2000-01-01"`), and when it has only extensions | json.html#primitive: the value is the JSON property itself; its id and extensions are in the `_key` sibling | Count the value: missing only when the primitive has no value (`pe4`). **Declared divergence** where HL7 reports it on a primitive that has one (`pe5`). |
+| B-D2 | Extension context `Element` on a resource root | Accepts it everywhere, resource roots included | An element context is a "formal element id"; an instance matches the ids of the elements it instantiates and of its type and the type's ancestors. `Resource` does not derive from `Element` (R4, R5) | Reject it on a resource root. **Declared divergence.** |
+| B-D3 | Extension context `BackboneElement` on an element defined by contentReference (`Questionnaire.item.item` → `Questionnaire.item`) | Rejects it: only the element's path and its target's are matched | The element instantiates `Questionnaire.item`, a `BackboneElement` | Accept it. **Declared divergence.** |
+| B-D4 | Element context written as a path through a data type (`Patient.name.given`; 29 in the extensions packages) | Accepts it as a path | Not a formal element id | Resolve the path through the definitions; it names the element it resolves to, and matches only that. A path that does not resolve matches nothing. Same as HL7. |
+| B-D5 | Element context naming a type the validated version does not define (`CanonicalResource` in R4; 33 in the extensions packages) | Accepts it on R4 canonical resources | R4 defines no `CanonicalResource`, but references.html lists the R4 resources that are canonical | Versioned data: the R4 and R4B lists of canonical resource types from references.html (`registry.canonicalResourceTypes`); `CanonicalResource` matches those. Same as HL7. |
 | B-D6 | Which packages and versions a guide's canonicals resolve against | Loads the guide's dependencies, transitively, in the versions declared, several versions of a package side by side (`hl7.terminology.r4` 5.0.0 and 7.4.0); an unversioned canonical resolves to the latest version loaded, a pinned one exactly (DEQM `cqf-inputParameters|5.2.0`) | references.html#canonical: without a version, "should pick the latest version"; with one, that version. The NPM package specification declares `dependencies` and the package `type` (`fhir.core`) | Load the dependencies, transitively, from the cache (the CLI downloads the missing ones; the library reports them). Several versions coexist. Unversioned: the latest among the definitions written for the FHIR version validated (then its release, then any), so an R5 flavor does not replace the R4 one (for R4B, the R4 extensions package, written for 4.0.1, ranks below the R4B core's definitions of the same URLs); a definition is used whole, its extension contexts included (`event-location` 5.3.0 is not allowed on `Media`, which R4 core's 4.0.1 allowed: HL7 6.10.4 reports it too, and the contexts are no longer merged across versions); a semver version is above one that is not (the core package's `v3-ActCode` is `2018-08-12`). **Errata** (`loader.Publishers`, R4 and R4B): the core and examples packages' copies of definitions under another loaded package's canonical (not their own) (terminology.hl7.org: `consentpolicycodes` `4.0.1` in core, `3.0.1` in THO) rank below that package's, as in the HL7 validator ("special case logic for UTG support prior to version 5"). One core package, the FHIR version validated's: another version's is reported and not loaded. A CodeSystem that does not include all its codes (content `not-present`, `fragment`, `example`) cannot reject a code: `not-present` is reported as information (HL7 `TERMINOLOGY_TX_SYSTEM_NOT_USABLE`), the others as a warning, and a ValueSet including the whole system accepts the code unchecked (THO's CDCREC is `not-present`). |
+| B-D7 | Extension context naming a sub-extension (`url#code`, `url|version#code`) | Never matches it: compares the expression with the sub-extension's relative url | structuredefinition.html (R5) defines `#` followed by the code of a sub-extension within a complex extension | Match the sub-extension of the extension the url names, whatever version it pins. Not declared: `hl7diff` compares the errors gofhir reports (`ue_t11_sub`, `ue_t11b_subsub`). |
+| B-D8 | Element context `MetadataResource` on an R5 resource whose definition declares it (ValueSet, `structuredefinition-implements`) | Rejects it | A resource is named by the interfaces its type implements, which R5's definitions declare | Match the interfaces the definitions declare. **Declared divergence** (`ui5_vs_x5-meta`). |
 
 ## Design: definition layering
 
@@ -208,8 +214,55 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
   not `Element`'s), so a profile that requires or forbids the value is met as json.html#primitive
   says (decision B-D1).
 - **Still open in B4:**
-  - **B4b, the context of use:** a definition with no context; contexts of type `fhirpath` and
-    `extension`, which today reject the extension; and the HL7 message to pair with.
+  - **B4b, the context of use (2026-10-04, `feat/b4b-extension-context`):** the target is the
+    element that holds the extension, and what it is comes from the definitions the instance is
+    walked with (decisions B-D2 to B-D5); `extension` contexts, a definition with no context, and
+    context invariants. A `fhirpath` context is evaluated from the root of the resource the target is
+    in, and selects the target when the target is one of the nodes it returns, by place
+    (gofhir/fhirpath v1.10.3 `ObjectValue.Location()`), not by value, as HL7 does
+    (`uc_fnamepath`: `name[0]` allowed, `name[1]` and an equal `contact[0].name` not; a contained
+    resource from its own root). Paired with HL7 `Extension_EXTP_Context_Wrong`, at the target.
+    Expressions are evaluated on the resource the target is in, a contained resource as a node of its
+    container, which is its `%rootResource`, so the places of the two are told apart
+    (`ue_u04_controot`); `resolve()` finds the entries of the Bundle validated, as for the profiles'
+    invariants (`us_r05b_resolve_bundle`). A context invariant is evaluated on the target's own
+    JSON, typed as the constraint phase types a value (a choice value by its type,
+    `us_z01_isqty`; a contentReference by the element it points to, `us_z42_cref_is`), a
+    primitive with its id and extensions (`ue_u01_invid`), and its result read as HL7 reads it: a
+    single boolean is its value, nothing is false (`ue_u02_invfam_empty`), anything else true
+    (`us_d01_invstr`, `us_d02_invmulti`); the first that does not hold is reported
+    (`us_z05_two_inv`). The resource validated is read once, from the JSON it was parsed from, when an
+    expression needs it; the resources it holds (Bundle entries, contained resources,
+    `Parameters.parameter.resource`) are nodes of that reading, found once per path. Numbers are read
+    as the JSON spells them (`1.50` is not `1.5`, `us_r5_d1`), in a slice's conformance check too,
+    which reads the value it checks as the validation parsed it (`us_n_g01_bslice150`); a primitive
+    with no value is its element, typed as the primitive (`us_r5_n`). A fhirpath context's places
+    are worked out once per resource, with `ObjectValue.Location()`, whose cost is the depth of the
+    path, wherever the JSON writes `resourceType`, and which reads an escaped `resourceType` decoded
+    (gofhir/fhirpath v1.10.3; `us_q_p03_esc_rt`, `us_q_p12_entry_esc_rt`). A decimal is read as written (`-0`,
+    `100`) since v1.10.1 (`us_n_a11_negzs`, `us_n_h02_negz_prim`).
+    `resolve()` looks for a reference in the innermost Bundle that holds the expression's resource,
+    then in the Bundles that hold that one, as HL7 does; a fragment reference (`#id`) only among the
+    resources the referring resource contains (references.html#contained), in the constraint phase
+    too, where it was looked for in every entry of the Bundle (`us_v_g5_frag_other_entry`). The
+    numbers as the JSON spells them are decoded only when an expression needs them.
+  - **Found in B4b review (not B4b):** Duplicate JSON keys are not reported (HL7: the property is a duplicate and ignored;
+    `encoding/json` keeps the last, the JSON readers the first). A JSON with a byte order mark is
+    rejected (HL7 accepts it). The constraint phase's `resolve()` in a profile's invariant does not
+    look in a Bundle an entry holds. A regular extension used as a `modifierExtension` is not reported
+    (HL7: `Extension_EXT_Modifier_Y`). In the profiles' invariants (the constraint phase), unlike
+    the context invariants: a value below a resource's root is read from the parse into float64,
+    so a decimal loses its precision (`1.50` is `1.5`); an empty result holds, where HL7 converts it
+    to false; and resolve() in a Bundle an entry holds looks in the outer Bundle only. Present on
+    main.
+    An evaluation stopped at the time limit is the constraint phase's processing notice, not a
+    violation. An extension context names the extension that holds it by its url
+    even when its definition is not loaded (`ue_u06_unkext`). R4's and R4B's `MetadataResource`
+    names no resource (`interface-probes`), as in HL7. Decision B-D7.
+  - **Found in B4b review (not B4b):** a `null` in a primitive array whose `_key` sibling holds the
+    element (`"given":["a",null],"_given":[null,{...}]`, json.html#primitive) is reported as a
+    parse error ("the primitive value must be a string"); HL7 accepts it (`ue_t01_given_null`).
+    Present on main.
 - **Sub-extensions (2026-10-04, `fix/b4-subextension-severity`):** a part with a relative url its
   definition does not declare is an error, `EXTENSION_SUBEXTENSION_INVALID`, as HL7 reports
   `Extension_EXT_SubExtension_Invalid` (`xd3`, `xd7`, `xd12`): parts are "local/relative to the

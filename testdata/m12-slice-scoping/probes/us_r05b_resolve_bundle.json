@@ -1,0 +1,33 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1"
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Observation/o1",
+   "resource": {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "id": "o1",
+    "subject": {
+     "reference": "Patient/p1",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/q-resolve",
+       "valueString": "x"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

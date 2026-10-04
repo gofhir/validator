@@ -1,0 +1,21 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "given": [
+    "abc"
+   ],
+   "_given": [
+    {
+     "id": "g1",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/p-invid",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

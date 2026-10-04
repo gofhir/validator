@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "p1",
+   "name": [
+    {
+     "family": "x",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/p-name",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "link": [
+  {
+   "other": {
+    "reference": "#p1"
+   },
+   "type": "seealso"
+  }
+ ]
+}

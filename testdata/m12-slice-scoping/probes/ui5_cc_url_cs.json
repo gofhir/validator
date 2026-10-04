@@ -1,0 +1,14 @@
+{
+ "resourceType": "CodeSystem",
+ "status": "draft",
+ "content": "not-present",
+ "url": "http://a.org/cs",
+ "_url": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/x5-cc",
+    "valueString": "x"
+   }
+  ]
+ }
+}

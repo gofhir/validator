@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "zz",
+ "name": [
+  {
+   "family": "x",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/q-resid",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

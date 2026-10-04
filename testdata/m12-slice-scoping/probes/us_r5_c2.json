@@ -1,0 +1,11 @@
+{
+ "resourceType": "Patient",
+ "_deceasedBoolean": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-c1",
+    "valueString": "x"
+   }
+  ]
+ }
+}

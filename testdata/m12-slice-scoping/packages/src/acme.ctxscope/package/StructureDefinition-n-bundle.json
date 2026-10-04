@@ -1,0 +1,50 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "n-bundle",
+ "url": "https://example.org/fhir/StructureDefinition/n-bundle",
+ "version": "0.1.0",
+ "name": "NBundle",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "resource"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Bundle.entry:obs",
+    "path": "Bundle.entry",
+    "sliceName": "obs",
+    "min": 1,
+    "max": "*"
+   },
+   {
+    "id": "Bundle.entry:obs.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Observation",
+      "profile": [
+       "https://example.org/fhir/StructureDefinition/n-obs"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

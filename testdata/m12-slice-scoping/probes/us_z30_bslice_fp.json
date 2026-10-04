@@ -1,0 +1,29 @@
+{
+ "resourceType": "Bundle",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/StructureDefinition/z-bun"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "name": [
+     {
+      "family": "a",
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/z-bfp",
+        "valueString": "x"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

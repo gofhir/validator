@@ -54,5 +54,69 @@
     "file": "testdata/m12-slice-scoping/probes/pe5_value_present.json",
     "location": "Patient.birthDate",
     "messageId": "Validation_VAL_Profile_Minimum"
+  },
+  {
+    "decision": "B-D2",
+    "reason": "An element context is a formal element id (defining-extensions.html#context), and an element matches the ids of the elements it instantiates and of its type and the type's ancestors; Resource does not derive from Element (R4, R5), so 'Element' does not name a resource's root. HL7 6.10.4 accepts 'Element' everywhere.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/uc_element_patient.json",
+    "location": "Patient",
+    "messageId": "EXTENSION_INVALID_CONTEXT"
+  },
+  {
+    "decision": "B-D2",
+    "reason": "An element context is a formal element id (defining-extensions.html#context), and an element matches the ids of the elements it instantiates and of its type and the type's ancestors; Resource does not derive from Element (R4, R5), so 'Element' does not name a resource's root. HL7 6.10.4 accepts 'Element' everywhere.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/uc_element_questionnaire.json",
+    "location": "Questionnaire",
+    "messageId": "EXTENSION_INVALID_CONTEXT"
+  },
+  {
+    "decision": "B-D3",
+    "reason": "Questionnaire.item.item is defined by a contentReference to Questionnaire.item, a BackboneElement: the element instantiates a BackboneElement, which the context names. HL7 6.10.4 matches only the element's and its target's paths.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/uc_backbone_questionnaire.json",
+    "location": "Questionnaire.item[0].item[0]",
+    "messageId": "Extension_EXTP_Context_Wrong"
+  },
+  {
+    "decision": "B-D2",
+    "reason": "An element context is a formal element id (defining-extensions.html#context), and an element matches the ids of the elements it instantiates and of its type and the type's ancestors; Resource does not derive from Element (R4, R5), so 'Element' does not name a resource's root. HL7 6.10.4 accepts 'Element' everywhere.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/us_v_c3_elem_root.json",
+    "location": "Patient",
+    "messageId": "EXTENSION_INVALID_CONTEXT"
+  },
+  {
+    "decision": "B-D2",
+    "reason": "An element context is a formal element id (defining-extensions.html#context), and an element matches the ids of the elements it instantiates and of its type and the type's ancestors; Resource does not derive from Element (R4, R5), so 'Element' does not name a resource's root. HL7 6.10.4 accepts 'Element' everywhere.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ui5_ap_x5-elem.json",
+    "location": "ActorDefinition",
+    "messageId": "EXTENSION_INVALID_CONTEXT"
+  },
+  {
+    "decision": "B-D2",
+    "reason": "An element context is a formal element id (defining-extensions.html#context), and an element matches the ids of the elements it instantiates and of its type and the type's ancestors; Resource does not derive from Element (R4, R5), so 'Element' does not name a resource's root. HL7 6.10.4 accepts 'Element' everywhere.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ui5_pat_x5-elem.json",
+    "location": "Patient",
+    "messageId": "EXTENSION_INVALID_CONTEXT"
+  },
+  {
+    "decision": "B-D2",
+    "reason": "An element context is a formal element id (defining-extensions.html#context), and an element matches the ids of the elements it instantiates and of its type and the type's ancestors; Resource does not derive from Element (R4, R5), so 'Element' does not name a resource's root. HL7 6.10.4 accepts 'Element' everywhere.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ui5_vs_x5-elem.json",
+    "location": "ValueSet",
+    "messageId": "EXTENSION_INVALID_CONTEXT"
+  },
+  {
+    "decision": "B-D8",
+    "reason": "An element context names an element id, and a resource is also named by the interfaces its type implements; R5's ValueSet definition declares MetadataResource (structuredefinition-implements), so 'MetadataResource' names it. HL7 6.10.4 does not match the interfaces R5 declares.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ui5_vs_x5-meta.json",
+    "location": "ValueSet",
+    "messageId": "Extension_EXTP_Context_Wrong"
   }
 ]

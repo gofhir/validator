@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"o1","status":"final","code":{"text":"x"},"valueQuantity":{"extension":[{"url":"https://example.org/fhir/StructureDefinition/n-eq10","valueString":"a"}],"value":1}}

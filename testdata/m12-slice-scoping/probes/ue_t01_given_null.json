@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "given": [
+    "a",
+    null
+   ],
+   "_given": [
+    null,
+    {
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/p-given",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

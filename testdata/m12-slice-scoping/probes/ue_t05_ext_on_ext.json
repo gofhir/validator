@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/p-cplx",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/p-extwhere",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,42 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "v-d3",
+ "url": "https://example.org/fhir/StructureDefinition/v-d3",
+ "version": "0.1.0",
+ "name": "v_d3",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "fhirpath",
+   "expression": "Observation.where(valueQuantity.value.toString() = '1.50')"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/v-d3"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ }
+}

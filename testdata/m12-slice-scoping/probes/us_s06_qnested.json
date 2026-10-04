@@ -1,0 +1,57 @@
+{
+ "resourceType": "Questionnaire",
+ "status": "active",
+ "item": [
+  {
+   "linkId": "g",
+   "type": "group",
+   "item": [
+    {
+     "linkId": "a",
+     "type": "decimal",
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+       "valueCoding": {
+        "system": "http://unitsofmeasure.org",
+        "code": "kg"
+       }
+      }
+     ]
+    },
+    {
+     "linkId": "b",
+     "type": "string",
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+       "valueCoding": {
+        "system": "http://unitsofmeasure.org",
+        "code": "kg"
+       }
+      }
+     ]
+    },
+    {
+     "linkId": "c",
+     "type": "group",
+     "item": [
+      {
+       "linkId": "d",
+       "type": "integer",
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+         "valueCoding": {
+          "system": "http://unitsofmeasure.org",
+          "code": "kg"
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

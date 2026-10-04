@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "family": "2019-12-08",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/r-invstrdate",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

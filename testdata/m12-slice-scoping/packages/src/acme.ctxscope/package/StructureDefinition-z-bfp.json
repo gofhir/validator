@@ -1,0 +1,42 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "z-bfp",
+ "url": "https://example.org/fhir/StructureDefinition/z-bfp",
+ "version": "0.1.0",
+ "name": "z_bfp",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "fhirpath",
+   "expression": "Bundle.entry.resource.ofType(Patient).name"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/z-bfp"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ }
+}

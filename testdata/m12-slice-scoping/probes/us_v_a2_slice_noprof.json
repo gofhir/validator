@@ -1,0 +1,26 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "bp"
+ },
+ "component": [
+  {
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/x-sys",
+     "valueString": "x"
+    }
+   ],
+   "code": {
+    "coding": [
+     {
+      "system": "http://loinc.org",
+      "code": "8480-6"
+     }
+    ]
+   },
+   "valueString": "1"
+  }
+ ]
+}

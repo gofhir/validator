@@ -94,3 +94,28 @@ func TestExtensionValidation_UsesProfileResolver(t *testing.T) {
 		t.Error("ProfileResolver was never called — extension validator is still using GetByURL instead of ResolveByCanonical")
 	}
 }
+
+// An extension only the ProfileResolver serves has its context of use checked the first time it is
+// met, not only once a validation has kept its definition.
+func TestExtensionContextFromTheProfileResolver(t *testing.T) {
+	const extURL = "http://example.org/StructureDefinition/patient-only"
+	resolver := &mockExtensionResolver{extensionURL: extURL, sdJSON: []byte(`{"resourceType":"StructureDefinition",
+		"url":"` + extURL + `","name":"PatientOnly","status":"active","fhirVersion":"4.0.1","kind":"complex-type",
+		"abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension",
+		"derivation":"constraint","context":[{"type":"element","expression":"Patient"}],
+		"snapshot":{"element":[{"id":"Extension","path":"Extension","min":0,"max":"*"},
+			{"id":"Extension.url","path":"Extension.url","min":1,"max":"1","fixedUri":"` + extURL + `"},
+			{"id":"Extension.value[x]","path":"Extension.value[x]","min":1,"max":"1","type":[{"code":"string"}]}]}}`)}
+	v, err := New(WithProfileResolver(resolver), WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := v.Validate(context.Background(), []byte(`{"resourceType":"Observation","status":"final","code":{"text":"x"},`+
+		`"extension":[{"url":"`+extURL+`","valueString":"v"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if issueFor(t, result, "EXTENSION_INVALID_CONTEXT") == nil {
+		t.Error("an extension allowed on Patient only is not reported on an Observation the first time it is met")
+	}
+}

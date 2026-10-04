@@ -1,0 +1,28 @@
+{
+ "resourceType": "Parameters",
+ "parameter": [
+  {
+   "name": "a",
+   "resource": {
+    "resourceType": "Patient",
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/x-pat",
+      "valueString": "x"
+     }
+    ],
+    "name": [
+     {
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/x-param",
+        "valueString": "x"
+       }
+      ],
+      "text": "x"
+     }
+    ]
+   }
+  }
+ ]
+}

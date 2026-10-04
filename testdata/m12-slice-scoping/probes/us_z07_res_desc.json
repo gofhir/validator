@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "family": "a",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/z-desc",
+     "valueString": "x"
+    }
+   ]
+  },
+  {
+   "family": "b"
+  }
+ ]
+}

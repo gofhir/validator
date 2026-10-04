@@ -1,0 +1,12 @@
+{
+ "resourceType": "Patient",
+ "id": "p1",
+ "meta": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/q-typeinv",
+    "valueString": "x"
+   }
+  ]
+ }
+}

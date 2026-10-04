@@ -40,6 +40,8 @@ type StructureDefinition struct {
 
 	// Context defines where an extension can be used
 	Context []ExtensionContext `json:"context,omitempty"`
+	// ContextInvariant are the FHIRPath rules an extension's target must meet to hold it.
+	ContextInvariant []string `json:"contextInvariant,omitempty"`
 
 	Snapshot     *Snapshot     `json:"snapshot,omitempty"`
 	Differential *Differential `json:"differential,omitempty"`
@@ -285,9 +287,10 @@ type Registry struct {
 	resolver ProfileResolver
 
 	// Type classification caches - computed once after loading for O(1) lookups
-	domainResources    map[string]bool // types that inherit from DomainResource
-	canonicalResources map[string]bool // types with 'url' element
-	metadataResources  map[string]bool // canonical + name/status/experimental
+	domainResources map[string]bool // types that inherit from DomainResource
+
+	// interfaces caches the interfaces of each definition's type (see Interfaces).
+	interfaces map[*StructureDefinition][]string
 
 	model *FHIRPathModel // see FHIRPathModel
 }
@@ -295,13 +298,13 @@ type Registry struct {
 // New creates a new empty Registry.
 func New() *Registry {
 	r := &Registry{
-		byURL:              make(map[string]*StructureDefinition),
-		byURLVersion:       make(map[string]*StructureDefinition),
-		byType:             make(map[string]*StructureDefinition),
-		elementDefCache:    make(map[string]*ElementDefinition),
-		domainResources:    make(map[string]bool),
-		canonicalResources: make(map[string]bool),
-		metadataResources:  make(map[string]bool),
+		byURL:           make(map[string]*StructureDefinition),
+		byURLVersion:    make(map[string]*StructureDefinition),
+		byType:          make(map[string]*StructureDefinition),
+		elementDefCache: make(map[string]*ElementDefinition),
+		domainResources: make(map[string]bool),
+
+		interfaces: map[*StructureDefinition][]string{},
 	}
 	r.model = &FHIRPathModel{reg: r}
 	return r
@@ -340,8 +343,7 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 func (r *Registry) refreshDerivedUnlocked() {
 	clear(r.elementDefCache)
 	clear(r.domainResources)
-	clear(r.canonicalResources)
-	clear(r.metadataResources)
+	clear(r.interfaces)
 	r.buildTypeClassificationCaches()
 	r.model = &FHIRPathModel{reg: r}
 }
@@ -463,18 +465,6 @@ func (r *Registry) buildTypeClassificationCaches() {
 		// Check if DomainResource (inherits from DomainResource)
 		if r.inheritsFromUnlocked(sd, domainResourceURL) {
 			r.domainResources[typeName] = true
-		}
-
-		// Check if CanonicalResource (has .url element)
-		if r.hasElementUnlocked(sd, typeName+".url") {
-			r.canonicalResources[typeName] = true
-
-			// Check if MetadataResource (canonical + name/status/experimental)
-			if r.hasRequiredElementUnlocked(sd, typeName+".status") &&
-				r.hasElementUnlocked(sd, typeName+".name") &&
-				r.hasElementUnlocked(sd, typeName+".experimental") {
-				r.metadataResources[typeName] = true
-			}
 		}
 	}
 }
@@ -781,27 +771,25 @@ func (r *Registry) IsDomainResource(typeName string) bool {
 	return r.domainResources[typeName]
 }
 
-// IsCanonicalResource checks if the given type is a CanonicalResource.
-// Derived from StructureDefinition: has 'url' element defined.
-// CanonicalResources have globally unique identifiers and can be referenced by URL.
-// Note: In R4, url is optional in most canonical resources; only StructureDefinition requires it.
-// Examples: StructureDefinition, ValueSet, CodeSystem, CapabilityStatement, etc.
-// Uses pre-computed cache for O(1) lookups.
+// IsCanonicalResource reports whether a resource type is a canonical resource: one that implements
+// CanonicalResource (Interfaces).
 func (r *Registry) IsCanonicalResource(typeName string) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.canonicalResources[typeName]
+	return r.implements(typeName, canonicalResourceInterface)
 }
 
-// IsMetadataResource checks if the given type is a MetadataResource.
-// Derived from StructureDefinition: is CanonicalResource + has name, status, experimental.
-// MetadataResources are publishable conformance resources.
-// Examples: StructureDefinition, ValueSet, CodeSystem, SearchParameter, etc.
-// Uses pre-computed cache for O(1) lookups.
+// IsMetadataResource reports whether a resource type implements MetadataResource (Interfaces). A
+// version whose definitions declare no interfaces (R4, R4B) names no metadata resource.
 func (r *Registry) IsMetadataResource(typeName string) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.metadataResources[typeName]
+	return r.implements(typeName, "MetadataResource")
+}
+
+func (r *Registry) implements(typeName, iface string) bool {
+	for _, name := range r.Interfaces(r.GetByType(typeName)) {
+		if name == iface {
+			return true
+		}
+	}
+	return false
 }
 
 // Unlocked versions for use inside buildTypeClassificationCaches (called while lock is held).
@@ -823,32 +811,4 @@ func (r *Registry) inheritsFromUnlocked(sd *StructureDefinition, baseURL string)
 	}
 	baseSd := r.byURL[sd.BaseDefinition]
 	return r.inheritsFromUnlocked(baseSd, baseURL)
-}
-
-// hasElementUnlocked checks for element existence without acquiring locks.
-// Used during cache building when the lock is already held.
-func (r *Registry) hasElementUnlocked(sd *StructureDefinition, path string) bool {
-	if sd == nil || sd.Snapshot == nil {
-		return false
-	}
-	for _, elem := range sd.Snapshot.Element {
-		if elem.Path == path {
-			return true
-		}
-	}
-	return false
-}
-
-// hasRequiredElementUnlocked checks for required element without acquiring locks.
-// Used during cache building when the lock is already held.
-func (r *Registry) hasRequiredElementUnlocked(sd *StructureDefinition, path string) bool {
-	if sd == nil || sd.Snapshot == nil {
-		return false
-	}
-	for _, elem := range sd.Snapshot.Element {
-		if elem.Path == path && elem.Min >= 1 {
-			return true
-		}
-	}
-	return false
 }

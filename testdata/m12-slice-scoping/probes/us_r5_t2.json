@@ -1,0 +1,25 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "issued": "2020-01-01T10:00:00Z",
+ "_issued": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-t-inst",
+    "valueString": "x"
+   }
+  ]
+ },
+ "valueTime": "10:00:00",
+ "_valueTime": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-t-time",
+    "valueString": "x"
+   }
+  ]
+ }
+}

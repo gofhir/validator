@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "reference": "#p1"
+ },
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "p1",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/r-root",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "id": "p1",
+ "name": [
+  {
+   "given": [
+    "abc"
+   ],
+   "_given": [
+    {
+     "id": "g1",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/q-primid",
+       "valueString": "x"
+      },
+      {
+       "url": "https://example.org/fhir/StructureDefinition/q-primext",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

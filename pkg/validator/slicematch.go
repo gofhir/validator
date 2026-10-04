@@ -125,7 +125,12 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 	if err := c.v.registry.EnsureSnapshot(ctx, profile); err != nil {
 		return false
 	}
-	raw, err := json.Marshal(data)
+	// The value as the JSON spells its numbers, when the validation read it (1.50 is not 1.5).
+	exact := exactOf(ctx, data)
+	if exact == nil {
+		exact = data
+	}
+	raw, err := json.Marshal(exact)
 	if err != nil {
 		return false
 	}
@@ -134,7 +139,7 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 	result.Stats = &issue.Stats{}
 	st, _ := ctx.Value(conformStateKey{}).(*conformState)
 	// The check's issues are discarded: it reports into a scope of its own.
-	c.v.validateAgainstProfile(constraint.WithReportScope(ctx), data, raw, profile, &valueScope{scope: scope, state: st}, result)
+	c.v.validateAgainstProfile(withExtensionScope(constraint.WithReportScope(ctx)), data, raw, profile, &valueScope{scope: scope, state: st}, result)
 	return result.ErrorCount() == 0
 }
 

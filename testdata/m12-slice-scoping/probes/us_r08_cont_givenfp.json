@@ -1,0 +1,37 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "reference": "#p1"
+ },
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "p1",
+   "name": [
+    {
+     "given": [
+      "abc"
+     ],
+     "_given": [
+      {
+       "extension": [
+        {
+         "url": "https://example.org/fhir/StructureDefinition/q-cgivenfp",
+         "valueString": "x"
+        },
+        {
+         "url": "https://example.org/fhir/StructureDefinition/q-contsel",
+         "valueString": "x"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

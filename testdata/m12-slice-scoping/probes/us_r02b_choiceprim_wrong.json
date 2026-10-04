@@ -1,0 +1,16 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueBoolean": true,
+ "_valueBoolean": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/q-choiceprim",
+    "valueString": "x"
+   }
+  ]
+ }
+}

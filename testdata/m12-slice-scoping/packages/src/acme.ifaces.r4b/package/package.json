@@ -1,0 +1,10 @@
+{
+ "name": "acme.ifaces.r4b",
+ "version": "0.1.0",
+ "fhirVersions": [
+  "4.3.0"
+ ],
+ "dependencies": {
+  "hl7.fhir.r4b.core": "4.3.0"
+ }
+}

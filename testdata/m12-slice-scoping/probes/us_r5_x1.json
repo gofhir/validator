@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/v-x2",
+   "valueString": "x"
+  }
+ ],
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueQuantity": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-x1",
+    "valueString": "x"
+   }
+  ],
+  "value": 1.50
+ }
+}

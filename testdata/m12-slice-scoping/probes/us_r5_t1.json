@@ -1,0 +1,57 @@
+{
+ "resourceType": "Patient",
+ "id": "p1",
+ "_id": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-t-id",
+    "valueString": "x"
+   }
+  ]
+ },
+ "implicitRules": "http://x.org/r",
+ "_implicitRules": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-t-uri",
+    "valueString": "x"
+   }
+  ]
+ },
+ "gender": "male",
+ "_gender": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-t-code",
+    "valueString": "x"
+   }
+  ]
+ },
+ "active": true,
+ "_active": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-t-bool",
+    "valueString": "x"
+   }
+  ]
+ },
+ "multipleBirthInteger": 2,
+ "_multipleBirthInteger": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-t-int",
+    "valueString": "x"
+   }
+  ]
+ },
+ "deceasedBoolean": false,
+ "_deceasedBoolean": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-c1",
+    "valueString": "x"
+   }
+  ]
+ }
+}

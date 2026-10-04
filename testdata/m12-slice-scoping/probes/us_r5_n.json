@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-n1",
+    "valueString": "x"
+   },
+   {
+    "url": "https://example.org/fhir/StructureDefinition/v-n2",
+    "valueString": "x"
+   }
+  ]
+ }
+}

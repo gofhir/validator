@@ -1,0 +1,11 @@
+{
+ "resourceType": "ValueSet",
+ "status": "draft",
+ "url": "http://a.org/vs",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/x5-elem",
+   "valueString": "x"
+  }
+ ]
+}

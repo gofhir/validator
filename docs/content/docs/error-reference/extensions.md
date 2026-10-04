@@ -12,7 +12,8 @@ Extension errors occur when FHIR extensions do not conform to their declared Str
 | ID | Severity | Message |
 |----|----------|---------|
 | `EXTENSION_UNKNOWN` | warning | Unknown extension '{url}' |
-| `EXTENSION_INVALID_CONTEXT` | error | Extension '{url}' not allowed in context '{path}' |
+| `EXTENSION_INVALID_CONTEXT` | error | Extension '{url}' is not allowed in context '{context}' |
+| `EXTENSION_CONTEXT_INVARIANT` | error | Extension '{url}' is not allowed here: its context invariant '{expression}' does not hold |
 | `EXTENSION_MISSING_URL` | error | Extension at '{path}' has no url |
 | `EXTENSION_NO_VALUE` | error | Extension at '{path}' has no value[x] |
 | `EXTENSION_MULTIPLE_VALUES` | error | Extension at '{path}' has multiple value[x] elements |
@@ -53,7 +54,14 @@ gofhir-validator -ig http://example.org/fhir/ImplementationGuide/example patient
 
 ## EXTENSION_INVALID_CONTEXT
 
-The extension is defined with a context restriction that does not include the element where it was used. Every extension StructureDefinition declares where it is permitted via `StructureDefinition.context`.
+An extension is used on a target its definition does not allow (`StructureDefinition.context`; "Extensions SHALL only be used on a target that appears in their context list", defining-extensions.html). The target is the element that holds the extension, and the issue is reported there. What the target is comes from the definitions, not from its JSON path:
+
+- an `element` context names an element id. The target matches the id of the element it instantiates and the element that one is based on (`Patient.text` is based on `DomainResource.text`), the element a contentReference points to, the root of its type and of each of the type's ancestors (`HumanName`, `Element`; `Patient`, `DomainResource`, `Resource`), and its path from the resource through the data types it is in (`Patient.name.given`). A context does not cover the elements under its target: `Patient` allows the resource's root, not `Patient.name`. `Element` does not name a resource's root, which is not an Element. A resource is also named by the interfaces its type implements: those its definition declares (R5: `CanonicalResource`, `MetadataResource`; the HL7 validator 6.10.4 does not match `MetadataResource` on R5's ValueSet, which declares it); in R4 and R4B, which declare none, `CanonicalResource` names the resources references.html lists as canonical, and `MetadataResource`, a logical model no resource derives from, names none, as in the HL7 validator;
+- an `extension` context names the extension that holds it: its url, whatever version the context pins, or `url#code` for a sub-extension of a complex extension;
+- a `fhirpath` context selects the target: the expression is evaluated from the root of the resource the target is in (a contained resource's own root, with its container as `%rootResource`), and the target must be one of the nodes it returns. The same node, not an equal one: `Patient.name.where(use = 'official')` allows `Patient.name[0]` when that name is official, and not `Patient.contact[0].name`, however alike. An expression that returns no element, such as a boolean, allows no target;
+- a definition with no context allows no target.
+
+The context names the issue lists are the target's.
 
 **Example:**
 
@@ -72,6 +80,15 @@ An extension defined with context `Patient` used on an Observation:
 ```
 
 **Fix:** Use the extension only in the contexts declared in its StructureDefinition, or update the extension definition to include the desired context.
+
+
+---
+
+## EXTENSION_CONTEXT_INVARIANT
+
+An extension is used on a target its context allows, but one of its definition's context invariants (`StructureDefinition.contextInvariant`) does not hold. A context invariant is "a rule that is executed on the element that contains the extension when it is present" (defining-extensions.html): it is evaluated on the target, as a profile's invariant is: on a primitive, with its id and extensions; with `%rootResource` the container of a contained resource, and `resolve()` finding a fragment reference (`#id`) among the resources the target's resource contains, and any other reference among the entries of the innermost Bundle that holds it, then of the Bundles that hold that one. Its result is read as a boolean as the HL7 validator reads it: a single boolean is its value, nothing is false, and anything else is true. The issue is reported at the target, once, for the first invariant that does not hold.
+
+**Example:** an extension for `Patient` with the context invariant `gender.exists()`, on a Patient with no gender.
 
 ---
 

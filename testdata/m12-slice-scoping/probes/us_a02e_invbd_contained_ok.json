@@ -1,0 +1,25 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "reference": "#p1"
+ },
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "p1",
+   "birthDate": "1980-01-01",
+   "_birthDate": {
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/r-invbd",
+      "valueString": "x"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "modifierExtension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/p-cplx",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/p-modext",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

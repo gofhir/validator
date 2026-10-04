@@ -1,0 +1,21 @@
+{
+ "resourceType": "ValueSet",
+ "status": "active",
+ "expansion": {
+  "timestamp": "2020-01-01",
+  "contains": [
+   {
+    "code": "c",
+    "display": "bcd",
+    "_display": {
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/z-cont",
+       "valueString": "x"
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

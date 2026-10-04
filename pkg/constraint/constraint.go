@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -24,6 +25,9 @@ type ValidateOptions struct {
 	// BundleData is the parsed Bundle JSON, enabling resolve() in FHIRPath.
 	// When non-nil, a resolver is created that can find resources by fullUrl.
 	BundleData map[string]any
+	// OuterBundles are the Bundles that hold BundleData, innermost first, where resolve() looks for
+	// a reference BundleData does not resolve.
+	OuterBundles []map[string]any
 
 	// Resource and RootResource are the resources the validated value sits in, for %resource and
 	// %rootResource, as FHIRPath collections, when the value is not itself the root of its
@@ -145,6 +149,7 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	if evalOpts.scope.Resource == nil {
 		evalOpts.scope = slicematch.Scope{Resource: resource, RootResource: resource, Container: resource}
 	}
+	evalOpts.resolver = resolverWithin(evalOpts.resolver, evalOpts.scope.RootResource, nil)
 
 	v.walk(sd, root, "", resource, resourceData, sd.RootName(resource), evalOpts, result)
 }
@@ -165,7 +170,7 @@ func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResource
 
 	// Wire resolver if Bundle data is available.
 	if vopts != nil && vopts.BundleData != nil {
-		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData}
+		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData, outer: vopts.OuterBundles}
 	}
 	if vopts != nil {
 		opts.sliceResolver, opts.containment = vopts.Resolver, vopts.Containment
@@ -270,8 +275,14 @@ func hitTimeLimit(err error) bool {
 
 // evaluateWithContext builds an eval.Context with all services wired and evaluates the expression.
 func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.RawMessage, defPath string, opts *constraintEvalOpts) (fhirpath.Collection, error) {
+	return v.evaluateOn(expr, focus(v.model(), data, defPath), defPath, opts)
+}
+
+// evaluateOn evaluates the expression with focus, a value read from the input whose definition path
+// is defPath, as evaluateWithContext does.
+func (v *Validator) evaluateOn(expr *fhirpath.Expression, focus fhirpath.Collection, defPath string, opts *constraintEvalOpts) (fhirpath.Collection, error) {
 	model := v.model()
-	evalCtx := eval.NewContextForRoot(focus(model, data, defPath))
+	evalCtx := eval.NewContextForRoot(focus)
 	if model != nil {
 		// The types come from the loaded definitions, not from the engine's guesses: without them
 		// a string that begins with four digits is read as a date.
@@ -326,14 +337,7 @@ func (v *Validator) model() *registry.FHIRPathModel {
 // definition, so an object's fields resolve and a primitive is read as its FHIR type
 // ("2019-12-08" at a dateTime is a dateTime, not a date).
 func focus(model *registry.FHIRPathModel, data json.RawMessage, defPath string) fhirpath.Collection {
-	var typ string
-	if model != nil && defPath != "" {
-		typ = model.TypeOf(defPath)
-		if typ == "" && model.HasType(defPath) {
-			typ = defPath
-		}
-	}
-	col, _ := types.JSONToCollectionWithType(data, typ)
+	col, _ := types.JSONToCollectionWithType(data, typeOf(model, defPath))
 	// The focus is read for one evaluation, in one goroutine: it may keep what it works out about
 	// itself (its type, the fields read) rather than work it out again.
 	for _, v := range col {
@@ -342,6 +346,21 @@ func focus(model *registry.FHIRPathModel, data json.RawMessage, defPath string) 
 		}
 	}
 	return col
+}
+
+// typeOf is the type the model assigns defPath: a resource or a data type by its own name, an
+// element by the type of its definition; "" without a model.
+func typeOf(model *registry.FHIRPathModel, defPath string) string {
+	if model == nil || defPath == "" {
+		return ""
+	}
+	if typ := model.TypeOf(defPath); typ != "" {
+		return typ
+	}
+	if model.HasType(defPath) {
+		return defPath
+	}
+	return ""
 }
 
 // getCompiledExpression returns a cached compiled expression or compiles a new one.
@@ -419,4 +438,337 @@ func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath strin
 // Dom-6: narrative requirement - warning severity per FHIR spec.
 func (v *Validator) isBestPractice(_ string) bool {
 	return false
+}
+
+// bundleType is the resource whose entries resolve() finds references in (bundle.html#references).
+const bundleType = "Bundle"
+
+// ScopeRoot is the resource a Scope evaluates the expressions of extension contexts on.
+type ScopeRoot struct {
+	// Resource is the resource, as parsed.
+	Resource map[string]any
+	// Raw is the JSON Resource was parsed from, which the expressions read; nil reads Resource.
+	Raw []byte
+	// Bundle is the Bundle being validated, which resolve() finds references in, when Resource is
+	// in one (a slice's conformance check).
+	Bundle map[string]any
+	// Exact returns an object of Resource, or of Bundle, with its numbers as the JSON spells them
+	// (1.50 is not 1.5), or nil when it has none: what resolve() returns, and what is read when Raw
+	// is nil. Nil reads the objects as parsed.
+	Exact func(map[string]any) map[string]any
+}
+
+// Scope returns what evaluates the expressions of extension contexts on root's resource;
+// Scope.Within, on a resource it holds. The references resolve() follows are found in the Bundles
+// that hold the resource, as for the profiles' invariants. The resource is read once, when an expression first
+// needs it, and the resources it holds are nodes of that reading; what each expression selects is
+// kept.
+func (v *Validator) Scope(ctx context.Context, root ScopeRoot) *Scope {
+	s := &Scope{v: v, ctx: ctx, raw: root.Raw, data: root.Resource, exact: root.Exact, selected: map[string]map[string]struct{}{}}
+	if root.Bundle != nil {
+		s.bundles = []map[string]any{root.Bundle}
+	}
+	if rt, _ := root.Resource[resourceTypeKey].(string); rt == bundleType && root.Bundle == nil {
+		s.bundles = []map[string]any{root.Resource}
+	}
+	return s
+}
+
+// Scope evaluates the expressions of extension contexts on one resource (Validator.Scope). It is
+// used by one goroutine.
+type Scope struct {
+	v      *Validator
+	ctx    context.Context
+	raw    []byte         // the JSON the root was parsed from; nil for a resource another holds
+	parent *Scope         // the scope of the resource that holds this one; nil for the root
+	at     string         // where the resource is in root: "" for root, "Bundle.entry[0].resource"
+	data   map[string]any // the resource
+	// contained reports a resource its parent contains, whose %rootResource the parent is.
+	contained bool
+	// bundles are the Bundles resolve() finds references in, innermost first.
+	bundles []map[string]any
+	exact   func(map[string]any) map[string]any // see ScopeRoot.Exact
+
+	read     bool
+	in       evaluation
+	err      error
+	selected map[string]map[string]struct{}       // the places each expression selects
+	held     map[string]map[string]fhirpath.Value // the resources it holds, by path and place
+}
+
+// Within returns the scope of resource, at at in root ("Bundle.entry[0].resource",
+// "Observation.contained[0]"), a resource the scope's resource holds: contained, its %rootResource is
+// the scope's resource; otherwise its own. When resource is a Bundle, resolve() looks for a
+// reference in it first, then in the Bundles that hold it. A resource that is not where at says is
+// evaluated as a root of its own.
+func (s *Scope) Within(at string, resource map[string]any, contained bool) *Scope {
+	bundles := s.bundles
+	if rt, _ := resource[resourceTypeKey].(string); rt == bundleType {
+		bundles = append([]map[string]any{resource}, s.bundles...)
+	}
+	return &Scope{v: s.v, ctx: s.ctx, parent: s, at: at, data: resource, contained: contained, bundles: bundles, exact: s.exact, selected: map[string]map[string]struct{}{}}
+}
+
+// Holds reports whether expression, a FHIRPath invariant, is true on value, an element of the
+// resource whose definition path, as the definitions type it, is focusPath ("Observation.valueQuantity",
+// "Questionnaire.item"): an object, or a primitive's value, with element its "_key" sibling (its id
+// and extensions). It is evaluated as this phase evaluates a constraint, and its result converted to
+// a boolean as the HL7 validator converts it (toBoolean): an empty result does not hold. An
+// evaluation stopped at this validator's time limit is an error that wraps context.DeadlineExceeded.
+func (s *Scope) Holds(expression, focusPath string, value any, element map[string]any) (bool, error) {
+	expr, err := s.v.getCompiledExpression(expression)
+	if err != nil {
+		return false, err
+	}
+	if err := s.readResource(); err != nil || s.in.resource == nil {
+		return false, err
+	}
+	on, err := s.v.focusOn(value, element, focusPath)
+	if err != nil || on == nil {
+		return false, err
+	}
+	res, err := s.v.evaluateOn(expr, on, focusPath, s.in.opts)
+	if err != nil {
+		return false, timeLimited(err)
+	}
+	return toBoolean(res), nil
+}
+
+// focusOn reads value as the type the model assigns focusPath, with element, a primitive's "_key"
+// sibling, as the element the primitive carries (json.html#primitive). A primitive with no value is
+// its element.
+func (v *Validator) focusOn(value any, element map[string]any, focusPath string) (fhirpath.Collection, error) {
+	var carried *types.ObjectValue
+	if element != nil {
+		data, err := json.Marshal(element)
+		if err != nil {
+			return nil, err
+		}
+		carried = types.NewObjectValueWithType(data, typeOf(v.model(), focusPath))
+	}
+	if value == nil {
+		if carried == nil {
+			return nil, nil
+		}
+		return fhirpath.Collection{carried}, nil // a primitive with no value, typed as one with
+	}
+	data, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+	on := focus(v.model(), data, focusPath)
+	if carried != nil && len(on) == 1 {
+		on[0] = withElement(on[0], carried)
+	}
+	return on, nil
+}
+
+// withElement is the primitive p carrying element.
+func withElement(p fhirpath.Value, element *types.ObjectValue) fhirpath.Value {
+	switch p := p.(type) {
+	case types.String:
+		return p.WithElement(element)
+	case types.Boolean:
+		return p.WithElement(element)
+	case types.Integer:
+		return p.WithElement(element)
+	case types.Decimal:
+		return p.WithElement(element)
+	case types.Date:
+		return p.WithElement(element)
+	case types.DateTime:
+		return p.WithElement(element)
+	case types.Time:
+		return p.WithElement(element)
+	}
+	return p
+}
+
+// toBoolean is a context invariant's result as a boolean, as the HL7 validator converts it
+// (FHIRPathEngine.convertToBoolean): a single Boolean is its value; any other result is true when it
+// is not empty. Empty is false.
+func toBoolean(res fhirpath.Collection) bool {
+	if len(res) == 1 {
+		if b, ok := res[0].(types.Boolean); ok {
+			return b.Bool()
+		}
+	}
+	return len(res) > 0
+}
+
+// Selects reports whether expression, evaluated from the resource as this phase evaluates a
+// constraint on a resource, returns the node at location in root: "Patient.name[0]", and for a
+// primitive the element it carries, "Patient.name[0].given[1]". Places are root's, so a node of a
+// container and one of the resource it contains are told apart; a node the expression makes rather
+// than reads from root is in no place. The places an expression selects are worked out once.
+// Errors are as for Holds.
+func (s *Scope) Selects(expression, location string) (bool, error) {
+	if places, ok := s.selected[expression]; ok {
+		_, selected := places[location]
+		return selected, nil
+	}
+	expr, err := s.v.getCompiledExpression(expression)
+	if err != nil {
+		return false, err
+	}
+	if err := s.readResource(); err != nil || s.in.resource == nil {
+		return false, err
+	}
+	res, err := s.v.evaluateOn(expr, s.in.resource, s.in.resourceType, s.in.opts)
+	if err != nil {
+		return false, timeLimited(err)
+	}
+	places := make(map[string]struct{}, len(res))
+	for _, node := range res {
+		if place := locationOf(node); place != "" {
+			places[place] = struct{}{}
+		}
+	}
+	s.selected[expression] = places
+	_, selected := places[location]
+	return selected, nil
+}
+
+// readResource reads the resource the first time an expression needs it: root from its JSON, and
+// a resource it holds as a node of that reading, found once per path among the resources its parent
+// holds.
+func (s *Scope) readResource() error {
+	if s.read {
+		return s.err
+	}
+	s.read = true
+	if s.parent == nil {
+		s.in, s.err = s.v.evaluationOf(s.ctx, s.data, s.raw, s.bundles, s.exact)
+		return s.err
+	}
+	node, err := s.parent.heldAt(s.at)
+	if err != nil {
+		s.err = err
+		return err
+	}
+	if node == nil {
+		s.in, s.err = s.v.evaluationOf(s.ctx, s.data, nil, s.bundles, s.exact)
+		return s.err
+	}
+	resource := fhirpath.Collection{node}
+	rootResource, container := resource, s.data
+	if s.contained {
+		rootResource, container = s.parent.in.resource, s.parent.data
+	}
+	opts := s.v.buildEvalOpts(s.ctx, resource, rootResource, bundleOptions(s.bundles))
+	opts.resolver = resolverWithin(opts.resolver, container, s.exact)
+	s.in = evaluation{resourceType: node.Type(), resource: resource, opts: opts}
+	return nil
+}
+
+// heldAt is the resource at at in root, one the scope's resource holds, or nil when there is none:
+// the resources the scope's resource holds under the same path are found once.
+func (s *Scope) heldAt(at string) (fhirpath.Value, error) {
+	if err := s.readResource(); err != nil || s.in.resource == nil {
+		return nil, err
+	}
+	prefix := locationOf(s.in.resource[0])
+	rest, ok := strings.CutPrefix(at, prefix+".")
+	if !ok || prefix == "" {
+		return nil, nil
+	}
+	path := withoutIndexes(rest) // "entry.resource", "contained", "parameter.resource"
+	held, ok := s.held[path]
+	if !ok {
+		expr, err := s.v.getCompiledExpression(path)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := s.v.evaluateOn(expr, s.in.resource, s.in.resourceType, s.in.opts)
+		if err != nil {
+			return nil, timeLimited(err)
+		}
+		held = make(map[string]fhirpath.Value, len(nodes))
+		for _, node := range nodes {
+			if location := locationOf(node); location != "" {
+				held[location] = node
+			}
+		}
+		if s.held == nil {
+			s.held = map[string]map[string]fhirpath.Value{}
+		}
+		s.held[path] = held
+	}
+	return held[at], nil
+}
+
+// withoutIndexes is a place without its indexes: "entry.resource" for "entry[3].resource".
+func withoutIndexes(place string) string {
+	var b strings.Builder
+	depth := 0
+	for _, r := range place {
+		switch {
+		case r == '[':
+			depth++
+		case r == ']':
+			depth--
+		case depth == 0:
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
+}
+
+// timeLimited marks an evaluation stopped at this validator's own time limit as such: it wraps
+// context.DeadlineExceeded.
+func timeLimited(err error) error {
+	if hitTimeLimit(err) && !errors.Is(err, context.DeadlineExceeded) {
+		return fmt.Errorf("%w: %w", context.DeadlineExceeded, err)
+	}
+	return err
+}
+
+// evaluation is a resource read for evaluating expressions on it.
+type evaluation struct {
+	resourceType string
+	resource     fhirpath.Collection // the resource, read as its type within root
+	opts         *constraintEvalOpts
+}
+
+// evaluationOf reads root for evaluating expressions on it, from raw, the JSON it was parsed from,
+// or when raw is nil from root itself, as exact gives it: %resource and %rootResource are it, and
+// resolve() finds references in bundles, innermost first.
+func (v *Validator) evaluationOf(ctx context.Context, root map[string]any, raw []byte, bundles []map[string]any, exact func(map[string]any) map[string]any) (evaluation, error) {
+	if raw == nil {
+		var err error
+		if raw, err = json.Marshal(exactOr(exact, root)); err != nil {
+			return evaluation{}, err
+		}
+	}
+	rt, _ := root[resourceTypeKey].(string)
+	col := focus(v.model(), raw, rt)
+	opts := v.buildEvalOpts(ctx, col, col, bundleOptions(bundles))
+	opts.resolver = resolverWithin(opts.resolver, root, exact)
+	return evaluation{resourceType: rt, resource: col, opts: opts}, nil
+}
+
+// exactOr is exact's twin of m, or m when there is none.
+func exactOr(exact func(map[string]any) map[string]any, m map[string]any) map[string]any {
+	if exact != nil {
+		if e := exact(m); e != nil {
+			return e
+		}
+	}
+	return m
+}
+
+// bundleOptions are the options for resolve() to find references in bundles, innermost first.
+func bundleOptions(bundles []map[string]any) *ValidateOptions {
+	if len(bundles) == 0 {
+		return &ValidateOptions{}
+	}
+	return &ValidateOptions{BundleData: bundles[0], OuterBundles: bundles[1:]}
+}
+
+// locationOf is where node is in the input it was read from, or "" when it was not read from it.
+func locationOf(node fhirpath.Value) string {
+	if element, ok := types.ElementOf(node); ok {
+		return element.Location()
+	}
+	return ""
 }

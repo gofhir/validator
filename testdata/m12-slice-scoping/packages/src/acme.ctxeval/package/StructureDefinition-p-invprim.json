@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-invprim",
+ "url": "https://example.org/fhir/StructureDefinition/p-invprim",
+ "version": "0.1.0",
+ "name": "p_invprim",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/p-invprim"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "HumanName.given"
+  }
+ ],
+ "contextInvariant": [
+  "startsWith('a')"
+ ]
+}

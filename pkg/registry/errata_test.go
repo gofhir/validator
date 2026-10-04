@@ -137,6 +137,11 @@ func TestEveryErratumHasASource(t *testing.T) {
 			t.Errorf("incomplete erratum %+v", er)
 		}
 	}
+	for _, er := range contextErrata {
+		if er.source == "" || er.fhirVersion == "" || er.url == "" || len(er.published) == 0 || er.add.Expression == "" {
+			t.Errorf("incomplete erratum %+v", er)
+		}
+	}
 	for _, er := range constraintErrata {
 		if er.source == "" || er.fhirVersion == "" || (er.from == "") == (er.path == "") || er.key == "" || er.published == er.corrected {
 			t.Errorf("incomplete erratum %+v", er)

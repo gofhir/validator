@@ -81,7 +81,7 @@ func TestSubExtensionInItsExtensionContext(t *testing.T) {
 			"Patient.extension[0].extension[0]", false},
 		{"on the resource",
 			`{"resourceType":"Patient","extension":[` + part + `]}`,
-			"Patient.extension[0]", true},
+			"Patient", true}, // where the HL7 validator reports it: the element that holds the extension
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			res, err := v.Validate(context.Background(), []byte(tt.resource))

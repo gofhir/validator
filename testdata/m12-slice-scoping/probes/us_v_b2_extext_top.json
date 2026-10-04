@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+   "valueAddress": {
+    "city": "x"
+   },
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/x-extext",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

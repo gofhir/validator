@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "given": [
+    "abc",
+    null
+   ],
+   "_given": [
+    null,
+    {
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/r-invprim",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,3 @@
+{"resourceType":"Patient","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},
+ "contained":[null,{"resourceType":"Patient","id":"c1","extension":[{"url":"https://example.org/fhir/StructureDefinition/v-e2","valueDate":"2020-01-01"}]}],
+ "link":[{"other":{"reference":"#c1"},"type":"seealso"}]}

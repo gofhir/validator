@@ -66,6 +66,42 @@
       ]
     },
     {
+      "name": "context-probes",
+      "packageFiles": [
+        "testdata/m12-slice-scoping/packages/acme.ctx-0.1.0.tgz"
+      ],
+      "files": [
+        "testdata/m12-slice-scoping/probes/uc_*.json"
+      ]
+    },
+    {
+      "name": "context-eval-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.ctxeval-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/ue_*.json"]
+    },
+    {
+      "name": "context-scope-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.ctxscope-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/us_*.json"]
+    },
+    {
+      "name": "interface-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.ifaces-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/ui_*.json"]
+    },
+    {
+      "name": "interface-probes-r5",
+      "version": "5.0.0",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.ifaces.r5-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/ui5_*.json"]
+    },
+    {
+      "name": "interface-probes-r4b",
+      "version": "4.3.0",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.ifaces.r4b-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/ui_*.json"]
+    },
+    {
       "name": "constraint-probes",
       "packageFiles": [
         "testdata/m12-slice-scoping/packages/acme.constraints-0.1.0.tgz"

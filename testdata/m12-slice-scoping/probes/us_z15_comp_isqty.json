@@ -1,0 +1,23 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "component": [
+  {
+   "code": {
+    "text": "c"
+   },
+   "valueQuantity": {
+    "value": 1,
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/z-isqty",
+      "valueString": "x"
+     }
+    ]
+   }
+  }
+ ]
+}

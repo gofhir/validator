@@ -60,6 +60,7 @@ const (
 	DiagExtensionUnknown          DiagnosticID = "EXTENSION_UNKNOWN"
 	DiagModifierExtensionUnknown  DiagnosticID = "MODIFIER_EXTENSION_UNKNOWN"
 	DiagExtensionInvalidContext   DiagnosticID = "EXTENSION_INVALID_CONTEXT"
+	DiagExtensionContextInvariant DiagnosticID = "EXTENSION_CONTEXT_INVARIANT"
 	DiagExtensionValueRequired    DiagnosticID = "EXTENSION_VALUE_REQUIRED"
 	DiagExtensionValueNotAllowed  DiagnosticID = "EXTENSION_VALUE_NOT_ALLOWED"
 	DiagExtensionInvalidValueType DiagnosticID = "EXTENSION_INVALID_VALUE_TYPE"
@@ -379,6 +380,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeExtension,
 		Template: "Extension '{url}' is not allowed in context '{context}'",
+	},
+	DiagExtensionContextInvariant: {
+		Severity: SeverityError,
+		Code:     CodeExtension,
+		Template: "Extension '{url}' is not allowed here: its context invariant '{expression}' does not hold",
 	},
 	DiagExtensionValueRequired: {
 		Severity: SeverityError,
