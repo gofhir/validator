@@ -53,3 +53,76 @@ func TestSubExtensions(t *testing.T) {
 		})
 	}
 }
+
+// A part with an absolute url whose definition's context is the extension that holds it (context of
+// type extension) is allowed there, and only there.
+func TestSubExtensionInItsExtensionContext(t *testing.T) {
+	const nationality = "http://hl7.org/fhir/StructureDefinition/patient-nationality"
+	const url = "https://example.org/fhir/StructureDefinition/in-nationality"
+	sd := `{"resourceType":"StructureDefinition","url":"` + url + `","name":"InNationality","status":"draft",` +
+		`"fhirVersion":"4.0.1","kind":"complex-type","abstract":false,"type":"Extension",` +
+		`"baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint",` +
+		`"context":[{"type":"extension","expression":"` + nationality + `|4.0.1"}],` +
+		`"snapshot":{"element":[` +
+		`{"id":"Extension","path":"Extension","min":0,"max":"*"},` +
+		`{"id":"Extension.url","path":"Extension.url","min":1,"max":"1","type":[{"code":"uri"}],"fixedUri":"` + url + `"},` +
+		`{"id":"Extension.value[x]","path":"Extension.value[x]","min":1,"max":"1","type":[{"code":"string"}]}]}}`
+	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{[]byte(sd)}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	part := `{"url":"` + url + `","valueString":"x"}`
+	for _, tt := range []struct {
+		name, resource, at string
+		want               bool // the context is reported invalid
+	}{
+		{"inside the extension its context names",
+			`{"resourceType":"Patient","extension":[{"url":"` + nationality + `","extension":[` + part + `]}]}`,
+			"Patient.extension[0].extension[0]", false},
+		{"on the resource",
+			`{"resourceType":"Patient","extension":[` + part + `]}`,
+			"Patient.extension[0]", true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := v.Validate(context.Background(), []byte(tt.resource))
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := issueFor(t, res, issue.DiagExtensionInvalidContext)
+			if (got != nil) != tt.want {
+				t.Errorf("context reported invalid: %v, want %v", got, tt.want)
+			}
+			if got != nil && (len(got.Expression) == 0 || got.Expression[0] != tt.at) {
+				t.Errorf("at %v, want %s", got.Expression, tt.at)
+			}
+		})
+	}
+}
+
+// A part its definition declares is not reported as undeclared when the snapshot has no value[x]
+// element for it.
+func TestDeclaredPartWithoutValueElement(t *testing.T) {
+	const parent = "https://example.org/fhir/StructureDefinition/no-value-elements"
+	sd := `{"resourceType":"StructureDefinition","url":"` + parent + `","name":"NoValueElements","status":"draft",` +
+		`"fhirVersion":"4.0.1","kind":"complex-type","abstract":false,"type":"Extension",` +
+		`"baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint",` +
+		`"context":[{"type":"element","expression":"Element"}],` +
+		`"snapshot":{"element":[` +
+		`{"id":"Extension","path":"Extension","min":0,"max":"*"},` +
+		`{"id":"Extension.extension","path":"Extension.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"},"min":0,"max":"*"},` +
+		`{"id":"Extension.extension:a","path":"Extension.extension","sliceName":"a","min":0,"max":"1"},` +
+		`{"id":"Extension.extension:a.url","path":"Extension.extension.url","min":1,"max":"1","type":[{"code":"uri"}],"fixedUri":"a"},` +
+		`{"id":"Extension.url","path":"Extension.url","min":1,"max":"1","type":[{"code":"uri"}],"fixedUri":"` + parent + `"},` +
+		`{"id":"Extension.value[x]","path":"Extension.value[x]","min":0,"max":"0"}]}}`
+	v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{[]byte(sd)}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Patient","extension":[{"url":"`+parent+`","extension":[{"url":"a","valueString":"x"}]}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := issueFor(t, res, issue.DiagExtensionSubExtensionInvalid); got != nil {
+		t.Errorf("a declared part reported undeclared: %s", got.Diagnostics)
+	}
+}

@@ -209,7 +209,7 @@ func (v *Validator) validateExtensionArray(ctx context.Context, extensions any, 
 		}
 
 		extPath := fmt.Sprintf("%s[%d]", basePath, i)
-		v.validateSingleExtension(ctx, extMap, extPath, contextPath, isModifier, result)
+		v.validateSingleExtension(ctx, extMap, extPath, contextPath, "", isModifier, result)
 	}
 }
 
@@ -281,7 +281,10 @@ func isValidURIScheme(scheme string) bool {
 // validateSingleExtension validates a single extension.
 // Per FHIR R4 §2.1.0.1, unknown modifier extensions produce an ERROR (not a warning),
 // because a system SHALL refuse to process a resource with an unrecognized modifier extension.
-func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]any, extPath, contextPath string, isModifier bool, result *issue.Result) {
+//
+// The holderURL is the url of the extension that holds this one, for a part of a complex extension, and
+// "" otherwise.
+func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]any, extPath, contextPath, holderURL string, isModifier bool, result *issue.Result) {
 	// Get extension URL
 	url, ok := ext[keyURL].(string)
 	if !ok || url == "" {
@@ -322,7 +325,7 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 	}
 
 	// Validate context
-	v.validateContext(extSD, contextPath, extPath, result)
+	v.validateContext(extSD, contextPath, holderURL, extPath, result)
 
 	// Validate value[x]
 	v.validateExtensionValue(ctx, ext, extSD, extPath, result)
@@ -357,7 +360,7 @@ func (v *Validator) DefinitionOf(ctx context.Context, typeCode string, value map
 }
 
 // validateContext validates that the extension is allowed in the current context.
-func (v *Validator) validateContext(extSD *registry.StructureDefinition, contextPath, extPath string, result *issue.Result) {
+func (v *Validator) validateContext(extSD *registry.StructureDefinition, contextPath, holderURL, extPath string, result *issue.Result) {
 	if len(extSD.Context) == 0 {
 		// No context restrictions
 		return
@@ -370,7 +373,15 @@ func (v *Validator) validateContext(extSD *registry.StructureDefinition, context
 				return // Context is valid
 			}
 		}
-		// TODO: Handle other context types (fhirpath, extension)
+		// An extension context allows the extension inside the extension its expression names
+		// (structuredefinition.html: "the context is a particular extension from a particular
+		// StructureDefinition"), whatever its version.
+		if ctx.Type == "extension" && holderURL != "" {
+			if url, _ := registry.ParseCanonical(ctx.Expression); url == holderURL {
+				return
+			}
+		}
+		// TODO: Handle fhirpath contexts
 	}
 
 	result.AddErrorWithID(
@@ -980,12 +991,14 @@ func (v *Validator) validateNestedExtensions(ctx context.Context, nestedExts any
 		extPath := fmt.Sprintf("%s.extension[%d]", parentPath, i)
 		url, _ := extMap[keyURL].(string)
 
-		if nestedDef := findNestedExtensionDef(parentSD, url); nestedDef != nil {
-			v.validateNestedExtensionValue(extMap, nestedDef, parentSD, extPath, result)
+		if valueDef, declared := findNestedExtensionDef(parentSD, url); declared {
+			if valueDef != nil {
+				v.validateNestedExtensionValue(extMap, valueDef, parentSD, extPath, result)
+			}
 			continue
 		}
 		if url != "" && absoluteURLDefect(url) == "" {
-			v.validateSingleExtension(ctx, extMap, extPath, "Extension", false, result)
+			v.validateSingleExtension(ctx, extMap, extPath, "Extension", parentSD.URL, false, result)
 			continue
 		}
 		result.AddErrorWithID(
@@ -996,12 +1009,12 @@ func (v *Validator) validateNestedExtensions(ctx context.Context, nestedExts any
 	}
 }
 
-// findNestedExtensionDef returns the value[x] element of the slice of Extension.extension whose url
-// is fixed to url in the parent's definition, or nil when the parent declares no such slice. The
-// slice's elements are found by their ids ("Extension.extension:a.url").
-func findNestedExtensionDef(parentSD *registry.StructureDefinition, url string) *registry.ElementDefinition {
+// findNestedExtensionDef reports whether the parent's definition declares a slice of
+// Extension.extension whose url is fixed to url, and returns that slice's value[x] element (nil when
+// the snapshot has none). The slice's elements are found by their ids ("Extension.extension:a.url").
+func findNestedExtensionDef(parentSD *registry.StructureDefinition, url string) (valueDef *registry.ElementDefinition, declared bool) {
 	if parentSD.Snapshot == nil || url == "" {
-		return nil
+		return nil, false
 	}
 	elems := parentSD.Snapshot.Element
 	for i := range elems {
@@ -1020,11 +1033,12 @@ func findNestedExtensionDef(parentSD *registry.StructureDefinition, url string) 
 		}
 		for j := range elems {
 			if elems[j].ID == slice+".value[x]" {
-				return &elems[j]
+				return &elems[j], true
 			}
 		}
+		return nil, true
 	}
-	return nil
+	return nil, false
 }
 
 // validateNestedExtensionValue validates the value of a nested extension.

@@ -66,7 +66,11 @@ const (
 	// DiagExtensionSubExtensionInvalid: a complex extension holds an extension whose relative url
 	// names no part its definition declares.
 	DiagExtensionSubExtensionInvalid DiagnosticID = "EXTENSION_SUBEXTENSION_INVALID"
-	DiagExtensionInvalidURL          DiagnosticID = "EXTENSION_INVALID_URL"
+	// Deprecated: no longer reported. A part of a complex extension its definition does not declare
+	// is DiagExtensionSubExtensionInvalid when its url is relative, and is validated as any
+	// extension when it is absolute.
+	DiagExtensionNestedUnknown DiagnosticID = "EXTENSION_NESTED_UNKNOWN"
+	DiagExtensionInvalidURL    DiagnosticID = "EXTENSION_INVALID_URL"
 )
 
 // Diagnostic IDs for reference validation (M9).
