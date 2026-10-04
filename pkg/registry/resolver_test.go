@@ -265,7 +265,7 @@ func TestResolveByCanonical_PinnedVersion(t *testing.T) {
 	reg.mu.Unlock()
 	resolver := &mockResolver{profiles: map[string][]byte{
 		"http://example.org/SD/p|2.0.0": makeSDJSON("http://example.org/SD/p", "2.0.0", "Patient"),
-		"http://example.org/SD/p|3.0.0": makeSDJSON("http://example.org/SD/p", "2.5.0", "Patient"), // not the one asked
+		"http://example.org/SD/p|3.0.0": makeSDJSON("http://example.org/SD/p", "2.5.0", "Observation"), // not the one asked
 	}}
 	reg.SetResolver(resolver)
 

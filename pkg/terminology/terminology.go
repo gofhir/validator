@@ -1383,48 +1383,27 @@ func (r *Registry) validateCodeInCodeSystemLocally(ctx context.Context, system, 
 	}
 
 	cs := r.GetCodeSystem(system)
-	if cs == nil {
-		// Not held by this registry; a configured provider may know it — for
-		// instance a CodeSystem authored over a REST API after this registry was
-		// populated.
-		if p := r.getProvider(); p != nil {
-			if valid, err := p.ValidateCode(ctx, bareSystem, code); err == nil {
-				return valid, true
-			}
-		}
-		return false, false // CodeSystem not loaded
-	}
-
-	// Search for the code in the CodeSystem
-	var findCode func(concepts []CodeSystemCode) bool
-	findCode = func(concepts []CodeSystemCode) bool {
-		for _, c := range concepts {
-			if c.Code == code {
-				return true
-			}
-			if len(c.Concept) > 0 {
-				if findCode(c.Concept) {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
-	if findCode(cs.Concept) {
+	switch {
+	case cs != nil && findConcept(cs.Concept, code) != nil:
 		return true, true
+	case cs != nil && !cs.partial():
+		return false, true
 	}
-	// A CodeSystem that does not include all its codes cannot tell a code is not one of them; a
-	// configured provider may.
-	if cs.partial() {
-		if p := r.getProvider(); p != nil {
-			if valid, err := p.ValidateCode(ctx, bareSystem, code); err == nil {
-				return valid, true
-			}
+	// Not held by this registry, or held without all its codes (which cannot tell a code is not
+	// one of them): a configured provider may know it — for instance a CodeSystem authored over a
+	// REST API after this registry was populated.
+	return r.providerDecides(ctx, bareSystem, code)
+}
+
+// providerDecides asks a configured provider whether code is in system; found is false when no
+// provider answered.
+func (r *Registry) providerDecides(ctx context.Context, system, code string) (isValid, found bool) {
+	if p := r.getProvider(); p != nil {
+		if valid, err := p.ValidateCode(ctx, system, code); err == nil {
+			return valid, true
 		}
-		return false, false
 	}
-	return false, true
+	return false, false
 }
 
 // partial reports whether the CodeSystem does not include all its codes: its content is
