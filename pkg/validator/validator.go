@@ -82,6 +82,7 @@ type Config struct {
 	PackagePath          string                   // Path to FHIR package cache
 	BasePackages         []PackageSpec            // The base packages to load instead of the version's embedded set
 	AdditionalPackages   []PackageSpec            // Additional packages to load (e.g., US Core)
+	PackageRegistry      string                   // Package registry to download missing packages from; empty downloads none
 	PackageTgzPaths      []string                 // Paths to local .tgz package files
 	PackageURLs          []string                 // URLs to remote .tgz package files
 	PackageData          [][]byte                 // In-memory .tgz package bytes (e.g., from //go:embed)
@@ -139,6 +140,16 @@ func WithBasePackages(packages ...PackageSpec) Option {
 	}
 }
 
+// WithPackageRegistry sets the package registry (such as loader.DefaultRegistry) that packages
+// missing from the package cache are downloaded from, into the cache: the packages added with
+// WithPackage and the packages they depend on. Without it, nothing is downloaded, and a dependency
+// missing from the cache is reported and not loaded.
+func WithPackageRegistry(url string) Option {
+	return func(c *Config) {
+		c.PackageRegistry = url
+	}
+}
+
 // WithPackagePath sets the FHIR package cache path.
 func WithPackagePath(path string) Option {
 	return func(c *Config) {
@@ -146,7 +157,9 @@ func WithPackagePath(path string) Option {
 	}
 }
 
-// WithPackage adds an additional FHIR package to load (e.g., US Core, IPS).
+// WithPackage adds an additional FHIR package to load (e.g., US Core, IPS), from the package cache.
+// The packages it depends on are loaded too, transitively, in the versions it declares; see
+// WithPackageRegistry for those missing from the cache.
 func WithPackage(name, version string) Option {
 	return func(c *Config) {
 		c.AdditionalPackages = append(c.AdditionalPackages, PackageSpec{Name: name, Version: version})
@@ -392,9 +405,16 @@ func New(opts ...Option) (*Validator, error) {
 		return nil, fmt.Errorf("failed to load FHIR packages: %w", err)
 	}
 
+	base := len(packages)
+
 	// Load additional packages (e.g., US Core, IPS)
 	for _, pkgSpec := range config.AdditionalPackages {
-		pkg, err := l.LoadPackage(pkgSpec.Name, pkgSpec.Version)
+		version, err := dependencyVersion(l, config, pkgSpec.Name, pkgSpec.Version)
+		if err != nil {
+			logger.Warn("Could not load additional package %s#%s: %v", pkgSpec.Name, pkgSpec.Version, err)
+			continue
+		}
+		pkg, err := l.LoadPackage(pkgSpec.Name, version)
 		if err != nil {
 			logger.Warn("Could not load additional package %s#%s: %v", pkgSpec.Name, pkgSpec.Version, err)
 			continue
@@ -438,10 +458,10 @@ func New(opts ...Option) (*Validator, error) {
 	// Load conformance resources from memory (raw + IG-tagged).
 	packages = loadConformanceResources(l, config, packages)
 
-	// A package loaded in two versions would leave which definition applies to load order.
-	if err := oneVersionEach(packages); err != nil {
-		return nil, err
-	}
+	// A package added once, and one core package, the version validated's; then the packages those
+	// added depend on.
+	packages = append(packages[:base], addedPackages(packages[:base], packages[base:], config.FHIRVersion)...)
+	packages = append(packages, loadDependencies(l, config, packages, packages[base:])...)
 
 	loadDuration := time.Since(loadStart)
 
@@ -459,6 +479,7 @@ func New(opts ...Option) (*Validator, error) {
 	logger.Info("Building StructureDefinition registry...")
 	registryStart := time.Now()
 	reg := registry.New()
+	reg.SetFHIRVersion(config.FHIRVersion)
 	if err := reg.LoadFromPackages(packages); err != nil {
 		return nil, fmt.Errorf("failed to load StructureDefinitions: %w", err)
 	}
@@ -471,6 +492,7 @@ func New(opts ...Option) (*Validator, error) {
 	// Create and populate the terminology registry
 	logger.Debug("Building terminology registry...")
 	termReg := terminology.NewRegistry()
+	termReg.SetFHIRVersion(config.FHIRVersion)
 
 	if config.TerminologyAuthority != nil {
 		// The host owns terminology resolution, so parsing our own copy of the
@@ -1038,19 +1060,4 @@ func loadBasePackages(l *loader.Loader, base []PackageSpec) ([]*loader.Package, 
 		packages = append(packages, pkg)
 	}
 	return packages, nil
-}
-
-// oneVersionEach reports the packages loaded in more than one version: which of their definitions
-// would apply would depend on the order they were loaded in. Base packages are replaced with
-// WithBasePackages, not added to.
-func oneVersionEach(packages []*loader.Package) error {
-	versions := map[string]string{}
-	for _, pkg := range packages {
-		if v, ok := versions[pkg.Name]; ok && v != pkg.Version {
-			return fmt.Errorf("package %s is loaded in two versions, %s and %s: load one (to replace a base package, give the base set: WithBasePackages, or -base-package)",
-				pkg.Name, v, pkg.Version)
-		}
-		versions[pkg.Name] = pkg.Version
-	}
-	return nil
 }

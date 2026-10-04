@@ -25,7 +25,9 @@ cat resource.json | gofhir-validator -
 |--------|-------------|---------|
 | `-version` | FHIR version (`4.0.1`, `4.3.0`, `5.0.0`) | `4.0.1` |
 | `-ig` | Profile URL(s) to validate against (comma-separated) | -- |
-| `-package` | Additional FHIR package(s) to load from cache (`name#version`) | -- |
+| `-package` | Additional FHIR package(s) to load from cache (`name#version`), with the packages they depend on | -- |
+| `-package-registry` | Package registry that packages missing from the cache are downloaded from | `https://packages.fhir.org` |
+| `-no-download` | Download no package: a dependency missing from the cache is reported and not loaded | `false` |
 | `-base-package` | Base package(s) to load from cache instead of the ones embedded for the version (`name#version`, comma-separated) | the embedded core, terminology and extensions |
 | `-package-file` | Local `.tgz` package file(s) (comma-separated) | -- |
 | `-package-url` | Remote `.tgz` package URL(s) (comma-separated) | -- |
@@ -124,6 +126,10 @@ gofhir-validator -package hl7.fhir.us.core#6.1.0 \
     patient.json
 ```
 
+The packages a package depends on (its `package.json` `dependencies`) are loaded too, transitively, in the versions it declares. A package missing from the cache, given with `-package` or depended on, is downloaded into the cache from the package registry (`-package-registry`; base packages given with `-base-package` must be in the cache); `-no-download` turns that off, and a dependency missing from the cache is then reported and not loaded.
+
+Several versions of a package may be loaded, for example a guide that depends on an older terminology package than the base one. A canonical that names a version resolves to that version; one that names none resolves to the highest version loaded among the definitions written for the FHIR version validated. The R4 and R4B core packages carry copies of the HL7 Terminology code systems and value sets, versioned as the FHIR version (`4.0.1`): when the HL7 Terminology package is loaded, its definitions are used instead, whatever their version. One core package is loaded, the FHIR version validated's: a dependency on the core package of another FHIR version is reported and not loaded.
+
 Load a package from a local `.tgz` file:
 
 ```bash
@@ -157,7 +163,7 @@ gofhir-validator -version 4.0.1 \
     patient.json
 ```
 
-A package loaded in two versions is refused, because which of its definitions applies would depend on the order they were loaded in. `-package hl7.terminology.r4#6.2.0` alone, on top of the embedded terminology package, fails: replace the base set with `-base-package` instead.
+`-package hl7.terminology.r4#6.2.0` instead adds that version to the embedded terminology package: canonicals that name no version resolve to the higher of the two.
 
 ### JSON Output
 

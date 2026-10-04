@@ -7,21 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/pkg/issue"
 )
-
-// A package loaded in two versions is refused: which of its definitions applies would depend on
-// the order they were loaded in.
-func TestOneVersionEach(t *testing.T) {
-	pkg := func(name, version string) *loader.Package { return &loader.Package{Name: name, Version: version} }
-	if err := oneVersionEach([]*loader.Package{pkg("a", "1"), pkg("b", "1"), pkg("a", "1")}); err != nil {
-		t.Errorf("the same version twice: %v", err)
-	}
-	err := oneVersionEach([]*loader.Package{pkg("a", "1"), pkg("b", "1"), pkg("a", "2")})
-	if err == nil || !strings.Contains(err.Error(), "a is loaded in two versions, 1 and 2") {
-		t.Errorf("two versions: %v", err)
-	}
-}
 
 // A base package that is not in the package cache fails the validator's creation, naming it.
 func TestBasePackageMissing(t *testing.T) {
@@ -62,10 +49,38 @@ func TestBasePackagesReplaceTheEmbeddedSet(t *testing.T) {
 	if _, err := v.Validate(context.Background(), []byte(`{"resourceType":"Patient"}`)); err != nil {
 		t.Fatal(err)
 	}
+	// An extension's contexts are those of the version its url resolves to: event-location 5.3.0
+	// lists DocumentReference, not Media (the R4 core package's 4.0.1 lists Media), as in the HL7
+	// validator.
+	media := `{"resourceType":"Media","status":"completed","content":{"contentType":"image/png"},"extension":[` +
+		`{"url":"http://hl7.org/fhir/StructureDefinition/event-location","valueReference":{"reference":"Location/l"}}]}`
+	res, err := v.Validate(context.Background(), []byte(media))
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, iss := range res.Issues {
+		found = found || iss.MessageID == string(issue.DiagExtensionInvalidContext)
+	}
+	if !found {
+		t.Errorf("event-location on Media: %v, want it not allowed there", res.Issues)
+	}
 
-	// Adding a base package in another version is refused.
-	_, err = New(WithVersion("4.0.1"), WithPackagePath(cache), WithPackage("hl7.terminology.r4", "6.2.0"))
-	if err == nil || !strings.Contains(err.Error(), "two versions") {
-		t.Errorf("err = %v, want two versions of hl7.terminology.r4 refused", err)
+	// A base package in another version is loaded too: an unversioned canonical resolves to the
+	// highest version loaded, a pinned one to its version.
+	if _, err := os.Stat(filepath.Join(cache, "hl7.fhir.uv.extensions.r4#5.2.0")); err != nil {
+		t.Skip("hl7.fhir.uv.extensions.r4#5.2.0 is not in the package cache")
+	}
+	v, err = New(WithVersion("4.0.1"), WithPackagePath(cache), WithBasePackages(base...),
+		WithPackage("hl7.fhir.uv.extensions.r4", "5.2.0"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const maxOccurs = "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs"
+	if sd, _ := v.Registry().ResolveCanonical(maxOccurs); sd == nil || sd.Version != "5.3.0" {
+		t.Errorf("%s resolves to %v, want 5.3.0", maxOccurs, sd)
+	}
+	if sd, _ := v.Registry().ResolveCanonical(maxOccurs + "|5.2.0"); sd == nil || sd.Version != "5.2.0" {
+		t.Errorf("%s|5.2.0 resolves to %v, want 5.2.0", maxOccurs, sd)
 	}
 }

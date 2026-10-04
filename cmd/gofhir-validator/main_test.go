@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/gofhir/validator/pkg/loader"
 )
 
 func TestParseArgs(t *testing.T) {
@@ -56,5 +58,23 @@ func TestBasePackageFlag(t *testing.T) {
 	}
 	if want := []string{"hl7.fhir.r4.core#4.0.1", "hl7.terminology.r4#6.2.0"}; !slices.Equal(c.BasePackages, want) {
 		t.Errorf("base packages %v, want %v", c.BasePackages, want)
+	}
+}
+
+// Packages missing from the cache are downloaded from the package registry unless -no-download.
+func TestDownloadFlags(t *testing.T) {
+	c, err := parseArgs([]string{"p.json"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Registry != loader.DefaultRegistry || c.NoDownload {
+		t.Errorf("default: registry %q, no-download %v; want %s, false", c.Registry, c.NoDownload, loader.DefaultRegistry)
+	}
+	c, err = parseArgs([]string{"-no-download", "-package-registry", "https://example.org/packages", "p.json"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Registry != "https://example.org/packages" || !c.NoDownload {
+		t.Errorf("registry %q, no-download %v", c.Registry, c.NoDownload)
 	}
 }
