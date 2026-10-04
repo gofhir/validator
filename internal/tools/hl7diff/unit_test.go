@@ -119,30 +119,6 @@ func TestDivergenceScopes(t *testing.T) {
 	}
 }
 
-func TestVersionLess(t *testing.T) {
-	for _, c := range []struct {
-		a, b string
-		want bool
-	}{{"0.11.0", "0.22.0", true}, {"5.9.0", "5.10.0", true}, {"5.10.0", "5.9.0", false}, {"5.4.0", "5.5.0", true}, {"1.0", "1.0.1", true}, {"5.3.0-ballot", "5.3.0", true}, {"5.3.0", "5.3.0-ballot", false}, {"5.3.0-ballot", "5.4.0", true}} {
-		if got := versionLess(c.a, c.b); got != c.want {
-			t.Errorf("versionLess(%s, %s) = %v, want %v", c.a, c.b, got, c.want)
-		}
-	}
-}
-
-func TestWildcardVersions(t *testing.T) {
-	v, ok := highestMatching("3.3.x", []string{"3.2.0", "3.3.0", "3.3.2", "3.4.0"})
-	if !ok || v != "3.3.2" {
-		t.Errorf("3.3.x -> %q, %v; want 3.3.2", v, ok)
-	}
-	if _, ok := highestMatching("3.5.x", []string{"3.3.0"}); ok {
-		t.Error("no match must be reported")
-	}
-	if !versionMatches("1.0.0", "1.0.0") || versionMatches("1.0.0", "1.0.1") || isWildcard("1.0.0") || !isWildcard("3.x") {
-		t.Error("exact versions must match only themselves")
-	}
-}
-
 func TestNamesAgree(t *testing.T) {
 	fam, err := LoadFamilies()
 	if err != nil {
@@ -655,5 +631,34 @@ func TestReadManifestExclusions(t *testing.T) {
 	m, err := readManifest(path)
 	if err != nil || len(m.Groups[0].Exclude) != 1 {
 		t.Errorf("valid exclusion: %v, %v", m, err)
+	}
+}
+
+// The packages the HL7 validator loaded are read from its log.
+func TestParsePackageSummary(t *testing.T) {
+	log := "  Load hl7.terminology.r4#6.2.0 - 4288 resources\n  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions#5.3.0]\n  Get set...\n"
+	got, err := ParsePackageSummary(log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "hl7.fhir.r4.core#4.0.1,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions#5.3.0"; joinIDs(got) != want {
+		t.Errorf("got %s, want %s", joinIDs(got), want)
+	}
+	if _, err := ParsePackageSummary("no summary here"); err == nil {
+		t.Error("a log with no Package Summary is accepted")
+	}
+}
+
+// gofhir runs with each base package in the version the HL7 validator uses of its family: the
+// highest among the flavors it loaded, under gofhir's name; a family it did not load keeps gofhir's.
+func TestEffectiveBase(t *testing.T) {
+	embedded := map[string]string{"hl7.fhir.r4.core": "4.0.1", "hl7.terminology.r4": "7.0.1", "hl7.fhir.uv.extensions.r4": "5.2.0", "x.only.gofhir": "1.0.0"}
+	loaded := []PackageID{
+		{"hl7.fhir.r4.core", "4.0.1"}, {"hl7.terminology.r4", "6.2.0"}, {"hl7.terminology", "7.4.0"}, {"hl7.terminology.r5", "7.1.0"},
+		{"hl7.fhir.uv.extensions.r4", "5.2.0"}, {"hl7.fhir.uv.extensions", "5.3.0"}, {"hl7.fhir.uv.extensions.r5", "5.2.0"},
+	}
+	want := "hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0,x.only.gofhir#1.0.0"
+	if got := joinIDs(EffectiveBase(embedded, loaded)); got != want {
+		t.Errorf("got %s, want %s", got, want)
 	}
 }
