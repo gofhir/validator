@@ -3,6 +3,8 @@ package terminology
 import (
 	"context"
 	"encoding/json"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/loader"
@@ -147,5 +149,76 @@ func TestSameVersionInTwoPackages(t *testing.T) {
 	unversioned, versioned := r.GetValueSet(url), r.GetValueSet(url+"|1.0.0")
 	if unversioned == nil || unversioned.Name != "r4" || versioned != unversioned {
 		t.Errorf("unversioned %v, versioned %v; want both the R4 package's", unversioned, versioned)
+	}
+}
+
+// A ValueSet its package defers is read the first time it is asked for, once, and is chosen among
+// versions like one read on load.
+func TestDeferredResources(t *testing.T) {
+	const url = "http://example.org/ValueSet/v"
+	reads := 0
+	deferred := func(version, code string) loader.DeferredResource {
+		return loader.DeferredResource{ResourceType: "ValueSet", URL: url, Version: version, Read: func() ([]byte, error) {
+			reads++
+			return []byte(`{"resourceType":"ValueSet","url":"` + url + `","version":"` + version +
+				`","compose":{"include":[{"system":"http://example.org/cs","concept":[{"code":"` + code + `"}]}]}}`), nil
+		}}
+	}
+	eager := &loader.Package{Name: "eager", Version: "1", Resources: map[string]json.RawMessage{"vs": json.RawMessage(
+		`{"resourceType":"ValueSet","url":"` + url + `","version":"1.0.0"}`)}}
+	lazy := &loader.Package{Name: "lazy", Version: "1", Deferred: []loader.DeferredResource{deferred("2.0.0", "b"), deferred("1.5.0", "c")}}
+	r := NewRegistry()
+	if err := r.LoadFromPackages([]*loader.Package{eager, lazy}); err != nil {
+		t.Fatal(err)
+	}
+	if reads != 0 {
+		t.Fatalf("%d reads on load", reads)
+	}
+	if r.ValueSetCount() != 1 {
+		t.Errorf("ValueSetCount = %d, want 1", r.ValueSetCount())
+	}
+	for range 3 {
+		if vs := r.GetValueSet(url); vs == nil || vs.Version != "2.0.0" {
+			t.Fatalf("GetValueSet = %v, want the deferred 2.0.0", vs)
+		}
+	}
+	if valid, _ := r.ValidateCodeContext(context.Background(), url, "http://example.org/cs", "b"); !valid || reads != 1 {
+		t.Errorf("code b valid %v, %d reads; want valid, 1 read", valid, reads)
+	}
+	if vs := r.GetValueSet(url + "|1.5.0"); vs == nil || vs.Version != "1.5.0" || reads != 2 {
+		t.Errorf("GetValueSet|1.5.0 = %v, %d reads", vs, reads)
+	}
+	if vs := r.GetValueSet(url + "|1.0.0"); vs == nil || vs.Version != "1.0.0" || reads != 2 {
+		t.Errorf("GetValueSet|1.0.0 = %v, %d reads", vs, reads)
+	}
+}
+
+// Concurrent lookups of a deferred resource read it once and agree.
+func TestDeferredResourceConcurrently(t *testing.T) {
+	const url = "http://example.org/ValueSet/v"
+	var reads atomic.Int32
+	lazy := &loader.Package{Name: "lazy", Version: "1", Deferred: []loader.DeferredResource{{ResourceType: "ValueSet", URL: url,
+		Read: func() ([]byte, error) {
+			reads.Add(1)
+			return []byte(`{"resourceType":"ValueSet","url":"` + url + `"}`), nil
+		}}}}
+	r := NewRegistry()
+	if err := r.LoadFromPackages([]*loader.Package{lazy}); err != nil {
+		t.Fatal(err)
+	}
+	var wg sync.WaitGroup
+	got := make([]*ValueSet, 16)
+	for i := range got {
+		wg.Add(1)
+		go func() { defer wg.Done(); got[i] = r.GetValueSet(url) }()
+	}
+	wg.Wait()
+	for _, vs := range got {
+		if vs == nil || vs != got[0] {
+			t.Fatalf("lookups disagree: %v", got)
+		}
+	}
+	if reads.Load() != 1 {
+		t.Errorf("%d reads, want 1", reads.Load())
 	}
 }

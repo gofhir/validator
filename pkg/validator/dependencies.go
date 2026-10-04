@@ -78,7 +78,7 @@ func loadDependencies(l *loader.Loader, config *Config, loaded, from []*loader.P
 			}
 			coreLoaded = true
 		}
-		pkg, err := l.LoadPackage(dep.name, version)
+		pkg, err := l.OpenPackage(dep.name, version)
 		if err != nil {
 			logger.Warn("Dependency %s of %s is not loaded: %v", id, dep.of, err)
 			continue

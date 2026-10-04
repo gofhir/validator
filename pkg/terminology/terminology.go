@@ -92,17 +92,20 @@ type Registry struct {
 	// unversioned lookup resolves to: the publisher's rather than a copy
 	// (loader.Publishers), then one from a package for the FHIR version validated
 	// (SetFHIRVersion), then the highest version (references.html#canonical:
-	// "should pick the latest version"); between equals, the one loaded first.
+	// "should pick the latest version"); between equals, the one loaded first. A
+	// resource deferred by its package (loader.OpenPackage) is held once it has
+	// been read.
 	valueSets   map[string]*ValueSet
 	codeSystems map[string]*CodeSystem
 	// loadedValueSets and loadedCodeSystems hold every version loaded, with its
 	// package, so the choice above can be made again when publishers changes.
-	loadedValueSets   []loaded[*ValueSet]
-	loadedCodeSystems []loaded[*CodeSystem]
+	loadedValueSets   []*loaded[*ValueSet]
+	loadedCodeSystems []*loaded[*CodeSystem]
 	// valueSetPackage and codeSystemPackage hold, by URL and by "url|version", the
-	// entry the maps above hold, with its package, to compare with the next one loaded.
-	valueSetPackage   map[string]loaded[*ValueSet]
-	codeSystemPackage map[string]loaded[*CodeSystem]
+	// entry chosen, with its package, to compare with the next one loaded and to
+	// read a deferred resource from.
+	valueSetPackage   map[string]*loaded[*ValueSet]
+	codeSystemPackage map[string]*loaded[*CodeSystem]
 	publishers        loader.Publishers
 	fhirVersion       string
 	// valueSetsByVersion and codeSystemsByVersion are keyed "url|version", so a
@@ -162,8 +165,8 @@ func NewRegistry() *Registry {
 		codeSystems:          make(map[string]*CodeSystem),
 		valueSetsByVersion:   make(map[string]*ValueSet),
 		codeSystemsByVersion: make(map[string]*CodeSystem),
-		valueSetPackage:      make(map[string]loaded[*ValueSet]),
-		codeSystemPackage:    make(map[string]loaded[*CodeSystem]),
+		valueSetPackage:      make(map[string]*loaded[*ValueSet]),
+		codeSystemPackage:    make(map[string]*loaded[*CodeSystem]),
 		expansionCache:       make(map[string]map[string]bool),
 		hierarchyCache:       make(map[string]map[string][]string),
 		unresolved:           make(map[string]time.Time),
@@ -258,12 +261,48 @@ func (r *Registry) authorityFor() (a Authority, authoritative bool) {
 }
 
 // loaded is a ValueSet or CodeSystem loaded, with the package ("name#version") it came from and
-// the FHIR versions that package is for.
+// the FHIR versions that package is for. A resource its package defers is read, once, when first
+// asked for; until then only its URL and version, from the package's index, are known.
 type loaded[T any] struct {
-	resource     T
+	resource     T // the resource, when it was read on load
 	url, version string
 	packageID    string
 	fhirVersions []string
+
+	read   func() ([]byte, error) // a deferred resource's JSON
+	once   sync.Once
+	parsed T
+	ok     bool
+}
+
+// get returns the resource, reading a deferred one the first time.
+func (e *loaded[T]) get(parse func([]byte) (T, bool)) (T, bool) {
+	if e.read == nil {
+		return e.resource, true
+	}
+	e.once.Do(func() {
+		if data, err := e.read(); err == nil {
+			e.parsed, e.ok = parse(data)
+		}
+	})
+	return e.parsed, e.ok
+}
+
+// parseValueSet and parseCodeSystem read a resource's JSON; one without a URL is not used.
+func parseValueSet(data []byte) (*ValueSet, bool) {
+	var vs ValueSet
+	if err := json.Unmarshal(data, &vs); err != nil || vs.URL == "" {
+		return nil, false
+	}
+	return &vs, true
+}
+
+func parseCodeSystem(data []byte) (*CodeSystem, bool) {
+	var cs CodeSystem
+	if err := json.Unmarshal(data, &cs); err != nil || cs.URL == "" {
+		return nil, false
+	}
+	return &cs, true
 }
 
 // SetFHIRVersion sets the FHIR version validated ("4.0.1"). Where several versions of a URL are
@@ -300,19 +339,33 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 		if pkg.FHIRVersion != "" {
 			fhirVersions = append([]string{pkg.FHIRVersion}, fhirVersions...)
 		}
-		for _, data := range pkg.Resources {
+		pkg.Each(func(data json.RawMessage) {
 			var peek struct {
 				ResourceType string `json:"resourceType"`
 			}
 			if err := json.Unmarshal(data, &peek); err != nil {
-				continue
+				return
 			}
-
 			switch peek.ResourceType {
 			case "ValueSet":
 				r.indexValueSetUnlocked(data, packageID, fhirVersions)
 			case "CodeSystem":
 				r.indexCodeSystemUnlocked(data, packageID, fhirVersions)
+			}
+		})
+		for _, d := range pkg.Deferred {
+			if d.URL == "" {
+				continue
+			}
+			switch d.ResourceType {
+			case "ValueSet":
+				e := &loaded[*ValueSet]{url: d.URL, version: d.Version, packageID: packageID, fhirVersions: fhirVersions, read: d.Read}
+				r.loadedValueSets = append(r.loadedValueSets, e)
+				r.selectValueSetUnlocked(e)
+			case "CodeSystem":
+				e := &loaded[*CodeSystem]{url: d.URL, version: d.Version, packageID: packageID, fhirVersions: fhirVersions, read: d.Read}
+				r.loadedCodeSystems = append(r.loadedCodeSystems, e)
+				r.selectCodeSystemUnlocked(e)
 			}
 		}
 	}
@@ -323,11 +376,11 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 // indexValueSetUnlocked adds a ValueSet to both indexes. Must be called with the
 // write lock held.
 func (r *Registry) indexValueSetUnlocked(data json.RawMessage, packageID string, fhirVersions []string) {
-	var vs ValueSet
-	if err := json.Unmarshal(data, &vs); err != nil || vs.URL == "" {
+	vs, ok := parseValueSet(data)
+	if !ok {
 		return
 	}
-	entry := loaded[*ValueSet]{&vs, vs.URL, vs.Version, packageID, fhirVersions}
+	entry := &loaded[*ValueSet]{resource: vs, url: vs.URL, version: vs.Version, packageID: packageID, fhirVersions: fhirVersions}
 	r.loadedValueSets = append(r.loadedValueSets, entry)
 	r.selectValueSetUnlocked(entry)
 }
@@ -335,18 +388,18 @@ func (r *Registry) indexValueSetUnlocked(data json.RawMessage, packageID string,
 // indexCodeSystemUnlocked adds a CodeSystem to both indexes. Must be called with
 // the write lock held.
 func (r *Registry) indexCodeSystemUnlocked(data json.RawMessage, packageID string, fhirVersions []string) {
-	var cs CodeSystem
-	if err := json.Unmarshal(data, &cs); err != nil || cs.URL == "" {
+	cs, ok := parseCodeSystem(data)
+	if !ok {
 		return
 	}
-	entry := loaded[*CodeSystem]{&cs, cs.URL, cs.Version, packageID, fhirVersions}
+	entry := &loaded[*CodeSystem]{resource: cs, url: cs.URL, version: cs.Version, packageID: packageID, fhirVersions: fhirVersions}
 	r.loadedCodeSystems = append(r.loadedCodeSystems, entry)
 	r.selectCodeSystemUnlocked(entry)
 }
 
 // selectValueSetUnlocked makes a ValueSet loaded the one lookups of its URL, and of its URL and
 // version, resolve to when it supersedes the one held. Must be called with the write lock held.
-func (r *Registry) selectValueSetUnlocked(e loaded[*ValueSet]) {
+func (r *Registry) selectValueSetUnlocked(e *loaded[*ValueSet]) {
 	pick(r, r.valueSets, r.valueSetPackage, e.url, e)
 	if e.version != "" {
 		pick(r, r.valueSetsByVersion, r.valueSetPackage, e.url+"|"+e.version, e)
@@ -354,23 +407,49 @@ func (r *Registry) selectValueSetUnlocked(e loaded[*ValueSet]) {
 }
 
 // selectCodeSystemUnlocked is selectValueSetUnlocked for a CodeSystem.
-func (r *Registry) selectCodeSystemUnlocked(e loaded[*CodeSystem]) {
+func (r *Registry) selectCodeSystemUnlocked(e *loaded[*CodeSystem]) {
 	pick(r, r.codeSystems, r.codeSystemPackage, e.url, e)
 	if e.version != "" {
 		pick(r, r.codeSystemsByVersion, r.codeSystemPackage, e.url+"|"+e.version, e)
 	}
 }
 
-// pick makes e what key ("url" or "url|version") resolves to in held when it supersedes the entry
-// recorded for key in entries. For "url|version", two packages carry the same version: only the
-// publisher's, or one from a package for the FHIR version validated, replaces the one loaded first.
-func pick[T any](r *Registry, held map[string]T, entries map[string]loaded[T], key string, e loaded[T]) {
+// pick makes e what key ("url" or "url|version") resolves to when it supersedes the entry recorded
+// for key in entries; held holds it when it was read. For "url|version", two packages carry the
+// same version: only the publisher's, or one from a package for the FHIR version validated,
+// replaces the one loaded first.
+func pick[T any](r *Registry, held map[string]T, entries map[string]*loaded[T], key string, e *loaded[T]) {
 	if cur, ok := entries[key]; ok && !r.supersedes(e.url, e.version, cur.version, e.packageID, cur.packageID,
 		e.fhirVersions, cur.fhirVersions) {
 		return
 	}
-	held[key] = e.resource
 	entries[key] = e
+	if e.read == nil {
+		held[key] = e.resource
+	} else {
+		delete(held, key) // read when first asked for
+	}
+}
+
+// resolve returns what key resolves to: the resource held, or the entry chosen for key, read the
+// first time it is asked for.
+func resolve[T any](r *Registry, held map[string]T, entries map[string]*loaded[T], key string, parse func([]byte) (T, bool)) (T, bool) {
+	r.mu.RLock()
+	v, ok := held[key]
+	e := entries[key]
+	r.mu.RUnlock()
+	if ok || e == nil {
+		return v, ok
+	}
+	if v, ok = e.get(parse); !ok {
+		return v, false
+	}
+	r.mu.Lock()
+	if entries[key] == e { // still the one chosen
+		held[key] = v
+	}
+	r.mu.Unlock()
+	return v, true
 }
 
 // supersedes reports whether version a of url replaces version b, for unversioned lookups: the
@@ -436,9 +515,8 @@ func (r *Registry) GetValueSet(url string) *ValueSet {
 		return r.GetValueSetVersion(base, version)
 	}
 
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.valueSets[url]
+	vs, _ := resolve(r, r.valueSets, r.valueSetPackage, url, parseValueSet)
+	return vs
 }
 
 // GetCodeSystem returns a CodeSystem by URL.
@@ -450,9 +528,8 @@ func (r *Registry) GetCodeSystem(url string) *CodeSystem {
 		return r.GetCodeSystemVersion(base, version)
 	}
 
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.codeSystems[url]
+	cs, _ := resolve(r, r.codeSystems, r.codeSystemPackage, url, parseCodeSystem)
+	return cs
 }
 
 // GetCodeSystemVersion returns the CodeSystem for url at the given version when
@@ -465,25 +542,21 @@ func (r *Registry) GetCodeSystem(url string) *CodeSystem {
 // 441 versioned includes unresolvable. The fallback is reported by
 // CodeSystemVersionMatches for callers that need to know.
 func (r *Registry) GetCodeSystemVersion(url, version string) *CodeSystem {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	if cs, ok := r.codeSystemsByVersion[url+"|"+version]; ok {
+	if cs, ok := resolve(r, r.codeSystemsByVersion, r.codeSystemPackage, url+"|"+version, parseCodeSystem); ok {
 		return cs
 	}
-	return r.codeSystems[url]
+	cs, _ := resolve(r, r.codeSystems, r.codeSystemPackage, url, parseCodeSystem)
+	return cs
 }
 
 // GetValueSetVersion returns the ValueSet for url at the given version when that
 // version was loaded, falling back to the version held for url otherwise.
 func (r *Registry) GetValueSetVersion(url, version string) *ValueSet {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	if vs, ok := r.valueSetsByVersion[url+"|"+version]; ok {
+	if vs, ok := resolve(r, r.valueSetsByVersion, r.valueSetPackage, url+"|"+version, parseValueSet); ok {
 		return vs
 	}
-	return r.valueSets[url]
+	vs, _ := resolve(r, r.valueSets, r.valueSetPackage, url, parseValueSet)
+	return vs
 }
 
 // CodeSystemVersionMatches reports whether the requested version of url is the one
@@ -495,8 +568,9 @@ func (r *Registry) CodeSystemVersionMatches(url, version string) bool {
 	}
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	_, ok := r.codeSystemsByVersion[url+"|"+version]
-	return ok
+	_, held := r.codeSystemsByVersion[url+"|"+version]
+	_, loaded := r.codeSystemPackage[url+"|"+version]
+	return held || loaded
 }
 
 // ValidateCode checks if a code is valid for a given ValueSet URL.
@@ -1210,14 +1284,25 @@ func (r *Registry) buildHierarchy(cs *CodeSystem) map[string][]string {
 func (r *Registry) ValueSetCount() int {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	return len(r.valueSets)
+	return countURLs(r.valueSets, r.valueSetPackage)
 }
 
 // CodeSystemCount returns the number of loaded CodeSystems.
 func (r *Registry) CodeSystemCount() int {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	return len(r.codeSystems)
+	return countURLs(r.codeSystems, r.codeSystemPackage)
+}
+
+// countURLs counts the URLs held or loaded, read or not.
+func countURLs[T any](held map[string]T, entries map[string]*loaded[T]) int {
+	n := len(held)
+	for key := range entries {
+		if _, ok := held[key]; !ok && !strings.Contains(key, "|") {
+			n++
+		}
+	}
+	return n
 }
 
 // GetDisplayForCode returns the display text for a code in a CodeSystem.

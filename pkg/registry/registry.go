@@ -311,9 +311,7 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 	for _, pkg := range packages {
 		packageID := pkg.Name + "#" + pkg.Version
-		for _, data := range pkg.Resources {
-			r.loadResourceUnlocked(data, packageID)
-		}
+		pkg.Each(func(data json.RawMessage) { r.loadResourceUnlocked(data, packageID) })
 	}
 
 	// The definitions loaded may change which version of a URL or type is used.
