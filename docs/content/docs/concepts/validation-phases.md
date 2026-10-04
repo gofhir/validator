@@ -35,6 +35,8 @@ The structural phase verifies that the JSON payload is well-formed and that ever
 
 This phase walks every ElementDefinition in the snapshot and checks that the number of values provided falls within the declared `min` and `max` bounds. A required element (`min: 1`) that is absent produces an error; an element that exceeds `max` also produces an error.
 
+The children of a value are those its element defines, or else those of the profile its type declares, or else, for an extension, those of the definition its `url` names, or else those of its type. So an extension's sub-extensions and `value[x]` are checked against its definition, with or without a profile.
+
 ### 3. Primitive
 
 Primitive types such as `dateTime`, `uri`, `code`, and `id` have format rules defined by FHIR (typically as regular expressions). This phase validates that each primitive value matches the expected format and JSON type.
@@ -74,6 +76,8 @@ When an ElementDefinition specifies a `fixed[x]` value, the resource element mus
 ### 9. Slicing
 
 FHIR arrays can be sliced into named groups using discriminators. This phase matches each array element to the correct slice based on discriminator values, then validates that each slice meets its own cardinality constraints.
+
+The slicing of an extension's own elements (its sub-extensions, a type-sliced `value[x]`) is checked against the definition its `url` names, as cardinality is.
 
 ## Profile Validation Flow
 

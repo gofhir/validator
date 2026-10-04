@@ -46,5 +46,13 @@
     "file": "testdata/m12-slice-scoping/decisions/instances/Q5_openatend_wrong.json",
     "location": "Patient.identifier[0]",
     "messageId": "SLICING_OPEN_AT_END"
+  },
+  {
+    "decision": "B-D1",
+    "reason": "A primitive's value is the JSON property itself (json.html#primitive: \"the value of the primitive is represented as the property value\"), so birthDate \"2000-01-01\" has one value and meets Patient.birthDate.value min 1; HL7 6.10.4 counts the value as absent.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/pe5_value_present.json",
+    "location": "Patient.birthDate",
+    "messageId": "Validation_VAL_Profile_Minimum"
   }
 ]

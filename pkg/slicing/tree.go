@@ -27,7 +27,7 @@ const (
 // The instance's type, typeCode, picks the profile a choice element's type declares; it is ""
 // for any other element.
 func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, result *issue.Result) {
-	childSD, children := v.walkChildren(sd, node, typeCode, 0)
+	childSD, children := v.walkChildren(run.ctx, sd, node, typeCode, inst)
 	for _, child := range children {
 		values := elementvalues.Of(child, inst, v.registry.ChoiceType)
 		governing := make([]*registry.ElementNode, len(values))
@@ -41,6 +41,11 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 			m, ok := cv.Value.(map[string]any)
 			if !ok {
 				m = cv.Ext
+				// A primitive whose element the snapshot unrolls (a profile that slices its
+				// extensions) is checked even with no "_key" sibling: its slices may be required.
+				if m == nil && len(governedChildren(governing[i])) > 0 {
+					m = map[string]any{}
+				}
 			}
 			if m == nil {
 				continue
@@ -75,41 +80,25 @@ func (v *Validator) memberTree(sd *registry.StructureDefinition, node *registry.
 	return psd, member
 }
 
-// maxContentReferenceHops bounds a chain of contentReferences (a cycle in a malformed
-// StructureDefinition).
-const maxContentReferenceHops = 8
+// walkChildren returns the children that govern an instance of node, inst, and the
+// StructureDefinition they belong to (Registry.ChildrenOf, with the definition the instance
+// declares for itself): their slicing applies to the value. A type's base definition has no
+// slicing of its own, but the walk goes through it to the extensions it holds, a primitive's
+// included, each checked against its definition. A profile that does not resolve is reported by
+// the cardinality phase.
+func (v *Validator) walkChildren(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any) (*registry.StructureDefinition, []*registry.ElementNode) {
+	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
+	return c.SD, c.Nodes
+}
 
-// walkChildren returns the children that govern an instance of node and the StructureDefinition
-// they belong to: node's own in the snapshot; those of the element it slices, when the snapshot
-// does not unroll the slice; those its contentReference points to; or those of the one profile its
-// type declares (type.profile, plan B L1), whose slicing applies to the value. A type's base
-// definition has no slicing of its own to check, and a profile that does not resolve is reported
-// by the cardinality phase.
-func (v *Validator) walkChildren(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, hops int) (*registry.StructureDefinition, []*registry.ElementNode) {
-	if c := governedChildren(node); len(c) > 0 {
-		return sd, c
+// selfDefinitions returns, for an instance, the definition it declares for itself for a type.
+func (v *Validator) selfDefinitions(ctx context.Context, inst map[string]any) func(string) *registry.StructureDefinition {
+	if v.definitions == nil {
+		return nil
 	}
-	ref := node.Def.ContentReference
-	if ref == nil {
-		if tp := v.registry.TypeProfile(context.Background(), node, typeCode); tp.SD != nil {
-			return tp.SD, tp.SD.Tree().Root().Children
-		}
-		return sd, nil
+	return func(typeCode string) *registry.StructureDefinition {
+		return v.definitions.DefinitionOf(ctx, typeCode, inst)
 	}
-	if hops >= maxContentReferenceHops {
-		return sd, nil
-	}
-	target, _ := v.registry.ContentReference(sd, node)
-	if target == nil {
-		return sd, nil
-	}
-	tsd := sd
-	if url, _, ok := registry.SplitContentReference(*ref); ok && url != "" && url != sd.URL {
-		if s, _ := v.registry.ResolveCanonical(url); s != nil {
-			tsd = s
-		}
-	}
-	return v.walkChildren(tsd, target, typeCode, hops+1)
 }
 
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
@@ -139,7 +128,7 @@ func (v *Validator) checkSlicing(run *validation, scope slicematch.Scope, sd *re
 		governing[i] = node
 		if slice := v.matchValue(run, scope, sd, node, cv, cv.Path(fhirPath), result); slice != nil {
 			governing[i] = slice
-			v.checkMember(node, slice, cv, cv.Path(fhirPath), result)
+			v.checkMember(run.ctx, sd, node, slice, cv, cv.Path(fhirPath), result)
 		}
 	}
 	all := make([]int, len(values))
@@ -240,20 +229,17 @@ func checkSliceCount(s *registry.ElementNode, count int, elementPath string, res
 	}
 }
 
-// checkMember checks the children of one value assigned to a slice. The unsliced element is the
-// base the cardinality phase checks against; a slice defined by its type's profile has no such
-// base here.
-func (v *Validator) checkMember(node, slice *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) {
+// checkMember checks the children of one value assigned to a slice, where the slice constrains
+// them further than the definitions the cardinality phase checks the value against: the children
+// that govern a value of the unsliced element (Registry.ChildrenOf), which the cardinality phase
+// takes from the same place.
+func (v *Validator) checkMember(ctx context.Context, sd *registry.StructureDefinition, node, slice *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) {
 	m, ok := cv.Value.(map[string]any)
 	if !ok {
 		return
 	}
-	member := v.memberDefinition(slice)
-	base := node
-	if member != slice {
-		base = nil
-	}
-	v.checkChildren(member, base, m, itemPath, node.Def.ID+":"+sliceNameOf(slice), result)
+	base := v.registry.ChildrenOf(ctx, sd, node, cv.TypeCode, v.selfDefinitions(ctx, m))
+	v.checkChildren(ctx, v.memberDefinition(slice), base, m, itemPath, node.Def.ID+":"+sliceNameOf(slice), result)
 }
 
 // matchValue returns the slice that governs one value, or nil, reporting what the matcher found on
