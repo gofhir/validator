@@ -155,6 +155,9 @@ func typeCodes(e *ElementDefinition) []string {
 // A guide's profiles, their snapshots stripped and regenerated from their differentials, match the
 // published snapshots on id, min, max and types for every element the differential names.
 func TestRegeneratedSnapshotsMatchPublished(t *testing.T) {
+	if testing.Short() {
+		t.Skip("regenerates whole guides; run without -short")
+	}
 	for _, guide := range [][2]string{{"hl7.fhir.us.core", "6.1.0"}, {"hl7.fhir.us.davinci-deqm", "5.0.0"}} {
 		t.Run(guide[0], func(t *testing.T) {
 			r := guideRegistry(t, guide[0], guide[1])
@@ -191,25 +194,20 @@ func TestRegeneratedExtensionSnapshots(t *testing.T) {
 	}
 }
 
-// sharedVersionCopy is a registry of the embedded R4 packages this test may add to.
+// sharedVersionCopy is a registry of the embedded R4 packages this test may add to: a clone of the
+// shared one.
 func sharedVersionCopy(t *testing.T) *Registry {
 	t.Helper()
-	packages, err := loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	r := New()
-	r.SetFHIRVersion("4.0.1")
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatal(err)
-	}
-	return r
+	return sharedVersion(t, "4.0.1").Clone()
 }
 
 // Every guide in the package cache with profiles that ship a snapshot and a differential: their
 // snapshots stripped and regenerated match the published ones (see snapshotMismatches). Guides
 // missing from the cache are skipped.
 func TestRegeneratedSnapshotsAcrossGuides(t *testing.T) {
+	if testing.Short() {
+		t.Skip("regenerates whole guides; run without -short")
+	}
 	for _, guide := range [][2]string{
 		{"hl7.fhir.us.qicore", "6.0.0"}, {"hl7.fhir.us.mcode", "4.0.0"}, {"hl7.fhir.uv.ips", "2.0.1"},
 		{"hl7.fhir.au.core", "2.0.0"}, {"hl7.fhir.au.base", "6.0.0"}, {"ch.fhir.ig.ch-core", "6.0.0"},

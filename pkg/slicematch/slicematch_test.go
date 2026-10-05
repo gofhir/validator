@@ -7,28 +7,18 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"sync"
 	"testing"
+
+	"github.com/gofhir/validator/internal/testfhir"
 
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/specs"
-)
-
-var (
-	coreOnce sync.Once
-	corePkgs []*loader.Package
-	errCore  error
 )
 
 // newRegistry loads the embedded R4 packages plus the given packages and inline resources.
 func newRegistry(t *testing.T, tgzs []string, resources ...string) *registry.Registry {
 	t.Helper()
-	coreOnce.Do(func() { corePkgs, errCore = loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages("4.0.1")) })
-	if errCore != nil {
-		t.Fatal(errCore)
-	}
-	pkgs := slices.Clone(corePkgs)
+	var pkgs []*loader.Package
 	l := loader.NewLoader("")
 	for _, f := range tgzs {
 		p, err := l.LoadFromTgz(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "packages", f))
@@ -48,7 +38,7 @@ func newRegistry(t *testing.T, tgzs []string, resources ...string) *registry.Reg
 		}
 		pkgs = append(pkgs, p)
 	}
-	r := registry.New()
+	r := testfhir.Registry(t, "4.0.1")
 	if err := r.LoadFromPackages(pkgs); err != nil {
 		t.Fatal(err)
 	}

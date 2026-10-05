@@ -12,9 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/internal/testfhir"
 	"github.com/gofhir/validator/pkg/logger"
-	"github.com/gofhir/validator/pkg/specs"
 )
 
 // testPackage is a package with one StructureDefinition, whose url names it.
@@ -190,10 +189,7 @@ func TestMissingPackagesAreDownloaded(t *testing.T) {
 // A dependency on a package loaded already, at the version loaded (the embedded base packages), is
 // neither looked for in the cache nor downloaded.
 func TestDependenciesOnLoadedPackages(t *testing.T) {
-	embedded, err := loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
-	if err != nil || len(embedded) == 0 {
-		t.Fatalf("embedded packages: %v", err)
-	}
+	embedded := testfhir.Packages(t, "4.0.1")
 	deps := map[string]string{}
 	for _, pkg := range embedded {
 		deps[pkg.Name] = pkg.Version

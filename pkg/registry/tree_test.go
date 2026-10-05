@@ -48,6 +48,7 @@ func sharedVersion(t testing.TB, version string) *Registry {
 			return nil, err
 		}
 		r := New()
+		r.SetFHIRVersion(version)
 		if err := r.LoadFromPackages(packages); err != nil {
 			return nil, err
 		}

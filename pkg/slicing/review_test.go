@@ -5,19 +5,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gofhir/validator/internal/testfhir"
+
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/specs"
 )
 
 // loadWith returns a slicing validator over the embedded R4 packages plus the given resources.
 func loadWith(t *testing.T, resources ...string) (*Validator, *registry.Registry) {
 	t.Helper()
 	l := loader.NewLoader("")
-	core, err := l.LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
-	if err != nil {
-		t.Fatal(err)
-	}
 	raw := make([][]byte, len(resources))
 	for i, r := range resources {
 		raw[i] = []byte(r)
@@ -26,8 +23,8 @@ func loadWith(t *testing.T, resources ...string) (*Validator, *registry.Registry
 	if err != nil {
 		t.Fatal(err)
 	}
-	reg := registry.New()
-	if err := reg.LoadFromPackages(append(core, p)); err != nil {
+	reg := testfhir.Registry(t, "4.0.1")
+	if err := reg.LoadFromPackages([]*loader.Package{p}); err != nil {
 		t.Fatal(err)
 	}
 	return New(reg), reg

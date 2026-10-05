@@ -146,8 +146,12 @@ func BenchmarkValidateHL7Example(b *testing.B) {
 	}
 }
 
-// BenchmarkValidatorCreation benchmarks the creation of a new validator.
+// BenchmarkValidatorCreation benchmarks the creation of a new validator, loading its packages as
+// New does outside the tests rather than cloning the base they share.
 func BenchmarkValidatorCreation(b *testing.B) {
+	shared := embeddedBase
+	embeddedBase = nil
+	b.Cleanup(func() { embeddedBase = shared })
 	for i := 0; i < b.N; i++ {
 		_, _ = New()
 	}

@@ -21,6 +21,10 @@ func TestWithTerminologyAuthorityReclaimsBaseTerminology(t *testing.T) {
 	if testing.Short() {
 		t.Skip("builds two validators and measures heap; run without -short")
 	}
+	// The heap measured is what New loads itself, not the base the other tests share.
+	shared := embeddedBase
+	embeddedBase = nil
+	t.Cleanup(func() { embeddedBase = shared })
 
 	// Measure the resident cost of one validator: GC to a quiet baseline, build
 	// it, GC again, and take the delta while it is still reachable. Measuring

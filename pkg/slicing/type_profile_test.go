@@ -4,9 +4,9 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/gofhir/validator/internal/testfhir"
+
 	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/specs"
 )
 
 // idProfile is an Identifier profile that slices its own extension, closed, by url: a datatype
@@ -35,16 +35,12 @@ const patProfile = `{"resourceType":"StructureDefinition","url":"https://example
 // profile (plan B, L1), as the HL7 validator applies it.
 func TestSlicingOfATypeProfile(t *testing.T) {
 	l := loader.NewLoader("")
-	core, err := l.LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
-	if err != nil {
-		t.Fatal(err)
-	}
 	p, err := l.LoadFromResources([][]byte{[]byte(idProfile), []byte(patProfile)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	reg := registry.New()
-	if err := reg.LoadFromPackages(append(core, p)); err != nil {
+	reg := testfhir.Registry(t, "4.0.1")
+	if err := reg.LoadFromPackages([]*loader.Package{p}); err != nil {
 		t.Fatal(err)
 	}
 	v := New(reg)

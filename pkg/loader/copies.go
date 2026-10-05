@@ -1,6 +1,7 @@
 package loader
 
 import (
+	"maps"
 	"slices"
 	"strings"
 )
@@ -81,4 +82,9 @@ func under(url, canonical string) bool {
 // specification's types fhir.core, fhir.examples and fhir.expansions).
 func specificationPackage(pkg *Package) bool {
 	return pkg.IsCore() || strings.EqualFold(pkg.Type, "fhir.examples") || strings.EqualFold(pkg.Type, "fhir.expansions")
+}
+
+// Clone returns a copy that Add does not share.
+func (p *Publishers) Clone() Publishers {
+	return Publishers{canonicals: slices.Clone(p.canonicals), carriers: maps.Clone(p.carriers)}
 }
