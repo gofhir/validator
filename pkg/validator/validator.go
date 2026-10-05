@@ -369,6 +369,50 @@ func ValidateWithMode(mode ValidateMode) ValidateOption {
 	}
 }
 
+// basePackages loads the packages of the FHIR version validated, with registries of them when the
+// embeddedBase hook already holds them. Base packages the configuration names are loaded without
+// the hook.
+func basePackages(l *loader.Loader, config *Config) (packages []*loader.Package, reg *registry.Registry, term *terminology.Registry, err error) {
+	if len(config.BasePackages) == 0 && embeddedBase != nil {
+		packages, reg, term, err = embeddedBase(config.FHIRVersion)
+		if err != nil || len(packages) > 0 {
+			return packages, reg, term, err
+		}
+	}
+	packages, err = loadBase(l, config)
+	return packages, nil, nil, err
+}
+
+// buildTerminology builds the terminology registry of the packages loaded. When base is a registry
+// of the first baseCount of them already, only the rest are loaded into it. Under a terminology
+// authority none is loaded, and base is not used.
+func buildTerminology(config *Config, base *terminology.Registry, packages []*loader.Package, baseCount int) (*terminology.Registry, error) {
+	termReg, termLoadInto := base, packages[baseCount:]
+	if termReg == nil || config.TerminologyAuthority != nil {
+		termReg, termLoadInto = terminology.NewRegistry(), packages
+		termReg.SetFHIRVersion(config.FHIRVersion)
+	}
+
+	if config.TerminologyAuthority != nil {
+		// The host owns terminology resolution, so parsing our own copy of the
+		// base ValueSets/CodeSystems would be dead weight — this is where the
+		// duplicate in-memory copy is avoided.
+		termReg.SetAuthority(config.TerminologyAuthority)
+		logger.Debug("  Terminology authority configured; base terminology not loaded")
+	} else {
+		if err := termReg.LoadFromPackages(termLoadInto); err != nil {
+			return nil, fmt.Errorf("failed to load terminology: %w", err)
+		}
+		logger.Debug("  Indexed %d ValueSets, %d CodeSystems", termReg.ValueSetCount(), termReg.CodeSystemCount())
+
+		if config.TerminologyProvider != nil {
+			termReg.SetProvider(config.TerminologyProvider)
+			logger.Debug("  External terminology provider configured")
+		}
+	}
+	return termReg, nil
+}
+
 // New creates a new Validator with the given options.
 func New(opts ...Option) (*Validator, error) {
 	startTime := time.Now()
@@ -391,7 +435,7 @@ func New(opts ...Option) (*Validator, error) {
 	// Load packages for the specified FHIR version (embedded-first, fallback to disk)
 	logger.Info("Loading FHIR packages...")
 	loadStart := time.Now()
-	packages, err := loadBase(l, config)
+	packages, baseReg, baseTerm, err := basePackages(l, config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load FHIR packages: %w", err)
 	}
@@ -469,9 +513,12 @@ func New(opts ...Option) (*Validator, error) {
 	// Create and populate the registry
 	logger.Info("Building StructureDefinition registry...")
 	registryStart := time.Now()
-	reg := registry.New()
-	reg.SetFHIRVersion(config.FHIRVersion)
-	if err := reg.LoadFromPackages(packages); err != nil {
+	reg, loadInto := baseReg, packages[base:]
+	if reg == nil {
+		reg, loadInto = registry.New(), packages
+		reg.SetFHIRVersion(config.FHIRVersion)
+	}
+	if err := reg.LoadFromPackages(loadInto); err != nil {
 		return nil, fmt.Errorf("failed to load StructureDefinitions: %w", err)
 	}
 	registryDuration := time.Since(registryStart)
@@ -482,25 +529,9 @@ func New(opts ...Option) (*Validator, error) {
 
 	// Create and populate the terminology registry
 	logger.Debug("Building terminology registry...")
-	termReg := terminology.NewRegistry()
-	termReg.SetFHIRVersion(config.FHIRVersion)
-
-	if config.TerminologyAuthority != nil {
-		// The host owns terminology resolution, so parsing our own copy of the
-		// base ValueSets/CodeSystems would be dead weight — this is where the
-		// duplicate in-memory copy is avoided.
-		termReg.SetAuthority(config.TerminologyAuthority)
-		logger.Debug("  Terminology authority configured; base terminology not loaded")
-	} else {
-		if err := termReg.LoadFromPackages(packages); err != nil {
-			return nil, fmt.Errorf("failed to load terminology: %w", err)
-		}
-		logger.Debug("  Indexed %d ValueSets, %d CodeSystems", termReg.ValueSetCount(), termReg.CodeSystemCount())
-
-		if config.TerminologyProvider != nil {
-			termReg.SetProvider(config.TerminologyProvider)
-			logger.Debug("  External terminology provider configured")
-		}
+	termReg, err := buildTerminology(config, baseTerm, packages, base)
+	if err != nil {
+		return nil, err
 	}
 
 	if config.ProfileResolver != nil {
@@ -1054,6 +1085,12 @@ func loadBase(l *loader.Loader, config *Config) ([]*loader.Package, error) {
 	logger.Info("  Loading specs from disk for %s", config.FHIRVersion)
 	return l.LoadVersion(config.FHIRVersion)
 }
+
+// embeddedBase, when set, gives the packages the validator embeds for a FHIR version and
+// registries of them, the caller's to load more into: New starts from them instead of loading the
+// embedded packages again. Tests set it, so that a validator per test does not cost a load of the
+// base packages each (internal/testfhir); it is nil otherwise.
+var embeddedBase func(fhirVersion string) ([]*loader.Package, *registry.Registry, *terminology.Registry, error)
 
 // loadBasePackages loads the base packages given, from the package cache, in their order.
 func loadBasePackages(l *loader.Loader, base []PackageSpec) ([]*loader.Package, error) {

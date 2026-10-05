@@ -39,18 +39,9 @@ func getSharedRegistry(t *testing.T) *Registry {
 	return sharedRegistry
 }
 
-// newMutableRegistry creates a fresh registry loaded with FHIR R4 4.0.1
-// packages. Use this for tests that need to modify the registry.
+// newMutableRegistry returns a registry of the embedded FHIR R4 4.0.1 packages (core, terminology
+// and extensions), for tests that modify it: a clone of the one sharedVersion loads.
 func newMutableRegistry(t *testing.T) *Registry {
 	t.Helper()
-	l := loader.NewLoader("")
-	packages, err := l.LoadVersion("4.0.1")
-	if err != nil {
-		t.Skipf("Cannot load FHIR packages: %v", err)
-	}
-	r := New()
-	if err := r.LoadFromPackages(packages); err != nil {
-		t.Fatalf("LoadFromPackages failed: %v", err)
-	}
-	return r
+	return sharedVersion(t, "4.0.1").Clone()
 }

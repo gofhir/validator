@@ -146,6 +146,7 @@ func (r *Registry) snapshotOf(ctx context.Context, g *generation, sd *StructureD
 	sd.snapshotMu.Lock()
 	if sd.Snapshot == nil {
 		sd.Snapshot, sd.snapshotNotes, sd.snapshotCyclic = snapshot, notes, frame.cyclic
+		sd.snapshotGenerated = true
 	}
 	snapshot = sd.Snapshot
 	sd.snapshotMu.Unlock()

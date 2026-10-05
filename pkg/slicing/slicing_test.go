@@ -7,10 +7,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/gofhir/validator/internal/testfhir"
+
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/specs"
 )
 
 var (
@@ -123,16 +124,12 @@ const extensionY = `{"resourceType":"StructureDefinition","url":"https://example
 // element is present.
 func TestSliceChildCardinality(t *testing.T) {
 	l := loader.NewLoader("")
-	core, err := l.LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
-	if err != nil {
-		t.Fatal(err)
-	}
 	p, err := l.LoadFromResources([][]byte{[]byte(childProfile), []byte(extensionY)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	reg := registry.New()
-	if err := reg.LoadFromPackages(append(core, p)); err != nil {
+	reg := testfhir.Registry(t, "4.0.1")
+	if err := reg.LoadFromPackages([]*loader.Package{p}); err != nil {
 		t.Fatal(err)
 	}
 	sd := reg.GetByURL("https://example.org/fhir/StructureDefinition/child")

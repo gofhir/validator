@@ -6,10 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gofhir/validator/internal/testfhir"
+
 	"github.com/gofhir/validator/pkg/issue"
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/specs"
 )
 
 // treeProfile is a Patient profile with two slices of contact whose children the base element
@@ -31,16 +32,12 @@ const treeProfile = `{"resourceType":"StructureDefinition","url":"https://exampl
 func treeRegistry(t *testing.T) *registry.Registry {
 	t.Helper()
 	l := loader.NewLoader("")
-	core, err := l.LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
-	if err != nil {
-		t.Fatal(err)
-	}
 	p, err := l.LoadFromResources([][]byte{[]byte(treeProfile)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	reg := registry.New()
-	if err := reg.LoadFromPackages(append(core, p)); err != nil {
+	reg := testfhir.Registry(t, "4.0.1")
+	if err := reg.LoadFromPackages([]*loader.Package{p}); err != nil {
 		t.Fatal(err)
 	}
 	return reg
@@ -129,14 +126,7 @@ func TestCardinalityFollowsContentReference(t *testing.T) {
 	nested := `{"resourceType":"Questionnaire","status":"draft","item":[{"linkId":"1","type":"group","item":[{"text":"no linkId"}]}]}`
 	for _, version := range []string{"4.0.1", "5.0.0"} {
 		t.Run(version, func(t *testing.T) {
-			pkgs, err := loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages(version))
-			if err != nil {
-				t.Fatal(err)
-			}
-			reg := registry.New()
-			if err := reg.LoadFromPackages(pkgs); err != nil {
-				t.Fatal(err)
-			}
+			reg := testfhir.Registry(t, version)
 			got := cardinalityErrors(t, New(reg), reg.GetByType("Questionnaire"), nested)
 			want := []string{"CARDINALITY_MIN @ Questionnaire.item[0].item[0].linkId", "CARDINALITY_MIN @ Questionnaire.item[0].item[0].type"}
 			if !slices.Equal(got, want) {

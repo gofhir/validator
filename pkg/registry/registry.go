@@ -63,6 +63,8 @@ type StructureDefinition struct {
 	// snapshotCyclic reports a snapshot generated while a cycle of type profiles was cut: it is kept
 	// for this StructureDefinition, and generated again where another needs it as a type.
 	snapshotCyclic bool
+	// snapshotGenerated reports a Snapshot generated from the differential rather than shipped.
+	snapshotGenerated bool
 
 	// tree caches the element hierarchy of Snapshot; see Tree.
 	tree treeCache
