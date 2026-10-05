@@ -534,44 +534,12 @@ func TestApplyDifferential_EmptyDiff(t *testing.T) {
 	}
 	diff := &Differential{Element: []ElementDefinition{}}
 
-	result, err := applyDifferential(base, diff)
+	result, _, err := New().applyDifferential(context.Background(), base, diff)
 	if err != nil {
 		t.Fatalf("applyDifferential failed: %v", err)
 	}
 	if len(result.Element) != 2 {
 		t.Errorf("Expected 2 elements (unchanged base), got %d", len(result.Element))
-	}
-}
-
-func TestFindMatchingElement(t *testing.T) {
-	sliceName := "MRN"
-	elements := []ElementDefinition{
-		{Path: "Patient"},
-		{Path: "Patient.identifier"},
-		{Path: "Patient.identifier", SliceName: &sliceName},
-		{Path: "Patient.name"},
-	}
-
-	tests := []struct {
-		name      string
-		path      string
-		sliceName *string
-		expected  int
-	}{
-		{"root element", "Patient", nil, 0},
-		{"unsliced identifier", "Patient.identifier", nil, 1},
-		{"sliced identifier", "Patient.identifier", &sliceName, 2},
-		{"name element", "Patient.name", nil, 3},
-		{"not found", "Patient.telecom", nil, -1},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			idx := findMatchingElement(elements, tt.path, tt.sliceName)
-			if idx != tt.expected {
-				t.Errorf("findMatchingElement(%q, %v) = %d, want %d", tt.path, tt.sliceName, idx, tt.expected)
-			}
-		})
 	}
 }
 

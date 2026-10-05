@@ -154,6 +154,12 @@ const (
 	// loaded, not in the version it pins, or has no snapshot, so the value cannot be checked
 	// against it.
 	DiagTypeProfileNotFound DiagnosticID = "TYPE_PROFILE_NOT_FOUND"
+	// DiagProfileSnapshotFailed: a profile the resource is validated against resolves, but its
+	// snapshot cannot be generated from its differential, so the resource is not validated against it.
+	DiagProfileSnapshotFailed DiagnosticID = "PROFILE_SNAPSHOT_FAILED"
+	// DiagProfileDifferentialIgnored: an element of a profile's differential names nothing its base
+	// has, so its snapshot leaves it out.
+	DiagProfileDifferentialIgnored DiagnosticID = "PROFILE_DIFFERENTIAL_IGNORED"
 )
 
 // DiagnosticTemplate defines the structure for a diagnostic message.
@@ -459,6 +465,16 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "Element matches more than one slice of '{path}': {slices}",
+	},
+	DiagProfileSnapshotFailed: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "Profile '{url}' has no snapshot, so the resource is not validated against it: {reason}",
+	},
+	DiagProfileDifferentialIgnored: {
+		Severity: SeverityWarning,
+		Code:     CodeProcessing,
+		Template: "Profile '{url}': {detail}",
 	},
 	DiagTypeProfileNotFound: {
 		Severity: SeverityError,

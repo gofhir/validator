@@ -135,6 +135,16 @@
       ]
     },
     {
+      "name": "profile-no-snapshot",
+      "rule": "equal",
+      "gofhir": [
+        "PROFILE_SNAPSHOT_FAILED"
+      ],
+      "hl7": [
+        "Validation_VAL_Profile_NoSnapshot"
+      ]
+    },
+    {
       "name": "subextension-invalid",
       "rule": "equal",
       "gofhir": [
@@ -288,6 +298,7 @@
     "EXTENSION_VALUE_NOT_ALLOWED": "no HL7 counterpart verified yet",
     "MODE_DELETE_REQUIRES_ID": "API mode check, not an instance finding",
     "MODE_UPDATE_REQUIRES_ID": "API mode check, not an instance finding",
+    "PROFILE_DIFFERENTIAL_IGNORED": "a warning: HL7 leaves such elements out silently",
     "REFERENCE_AGGREGATION_MODE": "no HL7 counterpart verified yet",
     "REFERENCE_CONTAINED_NOT_FOUND": "no HL7 counterpart verified yet",
     "REFERENCE_INVALID_FORMAT": "no HL7 counterpart verified yet",
