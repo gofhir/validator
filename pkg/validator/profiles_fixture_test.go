@@ -6,8 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/specs"
+	"github.com/gofhir/validator/internal/testfhir"
 	"github.com/gofhir/validator/pkg/terminology"
 )
 
@@ -64,9 +63,10 @@ func noPhotoProfile() ([]byte, error) {
 	})
 }
 
-// coreDefinition is a core R4 definition, decoded from the embedded package.
+// coreDefinition is a core R4 definition, decoded from the embedded package. The packages come from the
+// base testfhir loads once per test binary; decoding them here on every call was 1.8 GB allocated.
 func coreDefinition(url string) (map[string]any, error) {
-	pkgs, err := loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
+	pkgs, _, _, err := testfhir.Base("4.0.1")
 	if err != nil {
 		return nil, err
 	}
