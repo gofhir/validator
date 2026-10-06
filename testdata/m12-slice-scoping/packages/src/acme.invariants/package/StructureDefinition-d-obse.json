@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-obse",
+ "url": "https://example.org/fhir/StructureDefinition/d-obse",
+ "name": "DOBSE",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation",
+    "constraint": [
+     {
+      "key": "de-x",
+      "severity": "error",
+      "human": "de-x",
+      "expression": "hasMember.all(resolve().value.ofType(Quantity).value.toString() = '1.5')"
+     }
+    ]
+   }
+  ]
+ }
+}

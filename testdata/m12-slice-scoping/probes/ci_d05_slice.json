@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "o1", "status": "final", "code": {"text": "x"}, "meta": {"profile": ["https://example.org/fhir/StructureDefinition/d-obss"]}, "component": [{"code": {"coding": [{"system": "http://ex.org/cs", "code": "a"}]}, "valueQuantity": {"value": 1.50}}]}

@@ -86,7 +86,7 @@ func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.Elemen
 		if len(children) == 0 && typeRoot != nil {
 			childSD, children = typeSD, typeRoot.Children
 		}
-		v.walkChildren(childSD, children, obj, fhirPath, opts, result)
+		v.walkChildren(childSD, children, obj, raw, fhirPath, opts, result)
 	}
 }
 
@@ -117,44 +117,100 @@ func (v *Validator) governing(sd *registry.StructureDefinition, node *registry.E
 	return node
 }
 
-// walkPrimitiveExtensions walks a primitive's "_key" sibling (its id and extensions) against the
-// children of the primitive's type definition.
-func (v *Validator) walkPrimitiveExtensions(node *registry.ElementNode, typeCode string, ext map[string]any, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+// walkPrimitiveExtensions walks a primitive's "_key" sibling (its id and extensions), whose JSON
+// is raw, against the children of the primitive's type definition.
+func (v *Validator) walkPrimitiveExtensions(node *registry.ElementNode, typeCode string, ext map[string]any, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
 	typeSD, typeRoot := v.typeLayer(opts.ctx, node, node, typeCode, nil)
 	if typeRoot == nil || typeSD.Kind != kindPrimitive {
 		return
 	}
-	v.walkChildren(typeSD, typeRoot.Children, ext, fhirPath, opts, result)
+	v.walkChildren(typeSD, typeRoot.Children, ext, raw, fhirPath, opts, result)
 }
 
-// walkChildren walks the values inst holds for each of children.
-func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*registry.ElementNode, inst map[string]any, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+// walkChildren walks the values inst holds for each of children. Given raw, inst's JSON as the
+// resource spells it (nil when inst was not read from it), each value is evaluated on its own JSON,
+// read from raw, so that a decimal keeps its text (1.50 is not 1.5, json.html#primitive).
+func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*registry.ElementNode, inst map[string]any, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	fields := rawFields(raw)
 	for _, child := range children {
 		for _, cv := range elementvalues.Of(child, inst, v.registry.ChoiceType) {
 			path := cv.Path(fhirPath)
+			valueRaw, extRaw := fields.of(cv.Key, cv), fields.of("_"+cv.Key, cv)
 			if m, ok := cv.Value.(map[string]any); ok {
 				if _, isResource := m[resourceTypeKey]; isResource {
-					v.validateNested(child, m, path, opts, result)
+					v.validateNested(child, m, valueRaw, path, opts, result)
 					continue
 				}
 			}
 			node := v.governing(sd, child, cv, opts)
 			if cv.Value != nil {
-				v.walk(sd, node, cv.TypeCode, cv.Value, nil, path, opts, result)
+				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, path, opts, result)
 			}
 			if cv.Ext != nil {
-				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, path, opts, result)
+				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, extRaw, path, opts, result)
 			}
 		}
 	}
 }
 
+// jsonFields are the JSON of an object's properties as written, and of the items of those that are
+// arrays, read once (objectSpans, arraySpans).
+type jsonFields struct {
+	fields map[string][]byte
+	items  map[string][][]byte
+}
+
+// rawFields reads the properties of raw, a JSON object; none when raw is nil or not an object.
+func rawFields(raw json.RawMessage) *jsonFields {
+	if raw == nil {
+		return nil
+	}
+	fields := objectSpans(raw)
+	if fields == nil {
+		return nil
+	}
+	return &jsonFields{fields: fields}
+}
+
+// of is the JSON of the value cv reads from the property key: the property's, or the item's at
+// cv.Index when cv is read from an array (every position counts, nulls included). Nil when there
+// is none.
+func (f *jsonFields) of(key string, cv elementvalues.Value) json.RawMessage {
+	if f == nil {
+		return nil
+	}
+	raw, ok := f.fields[key]
+	if !ok {
+		return nil
+	}
+	if !cv.Array {
+		return raw
+	}
+	items, ok := f.items[key]
+	if !ok {
+		items = arraySpans(raw)
+		if f.items == nil {
+			f.items = map[string][][]byte{}
+		}
+		f.items[key] = items
+	}
+	if cv.Index < 0 || cv.Index >= len(items) {
+		return nil
+	}
+	return items[cv.Index]
+}
+
 // validateNested checks a resource held in an element as a resource of its own, against each
-// profile its meta.profile declares that resolves, or else its type's definition.
-func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]any, fhirPath string, parent *constraintEvalOpts, result *issue.Result) {
-	raw, err := json.Marshal(res)
-	if err != nil {
-		return
+// profile its meta.profile declares that resolves, or else its type's definition. Its JSON, as the
+// resource validated spells it, is raw, or nil when it was not read from it. A Bundle is where
+// resolve() looks first, before the Bundles that hold it (bundle.html#references), as the HL7
+// validator looks.
+func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]any, raw json.RawMessage, fhirPath string, parent *constraintEvalOpts, result *issue.Result) {
+	if raw == nil {
+		var err error
+		if raw, err = json.Marshal(res); err != nil {
+			return
+		}
 	}
 	col, err := types.JSONToCollection(raw)
 	if err != nil {
@@ -168,6 +224,9 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 	if holder.Def.Base != nil && holder.Def.Base.Path == containedBase {
 		opts.rootResourceCol = parent.resourceCol
 		opts.scope.RootResource = parent.scope.Resource
+	}
+	if rt, _ := res[resourceTypeKey].(string); rt == bundleType {
+		opts.resolver = resolverInBundle(opts.resolver, res, opts.exact)
 	}
 	opts.resolver = resolverWithin(opts.resolver, opts.scope.RootResource, nil)
 

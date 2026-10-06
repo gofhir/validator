@@ -1,0 +1,49 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-obsp",
+ "url": "https://example.org/fhir/StructureDefinition/d-obsp",
+ "name": "DOBSP",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.hasMember",
+    "path": "Observation.hasMember",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "resolve()"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.hasMember:q",
+    "path": "Observation.hasMember",
+    "sliceName": "q",
+    "min": 1,
+    "max": "1",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/StructureDefinition/d-obsq"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

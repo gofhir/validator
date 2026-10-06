@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-qty",
+ "url": "https://example.org/fhir/StructureDefinition/d-qty",
+ "name": "DQTY",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity",
+    "path": "Quantity",
+    "constraint": [
+     {
+      "key": "dq-1",
+      "severity": "error",
+      "human": "dq-1",
+      "expression": "value.toString() = '1.50'"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "w-obs",
+ "url": "https://example.org/fhir/StructureDefinition/w-obs",
+ "version": "0.1.0",
+ "name": "w_obs",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation",
+    "constraint": [
+     {
+      "key": "w-1",
+      "severity": "error",
+      "human": "member value 1.50",
+      "expression": "hasMember.all(resolve().value.ofType(Quantity).value.toString() = '1.50')",
+      "source": "https://example.org/fhir/StructureDefinition/w-obs"
+     }
+    ]
+   }
+  ]
+ }
+}

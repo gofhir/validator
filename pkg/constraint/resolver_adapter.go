@@ -27,15 +27,29 @@ type fhirpathResolver struct {
 
 // resolverWithin is r for expressions evaluated on a resource whose %rootResource is container:
 // a fragment reference names one of container's contained resources. What it finds it returns as
-// exact gives it, when exact is not nil. Another resolver is r.
+// exact gives it, when exact is not nil; a nil exact keeps r's. Another resolver is r.
 func resolverWithin(r eval.Resolver, container map[string]any, exact func(map[string]any) map[string]any) eval.Resolver {
 	fr, ok := r.(*fhirpathResolver)
 	if !ok || fr == nil {
 		return r
 	}
 	c := *fr
-	c.container, c.exact = container, exact
+	c.container = container
+	if exact != nil {
+		c.exact = exact
+	}
 	return &c
+}
+
+// resolverInBundle is r for expressions evaluated in bundle, a Bundle that r's Bundles hold, or that
+// a resource with no Bundle around it holds (r nil): it looks in bundle first, then where r looks,
+// and returns what it finds as exact gives it.
+func resolverInBundle(r eval.Resolver, bundle map[string]any, exact func(map[string]any) map[string]any) eval.Resolver {
+	inner := &fhirpathResolver{bundleData: bundle, exact: exact}
+	if fr, ok := r.(*fhirpathResolver); ok && fr != nil && fr.bundleData != nil {
+		inner.outer = append([]map[string]any{fr.bundleData}, fr.outer...)
+	}
+	return inner
 }
 
 // Resolve resolves a FHIR reference to the target resource JSON.

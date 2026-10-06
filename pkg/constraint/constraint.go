@@ -28,6 +28,10 @@ type ValidateOptions struct {
 	// OuterBundles are the Bundles that hold BundleData, innermost first, where resolve() looks for
 	// a reference BundleData does not resolve.
 	OuterBundles []map[string]any
+	// Exact returns an object of BundleData decoded with its numbers as the JSON spells them, or nil
+	// when it has none: what resolve() returns, so that a decimal keeps its precision (1.50 is not
+	// 1.5). Nil returns the objects as parsed.
+	Exact func(map[string]any) map[string]any
 
 	// Resource and RootResource are the resources the validated value sits in, for %resource and
 	// %rootResource, as FHIRPath collections, when the value is not itself the root of its
@@ -56,8 +60,11 @@ type constraintEvalOpts struct {
 	resourceCol     fhirpath.Collection // %resource variable.
 	rootResourceCol fhirpath.Collection // %rootResource variable (for contained/Bundle).
 	resolver        eval.Resolver       // For resolve() in FHIRPath.
-	termService     eval.TerminologyService
-	timeout         time.Duration
+	// exact returns an object with its numbers as the JSON spells them (ValidateOptions.Exact), for
+	// what resolve() returns.
+	exact       func(map[string]any) map[string]any
+	termService eval.TerminologyService
+	timeout     time.Duration
 
 	// What slice matching reads: the resources the value is in, and how references resolve.
 	scope         slicematch.Scope
@@ -170,9 +177,10 @@ func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResource
 
 	// Wire resolver if Bundle data is available.
 	if vopts != nil && vopts.BundleData != nil {
-		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData, outer: vopts.OuterBundles}
+		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData, outer: vopts.OuterBundles, exact: vopts.Exact}
 	}
 	if vopts != nil {
+		opts.exact = vopts.Exact
 		opts.sliceResolver, opts.containment = vopts.Resolver, vopts.Containment
 		if vopts.Scope != nil {
 			opts.scope = *vopts.Scope

@@ -1,0 +1,1 @@
+{"resourceType": "Parameters", "parameter": [{"name": "a", "resource": {"resourceType": "Observation", "id": "o1", "status": "final", "code": {"text": "x"}, "valueQuantity": {"value": 1.50, "unit": "mg", "extension": [{"url": "https://example.org/fhir/StructureDefinition/w-q150", "valueString": "a"}]}}}]}
