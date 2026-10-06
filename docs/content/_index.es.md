@@ -57,7 +57,7 @@ layout: hextra-home
 Instala el validador:
 
 ```shell
-go get github.com/gofhir/validator
+go get github.com/gofhir/validator/v2
 ```
 
 Valida un recurso FHIR:
@@ -68,7 +68,7 @@ package main
 import (
     "fmt"
 
-    "github.com/gofhir/validator"
+    "github.com/gofhir/validator/v2"
 )
 
 func main() {

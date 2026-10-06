@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/walker"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/walker"
 )
 
 const typeCodeReference = "Reference"

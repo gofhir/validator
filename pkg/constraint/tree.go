@@ -8,11 +8,11 @@ import (
 	"github.com/gofhir/fhirpath"
 	"github.com/gofhir/fhirpath/types"
 
-	"github.com/gofhir/validator/internal/elementvalues"
-	"github.com/gofhir/validator/internal/fhirpathcache"
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/slicematch"
+	"github.com/gofhir/validator/v2/internal/elementvalues"
+	"github.com/gofhir/validator/v2/internal/fhirpathcache"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/slicematch"
 )
 
 // The constraint phase walks the instance and the StructureDefinition's element tree together

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // mockExtensionResolver serves a single extension StructureDefinition on demand.

@@ -26,7 +26,7 @@ jobs:
           go-version: "1.24"
 
       - name: Install GoFHIR Validator
-        run: go install github.com/gofhir/validator/cmd/gofhir-validator@latest
+        run: go install github.com/gofhir/validator/v2/cmd/gofhir-validator@latest
 
       - name: Validate FHIR resources
         run: gofhir-validator -output json -strict resources/*.json > validation-results.json
@@ -117,7 +117,7 @@ Create a lightweight Docker image for running validations in containerized envir
 ```dockerfile
 FROM golang:1.24-alpine AS builder
 
-RUN go install github.com/gofhir/validator/cmd/gofhir-validator@latest
+RUN go install github.com/gofhir/validator/v2/cmd/gofhir-validator@latest
 
 FROM alpine:3.20
 
@@ -181,7 +181,7 @@ fhir-validation:
   image: golang:1.24-alpine
   before_script:
     - apk add --no-cache jq
-    - go install github.com/gofhir/validator/cmd/gofhir-validator@latest
+    - go install github.com/gofhir/validator/v2/cmd/gofhir-validator@latest
   script:
     - gofhir-validator -output json -strict resources/*.json > validation-results.json
     - |
@@ -215,7 +215,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/validator"
+	"github.com/gofhir/validator/v2/pkg/validator"
 )
 
 var v *validator.Validator

@@ -8,7 +8,7 @@ weight: 3
 The GoFHIR Validator Go library lives under a single import path:
 
 ```go
-import "github.com/gofhir/validator/pkg/validator"
+import "github.com/gofhir/validator/v2/pkg/validator"
 ```
 
 The library follows the **functional options pattern** for configuration. You create a `Validator` once with all the options you need, then call `Validate` or `ValidateJSON` as many times as required.

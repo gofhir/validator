@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // Value is one value of an element in an instance.

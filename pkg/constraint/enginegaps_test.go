@@ -10,9 +10,9 @@ import (
 	"github.com/gofhir/fhirpath"
 	"github.com/gofhir/fhirpath/eval"
 
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/specs"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/specs"
 )
 
 // Engine gap audit.

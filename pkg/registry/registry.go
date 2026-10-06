@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gofhir/validator/internal/versionorder"
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/v2/internal/versionorder"
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 // StructureDefinition.Kind constants.

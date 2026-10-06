@@ -3,7 +3,7 @@ package constraint
 import (
 	"context"
 
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // fhirpathTermService adapts terminology.Registry to the eval.TerminologyService interface

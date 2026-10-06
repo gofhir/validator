@@ -21,11 +21,15 @@ A high-performance FHIR resource validator written in Go, designed to be compati
 
 ```bash
 # As a CLI tool
-go install github.com/gofhir/validator/cmd/gofhir-validator@latest
+go install github.com/gofhir/validator/v2/cmd/gofhir-validator@latest
 
 # As a library
-go get github.com/gofhir/validator
+go get github.com/gofhir/validator/v2
 ```
+
+Since v2 the module path ends in `/v2`, as Go requires for a major version: import
+`github.com/gofhir/validator/v2/pkg/...`. v2.0.0 was tagged before the path changed and
+cannot be installed; use v2.0.1 or later. The last v1 is v1.28.0.
 
 ## Quick Start
 

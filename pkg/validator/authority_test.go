@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // TestWithTerminologyAuthorityReclaimsBaseTerminology covers both halves of the

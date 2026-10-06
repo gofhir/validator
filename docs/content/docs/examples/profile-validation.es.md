@@ -30,7 +30,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gofhir/validator/pkg/validator"
+	"github.com/gofhir/validator/v2/pkg/validator"
 )
 
 func main() {
@@ -95,7 +95,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gofhir/validator/pkg/validator"
+	"github.com/gofhir/validator/v2/pkg/validator"
 )
 
 func main() {
@@ -223,7 +223,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gofhir/validator/pkg/validator"
+	"github.com/gofhir/validator/v2/pkg/validator"
 )
 
 func main() {

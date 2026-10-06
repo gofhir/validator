@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // An evaluation stopped by the validator's own time limit says nothing about the instance: it is

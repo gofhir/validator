@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 type reportScopeKey struct{}

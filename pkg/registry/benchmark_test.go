@@ -3,7 +3,7 @@ package registry
 import (
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 var benchRegistry *Registry

@@ -16,8 +16,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gofhir/validator/pkg/jsoncompare"
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/jsoncompare"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // Scope carries the resources a value sits in. Constraints read the first two as %resource and

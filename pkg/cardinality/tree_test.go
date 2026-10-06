@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/internal/testfhir"
+	"github.com/gofhir/validator/v2/internal/testfhir"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // treeProfile is a Patient profile with two slices of contact whose children the base element

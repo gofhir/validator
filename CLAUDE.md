@@ -245,7 +245,7 @@ Herramienta de línea de comandos comparable con el HL7 FHIR Validator.
 ### Instalación
 
 ```bash
-go install github.com/gofhir/validator/cmd/gofhir-validator@latest
+go install github.com/gofhir/validator/v2/cmd/gofhir-validator@latest
 ```
 
 ### Uso Básico

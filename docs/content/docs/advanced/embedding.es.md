@@ -24,7 +24,7 @@ El paquete `pkg/specs` contiene archivos `.tgz` preconstruidos de los paquetes b
 Usa el paquete `specs` para consultar que versiones estan embebidas:
 
 ```go
-import "github.com/gofhir/validator/pkg/specs"
+import "github.com/gofhir/validator/v2/pkg/specs"
 
 // Verificar si una version esta disponible
 if specs.HasVersion("4.0.1") {
@@ -65,7 +65,7 @@ import (
     "fmt"
     "log"
 
-    "github.com/gofhir/validator/pkg/validator"
+    "github.com/gofhir/validator/v2/pkg/validator"
 )
 
 //go:embed my-ig-1.0.0.tgz
@@ -99,7 +99,7 @@ package main
 import (
     _ "embed"
 
-    "github.com/gofhir/validator/pkg/validator"
+    "github.com/gofhir/validator/v2/pkg/validator"
 )
 
 //go:embed igs/us-core-6.1.0.tgz
@@ -182,7 +182,7 @@ import (
     "log"
     "net/http"
 
-    "github.com/gofhir/validator/pkg/validator"
+    "github.com/gofhir/validator/v2/pkg/validator"
 )
 
 //go:embed igs/us-core-6.1.0.tgz

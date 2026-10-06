@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/gofhir/validator/pkg/constraint"
-	"github.com/gofhir/validator/pkg/extension"
+	"github.com/gofhir/validator/v2/pkg/constraint"
+	"github.com/gofhir/validator/v2/pkg/extension"
 )
 
 type extensionScopeKey struct{}

@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gofhir/validator/internal/exactjson"
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/primitive"
-	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/terminology"
-	"github.com/gofhir/validator/pkg/walker"
+	"github.com/gofhir/validator/v2/internal/exactjson"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/primitive"
+	"github.com/gofhir/validator/v2/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/walker"
 )
 
 // Constants for commonly used string values.

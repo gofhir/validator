@@ -8,7 +8,7 @@ weight: 3
 La interfaz `Provider` permite al validador delegar la validacion de codigos a un servicio de terminologia externo para sistemas de codigos que no pueden expandirse localmente (por ejemplo, SNOMED CT, LOINC, ICD-10).
 
 ```go
-import "github.com/gofhir/validator/pkg/terminology"
+import "github.com/gofhir/validator/v2/pkg/terminology"
 ```
 
 ## Interfaz
@@ -67,7 +67,7 @@ import (
     "net/http"
     "net/url"
 
-    "github.com/gofhir/validator/pkg/terminology"
+    "github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // Verificar cumplimiento de la interfaz en tiempo de compilacion.

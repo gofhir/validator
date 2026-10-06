@@ -8,7 +8,7 @@ weight: 4
 The `ProfileResolver` interface enables the validator to fetch StructureDefinitions on demand from an external source, such as a database or a remote FHIR server. This is the bridge between the validator and your conformance resource store.
 
 ```go
-import "github.com/gofhir/validator/pkg/registry"
+import "github.com/gofhir/validator/v2/pkg/registry"
 ```
 
 ## Interface
@@ -67,7 +67,7 @@ import (
     "context"
     "database/sql"
 
-    "github.com/gofhir/validator/pkg/registry"
+    "github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // Ensure interface compliance at compile time.

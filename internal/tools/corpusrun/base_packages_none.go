@@ -5,7 +5,7 @@ package main
 import (
 	"errors"
 
-	"github.com/gofhir/validator/pkg/validator"
+	"github.com/gofhir/validator/v2/pkg/validator"
 )
 
 // baseOption fails: this build is against a library with no way to replace the base packages it

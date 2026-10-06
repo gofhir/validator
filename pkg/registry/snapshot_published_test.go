@@ -12,8 +12,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/specs"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/specs"
 )
 
 // r4CorePackages decodes the embedded R4 packages once per test binary. Each guide used to decode them

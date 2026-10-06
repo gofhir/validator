@@ -8,7 +8,7 @@ weight: 3
 The `Provider` interface allows the validator to delegate code validation to an external terminology service for code systems that cannot be expanded locally (e.g. SNOMED CT, LOINC, ICD-10).
 
 ```go
-import "github.com/gofhir/validator/pkg/terminology"
+import "github.com/gofhir/validator/v2/pkg/terminology"
 ```
 
 ## Interface
@@ -67,7 +67,7 @@ import (
     "net/http"
     "net/url"
 
-    "github.com/gofhir/validator/pkg/terminology"
+    "github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // Ensure interface compliance at compile time.

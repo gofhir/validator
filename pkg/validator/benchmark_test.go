@@ -8,7 +8,7 @@ import (
 
 	"github.com/gofhir/fhirpath/funcs"
 
-	"github.com/gofhir/validator/pkg/logger"
+	"github.com/gofhir/validator/v2/pkg/logger"
 )
 
 func init() {

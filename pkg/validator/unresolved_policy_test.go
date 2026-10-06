@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // Patient.gender is bound required to administrative-gender.

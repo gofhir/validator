@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 const simpleQuantity = "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"

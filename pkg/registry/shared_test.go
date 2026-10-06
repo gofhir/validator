@@ -4,7 +4,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 // Shared registry instance loaded once for all read-only tests.

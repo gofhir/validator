@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/issue"
 )
 
 // A complex extension's parts: a relative url must be one its definition declares (an error

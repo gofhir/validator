@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gofhir/validator/internal/testfhir"
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/internal/testfhir"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // The profiles of the profile-loading tests. Each has its own URL and its own conformance package,
