@@ -9,7 +9,8 @@ import (
 // FHIRPathModel is the type information a FHIRPath engine needs about the FHIR types, read from
 // the base definitions loaded in a registry: the StructureDefinitions that define a type
 // (derivation other than constraint, kind other than logical), never a profile. It satisfies
-// gofhir/fhirpath's Model, VersionedModel and TypeRegistry interfaces by their method sets.
+// gofhir/fhirpath's Model, VersionedModel, TypeRegistry and ElementOrder interfaces by their
+// method sets.
 //
 // Without it the engine guesses: a string that begins with four digits is read as a date, and a
 // choice element is matched against a fixed list of type suffixes.
@@ -24,6 +25,7 @@ type FHIRPathModel struct {
 	choices   map[string][]string // choice element path without [x] -> its type codes
 	targets   map[string][]string // Reference/canonical element path -> target type names
 	elsewhere map[string]string   // element path -> the path its contentReference names
+	children  map[string][]string // element path -> its children's names, in definition order
 }
 
 // FHIRPathModel returns the registry's FHIRPath model. It is built on first use, from the
@@ -42,6 +44,7 @@ func (m *FHIRPathModel) build() {
 		m.choices = map[string][]string{}
 		m.targets = map[string][]string{}
 		m.elsewhere = map[string]string{}
+		m.children = map[string][]string{}
 
 		r := m.reg
 		r.mu.RLock()
@@ -84,6 +87,11 @@ func (m *FHIRPathModel) addElements(sd *StructureDefinition) {
 		if e.SliceName != nil || strings.Contains(e.ID, ":") || !strings.Contains(e.Path, ".") {
 			continue
 		}
+		// The children of an element in the order the definition lists them, a choice element
+		// under its name with [x] (value[x]).
+		if i := strings.LastIndex(e.Path, "."); i > 0 {
+			m.children[e.Path[:i]] = append(m.children[e.Path[:i]], e.Path[i+1:])
+		}
 		if e.ContentReference != nil {
 			if target, res := m.reg.ContentReference(sd, tree.ByID(e.ID)); res == ResolutionExact {
 				m.elsewhere[e.Path] = target.Def.Path
@@ -114,6 +122,15 @@ func (m *FHIRPathModel) addElements(sd *StructureDefinition) {
 			}
 		}
 	}
+}
+
+// ChildElements returns the names of the children of the element at path ("Reference": id,
+// extension, reference, type, identifier, display), in the order its definition lists them, a
+// choice element with its [x]; nil for a path no definition has. The slice is the model's: callers
+// must not modify it.
+func (m *FHIRPathModel) ChildElements(path string) []string {
+	m.build()
+	return m.children[path]
 }
 
 // ChoiceTypes returns the type codes a choice element allows, for its path without [x]

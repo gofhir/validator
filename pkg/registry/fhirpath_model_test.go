@@ -108,3 +108,38 @@ func TestFHIRPathModelInTheEngine(t *testing.T) {
 		})
 	}
 }
+
+// The children of an element come in the order its definition lists them, a choice element with
+// its [x], and a primitive's as id, extension, value; so children() and descendants() do not
+// depend on how the JSON orders its keys.
+func TestFHIRPathModelChildElements(t *testing.T) {
+	m := sharedVersion(t, "4.0.1").FHIRPathModel()
+	for path, want := range map[string][]string{
+		"Reference":             {"id", "extension", "reference", "type", "identifier", "display"},
+		"string":                {"id", "extension", "value"},
+		"Observation.component": {"id", "extension", "modifierExtension", "code", "value[x]", "dataAbsentReason", "interpretation", "referenceRange"},
+	} {
+		if got := m.ChildElements(path); !slices.Equal(got, want) {
+			t.Errorf("ChildElements(%q) = %q, want %q", path, got, want)
+		}
+	}
+	if got := m.ChildElements("Nothing.here"); got != nil {
+		t.Errorf("ChildElements of an unknown path = %q, want nil", got)
+	}
+
+	obs := []byte(`{"resourceType":"Observation","status":"final","code":{"text":"c"},
+"subject":{"display":"Peter","reference":"Patient/1"}}`)
+	expr, err := fhirpath.Compile("subject.children().first()")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := eval.NewContext(obs)
+	ctx.SetModel(m)
+	got, err := expr.EvaluateWithContext(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].String() != "Patient/1" {
+		t.Errorf("subject.children().first() = %v, want Patient/1", got)
+	}
+}
