@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 func TestParseCanonical(t *testing.T) {

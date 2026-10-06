@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 // A clone holds what the registry holds; what is loaded into either afterwards is not in the other.

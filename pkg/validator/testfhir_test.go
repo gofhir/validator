@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/internal/testfhir"
-	"github.com/gofhir/validator/pkg/issue"
+	"github.com/gofhir/validator/v2/internal/testfhir"
+	"github.com/gofhir/validator/v2/pkg/issue"
 )
 
 // Validators built in tests start from the embedded packages loaded once (see embeddedBase).

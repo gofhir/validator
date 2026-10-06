@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofhir/validator/internal/versionorder"
+	"github.com/gofhir/validator/v2/internal/versionorder"
 )
 
 // DefaultRegistry is the FHIR package registry packages are downloaded from.

@@ -297,8 +297,8 @@ import (
     "log"
     "net/http"
 
-    "github.com/gofhir/validator/pkg/issue"
-    "github.com/gofhir/validator/pkg/validator"
+    "github.com/gofhir/validator/v2/pkg/issue"
+    "github.com/gofhir/validator/v2/pkg/validator"
 )
 
 var v *validator.Validator

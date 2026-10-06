@@ -8,7 +8,7 @@ weight: 2
 After calling `Validate` or `ValidateJSON`, you receive a `*issue.Result` containing all validation issues and statistics.
 
 ```go
-import "github.com/gofhir/validator/pkg/issue"
+import "github.com/gofhir/validator/v2/pkg/issue"
 ```
 
 ## Result

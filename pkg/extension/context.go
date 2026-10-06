@@ -6,9 +6,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gofhir/validator/internal/elementvalues"
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/internal/elementvalues"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // The context of use of an extension (defining-extensions.html#context): "Extensions SHALL only

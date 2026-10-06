@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/issue"
 )
 
 // containedDupID has two contained resources sharing an id, referenced from an element whose

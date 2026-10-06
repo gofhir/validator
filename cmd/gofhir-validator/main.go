@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/validator"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/validator"
 )
 
 const (

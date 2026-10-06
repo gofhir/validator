@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // membershipAuthority reports a fixed verdict, so tests can drive each row of the

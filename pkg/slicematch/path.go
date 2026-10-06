@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // A discriminator path is "a FHIRPath expression that uses a restricted subset": element names

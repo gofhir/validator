@@ -4,9 +4,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/gofhir/validator/internal/testfhir"
+	"github.com/gofhir/validator/v2/internal/testfhir"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 // idProfile is an Identifier profile that slices its own extension, closed, by url: a datatype

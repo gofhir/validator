@@ -8,10 +8,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/registry"
-	"github.com/gofhir/validator/pkg/specs"
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/specs"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // base is what is loaded once for a FHIR version.

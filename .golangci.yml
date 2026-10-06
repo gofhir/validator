@@ -165,7 +165,7 @@ formatters:
           replacement: a[b:]
     goimports:
       local-prefixes:
-        - github.com/gofhir/validator
+        - github.com/gofhir/validator/v2
   exclusions:
     generated: lax
     paths:

@@ -1,4 +1,4 @@
-module github.com/gofhir/validator
+module github.com/gofhir/validator/v2
 
 go 1.25.0
 

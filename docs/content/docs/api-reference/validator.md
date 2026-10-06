@@ -8,7 +8,7 @@ weight: 1
 The `Validator` is the main entry point for validating FHIR resources. It is created once with construction options, then reused for many validation calls.
 
 ```go
-import "github.com/gofhir/validator/pkg/validator"
+import "github.com/gofhir/validator/v2/pkg/validator"
 ```
 
 ## Constructor
@@ -388,7 +388,7 @@ import (
     "log"
     "os"
 
-    "github.com/gofhir/validator/pkg/validator"
+    "github.com/gofhir/validator/v2/pkg/validator"
 )
 
 func main() {

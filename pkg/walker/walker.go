@@ -5,7 +5,7 @@ package walker
 import (
 	"fmt"
 
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // ResourceContext contains information about a resource being visited.

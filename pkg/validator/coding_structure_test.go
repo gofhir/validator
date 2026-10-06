@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/issue"
 )
 
 // A Coding is only interpretable as a pair. These tests cover the two ways it can fail to

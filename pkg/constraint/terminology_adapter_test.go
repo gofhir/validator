@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 func setupTermRegistry(t *testing.T) *terminology.Registry {

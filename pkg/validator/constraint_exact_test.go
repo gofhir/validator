@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/issue"
 )
 
 // constraintProfile is a profile of Observation with one invariant on value[x], from its

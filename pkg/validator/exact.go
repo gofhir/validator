@@ -3,7 +3,7 @@ package validator
 import (
 	"context"
 
-	"github.com/gofhir/validator/internal/exactjson"
+	"github.com/gofhir/validator/v2/internal/exactjson"
 )
 
 type exactKey struct{}

@@ -6,9 +6,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // An expression that does not parse is an error whatever the constraint's severity, as in the

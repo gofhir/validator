@@ -46,7 +46,7 @@ El validador usa un logger integrado que escribe en stderr. Puedes controlar el 
 ### Establecer el Nivel de Log
 
 ```go
-import "github.com/gofhir/validator/pkg/logger"
+import "github.com/gofhir/validator/v2/pkg/logger"
 
 // Habilitar logging de depuracion
 logger.SetLevel(logger.LevelDebug)
@@ -61,7 +61,7 @@ logger.SetOutput(myLogWriter)
 ### Crear un Logger Personalizado
 
 ```go
-import "github.com/gofhir/validator/pkg/logger"
+import "github.com/gofhir/validator/v2/pkg/logger"
 
 // Crear un logger con salida y nivel personalizados
 l := logger.New(os.Stdout, logger.LevelDebug)
@@ -148,7 +148,7 @@ import (
     "fmt"
     "sync"
 
-    "github.com/gofhir/validator/pkg/validator"
+    "github.com/gofhir/validator/v2/pkg/validator"
 )
 
 func main() {

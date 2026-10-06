@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/internal/testfhir"
-	"github.com/gofhir/validator/pkg/logger"
+	"github.com/gofhir/validator/v2/internal/testfhir"
+	"github.com/gofhir/validator/v2/pkg/logger"
 )
 
 // testPackage is a package with one StructureDefinition, whose url names it.

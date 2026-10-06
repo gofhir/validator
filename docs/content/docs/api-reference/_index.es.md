@@ -8,7 +8,7 @@ weight: 3
 La libreria Go del GoFHIR Validator se encuentra bajo una unica ruta de importacion:
 
 ```go
-import "github.com/gofhir/validator/pkg/validator"
+import "github.com/gofhir/validator/v2/pkg/validator"
 ```
 
 La libreria sigue el patron de **opciones funcionales** (functional options) para la configuracion. Se crea un `Validator` una sola vez con todas las opciones necesarias, y luego se llama a `Validate` o `ValidateJSON` tantas veces como sea necesario.

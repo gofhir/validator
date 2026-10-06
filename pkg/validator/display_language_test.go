@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // A Coding whose display is the valid Spanish translation of the concept.

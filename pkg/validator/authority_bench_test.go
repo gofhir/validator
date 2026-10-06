@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // benchAuthority answers instantly, so the benchmark isolates the structural cost

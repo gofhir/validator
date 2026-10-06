@@ -24,7 +24,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gofhir/validator/pkg/validator"
+	"github.com/gofhir/validator/v2/pkg/validator"
 )
 
 // Line is one issue, a marker for a resource with no issues, or a failure to validate one.

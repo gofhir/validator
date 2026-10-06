@@ -11,8 +11,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/specs"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/specs"
 )
 
 // loadVersion loads the embedded packages of one FHIR version into a fresh registry. They are

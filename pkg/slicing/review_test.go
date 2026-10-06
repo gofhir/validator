@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/internal/testfhir"
+	"github.com/gofhir/validator/v2/internal/testfhir"
 
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 // loadWith returns a slicing validator over the embedded R4 packages plus the given resources.

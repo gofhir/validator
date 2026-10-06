@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 // A CodeSystem that does not include all its codes cannot tell a code is not one of them: the code

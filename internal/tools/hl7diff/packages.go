@@ -16,9 +16,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gofhir/validator/internal/versionorder"
-	"github.com/gofhir/validator/pkg/loader"
-	"github.com/gofhir/validator/pkg/specs"
+	"github.com/gofhir/validator/v2/internal/versionorder"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/specs"
 )
 
 // PackageID is a FHIR package reference, "id#version".

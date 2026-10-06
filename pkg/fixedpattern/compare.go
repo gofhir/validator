@@ -3,7 +3,7 @@ package fixedpattern
 import (
 	"encoding/json"
 
-	"github.com/gofhir/validator/pkg/jsoncompare"
+	"github.com/gofhir/validator/v2/pkg/jsoncompare"
 )
 
 // DeepEqual compares two JSON values for exact equality.

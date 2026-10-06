@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/issue"
 )
 
 func TestUCUMValidQuantityCode(t *testing.T) {

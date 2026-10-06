@@ -21,7 +21,7 @@ go version
 Instala la herramienta de linea de comandos `gofhir-validator`:
 
 ```bash
-go install github.com/gofhir/validator/cmd/gofhir-validator@latest
+go install github.com/gofhir/validator/v2/cmd/gofhir-validator@latest
 ```
 
 Verifica la instalacion:
@@ -35,7 +35,7 @@ gofhir-validator -v
 Para usar el validador como libreria Go en tu proyecto:
 
 ```bash
-go get github.com/gofhir/validator
+go get github.com/gofhir/validator/v2
 ```
 
 Esto agrega el modulo del validador a tu `go.mod` y hace que el paquete `validator` este disponible para importar.

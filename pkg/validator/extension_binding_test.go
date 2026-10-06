@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofhir/validator/pkg/issue"
-	"github.com/gofhir/validator/pkg/terminology"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/terminology"
 )
 
 // An extension whose Extension.value[x] is bound required to a ValueSet. The
