@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "o", "status": "final", "code": {"text": "x"}, "contained": [{"resourceType": "Patient", "id": "c", "gender": "male"}], "subject": {"reference": "#c", "extension": [{"url": "https://example.org/fhir/StructureDefinition/x-refmale", "valueString": "x"}]}}

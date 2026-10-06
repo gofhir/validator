@@ -1,0 +1,42 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "z-fpc",
+ "url": "https://example.org/fhir/StructureDefinition/z-fpc",
+ "version": "0.1.0",
+ "name": "z_fpc",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "fhirpath",
+   "expression": "ValueSet.expansion.contains"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/z-fpc"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ }
+}

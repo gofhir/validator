@@ -1,0 +1,12 @@
+{
+ "resourceType": "Patient",
+ "birthDate": "1980-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/r-invbd",
+    "valueString": "x"
+   }
+  ]
+ }
+}

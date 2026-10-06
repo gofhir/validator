@@ -1,0 +1,12 @@
+{
+ "resourceType": "Patient",
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/x-prim",
+    "valueString": "x"
+   }
+  ]
+ }
+}

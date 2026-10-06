@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "given": [
+    "a",
+    null,
+    "b"
+   ],
+   "_given": [
+    null,
+    {
+     "id": "n"
+    },
+    {
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/z-giv",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

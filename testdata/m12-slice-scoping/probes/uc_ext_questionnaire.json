@@ -1,0 +1,38 @@
+{
+ "resourceType": "Questionnaire",
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "status": "draft",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/c-ext",
+   "valueString": "v"
+  }
+ ],
+ "item": [
+  {
+   "linkId": "1",
+   "type": "group",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/c-ext",
+     "valueString": "v"
+    }
+   ],
+   "item": [
+    {
+     "linkId": "2",
+     "type": "string",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/c-ext",
+       "valueString": "v"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

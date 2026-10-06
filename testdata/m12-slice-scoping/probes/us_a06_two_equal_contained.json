@@ -1,0 +1,41 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "reference": "#p1"
+ },
+ "performer": [
+  {
+   "reference": "#p2"
+  }
+ ],
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "p1",
+   "name": [
+    {
+     "family": "x"
+    }
+   ]
+  },
+  {
+   "resourceType": "Patient",
+   "id": "p2",
+   "name": [
+    {
+     "family": "x",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/r-pname",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

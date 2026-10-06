@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueQuantity": {
+  "value": 1.50,
+  "_value": {
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/v-t-dec",
+     "valueString": "x"
+    },
+    {
+     "url": "https://example.org/fhir/StructureDefinition/v-t-decv",
+     "valueString": "x"
+    }
+   ]
+  }
+ }
+}

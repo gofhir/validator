@@ -1,0 +1,52 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://a.org/fhir/Patient/1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "1",
+    "gender": "male"
+   }
+  },
+  {
+   "fullUrl": "http://a.org/fhir/Bundle/in",
+   "resource": {
+    "resourceType": "Bundle",
+    "id": "in",
+    "type": "collection",
+    "entry": [
+     {
+      "fullUrl": "http://a.org/fhir/Observation/o",
+      "resource": {
+       "resourceType": "Observation",
+       "id": "o",
+       "status": "final",
+       "code": {
+        "text": "x"
+       },
+       "subject": {
+        "reference": "Patient/1",
+        "extension": [
+         {
+          "url": "https://example.org/fhir/StructureDefinition/x-refmale",
+          "valueString": "x"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "fullUrl": "http://a.org/fhir/Patient/1",
+      "resource": {
+       "resourceType": "Patient",
+       "id": "1",
+       "gender": "female"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

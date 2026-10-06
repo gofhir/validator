@@ -1,0 +1,29 @@
+{
+ "resourceType": "Parameters",
+ "parameter": [
+  {
+   "name": "a",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p",
+    "generalPractitioner": [
+     {
+      "reference": "#pr",
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/x-ref",
+        "valueString": "x"
+       }
+      ]
+     }
+    ],
+    "contained": [
+     {
+      "resourceType": "Practitioner",
+      "id": "pr"
+     }
+    ]
+   }
+  }
+ ]
+}

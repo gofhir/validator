@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "x-refmale",
+ "url": "https://example.org/fhir/StructureDefinition/x-refmale",
+ "version": "0.1.0",
+ "name": "Xxrefmale",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "element",
+   "expression": "Reference"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/x-refmale"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "contextInvariant": [
+  "resolve().gender = 'male'"
+ ]
+}

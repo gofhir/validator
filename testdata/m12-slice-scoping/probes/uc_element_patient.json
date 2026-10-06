@@ -1,0 +1,81 @@
+{
+ "resourceType": "Patient",
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/c-element",
+   "valueString": "v"
+  }
+ ],
+ "name": [
+  {
+   "family": "A",
+   "given": [
+    "B"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/c-element",
+       "valueString": "v"
+      }
+     ]
+    }
+   ],
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/c-element",
+     "valueString": "v"
+    }
+   ]
+  }
+ ],
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/c-element",
+    "valueString": "v"
+   }
+  ]
+ },
+ "contact": [
+  {
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/c-element",
+     "valueString": "v"
+    }
+   ],
+   "name": {
+    "family": "C",
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/c-element",
+      "valueString": "v"
+     }
+    ]
+   }
+  }
+ ],
+ "photo": [
+  {
+   "contentType": "image/png",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/c-parent",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/c-element",
+       "valueString": "v"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

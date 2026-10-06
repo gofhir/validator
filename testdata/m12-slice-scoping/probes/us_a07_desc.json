@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "contact": [
+  {
+   "name": {
+    "family": "x",
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/r-desc",
+      "valueString": "x"
+     }
+    ]
+   }
+  }
+ ]
+}

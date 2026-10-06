@@ -1,0 +1,16 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "effectivePeriod": {
+  "start": "2020-01-01",
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/z-peris",
+    "valueString": "x"
+   }
+  ]
+ }
+}

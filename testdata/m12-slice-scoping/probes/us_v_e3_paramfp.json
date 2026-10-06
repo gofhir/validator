@@ -1,0 +1,25 @@
+{
+ "resourceType": "Parameters",
+ "parameter": [
+  {
+   "name": "a",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/x-paramfp",
+     "valueString": "x"
+    }
+   ],
+   "valueString": "v"
+  },
+  {
+   "name": "b",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/x-paramfp",
+     "valueString": "x"
+    }
+   ],
+   "valueString": "v"
+  }
+ ]
+}

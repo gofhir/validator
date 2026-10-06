@@ -1,0 +1,31 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "bp"
+ },
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/StructureDefinition/bp"
+  ]
+ },
+ "component": [
+  {
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/x-sys",
+     "valueString": "x"
+    }
+   ],
+   "code": {
+    "coding": [
+     {
+      "system": "http://loinc.org",
+      "code": "9999-9"
+     }
+    ]
+   },
+   "valueString": "1"
+  }
+ ]
+}

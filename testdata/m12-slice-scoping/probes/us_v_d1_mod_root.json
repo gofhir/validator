@@ -1,0 +1,9 @@
+{
+ "resourceType": "Patient",
+ "modifierExtension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/x-pat",
+   "valueString": "x"
+  }
+ ]
+}

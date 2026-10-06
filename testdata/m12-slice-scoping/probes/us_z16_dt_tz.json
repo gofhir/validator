@@ -1,0 +1,16 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "effectiveDateTime": "2020-01-01T10:00:00+05:00",
+ "_effectiveDateTime": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/z-dt",
+    "valueString": "x"
+   }
+  ]
+ }
+}

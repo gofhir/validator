@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "v-n1",
+ "url": "https://example.org/fhir/StructureDefinition/v-n1",
+ "version": "0.1.0",
+ "name": "v_n1",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient.birthDate"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/v-n1"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "contextInvariant": [
+  "$this is date"
+ ]
+}

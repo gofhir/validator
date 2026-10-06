@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "name": [
+  {
+   "family": "x",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/r-invstr",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "name": [
+     {
+      "family": "x",
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/q-entryfp",
+        "valueString": "x"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

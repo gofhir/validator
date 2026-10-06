@@ -1,0 +1,60 @@
+{
+ "resourceType": "Questionnaire",
+ "status": "active",
+ "item": [
+  {
+   "linkId": "q0",
+   "text": "Q0",
+   "type": "decimal",
+   "extension": [
+    {
+     "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+     "valueCoding": {
+      "system": "http://unitsofmeasure.org",
+      "code": "kg"
+     }
+    },
+    {
+     "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs",
+     "valueInteger": 2
+    }
+   ]
+  },
+  {
+   "linkId": "q1",
+   "text": "Q1",
+   "type": "decimal",
+   "extension": [
+    {
+     "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+     "valueCoding": {
+      "system": "http://unitsofmeasure.org",
+      "code": "kg"
+     }
+    },
+    {
+     "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs",
+     "valueInteger": 2
+    }
+   ]
+  },
+  {
+   "linkId": "q2",
+   "text": "Q2",
+   "type": "string",
+   "extension": [
+    {
+     "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+     "valueCoding": {
+      "system": "http://unitsofmeasure.org",
+      "code": "kg"
+     }
+    },
+    {
+     "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs",
+     "valueInteger": 2
+    }
+   ]
+  }
+ ]
+}

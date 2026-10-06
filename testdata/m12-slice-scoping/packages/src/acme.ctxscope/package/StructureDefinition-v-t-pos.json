@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "v-t-pos",
+ "url": "https://example.org/fhir/StructureDefinition/v-t-pos",
+ "version": "0.1.0",
+ "name": "v_t_pos",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "element",
+   "expression": "Questionnaire.item.maxLength"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/v-t-pos"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "contextInvariant": [
+  "$this is integer"
+ ]
+}

@@ -1,0 +1,73 @@
+{
+ "resourceType": "Parameters",
+ "parameter": [
+  {
+   "name": "a",
+   "part": [
+    {
+     "name": "x",
+     "valueString": "s"
+    },
+    {
+     "name": "y",
+     "resource": {
+      "resourceType": "Patient",
+      "id": "p1",
+      "name": [
+       {
+        "family": "A",
+        "extension": [
+         {
+          "url": "https://example.org/fhir/StructureDefinition/r7-fpa",
+          "valueString": "x"
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "name": "b",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p2",
+    "name": [
+     {
+      "family": "A",
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/r7-fpall",
+        "valueString": "x"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "c",
+   "part": [
+    {
+     "name": "z",
+     "resource": {
+      "resourceType": "Patient",
+      "id": "p3",
+      "name": [
+       {
+        "family": "B",
+        "extension": [
+         {
+          "url": "https://example.org/fhir/StructureDefinition/r7-fpa",
+          "valueString": "x"
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

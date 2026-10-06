@@ -1,0 +1,26 @@
+{
+ "resourceType": "Bundle",
+ "type": "batch-response",
+ "entry": [
+  {
+   "response": {
+    "status": "200",
+    "outcome": {
+     "resourceType": "OperationOutcome",
+     "issue": [
+      {
+       "severity": "error",
+       "code": "invalid",
+       "extension": [
+        {
+         "url": "https://example.org/fhir/StructureDefinition/r7-oo",
+         "valueString": "x"
+        }
+       ]
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"o2","status":"final","code":{"text":"x"},"contained":[{"resourceType":"Observation","id":"c1","status":"final","code":{"text":"x"},"valueQuantity":{"extension":[{"url":"https://example.org/fhir/StructureDefinition/n-fp150","valueString":"a"}],"value":1.50}}],"hasMember":[{"reference":"#c1"}]}

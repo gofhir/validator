@@ -289,50 +289,37 @@ func TestRegistryIsDomainResource(t *testing.T) {
 	}
 }
 
-func TestRegistryIsCanonicalResource(t *testing.T) {
-	r := getSharedRegistry(t)
-
-	// Canonical resources have required 'url' element
-	canonicalResources := []string{
-		"StructureDefinition", "ValueSet", "CodeSystem", "ConceptMap",
-		"CapabilityStatement", "OperationDefinition", "SearchParameter",
-		"Questionnaire", "Library", "Measure", "PlanDefinition",
-	}
-
-	for _, typeName := range canonicalResources {
-		if !r.IsCanonicalResource(typeName) {
-			t.Errorf("IsCanonicalResource(%q) = false, want true", typeName)
-		}
-	}
-
-	nonCanonicalResources := []string{
-		"Patient", "Observation", "Encounter", "Bundle",
-	}
-
-	for _, typeName := range nonCanonicalResources {
-		if r.IsCanonicalResource(typeName) {
-			t.Errorf("IsCanonicalResource(%q) = true, want false", typeName)
-		}
-	}
-}
-
-func TestRegistryIsMetadataResource(t *testing.T) {
-	r := getSharedRegistry(t)
-
-	// MetadataResources have url + name + status + experimental
-	metadataResources := []string{
-		"ValueSet", "CodeSystem", "Library", "Questionnaire",
-		"Measure", "PlanDefinition", "ActivityDefinition",
-	}
-
-	for _, typeName := range metadataResources {
-		if !r.IsMetadataResource(typeName) {
-			t.Errorf("IsMetadataResource(%q) = false, want true", typeName)
-		}
-	}
-
-	// Patient is definitely not a metadata resource
-	if r.IsMetadataResource("Patient") {
-		t.Error("IsMetadataResource(Patient) = true, want false")
+// A resource type implements the interfaces its definition declares (R5,
+// structuredefinition-implements, MetadataResource implementing CanonicalResource in turn); where
+// the definitions declare none (R4, R4B), CanonicalResource names the resources references.html
+// lists as canonical, and MetadataResource, a logical model there, names none, as in the HL7
+// validator.
+func TestRegistryInterfaces(t *testing.T) {
+	type kinds struct{ canonical, metadata bool }
+	for _, tt := range []struct {
+		version string
+		types   map[string]kinds
+	}{
+		{"4.0.1", map[string]kinds{
+			"ValueSet": {true, false}, "StructureDefinition": {true, false}, "NamingSystem": {true, false},
+			"SearchParameter": {true, false}, "Device": {false, false}, "Patient": {false, false},
+		}},
+		{"4.3.0", map[string]kinds{
+			"ValueSet": {true, false}, "SubscriptionTopic": {true, false}, "Device": {false, false}, "Patient": {false, false},
+		}},
+		{"5.0.0", map[string]kinds{
+			"ValueSet": {true, true}, "Library": {true, true}, "StructureDefinition": {true, false},
+			"CapabilityStatement": {true, false}, "Device": {false, false}, "Patient": {false, false},
+		}},
+	} {
+		t.Run(tt.version, func(t *testing.T) {
+			r := sharedVersion(t, tt.version)
+			for typeName, want := range tt.types {
+				got := kinds{r.IsCanonicalResource(typeName), r.IsMetadataResource(typeName)}
+				if got != want {
+					t.Errorf("%s: canonical, metadata = %v, want %v", typeName, got, want)
+				}
+			}
+		})
 	}
 }

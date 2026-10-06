@@ -1,0 +1,16 @@
+{
+ "resourceType": "Observation",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/v-d3",
+   "valueString": "x"
+  }
+ ],
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueQuantity": {
+  "value": 1.50
+ }
+}

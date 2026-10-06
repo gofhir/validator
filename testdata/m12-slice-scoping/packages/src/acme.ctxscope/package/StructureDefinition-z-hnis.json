@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "z-hnis",
+ "url": "https://example.org/fhir/StructureDefinition/z-hnis",
+ "version": "0.1.0",
+ "name": "z_hnis",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient.name"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/z-hnis"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "contextInvariant": [
+  "$this is HumanName"
+ ]
+}

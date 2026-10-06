@@ -1,0 +1,38 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://a.org/fhir/Bundle/b",
+   "resource": {
+    "resourceType": "Bundle",
+    "id": "b",
+    "type": "collection",
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/x-bundle",
+      "valueString": "x"
+     }
+    ],
+    "entry": [
+     {
+      "fullUrl": "urn:uuid:1d7b8a2e-0000-4000-8000-000000000003",
+      "resource": {
+       "resourceType": "Patient"
+      },
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/x-entry",
+        "valueString": "x"
+       },
+       {
+        "url": "https://example.org/fhir/StructureDefinition/x-entryfp",
+        "valueString": "x"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

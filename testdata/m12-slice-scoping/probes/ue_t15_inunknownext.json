@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://unknown.example.org/x",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/p-name",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

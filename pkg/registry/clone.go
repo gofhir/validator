@@ -38,17 +38,16 @@ func (r *Registry) Clone() *Registry {
 		all[i] = held(sd)
 	}
 	c := &Registry{
-		all:                all,
-		byURL:              heldIn(r.byURL),
-		byURLVersion:       heldIn(r.byURLVersion),
-		byType:             heldIn(r.byType),
-		elementDefCache:    make(map[string]*ElementDefinition),
-		fhirVersion:        r.fhirVersion,
-		publishers:         r.publishers.Clone(),
-		resolver:           r.resolver,
-		domainResources:    maps.Clone(r.domainResources),
-		canonicalResources: maps.Clone(r.canonicalResources),
-		metadataResources:  maps.Clone(r.metadataResources),
+		all:             all,
+		byURL:           heldIn(r.byURL),
+		byURLVersion:    heldIn(r.byURLVersion),
+		byType:          heldIn(r.byType),
+		elementDefCache: make(map[string]*ElementDefinition),
+		fhirVersion:     r.fhirVersion,
+		publishers:      r.publishers.Clone(),
+		resolver:        r.resolver,
+		domainResources: maps.Clone(r.domainResources),
+		interfaces:      map[*StructureDefinition][]string{}, // worked out again for the clone's
 	}
 	c.model = &FHIRPathModel{reg: c}
 	return c

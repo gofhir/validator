@@ -1,0 +1,27 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "reference": "#p1"
+ },
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "p1",
+   "name": [
+    {
+     "family": "x",
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/p-invroot",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

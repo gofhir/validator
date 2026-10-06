@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/v-e2",
+   "valueDate": "2020-01-01",
+   "_valueDate": {
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/v-e1",
+      "valueString": "x"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,49 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "z-per",
+ "url": "https://example.org/fhir/StructureDefinition/z-per",
+ "version": "0.1.0",
+ "name": "z_per",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "element",
+   "expression": "Observation.effective[x]"
+  },
+  {
+   "type": "element",
+   "expression": "Period"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/z-per"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "contextInvariant": [
+  "start < end"
+ ]
+}

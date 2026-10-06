@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p1","multipleBirthInteger":3,"_multipleBirthInteger":{"extension":[{"url":"https://example.org/fhir/StructureDefinition/n-intprim","valueString":"a"}]}}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:9b2a2f0e-0d55-4c4e-9a3e-1d1c1b1a1f10",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "meta": {
+     "profile": [
+      "http://hl7.org/fhir/StructureDefinition/Patient"
+     ]
+    },
+    "name": [
+     {
+      "family": "x",
+      "extension": [
+       {
+        "url": "https://example.org/fhir/StructureDefinition/c-none",
+        "valueString": "x"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

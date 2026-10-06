@@ -1,0 +1,16 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "a",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/z-sis",
+    "valueString": "x"
+   }
+  ]
+ }
+}

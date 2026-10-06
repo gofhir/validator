@@ -1,0 +1,15 @@
+{
+ "resourceType": "ValueSet",
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "status": "draft",
+ "url": "https://example.org/vs",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/n-canonical",
+   "valueString": "v"
+  }
+ ]
+}

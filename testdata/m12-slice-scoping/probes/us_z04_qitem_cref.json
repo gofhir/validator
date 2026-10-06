@@ -1,0 +1,29 @@
+{
+ "resourceType": "Questionnaire",
+ "status": "active",
+ "item": [
+  {
+   "linkId": "1",
+   "type": "group",
+   "item": [
+    {
+     "linkId": "1.1",
+     "type": "choice",
+     "answerOption": [
+      {
+       "valueCoding": {
+        "code": "a"
+       }
+      }
+     ],
+     "extension": [
+      {
+       "url": "https://example.org/fhir/StructureDefinition/z-qitem",
+       "valueString": "x"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

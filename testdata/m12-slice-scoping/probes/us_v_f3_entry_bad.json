@@ -1,0 +1,18 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:1d7b8a2e-0000-4000-8000-000000000001",
+   "resource": {
+    "resourceType": "Patient"
+   },
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/x-bundle",
+     "valueString": "x"
+    }
+   ]
+  }
+ ]
+}

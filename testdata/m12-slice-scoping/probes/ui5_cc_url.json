@@ -1,0 +1,13 @@
+{
+ "resourceType": "ValueSet",
+ "status": "draft",
+ "url": "http://a.org/vs",
+ "_url": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/x5-cc",
+    "valueString": "x"
+   }
+  ]
+ }
+}

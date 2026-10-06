@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "contact": [
+  {
+   "modifierExtension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/x-contact",
+     "valueString": "x"
+    }
+   ],
+   "name": {
+    "text": "x"
+   }
+  }
+ ]
+}

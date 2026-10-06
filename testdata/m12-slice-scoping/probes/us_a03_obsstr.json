@@ -1,0 +1,16 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "hello",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "https://example.org/fhir/StructureDefinition/r-obsstr",
+    "valueString": "x"
+   }
+  ]
+ }
+}

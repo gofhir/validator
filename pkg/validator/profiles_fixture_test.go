@@ -101,6 +101,7 @@ var profileFixture = sync.OnceValues(func() (*Validator, error) {
 		WithConformancePackage("test.typed", "0.0.1", typedProfiles),
 		WithConformancePackage("test.tree", "0.0.1", treeProfiles),
 		WithConformancePackage("test.extdefs", "0.0.1", extensionDefinitions),
+		WithConformancePackage("test.contexts", "0.0.1", contextExtensions),
 		WithTerminologyAuthority(&membershipAuthority{resolution: terminology.Valid}),
 	)
 })

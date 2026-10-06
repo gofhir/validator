@@ -1,0 +1,18 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueQuantity": {
+  "value": 1,
+  "_value": {
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/r-obsqtyval",
+     "valueString": "x"
+    }
+   ]
+  }
+ }
+}

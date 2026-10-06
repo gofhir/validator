@@ -1,0 +1,11 @@
+{
+ "resourceType": "ActorDefinition",
+ "status": "draft",
+ "type": "person",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/x5-elem",
+   "valueString": "x"
+  }
+ ]
+}

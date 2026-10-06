@@ -1,0 +1,19 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/z-rootis",
+      "valueString": "x"
+     }
+    ]
+   }
+  }
+ ]
+}

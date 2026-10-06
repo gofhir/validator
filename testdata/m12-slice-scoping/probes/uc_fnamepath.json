@@ -1,0 +1,49 @@
+{
+ "resourceType": "Patient",
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/f-namepath",
+   "valueString": "v"
+  }
+ ],
+ "name": [
+  {
+   "use": "official",
+   "family": "A",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/f-namepath",
+     "valueString": "v"
+    }
+   ]
+  },
+  {
+   "use": "usual",
+   "family": "B",
+   "extension": [
+    {
+     "url": "https://example.org/fhir/StructureDefinition/f-namepath",
+     "valueString": "v"
+    }
+   ]
+  }
+ ],
+ "contact": [
+  {
+   "name": {
+    "use": "official",
+    "family": "C",
+    "extension": [
+     {
+      "url": "https://example.org/fhir/StructureDefinition/f-namepath",
+      "valueString": "v"
+     }
+    ]
+   }
+  }
+ ]
+}

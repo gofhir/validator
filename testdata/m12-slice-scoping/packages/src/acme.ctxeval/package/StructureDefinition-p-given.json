@@ -1,0 +1,42 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-given",
+ "url": "https://example.org/fhir/StructureDefinition/p-given",
+ "version": "0.1.0",
+ "name": "p_given",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/p-given"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "fhirpath",
+   "expression": "Patient.name.given"
+  }
+ ]
+}

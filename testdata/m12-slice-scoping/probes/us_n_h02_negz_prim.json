@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"o1","status":"final","code":{"text":"x"},"valueQuantity":{"value":-0,"_value":{"extension":[{"url":"https://example.org/fhir/StructureDefinition/n-negzp","valueString":"a"}]}}}

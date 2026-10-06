@@ -5,22 +5,57 @@ import (
 	"encoding/json"
 	"reflect"
 	"strings"
+
+	"github.com/gofhir/fhirpath/eval"
 )
 
 // fhirpathResolver adapts Bundle data to the eval.Resolver interface
 // required by the fhirpath engine for resolve() evaluation.
 type fhirpathResolver struct {
 	bundleData map[string]any
+	// outer are the Bundles that hold bundleData, innermost first, where a reference not found in
+	// it is looked for next, as the HL7 validator looks for it.
+	outer []map[string]any
+	// container is the resource whose contained resources a fragment reference ("#id") names: the
+	// %rootResource of the resource the expression is evaluated on (references.html#contained).
+	// Without it, a fragment is looked for as ResolveReference does.
+	container map[string]any
+	// exact returns the resource found with its numbers as the JSON spells them; nil returns it as
+	// found.
+	exact func(map[string]any) map[string]any
+}
+
+// resolverWithin is r for expressions evaluated on a resource whose %rootResource is container:
+// a fragment reference names one of container's contained resources. What it finds it returns as
+// exact gives it, when exact is not nil. Another resolver is r.
+func resolverWithin(r eval.Resolver, container map[string]any, exact func(map[string]any) map[string]any) eval.Resolver {
+	fr, ok := r.(*fhirpathResolver)
+	if !ok || fr == nil {
+		return r
+	}
+	c := *fr
+	c.container, c.exact = container, exact
+	return &c
 }
 
 // Resolve resolves a FHIR reference to the target resource JSON.
 // It searches Bundle entries by fullUrl and contained resources by fragment ID.
 func (r *fhirpathResolver) Resolve(_ context.Context, reference string) ([]byte, error) {
+	if id, fragment := strings.CutPrefix(reference, "#"); fragment && r.container != nil {
+		res, ok := ContainedByID(r.container, id)
+		if !ok {
+			return nil, nil
+		}
+		return json.Marshal(exactOr(r.exact, res))
+	}
 	res, ok := ResolveReference(r.bundleData, reference)
+	for i := 0; !ok && i < len(r.outer); i++ {
+		res, ok = ResolveReference(r.outer[i], reference)
+	}
 	if !ok {
 		return nil, nil
 	}
-	return json.Marshal(res)
+	return json.Marshal(exactOr(r.exact, res))
 }
 
 // ResolveReference finds the resource a reference names inside the resource being validated,

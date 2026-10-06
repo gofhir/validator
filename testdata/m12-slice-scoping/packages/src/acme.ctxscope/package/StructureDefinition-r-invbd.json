@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "r-invbd",
+ "url": "https://example.org/fhir/StructureDefinition/r-invbd",
+ "version": "0.1.0",
+ "name": "r_invbd",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/r-invbd"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient.birthDate"
+  }
+ ],
+ "contextInvariant": [
+  "toString().startsWith('19')"
+ ]
+}

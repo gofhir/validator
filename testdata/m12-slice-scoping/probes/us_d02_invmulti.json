@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/r-invmulti",
+   "valueString": "x"
+  }
+ ],
+ "name": [
+  {
+   "family": "a"
+  },
+  {
+   "family": "b"
+  }
+ ]
+}

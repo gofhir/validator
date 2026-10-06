@@ -1,0 +1,10 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "extension": [
+  {
+   "url": "https://example.org/fhir/StructureDefinition/x-bundle",
+   "valueString": "x"
+  }
+ ]
+}

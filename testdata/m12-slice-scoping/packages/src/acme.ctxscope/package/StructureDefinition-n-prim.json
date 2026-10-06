@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "n-prim",
+ "url": "https://example.org/fhir/StructureDefinition/n-prim",
+ "version": "0.1.0",
+ "name": "n_prim",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/n-prim"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Quantity.value"
+  }
+ ],
+ "contextInvariant": [
+  "$this.toString() = '1.50'"
+ ]
+}

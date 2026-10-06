@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "n-big2",
+ "url": "https://example.org/fhir/StructureDefinition/n-big2",
+ "version": "0.1.0",
+ "name": "n_big2",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/n-big2"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Quantity"
+  }
+ ],
+ "contextInvariant": [
+  "value.toString() = '9007199254740993'"
+ ]
+}
