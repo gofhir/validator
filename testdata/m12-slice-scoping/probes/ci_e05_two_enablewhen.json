@@ -1,0 +1,1 @@
+{"resourceType": "Questionnaire", "id": "q", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "status": "draft", "item": [{"linkId": "a", "type": "boolean"}, {"linkId": "b", "type": "string", "enableWhen": [{"question": "a", "operator": "=", "answerBoolean": true}, {"question": "a", "operator": "exists", "answerBoolean": true}]}]}

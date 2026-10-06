@@ -1,12 +1,14 @@
 package registry
 
 // Corrections to published FHIR definitions that are wrong in the version they were published in,
-// each taken from a later official version that corrects it. They are applied when a
-// StructureDefinition is loaded, to that FHIR version only, and only where the published value is
-// exactly the defective one: a definition that differs is left as it is.
+// each taken from a later official publication that corrects it: a later version of the same
+// definition, or a later HL7 publication that republishes the same constraint (its
+// Constraint.source names the defective one) corrected. They are applied when a
+// StructureDefinition is loaded, to the FHIR versions the defect is published in, and only where
+// the published value is exactly the defective one: a definition that differs is left as it is.
 //
 // The HL7 validator corrects the same definitions in code (InstanceValidator's id checks, and
-// FHIRPathExpressionFixer for eld-11 and que-7). Keeping
+// FHIRPathExpressionFixer for the invariants below). Keeping
 // them here, as data with their sources, keeps every validation phase reading the definitions alone.
 
 const fhirTypeExtension = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type"
@@ -77,6 +79,127 @@ var constraintErrata = []constraintErratum{{
 	published: `operator = 'exists' implies (answer is Boolean)`,
 	corrected: `operator = 'exists' implies (answer is boolean)`,
 	source:    "hl7.fhir.r4b.core#4.3.0 StructureDefinition/Questionnaire, que-7",
+}, {
+	// R4's ref-1 is empty on a reference with no reference element (a logical reference, an
+	// identifier or display only), so it fails where it should not apply. R5 applies it only
+	// where there is a reference, and lets a contained resource refer to its container with '#'
+	// (references.html#contained), which R4B already does.
+	fhirVersion: fhirR4, path: "Reference", key: "ref-1",
+	published: `reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))`,
+	corrected: refOneCorrected,
+	source:    "hl7.fhir.r5.core#5.0.0 StructureDefinition/Reference, ref-1",
+}, {
+	// R4B's ref-1 has the same defect. R5 wraps it, unchanged, in reference.exists() implies.
+	fhirVersion: fhirR4B, from: "http://hl7.org/fhir/StructureDefinition/Reference", key: "ref-1",
+	published: `reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)`,
+	corrected: refOneCorrected,
+	source:    "hl7.fhir.r5.core#5.0.0 StructureDefinition/Reference, ref-1",
+}, {
+	// R4's bdl-8 is empty on an entry with no fullUrl. R4B applies it only where there is one.
+	fhirVersion: fhirR4, path: "Bundle.entry", key: "bdl-8",
+	published: `fullUrl.contains('/_history/').not()`,
+	corrected: `fullUrl.exists() implies fullUrl.contains('/_history/').not()`,
+	source:    "hl7.fhir.r4b.core#4.3.0 StructureDefinition/Bundle, bdl-8",
+}, {
+	// R4's ras-2 is empty on a prediction with no probability. R4B applies it only where there is
+	// a decimal one.
+	fhirVersion: fhirR4, path: "RiskAssessment.prediction", key: "ras-2",
+	published: `probability is decimal implies (probability as decimal) <= 100`,
+	corrected: `probability.exists($this is decimal) implies (probability as decimal) <= 100`,
+	source:    "hl7.fhir.r4b.core#4.3.0 StructureDefinition/RiskAssessment, ras-2",
+}, {
+	// US Core 5.0.1 and 6.1.0 write pd-1 as telecom or endpoint, which takes the telecoms and the
+	// endpoints as booleans: two telecoms are no boolean. US Core 9.0.0 tests their existence. The
+	// profile does not publish the constraint's source, so it is named by the element it is defined
+	// on, which names every profile that derives from it (QI-Core's publishes the same).
+	fhirVersion: fhirR4, path: "PractitionerRole", key: "pd-1",
+	published: `telecom or endpoint`,
+	corrected: `telecom.exists() or endpoint.exists()`,
+	source:    "hl7.fhir.us.core#9.0.0 StructureDefinition/us-core-practitionerrole, pd-1",
+}, {
+	// us-core-13 on the same profile has the same defect: healthcareService and location repeat,
+	// and two of them are no boolean. US Core 9.0.0 tests their existence.
+	fhirVersion: fhirR4, path: "PractitionerRole", key: "us-core-13",
+	published: `practitioner or organization or healthcareService or location`,
+	corrected: `practitioner.exists() or organization.exists() or healthcareService.exists() or location.exists()`,
+	source:    "hl7.fhir.us.core#9.0.0 StructureDefinition/us-core-practitionerrole, us-core-13",
+}, {
+	// The vital signs profile's vs-1 tests the precision of effective[x] as a dateTime, "if
+	// Observation.effective[x] is dateTime", but on any other type (a Period) $this as dateTime is
+	// empty, so it fails. R4, R4B and R5 publish it so. US Core 9.0.0 republishes the profile's
+	// constraint (source vitalsigns) corrected to apply only to a dateTime, as AU Core 2.0.0 and
+	// mCODE 4.0.0 do. R4 publishes no source, so it is named by its element; R4B and R5 do.
+	fhirVersion: fhirR4, path: "Observation.effective[x]", key: "vs-1",
+	published: vsOnePublished, corrected: vsOneCorrected, source: vsOneSource,
+}, {
+	fhirVersion: fhirR4B, from: vitalSigns, key: "vs-1",
+	published: vsOnePublished, corrected: vsOneCorrected, source: vsOneSource,
+}, {
+	fhirVersion: fhirR5, from: vitalSigns, key: "vs-1",
+	published: vsOnePublished, corrected: vsOneCorrected, source: vsOneSource,
+}, {
+	// R4's que-12 asks for enableBehavior from three enableWhen on, while its rule is "if there are
+	// more than one enableWhen". R4B and R5 count from two.
+	fhirVersion: fhirR4, path: "Questionnaire.item", key: "que-12",
+	published: `enableWhen.count() > 2 implies enableBehavior.exists()`,
+	corrected: `enableWhen.count() > 1 implies enableBehavior.exists()`,
+	source:    "hl7.fhir.r4b.core#4.3.0 StructureDefinition/Questionnaire, que-12",
+}, {
+	// R4's and R4B's tim-9 test when, which repeats, with in, which takes one item: several when
+	// with an offset cannot be evaluated. R5 tests each when.
+	fhirVersion: fhirR4, path: "Timing.repeat", key: "tim-9",
+	published: timNinePublished,
+	corrected: timNineCorrected,
+	source:    "hl7.fhir.r5.core#5.0.0 StructureDefinition/Timing, tim-9",
+}, {
+	fhirVersion: fhirR4B, path: "Timing.repeat", key: "tim-9",
+	published: timNinePublished,
+	corrected: timNineCorrected,
+	source:    "hl7.fhir.r5.core#5.0.0 StructureDefinition/Timing, tim-9",
+}, {
+	// R4's con-3 compares each category, a CodeableConcept, with the string 'problem-list-item',
+	// which no CodeableConcept equals, so it asks every Condition with no clinicalStatus for one.
+	// R4B tests the category's coding.
+	fhirVersion: fhirR4, path: "Condition", key: "con-3",
+	published: `clinicalStatus.exists() or verificationStatus.coding.where(system='http://terminology.hl7.org/CodeSystem/condition-ver-status' and code = 'entered-in-error').exists() or category.select($this='problem-list-item').empty()`,
+	corrected: `verificationStatus.empty().not() and verificationStatus.coding.where(system='http://terminology.hl7.org/CodeSystem/condition-ver-status' and code='entered-in-error').exists().not() and category.coding.where(system='http://terminology.hl7.org/CodeSystem/condition-category' and code='problem-list-item').exists() implies clinicalStatus.empty().not()`,
+	source:    "hl7.fhir.r4b.core#4.3.0 StructureDefinition/Condition, con-3",
+}}
+
+// refOneCorrected is R5's ref-1, which applies only where there is a reference.
+const refOneCorrected = `reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))`
+
+// vs-1 as the vital signs profiles publish it, and as US Core 9.0.0 republishes it, corrected.
+const (
+	vsOnePublished = `($this as dateTime).toString().length() >= 8`
+	vsOneCorrected = `$this is dateTime implies $this.toString().length() >= 10`
+	vsOneSource    = "hl7.fhir.us.core#9.0.0 StructureDefinition/us-core-vital-signs, vs-1 (source: vitalsigns)"
+	vitalSigns     = "http://hl7.org/fhir/StructureDefinition/vitalsigns"
+)
+
+const (
+	timNinePublished = `offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))`
+	timNineCorrected = `offset.empty() or (when.exists() and when.select($this in ('C' | 'CM' | 'CD' | 'CV')).allFalse())`
+)
+
+// expressionErratum corrects an expression wherever a definition of fhirVersion publishes it as a
+// constraint, whatever its key and element: one rule published on many resources.
+type expressionErratum struct {
+	fhirVersion string
+	published   string // the defective expression
+	corrected   string
+	source      string // the official definition that corrects it
+}
+
+var expressionErrata = []expressionErratum{{
+	// R4 publishes the rule that a canonical resource's name is computer friendly as
+	// name.matches(...) on 30 resources (csd-0, vsd-0, que-0, lib-0, ...), which is empty, so
+	// fails, where the resource has no name, which they all allow. R4B applies it where there is a
+	// name; vsd-0 is published there with name.exists() twice, so the source is csd-0.
+	fhirVersion: fhirR4,
+	published:   `name.matches('[A-Z]([A-Za-z0-9_]){0,254}')`,
+	corrected:   `name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')`,
+	source:      "hl7.fhir.r4b.core#4.3.0 StructureDefinition/CodeSystem, csd-0",
 }}
 
 // contextErratum adds a context of use to an extension whose published contexts leave out a target
@@ -153,16 +276,7 @@ func correctElements(fhirVersion string, elems []ElementDefinition) {
 }
 
 func correctElement(fhirVersion string, e *ElementDefinition) {
-	for _, er := range constraintErrata {
-		if er.fhirVersion != fhirVersion {
-			continue
-		}
-		for c := range e.Constraint {
-			if cn := &e.Constraint[c]; cn.Key == er.key && er.names(e, cn) && cn.Expression == er.published {
-				cn.Expression = er.corrected
-			}
-		}
-	}
+	correctConstraints(fhirVersion, e)
 	for _, er := range typeErrata {
 		if er.fhirVersion != fhirVersion || !elementAt(e, er.path) {
 			continue
@@ -173,6 +287,31 @@ func correctElement(fhirVersion string, e *ElementDefinition) {
 				if ext.URL == fhirTypeExtension && ext.ValueURL == er.published {
 					ext.ValueURL = er.corrected
 				}
+			}
+		}
+	}
+}
+
+// correctConstraints corrects e's constraints that an erratum of fhirVersion names, by key and
+// element, or by expression alone.
+func correctConstraints(fhirVersion string, e *ElementDefinition) {
+	for _, er := range constraintErrata {
+		if er.fhirVersion != fhirVersion {
+			continue
+		}
+		for c := range e.Constraint {
+			if cn := &e.Constraint[c]; cn.Key == er.key && er.names(e, cn) && cn.Expression == er.published {
+				cn.Expression = er.corrected
+			}
+		}
+	}
+	for _, er := range expressionErrata {
+		if er.fhirVersion != fhirVersion {
+			continue
+		}
+		for c := range e.Constraint {
+			if cn := &e.Constraint[c]; cn.Expression == er.published {
+				cn.Expression = er.corrected
 			}
 		}
 	}

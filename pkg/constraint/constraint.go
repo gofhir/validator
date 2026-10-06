@@ -221,6 +221,14 @@ func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResource
 // defPath names a choice element as the instance does ("Observation.valueQuantity"); the model
 // types the focus from it.
 func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints []registry.Constraint, fhirPath, defPath string, opts *constraintEvalOpts, result *issue.Result) {
+	v.evaluateConstraintsOn(func() fhirpath.Collection { return focus(v.model(), data, defPath) }, constraints, fhirPath, defPath, opts, result)
+}
+
+// evaluateConstraintsOn evaluates constraints as evaluateConstraintsWithCtx does, on the focus that
+// on returns, read once and only when an expression compiles.
+func (v *Validator) evaluateConstraintsOn(on func() fhirpath.Collection, constraints []registry.Constraint, fhirPath, defPath string, opts *constraintEvalOpts, result *issue.Result) {
+	var focused fhirpath.Collection
+	read := false
 	for _, c := range constraints {
 		if c.Expression == "" {
 			continue
@@ -232,27 +240,14 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 
 		expr, err := v.getCompiledExpression(c.Expression)
 		if err != nil {
-			// Reported once per location, as a failure is: every definition that inherits the
-			// expression fails to compile it the same way.
-			if !firstReport(opts.ctx, c, fhirPath) {
-				continue
-			}
-			params := failureParams(c, err)
-			if v.definedByBaseType(c) {
-				// A constraint of the specification's own definitions that does not parse is a
-				// defect of the specification, not of the instance (R5's eld-11 quotes a string
-				// with double quotes): a processing warning.
-				result.AddWarningWithID(issue.DiagConstraintCompileError, params, fhirPath)
-				continue
-			}
-			// Any other expression that does not parse cannot hold, whatever the constraint's
-			// severity. The HL7 validator reports it the same way, as an error (checkInvariant,
-			// PROBLEM_PROCESSING_EXPRESSION).
-			result.AddErrorWithID(issue.DiagConstraintCompileError, params, fhirPath)
+			v.reportCompileError(c, err, fhirPath, opts, result)
 			continue
 		}
 
-		evalResult, err := v.evaluateWithContext(expr, data, defPath, opts)
+		if !read {
+			focused, read = on(), true
+		}
+		evalResult, err := v.evaluateOn(expr, focused, defPath, opts)
 		if err != nil {
 			if opts.ctx.Err() != nil {
 				return // the validation was canceled; that says nothing about the instance
@@ -273,7 +268,7 @@ func (v *Validator) evaluateConstraintsWithCtx(data json.RawMessage, constraints
 			continue
 		}
 
-		if !v.constraintPassed(evalResult) {
+		if !toBoolean(evalResult) {
 			if firstReport(opts.ctx, c, fhirPath) {
 				v.addConstraintViolation(c, fhirPath, nil, result)
 			}
@@ -306,13 +301,28 @@ func hitTimeLimit(err error) bool {
 	return errors.Is(err, context.DeadlineExceeded) || (errors.As(err, &evalErr) && evalErr.Type == eval.ErrTimeout)
 }
 
-// evaluateWithContext builds an eval.Context with all services wired and evaluates the expression.
-func (v *Validator) evaluateWithContext(expr *fhirpath.Expression, data json.RawMessage, defPath string, opts *constraintEvalOpts) (fhirpath.Collection, error) {
-	return v.evaluateOn(expr, focus(v.model(), data, defPath), defPath, opts)
+// reportCompileError reports that c's expression does not compile, once per location, as a failure
+// is: every definition that inherits the expression fails to compile it the same way.
+func (v *Validator) reportCompileError(c registry.Constraint, err error, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	if !firstReport(opts.ctx, c, fhirPath) {
+		return
+	}
+	params := failureParams(c, err)
+	if v.definedByBaseType(c) {
+		// A constraint of the specification's own definitions that does not parse is a defect of
+		// the specification, not of the instance (R5's eld-11 quotes a string with double
+		// quotes): a processing warning.
+		result.AddWarningWithID(issue.DiagConstraintCompileError, params, fhirPath)
+		return
+	}
+	// Any other expression that does not parse cannot hold, whatever the constraint's severity.
+	// The HL7 validator reports it the same way, as an error (checkInvariant,
+	// PROBLEM_PROCESSING_EXPRESSION).
+	result.AddErrorWithID(issue.DiagConstraintCompileError, params, fhirPath)
 }
 
-// evaluateOn evaluates the expression with focus, a value read from the input whose definition path
-// is defPath, as evaluateWithContext does.
+// evaluateOn builds an eval.Context with all services wired and evaluates the expression with
+// focus, a value read from the input whose definition path is defPath.
 func (v *Validator) evaluateOn(expr *fhirpath.Expression, focus fhirpath.Collection, defPath string, opts *constraintEvalOpts) (fhirpath.Collection, error) {
 	model := v.model()
 	evalCtx := eval.NewContextForRoot(focus)
@@ -371,8 +381,9 @@ func (v *Validator) model() *registry.FHIRPathModel {
 // ("2019-12-08" at a dateTime is a dateTime, not a date).
 func focus(model *registry.FHIRPathModel, data json.RawMessage, defPath string) fhirpath.Collection {
 	col, _ := types.JSONToCollectionWithType(data, typeOf(model, defPath))
-	// The focus is read for one evaluation, in one goroutine: it may keep what it works out about
-	// itself (its type, the fields read) rather than work it out again.
+	// The focus is read for the evaluations of one element's invariants, in one goroutine: it may
+	// keep what it works out about itself (its type, the fields read) rather than work it out
+	// again. What it keeps depends on the data alone, so every evaluation may share it.
 	for _, v := range col {
 		if obj, ok := v.(*types.ObjectValue); ok {
 			obj.MarkPrivate()
@@ -419,23 +430,6 @@ func (v *Validator) getCompiledExpression(expr string) (*fhirpath.Expression, er
 type compiledExpr struct {
 	expr *fhirpath.Expression
 	err  error
-}
-
-// constraintPassed checks if a FHIRPath result indicates the constraint passed.
-func (v *Validator) constraintPassed(result fhirpath.Collection) bool {
-	// Empty collection = constraint not applicable = passes.
-	if result.Empty() {
-		return true
-	}
-
-	// Try to convert to boolean using Collection's ToBoolean method.
-	b, err := result.ToBoolean()
-	if err != nil {
-		// If conversion fails, treat non-empty collection as truthy.
-		return true
-	}
-
-	return b
 }
 
 // addConstraintViolation adds an issue for a failed constraint. When evalErr is not nil, it is
@@ -617,9 +611,10 @@ func withElement(p fhirpath.Value, element *types.ObjectValue) fhirpath.Value {
 	return p
 }
 
-// toBoolean is a context invariant's result as a boolean, as the HL7 validator converts it
-// (FHIRPathEngine.convertToBoolean): a single Boolean is its value; any other result is true when it
-// is not empty. Empty is false.
+// toBoolean is an invariant's result as a boolean, a constraint's or a context invariant's: a
+// single Boolean is its value; any other result is true when it is not empty. Empty is false: an
+// invariant "must evaluate to true when run on the element" (conformance-rules.html#constraints),
+// as the HL7 validator converts it (FHIRPathEngine.convertToBoolean).
 func toBoolean(res fhirpath.Collection) bool {
 	if len(res) == 1 {
 		if b, ok := res[0].(types.Boolean); ok {

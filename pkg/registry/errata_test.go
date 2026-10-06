@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 	"encoding/json"
+	"slices"
 	"strings"
 	"testing"
 
@@ -211,5 +212,225 @@ func TestConstraintErratumByElement(t *testing.T) {
 	applyErrata(sd)
 	if got := sd.Snapshot.Element[0].Constraint[0].Expression; got != constraintErrata[1].published {
 		t.Errorf("que-7 on another element corrected to %q", got)
+	}
+}
+
+// R4's ref-1, bdl-8 and ras-2, empty where they should not apply, are corrected to the expressions
+// later versions publish, which compile; and US Core's pd-1 only where it is the one published.
+func TestEmptyInvariantErrata(t *testing.T) {
+	const core = "http://hl7.org/fhir/StructureDefinition/"
+	r := sharedVersion(t, "4.0.1")
+	for _, tt := range []struct{ sd, element, key string }{
+		{"vitalsigns", "Observation.effective[x]", "vs-1"},
+		{"bodyweight", "Observation.effective[x]", "vs-1"}, // R4 publishes no source: named by its element
+		{"Reference", "Reference", "ref-1"},
+		{"Bundle", "Bundle.entry", "bdl-8"},
+		{"RiskAssessment", "RiskAssessment.prediction", "ras-2"},
+	} {
+		sd := r.GetByURL(core + tt.sd)
+		if sd == nil || sd.Snapshot == nil {
+			t.Fatalf("%s not loaded", tt.sd)
+		}
+		var want string
+		for _, er := range constraintErrata {
+			if er.key == tt.key && er.fhirVersion == fhirR4 {
+				want = er.corrected
+			}
+		}
+		found := false
+		for _, e := range sd.Snapshot.Element {
+			for _, c := range e.Constraint {
+				if e.ID == tt.element && c.Key == tt.key {
+					found = true
+					if c.Expression != want {
+						t.Errorf("%s: %s is %q", tt.element, tt.key, c.Expression)
+					}
+				}
+			}
+		}
+		if !found {
+			t.Errorf("no %s on %s", tt.key, tt.element)
+		}
+		if _, err := fhirpath.Compile(want); err != nil {
+			t.Errorf("corrected %s does not compile: %v", tt.key, err)
+		}
+	}
+
+	profile := func(key, expression string) *StructureDefinition {
+		return &StructureDefinition{FHIRVersion: "4.0.1", Snapshot: &Snapshot{Element: []ElementDefinition{{
+			ID: "PractitionerRole", Path: "PractitionerRole",
+			Constraint: []Constraint{{Key: key, Expression: expression}},
+		}}}}
+	}
+	const usCore13 = "practitioner.exists() or organization.exists() or healthcareService.exists() or location.exists()"
+	for _, tt := range []struct{ key, published, want string }{
+		{"pd-1", "telecom or endpoint", "telecom.exists() or endpoint.exists()"},                   // US Core 5.0.1, 6.1.0
+		{"pd-1", "telecom.exists() or endpoint.exists()", "telecom.exists() or endpoint.exists()"}, // US Core 9.0.0
+		{"pd-1", "telecom.exists()", "telecom.exists()"},                                           // another expression
+		{"us-core-13", "practitioner or organization or healthcareService or location", usCore13},  // US Core 5.0.1, 6.1.0
+		{"us-core-13", usCore13, usCore13},                                                         // US Core 9.0.0
+	} {
+		sd := profile(tt.key, tt.published)
+		applyErrata(sd)
+		if got := sd.Snapshot.Element[0].Constraint[0].Expression; got != tt.want {
+			t.Errorf("%s published %q: %q, want %q", tt.key, tt.published, got, tt.want)
+		}
+	}
+}
+
+// R4's rules on a canonical resource's name, que-12, tim-9 and con-3 are corrected to their later
+// publications wherever R4 publishes them, and the corrections compile.
+func TestR4RuleErrata(t *testing.T) {
+	const core = "http://hl7.org/fhir/StructureDefinition/"
+	r := sharedVersion(t, "4.0.1")
+	corrected := map[string]string{}
+	for _, er := range constraintErrata {
+		if er.fhirVersion == fhirR4 {
+			corrected[er.key] = er.corrected
+		}
+	}
+	name := expressionErrata[0].corrected
+	for _, tt := range []struct{ sd, element, key, want string }{
+		{"ValueSet", "ValueSet", "vsd-0", name},
+		{"CodeSystem", "CodeSystem", "csd-0", name},
+		{"Library", "Library", "lib-0", name}, // R4B publishes it as cnl-0
+		{"Questionnaire", "Questionnaire.item", "que-12", corrected["que-12"]},
+		{"Timing", "Timing.repeat", "tim-9", corrected["tim-9"]},
+		{"Condition", "Condition", "con-3", corrected["con-3"]},
+	} {
+		sd := r.GetByURL(core + tt.sd)
+		if sd == nil || sd.Snapshot == nil {
+			t.Fatalf("%s not loaded", tt.sd)
+		}
+		found := false
+		for _, e := range sd.Snapshot.Element {
+			for _, c := range e.Constraint {
+				if e.ID == tt.element && c.Key == tt.key {
+					found = true
+					if c.Expression != tt.want {
+						t.Errorf("%s: %s is %q", tt.element, tt.key, c.Expression)
+					}
+				}
+			}
+		}
+		if !found {
+			t.Errorf("no %s on %s", tt.key, tt.element)
+		}
+		if _, err := fhirpath.Compile(tt.want); err != nil {
+			t.Errorf("corrected %s does not compile: %v", tt.key, err)
+		}
+	}
+	for _, er := range expressionErrata {
+		if er.source == "" || er.fhirVersion == "" || er.published == "" || er.published == er.corrected {
+			t.Errorf("incomplete erratum %+v", er)
+		}
+	}
+}
+
+// R4B's ref-1 and vs-1, empty where they should not apply, are corrected too.
+func TestR4BEmptyInvariantErrata(t *testing.T) {
+	const core = "http://hl7.org/fhir/StructureDefinition/"
+	r := sharedVersion(t, "4.3.0")
+	for _, tt := range []struct{ sd, element, key, want string }{
+		{"Reference", "Reference", "ref-1", refOneCorrected},
+		{"vitalsigns", "Observation.effective[x]", "vs-1", vsOneCorrected},
+		{"bodyweight", "Observation.effective[x]", "vs-1", vsOneCorrected}, // derived, with its source
+	} {
+		sd := r.GetByURL(core + tt.sd)
+		if sd == nil || sd.Snapshot == nil {
+			t.Fatalf("%s not loaded", tt.sd)
+		}
+		found := false
+		for _, e := range sd.Snapshot.Element {
+			for _, c := range e.Constraint {
+				if e.ID == tt.element && c.Key == tt.key {
+					found = true
+					if c.Expression != tt.want {
+						t.Errorf("%s: %s is %q", tt.element, tt.key, c.Expression)
+					}
+				}
+			}
+		}
+		if !found {
+			t.Errorf("no %s on %s", tt.key, tt.element)
+		}
+	}
+}
+
+// Each correction is the expression the official publication it cites gives, where that
+// publication is a core specification the tests load. US Core's, pd-1, us-core-13 and vs-1, are
+// tested above on their published and corrected expressions.
+func TestErrataMatchTheirSources(t *testing.T) {
+	const core = "http://hl7.org/fhir/StructureDefinition/"
+	versions := map[string]string{"hl7.fhir.r4b.core#4.3.0": "4.3.0", "hl7.fhir.r5.core#5.0.0": "5.0.0"}
+	type erratum struct{ corrected, source string }
+	all := make([]erratum, 0, len(constraintErrata)+len(expressionErrata))
+	for _, er := range constraintErrata {
+		all = append(all, erratum{er.corrected, er.source})
+	}
+	for _, er := range expressionErrata {
+		all = append(all, erratum{er.corrected, er.source})
+	}
+	for _, er := range all {
+		// "<package> StructureDefinition/<name>, <key>"
+		pkg, rest, _ := strings.Cut(er.source, " StructureDefinition/")
+		name, key, _ := strings.Cut(rest, ", ")
+		version, ok := versions[pkg]
+		if !ok {
+			continue
+		}
+		sd := sharedVersion(t, version).GetByURL(core + name)
+		if sd == nil || sd.Snapshot == nil {
+			t.Fatalf("%s: %s not loaded", er.source, name)
+		}
+		var published []string
+		for _, e := range sd.Snapshot.Element {
+			for _, c := range e.Constraint {
+				if c.Key == key {
+					published = append(published, c.Expression)
+				}
+			}
+		}
+		if !slices.Contains(published, er.corrected) {
+			t.Errorf("%s publishes %q, not the correction %q", er.source, published, er.corrected)
+		}
+	}
+}
+
+// A FHIR primitive type and a FHIRPath system type type a primitive; a complex type does not.
+func TestIsPrimitiveTypeCode(t *testing.T) {
+	r := sharedVersion(t, "4.0.1")
+	for code, want := range map[string]bool{
+		"string":                                true,
+		"dateTime":                              true,
+		"http://hl7.org/fhirpath/System.String": true, // Resource.id's
+		"HumanName":                             false,
+		"Identifier":                            false,
+	} {
+		if got := r.IsPrimitiveTypeCode(code); got != want {
+			t.Errorf("IsPrimitiveTypeCode(%q) = %v, want %v", code, got, want)
+		}
+	}
+}
+
+// R5 publishes vs-1 as R4 does, and is corrected the same way.
+func TestR5VitalSignsErratum(t *testing.T) {
+	sd := sharedVersion(t, "5.0.0").GetByURL("http://hl7.org/fhir/StructureDefinition/bodyweight")
+	if sd == nil || sd.Snapshot == nil {
+		t.Fatal("bodyweight not loaded")
+	}
+	found := false
+	for _, e := range sd.Snapshot.Element {
+		for _, c := range e.Constraint {
+			if e.ID == "Observation.effective[x]" && c.Key == "vs-1" {
+				found = true
+				if c.Expression != vsOneCorrected {
+					t.Errorf("vs-1 is %q", c.Expression)
+				}
+			}
+		}
+	}
+	if !found {
+		t.Fatal("no vs-1 on Observation.effective[x]")
 	}
 }

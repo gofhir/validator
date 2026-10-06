@@ -128,7 +128,7 @@
     {
       "name": "r5-probes",
       "version": "5.0.0",
-      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json", "testdata/m12-slice-scoping/probes/e*_*.json"]
+      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json", "testdata/m12-slice-scoping/probes/r5_range_*.json", "testdata/m12-slice-scoping/probes/e*_*.json"]
     },
     {
       "name": "r4b-probes",

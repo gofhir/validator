@@ -5,20 +5,36 @@ description: "Errors related to FHIRPath constraint evaluation failures."
 weight: 7
 ---
 
-Constraint errors occur when a FHIRPath invariant defined in the StructureDefinition evaluates to `false` or encounters an evaluation error. FHIR defines constraints (invariants) on elements using FHIRPath expressions. Each constraint has a key (e.g., `ele-1`, `dom-6`), a severity (`error` or `warning`), a human-readable description, and a FHIRPath expression that must evaluate to `true` for the resource to be valid.
+Constraint errors occur when a FHIRPath invariant defined in the StructureDefinition does not evaluate to `true`, or cannot be compiled or evaluated. FHIR defines constraints (invariants) on elements using FHIRPath expressions. Each constraint has a key (e.g., `ele-1`, `dom-6`), a severity (`error` or `warning`), a human-readable description, and a FHIRPath expression that must evaluate to `true` for the resource to be valid.
 
 ## Error Codes
 
 | ID | Severity | Message |
 |----|----------|---------|
 | `CONSTRAINT_FAILED` | varies | Constraint failed: {constraint}: '{human}' |
-| `CONSTRAINT_ERROR` | warning | Constraint '{constraint}' evaluation error: {error} |
+| `CONSTRAINT_COMPILE_ERROR` | error (warning for the specification's own definitions) | Could not compile constraint '{key}': {error} |
+| `CONSTRAINT_EVAL_ERROR` | warning | Could not evaluate constraint '{key}': {error} |
 
 ---
 
 ## CONSTRAINT_FAILED
 
-A FHIRPath constraint evaluated to `false`. The severity of this issue is determined by the constraint definition itself -- each constraint declares whether violation is an `error` or a `warning`.
+A FHIRPath constraint did not evaluate to `true`. The severity of this issue is determined by the constraint definition itself -- each constraint declares whether violation is an `error` or a `warning`.
+
+An invariant "must evaluate to true when run on the element" (conformance-rules.html#constraints): a single boolean is its value, an empty result fails, and any other result holds. So `resolve().code.text = 'target'` fails where the reference does not resolve, as the HL7 validator evaluates it. Invariants are evaluated on every element, a primitive with only an id or extensions (`"_status": {...}` with no `status`) included.
+
+A few published invariants are empty where they should not apply. Each is corrected, in the version it is published in and only where its expression is the published one, to the expression a later official publication gives, of the same definition or of the same constraint (`Constraint.source`):
+
+| Key | Published in | Corrected from |
+|-----|--------------|----------------|
+| `ref-1` | R4 and R4B `Reference` (a reference with no `reference`) | R5 |
+| `bdl-8` | R4 `Bundle.entry` (an entry with no `fullUrl`) | R4B |
+| `ras-2` | R4 `RiskAssessment.prediction` (a prediction with no probability) | R4B |
+| `pd-1`, `us-core-13` | US Core 5.0.1 and 6.1.0 `PractitionerRole` (`telecom or endpoint`, `... or healthcareService or location`: no boolean with two of them) | US Core 9.0.0 |
+| `vs-1` | R4, R4B and R5 vital signs profiles (`$this as dateTime` on a Period) | US Core 9.0.0, which republishes the same constraint corrected |
+| `vsd-0`, `csd-0`, `que-0`, `lib-0`, … | R4, 30 canonical resources (`name.matches(...)`, a resource with no name) | R4B (`csd-0`) |
+
+Three other R4 invariants are wrong as published, and corrected the same way: `que-12` asks for `enableBehavior` from three `enableWhen` on (R4B: from two), `tim-9` cannot be evaluated with several `when` (R4 and R4B, corrected from R5), and `con-3` compares a CodeableConcept with a string (R4B, which asks for a clinicalStatus only where there is a verificationStatus).
 
 **Example -- invalid resource:**
 
@@ -87,32 +103,24 @@ The severity of `CONSTRAINT_FAILED` is not fixed. It is read from the `ElementDe
 If `severity` is `"error"`, the issue is an error. If `severity` is `"warning"`, the issue is a warning. Profiles can add new constraints or change constraint severity (within limits).
 
 {{< callout type="info" >}}
-Constraints are evaluated using FHIRPath, a path-based navigation and extraction language for FHIR. The constraint expression must return a boolean value. When it returns `false`, the constraint is considered violated.
+Constraints are evaluated using FHIRPath, a path-based navigation and extraction language for FHIR. The constraint expression should return a boolean value. When it returns `false`, or nothing, the constraint is violated.
 {{< /callout >}}
 
 ---
 
-## CONSTRAINT_ERROR
+## CONSTRAINT_COMPILE_ERROR and CONSTRAINT_EVAL_ERROR
 
-The FHIRPath expression for a constraint could not be evaluated due to a runtime error. This does not necessarily mean the resource is invalid -- it means the validator could not determine whether the constraint is satisfied. This is always reported as a warning.
+An expression that does not compile cannot hold: `CONSTRAINT_COMPILE_ERROR` is an error, reported once per location, as the HL7 validator reports it. In the specification's own definitions it is a warning, since the defect is the specification's, not the instance's (R5's `eld-11` quotes a string with double quotes).
 
-**Common causes:**
-
-- The FHIRPath expression references an element type that the engine does not fully support
-- The expression uses a FHIRPath function that is not implemented
-- A runtime error occurred during expression evaluation (e.g., type mismatch in comparison)
-
-**Example output:**
+An expression that compiles but fails while it is evaluated is a failed invariant: `CONSTRAINT_FAILED` at the constraint's own severity, with the error in its message, as in the HL7 validator, which takes an exception from its FHIRPath engine as a failed invariant. For example, `or` on a collection of two items is an error in FHIRPath ("singleton evaluation of collections"):
 
 ```text
-WARNING: Constraint 'inv-1' evaluation error: Function 'iif' not implemented
-  Path: Observation
-  MessageID: CONSTRAINT_ERROR
+ERROR: Constraint failed: inv-1: '...' (could not be evaluated: SingletonExpectedError: or expects a single item on each side, got 2 on the left)
+  Path: Patient
+  MessageID: CONSTRAINT_FAILED
 ```
 
-{{< callout type="warning" >}}
-Constraint evaluation errors indicate a limitation of the FHIRPath engine, not necessarily a problem with the resource. If you encounter these consistently, check whether the FHIRPath function used in the constraint is supported by the GoFHIR Validator.
-{{< /callout >}}
+Only an evaluation stopped by the validator's own time limit says nothing about the instance: it is `CONSTRAINT_EVAL_ERROR`, a warning.
 
 ---
 

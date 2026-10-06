@@ -498,3 +498,55 @@ func TestExtractRegexFromSD(t *testing.T) {
 		})
 	}
 }
+
+// A null in an array of primitives is an item with no value where the "_key" sibling's item at the
+// same index has its id or extensions (json.html#primitive); with no such item it is an error.
+func TestNullItemAlignedWithItsElement(t *testing.T) {
+	reg := setupTestRegistry(t)
+	v := New(reg)
+	sd := reg.GetByURL("http://hl7.org/fhir/StructureDefinition/Patient")
+	if sd == nil {
+		t.Fatal("Patient StructureDefinition not found")
+	}
+	ext := `{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"unknown"}]}`
+	for _, tt := range []struct {
+		name, name0 string
+		errors      int
+	}{
+		{"aligned with an extension", `{"given":[null,"A"],"_given":[` + ext + `,null]}`, 0},
+		{"aligned with an id", `{"given":[null,"A"],"_given":[{"id":"g"},null]}`, 0},
+		{"no _given", `{"given":[null,"A"]}`, 1},
+		{"a null _given item", `{"given":[null,"A"],"_given":[null,null]}`, 1},
+		{"a _given shorter than given", `{"given":["A",null],"_given":[null]}`, 1},
+		{"a _given item that is no object", `{"given":[null],"_given":["x"]}`, 1},
+		{"a _given item that is an array", `{"given":[null],"_given":[[]]}`, 1},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			result := v.Validate([]byte(`{"resourceType":"Patient","name":[`+tt.name0+`]}`), sd)
+			if got := result.ErrorCount(); got != tt.errors {
+				t.Errorf("%d errors, want %d", got, tt.errors)
+				for _, iss := range result.Issues {
+					t.Logf("  - [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+				}
+			}
+		})
+	}
+}
+
+// A null item of an array of a complex type is an error, whatever its "_key" sibling: only a
+// primitive has one.
+func TestNullItemOfAComplexType(t *testing.T) {
+	reg := setupTestRegistry(t)
+	v := New(reg)
+	sd := reg.GetByURL("http://hl7.org/fhir/StructureDefinition/Patient")
+	if sd == nil {
+		t.Fatal("Patient StructureDefinition not found")
+	}
+	result := v.Validate([]byte(`{"resourceType":"Patient","identifier":[null],"_identifier":[{"id":"x"}]}`), sd)
+	if got := result.ErrorCount(); got != 1 {
+		t.Errorf("%d errors, want 1", got)
+		for _, iss := range result.Issues {
+			t.Logf("  - [%s] %s @ %v", iss.Severity, iss.Diagnostics, iss.Expression)
+		}
+	}
+}

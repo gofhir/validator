@@ -1,0 +1,1 @@
+{"resourceType": "MolecularSequence", "id": "m1", "meta": {"profile": ["https://example.org/fhir/StructureDefinition/rv-ms"]}, "coordinateSystem": 0, "quality": [{"type": "snp", "roc": {"precision": [null, 2.50], "_precision": [{"extension": [{"url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason", "valueCode": "unknown"}]}, null]}}]}

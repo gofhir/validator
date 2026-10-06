@@ -1,0 +1,1 @@
+{"resourceType": "RiskAssessment", "id": "r", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "status": "final", "subject": {"reference": "Patient/p"}, "prediction": [{"outcome": {"text": "o"}}]}
