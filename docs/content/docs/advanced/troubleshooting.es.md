@@ -38,7 +38,7 @@ Verifica la ubicacion de tu cache de paquetes. Por defecto es `~/.fhir/packages/
 **Sintoma:** El validador advierte que una URL de perfil no pudo ser resuelta.
 
 ```text
-Profile 'http://example.org/fhir/StructureDefinition/my-profile' not found in registry
+Profile 'http://example.org/fhir/StructureDefinition/my-profile' was not checked: no definition with its url is loaded
 ```
 
 **Solucion:** Asegurate de que el paquete que contiene el perfil este cargado. La URL del perfil debe coincidir exactamente con lo definido en el campo `url` del StructureDefinition. Causas comunes:

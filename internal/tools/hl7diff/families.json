@@ -345,6 +345,7 @@
     "BINDING_EXTENSIBLE_NO_CODING": "a warning in both validators",
     "BINDING_EXTENSIBLE_OTHER_SYSTEM": "a warning in both validators",
     "BINDING_EXTENSIBLE_UNKNOWN_SYSTEM": "a warning in both validators",
+    "PROFILE_NOT_FOUND": "a warning in both validators (VALIDATION_VAL_PROFILE_UNKNOWN_ERROR)",
     "BINDING_TEXT_ONLY_WARNING": "a warning",
     "BINDING_UNRESOLVED": "processing notice",
     "BINDING_VALUESET_NOT_FOUND": "processing notice",

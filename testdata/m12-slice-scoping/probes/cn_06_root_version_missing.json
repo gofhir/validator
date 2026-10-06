@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "meta": {"profile": ["https://example.org/fhir/cn/StructureDefinition/cn-pat|9.9.9"]}, "identifier": [{"system": "http://s", "value": "1"}]}

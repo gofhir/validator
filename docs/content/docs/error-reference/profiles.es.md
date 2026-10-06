@@ -11,7 +11,7 @@ Los errores de perfiles ocurren cuando el validador no puede cargar, parsear o a
 
 | ID | Severidad | Mensaje |
 |----|-----------|---------|
-| `PROFILE_NOT_FOUND` | error | Profile '{profile}' could not be resolved |
+| `PROFILE_NOT_FOUND` | warning | Profile '{url}' was not checked: {reason} |
 | `PROFILE_INVALID` | error | Profile '{profile}' is not a valid StructureDefinition |
 | `PROFILE_WRONG_TYPE` | error | Resource type '{type}' does not match profile type '{expected}' |
 
@@ -19,7 +19,9 @@ Los errores de perfiles ocurren cuando el validador no puede cargar, parsear o a
 
 ## PROFILE_NOT_FOUND
 
-La URL del perfil especificada para la validación no se pudo resolver. El validador buscó un StructureDefinition con esa URL canónica en el registro cargado pero no pudo encontrarlo.
+Un perfil que el recurso declara (`meta.profile`) o con el que se pidió validarlo no se pudo resolver: ningún StructureDefinition cargado tiene su URL, o ninguno tiene la versión que fija (`url|version`). Una versión fijada se usa exacta, nunca otra versión de la misma URL (references.html#canonical). El recurso no se verifica contra ese perfil; si no se resuelve ninguno de los perfiles que declara, se verifica contra la definición de su tipo, como lo hace el validador de HL7.
+
+Se reporta como warning en la entrada de `meta.profile` que lo declara (`Patient.meta.profile[0]`, `Bundle.entry[0].resource.meta.profile[0]`), o en el recurso cuando se pidió por opción, como el `VALIDATION_VAL_PROFILE_UNKNOWN_ERROR` de HL7. Vale para el recurso validado y para los recursos que contiene (entradas de Bundle, `contained`).
 
 **Causas comunes:**
 
@@ -39,7 +41,7 @@ Si la Implementation Guide de US Core no está cargada, el validador no puede en
 Salida de validación:
 
 ```text
-ERROR: Profile 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient' could not be resolved
+WARNING: Profile 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient' was not checked: no definition with its url is loaded
   MessageID: PROFILE_NOT_FOUND
 ```
 
@@ -137,7 +139,7 @@ Los recursos pueden declarar a qué perfiles afirman conformar a través de `met
 }
 ```
 
-Si un perfil listado en `meta.profile` no se puede encontrar, el validador produce un error `PROFILE_NOT_FOUND`. Si no coincide con el tipo de recurso, produce un error `PROFILE_WRONG_TYPE`.
+Si un perfil listado en `meta.profile` no se puede encontrar, el validador reporta un warning `PROFILE_NOT_FOUND` en esa entrada, y verifica el recurso contra la definición de su tipo. Un recurso contenido en otro (una entrada de Bundle, `contained`) se verifica de la misma forma contra los perfiles que declara.
 
 ## Cadena de Resolución de Perfiles
 
@@ -151,7 +153,7 @@ Perfil Personalizado
         -> baseDefinition: Resource
 ```
 
-En cada nivel, el validador combina las restricciones del perfil con su base. Si algún perfil en la cadena no puede resolverse, el validador reporta `PROFILE_NOT_FOUND` para el eslabón faltante.
+En cada nivel, el validador combina las restricciones del perfil con su base. Si algún perfil en la cadena no puede resolverse, el perfil queda sin snapshot, y el validador reporta `PROFILE_SNAPSHOT_FAILED` nombrando el eslabón faltante.
 
 {{< callout type="info" >}}
 Todas las reglas de validación provienen de los StructureDefinitions. El validador carga el perfil, resuelve la cadena completa de derivación, genera un snapshot si es necesario, y luego valida el recurso contra las restricciones combinadas. No se hardcodea lógica específica de tipos de recurso.

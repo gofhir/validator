@@ -81,7 +81,9 @@ The reference points to a resource type that is not permitted by the ElementDefi
 }
 ```
 
-If the profile constrains `Observation.subject` to reference only `Patient` or `Group`, a reference to `Organization` is not a valid target.
+If the profile constrains `Observation.subject` to reference only `Patient` or `Group`, a reference to `Organization` is not a valid target. The issue is reported at the Reference (`Observation.subject`), as the HL7 validator reports it.
+
+A `targetProfile` may pin a version (`http://example.org/StructureDefinition/my-patient|1.0.0`); its type is the type of that version of the profile. The type of a literal reference is checked whether or not the target resolves: the target "must conform to at least one" of the profiles (ElementDefinition.type.targetProfile), and a resource of another type cannot. The HL7 validator 6.10.4 checks the type only of a target it resolves (decision B-D13 of plan B).
 
 **Fix:** Reference one of the allowed target types:
 

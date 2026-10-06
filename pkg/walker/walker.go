@@ -3,7 +3,9 @@
 package walker
 
 import (
+	"context"
 	"fmt"
+	"slices"
 
 	"github.com/gofhir/validator/v2/pkg/registry"
 )
@@ -78,52 +80,32 @@ func (w *Walker) Walk(data map[string]any, rootType, rootPath string, visitor Re
 	w.walkBundleEntries(data, rootPath, visitor)
 }
 
-// WalkWithProfiles traverses a resource, visiting once per declared profile.
-// For resources with meta.profile, the visitor is called once per profile.
-// For resources without profiles, it's called once with the base SD.
+// WalkWithProfiles traverses a resource, visiting it once per definition it is checked against
+// (definitions): each profile its meta.profile declares that resolves, or else its type's.
 func (w *Walker) WalkWithProfiles(data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
+	w.WalkWithProfilesContext(context.Background(), data, rootType, rootPath, visitor)
+}
+
+// WalkWithProfilesContext is WalkWithProfiles, resolving profiles with ctx (an external profile
+// resolver honors its cancellation).
+func (w *Walker) WalkWithProfilesContext(ctx context.Context, data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
 	profiles := getMetaProfiles(data)
-
-	if len(profiles) > 0 {
-		// Visit once per profile
-		for _, profileURL := range profiles {
-			sd := w.registry.GetByURL(profileURL)
-			if sd == nil || sd.Snapshot == nil {
-				continue
-			}
-
-			ctx := &ResourceContext{
-				Data:         data,
-				ResourceType: rootType,
-				FHIRPath:     rootPath,
-				SD:           sd,
-				Profiles:     profiles,
-			}
-
-			if !visitor(ctx) {
-				return
-			}
-		}
-	} else {
-		// Fall back to base type
-		sd := w.registry.GetByType(rootType)
-		if sd == nil || sd.Snapshot == nil {
-			return
-		}
-
+	for _, sd := range w.definitions(ctx, profiles, rootType) {
 		ctx := &ResourceContext{
 			Data:         data,
 			ResourceType: rootType,
 			FHIRPath:     rootPath,
 			SD:           sd,
+			Profiles:     profiles,
 		}
-
-		visitor(ctx)
+		if !visitor(ctx) {
+			return
+		}
 	}
 
 	// Walk nested resources
-	w.walkContainedWithProfiles(data, rootPath, visitor)
-	w.walkBundleEntriesWithProfiles(data, rootPath, visitor)
+	w.walkContainedWithProfiles(ctx, data, rootPath, visitor)
+	w.walkBundleEntriesWithProfiles(ctx, data, rootPath, visitor)
 }
 
 // walkContained traverses contained resources.
@@ -171,7 +153,7 @@ func (w *Walker) walkContained(data map[string]any, basePath string, visitor Res
 }
 
 // walkContainedWithProfiles traverses contained resources, visiting per profile.
-func (w *Walker) walkContainedWithProfiles(data map[string]any, basePath string, visitor ResourceVisitor) {
+func (w *Walker) walkContainedWithProfiles(ctx context.Context, data map[string]any, basePath string, visitor ResourceVisitor) {
 	containedRaw, ok := data["contained"]
 	if !ok {
 		return
@@ -195,44 +177,17 @@ func (w *Walker) walkContainedWithProfiles(data map[string]any, basePath string,
 
 		containedPath := fmt.Sprintf("%s.contained[%d]", basePath, i)
 		profiles := getMetaProfiles(resourceMap)
-
-		if len(profiles) > 0 {
-			for _, profileURL := range profiles {
-				sd := w.registry.GetByURL(profileURL)
-				if sd == nil || sd.Snapshot == nil {
-					continue
-				}
-
-				ctx := &ResourceContext{
-					Data:         resourceMap,
-					ResourceType: resourceType,
-					FHIRPath:     containedPath,
-					SD:           sd,
-					Profiles:     profiles,
-					IsContained:  true,
-					ParentPath:   basePath,
-				}
-
-				if !visitor(ctx) {
-					return
-				}
-			}
-		} else {
-			sd := w.registry.GetByType(resourceType)
-			if sd == nil || sd.Snapshot == nil {
-				continue
-			}
-
-			ctx := &ResourceContext{
+		for _, sd := range w.definitions(ctx, profiles, resourceType) {
+			rc := &ResourceContext{
 				Data:         resourceMap,
 				ResourceType: resourceType,
 				FHIRPath:     containedPath,
 				SD:           sd,
+				Profiles:     profiles,
 				IsContained:  true,
 				ParentPath:   basePath,
 			}
-
-			if !visitor(ctx) {
+			if !visitor(rc) {
 				return
 			}
 		}
@@ -302,7 +257,7 @@ func (w *Walker) walkBundleEntries(data map[string]any, basePath string, visitor
 }
 
 // walkBundleEntriesWithProfiles traverses Bundle entries, visiting per profile.
-func (w *Walker) walkBundleEntriesWithProfiles(data map[string]any, basePath string, visitor ResourceVisitor) {
+func (w *Walker) walkBundleEntriesWithProfiles(ctx context.Context, data map[string]any, basePath string, visitor ResourceVisitor) {
 	entries := w.extractBundleEntries(data)
 	if entries == nil {
 		return
@@ -316,13 +271,13 @@ func (w *Walker) walkBundleEntriesWithProfiles(data map[string]any, basePath str
 
 		entryPath := fmt.Sprintf("%s.entry[%d].resource", basePath, i)
 
-		if !w.visitEntryResource(resourceMap, resourceType, entryPath, basePath, visitor) {
+		if !w.visitEntryResource(ctx, resourceMap, resourceType, entryPath, basePath, visitor) {
 			return
 		}
 
 		// Recursively walk contained and nested Bundles
-		w.walkContainedWithProfiles(resourceMap, entryPath, visitor)
-		w.walkBundleEntriesWithProfiles(resourceMap, entryPath, visitor)
+		w.walkContainedWithProfiles(ctx, resourceMap, entryPath, visitor)
+		w.walkBundleEntriesWithProfiles(ctx, resourceMap, entryPath, visitor)
 	}
 }
 
@@ -361,26 +316,12 @@ func (w *Walker) extractEntryResource(entry any) (resourceMap map[string]any, re
 	return resourceMap, resourceType
 }
 
-// visitEntryResource visits a Bundle entry resource with its profiles or base SD.
-func (w *Walker) visitEntryResource(resourceMap map[string]any, resourceType, entryPath, basePath string, visitor ResourceVisitor) bool {
+// visitEntryResource visits a Bundle entry resource once per definition it is checked against
+// (definitions).
+func (w *Walker) visitEntryResource(ctx context.Context, resourceMap map[string]any, resourceType, entryPath, basePath string, visitor ResourceVisitor) bool {
 	profiles := getMetaProfiles(resourceMap)
-
-	if len(profiles) > 0 {
-		return w.visitWithProfiles(resourceMap, resourceType, entryPath, basePath, profiles, visitor)
-	}
-
-	return w.visitWithBaseSD(resourceMap, resourceType, entryPath, basePath, visitor)
-}
-
-// visitWithProfiles visits a resource once per declared profile.
-func (w *Walker) visitWithProfiles(resourceMap map[string]any, resourceType, entryPath, basePath string, profiles []string, visitor ResourceVisitor) bool {
-	for _, profileURL := range profiles {
-		sd := w.registry.GetByURL(profileURL)
-		if sd == nil || sd.Snapshot == nil {
-			continue
-		}
-
-		ctx := &ResourceContext{
+	for _, sd := range w.definitions(ctx, profiles, resourceType) {
+		rc := &ResourceContext{
 			Data:          resourceMap,
 			ResourceType:  resourceType,
 			FHIRPath:      entryPath,
@@ -389,31 +330,43 @@ func (w *Walker) visitWithProfiles(resourceMap map[string]any, resourceType, ent
 			IsBundleEntry: true,
 			ParentPath:    basePath,
 		}
-
-		if !visitor(ctx) {
+		if !visitor(rc) {
 			return false
 		}
 	}
 	return true
 }
 
-// visitWithBaseSD visits a resource with its base StructureDefinition.
-func (w *Walker) visitWithBaseSD(resourceMap map[string]any, resourceType, entryPath, basePath string, visitor ResourceVisitor) bool {
-	sd := w.registry.GetByType(resourceType)
-	if sd == nil || sd.Snapshot == nil {
-		return true
+// definitions are the definitions a resource of resourceType declaring profiles is checked
+// against: each profile that resolves (profile), once however many canonicals name it (url and
+// url|version); and its type's definition unless a profile of its type stands for it, as the HL7
+// validator checks a resource against its type's definition besides its profiles.
+func (w *Walker) definitions(ctx context.Context, profiles []string, resourceType string) []*registry.StructureDefinition {
+	out := make([]*registry.StructureDefinition, 0, len(profiles)+1)
+	ofType := false
+	for _, p := range profiles {
+		if sd := w.profile(ctx, p); sd != nil && !slices.Contains(out, sd) {
+			out = append(out, sd)
+			ofType = ofType || sd.Type == resourceType
+		}
 	}
-
-	ctx := &ResourceContext{
-		Data:          resourceMap,
-		ResourceType:  resourceType,
-		FHIRPath:      entryPath,
-		SD:            sd,
-		IsBundleEntry: true,
-		ParentPath:    basePath,
+	if !ofType {
+		if sd := w.registry.GetByType(resourceType); sd != nil && sd.Snapshot != nil {
+			out = append(out, sd)
+		}
 	}
+	return out
+}
 
-	return visitor(ctx)
+// profile is the definition a resource's meta.profile entry names, with its snapshot: the version
+// it pins, or the one an unversioned canonical resolves to (references.html#canonical). Nil when it
+// does not resolve, or its snapshot cannot be generated; the constraint phase reports which.
+func (w *Walker) profile(ctx context.Context, canonical string) *registry.StructureDefinition {
+	sd, _, err := w.registry.ResolveProfile(ctx, canonical)
+	if err != nil {
+		return nil
+	}
+	return sd
 }
 
 // getMetaProfiles extracts profile URLs from resource's meta.profile array.

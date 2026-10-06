@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/gofhir/fhirpath"
@@ -233,37 +234,62 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 	}
 	opts.resolver = resolverWithin(opts.resolver, opts.scope.RootResource, nil)
 
-	for _, sd := range v.nestedDefinitions(opts.ctx, res) {
+	for _, sd := range v.nestedDefinitions(opts.ctx, res, fhirPath, result) {
 		if root := sd.Tree().Root(); root != nil {
 			v.walk(sd, root, "", res, raw, nil, fhirPath, &opts, result)
 		}
 	}
 }
 
-// nestedDefinitions are the definitions a nested resource is checked against: the profiles its
-// meta.profile declares that resolve, or else its type's definition.
-func (v *Validator) nestedDefinitions(ctx context.Context, res map[string]any) []*registry.StructureDefinition {
+// nestedDefinitions are the definitions a nested resource at fhirPath is checked against: the
+// profiles its meta.profile declares that resolve (declaredProfile), each once, and its type's
+// definition unless a profile of its type stands for it, as the HL7 validator checks a resource
+// against its type's definition besides its profiles.
+func (v *Validator) nestedDefinitions(ctx context.Context, res map[string]any, fhirPath string, result *issue.Result) []*registry.StructureDefinition {
+	rt, _ := res[resourceTypeKey].(string)
 	var out []*registry.StructureDefinition
+	ofType := false
 	if meta, ok := res["meta"].(map[string]any); ok {
-		if profiles, ok := meta["profile"].([]any); ok {
-			for _, p := range profiles {
-				if url, ok := p.(string); ok {
-					if sd, _ := v.registry.ResolveCanonical(url); sd != nil && v.registry.EnsureSnapshot(ctx, sd) == nil {
-						out = append(out, sd)
-					}
-				}
+		profiles, _ := meta["profile"].([]any)
+		for i, p := range profiles {
+			url, ok := p.(string)
+			if !ok {
+				continue
+			}
+			if sd := v.declaredProfile(ctx, url, fmt.Sprintf("%s.meta.profile[%d]", fhirPath, i), fhirPath, result); sd != nil && !slices.Contains(out, sd) {
+				out = append(out, sd)
+				ofType = ofType || sd.Type == rt
 			}
 		}
 	}
-	if len(out) > 0 {
-		return out
-	}
-	if rt, _ := res[resourceTypeKey].(string); rt != "" {
+	if !ofType && rt != "" {
 		if sd := v.registry.GetByType(rt); sd != nil && sd.Snapshot != nil {
 			out = append(out, sd)
 		}
 	}
 	return out
+}
+
+// declaredProfile resolves the profile url a nested resource at fhirPath declares at its
+// meta.profile entry at: the version a canonical pins, or the one an unversioned canonical resolves
+// to (references.html#canonical). One that does not resolve is reported at the entry, and one whose
+// snapshot cannot be generated at the resource, as the HL7 validator reports them; once per
+// location.
+func (v *Validator) declaredProfile(ctx context.Context, url, at, fhirPath string, result *issue.Result) *registry.StructureDefinition {
+	sd, resolution, err := v.registry.ResolveProfile(ctx, url)
+	switch {
+	case sd != nil:
+		return sd
+	case err != nil:
+		if firstReportKey(ctx, fhirPath+"\x00"+string(issue.DiagProfileSnapshotFailed)+"\x00"+url) {
+			result.AddErrorWithID(issue.DiagProfileSnapshotFailed, map[string]any{"url": url, "reason": err.Error()}, fhirPath)
+		}
+	default:
+		if firstReportKey(ctx, at+"\x00"+string(issue.DiagProfileNotFound)) {
+			result.AddWarningWithID(issue.DiagProfileNotFound, map[string]any{"url": url, "reason": resolution.Reason()}, at)
+		}
+	}
+	return nil
 }
 
 // typeLayer is the definition that governs a value through its type: the one profile that the type

@@ -81,7 +81,9 @@ La referencia apunta a un tipo de recurso que no está permitido por el ElementD
 }
 ```
 
-Si el perfil restringe `Observation.subject` a referenciar solo `Patient` o `Group`, una referencia a `Organization` no es un destino válido.
+Si el perfil restringe `Observation.subject` a referenciar solo `Patient` o `Group`, una referencia a `Organization` no es un destino válido. El issue se reporta en el Reference (`Observation.subject`), como lo reporta el validador de HL7.
+
+Un `targetProfile` puede fijar una versión (`http://example.org/StructureDefinition/my-patient|1.0.0`); su tipo es el de esa versión del perfil. El tipo de una referencia literal se verifica se resuelva o no el destino: el destino "must conform to at least one" de los perfiles (ElementDefinition.type.targetProfile), y un recurso de otro tipo no puede. El validador de HL7 6.10.4 verifica el tipo solo de un destino que resuelve (decisión B-D13 del plan B).
 
 **Corrección:** Referencia uno de los tipos de destino permitidos:
 

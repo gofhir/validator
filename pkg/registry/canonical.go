@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"context"
 	"strings"
 )
 
@@ -47,6 +48,39 @@ func (r Resolution) String() string {
 		return "invalid"
 	default:
 		return "not-found"
+	}
+}
+
+// ResolveProfile resolves a profile a resource declares (meta.profile) to a definition it can be
+// validated against, as the resource validated's are: [Registry.ResolveCanonical], and, when no
+// definition loaded has the url and version, the external resolver ([Registry.ResolveByCanonical],
+// which never substitutes another version either); with its snapshot generated when it has only a
+// differential. The StructureDefinition is nil unless it resolves and its snapshot is there, err
+// saying why it is not.
+func (r *Registry) ResolveProfile(ctx context.Context, canonical string) (*StructureDefinition, Resolution, error) {
+	sd, res := r.ResolveCanonical(canonical)
+	if sd == nil {
+		url, version := ParseCanonical(canonical)
+		if sd = r.ResolveByCanonical(ctx, url, version); sd == nil {
+			return nil, res, nil
+		}
+		res = ResolutionExact
+	}
+	if err := r.EnsureSnapshot(ctx, sd); err != nil {
+		return nil, res, err
+	}
+	return sd, res, nil
+}
+
+// Reason says why a canonical with this resolution was not resolved, for a message.
+func (r Resolution) Reason() string {
+	switch r {
+	case ResolutionVersionMissing:
+		return "the version it pins is not loaded, and another version of it is not used instead"
+	case ResolutionInvalid:
+		return "it is not a valid canonical"
+	default:
+		return "no definition with its url is loaded"
 	}
 }
 

@@ -1,0 +1,1 @@
+{"resourceType": "Bundle", "id": "b", "type": "collection", "entry": [{"fullUrl": "http://example.org/fhir/Patient/p", "resource": {"resourceType": "Patient", "id": "p", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "meta": {"profile": ["https://example.org/fhir/cn/StructureDefinition/cn-pat"]}}}]}
