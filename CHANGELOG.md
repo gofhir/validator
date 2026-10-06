@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0](https://github.com/gofhir/validator/compare/v1.28.0...v2.0.0) (2026-10-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **extension:** registry.Registry.IsCanonicalResource and IsMetadataResource follow Interfaces: the interfaces a definition declares (R5), or in R4 and R4B the canonical resources references.html lists, and no MetadataResource, as in the HL7 validator. In R4, IsMetadataResource was true for ValueSet and other knowledge resources and IsCanonicalResource for Device and Contract; both are false now.
+
+### Features
+
+* **extension:** check an extension's context of use from the definitions, fhirpath contexts by place (plan B, B4b) ([#133](https://github.com/gofhir/validator/issues/133)) ([492a1a7](https://github.com/gofhir/validator/commit/492a1a749b45a158e2816c607b30a1bf61501303))
+
+
+### Bug Fixes
+
+* **extension:** a sub-extension the definition does not declare is an error; one defined separately is validated (plan B, B4) ([#129](https://github.com/gofhir/validator/issues/129)) ([9001b81](https://github.com/gofhir/validator/commit/9001b8125a0c660969badae10b334dda61665ff9))
+* **registry:** generate snapshots by element id, with slices and unrolled children as HL7 does (plan B, B7) ([#131](https://github.com/gofhir/validator/issues/131)) ([e10a53e](https://github.com/gofhir/validator/commit/e10a53e25a1e227ccf4be6bbc994f0001d98cb92))
+
 ## [1.28.0](https://github.com/gofhir/validator/compare/v1.27.0...v1.28.0) (2026-10-04)
 
 
