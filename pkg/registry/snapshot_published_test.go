@@ -9,11 +9,36 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/gofhir/validator/pkg/loader"
 	"github.com/gofhir/validator/pkg/specs"
 )
+
+// r4CorePackages decodes the embedded R4 packages once per test binary. Each guide used to decode them
+// again: across the 15 guides of TestRegeneratedSnapshotsAcrossGuides that was 9.5 of the package's
+// 10.4 GB allocated, half of it io.ReadAll over the same tgz. A Package is written only while it is
+// loaded, and the registry decodes its own copy of each resource, so the guides can share them.
+var r4CorePackages = sync.OnceValues(func() ([]*loader.Package, error) {
+	return loader.NewLoader("").LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
+})
+
+// r4CoreRegistry is a registry of the embedded R4 packages, loaded once; each guide loads its own
+// packages into a Clone of it, as testfhir does for the validator's tests (this package cannot import
+// testfhir, which imports it).
+var r4CoreRegistry = sync.OnceValues(func() (*Registry, error) {
+	core, err := r4CorePackages()
+	if err != nil {
+		return nil, err
+	}
+	r := New()
+	r.SetFHIRVersion("4.0.1")
+	if err := r.LoadFromPackages(core); err != nil {
+		return nil, err
+	}
+	return r, nil
+})
 
 // guideRegistry loads the embedded R4 packages, and a guide with its dependencies from the package
 // cache; it skips when the guide is not in the cache.
@@ -27,12 +52,13 @@ func guideRegistry(t *testing.T, name, version string) *Registry {
 	if _, ok := l.InstalledVersion(name, version); !ok {
 		t.Skipf("%s#%s is not in the package cache", name, version)
 	}
-	packages, err := l.LoadFromEmbeddedData(specs.GetPackages("4.0.1"))
+	core, err := r4CorePackages()
 	if err != nil {
 		t.Fatal(err)
 	}
+	var packages []*loader.Package // the guide's own, loaded into a clone of the core registry
 	have := map[string]bool{}
-	for _, p := range packages {
+	for _, p := range core {
 		have[p.Name+"#"+p.Version] = true
 	}
 	// The cross-version extensions (versions.html: http://hl7.org/fhir/5.0/StructureDefinition/
@@ -53,8 +79,11 @@ func guideRegistry(t *testing.T, name, version string) *Registry {
 			}
 		}
 	}
-	r := New()
-	r.SetFHIRVersion("4.0.1")
+	base, err := r4CoreRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := base.Clone()
 	if err := r.LoadFromPackages(packages); err != nil {
 		t.Fatal(err)
 	}
