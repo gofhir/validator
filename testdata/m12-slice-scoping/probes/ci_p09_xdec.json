@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p1", "extension": [{"url": "https://example.org/fhir/StructureDefinition/w-host", "valueDecimal": 1.50, "_valueDecimal": {"extension": [{"url": "https://example.org/fhir/StructureDefinition/w-xdec", "valueString": "a"}]}}]}

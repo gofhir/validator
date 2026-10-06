@@ -34,6 +34,8 @@ type conformState struct {
 	// collections caches a resource's FHIRPath collection, for %resource and %rootResource: the
 	// same Bundle is the scope of every check inside it.
 	collections map[uintptr]fhirpath.Collection
+	// exact returns a resource with its numbers as the JSON spells them (exactIn), or is nil.
+	exact func(map[string]any) map[string]any
 }
 
 // collection returns the FHIRPath collection of a resource, converting it once per validation.
@@ -48,7 +50,13 @@ func (st *conformState) collection(m map[string]any) fhirpath.Collection {
 	if ok {
 		return col
 	}
-	raw, err := json.Marshal(m)
+	written := m // as the JSON spells its numbers, when the validation read it
+	if st.exact != nil {
+		if e := st.exact(m); e != nil {
+			written = e
+		}
+	}
+	raw, err := json.Marshal(written)
 	if err != nil {
 		return nil
 	}
@@ -77,6 +85,7 @@ func withConformState(ctx context.Context) context.Context {
 	}
 	return context.WithValue(ctx, conformStateKey{}, &conformState{
 		memo: map[conformKey]bool{}, running: map[conformKey]bool{}, collections: map[uintptr]fhirpath.Collection{},
+		exact: exactIn(ctx),
 	})
 }
 

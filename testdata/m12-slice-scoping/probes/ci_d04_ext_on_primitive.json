@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p", "birthDate": "2000-01-01", "_birthDate": {"extension": [{"url": "https://example.org/fhir/StructureDefinition/d-ext", "valueDecimal": 1.50}]}}

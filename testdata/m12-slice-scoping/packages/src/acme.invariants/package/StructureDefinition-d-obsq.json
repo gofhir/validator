@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-obsq",
+ "url": "https://example.org/fhir/StructureDefinition/d-obsq",
+ "name": "DOBSQ",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "Quantity",
+      "profile": [
+       "https://example.org/fhir/StructureDefinition/d-qty"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

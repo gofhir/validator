@@ -1,0 +1,35 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "rv-ms",
+ "url": "https://example.org/fhir/StructureDefinition/rv-ms",
+ "version": "0.1.0",
+ "name": "rv_ms",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "MolecularSequence",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/MolecularSequence",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "MolecularSequence",
+    "path": "MolecularSequence"
+   },
+   {
+    "id": "MolecularSequence.quality.roc.precision",
+    "path": "MolecularSequence.quality.roc.precision",
+    "constraint": [
+     {
+      "key": "rv-10",
+      "severity": "error",
+      "human": "rv-10",
+      "expression": "$this.toString() = '2.50'",
+      "source": "https://example.org/fhir/StructureDefinition/rv-ms"
+     }
+    ]
+   }
+  ]
+ }
+}

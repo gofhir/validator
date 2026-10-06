@@ -756,11 +756,12 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	// Validate against ALL profiles
 	// According to FHIR spec, resource must be valid against all claimed profiles
 	// Pass parsed data to avoid re-parsing JSON in each phase
-	// Conformance checks made by slice matching share one memo for this validation.
+	// Conformance checks made by slice matching share one memo for this validation, and read the
+	// resource's numbers as the JSON spells them.
+	ctx = withExact(ctx, data, resource)
 	ctx = withConformState(ctx)
 	ctx = constraint.WithReportScope(ctx)
 	ctx = withExtensionScope(ctx)
-	ctx = withExact(ctx, data, resource)
 	for _, sd := range profilesToValidate {
 		v.validateAgainstProfile(ctx, data, resource, sd, nil, result)
 	}
@@ -839,6 +840,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	// Slice matching shares what it learns about a value with the slicing phase by the value's
 	// identity: both read the same parse.
 	constraintOpts.Data = data
+	constraintOpts.Exact = exactIn(ctx)
 	constraintOpts.Resolver, constraintOpts.Containment = referenceResolver{}, constraint.IsContainedIn
 	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
 	result.Stats.PhasesRun++

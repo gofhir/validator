@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-obsr",
+ "url": "https://example.org/fhir/StructureDefinition/d-obsr",
+ "name": "DOBSR",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation",
+    "constraint": [
+     {
+      "key": "dr-1",
+      "severity": "error",
+      "human": "dr-1",
+      "expression": "hasMember.all(resolve().value.ofType(Quantity).value.toString() = '1.50')"
+     }
+    ]
+   }
+  ]
+ }
+}

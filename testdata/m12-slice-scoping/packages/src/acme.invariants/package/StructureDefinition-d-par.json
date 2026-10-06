@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-par",
+ "url": "https://example.org/fhir/StructureDefinition/d-par",
+ "name": "DPAR",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Parameters",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Parameters",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Parameters",
+    "path": "Parameters"
+   },
+   {
+    "id": "Parameters.parameter.part",
+    "path": "Parameters.parameter.part",
+    "constraint": [
+     {
+      "key": "dp-1",
+      "severity": "error",
+      "human": "dp-1",
+      "expression": "value.ofType(decimal).empty() or value.ofType(decimal).toString() = '1.50'"
+     }
+    ]
+   }
+  ]
+ }
+}

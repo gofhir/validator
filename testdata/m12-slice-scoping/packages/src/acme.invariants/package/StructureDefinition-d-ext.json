@@ -1,0 +1,61 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-ext",
+ "url": "https://example.org/fhir/StructureDefinition/d-ext",
+ "name": "DEXT",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension",
+    "constraint": [
+     {
+      "key": "de-1",
+      "severity": "error",
+      "human": "de-1",
+      "expression": "value.ofType(decimal).toString() = '1.50'"
+     }
+    ]
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "https://example.org/fhir/StructureDefinition/d-ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "decimal"
+     }
+    ],
+    "constraint": [
+     {
+      "key": "de-2",
+      "severity": "error",
+      "human": "de-2",
+      "expression": "$this.toString() = '1.50'"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

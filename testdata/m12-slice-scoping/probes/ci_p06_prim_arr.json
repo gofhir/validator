@@ -1,0 +1,1 @@
+{"resourceType": "MolecularSequence", "id": "m1", "coordinateSystem": 0, "quality": [{"type": "snp", "roc": {"precision": [1.10, 2.50], "_precision": [null, {"extension": [{"url": "https://example.org/fhir/StructureDefinition/w-prec", "valueString": "a"}]}]}}]}
