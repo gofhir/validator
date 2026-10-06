@@ -118,5 +118,141 @@
     "file": "testdata/m12-slice-scoping/probes/ui5_vs_x5-meta.json",
     "location": "ValueSet",
     "messageId": "Extension_EXTP_Context_Wrong"
+  },
+  {
+    "decision": "B-D9",
+    "reason": "ElementDefinition.contentReference names an element of the same definition whose content rules apply to the current element: the profile's fixed Questionnaire.item.prefix applies to item.item. HL7 6.10.4 does not apply it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_f1_contentref_bad.json",
+    "location": "Questionnaire.item[0].item[0].prefix",
+    "messageId": "FIXED_VALUE_MISMATCH"
+  },
+  {
+    "decision": "B-D10",
+    "reason": "ElementDefinition.fixed[x]: missing elements/attributes must also be missing, so an element the fixed CodeableConcept does not have is an error. HL7 6.10.4 accepts it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_i1_fixed_extra_text.json",
+    "location": "Observation.code.text",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D10",
+    "reason": "ElementDefinition.fixed[x]: missing elements/attributes must also be missing, so a coding the fixed CodeableConcept does not have is an error. HL7 6.10.4 accepts it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_i5_fixed_extra_coding.json",
+    "location": "Observation.code.coding[1]",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D10",
+    "reason": "ElementDefinition.fixed[x]: missing elements/attributes must also be missing, so an id the fixed Coding does not have is an error. HL7 6.10.4 accepts it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r03_coding_id.json",
+    "location": "Observation.code.coding[0].id",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D10",
+    "reason": "ElementDefinition.fixed[x]: missing elements/attributes must also be missing, so an id the fixed Coding does not have is an error. HL7 6.10.4 accepts it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r14_marital_id.json",
+    "location": "Patient.maritalStatus.coding[0].id",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D10",
+    "reason": "The fixed value has no extension: HL7 6.10.4 reports the same extension (Extension_EXT_Fixed_Banned) at the array, without the item's index; gofhir reports it at the item that holds it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r04_coding_ext.json",
+    "location": "Observation.code.coding[0]",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D10",
+    "reason": "The fixed value has no extension: HL7 6.10.4 reports the same extension (Extension_EXT_Fixed_Banned) at the array, without the item's index; gofhir reports it at the item that holds it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r20_code_coding_ext_primitive.json",
+    "location": "Observation.code.coding[0].code",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D10",
+    "reason": "The fixed HumanName has no extension on given: HL7 6.10.4 reports the same extension (Extension_EXT_Fixed_Banned) at the array, without the item's index; gofhir reports it at the item that holds it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r21_name_given_ext.json",
+    "location": "Patient.name[0].given[0]",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D11",
+    "reason": "ElementDefinition.pattern[x]: each element of a pattern array must match at least one element of the instance's array, so one coding may meet two pattern codings. HL7 6.10.4 requires as many codings as the pattern has (Terminology_TX_Coding_Count).",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/fp_r00_obs_ok.json",
+    "location": "Observation.category[0]",
+    "messageId": "Terminology_TX_Coding_Count"
+  },
+  {
+    "decision": "B-D11",
+    "reason": "ElementDefinition.pattern[x]: each element of a pattern array must match at least one element of the instance's array, so one coding may meet two pattern codings. HL7 6.10.4 requires as many codings as the pattern has (Terminology_TX_Coding_Count).",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/fp_r08_cat_two_items.json",
+    "location": "Observation.category[0]",
+    "messageId": "Terminology_TX_Coding_Count"
+  },
+  {
+    "decision": "B-D12",
+    "reason": "ElementDefinition.fixed[x] and pattern[x]: the value in the instance SHALL be the fixed value or follow the pattern, so a primitive that has only extensions (json.html#primitive), and no value, does not meet a fixed or pattern value that has one. HL7 6.10.4 checks no fixed or pattern value on such a primitive.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json",
+    "location": "Observation.status",
+    "messageId": "FIXED_VALUE_MISSING"
+  },
+  {
+    "decision": "B-D12",
+    "reason": "ElementDefinition.fixed[x] and pattern[x]: the value in the instance SHALL be the fixed value or follow the pattern, so a primitive that has only extensions (json.html#primitive), and no value, does not meet a fixed or pattern value that has one. HL7 6.10.4 checks no fixed or pattern value on such a primitive. Its extensions are extra to the fixed value, as they are when the value is there (fp_r01).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json",
+    "location": "Observation.status",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D12",
+    "reason": "ElementDefinition.fixed[x] and pattern[x]: the value in the instance SHALL be the fixed value or follow the pattern, so a primitive that has only extensions (json.html#primitive), and no value, does not meet a fixed or pattern value that has one. HL7 6.10.4 checks no fixed or pattern value on such a primitive.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r10_gender_ext_only.json",
+    "location": "Patient.gender",
+    "messageId": "FIXED_VALUE_MISSING"
+  },
+  {
+    "decision": "B-D11",
+    "reason": "ElementDefinition.pattern[x]: each element of a pattern array must match at least one element of the instance's array, so a name with more given names than the pattern meets it. HL7 6.10.4 requires as many items as the pattern has (Fixed_Type_Checks_DT_Name_Given).",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/fp_r24_pattern_given_ext_later.json",
+    "location": "Patient.name[0]",
+    "messageId": "Fixed_Type_Checks_DT_Name_Given"
+  },
+  {
+    "decision": "B-D12",
+    "reason": "ElementDefinition.fixed[x] and pattern[x]: the value in the instance SHALL be the fixed value or follow the pattern, so a primitive that has only extensions (json.html#primitive), and no value, does not meet a fixed or pattern value that has one. HL7 6.10.4 checks no fixed or pattern value on such a primitive.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r26_ext_type_slice_no_value.json",
+    "location": "Patient.extension[0].valueCode",
+    "messageId": "FIXED_VALUE_MISSING"
+  },
+  {
+    "decision": "B-D12",
+    "reason": "ElementDefinition.fixed[x] and pattern[x]: the value in the instance SHALL be the fixed value or follow the pattern, so a primitive that has only extensions (json.html#primitive), and no value, does not meet a fixed or pattern value that has one. HL7 6.10.4 checks no fixed or pattern value on such a primitive. Its extensions are extra to the fixed value, as they are when the value is there (fp_r01).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r26_ext_type_slice_no_value.json",
+    "location": "Patient.extension[0].valueCode",
+    "messageId": "FIXED_VALUE_EXTRA"
+  },
+  {
+    "decision": "B-D12",
+    "reason": "ElementDefinition.fixed[x] and pattern[x]: the value in the instance SHALL be the fixed value or follow the pattern, so a primitive that has only extensions (json.html#primitive), and no value, does not meet a fixed or pattern value that has one. HL7 6.10.4 checks no fixed or pattern value on such a primitive.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fp_r28_contained_no_value.json",
+    "location": "Observation.contained[0].gender",
+    "messageId": "FIXED_VALUE_MISSING"
   }
 ]

@@ -195,6 +195,34 @@ func (ed *ElementDefinition) GetPattern() (value json.RawMessage, typeSuffix str
 	return extractPrefixedValue(ed.raw, "pattern")
 }
 
+// GetFixedElement returns the "_" sibling of the fixed[x] value, its id and extensions when it is a
+// primitive (json.html#primitive), if the definition has one: "_fixedCode" for fixedCode, or, for a
+// fixed primitive with extensions and no value, the "_fixed" property alone.
+func (ed *ElementDefinition) GetFixedElement() (json.RawMessage, bool) {
+	return extractPrimitiveElement(ed.raw, "fixed")
+}
+
+// GetPatternElement returns the "_" sibling of the pattern[x] value, its id and extensions when it
+// is a primitive (json.html#primitive), if the definition has one, as GetFixedElement does.
+func (ed *ElementDefinition) GetPatternElement() (json.RawMessage, bool) {
+	return extractPrimitiveElement(ed.raw, "pattern")
+}
+
+// extractPrimitiveElement returns the "_" sibling of the property raw has whose name starts with
+// prefix: the one of that property's type, or, when raw has no such property, any.
+func extractPrimitiveElement(raw json.RawMessage, prefix string) (json.RawMessage, bool) {
+	if _, typeSuffix, ok := extractPrefixedValue(raw, prefix); ok {
+		var obj map[string]json.RawMessage
+		if err := json.Unmarshal(raw, &obj); err != nil {
+			return nil, false
+		}
+		value, ok := obj["_"+prefix+typeSuffix]
+		return value, ok
+	}
+	value, _, ok := extractPrefixedValue(raw, "_"+prefix)
+	return value, ok
+}
+
 // extractPrefixedValue finds a key with the given prefix in the raw JSON.
 // Used for polymorphic properties like fixed[x] and pattern[x].
 func extractPrefixedValue(raw json.RawMessage, prefix string) (json.RawMessage, string, bool) {

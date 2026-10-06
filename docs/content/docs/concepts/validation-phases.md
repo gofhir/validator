@@ -19,9 +19,9 @@ When you validate a resource, the following phases run in sequence:
 | 4 | Binding | `pkg/binding` | Terminology validation (ValueSet/CodeSystem) |
 | 5 | Extension | `pkg/extension` | Extension URL resolution, context validation |
 | 6 | Reference | `pkg/reference` | Reference format and type validation |
-| 7 | Constraint | `pkg/constraint` | FHIRPath invariant evaluation |
-| 8 | Fixed/Pattern | `pkg/fixedpattern` | `fixed[x]` and `pattern[x]` constraints |
-| 9 | Slicing | `pkg/slicing` | Slice discriminator matching and cardinality |
+| 7 | Constraint | `pkg/constraint` | FHIRPath invariants, and `fixed[x]` and `pattern[x]` values (`pkg/fixedpattern`) |
+| 8 | Slicing | `pkg/slicing` | Slice discriminator matching and cardinality |
+| 9 | UCUM | `pkg/ucumvalidator` | UCUM syntax of `Quantity.code` |
 
 Each phase receives the full resource tree and the resolved StructureDefinition, then produces zero or more **Issue** objects describing any violations found.
 
@@ -65,19 +65,21 @@ StructureDefinitions can declare FHIRPath invariants via `ElementDefinition.cons
 
 A constraint that two of these definitions share is evaluated once per value.
 
+The same walk checks each value against the `fixed[x]` and `pattern[x]` values of every definition that governs it (`pkg/fixedpattern`): a `fixed[x]` value must be matched exactly, a `pattern[x]` value as a subset. A primitive with only extensions is checked too. An issue is reported once per location, at the element that differs (see [Fixed/Pattern errors](../../error-reference/fixed-pattern)).
+
 A resource held in an element (`Bundle.entry.resource`, `contained`, `Parameters.parameter.resource`) is checked as a resource of its own, against the profiles its `meta.profile` declares or else its type's definition when none of them resolves. `%resource` is that resource; `%rootResource` is its container for a contained resource, and the resource itself otherwise.
 
 A constraint that does not hold, or whose evaluation fails, is reported at its own severity; an evaluation stopped by the validator's time limit is a warning. An expression that does not compile is an error, except in the specification's own definitions, where it is a warning.
 
-### 8. Fixed/Pattern
-
-When an ElementDefinition specifies a `fixed[x]` value, the resource element must match exactly. When it specifies a `pattern[x]` value, the resource element must contain at least the specified fields. This phase enforces both.
-
-### 9. Slicing
+### 8. Slicing
 
 FHIR arrays can be sliced into named groups using discriminators. This phase matches each array element to the correct slice based on discriminator values, then validates that each slice meets its own cardinality constraints.
 
 The slicing of an extension's own elements (its sub-extensions, a type-sliced `value[x]`) is checked against the definition its `url` names, as cardinality is.
+
+### 9. UCUM
+
+A `Quantity` whose `system` is UCUM must have a `code` that is valid UCUM syntax.
 
 ## Profile Validation Flow
 

@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "fp-qty",
+ "url": "https://example.org/fhir/StructureDefinition/fp-qty",
+ "version": "0.1.0",
+ "name": "fpqty",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity",
+    "path": "Quantity"
+   },
+   {
+    "id": "Quantity.system",
+    "path": "Quantity.system",
+    "fixedUri": "http://unitsofmeasure.org"
+   }
+  ]
+ }
+}

@@ -136,9 +136,15 @@ type end struct {
 	def      *registry.ElementNode
 	allowed  []registry.Type
 	value    any    // nil when the instance has no value at the path
+	present  bool   // the instance has the element with no value: a primitive with extensions only
 	typeCode string // the instance value's type
 	profiles []string
 	frames   []frame
+}
+
+// isPresent reports whether the instance has the element where the walk stopped.
+func (e end) isPresent() bool {
+	return e.value != nil || e.present
 }
 
 type walker struct {
@@ -150,22 +156,24 @@ type walker struct {
 type state struct {
 	branch   string
 	cur      cursor
-	value    any // nil: no instance value, walking the definition only
+	value    any  // nil: no instance value, walking the definition only
+	present  bool // with value nil: a primitive with only an id or extensions (json.html#primitive)
 	typeCode string
 	frames   []frame
 	resolved bool     // the last step was resolve()
 	targets  []string // targetProfile of the reference just resolved
 }
 
-// walk follows steps from start, for each of the start values.
-func (w walker) walk(start cursor, values []any, steps []step) ([]end, error) {
+// walk follows steps from start, for each of the start values; valueless reports a start value
+// that is a primitive with only an id or extensions, there with no value.
+func (w walker) walk(start cursor, values []any, valueless bool, steps []step) ([]end, error) {
 	var states []state
 	for _, v := range values {
 		tc := start.typeCode
 		if tc == "" {
 			tc = singleTypeCode(start.allowed(), v)
 		}
-		states = append(states, state{cur: start, value: v, typeCode: tc})
+		states = append(states, state{cur: start, value: v, present: valueless && v == nil, typeCode: tc})
 	}
 	for _, s := range steps {
 		next, err := w.advance(states, s)
@@ -176,7 +184,7 @@ func (w walker) walk(start cursor, values []any, steps []step) ([]end, error) {
 	}
 	ends := make([]end, 0, len(states))
 	for _, st := range states {
-		e := end{branch: st.branch, def: st.cur.node, allowed: st.cur.allowed(), value: st.value, typeCode: st.typeCode, frames: st.frames}
+		e := end{branch: st.branch, def: st.cur.node, allowed: st.cur.allowed(), value: st.value, present: st.present, typeCode: st.typeCode, frames: st.frames}
 		if st.resolved {
 			e.profiles = st.targets
 		} else {
@@ -205,7 +213,7 @@ func (w walker) advance(states []state, s step) ([]state, error) {
 			continue
 		}
 		for _, n := range next {
-			if n.value == nil {
+			if n.value == nil && !n.present {
 				if _, seen := defOnly[n.branch]; !seen {
 					defOnly[n.branch] = n
 					order = append(order, n.branch)
@@ -295,9 +303,16 @@ func (w walker) nameIn(st state, sd *registry.StructureDefinition, children []*r
 	obj, _ := st.value.(map[string]any)
 	var out []state
 	emit := func(key string, types []registry.Type) {
-		for _, v := range items(obj, key) {
+		// A primitive is there with a value, or with only an id or extensions in its "_key"
+		// sibling, item by item for a repeating one (json.html#primitive).
+		values, elements := items(obj, key), items(obj, "_"+key)
+		for i := range max(len(values), len(elements)) {
+			v, el := itemAt(values, i), itemAt(elements, i)
+			if v == nil && el == nil {
+				continue
+			}
 			out = append(out, state{branch: st.branch, cur: cursor{sd: sd, node: child, key: key, types: types},
-				value: v, typeCode: singleTypeCode(types, v), frames: frames})
+				value: v, present: v == nil, typeCode: singleTypeCode(types, v), frames: frames})
 		}
 	}
 	if choice {
@@ -421,7 +436,7 @@ func ofType(st state, t string) []state {
 	if cur.types == nil {
 		cur.types = []registry.Type{}
 	}
-	if st.value != nil && st.typeCode != t {
+	if (st.value != nil || st.present) && st.typeCode != t {
 		return []state{{branch: st.branch, cur: cur, frames: st.frames}}
 	}
 	st.cur = cur
@@ -441,6 +456,14 @@ func items(obj map[string]any, key string) []any {
 	default:
 		return []any{v}
 	}
+}
+
+// itemAt is the item of list at i, nil past its end.
+func itemAt(list []any, i int) any {
+	if i < len(list) {
+		return list[i]
+	}
+	return nil
 }
 
 // singleTypeCode returns the type of an instance value: the resourceType of a resource, else the

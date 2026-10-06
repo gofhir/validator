@@ -38,16 +38,15 @@ type Validator struct {
 	config       *Config
 
 	// Phase validators (reused across validations for caching)
-	structValidator       *structural.Validator
-	cardValidator         *cardinality.Validator
-	primValidator         *primitive.Validator
-	bindValidator         *binding.Validator
-	extValidator          *extension.Validator
-	refValidator          *reference.Validator
-	constraintValidator   *constraint.Validator
-	fixedPatternValidator *fixedpattern.Validator
-	slicingValidator      *slicing.Validator
-	ucumValidator         *ucumvalidator.Validator
+	structValidator     *structural.Validator
+	cardValidator       *cardinality.Validator
+	primValidator       *primitive.Validator
+	bindValidator       *binding.Validator
+	extValidator        *extension.Validator
+	refValidator        *reference.Validator
+	constraintValidator *constraint.Validator
+	slicingValidator    *slicing.Validator
+	ucumValidator       *ucumvalidator.Validator
 }
 
 // PackageSpec represents an additional FHIR package to load.
@@ -577,11 +576,12 @@ func New(opts ...Option) (*Validator, error) {
 		slicematch.WithConformer(conformer{v: v}),
 		slicematch.WithMemberChecker(memberChecker{v: v}),
 	)
+	// The constraint phase's walk checks each value against every definition that governs it: its
+	// invariants, and its fixed and pattern values (plan B, B3).
 	v.constraintValidator = constraint.New(reg, constraintTermReg, constraint.WithMatcher(matcher),
-		constraint.WithDefinitions(v.extValidator))
+		constraint.WithDefinitions(v.extValidator), constraint.WithValueChecker(fixedpattern.NewChecker()))
 	// An extension's context invariants are evaluated as the profiles' invariants are.
 	v.extValidator.SetFHIRPathEvaluator(contextScopes{v.constraintValidator})
-	v.fixedPatternValidator = fixedpattern.New(reg)
 	v.slicingValidator = slicing.NewWithMatcher(reg, matcher, slicing.WithDefinitions(v.extValidator))
 
 	v.ucumValidator = initUCUMValidator(reg)
@@ -845,11 +845,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
 	result.Stats.PhasesRun++
 
-	// Phase 8: Fixed/Pattern value validation
-	v.fixedPatternValidator.ValidateData(data, sd, result)
-	result.Stats.PhasesRun++
-
-	// Phase 9: Slicing validation
+	// Phase 8: Slicing validation
 	sliceOpts := slicing.Options{Resolver: referenceResolver{}, Containment: constraint.IsContainedIn}
 	if vs != nil {
 		sliceOpts.Scope = &vs.scope
@@ -857,7 +853,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	v.slicingValidator.ValidateDataContext(ctx, data, sd, sliceOpts, result)
 	result.Stats.PhasesRun++
 
-	// Phase 10: UCUM validation (Quantity.code syntax)
+	// Phase 9: UCUM validation (Quantity.code syntax)
 	if v.ucumValidator != nil {
 		v.ucumValidator.ValidateData(data, sd, result)
 	}

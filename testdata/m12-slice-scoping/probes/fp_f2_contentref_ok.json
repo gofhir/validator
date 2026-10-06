@@ -1,0 +1,1 @@
+{"resourceType": "Questionnaire", "id": "q", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "meta": {"profile": ["https://example.org/fhir/StructureDefinition/fp-q"]}, "status": "active", "item": [{"linkId": "1", "type": "group", "prefix": "P", "item": [{"linkId": "1.1", "type": "string", "prefix": "P"}]}]}

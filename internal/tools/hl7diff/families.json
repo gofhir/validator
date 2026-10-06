@@ -268,6 +268,49 @@
       ]
     },
     {
+      "name": "fixed-value",
+      "rule": "equal",
+      "gofhir": [
+        "FIXED_VALUE_MISMATCH"
+      ],
+      "hl7": [
+        "_DT_Fixed_Wrong"
+      ]
+    },
+    {
+      "name": "fixed-value-missing",
+      "rule": "equal",
+      "gofhir": [
+        "FIXED_VALUE_MISSING"
+      ],
+      "hl7": [
+        "Profile_VAL_MissingElement",
+        "Extension_EXT_Count_Mismatch"
+      ]
+    },
+    {
+      "name": "fixed-value-extra",
+      "rule": "equal",
+      "gofhir": [
+        "FIXED_VALUE_EXTRA"
+      ],
+      "hl7": [
+        "Extension_EXT_Fixed_Banned"
+      ]
+    },
+    {
+      "name": "pattern-item",
+      "rule": "equal",
+      "gofhir": [
+        "PATTERN_ITEM_UNMATCHED"
+      ],
+      "hl7": [
+        "TYPE_CHECKS_PATTERN_CC",
+        "Terminology_TX_Coding_Count",
+        "Fixed_Type_Checks_DT_Name_Given"
+      ]
+    },
+    {
       "name": "extension-context",
       "rule": "equal",
       "gofhir": [

@@ -86,6 +86,20 @@ type Validator struct {
 
 	// definitions names the definition a value declares for itself.
 	definitions DefinitionSource
+
+	// values checks a value against each definition the walk finds governing it, besides its
+	// invariants: its fixed and pattern values.
+	values ValueChecker
+}
+
+// ValueChecker checks a value against an element definition. Implemented by fixedpattern.Checker.
+type ValueChecker interface {
+	// Governs reports whether def has anything a value is checked against.
+	Governs(def *registry.ElementDefinition) bool
+	// CheckValue reports each issue through report with its diagnostic, parameters and location.
+	// Its raw argument is the value's JSON as the resource writes it (nil for a primitive that has
+	// only extensions), and element a primitive's "_x" sibling (nil for none).
+	CheckValue(def *registry.ElementDefinition, raw, element json.RawMessage, fhirPath string, report func(issue.DiagnosticID, map[string]any, string))
 }
 
 // DefinitionSource names the definition a value declares for itself, which governs the value
@@ -107,6 +121,10 @@ func WithMatcher(m *slicematch.Matcher) Option { return func(v *Validator) { v.m
 // WithDefinitions sets the source of the definitions values declare for themselves. Without it, a
 // value is checked against the definitions of the element that holds it only.
 func WithDefinitions(d DefinitionSource) Option { return func(v *Validator) { v.definitions = d } }
+
+// WithValueChecker checks every value the walk reaches against each definition that governs it, as
+// the invariants are (ValueChecker).
+func WithValueChecker(c ValueChecker) Option { return func(v *Validator) { v.values = c } }
 
 // New creates a new constraint Validator.
 // The termRegistry may be nil to disable memberOf() support (e.g., when -tx n/a is set).
@@ -130,6 +148,13 @@ func New(reg *registry.Registry, termReg *terminology.Registry, opts ...Option) 
 func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, sd *registry.StructureDefinition, opts *ValidateOptions, result *issue.Result) {
 	if sd == nil || sd.Snapshot == nil {
 		return
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if !hasReportScope(ctx) {
+		// The definitions that govern one value report an issue once, however the caller scopes it.
+		ctx = WithReportScope(ctx)
 	}
 	var resource map[string]any
 	if opts != nil && opts.Data != nil {
@@ -158,7 +183,7 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	}
 	evalOpts.resolver = resolverWithin(evalOpts.resolver, evalOpts.scope.RootResource, nil)
 
-	v.walk(sd, root, "", resource, resourceData, sd.RootName(resource), evalOpts, result)
+	v.walk(sd, root, "", resource, resourceData, nil, sd.RootName(resource), evalOpts, result)
 }
 
 // buildEvalOpts constructs constraintEvalOpts from the validator state and per-call options.

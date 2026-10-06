@@ -19,9 +19,9 @@ Cuando validas un recurso, las siguientes fases se ejecutan en secuencia:
 | 4 | Binding | `pkg/binding` | Validación de terminología (ValueSet/CodeSystem) |
 | 5 | Extension | `pkg/extension` | Resolución de URL de extensiones, validación de contexto |
 | 6 | Reference | `pkg/reference` | Formato de referencias y validación de tipos |
-| 7 | Constraint | `pkg/constraint` | Evaluación de invariantes FHIRPath |
-| 8 | Fixed/Pattern | `pkg/fixedpattern` | Restricciones `fixed[x]` y `pattern[x]` |
-| 9 | Slicing | `pkg/slicing` | Coincidencia de discriminadores de slices y cardinalidad |
+| 7 | Constraint | `pkg/constraint` | Invariantes FHIRPath, y valores `fixed[x]` y `pattern[x]` (`pkg/fixedpattern`) |
+| 8 | Slicing | `pkg/slicing` | Coincidencia de discriminadores de slices y cardinalidad |
+| 9 | UCUM | `pkg/ucumvalidator` | Sintaxis UCUM de `Quantity.code` |
 
 Cada fase recibe el árbol completo del recurso y el StructureDefinition resuelto, y luego produce cero o más objetos **Issue** describiendo cualquier violación encontrada.
 
@@ -65,19 +65,21 @@ Los StructureDefinitions pueden declarar invariantes FHIRPath mediante `ElementD
 
 Un constraint que comparten dos de estas definiciones se evalúa una vez por valor.
 
+El mismo recorrido verifica cada valor contra los valores `fixed[x]` y `pattern[x]` de cada definición que lo rige (`pkg/fixedpattern`): un valor `fixed[x]` debe coincidir exactamente, y un `pattern[x]` como subconjunto. También se verifica un primitivo que solo tiene extensions. Cada issue se reporta una vez por ubicación, en el elemento que difiere (ver [Errores de Fixed/Pattern](../../error-reference/fixed-pattern)).
+
 Un recurso contenido en un elemento (`Bundle.entry.resource`, `contained`, `Parameters.parameter.resource`) se verifica como un recurso propio, contra los perfiles que declara su `meta.profile` o, si no declara ninguno que se resuelva, contra la definición de su tipo. `%resource` es ese recurso; `%rootResource` es su contenedor en un recurso de `contained`, y el recurso mismo en los demás casos.
 
 Un constraint que no se cumple, o cuya evaluación falla, se reporta con su propia severidad; una evaluación que detiene el límite de tiempo del validador es un warning. Una expresión que no compila es un error, salvo en las definiciones de la propia especificación, donde es un warning.
 
-### 8. Fixed/Pattern
-
-Cuando un ElementDefinition especifica un valor `fixed[x]`, el elemento del recurso debe coincidir exactamente. Cuando especifica un valor `pattern[x]`, el elemento del recurso debe contener al menos los campos especificados. Esta fase aplica ambos.
-
-### 9. Slicing
+### 8. Slicing
 
 Los arrays de FHIR pueden dividirse en grupos nombrados usando discriminadores. Esta fase asocia cada elemento del array con el slice correcto basándose en los valores del discriminador, y luego valida que cada slice cumpla con sus propias restricciones de cardinalidad.
 
 El slicing de los elementos propios de una extensión (sus sub-extensiones, un `value[x]` con slicing por tipo) se verifica contra la definición que nombra su `url`, igual que la cardinalidad.
+
+### 9. UCUM
+
+Un `Quantity` cuyo `system` es UCUM debe tener un `code` con sintaxis UCUM válida.
 
 ## Flujo de Validación de Perfiles
 

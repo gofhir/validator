@@ -161,6 +161,19 @@ const (
 	// DiagProfileDifferentialIgnored: an element of a profile's differential names nothing its base
 	// has, so its snapshot leaves it out.
 	DiagProfileDifferentialIgnored DiagnosticID = "PROFILE_DIFFERENTIAL_IGNORED"
+
+	// Fixed and pattern values (ElementDefinition.fixed[x], pattern[x]), reported at the element of
+	// the value that differs.
+	//
+	// DiagFixedValueMismatch: a primitive differs from the fixed or pattern value's.
+	DiagFixedValueMismatch DiagnosticID = "FIXED_VALUE_MISMATCH"
+	// DiagFixedValueMissing: an element the fixed or pattern value has is missing.
+	DiagFixedValueMissing DiagnosticID = "FIXED_VALUE_MISSING"
+	// DiagFixedValueExtra: an element a fixed value does not have is present ("missing
+	// elements/attributes must also be missing").
+	DiagFixedValueExtra DiagnosticID = "FIXED_VALUE_EXTRA"
+	// DiagPatternItemUnmatched: an item of a pattern's array matches no item of the value's.
+	DiagPatternItemUnmatched DiagnosticID = "PATTERN_ITEM_UNMATCHED"
 )
 
 // DiagnosticTemplate defines the structure for a diagnostic message.
@@ -481,6 +494,26 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeProcessing,
 		Template: "Profile '{url}': {detail}",
+	},
+	DiagFixedValueMismatch: {
+		Severity: SeverityError,
+		Code:     CodeValue,
+		Template: "Value is {actual}, but the profile requires {expected}",
+	},
+	DiagFixedValueMissing: {
+		Severity: SeverityError,
+		Code:     CodeRequired,
+		Template: "Missing element '{element}', which the profile requires to be {expected}",
+	},
+	DiagFixedValueExtra: {
+		Severity: SeverityError,
+		Code:     CodeValue,
+		Template: "Element '{element}' is present, but the fixed value the profile requires has none",
+	},
+	DiagPatternItemUnmatched: {
+		Severity: SeverityError,
+		Code:     CodeValue,
+		Template: "No item of '{element}' matches {pattern}, which the profile's pattern requires",
 	},
 	DiagTypeProfileNotFound: {
 		Severity: SeverityError,

@@ -129,6 +129,10 @@ type Request struct {
 	Key string
 	// Value is the instance, one item of the element.
 	Value any
+	// Valueless reports a primitive present only through its "_key" sibling, with an id or
+	// extensions and no value (json.html#primitive): it is there, of the type its key names, with
+	// Value nil. A JSON null is no value and not this.
+	Valueless bool
 	// Scope holds the resources the value sits in.
 	Scope Scope
 	// Resolver follows references for resolve(); it depends on the resource being validated.
@@ -223,7 +227,7 @@ func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *
 
 	start := cursor{sd: req.SD, node: slice, key: req.Key, typeCode: m.keyType(req.Node, req.Key)}
 	w := walker{m: m, resolver: req.Resolver, scope: req.Scope}
-	ends, err := w.walk(start, []any{req.Value}, steps)
+	ends, err := w.walk(start, []any{req.Value}, req.Valueless, steps)
 	if err != nil {
 		return cannot("%s: %v", slice.Def.ID, err)
 	}
@@ -247,7 +251,7 @@ func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *
 // decide evaluates one discriminator on one alternative. A slice that prohibits the element at the
 // path (max 0) requires it to be absent, whatever the discriminator type.
 func (m *Matcher) decide(ctx context.Context, req Request, slice *registry.ElementNode, group []end, d registry.Discriminator) verdict {
-	present := len(instanceValues(group)) > 0
+	present := anyPresent(group)
 	for _, e := range group {
 		if e.def != nil && e.def.Def.Max == "0" {
 			return verdict{ok: !present, constrained: true}
@@ -366,7 +370,7 @@ func satisfiesAll(actual []json.RawMessage, expect []expectation) bool {
 // evaluated, as the HL7 validator reports: the discriminator is based on element existence, but
 // the slice neither sets min>=1 nor max=0.
 func existsMatches(slice *registry.ElementNode, ends []end) verdict {
-	present := len(instanceValues(ends)) > 0
+	present := anyPresent(ends)
 	for _, e := range ends {
 		if e.def != nil && e.def.Def.Min > 0 {
 			return verdict{ok: present, constrained: true}
@@ -381,7 +385,7 @@ func existsMatches(slice *registry.ElementNode, ends []end) verdict {
 func (m *Matcher) typeMatches(ends []end) bool {
 	seen := false
 	for _, e := range ends {
-		if e.value == nil {
+		if !e.isPresent() {
 			continue
 		}
 		seen = true
@@ -484,6 +488,16 @@ func (m *Matcher) keyType(node *registry.ElementNode, key string) string {
 
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
 const resourceTypeKey = "resourceType"
+
+// anyPresent reports whether the instance has an element where any of ends stopped.
+func anyPresent(ends []end) bool {
+	for _, e := range ends {
+		if e.isPresent() {
+			return true
+		}
+	}
+	return false
+}
 
 // instanceValues returns the instance values reached by a walk, as JSON.
 func instanceValues(ends []end) []json.RawMessage {

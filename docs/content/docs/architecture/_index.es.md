@@ -61,9 +61,9 @@ Ejecucion de fases (9 fases se ejecutan secuencialmente)
   │  ├─ 4. Binding
   │  ├─ 5. Extension
   │  ├─ 6. Reference
-  │  ├─ 7. Constraint
-  │  ├─ 8. Fixed/Pattern
-  │  └─ 9. Slicing
+  │  ├─ 7. Constraint (con fixed/pattern)
+  │  ├─ 8. Slicing
+  │  └─ 9. UCUM
   │
   ▼
 Agregacion de resultados (fusionar issues → OperationOutcome)

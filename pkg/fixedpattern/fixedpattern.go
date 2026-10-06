@@ -11,7 +11,12 @@ import (
 	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
-// Validator validates fixed[x] and pattern[x] constraints.
+// Validator validates fixed[x] and pattern[x] constraints by element path.
+//
+// Deprecated: it checks the resource's own definition only, by path: no slice, no type profile,
+// no extension definition, no nested resource but contained ones. The validator checks the
+// fixed and pattern values with Checker, on every definition that governs a value
+// (constraint.WithValueChecker).
 type Validator struct {
 	registry *registry.Registry
 }
