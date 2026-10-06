@@ -116,6 +116,11 @@
       "files": ["testdata/m12-slice-scoping/probes/ci_*.json"]
     },
     {
+      "name": "fixedpattern-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.fixedpattern-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/fp_*.json"]
+    },
+    {
       "name": "r5-probes",
       "version": "5.0.0",
       "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json", "testdata/m12-slice-scoping/probes/e*_*.json"]

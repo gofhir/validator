@@ -52,7 +52,6 @@ type Orchestrator struct {
     extension   *extension.Validator
     reference   *reference.Validator
     constraint  *constraint.Validator
-    fixedpattern *fixedpattern.Validator
     slicing     *slicing.Validator
 }
 ```

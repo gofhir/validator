@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p", "meta": {"profile": ["https://example.org/fhir/rv/StructureDefinition/rv-name"]}, "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "name": [{"given": ["A"], "_given": [{"extension": [{"url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason", "valueCode": "masked"}]}]}]}

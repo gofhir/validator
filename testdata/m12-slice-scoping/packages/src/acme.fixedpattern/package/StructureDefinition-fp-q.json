@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "fp-q",
+ "url": "https://example.org/fhir/StructureDefinition/fp-q",
+ "version": "0.1.0",
+ "name": "fpq",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Questionnaire",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Questionnaire",
+    "path": "Questionnaire"
+   },
+   {
+    "id": "Questionnaire.item.prefix",
+    "path": "Questionnaire.item.prefix",
+    "fixedString": "P"
+   }
+  ]
+ }
+}

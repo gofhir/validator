@@ -61,9 +61,9 @@ Phase execution (9 phases run sequentially)
   │  ├─ 4. Binding
   │  ├─ 5. Extension
   │  ├─ 6. Reference
-  │  ├─ 7. Constraint
-  │  ├─ 8. Fixed/Pattern
-  │  └─ 9. Slicing
+  │  ├─ 7. Constraint (with fixed/pattern)
+  │  ├─ 8. Slicing
+  │  └─ 9. UCUM
   │
   ▼
 Result aggregation (merge issues → OperationOutcome)

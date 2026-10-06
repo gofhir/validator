@@ -3,6 +3,7 @@ package constraint
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/gofhir/fhirpath"
@@ -48,11 +49,11 @@ const maxContentReferenceHops = 8
 // The walk checks one value of node, held at fhirPath, and recurses into its children. The node is
 // the most specific definition of the value: the slice it belongs to, or the element. The value's
 // type is typeCode (a choice element's type, or its only type).
-func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
 	seen := map[string]bool{}
 	base := node
 	for n := node; n != nil; n = n.SliceOf {
-		v.evaluate(n, choiceElementPath(n.Def.Path, typeCode), value, &raw, fhirPath, seen, opts, result)
+		v.layer(n, choiceElementPath(n.Def.Path, typeCode), value, &raw, element, fhirPath, seen, opts, result)
 		base = n
 	}
 
@@ -62,19 +63,19 @@ func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.Elemen
 		if target == nil {
 			break
 		}
-		v.evaluate(target, target.Def.Path, value, &raw, fhirPath, seen, opts, result)
+		v.layer(target, target.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
 		layerSD, layer, hops = tsd, target, hops+1
 	}
 
 	self := v.selfDefinition(opts.ctx, layer, typeCode, value)
 	typeSD, typeRoot := v.typeLayer(opts.ctx, node, layer, typeCode, self)
 	if typeRoot != nil && typeSD.Kind != kindPrimitive {
-		v.evaluate(typeRoot, typeRoot.Def.Path, value, &raw, fhirPath, seen, opts, result)
+		v.layer(typeRoot, typeRoot.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
 	}
 	if self != nil && self != typeSD {
 		// The slice's profile governs the value, and so does the definition it declares itself.
 		if root := self.Tree().Root(); root != nil {
-			v.evaluate(root, root.Def.Path, value, &raw, fhirPath, seen, opts, result)
+			v.layer(root, root.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
 		}
 	}
 
@@ -104,11 +105,11 @@ func governedChildren(node *registry.ElementNode) []*registry.ElementNode {
 // governing is the most specific definition of one value of node: the slice slice matching assigns
 // it to, or node itself when node is not sliced or the value is in none of its slices.
 func (v *Validator) governing(sd *registry.StructureDefinition, node *registry.ElementNode, cv elementvalues.Value, opts *constraintEvalOpts) *registry.ElementNode {
-	if node.Def.Slicing == nil || len(node.Slices) == 0 || cv.Value == nil {
+	if node.Def.Slicing == nil || len(node.Slices) == 0 {
 		return node
 	}
 	m := v.matcher.Resolve(opts.ctx, slicematch.Request{
-		SD: sd, Node: node, Key: cv.Key, Value: cv.Value,
+		SD: sd, Node: node, Key: cv.Key, Value: cv.Value, Valueless: cv.Value == nil && cv.Ext != nil,
 		Scope: opts.scope, Resolver: opts.sliceResolver, Containment: opts.containment,
 	})
 	if m.Matched {
@@ -144,7 +145,9 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 			}
 			node := v.governing(sd, child, cv, opts)
 			if cv.Value != nil {
-				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, path, opts, result)
+				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, extRaw, path, opts, result)
+			} else if extRaw != nil {
+				v.checkValueless(sd, node, extRaw, path, opts, result)
 			}
 			if cv.Ext != nil {
 				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, extRaw, path, opts, result)
@@ -232,7 +235,7 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 
 	for _, sd := range v.nestedDefinitions(opts.ctx, res) {
 		if root := sd.Tree().Root(); root != nil {
-			v.walk(sd, root, "", res, raw, fhirPath, &opts, result)
+			v.walk(sd, root, "", res, raw, nil, fhirPath, &opts, result)
 		}
 	}
 }
@@ -359,6 +362,62 @@ func (v *Validator) evaluate(def *registry.ElementNode, defPath string, value an
 		*raw = b
 	}
 	v.evaluateConstraintsWithCtx(*raw, pending, fhirPath, defPath, opts, result)
+}
+
+// layer checks value, at fhirPath, against def, one of the definitions that govern it: its
+// invariants, and what the ValueChecker checks (its fixed and pattern values), element being a
+// primitive's "_x" sibling. An issue is reported once per location, however many definitions or
+// profiles find it.
+func (v *Validator) layer(def *registry.ElementNode, defPath string, value any, raw *json.RawMessage, element json.RawMessage, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
+	v.evaluate(def, defPath, value, raw, fhirPath, seen, opts, result)
+	if v.values == nil || !v.values.Governs(def.Def) {
+		return
+	}
+	if *raw == nil {
+		b, err := json.Marshal(value)
+		if err != nil {
+			return
+		}
+		*raw = b
+	}
+	v.checkValue(def, *raw, element, fhirPath, opts, result)
+}
+
+// checkValue checks a value at fhirPath, raw with its "_x" sibling element, against def's fixed
+// and pattern values. An issue is reported once per location.
+func (v *Validator) checkValue(def *registry.ElementNode, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	if v.values == nil || !v.values.Governs(def.Def) {
+		return
+	}
+	v.values.CheckValue(def.Def, raw, element, fhirPath, func(id issue.DiagnosticID, params map[string]any, at string) {
+		if firstReportKey(opts.ctx, at+"\x00"+string(id)+"\x00"+fmt.Sprint(params)) {
+			result.AddErrorWithID(id, params, at)
+		}
+	})
+}
+
+// checkValueless checks a primitive that has extensions and no value (json.html#primitive), at
+// fhirPath with its "_x" sibling element, against the fixed and pattern values of the definitions
+// that govern it, as walk layers them: node, the slices it reslices, and the elements a
+// contentReference points to. A primitive type's definition has none.
+func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	if v.values == nil {
+		return
+	}
+	base := node
+	for n := node; n != nil; n = n.SliceOf {
+		v.checkValue(n, nil, element, fhirPath, opts, result)
+		base = n
+	}
+	layerSD, layer := sd, base
+	for hops := 0; layer.Def.ContentReference != nil && hops < maxContentReferenceHops; hops++ {
+		target, tsd := v.contentTarget(layerSD, layer)
+		if target == nil {
+			break
+		}
+		v.checkValue(target, nil, element, fhirPath, opts, result)
+		layerSD, layer = tsd, target
+	}
 }
 
 // choiceElementPath renders the concrete path of a choice element for the type a value has:

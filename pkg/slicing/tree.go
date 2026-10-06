@@ -247,7 +247,7 @@ func (v *Validator) checkMember(ctx context.Context, sd *registry.StructureDefin
 // and unknown ValueSet membership (D-6).
 func (v *Validator) matchValue(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) *registry.ElementNode {
 	m := v.matcher.Resolve(run.ctx, slicematch.Request{
-		SD: sd, Node: node, Key: cv.Key, Value: cv.Value, Scope: scope,
+		SD: sd, Node: node, Key: cv.Key, Value: cv.Value, Valueless: cv.Value == nil && cv.Ext != nil, Scope: scope,
 		Resolver: run.opts.Resolver, Containment: run.opts.Containment,
 	})
 	for _, n := range m.Notes {

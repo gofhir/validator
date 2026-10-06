@@ -76,6 +76,10 @@ specification, gofhir follows the specification, and the divergence is declared 
 | B-D6 | Which packages and versions a guide's canonicals resolve against | Loads the guide's dependencies, transitively, in the versions declared, several versions of a package side by side (`hl7.terminology.r4` 5.0.0 and 7.4.0); an unversioned canonical resolves to the latest version loaded, a pinned one exactly (DEQM `cqf-inputParameters|5.2.0`) | references.html#canonical: without a version, "should pick the latest version"; with one, that version. The NPM package specification declares `dependencies` and the package `type` (`fhir.core`) | Load the dependencies, transitively, from the cache (the CLI downloads the missing ones; the library reports them). Several versions coexist. Unversioned: the latest among the definitions written for the FHIR version validated (then its release, then any), so an R5 flavor does not replace the R4 one (for R4B, the R4 extensions package, written for 4.0.1, ranks below the R4B core's definitions of the same URLs); a definition is used whole, its extension contexts included (`event-location` 5.3.0 is not allowed on `Media`, which R4 core's 4.0.1 allowed: HL7 6.10.4 reports it too, and the contexts are no longer merged across versions); a semver version is above one that is not (the core package's `v3-ActCode` is `2018-08-12`). **Errata** (`loader.Publishers`, R4 and R4B): the core and examples packages' copies of definitions under another loaded package's canonical (not their own) (terminology.hl7.org: `consentpolicycodes` `4.0.1` in core, `3.0.1` in THO) rank below that package's, as in the HL7 validator ("special case logic for UTG support prior to version 5"). One core package, the FHIR version validated's: another version's is reported and not loaded. A CodeSystem that does not include all its codes (content `not-present`, `fragment`, `example`) cannot reject a code: `not-present` is reported as information (HL7 `TERMINOLOGY_TX_SYSTEM_NOT_USABLE`), the others as a warning, and a ValueSet including the whole system accepts the code unchecked (THO's CDCREC is `not-present`). |
 | B-D7 | Extension context naming a sub-extension (`url#code`, `url|version#code`) | Never matches it: compares the expression with the sub-extension's relative url | structuredefinition.html (R5) defines `#` followed by the code of a sub-extension within a complex extension | Match the sub-extension of the extension the url names, whatever version it pins. Not declared: `hl7diff` compares the errors gofhir reports (`ue_t11_sub`, `ue_t11b_subsub`). |
 | B-D8 | Element context `MetadataResource` on an R5 resource whose definition declares it (ValueSet, `structuredefinition-implements`) | Rejects it | A resource is named by the interfaces its type implements, which R5's definitions declare | Match the interfaces the definitions declare. **Declared divergence** (`ui5_vs_x5-meta`). |
+| B-D9 | A fixed or pattern value on an element a contentReference points to (`Questionnaire.item.prefix` fixed, on `item.item`) | Not applied to the referring element | ElementDefinition.contentReference: "an element defined elsewhere in the definition whose content rules should be applied to the current element" | Apply the referenced element of the same definition. **Declared divergence** (`fp_f1_contentref_bad`). |
+| B-D10 | A complex fixed value whose instance has an element the fixed value does not (`fixedCodeableConcept` with an extra `text`, `coding` or `id`) | Accepts it; reports an extension (`Extension_EXT_Fixed_Banned`), at the array without the item's index | ElementDefinition.fixed[x]: "Missing elements/attributes must also be missing" | Report the extra element (`FIXED_VALUE_EXTRA`), an extension at the item that holds it, a primitive's id or extension at the primitive. **Declared divergence** (`fp_i1`, `fp_i5`, `fp_r03`, `fp_r14`; `fp_r04`, `fp_r20`, `fp_r21` for the location). |
+| B-D11 | A pattern array two of whose items one instance item meets (`patternCodeableConcept` with two codings both met by one) | Reports the count (`Terminology_TX_Coding_Count`, "Expected 2 but found 1"; `Fixed_Type_Checks_DT_Name_Given` for given names) | ElementDefinition.pattern[x]: each element of the pattern array "must (recursively) match at least one element from the instance array" | Accept it. **Declared divergence** (`fp_r00`, `fp_r08`, `fp_r24`). |
+| B-D12 | A primitive with extensions and no value (`"_status": {"extension": [...]}`) where the profile has a fixed or pattern value | Checks no fixed or pattern value (reports only the required binding) | ElementDefinition.fixed[x]: the value "SHALL be exactly the value for this element in the instance"; pattern[x]: "the value in the instance SHALL follow" | Report the missing value (`FIXED_VALUE_MISSING`, element `value`) and, for a fixed value, its extensions (`FIXED_VALUE_EXTRA`). **Declared divergence** (`fp_r02`, `fp_r10`, `fp_r26` through a type slice of an extension's `value[x]`, `fp_r28` in a contained resource). |
 
 ## Design: definition layering
 
@@ -170,7 +174,73 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 
 **PR B3: `fixedpattern` on layers** (D3)
 
-- Acceptance: P3 reports the fixed-value violation; P5 stays clean.
+- **Evidence (2026-10-06).** P3 no longer shows the defect: HL7 6.10.4 cannot evaluate the slicing
+  that holds `cehrt` (its cross-version extension `supplementalData` does not resolve) and reports
+  no fixed value. New probes (`acme.fixedpattern`, `fp_*`), against HL7 6.10.4:
+
+  | Probe | Layer | HL7 6.10.4 | gofhir 2.0.1 |
+  | --- | --- | --- | --- |
+  | `a1` | a slice's fixed `system` (`identifier:mrn`) | `_DT_Fixed_Wrong` at `identifier[0].system` | accepted |
+  | `b1` | the profile `valueQuantity`'s type declares (fixed `system`) | `_DT_Fixed_Wrong` | accepted |
+  | `c1`, `d1` | a Bundle entry's and a contained resource's `meta.profile` | `_DT_Fixed_Wrong` | accepted |
+  | `e1` | the extension definition its url names (pattern on `value[x]`) | `_DT_Fixed_Wrong` at `.system` | accepted |
+  | `g1` | a `component` slice's fixed `unit` | `_DT_Fixed_Wrong` | accepted |
+  | `h1` | a pattern's element missing (`Coding` with no `system`) | `Profile_VAL_MissingElement` at `.system` | accepted |
+  | `i2` | a pattern array no item matches (`category.coding`) | `TYPE_CHECKS_PATTERN_CC` at `category[0]` | accepted |
+  | `i3` | a fixed decimal with another precision (`fixedDecimal 1.50`, value `1.5`) | `_DT_Fixed_Wrong` (precision counts, datatypes.html#decimal) | accepted |
+
+  The phase indexes the snapshot by path and skips every element whose id has `:`, so it checks no
+  slice, no type profile, no extension definition, and no resource but the root and its contained
+  ones, the latter against the base definition.
+- **Design.** The fixed and pattern values are checked in the constraint phase's walk (B2), on the
+  same layers as the invariants: the slice slice matching assigns, the contentReference target, the
+  type profile, the definition an extension's url names, nested resources with their profiles. Each
+  value is compared as the JSON writes it (C-1's spans), so a decimal keeps its precision. The
+  comparison descends into the fixed or pattern value and reports at the element that differs, as
+  HL7 does: a primitive that differs (`FIXED_VALUE_MISMATCH`, HL7 `_DT_Fixed_Wrong`), an element
+  missing (`FIXED_VALUE_MISSING`, `Profile_VAL_MissingElement`), an element a fixed value does not
+  have, a fixed primitive's id and extensions included, item by item for a repeating primitive
+  (`FIXED_VALUE_EXTRA`, HL7 `Extension_EXT_Fixed_Banned` for an extension, B-D10), an extension a
+  fixed or pattern primitive has (its `_x`, as `_fixedCode` or `_code` within a value) missing
+  (`FIXED_VALUE_MISSING`, HL7 `Extension_EXT_Count_Mismatch`), a pattern array item no instance item
+  matches (`PATTERN_ITEM_UNMATCHED` at the element holding the array, `TYPE_CHECKS_PATTERN_CC`,
+  `Terminology_TX_Coding_Count`). A failure is reported once per location across layers and
+  profiles. Each definition's fixed and pattern values are decoded once (`fixedpattern.Checker`):
+  `Bundle-dataelements` (20 MB) takes 6.5 s against 6.8 s on `main`. `fixedpattern.Validator` (by
+  path) is no longer run.
+- Acceptance: each probe above gives HL7's issue at HL7's location, the controls (`a2`, `b2`, `c2`,
+  `e2`, `g2`, `h2`, `i4`) stay clean, and B-D9 to B-D11 are declared. A review added `fp_r*`: a
+  fixed primitive with an extension (`r01`, HL7 `Extension_EXT_Fixed_Banned`), nested patterns,
+  primitive arrays, two profiles, `meta.source`, decimals. A second review added `fp_r21` (an
+  extension on a repeating primitive within a fixed `HumanName`, which went unreported) and
+  `fp_r22` (a fixed primitive's own extension, missing), and found that rendering a value cut at
+  100 characters merged two pattern items into one issue: values are rendered whole. Two HL7
+  6.10.4 defects showed up, neither declared since gofhir follows the specification and hl7diff
+  reports no finding: a fixed `HumanName` with no `prefix` or `suffix` makes HL7 report "Expected 0
+  but found 1 prefix elements" (`Fixed_Type_Checks_DT_Name_Prefix`, `_Suffix`) on an instance with
+  none, and a fixed primitive with an extension the instance has too makes HL7 throw a
+  NullPointerException in `checkFixedValue` (so that case is in `checker_test.go`, not in the
+  corpus). A third review found the pattern compared a primitive array's values and their `_x`
+  items apart: an item is now a value with its `_x` item, so a pattern given name with an extension
+  needs one given name that has both (`fp_r24`, `fp_r25`); a `_x` written as an array where the
+  pattern has an object, or the reverse, is a mismatch; a primitive with extensions and no value is
+  checked against the fixed and pattern values of the definitions that govern it (B-D12); a fixed
+  value of extensions only (`_fixedCode` with no `fixedCode`) is checked; and items are matched
+  without rendering the values they are compared with. A `_x` written as an array for a primitive
+  that does not repeat is a JSON error HL7 reports ("This property must be an object, not an
+  Array") and gofhir's structural phase does not: tracked apart, outside B3. A fourth review found
+  a primitive with no value was not assigned to the slice of a choice sliced by type (`$this`), so
+  that slice's fixed value went unchecked, and the slicing phase reported the value in no slice of
+  a closed slicing: slice matching now takes such a primitive as present, of the type its key
+  names (`slicematch.Request.Valueless`), for type and exists discriminators and a slice that
+  prohibits the element (`fp_r26`, `fp_r27`). A fifth review found the same down a discriminator's
+  path (`exists` on `component` by `value`, with `_valueString` only: assigned to the slice that
+  prohibits the value, against the cardinality phase, which counts it): the path walk reads a
+  property's `_` sibling as well (`fp_r29`); a JSON null is no primitive. `pkg/validator`'s layer
+  test covers B-D12, B-D11, the `_x` probes and the slicing issues of these probes;
+  `pkg/slicematch` tests a primitive with no value at `$this` and down a path. The phases page
+  shows fixed and pattern within the constraint phase. `fixedpattern.Validator` stays exported,
+  deprecated, until the next major version.
 
 **PR B4: extension internals as layers** (D6)
 

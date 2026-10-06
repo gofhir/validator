@@ -24,6 +24,15 @@ func WithReportScope(ctx context.Context) context.Context {
 	return context.WithValue(ctx, reportScopeKey{}, &reportScope{seen: map[string]bool{}})
 }
 
+// hasReportScope reports whether ctx has a report scope.
+func hasReportScope(ctx context.Context) bool {
+	if ctx == nil {
+		return false
+	}
+	_, ok := ctx.Value(reportScopeKey{}).(*reportScope)
+	return ok
+}
+
 // firstReport reports whether the failure of c at fhirPath has not been reported yet in the
 // context's scope, and records it. Without a scope, every failure is reported.
 func firstReport(ctx context.Context, c registry.Constraint, fhirPath string) bool {
@@ -41,5 +50,24 @@ func firstReport(ctx context.Context, c registry.Constraint, fhirPath string) bo
 		return false
 	}
 	scope.seen[k] = true
+	return true
+}
+
+// firstReportKey reports whether the issue key names has not been reported yet in the context's
+// scope, and records it. Without a scope, every issue is reported.
+func firstReportKey(ctx context.Context, key string) bool {
+	if ctx == nil {
+		return true
+	}
+	scope, _ := ctx.Value(reportScopeKey{}).(*reportScope)
+	if scope == nil {
+		return true
+	}
+	scope.mu.Lock()
+	defer scope.mu.Unlock()
+	if scope.seen[key] {
+		return false
+	}
+	scope.seen[key] = true
 	return true
 }

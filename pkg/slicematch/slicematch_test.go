@@ -533,3 +533,48 @@ func TestTypeDiscriminatorOnAResource(t *testing.T) {
 		}
 	}
 }
+
+// A primitive with only an id or extensions (json.html#primitive) is there, of the type its key
+// names, with no value: a type or exists discriminator finds it, at the sliced element ($this)
+// and down a path, and a slice that prohibits the element does not take it. A JSON null is no
+// primitive.
+func TestValuelessPrimitive(t *testing.T) {
+	const prof = "https://example.org/fhir/StructureDefinition/vl"
+	reg := newRegistry(t, nil, `{"resourceType":"StructureDefinition","url":"`+prof+`","name":"VL","type":"Observation","kind":"resource",
+	"derivation":"constraint","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Observation","snapshot":{"element":[
+	 {"id":"Observation","path":"Observation","min":0,"max":"*"},
+	 {"id":"Observation.value[x]","path":"Observation.value[x]","min":0,"max":"1","slicing":{"discriminator":[{"type":"type","path":"$this"}],"rules":"closed"},"type":[{"code":"code"},{"code":"string"}]},
+	 {"id":"Observation.value[x]:valueCode","path":"Observation.value[x]","sliceName":"valueCode","min":0,"max":"1","type":[{"code":"code"}]},
+	 {"id":"Observation.value[x]:valueString","path":"Observation.value[x]","sliceName":"valueString","min":0,"max":"1","type":[{"code":"string"}]},
+	 {"id":"Observation.component","path":"Observation.component","min":0,"max":"*","slicing":{"discriminator":[{"type":"exists","path":"value"}],"rules":"closed"},"type":[{"code":"BackboneElement"}]},
+	 {"id":"Observation.component:noValue","path":"Observation.component","sliceName":"noValue","min":0,"max":"*","type":[{"code":"BackboneElement"}]},
+	 {"id":"Observation.component:noValue.value[x]","path":"Observation.component.value[x]","min":0,"max":"0","type":[{"code":"string"}]},
+	 {"id":"Observation.component:withValue","path":"Observation.component","sliceName":"withValue","min":0,"max":"*","type":[{"code":"BackboneElement"}]},
+	 {"id":"Observation.component:withValue.value[x]","path":"Observation.component.value[x]","min":1,"max":"1","type":[{"code":"string"}]}]}}`)
+	m := New(reg)
+	sd, _ := reg.ResolveCanonical(prof)
+	if sd == nil {
+		t.Fatal("profile not loaded")
+	}
+	ext := map[string]any{"extension": []any{map[string]any{"url": "http://e", "valueString": "v"}}}
+	for _, tt := range []struct {
+		name, id, key string
+		value         any
+		valueless     bool
+		want          string
+	}{
+		{"type at $this, no value", "Observation.value[x]", "valueCode", nil, true, "Observation.value[x]:valueCode"},
+		{"type at $this, the other type", "Observation.value[x]", "valueString", nil, true, "Observation.value[x]:valueString"},
+		{"type at $this, null", "Observation.value[x]", "valueCode", nil, false, ""},
+		{"exists down a path, no value", "Observation.component", "component", map[string]any{"_valueString": ext}, false, "Observation.component:withValue"},
+		{"exists down a path, a value", "Observation.component", "component", map[string]any{"valueString": "v"}, false, "Observation.component:withValue"},
+		{"exists down a path, none", "Observation.component", "component", map[string]any{"code": map[string]any{"text": "c"}}, false, "Observation.component:noValue"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			got := m.Resolve(context.Background(), Request{SD: sd, Node: sd.Tree().ByID(tt.id), Key: tt.key, Value: tt.value, Valueless: tt.valueless})
+			if id, _ := sliceIDs(got); id != tt.want {
+				t.Errorf("matched %q, want %q (notes %v)", id, tt.want, got.Notes)
+			}
+		})
+	}
+}
