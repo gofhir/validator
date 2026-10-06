@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1](https://github.com/gofhir/validator/compare/v2.0.0...v2.0.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **constraint:** read a profile's invariant's value as the JSON writes it, and resolve() in the innermost Bundle (plan C, C-1) ([#134](https://github.com/gofhir/validator/issues/134)) ([b32b9a2](https://github.com/gofhir/validator/commit/b32b9a2c3f20885681ea13f68082d8a37da626e3))
+* **module:** the module path ends in /v2, so v2 can be installed ([#137](https://github.com/gofhir/validator/issues/137)) ([534d154](https://github.com/gofhir/validator/commit/534d15484f4cde96a11eb88258970b606584d255))
+
 ## [2.0.0](https://github.com/gofhir/validator/compare/v1.28.0...v2.0.0) (2026-10-06)
 
 
