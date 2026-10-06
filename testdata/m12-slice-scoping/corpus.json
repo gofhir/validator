@@ -121,6 +121,11 @@
       "files": ["testdata/m12-slice-scoping/probes/fp_*.json"]
     },
     {
+      "name": "canonical-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.canonicals-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/cn_*.json"]
+    },
+    {
       "name": "r5-probes",
       "version": "5.0.0",
       "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json", "testdata/m12-slice-scoping/probes/e*_*.json"]

@@ -80,6 +80,8 @@ specification, gofhir follows the specification, and the divergence is declared 
 | B-D10 | A complex fixed value whose instance has an element the fixed value does not (`fixedCodeableConcept` with an extra `text`, `coding` or `id`) | Accepts it; reports an extension (`Extension_EXT_Fixed_Banned`), at the array without the item's index | ElementDefinition.fixed[x]: "Missing elements/attributes must also be missing" | Report the extra element (`FIXED_VALUE_EXTRA`), an extension at the item that holds it, a primitive's id or extension at the primitive. **Declared divergence** (`fp_i1`, `fp_i5`, `fp_r03`, `fp_r14`; `fp_r04`, `fp_r20`, `fp_r21` for the location). |
 | B-D11 | A pattern array two of whose items one instance item meets (`patternCodeableConcept` with two codings both met by one) | Reports the count (`Terminology_TX_Coding_Count`, "Expected 2 but found 1"; `Fixed_Type_Checks_DT_Name_Given` for given names) | ElementDefinition.pattern[x]: each element of the pattern array "must (recursively) match at least one element from the instance array" | Accept it. **Declared divergence** (`fp_r00`, `fp_r08`, `fp_r24`). |
 | B-D12 | A primitive with extensions and no value (`"_status": {"extension": [...]}`) where the profile has a fixed or pattern value | Checks no fixed or pattern value (reports only the required binding) | ElementDefinition.fixed[x]: the value "SHALL be exactly the value for this element in the instance"; pattern[x]: "the value in the instance SHALL follow" | Report the missing value (`FIXED_VALUE_MISSING`, element `value`) and, for a fixed value, its extensions (`FIXED_VALUE_EXTRA`). **Declared divergence** (`fp_r02`, `fp_r10`, `fp_r26` through a type slice of an extension's `value[x]`, `fp_r28` in a contained resource). |
+| B-D13 | A literal reference to a type no `targetProfile` of the element constrains, whose target does not resolve (`DeviceMetric.parent` → `DeviceDefinition/…`) | Accepts it: checks the type only of a target it resolves | ElementDefinition.type.targetProfile: the target "must conform to at least one" of the profiles; a resource of another type cannot | Report it (`REFERENCE_INVALID_TARGET`, at the Reference). **Declared divergence** (4 R4 core examples). |
+| B-D14 | IPS all-sections: the Composition entry, whose `section[14].entry[0]` HL7 matches to two slices under `-tx n/a` | Reports `Bundle.entry:composition` missing (`Validation_VAL_Profile_Minimum_SLICE`), because the Composition does not conform with that multi-match | The pregnancyOutcome slice's required binding enumerates its codes, and 82810-3 is not one (plan A, IPS all-sections multi-match, withdrawn) | The Composition conforms, so the entry is in its slice. **Declared divergence** (side HL7). |
 
 ## Design: definition layering
 
@@ -342,6 +344,39 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
   instead of snapshot proximity (D6).
 
 **PR B5: `ResolveCanonical` in `walker`, `reference` and the top-level `meta.profile`** (D7)
+
+- **Status (2026-10-06): B5a implemented.** Probes `cn_*` (`acme.canonicals`), against HL7 6.10.4:
+  - **Nested profiles.** The walker's profile walk (`WalkWithProfiles`, used by the cardinality
+    phase, and now by the reference phase) resolved a Bundle entry's or a contained resource's
+    `meta.profile` by exact url, with no snapshot generated: a versioned canonical resolved to
+    nothing, and a profile with only a differential was skipped, versioned or not (`cn_01`,
+    `cn_02`, `cn_05`: HL7 `Validation_VAL_Profile_Minimum`, gofhir nothing). It now resolves each
+    canonical as the resource validated's are (`Registry.ResolveProfile`): the version it pins or
+    the one an unversioned canonical resolves to, then the external profile resolver, with its
+    snapshot. Each definition is visited once however many canonicals name it (`cn_10`), and the
+    type's definition too unless a profile of the type stands for it (`cn_11`), as HL7 checks a
+    resource against its type's definition besides its profiles.
+  - **Still open (B6):** the binding, primitive, extension and UCUM phases walk nested resources
+    against their type's definition only (`Walk`): a binding a Bundle entry's profile declares is
+    not checked (HL7 reports it). A profile of another type than the resource (`cn_11`: HL7
+    reports each element the profile does not allow) is not reported as such either.
+  - **Profiles that do not resolve** are reported at the `meta.profile` entry, for nested
+    resources too (`PROFILE_NOT_FOUND`, a warning, HL7 `VALIDATION_VAL_PROFILE_UNKNOWN_ERROR`):
+    a pinned version that is not loaded says so (`cn_04`, `cn_06`), each entry at its own index
+    (`cn_12`). The top-level resolution
+    already used the pinned version exactly (`GetByCanonical`, D-2).
+  - **Versioned `targetProfile`.** The reference phase took the type of `…/Patient|4.0.1` as
+    `Patient|4.0.1`: every reference under a profile that pins versions was a false
+    `REFERENCE_INVALID_TARGET` (IPS: 38 on its all-sections Composition). It now takes the type of
+    the definition the canonical resolves to. The phase also checks nested resources against their
+    profiles, not their base type, so a Bundle entry's profile's `targetProfile` applies
+    (`cn_09`: HL7 `Reference_REF_BadTargetType`, gofhir nothing). The issue is at the Reference, as
+    HL7 reports it, once however many of the resource's definitions find it. B-D13 and B-D14 are
+    declared.
+- **B5b (next):** a resolved target must conform to one of the `targetProfile`s
+  (`Reference_REF_CantMatchChoice`); gofhir checks only the target's type, versioned or not. A
+  `targetProfile` that does not resolve is reported by HL7 ("Unable to resolve the profile
+  reference"); gofhir takes the last segment of its url as a type.
 
 - Acceptance: a nested resource with a versioned `meta.profile` is validated against that profile;
   a versioned `targetProfile` is enforced; a resource whose top-level `meta.profile` pins a version

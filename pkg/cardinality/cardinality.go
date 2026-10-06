@@ -76,6 +76,11 @@ func (v *Validator) Validate(resource []byte, sd *registry.StructureDefinition) 
 // ValidateData validates the cardinality of a pre-parsed FHIR resource against its StructureDefinition.
 // This is the preferred method when JSON has already been parsed to avoid redundant parsing.
 func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefinition) *issue.Result {
+	return v.ValidateDataContext(context.Background(), data, sd)
+}
+
+// ValidateDataContext is ValidateData, resolving the profiles nested resources declare with ctx.
+func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any, sd *registry.StructureDefinition) *issue.Result {
 	result := issue.GetPooledResult()
 
 	rootType := sd.Type
@@ -86,7 +91,7 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 
 	// Walk all nested resources (contained + Bundle entries) using the generic walker.
 	// WalkWithProfiles validates against each declared profile in meta.profile.
-	v.walker.WalkWithProfiles(data, rootType, rootType, func(ctx *walker.ResourceContext) bool {
+	v.walker.WalkWithProfilesContext(ctx, data, rootType, rootType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == rootType {
 			return true

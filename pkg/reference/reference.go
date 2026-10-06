@@ -2,6 +2,7 @@
 package reference
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -234,6 +235,12 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 // ValidateDataWithBundle validates all Reference elements in a pre-parsed FHIR resource
 // within the context of a Bundle. This enables validation of urn:uuid references.
 func (v *Validator) ValidateDataWithBundle(resource map[string]any, sd *registry.StructureDefinition, bundleCtx *BundleContext, result *issue.Result) {
+	v.ValidateDataWithBundleContext(context.Background(), resource, sd, bundleCtx, result)
+}
+
+// ValidateDataWithBundleContext is ValidateDataWithBundle, resolving the profiles nested resources
+// declare with ctx.
+func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource map[string]any, sd *registry.StructureDefinition, bundleCtx *BundleContext, result *issue.Result) {
 	if sd == nil || sd.Snapshot == nil {
 		return
 	}
@@ -249,8 +256,12 @@ func (v *Validator) ValidateDataWithBundle(resource map[string]any, sd *registry
 	// Validate references in root resource
 	v.validateElementWithPaths(resource, sd, resourceType, resourceType, bundleCtx, containedCtx, result)
 
-	// Walk all nested resources (contained + Bundle entries) using the generic walker.
-	v.walker.Walk(resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
+	// Walk all nested resources (contained + Bundle entries) using the generic walker, each against
+	// the profiles its meta.profile declares and its type's definition. A reference that several
+	// of them find wrong is reported once.
+	nested := issue.GetPooledResult()
+	defer issue.ReleaseResult(nested)
+	v.walker.WalkWithProfilesContext(ctx, resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == resourceType {
 			return true
@@ -264,9 +275,17 @@ func (v *Validator) ValidateDataWithBundle(resource map[string]any, sd *registry
 
 		// Validate references in the nested resource
 		// Use ResourceType for SD lookup, FHIRPath for error reporting
-		v.validateElementWithPaths(ctx.Data, ctx.SD, ctx.ResourceType, ctx.FHIRPath, bundleCtx, nestedContainedCtx, result)
+		v.validateElementWithPaths(ctx.Data, ctx.SD, ctx.ResourceType, ctx.FHIRPath, bundleCtx, nestedContainedCtx, nested)
 		return true
 	})
+	seen := make(map[string]bool, len(nested.Issues))
+	for _, is := range nested.Issues {
+		k := string(is.Severity) + "\x00" + is.MessageID + "\x00" + strings.Join(is.Expression, ",") + "\x00" + is.Diagnostics
+		if !seen[k] {
+			seen[k] = true
+			result.AddIssue(is)
+		}
+	}
 }
 
 // ValidateElementWithPaths validates references with separate paths for SD lookup and error reporting.
@@ -600,7 +619,7 @@ func (v *Validator) validateTargetProfile(extractedType, refStr string, elemDef 
 				"type":    extractedType,
 				"allowed": strings.Join(allowedTypes, ", "),
 			},
-			fhirPath+".reference",
+			fhirPath, // the Reference, as the HL7 validator reports it (Reference_REF_BadTargetType)
 		)
 	}
 }
@@ -633,21 +652,16 @@ func (v *Validator) typeMatchesProfiles(resourceType string, profiles []string) 
 	return false
 }
 
-// extractTypeFromProfile extracts the resource type from a StructureDefinition profile URL.
-func (v *Validator) extractTypeFromProfile(profileURL string) string {
-	// Standard FHIR profiles: http://hl7.org/fhir/StructureDefinition/[Type]
-	const basePrefix = "http://hl7.org/fhir/StructureDefinition/"
-	if strings.HasPrefix(profileURL, basePrefix) {
-		return strings.TrimPrefix(profileURL, basePrefix)
-	}
-
-	// For custom profiles, try to get the type from the loaded StructureDefinition
-	sd := v.registry.GetByURL(profileURL)
-	if sd != nil {
+// extractTypeFromProfile returns the resource type a targetProfile constrains: the type of the
+// definition the canonical names, the version it pins or the one an unversioned canonical resolves
+// to (references.html#canonical).
+func (v *Validator) extractTypeFromProfile(profile string) string {
+	if sd, _ := v.registry.ResolveCanonical(profile); sd != nil {
 		return sd.Type
 	}
 
 	// Fallback: extract last path segment
+	profileURL, _ := registry.ParseCanonical(profile)
 	parts := strings.Split(profileURL, "/")
 	if len(parts) > 0 {
 		return parts[len(parts)-1]

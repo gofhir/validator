@@ -254,5 +254,53 @@
     "file": "testdata/m12-slice-scoping/probes/fp_r28_contained_no_value.json",
     "location": "Observation.contained[0].gender",
     "messageId": "FIXED_VALUE_MISSING"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/DeviceMetric-example.json",
+    "location": "DeviceMetric.parent",
+    "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/DeviceUseStatement-example.json",
+    "location": "DeviceUseStatement.reasonReference[0]",
+    "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0301.json",
+    "location": "MedicationRequest.dispenseRequest.performer",
+    "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/Observation-clinical-gender.json",
+    "location": "Observation.performer[0]",
+    "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D14",
+    "reason": "The Composition conforms to Composition-uv-ips: section[14].entry[0] (LOINC 82810-3) is in no ValueSet of the pregnancyOutcome slice's required binding (pregnancies-summary-uv-ips enumerates its codes), so it matches pregnancyStatus alone. Under -tx n/a HL7 6.10.4 does not evaluate that binding, matches both slices, and so finds no entry for Bundle.entry:composition (plan A, IPS all-sections multi-match, withdrawn).",
+    "side": "hl7",
+    "file": "fhir-cache:/hl7.fhir.uv.ips#2.0.1/package/example/Bundle-bundle-ips-all-sections.json",
+    "location": "Bundle",
+    "messageId": "Validation_VAL_Profile_Minimum_SLICE"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/cn_11_entry_profile_of_other_type.json",
+    "location": "Bundle.entry[0].resource.subject",
+    "messageId": "REFERENCE_INVALID_TARGET"
   }
 ]

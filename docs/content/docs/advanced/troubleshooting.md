@@ -38,7 +38,7 @@ Check your package cache location. By default it is `~/.fhir/packages/`. If you 
 **Symptom:** The validator warns that a profile URL could not be resolved.
 
 ```text
-Profile 'http://example.org/fhir/StructureDefinition/my-profile' not found in registry
+Profile 'http://example.org/fhir/StructureDefinition/my-profile' was not checked: no definition with its url is loaded
 ```
 
 **Solution:** Ensure the package containing the profile is loaded. The profile URL must match exactly what is defined in the StructureDefinition's `url` field. Common causes:

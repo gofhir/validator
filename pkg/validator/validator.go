@@ -694,14 +694,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	customProfiles := v.collectProfilesToValidate(vc.profiles, metaProfiles)
 	resolvedProfiles, profileURLs, profilesNotFound, profilesUnusable := v.resolveProfiles(ctx, vc.canonicalProfiles, customProfiles)
 
-	// Emit warnings for profiles not found
-	for _, notFound := range profilesNotFound {
-		result.AddIssue(issue.Issue{
-			Severity:    issue.SeverityWarning,
-			Code:        issue.CodeNotFound,
-			Diagnostics: fmt.Sprintf("Profile '%s' not found in registry", notFound),
-		})
-	}
+	v.reportProfilesNotFound(resourceType, data, profilesNotFound, result)
 	// A profile that is loaded but whose snapshot cannot be generated was not validated against, as
 	// the HL7 validator reports it (Validation_VAL_Profile_NoSnapshot); one whose differential names
 	// elements its base does not have is validated without them.
@@ -792,7 +785,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	result.Stats.PhasesRun++
 
 	// Phase 2: Cardinality validation
-	cardResult := v.cardValidator.ValidateData(data, sd)
+	cardResult := v.cardValidator.ValidateDataContext(ctx, data, sd)
 	result.Merge(cardResult)
 	issue.ReleaseResult(cardResult)
 	result.Stats.PhasesRun++
@@ -825,7 +818,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 		// Validate Bundle-specific rules: fullUrl must be consistent with resource.id
 		reference.ValidateBundleFullUrls(data, result)
 	}
-	v.refValidator.ValidateDataWithBundle(data, sd, bundleCtx, result)
+	v.refValidator.ValidateDataWithBundleContext(ctx, data, sd, bundleCtx, result)
 	result.Stats.PhasesRun++
 
 	// Phase 7: Constraint validation (FHIRPath, uses cached expressions)
@@ -1025,6 +1018,29 @@ func (v *Validator) resolveProfiles(ctx context.Context, canonicals []canonicalR
 	}
 
 	return withSnapshots, withSnapshotURLs, notFound, unusable
+}
+
+// reportProfilesNotFound reports each profile that does not resolve at the meta.profile entry of
+// data that declares it, each entry once, or at the resource when the caller asked for it, as the
+// HL7 validator reports it.
+func (v *Validator) reportProfilesNotFound(resourceType string, data map[string]any, notFound []string, result *issue.Result) {
+	var entries []any
+	if meta, ok := data["meta"].(map[string]any); ok {
+		entries, _ = meta["profile"].([]any)
+	}
+	used := make([]bool, len(entries))
+	for _, canonical := range notFound {
+		at := resourceType
+		for i, e := range entries {
+			if s, ok := e.(string); ok && s == canonical && !used[i] {
+				used[i] = true
+				at = fmt.Sprintf("%s.meta.profile[%d]", resourceType, i)
+				break
+			}
+		}
+		_, resolution := v.registry.ResolveCanonical(canonical)
+		result.AddWarningWithID(issue.DiagProfileNotFound, map[string]any{"url": canonical, "reason": resolution.Reason()}, at)
+	}
 }
 
 // unusableProfile is a profile that resolves but whose snapshot cannot be generated, and why.

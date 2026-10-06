@@ -11,7 +11,7 @@ Profile errors occur when the validator cannot load, parse, or apply a Structure
 
 | ID | Severity | Message |
 |----|----------|---------|
-| `PROFILE_NOT_FOUND` | error | Profile '{profile}' could not be resolved |
+| `PROFILE_NOT_FOUND` | warning | Profile '{url}' was not checked: {reason} |
 | `PROFILE_INVALID` | error | Profile '{profile}' is not a valid StructureDefinition |
 | `PROFILE_WRONG_TYPE` | error | Resource type '{type}' does not match profile type '{expected}' |
 
@@ -19,7 +19,9 @@ Profile errors occur when the validator cannot load, parse, or apply a Structure
 
 ## PROFILE_NOT_FOUND
 
-The profile URL specified for validation could not be resolved. The validator looked for a StructureDefinition with that canonical URL in the loaded registry but could not find it.
+A profile the resource declares (`meta.profile`), or that it was asked to be validated against, does not resolve: no loaded StructureDefinition has its url, or none has the version it pins (`url|version`). A pinned version is used exactly, never another version of the same url (references.html#canonical). The resource is not checked against that profile; when none of the profiles it declares resolves, it is checked against its type's definition, as the HL7 validator checks it.
+
+It is a warning at the `meta.profile` entry that declares the profile (`Patient.meta.profile[0]`, `Bundle.entry[0].resource.meta.profile[0]`), or at the resource when the profile was asked for by option, as HL7's `VALIDATION_VAL_PROFILE_UNKNOWN_ERROR`. It applies to the resource validated and to the resources it holds (Bundle entries, `contained`).
 
 **Common causes:**
 
@@ -39,7 +41,7 @@ If the US Core Implementation Guide is not loaded, the validator cannot find the
 Validation output:
 
 ```text
-ERROR: Profile 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient' could not be resolved
+WARNING: Profile 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient' was not checked: no definition with its url is loaded
   MessageID: PROFILE_NOT_FOUND
 ```
 
@@ -137,7 +139,7 @@ Resources can declare which profiles they claim to conform to via `meta.profile`
 }
 ```
 
-If a profile listed in `meta.profile` cannot be found, the validator produces a `PROFILE_NOT_FOUND` error. If it does not match the resource type, it produces a `PROFILE_WRONG_TYPE` error.
+If a profile listed in `meta.profile` cannot be found, the validator reports a `PROFILE_NOT_FOUND` warning at that entry, and checks the resource against its type's definition. A resource held in another (a Bundle entry, `contained`) is checked against the profiles it declares the same way.
 
 ## Profile Resolution Chain
 
@@ -151,7 +153,7 @@ Custom Profile
         -> baseDefinition: Resource
 ```
 
-At each level, the validator merges constraints from the profile with its base. If any profile in the chain cannot be resolved, the validator reports `PROFILE_NOT_FOUND` for the missing link.
+At each level, the validator merges constraints from the profile with its base. If any profile in the chain cannot be resolved, the profile has no snapshot, and the validator reports `PROFILE_SNAPSHOT_FAILED` naming the missing link.
 
 {{< callout type="info" >}}
 All validation rules come from StructureDefinitions. The validator loads the profile, resolves the full derivation chain, generates a snapshot if needed, and then validates the resource against the merged constraints. No resource-type-specific logic is hardcoded.
