@@ -1,7 +1,7 @@
 # Plan C: the profiles' invariants as the HL7 validator evaluates them
 
-**Status:** C-1 (C1, C3) implemented on `fix/constraint-exact-json`; C-2 (C2, decided as C-D1 (b))
-waits for gofhir/fhirpath
+**Status:** C-1 (C1, C3) merged (#134); C-2 (C2, decided as C-D1 (b)) implemented on
+`fix/c2-empty-invariant-fails`, with gofhir/fhirpath v1.12.2
 **Date:** 2026-10-05
 **Follows:** [Plan B](2026-09-27-profile-false-negatives.md), PR B4b (#133), which evaluates the
 expressions of extension contexts this way already;
@@ -73,7 +73,7 @@ whole corpus (`hl7diff`, every group plus `r4-core-examples`):
 | `bdl-8` | R4 `Bundle.entry` | 32 | an entry with no `fullUrl` | R4B and R5 `Bundle`: `fullUrl.exists() implies fullUrl.contains('/_history/').not()` |
 | `ra-3` | DEQM 5.0.0 `parameters-caregap-remark-patch` | 4 | `value.startsWith(...)` on a `string`: gofhir/fhirpath gives `value` on a FHIR primitive as empty | none needed: the expression is right, the engine is not (upstream, below) |
 | `ras-2` | R4 `RiskAssessment.prediction` | 2 | `probability is decimal` with no probability | R4B `RiskAssessment`: `probability.exists($this is decimal) implies ...` |
-| `pd-1` | US Core 5.0.1 and 6.1.0 `us-core-practitionerrole` | 1 | `telecom or endpoint` with neither | US Core 9.0.0: `telecom.exists() or endpoint.exists()` |
+| `pd-1` | US Core 5.0.1 and 6.1.0 `us-core-practitionerrole` | 1 | `telecom or endpoint` with two telecoms: gofhir/fhirpath gives empty for `or` on a collection of two, where FHIRPath's singleton evaluation is an error (upstream) | US Core 9.0.0: `telecom.exists() or endpoint.exists()` |
 
 Beyond these, hl7diff counts 3 fewer errors that HL7 does not report either (one each in
 `core-probes`, `deqm-probes` and `deqm-examples`), not yet identified: C-2 names them. The
@@ -90,6 +90,11 @@ regular expressions.
 | # | Question | HL7 6.10.4 | Spec | Options |
 | --- | --- | --- | --- | --- |
 | C-D1 | An invariant whose result is empty | fails (`convertToBoolean`), with about thirty published invariants rewritten first (`fixExpr`) | "must evaluate to true when run on the element" (conformance-rules.html#constraints) | **(a)** Keep empty as satisfied: the decision of 2026-10-01, a declared divergence; `r04`, `r06` stay false acceptances. **(b)** Empty fails, and each published invariant that gives a false error because of it is corrected by an erratum to the expression a later official publication of the same artifact gives (the existing `registry.constraintErrata`: version-scoped, matched on the exact published expression, with its source). |
+| C-D2 | R4's con-3, whose published expression compares a CodeableConcept with a string | rewrites it to an expression that never fails (`category.coding.exists(...).empty()` is a boolean, never empty): reports no con-3 | the human text: clinicalStatus "SHALL be present if verificationStatus is not entered-in-error and category is problem-list-item"; R4B publishes the corrected expression, which applies it only where there is a verificationStatus | **Decided: R4B's expression**, the official correction, as every erratum. A problem-list-item Condition with no verificationStatus is no longer asked for a clinicalStatus (R4B's reading). A confirmed one with no clinicalStatus gets the warning, which HL7 does not report (`e09`; warnings are outside hl7diff). |
+| C-D3 | IPA 1.1.0's ipa-obs-1, `(component.empty() and hasMember.empty()) implies (dataAbsentReason or value)`, on `valueBoolean: false` | rewrites it to `dataAbsentReason.exists() or value.exists()`: holds | `false or {}` is empty (fhirpath.html#boolean-logic), so the invariant does not evaluate to true | **No erratum**: no later IPA publication corrects it. gofhir reports it, as the specification evaluates it; HL7 does not. To be reported to IPA. IPA is not a corpus group. |
+| C-D4 | R4B's vsd-0, `name.exists() implies name.exists() implies name.matches(...)`, empty on a ValueSet with no name | not rewritten: reports it (a warning) | evaluated as published, it does not evaluate to true | **No erratum**: the later publication of the same rule, R5's `cnl-0`, changes the rule itself (`^[A-Z]([A-Za-z0-9_]){1,254}$`), and another R4B resource's rule is not a later publication. Reported as published, as HL7 reports it. |
+| C-D5 | US Core 5.0.1 and 6.1.0's us-core-13, `practitioner or organization or healthcareService or location`, on a PractitionerRole with two locations | not rewritten: "Unable to evaluate as a boolean", an error | `or` on two items is an error (singleton evaluation) | **Erratum from US Core 9.0.0**, as pd-1 on the same profile, which HL7 rewrites: no error. A declared difference from HL7 on that instance; the published correction decides. |
+| C-D6 | The vital signs profiles' vs-1, `($this as dateTime).toString().length() >= 8` on `effective[x]`, on an `effectivePeriod` | rewrites it in the core profiles of R4 and R4B (`StructureDefinitionHacker`): no error; reports it in R5, and on the copies US Core 5.0.1 and 6.1.0 make | the human text: "if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day"; `as dateTime` on a Period is empty | **Erratum from US Core 9.0.0**, an HL7 publication that republishes the same constraint (`source: vitalsigns`) corrected to `$this is dateTime implies $this.toString().length() >= 10`, as AU Core 2.0.0 and mCODE 4.0.0 do. R4, R4B and R5 publish the same expression, R5 included (no later core version corrects it), so it is corrected in all three; the rule (errata.go) is a later official publication of the same definition or of the same constraint. Every vital signs Observation with a Period failed. Declared differences from HL7: R5, and US Core 5.0.1 and 6.1.0's copies, where HL7 reports vs-1 on a Period. On `_effectiveDateTime` with a data-absent-reason, the corrected expression still fails (it is a dateTime with no value), as HL7 reports it. `>= 10` for `>= 8` changes nothing for a valid dateTime (4, 7, 10 or 20+ characters). `e13`, `e14`. |
 
 **Decided (2026-10-06): (b).** The specification decides: the invariant must evaluate to true. It
 follows HL7 too, and hardcodes nothing that is not published. `constraintErrata` already corrects `que-7` (R4, from R4B) and `eld-11` (R5) this way.
@@ -132,9 +137,71 @@ into `json.RawMessage` values instead was 30 to 40 % slower: it copies every val
   both.
 - `constraintErrata` gains `ref-1` (R4), `bdl-8` (R4), `ras-2` (R4) and `pd-1` (US Core 5.0.1,
   6.1.0), each matched on its exact published expression, scoped to the version it is published
-  in, with the source of its correction. An erratum on an IG's invariant is keyed by the profile's
-  canonical, as `eld-11` is keyed by `ElementDefinition`'s.
+  in, with the source of its correction. US Core's pd-1 publishes no source, so it is keyed by the
+  element it is defined on (`PractitionerRole`), which also corrects the profiles that derive from
+  it with the same expression (QI-Core 6.0.0).
 - Lands only with a gofhir/fhirpath that navigates `value` on a FHIR primitive.
+
+- **Implemented (2026-10-06).** gofhir/fhirpath v1.11.0 (#141) navigates `value` on a FHIR primitive, so
+  `ra-3` holds on DEQM. Against `main`, hl7diff over the 30 groups gives 0 findings: the errata
+  (ref-1 R4 and R4B, bdl-8, ras-2, pd-1 and us-core-13, vs-1 R4, R4B and R5, the name rule of 30
+  R4 resources, que-12, tim-9 R4 and R4B, con-3) remove every false error and warning an empty result
+  gave, and the three errors the measurement
+  above could not name are false acceptances fixed, each reported by HL7 too: `que-1` on a nested
+  Questionnaire item (`core-probes`), `deqm-2` (`deqm-probes`), `deqm-6` (`deqm-examples`). The
+  probes `r04`, `r06` and `v16` report `w-3` and `rv-10` as HL7 does; `e01`, `e02` and `e03` (a
+  logical reference, a transaction entry with no `fullUrl`, a prediction with no probability)
+  stay clean in both. `pd-1` is tested on the published expressions of US Core 5.0.1, 6.1.0 and
+  9.0.0.
+- **R5's rng-2, found in review.** R5 publishes `rng-2` as `... or (low.lowBoundary() <=
+  high.highBoundary())`. gofhir/fhirpath v1.11.0 gave `lowBoundary()` and `highBoundary()` on a
+  FHIR Quantity as empty, so with empty as false every Range with both ends failed `rng-2` under
+  R5; R5's `ratrng-2` has the same pattern. Reported upstream and fixed in v1.12.2, which also
+  makes `or` and `and` on a collection of two an error, as FHIRPath's singleton evaluation asks.
+  Probes `r5_range_both_ends` and `r5_range_low_above_high` (`r5-probes`) agree with HL7.
+- **gofhir/fhirpath 1.12.x, found in the PR's review.** Besides the boundaries, 1.12.0 makes a
+  boolean operator (`or`, `and`, `xor`, `implies`) and `iif`'s criterion an error on more than one
+  item, as FHIRPath's singleton evaluation asks; a Quantity with a `comparator` an error in
+  comparisons, arithmetic and boundaries; Money no Quantity; and object equality independent of
+  the JSON's layout. An evaluation error is a failed invariant, as in HL7. Effects measured:
+  US Core's `us-core-13` (`practitioner or organization or healthcareService or location`) failed
+  with two locations, and is corrected from US Core 9.0.0 as `pd-1` is; a Range whose low has a
+  comparator (already wrong: `sqty-1`) also fails R4's `rng-2`, which HL7, ignoring the
+  comparator, does not report. No other published invariant applies a boolean operator to a
+  repeating element (a sweep of every package in the cache).
+- **The name rule.** No later publication of the same artifact corrects R4's `name.matches(...)`
+  on every resource: R4B publishes it, corrected, as `csd-0` and 18 others, keeps the defect in
+  `vsd-0` (C-D4), and has no `ees`, `rvs`, `rsd` or `red` resources. It is one rule, FHIR's for a
+  canonical resource's name, published on each; its R4B publication is the source for all 30, as
+  HL7 rewrites it for all of them.
+- **Not covered yet (also on `main`).** A `_key` item with no item at its index in the value
+  array (`"given": ["A"], "_given": [null, {"id": "x"}]`) is not read as a primitive, so its
+  invariants are not evaluated; HL7 reports `ele-1` there. The values of an element are read from
+  its value array (`elementvalues`), for every phase: plan B, pending.
+- **Found in the PR's last review: vital signs.** The corpus examples declare no vital signs
+  profile (HL7 applies it by the LOINC code, gofhir does not), so hl7diff did not see `vs-1` fail
+  on an `effectivePeriod` (C-D6), nor the difference it declares with HL7 on US Core 5.0.1 and
+  6.1.0's vital signs profiles.
+- **Other differences on invalid instances.** A top-level `"reference": "#"` gets `ref-1`, R5's,
+  besides its format error (HL7 rewrites ref-1 to accept it); and a property that is null with a
+  `_key` sibling is a JSON error alone, as in HL7.
+- **Found in review: warnings.** hl7diff compares errors, and R4's rule on a canonical resource's
+  name (`name.matches(...)`, a warning on 30 resources: `vsd-0`, `csd-0`, `que-0`, `lib-0`, ...)
+  is empty, so failed, on every resource with no name: 76 warnings on the R4 examples, none from
+  HL7, which rewrites it (`fixExpr`). It is corrected wherever R4 publishes the expression, to
+  R4B's `name.exists() implies ...` (`csd-0`; R4B's `vsd-0` writes `name.exists()` twice). The
+  review found three more R4 invariants HL7 rewrites, each corrected by its later publication:
+  `que-12` (`count() > 2` for "more than one", R4B), `tim-9` (`when in (...)` on several when,
+  R5), `con-3` (a CodeableConcept compared with a string, R4B); probes `e04` to `e07`. The test
+  compares failed invariants of every severity.
+- **Found on the way, fixed here.** `v16` needs two more things, which the specification asks:
+  - a primitive with only an id or extensions is evaluated against the invariants of the
+    definitions that govern it, as a primitive of its type with no value (`rv-10`, and `ele-1`,
+    which HL7 reports on `"_family": {"id": "i1"}`); the constraint walk evaluated none;
+  - a null item of a primitive array is a primitive with no value where the `_key` sibling's
+    item at the same index has an id or extensions ("JSON null values are used to fill out both
+    arrays so that the id and/or extension are aligned", json.html#primitive); the primitive phase
+    reported it as a JSON error, which HL7 does not. A null with no such item stays an error.
 
 ### C3: the innermost Bundle first
 

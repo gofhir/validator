@@ -766,6 +766,13 @@ func (r *Registry) IsResourceType(typeName string) bool {
 	return sd.Kind == KindResource
 }
 
+// IsPrimitiveTypeCode reports whether code, an ElementDefinition.type.code, types a primitive: a
+// FHIR primitive type, or a FHIRPath system type (System.String), which the specification's own
+// definitions give a primitive's value and a resource's id.
+func (r *Registry) IsPrimitiveTypeCode(code string) bool {
+	return strings.HasPrefix(code, fhirPathSystemTypes) || r.IsPrimitiveType(code)
+}
+
 // IsPrimitiveType checks if the given type name is a FHIR primitive type.
 // Derived from StructureDefinition.Kind == "primitive-type".
 // Examples: string, boolean, integer, decimal, uri, code, etc.

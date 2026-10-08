@@ -147,8 +147,11 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 			node := v.governing(sd, child, cv, opts)
 			if cv.Value != nil {
 				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, extRaw, path, opts, result)
-			} else if extRaw != nil {
-				v.checkValueless(sd, node, extRaw, path, opts, result)
+			} else if extRaw != nil && (cv.Array || valueRaw == nil) && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
+				// Only a primitive has a "_key" sibling (json.html#primitive). A null value is one
+				// only as an item of an array aligned with its "_key" item; a property that is null
+				// is a JSON error, which the primitive phase reports.
+				v.checkValueless(sd, node, cv.TypeCode, extRaw, path, opts, result)
 			}
 			if cv.Ext != nil {
 				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, extRaw, path, opts, result)
@@ -368,15 +371,7 @@ func (v *Validator) contentTarget(sd *registry.StructureDefinition, node *regist
 // evaluate checks the constraints of one definition on a value, skipping those already evaluated
 // on it (seen). The value's JSON is built once, on the first constraint that needs it.
 func (v *Validator) evaluate(def *registry.ElementNode, defPath string, value any, raw *json.RawMessage, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
-	var pending []registry.Constraint
-	for _, c := range def.Def.Constraint {
-		k := c.Key + "\x00" + c.Expression
-		if c.Expression == "" || seen[k] {
-			continue
-		}
-		seen[k] = true
-		pending = append(pending, c)
-	}
+	pending := pendingConstraints(def, seen)
 	if len(pending) == 0 {
 		return
 	}
@@ -422,17 +417,23 @@ func (v *Validator) checkValue(def *registry.ElementNode, raw, element json.RawM
 	})
 }
 
-// checkValueless checks a primitive that has extensions and no value (json.html#primitive), at
-// fhirPath with its "_x" sibling element, against the fixed and pattern values of the definitions
-// that govern it, as walk layers them: node, the slices it reslices, and the elements a
-// contentReference points to. A primitive type's definition has none.
-func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
-	if v.values == nil {
-		return
+// checkValueless checks a primitive that has an id or extensions and no value (json.html#primitive),
+// at fhirPath with its "_x" sibling element, against the definitions that govern it, as walk layers
+// them: node, the slices it reslices, and the elements a contentReference points to. Their
+// invariants are evaluated on it, a primitive of its type with no value (ele-1 among them), and
+// their fixed and pattern values checked. A primitive type's definition has neither.
+func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	if objectSpans(element) == nil {
+		return // not an object: a JSON error the primitive phase reports
+	}
+	seen := map[string]bool{}
+	check := func(n *registry.ElementNode) {
+		v.evaluateValueless(n, choiceElementPath(n.Def.Path, typeCode), typeCode, element, fhirPath, seen, opts, result)
+		v.checkValue(n, nil, element, fhirPath, opts, result)
 	}
 	base := node
 	for n := node; n != nil; n = n.SliceOf {
-		v.checkValue(n, nil, element, fhirPath, opts, result)
+		check(n)
 		base = n
 	}
 	layerSD, layer := sd, base
@@ -441,9 +442,42 @@ func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *regis
 		if target == nil {
 			break
 		}
-		v.checkValue(target, nil, element, fhirPath, opts, result)
+		check(target)
 		layerSD, layer = tsd, target
 	}
+}
+
+// evaluateValueless evaluates def's invariants not evaluated yet (seen) on a primitive with no
+// value at fhirPath, whose "_x" sibling is element as the resource writes it: a primitive of the
+// type the model gives defPath, or else of typeCode, the element's type, carrying its id and
+// extensions. A profile's path below a data type ("Patient.name.family") is no path of the model.
+func (v *Validator) evaluateValueless(def *registry.ElementNode, defPath, typeCode string, element json.RawMessage, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
+	pending := pendingConstraints(def, seen)
+	if len(pending) == 0 {
+		return
+	}
+	t := typeOf(v.model(), defPath)
+	if t == "" && v.registry.IsPrimitiveType(typeCode) {
+		t = typeCode
+	}
+	v.evaluateConstraintsOn(func() fhirpath.Collection {
+		return fhirpath.Collection{types.NewObjectValueWithType(element, t)}
+	}, pending, fhirPath, defPath, opts, result)
+}
+
+// pendingConstraints are def's constraints with an expression that no definition of the value
+// has had evaluated yet (seen, by key and expression), which it records.
+func pendingConstraints(def *registry.ElementNode, seen map[string]bool) []registry.Constraint {
+	var pending []registry.Constraint
+	for _, c := range def.Def.Constraint {
+		k := c.Key + "\x00" + c.Expression
+		if c.Expression == "" || seen[k] {
+			continue
+		}
+		seen[k] = true
+		pending = append(pending, c)
+	}
+	return pending
 }
 
 // choiceElementPath renders the concrete path of a choice element for the type a value has:

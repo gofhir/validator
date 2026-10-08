@@ -1,0 +1,1 @@
+{"resourceType": "Bundle", "id": "b", "type": "transaction", "entry": [{"resource": {"resourceType": "Patient", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}}, "request": {"method": "POST", "url": "Patient"}}]}

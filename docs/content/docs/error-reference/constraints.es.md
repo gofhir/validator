@@ -5,20 +5,36 @@ description: "Errores relacionados con fallos en la evaluación de constraints F
 weight: 7
 ---
 
-Los errores de constraints ocurren cuando una invariante FHIRPath definida en el StructureDefinition se evalúa como `false` o encuentra un error de evaluación. FHIR define constraints (invariantes) en elementos usando expresiones FHIRPath. Cada constraint tiene una clave (ej., `ele-1`, `dom-6`), una severidad (`error` o `warning`), una descripción legible por humanos y una expresión FHIRPath que debe evaluarse como `true` para que el recurso sea válido.
+Los errores de constraints ocurren cuando una invariante FHIRPath definida en el StructureDefinition no se evalúa como `true`, o no se puede compilar o evaluar. FHIR define constraints (invariantes) en elementos usando expresiones FHIRPath. Cada constraint tiene una clave (ej., `ele-1`, `dom-6`), una severidad (`error` o `warning`), una descripción legible por humanos y una expresión FHIRPath que debe evaluarse como `true` para que el recurso sea válido.
 
 ## Códigos de Error
 
 | ID | Severidad | Mensaje |
 |----|-----------|---------|
 | `CONSTRAINT_FAILED` | varía | Constraint failed: {constraint}: '{human}' |
-| `CONSTRAINT_ERROR` | warning | Constraint '{constraint}' evaluation error: {error} |
+| `CONSTRAINT_COMPILE_ERROR` | error (warning en las definiciones de la propia especificación) | Could not compile constraint '{key}': {error} |
+| `CONSTRAINT_EVAL_ERROR` | warning | Could not evaluate constraint '{key}': {error} |
 
 ---
 
 ## CONSTRAINT_FAILED
 
-Un constraint FHIRPath se evaluó como `false`. La severidad de este issue está determinada por la definición del constraint en sí -- cada constraint declara si la violación es un `error` o un `warning`.
+Un constraint FHIRPath no se evaluó como `true`. La severidad de este issue está determinada por la definición del constraint en sí -- cada constraint declara si la violación es un `error` o un `warning`.
+
+Un invariante "must evaluate to true when run on the element" (conformance-rules.html#constraints): un único booleano es su valor, un resultado vacío falla y cualquier otro resultado se cumple. Así, `resolve().code.text = 'target'` falla donde la referencia no se resuelve, como lo evalúa el validador de HL7. Los invariantes se evalúan en todo elemento, incluido un primitivo que solo tiene id o extensions (`"_status": {...}` sin `status`).
+
+Algunos invariantes publicados son vacíos donde no deberían aplicar. Cada uno se corrige, en la versión en que se publicó y solo donde su expresión es la publicada, a la expresión que da una publicación oficial posterior, de la misma definición o del mismo constraint (`Constraint.source`):
+
+| Clave | Publicado en | Corregido desde |
+|-------|--------------|-----------------|
+| `ref-1` | R4 y R4B `Reference` (una referencia sin `reference`) | R5 |
+| `bdl-8` | R4 `Bundle.entry` (una entrada sin `fullUrl`) | R4B |
+| `ras-2` | R4 `RiskAssessment.prediction` (una predicción sin probabilidad) | R4B |
+| `pd-1`, `us-core-13` | US Core 5.0.1 y 6.1.0 `PractitionerRole` (`telecom or endpoint`, `... or healthcareService or location`: no es booleano con dos de ellos) | US Core 9.0.0 |
+| `vs-1` | Perfiles de signos vitales de R4, R4B y R5 (`$this as dateTime` sobre un Period) | US Core 9.0.0, que republica el mismo constraint corregido |
+| `vsd-0`, `csd-0`, `que-0`, `lib-0`, … | R4, 30 recursos canónicos (`name.matches(...)`, un recurso sin nombre) | R4B (`csd-0`) |
+
+Otros tres invariantes de R4 están mal publicados y se corrigen igual: `que-12` exige `enableBehavior` desde tres `enableWhen` (R4B: desde dos), `tim-9` no puede evaluarse con varios `when` (R4 y R4B, corregido desde R5) y `con-3` compara un CodeableConcept con un string (R4B, que exige clinicalStatus solo donde hay verificationStatus).
 
 **Ejemplo -- recurso inválido:**
 
@@ -87,32 +103,24 @@ La severidad de `CONSTRAINT_FAILED` no es fija. Se lee del campo `ElementDefinit
 Si `severity` es `"error"`, el issue es un error. Si `severity` es `"warning"`, el issue es un warning. Los perfiles pueden agregar nuevos constraints o cambiar la severidad del constraint (dentro de ciertos límites).
 
 {{< callout type="info" >}}
-Los constraints se evalúan usando FHIRPath, un lenguaje de navegación y extracción basado en rutas para FHIR. La expresión del constraint debe retornar un valor booleano. Cuando retorna `false`, el constraint se considera violado.
+Los constraints se evalúan usando FHIRPath, un lenguaje de navegación y extracción basado en rutas para FHIR. La expresión del constraint debería retornar un valor booleano. Cuando retorna `false`, o nada, el constraint se considera violado.
 {{< /callout >}}
 
 ---
 
-## CONSTRAINT_ERROR
+## CONSTRAINT_COMPILE_ERROR y CONSTRAINT_EVAL_ERROR
 
-La expresión FHIRPath de un constraint no se pudo evaluar debido a un error en tiempo de ejecución. Esto no necesariamente significa que el recurso sea inválido -- significa que el validador no pudo determinar si el constraint se satisface. Esto siempre se reporta como un warning.
+Una expresión que no compila no puede cumplirse: `CONSTRAINT_COMPILE_ERROR` es un error, reportado una vez por ubicación, como lo reporta el validador de HL7. En las definiciones de la propia especificación es un warning, porque el defecto es de la especificación, no de la instancia (el `eld-11` de R5 cita un string con comillas dobles).
 
-**Causas comunes:**
-
-- La expresión FHIRPath referencia un tipo de elemento que el motor no soporta completamente
-- La expresión usa una función FHIRPath que no está implementada
-- Ocurrió un error en tiempo de ejecución durante la evaluación de la expresión (ej., discrepancia de tipos en una comparación)
-
-**Ejemplo de salida:**
+Una expresión que compila pero falla al evaluarse es un invariante que no se cumple: `CONSTRAINT_FAILED` con la severidad del propio constraint y el error en su mensaje, como en el validador de HL7, que toma una excepción de su motor FHIRPath como un invariante fallido. Por ejemplo, `or` sobre una colección de dos ítems es un error en FHIRPath ("singleton evaluation of collections"):
 
 ```text
-WARNING: Constraint 'inv-1' evaluation error: Function 'iif' not implemented
-  Path: Observation
-  MessageID: CONSTRAINT_ERROR
+ERROR: Constraint failed: inv-1: '...' (could not be evaluated: SingletonExpectedError: or expects a single item on each side, got 2 on the left)
+  Path: Patient
+  MessageID: CONSTRAINT_FAILED
 ```
 
-{{< callout type="warning" >}}
-Los errores de evaluación de constraints indican una limitación del motor FHIRPath, no necesariamente un problema con el recurso. Si los encuentras consistentemente, verifica si la función FHIRPath utilizada en el constraint está soportada por el GoFHIR Validator.
-{{< /callout >}}
+Solo una evaluación detenida por el límite de tiempo del propio validador no dice nada de la instancia: es `CONSTRAINT_EVAL_ERROR`, un warning.
 
 ---
 

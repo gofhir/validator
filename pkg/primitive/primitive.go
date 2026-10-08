@@ -189,7 +189,30 @@ func (v *Validator) validateElement(
 			continue
 		}
 
+		if items, ok := value.([]any); ok {
+			v.validateItems(items, data["_"+key], resolved, elementSDPath, elementFHIRPath, idx, ctx, result)
+			continue
+		}
 		v.validateValue(value, resolved, elementSDPath, elementFHIRPath, idx, ctx, result)
+	}
+}
+
+// validateItems validates the items of an array. A null item of a primitive type is a primitive
+// with no value where the "_key" sibling's item at the same index is an object, its id and
+// extensions: "JSON null values are used to fill out both arrays so that the id and/or extension
+// are aligned" (json.html#primitive). Only a primitive has such a sibling.
+func (v *Validator) validateItems(items []any, sibling any, resolved *resolvedElement, sdPath, fhirPath string, idx *elementIndex, ctx *validationContext, result *issue.Result) {
+	var elements []any
+	if v.registry.IsPrimitiveTypeCode(resolved.resolvedType) {
+		elements, _ = sibling.([]any)
+	}
+	for i, item := range items {
+		if item == nil && i < len(elements) {
+			if _, isObject := elements[i].(map[string]any); isObject {
+				continue
+			}
+		}
+		v.validateValue(item, resolved, sdPath, fmt.Sprintf("%s[%d]", fhirPath, i), idx, ctx, result)
 	}
 }
 
