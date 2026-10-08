@@ -1,0 +1,29 @@
+{
+ "resourceType": "Patient",
+ "id": "p",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/vs/StructureDefinition/pid"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "contained": [
+  {
+   "resourceType": "Organization",
+   "id": "org",
+   "name": "x"
+  }
+ ],
+ "identifier": [
+  {
+   "system": "http://x",
+   "value": "1",
+   "assigner": {
+    "reference": "#org"
+   }
+  }
+ ]
+}

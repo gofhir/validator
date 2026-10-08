@@ -1,0 +1,54 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "outer",
+ "url": "https://example.org/fhir/vs/StructureDefinition/outer",
+ "version": "0.1.0",
+ "name": "outer",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "resource"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Bundle.entry:doc",
+    "path": "Bundle.entry",
+    "sliceName": "doc",
+    "min": 1,
+    "max": "1"
+   },
+   {
+    "id": "Bundle.entry:doc.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Bundle",
+      "profile": [
+       "https://example.org/fhir/vs/StructureDefinition/inner"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

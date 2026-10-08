@@ -1,0 +1,120 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Patient/d",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "d",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/nm/StructureDefinition/pc"
+     ]
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/b"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/z",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "z",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/nm/StructureDefinition/pz"
+     ]
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/a"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/a",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "a",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "gender": "female",
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/b"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/b",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "b",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/a"
+      },
+      "type": "seealso"
+     },
+     {
+      "other": {
+       "reference": "Patient/c"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/c",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "c",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "gender": "male",
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/b"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  }
+ ]
+}

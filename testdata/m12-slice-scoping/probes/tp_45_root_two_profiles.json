@@ -1,0 +1,28 @@
+{
+ "resourceType": "Observation",
+ "id": "o",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj",
+   "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj2"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "p",
+   "gender": "male"
+  }
+ ],
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "reference": "#p"
+ }
+}

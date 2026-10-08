@@ -1,0 +1,73 @@
+{
+ "resourceType": "Bundle",
+ "id": "dc",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Observation/c",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "c",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/nm/StructureDefinition/dpcsw"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "Patient/a"
+    },
+    "focus": [
+     {
+      "reference": "Patient/a"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/a",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "a",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/b"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/b",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "b",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/a"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  }
+ ]
+}

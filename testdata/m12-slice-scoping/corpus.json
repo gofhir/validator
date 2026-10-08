@@ -121,6 +121,13 @@
       "files": ["testdata/m12-slice-scoping/probes/fp_*.json"]
     },
     {
+      "name": "target-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.targets-0.1.0.tgz",
+                       "testdata/m12-slice-scoping/packages/acme.nm-0.1.0.tgz",
+                       "testdata/m12-slice-scoping/packages/acme.vscope-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/tp_*.json", "testdata/m12-slice-scoping/probes/vs_*.json"]
+    },
+    {
       "name": "canonical-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.canonicals-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/cn_*.json"]

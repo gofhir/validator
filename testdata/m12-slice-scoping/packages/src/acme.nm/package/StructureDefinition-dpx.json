@@ -1,0 +1,54 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "dpx",
+ "url": "https://example.org/fhir/nm/StructureDefinition/dpx",
+ "version": "0.1.0",
+ "name": "dpx",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.link",
+    "path": "Patient.link",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "other.resolve()"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.link:t",
+    "path": "Patient.link",
+    "sliceName": "t",
+    "min": 0,
+    "max": "*"
+   },
+   {
+    "id": "Patient.link:t.other",
+    "path": "Patient.link.other",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/nm/StructureDefinition/dlp"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

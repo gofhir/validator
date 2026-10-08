@@ -1,0 +1,57 @@
+{
+ "resourceType": "Bundle",
+ "id": "out",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/vs/StructureDefinition/outer"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:33333333-3333-3333-3333-333333333333",
+   "resource": {
+    "resourceType": "Bundle",
+    "id": "in",
+    "type": "collection",
+    "entry": [
+     {
+      "fullUrl": "http://ex.org/fhir/Observation/o",
+      "resource": {
+       "resourceType": "Observation",
+       "id": "o",
+       "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+       },
+       "status": "final",
+       "code": {
+        "text": "x"
+       },
+       "subject": {
+        "reference": "Patient/p"
+       }
+      }
+     },
+     {
+      "fullUrl": "http://ex.org/fhir/Patient/p",
+      "resource": {
+       "resourceType": "Patient",
+       "id": "p",
+       "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+       },
+       "identifier": [
+        {
+         "system": "http://x",
+         "value": "1"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

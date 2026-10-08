@@ -50,6 +50,12 @@ func TestVersionedCanonicals(t *testing.T) {
 			"REFERENCE_INVALID_TARGET @ Bundle.entry[0].resource.subject", // its type's definition still applies
 		}},
 		{"12_root_same_missing_twice", []string{"PROFILE_NOT_FOUND @ Patient.meta.profile[0]", "PROFILE_NOT_FOUND @ Patient.meta.profile[1]"}},
+		// The target a reference resolves to conforms to one of the profiles of its type (B5b).
+		{"13_target_not_conformant", []string{"REFERENCE_TARGET_PROFILE @ Bundle.entry[0].resource.subject"}},
+		{"14_target_conformant", nil},
+		{"15_contained_target_not_conformant", []string{"REFERENCE_TARGET_PROFILE @ Observation.subject"}},
+		{"16_contained_target_conformant", nil},
+		{"17_target_unresolved", nil}, // not checked
 	} {
 		t.Run(tt.probe, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join(dir, "probes", "cn_"+tt.probe+".json"))

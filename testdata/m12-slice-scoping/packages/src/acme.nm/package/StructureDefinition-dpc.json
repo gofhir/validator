@@ -1,0 +1,46 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "dpc",
+ "url": "https://example.org/fhir/nm/StructureDefinition/dpc",
+ "version": "0.1.0",
+ "name": "dpc",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.subject",
+    "path": "Observation.subject",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/nm/StructureDefinition/dpa"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Observation.focus",
+    "path": "Observation.focus",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/nm/StructureDefinition/dpx"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

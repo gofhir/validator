@@ -1,0 +1,63 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "inner7b",
+ "url": "https://example.org/fhir/vs/StructureDefinition/inner7b",
+ "version": "0.1.0",
+ "name": "inner7b",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "resource"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Bundle.entry:obs",
+    "path": "Bundle.entry",
+    "sliceName": "obs",
+    "min": 1,
+    "max": "1",
+    "constraint": [
+     {
+      "key": "vs-3",
+      "severity": "error",
+      "human": "obs entry fullUrl starts with urn:uuid:9",
+      "expression": "fullUrl.startsWith('urn:uuid:9')",
+      "source": "https://example.org/fhir/vs/StructureDefinition/inner7b"
+     }
+    ]
+   },
+   {
+    "id": "Bundle.entry:obs.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Observation",
+      "profile": [
+       "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

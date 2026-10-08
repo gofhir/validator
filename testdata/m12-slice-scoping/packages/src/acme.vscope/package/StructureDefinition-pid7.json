@@ -1,0 +1,59 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pid7",
+ "url": "https://example.org/fhir/vs/StructureDefinition/pid7",
+ "version": "0.1.0",
+ "name": "pid7",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn",
+    "min": 0,
+    "max": "1",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "https://example.org/fhir/vs/StructureDefinition/idp7"
+      ]
+     }
+    ],
+    "constraint": [
+     {
+      "key": "vs-2",
+      "severity": "error",
+      "human": "mrn value starts with A",
+      "expression": "value.startsWith('A')",
+      "source": "https://example.org/fhir/vs/StructureDefinition/pid7"
+     }
+    ]
+   }
+  ]
+ }
+}

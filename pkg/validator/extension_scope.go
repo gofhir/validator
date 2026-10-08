@@ -80,7 +80,7 @@ func (v *Validator) extensionData(ctx context.Context, data map[string]any, raw 
 		return d
 	}
 	if rt, _ := vs.scope.Container[resourceTypeKey].(string); rt == bundleType {
-		d.Bundle = vs.scope.Container
+		d.Bundle, d.Outer = vs.scope.Container, vs.scope.Outer
 	}
 	root := vs.scope.RootResource
 	if root == nil || reflect.ValueOf(root).Pointer() == reflect.ValueOf(data).Pointer() {

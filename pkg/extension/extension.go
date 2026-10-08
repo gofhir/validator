@@ -87,9 +87,9 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 
 // checkResourceContexts checks the contexts of use in d's resource.
 func (v *Validator) checkResourceContexts(ctx context.Context, d Data, resourceType string, result *issue.Result) {
-	in := place{root: ScopeRoot{Raw: d.Raw, Bundle: d.Bundle, Exact: d.Exact}, exact: d.Exact}
+	in := place{root: ScopeRoot{Raw: d.Raw, Bundle: d.Bundle, Outer: d.Outer, Exact: d.Exact}, exact: d.Exact}
 	if d.Container != nil && d.At != "" && v.fhirpath != nil {
-		container := v.fhirpath.Scope(ctx, ScopeRoot{Resource: d.Container, Bundle: d.Bundle, Exact: d.Exact})
+		container := v.fhirpath.Scope(ctx, ScopeRoot{Resource: d.Container, Bundle: d.Bundle, Outer: d.Outer, Exact: d.Exact})
 		in = place{local: d.At, parent: container, contained: true, exact: d.Exact}
 	}
 	v.checkContexts(ctx, d.Resource, resourceType, in, result)
@@ -118,6 +118,8 @@ type Data struct {
 	// Bundle is the Bundle being validated, which resolve() finds references in, when Resource is
 	// in one; a Bundle validated is its own.
 	Bundle map[string]any
+	// Outer are the Bundles that hold Bundle, the innermost first, where resolve() looks after it.
+	Outer []map[string]any
 	// Container is the resource that contains Resource, and At where Resource is in it
 	// ("Observation.contained[0]"), when Resource is a contained resource validated on its own (a
 	// slice's conformance check): its %rootResource.

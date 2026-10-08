@@ -3,7 +3,8 @@
 This directory holds the evidence behind
 [plan A](../../docs/plans/2026-09-27-slice-scoped-element-resolution.md) and
 [plan B](../../docs/plans/2026-09-27-profile-false-negatives.md). Everything here is input or
-recorded output; nothing is asserted by a test yet.
+recorded output. The probes of plan B's later steps (`cn_*`, `tp_*`, `vs_*`) are also asserted by
+tests in `pkg/validator`.
 
 | Path | Contents |
 | --- | --- |
@@ -15,6 +16,9 @@ recorded output; nothing is asserted by a test yet.
 | `packages/acme.multimatch-0.1.0.tgz` | One invented profile with overlapping `pattern` slices (probes `r2_M*`). Its snapshot was assembled by hand: the core `Patient` snapshot plus two slices. |
 | `packages/acme.fixedpattern-0.1.0.tgz` | Fixed and pattern values on every layer: a slice, a type profile, a Bundle entry's and a contained resource's profile, an extension definition, a component slice, contentReference, decimals (probes `fp_*`, plan B, B3). Sources in `packages/src/acme.fixedpattern/package`. |
 | `packages/acme.canonicals-0.1.0.tgz` | A Patient profile and an Observation profile whose `subject` pins the Patient profile's version (`targetProfile`), for profiles declared by Bundle entries, contained and root resources, with and without a version, and a pinned version that is not loaded (probes `cn_*`, plan B, B5). Sources in `packages/src/acme.canonicals/package`. |
+| `packages/acme.targets-0.1.0.tgz` | Profiles whose references' targetProfile is a Patient profile requiring an identifier, with `Resource` and `DomainResource` alternatives (probes `tp_*`, plan B, B5b): relative and absolute references, fullUrl bases, nested Bundles, versions, contained targets, cycles. Sources in `packages/src/acme.targets/package`. |
+| `packages/acme.nm-0.1.0.tgz` | Patient profiles whose targets form a cycle through a slice that a profile discriminator assigns (probes `tp_22` to `tp_25`, plan B, B5b): an answer that relied on an assumed cycle is not kept when the cycle fails; and profiles (`dpa`, `dpx`, `dlp`, `dpc`, `dpcsw`) whose discriminator's check meets itself again through a target's (probes `tp_36` to `tp_38`), or within itself (`ep` to `eys`, probes `tp_39`, `tp_40`). Sources in `packages/src/acme.nm/package`. |
+| `packages/acme.vscope-0.1.0.tgz` | Bundle profiles whose entries are sliced by profile, one nesting another, and a Patient profile whose `identifier` is sliced by a profile with a required `assigner` (probes `vs_*`, plan B, B5b): a value checked against a profile resolves its references where it is, a nested Bundle's entries in that Bundle, `urn:uuid:` references among them, a datatype's `#id` among its resource's contained resources, a target's `#id` among its own; resolve() in a nested Bundle, then outwards, an extension's context invariant's too, and a target found outwards resolving its own references there; a reference several entries match. Sources in `packages/src/acme.vscope/package`. |
 | `packages/acme.invariants-0.1.0.tgz` | Profiles with invariants on decimals at every depth, on `resolve()` within and between Bundles, and on fragment references (probes `ci_*`, plan C). Sources in `packages/src/acme.invariants/package`. |
 | `packages/acme.ctx-0.1.0.tgz` | One extension per kind of context of use (probes `uc_*`): element contexts by element id, type, ancestor and path; extension and fhirpath contexts; no context; a context invariant. |
 | `packages/acme.extdefs-0.1.0.tgz` | Extensions validated against their own definitions (probes `xd*`). `ext-pair`, `ext-req` and `ext-xp` allow `Resource` as well as `Element`, so that the probes using them on a resource's root do not meet decision B-D2. |

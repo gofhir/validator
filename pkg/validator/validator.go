@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/gofhir/validator/v2/pkg/binding"
@@ -563,7 +564,9 @@ func New(opts ...Option) (*Validator, error) {
 	// An extension is checked against the definition its url names by the phases that walk
 	// definitions, as by the element that holds it.
 	v.cardValidator = cardinality.New(reg, cardinality.WithDefinitions(v.extValidator))
-	v.refValidator = reference.New(reg)
+	// A reference's target is checked against the profiles its element allows with the same
+	// conformance check and resolution slice matching uses.
+	v.refValidator = reference.New(reg, reference.WithTargets(conformer{v: v, assume: true}))
 	// Pass termRegistry to constraint validator for memberOf() support.
 	// When NoTerminology is set, pass nil to disable terminology in FHIRPath.
 	constraintTermReg := termReg
@@ -753,10 +756,16 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	// resource's numbers as the JSON spells them.
 	ctx = withExact(ctx, data, resource)
 	ctx = withConformState(ctx)
+	ctx = reference.WithIndexes(ctx)
 	ctx = constraint.WithReportScope(ctx)
 	ctx = withExtensionScope(ctx)
+	reported := map[string]bool{}
 	for _, sd := range profilesToValidate {
+		from := len(result.Issues)
 		v.validateAgainstProfile(ctx, data, resource, sd, nil, result)
+		// An issue a profile validated before already reported is reported once, as the HL7
+		// validator reports it, but for a cardinality, which each profile sets (HL7: "(from X)").
+		result.Issues = dropReported(result.Issues, from, reported)
 	}
 
 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
@@ -778,6 +787,13 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 // The value scope is nil for the resource being validated, and set for a value checked for
 // conformance inside it (a slice's profile discriminator), which may be a datatype or an extension.
 func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]any, rawJSON []byte, sd *registry.StructureDefinition, vs *valueScope, result *issue.Result) {
+	if rt, _ := data[resourceTypeKey].(string); vs != nil && rt == bundleType && !sameMap(vs.scope.Container, data) {
+		// A Bundle checked as a value is where the references of its entries resolve, as the
+		// Bundle validated is (bundle.html#references), and resolve() then the Bundles that hold it.
+		in := *vs
+		in.scope = constraint.ScopeInBundle(vs.scope, data)
+		vs = &in
+	}
 	// Phase 1: Structural validation (uses cached element indexes)
 	structResult := v.structValidator.ValidateData(data, sd)
 	result.Merge(structResult)
@@ -810,15 +826,36 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	}
 	result.Stats.PhasesRun++
 
-	// Phase 6: Reference validation
-	// For Bundles, create a BundleContext to validate urn:uuid references
-	var bundleCtx *reference.BundleContext
+	// Phase 6: Reference validation. A Bundle's references resolve among its entries.
 	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
-		bundleCtx = reference.NewBundleContext(data)
 		// Validate Bundle-specific rules: fullUrl must be consistent with resource.id
 		reference.ValidateBundleFullUrls(data, result)
 	}
-	v.refValidator.ValidateDataWithBundleContext(ctx, data, sd, bundleCtx, result)
+	refCtx := ctx
+	if vs != nil {
+		// A value inside another resource resolves references in the Bundle that holds it, not in
+		// the one the check that reached it resolves in.
+		var container map[string]any
+		if rt, _ := vs.scope.Container[resourceTypeKey].(string); rt == bundleType {
+			container = vs.scope.Container
+		}
+		refCtx = reference.WithContainer(ctx, container, vs.scope.Outer...)
+		refCtx = reference.WithHoldingResource(reference.WithContainingResource(refCtx, nil), nil)
+		_, isResource := data[resourceTypeKey]
+		switch {
+		case vs.scope.RootResource != nil && constraint.IsContainedIn(vs.scope.RootResource, data):
+			// A contained resource resolves "#id" among its container's contained resources
+			// (references.html#contained).
+			refCtx = reference.WithContainingResource(refCtx, vs.scope.RootResource)
+		case !isResource && vs.scope.Resource != nil && !sameMap(vs.scope.Resource, vs.scope.RootResource):
+			// A datatype in a contained resource resolves as that resource does.
+			refCtx = reference.WithContainingResource(refCtx, vs.scope.RootResource)
+		case !isResource && vs.scope.Resource != nil:
+			// A datatype resolves as the resource it is in.
+			refCtx = reference.WithHoldingResource(refCtx, vs.scope.Resource)
+		}
+	}
+	v.refValidator.ValidateDataWithBundleContext(refCtx, data, sd, nil, result)
 	result.Stats.PhasesRun++
 
 	// Phase 7: Constraint validation (FHIRPath, uses cached expressions)
@@ -851,6 +888,34 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 		v.ucumValidator.ValidateData(data, sd, result)
 	}
 	result.Stats.PhasesRun++
+}
+
+// dropReported removes, from the issues a profile reported, those at from and after, the ones the
+// profiles validated before reported, which it records in reported; a cardinality's are kept
+// (profileCardinality).
+func dropReported(issues []issue.Issue, from int, reported map[string]bool) []issue.Issue {
+	for _, is := range issues[:from] {
+		reported[issueKey(is)] = true
+	}
+	kept := issues[:from]
+	for _, is := range issues[from:] {
+		if !reported[issueKey(is)] || profileCardinality[issue.DiagnosticID(is.MessageID)] {
+			kept = append(kept, is)
+		}
+	}
+	return kept
+}
+
+// profileCardinality are the diagnostics of a cardinality a profile sets: two profiles that set the
+// same are each reported, as the HL7 validator reports each with its profile
+// (Validation_VAL_Profile_Minimum, _Maximum, _Minimum_SLICE).
+var profileCardinality = map[issue.DiagnosticID]bool{
+	issue.DiagCardinalityMin: true, issue.DiagCardinalityMax: true,
+	issue.DiagSlicingCardinalityMin: true, issue.DiagSlicingCardinalityMax: true,
+}
+
+func issueKey(is issue.Issue) string {
+	return string(is.Severity) + "\x00" + is.MessageID + "\x00" + strings.Join(is.Expression, ",") + "\x00" + is.Diagnostics
 }
 
 // enrichLocations adds each issue's line and column in the source JSON, locating every issue in

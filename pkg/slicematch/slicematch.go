@@ -23,11 +23,13 @@ import (
 // Scope carries the resources a value sits in. Constraints read the first two as %resource and
 // %rootResource (fhirpath.html#variables): the resource the value is in, and the resource that
 // contains it when it is a contained resource, else the same one. Container is where references
-// resolve: the Bundle, or the resource, being validated.
+// resolve: the Bundle, or the resource, being validated. Outer are the Bundles that hold
+// Container, the innermost first, where resolve() looks after it, as the HL7 validator does.
 type Scope struct {
 	Resource     map[string]any
 	RootResource map[string]any
 	Container    map[string]any
+	Outer        []map[string]any
 }
 
 // Conformer answers whether value conforms to profile (discriminator type "profile"). The
@@ -37,9 +39,18 @@ type Conformer interface {
 }
 
 // Resolver follows a reference made from within scope (discriminator function resolve()): a
-// contained resource of the resource that makes it, or an entry of the Bundle being validated.
+// contained resource of the resource that makes it, or an entry of scope's Container, else of the
+// Bundles that hold it.
 type Resolver interface {
 	Resolve(ref string, scope Scope) (map[string]any, bool)
+}
+
+// ScopedResolver is a Resolver that also gives the scope of the resource it finds: the Bundle it
+// was found in, and those that hold that one, where the resource's own references resolve. A
+// Resolver that is not one leaves the resource in the scope of the reference.
+type ScopedResolver interface {
+	Resolver
+	ResolveScoped(ref string, scope Scope) (map[string]any, Scope, bool)
 }
 
 // Membership is the answer to a ValueSet membership question.
@@ -422,6 +433,27 @@ func (m *Matcher) profileMatches(ctx context.Context, req Request, slice *regist
 	return verdict{ok: ok, constrained: true, note: note}
 }
 
+// valueScope is the scope of e's value. A resource value is its own %resource. Its %rootResource
+// is the resource containing it when it is contained there, else itself: a Bundle entry is not
+// contained (fhirpath.html#variables). References still resolve in the same container. A datatype
+// value keeps the resources it sits in. A value resolve() reached is in the scope of the resource
+// it is in.
+func valueScope(req Request, e end) Scope {
+	scope := req.Scope
+	if e.in != nil {
+		scope = *e.in
+	}
+	res, _ := e.value.(map[string]any)
+	if _, isResource := res[resourceTypeKey]; !isResource {
+		return scope
+	}
+	root := res
+	if req.Containment != nil && req.Containment(scope.RootResource, res) {
+		root = scope.RootResource
+	}
+	return Scope{Resource: res, RootResource: root, Container: scope.Container, Outer: scope.Outer}
+}
+
 func (m *Matcher) profileConforms(ctx context.Context, req Request, slice *registry.ElementNode, ends []end) (bool, *Note) {
 	seen := false
 	for _, e := range ends {
@@ -444,21 +476,7 @@ func (m *Matcher) profileConforms(ctx context.Context, req Request, slice *regis
 				return false, &Note{Kind: NoteCannotEvaluate, Slice: slice,
 					Message: fmt.Sprintf("profile %s on %s could not be resolved (%s)", p, slice.Def.ID, res)}
 			}
-			// A resource value is its own %resource. Its %rootResource is the resource containing
-			// it when it is contained there, else itself: a Bundle entry is not contained
-			// (fhirpath.html#variables). References still resolve in the same container. A
-			// datatype value keeps the resources it sits in.
-			scope := req.Scope
-			if res, _ := e.value.(map[string]any); res != nil {
-				if _, isResource := res[resourceTypeKey]; isResource {
-					root := res
-					if req.Containment != nil && req.Containment(req.Scope.RootResource, res) {
-						root = req.Scope.RootResource
-					}
-					scope = Scope{Resource: res, RootResource: root, Container: req.Scope.Container}
-				}
-			}
-			if m.conformer.Conforms(ctx, e.value, psd, scope) {
+			if m.conformer.Conforms(ctx, e.value, psd, valueScope(req, e)) {
 				conforms = true
 				break
 			}

@@ -314,7 +314,12 @@ func TestValidateTargetProfile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := issue.NewResult()
-			v.validateTargetProfile(tt.extractedType, tt.refStr, tt.elemDef, "Test.reference", tt.bundleCtx, nil, result)
+			rc := &refContext{bundle: tt.bundleCtx}
+			target, targetType := v.targetOf(tt.refStr, rc)
+			if tt.extractedType != "" {
+				targetType = tt.extractedType
+			}
+			v.validateTargetProfile(targetType, target, tt.refStr, tt.elemDef, "Test.reference", rc, result)
 
 			hasError := result.HasErrors()
 			if hasError != tt.expectError {

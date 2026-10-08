@@ -1,0 +1,35 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "idp8",
+ "url": "https://example.org/fhir/vs/StructureDefinition/idp8",
+ "version": "0.1.0",
+ "name": "idp8",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.assigner",
+    "path": "Identifier.assigner",
+    "min": 1,
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/vs/StructureDefinition/org8"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

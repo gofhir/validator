@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/gofhir/fhirpath/eval"
+
+	"github.com/gofhir/validator/v2/pkg/slicematch"
 )
 
 // fhirpathResolver adapts Bundle data to the eval.Resolver interface
@@ -110,6 +112,21 @@ func ResolveInBundle(bundle map[string]any, reference string) (map[string]any, b
 		}
 	}
 	return nil, false
+}
+
+// ScopeInBundle returns s for a value inside bundle, a Bundle s's Container holds or is: bundle is
+// where its references resolve, then the Bundles that hold it (resolve(), as the HL7 validator
+// looks).
+func ScopeInBundle(s slicematch.Scope, bundle map[string]any) slicematch.Scope {
+	if reflect.ValueOf(bundle).Pointer() == reflect.ValueOf(s.Container).Pointer() {
+		return s
+	}
+	in := s
+	in.Container = bundle
+	if rt, _ := s.Container[resourceTypeKey].(string); rt == bundleType {
+		in.Outer = append([]map[string]any{s.Container}, s.Outer...)
+	}
+	return in
 }
 
 // ContainedByID returns the contained resource of resource with this id: the target of the

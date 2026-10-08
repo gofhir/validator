@@ -1,0 +1,131 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Patient/y2",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "y2",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/nm/StructureDefinition/eys"
+     ]
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/z"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/z",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "z",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/w"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/y1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "y1",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/nm/StructureDefinition/eyr"
+     ]
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/u"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/u",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "u",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/v"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/v",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "v",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/w"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/w",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "w",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/v"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  }
+ ]
+}

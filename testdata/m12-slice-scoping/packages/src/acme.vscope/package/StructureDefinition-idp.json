@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "idp",
+ "url": "https://example.org/fhir/vs/StructureDefinition/idp",
+ "version": "0.1.0",
+ "name": "idp",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.system",
+    "path": "Identifier.system",
+    "min": 1
+   }
+  ]
+ }
+}
