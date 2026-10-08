@@ -133,6 +133,17 @@ type CodeResult struct {
 	// language.
 	DisplayLanguageHonored bool
 
+	// DisplayLanguage is the language Display is in (the CodeSystem's
+	// language), empty when unknown.
+	DisplayLanguage string
+
+	// Designations are the concept's additional representations
+	// (CodeSystem.concept.designation), each in its language, empty when the
+	// backend does not give them. Which of them a Coding.display may be depends
+	// on the language asked for: the binding phase accepts one with no
+	// language, or in that language or a language it is a variant of. Read only.
+	Designations []Designation
+
 	// SystemInValueSet reports whether the queried system is among the
 	// ValueSet's declared systems, so callers can apply extensible binding
 	// semantics without holding a local copy of the ValueSet. Meaningful only

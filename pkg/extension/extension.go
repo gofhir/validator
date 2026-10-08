@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gofhir/validator/v2/internal/exactjson"
+	"github.com/gofhir/validator/v2/internal/reslang"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/primitive"
 	"github.com/gofhir/validator/v2/pkg/registry"
@@ -139,8 +140,11 @@ func (v *Validator) ValidateDataWith(ctx context.Context, d Data, sd *registry.S
 	// Each extension's context of use, in this resource and the resources it holds.
 	v.checkResourceContexts(ctx, d, resourceType, result)
 
-	// Validate extensions at root level and recursively
+	// Validate extensions at root level and recursively, a coded value's display in the
+	// resource's language
+	ctx = reslang.With(ctx, resource)
 	v.validateElement(ctx, resource, resourceType, result)
+	languages := reslang.NewWalk(ctx, resourceType)
 
 	// Walk all nested resources (contained + Bundle entries) using the generic walker.
 	v.walker.Walk(resource, resourceType, resourceType, func(wctx *walker.ResourceContext) bool {
@@ -149,8 +153,9 @@ func (v *Validator) ValidateDataWith(ctx context.Context, d Data, sd *registry.S
 			return true
 		}
 
-		// Validate extensions in the nested resource using its own resourceType as context
-		v.validateElement(ctx, wctx.Data, wctx.FHIRPath, result)
+		// Validate extensions in the nested resource using its own resourceType as context, in
+		// its language or else its container's
+		v.validateElement(languages.Context(ctx, wctx), wctx.Data, wctx.FHIRPath, result)
 		return true
 	})
 }
@@ -177,14 +182,16 @@ func (v *Validator) validateElement(ctx context.Context, data map[string]any, ba
 
 		elementPath := fmt.Sprintf("%s.%s", basePath, key)
 
+		// A resource held in an element (Parameters.parameter.resource), which the walk does not
+		// visit, is in its own language, or else in the language of the resource that holds it.
 		switch val := value.(type) {
 		case map[string]any:
-			v.validateElement(ctx, val, elementPath, result)
+			v.validateElement(reslang.In(ctx, val), val, elementPath, result)
 		case []any:
 			for i, item := range val {
 				itemPath := fmt.Sprintf("%s[%d]", elementPath, i)
 				if mapItem, ok := item.(map[string]any); ok {
-					v.validateElement(ctx, mapItem, itemPath, result)
+					v.validateElement(reslang.In(ctx, mapItem), mapItem, itemPath, result)
 				}
 			}
 		}
@@ -757,7 +764,7 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 }
 
 // validateExtensionBinding validates the binding on an extension's value[x].
-func (v *Validator) validateExtensionBinding(ctx context.Context, value any, binding *registry.Binding, valuePath string, result *issue.Result) {
+func (v *Validator) validateExtensionBinding(ctx context.Context, value any, bound *registry.Binding, valuePath string, result *issue.Result) {
 	if v.bindValidator == nil {
 		return // binding validation not wired
 	}
@@ -767,5 +774,5 @@ func (v *Validator) validateExtensionBinding(ctx context.Context, value any, bin
 	// instead of aggregating a CodeableConcept, and treated an unresolvable binding
 	// as nothing at all. An extension value is bound like any other element and is
 	// now validated like one.
-	v.bindValidator.ValidateValueBinding(ctx, value, binding, valuePath, result)
+	v.bindValidator.ValidateValueBinding(ctx, value, bound, valuePath, result)
 }
