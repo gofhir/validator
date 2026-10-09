@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gofhir/validator/v2/internal/reslang"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/terminology"
@@ -109,8 +110,10 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 		return
 	}
 
-	// Validate root resource bindings
+	// Validate root resource bindings, in its language
+	ctx = reslang.With(ctx, resource)
 	v.validateElement(ctx, resource, sd, resourceType, result)
+	languages := reslang.NewWalk(ctx, resourceType)
 
 	// Walk all nested resources (contained + Bundle entries) using the generic walker.
 	// This replaces the duplicated validateContainedBindings, validateBundleEntryBindings,
@@ -121,8 +124,8 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 			return true
 		}
 
-		// Validate bindings in the nested resource
-		v.validateElementWithPaths(ctx, rc.Data, rc.SD, rc.ResourceType, rc.FHIRPath, result)
+		// Validate bindings in the nested resource, in its language or else its container's
+		v.validateElementWithPaths(languages.Context(ctx, rc), rc.Data, rc.SD, rc.ResourceType, rc.FHIRPath, result)
 		return true
 	})
 }
@@ -701,7 +704,7 @@ func (v *Validator) validateDisplayMismatch(ctx context.Context, system, systemV
 		// would say nothing about the submitted one.
 		return
 	}
-	if strings.EqualFold(providedDisplay, res.Display) {
+	if validDisplay(providedDisplay, res, reslang.Of(ctx)) {
 		return
 	}
 
@@ -714,6 +717,44 @@ func (v *Validator) validateDisplayMismatch(ctx context.Context, system, systemV
 		},
 		fhirPath+".display",
 	)
+}
+
+// validDisplay reports whether display names the concept res describes in the language asked
+// for: the resource's (Resource.language), or else the CodeSystem's. Valid are the designations
+// with no language (a synonym), those in that language or in one it is a variant of ("de" for
+// "de-CH", languages.html), and the concept's display when the CodeSystem's language is that or
+// it does not say. When the concept has no name in that language, its display is valid too: there
+// is nothing else to write it with. The HL7 validator checks a display the same way, with two
+// differences: with no Resource.language it asks for its JVM's locale (6.10.2), where the
+// CodeSystem's language does not depend on where the validator runs, as the specification sets no
+// default; and it compares language tags with their case, which BCP 47 says does not matter
+// (rfc5646 2.1.1). A display's case is ignored, as HL7 ignores it.
+func validDisplay(display string, res terminology.CodeResult, asked string) bool {
+	if asked == "" {
+		asked = res.DisplayLanguage
+	}
+	inAsked := res.DisplayLanguage == "" || languageMatches(res.DisplayLanguage, asked)
+	if inAsked && strings.EqualFold(display, res.Display) {
+		return true
+	}
+	for _, d := range res.Designations {
+		if d.Language == "" || languageMatches(d.Language, asked) {
+			inAsked = inAsked || d.Language != ""
+			if strings.EqualFold(display, d.Value) {
+				return true
+			}
+		}
+	}
+	return !inAsked && strings.EqualFold(display, res.Display)
+}
+
+// languageMatches reports whether a name in language tag serves for asked: the same language, or
+// one asked is a variant of ("de" for "de-CH"; BCP-47 tags, compared ignoring case).
+func languageMatches(tag, asked string) bool {
+	if asked == "" {
+		return false
+	}
+	return strings.EqualFold(tag, asked) || (len(asked) > len(tag) && strings.EqualFold(asked[:len(tag)], tag) && asked[len(tag)] == '-')
 }
 
 // reportBindingViolation reports a binding violation based on binding strength.

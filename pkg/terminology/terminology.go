@@ -58,14 +58,17 @@ type Filter struct {
 
 // CodeSystem represents a FHIR CodeSystem resource.
 type CodeSystem struct {
-	ResourceType string           `json:"resourceType"`
-	ID           string           `json:"id"`
-	URL          string           `json:"url"`
-	Version      string           `json:"version"`
-	Name         string           `json:"name"`
-	Status       string           `json:"status"`
-	Content      string           `json:"content"` // not-present | example | fragment | complete | supplement
-	Concept      []CodeSystemCode `json:"concept,omitempty"`
+	ResourceType string `json:"resourceType"`
+	ID           string `json:"id"`
+	URL          string `json:"url"`
+	Version      string `json:"version"`
+	Name         string `json:"name"`
+	Status       string `json:"status"`
+	Content      string `json:"content"` // not-present | example | fragment | complete | supplement
+	// Language is the language its displays are in (Resource.language), empty when it does not
+	// say.
+	Language string           `json:"language,omitempty"`
+	Concept  []CodeSystemCode `json:"concept,omitempty"`
 }
 
 // CodeSystemCode represents a code in a CodeSystem.
@@ -75,6 +78,15 @@ type CodeSystemCode struct {
 	Definition string               `json:"definition,omitempty"`
 	Property   []CodeSystemProperty `json:"property,omitempty"` // Properties including subsumedBy
 	Concept    []CodeSystemCode     `json:"concept,omitempty"`  // Nested concepts
+	// Designation are the concept's additional representations (CodeSystem.concept.designation):
+	// its display in other languages, its synonyms. Read only.
+	Designation []Designation `json:"designation,omitempty"`
+}
+
+// Designation is an additional representation of a concept (CodeSystem.concept.designation).
+type Designation struct {
+	Language string `json:"language,omitempty"`
+	Value    string `json:"value"`
 }
 
 // CodeSystemProperty represents a property of a code in a CodeSystem.
@@ -1308,27 +1320,33 @@ func countURLs[T any](held map[string]T, entries map[string]*loaded[T]) int {
 // GetDisplayForCode returns the display text for a code in a CodeSystem.
 // Returns (display, found) where found indicates if the code was found.
 func (r *Registry) GetDisplayForCode(system, code string) (string, bool) {
+	_, c := r.conceptOf(system, code)
+	if c == nil {
+		return "", false
+	}
+	return c.Display, true
+}
+
+// conceptOf returns system's CodeSystem and the concept code defines in it, at any depth, or a
+// nil concept.
+func (r *Registry) conceptOf(system, code string) (*CodeSystem, *CodeSystemCode) {
 	cs := r.GetCodeSystem(system)
 	if cs == nil {
-		return "", false
+		return nil, nil
 	}
-
-	var findDisplay func(concepts []CodeSystemCode) (string, bool)
-	findDisplay = func(concepts []CodeSystemCode) (string, bool) {
-		for _, c := range concepts {
-			if c.Code == code {
-				return c.Display, true
+	var find func(concepts []CodeSystemCode) *CodeSystemCode
+	find = func(concepts []CodeSystemCode) *CodeSystemCode {
+		for i := range concepts {
+			if concepts[i].Code == code {
+				return &concepts[i]
 			}
-			if len(c.Concept) > 0 {
-				if display, found := findDisplay(c.Concept); found {
-					return display, true
-				}
+			if c := find(concepts[i].Concept); c != nil {
+				return c
 			}
 		}
-		return "", false
+		return nil
 	}
-
-	return findDisplay(cs.Concept)
+	return cs, find(cs.Concept)
 }
 
 // IsSystemInValueSet checks if a system is one of the systems defined in a ValueSet.
@@ -1431,14 +1449,15 @@ func (r *Registry) ResolveCodeInCodeSystem(ctx context.Context, system, code str
 		}
 	}
 
-	// Carry the display so callers can validate a Coding.display without a second
-	// lookup. Only the CodeSystem's own display is parsed — designations are not —
-	// so a specific language cannot be honored locally, and saying so lets callers
-	// skip the comparison instead of checking a submitted translation against
-	// English.
+	// Carry the display, and the concept's designations, so callers can validate a
+	// Coding.display without a second lookup. A specific display language is not
+	// chosen locally, and saying so lets callers skip the comparison instead of
+	// checking a submitted translation against English.
 	if res.Resolution == Valid {
-		if display, ok := r.GetDisplayForCode(lookupSystem, code); ok {
-			res.Display = display
+		if cs, c := r.conceptOf(lookupSystem, code); c != nil {
+			res.Display = c.Display
+			res.DisplayLanguage = cs.Language
+			res.Designations = c.Designation
 			res.DisplayLanguageHonored = opts.DisplayLanguage == ""
 		}
 	}
