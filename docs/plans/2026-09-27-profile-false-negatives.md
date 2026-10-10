@@ -628,6 +628,49 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
 - Updating `gofhir/fhirpath` from v1.6.0 to v1.9.1 halves the absent-field cost. That is a separate
   dependency change, and it gets the same invariant check.
 
+## Follow-ups (found reviewing B5b)
+
+Each is its own task, with probes against HL7 6.10.2 first.
+
+1. **Fixed point of target checks.** Two parts of the same engine (`conformState`):
+   - With profile discriminators in dense cycles of references, what conforms depends on what is
+     assumed; the specification defines no answer, and HL7's depends on the entries' order.
+     gofhir's depends on `maxSwayedChecks` (3), which keeps the work polynomial: unbounded, 25
+     Patients took 39 s. A well-founded fixed point is to be defined.
+   - Without discriminators the work is polynomial but quadratic: a check assumed true that fails
+     drops what was made within it, which is checked again. A chain of n Observations each
+     reaching m roots that fail (n = m = 400) takes 45 s; HL7, 1.7 s. Record per check the
+     formula of its targets' answers (its own errors and, per reference, any of its candidates)
+     and propagate a failure over it instead of running the pipeline again.
+2. **Slicing of nested resources' profiles.** An entry's or a contained resource's `meta.profile`
+   is not used by the slicing phase: entries are not sliced, contained resources only against
+   their type (`pkg/slicing/slicing.go` `validateContained`, `walk` stops at resources). An entry
+   declaring a profile whose slice has min 1 and is missing is not reported; HL7 reports it
+   ("a matching slice is required"). A target can then fail REFERENCE_TARGET_PROFILE for a slice
+   its own validation never reports. Present on `main`; the largest of these.
+3. **One resolution for resolve().** `constraint.ResolveInBundle` (discriminators' and FHIRPath's
+   resolve()) matches a fullUrl by suffix: no base from the referring entry, no version, no
+   ambiguity, unlike the reference phase (`resolveTarget`). Two entries `http://a.org/.../x` and
+   `http://b.org/.../x`: a false negative or a false positive against HL7, depending on order.
+4. **Parameters.** The reference phase does not visit `Parameters.parameter.resource`; HL7 checks
+   their references (types and target profiles).
+5. **Scopes along a discriminator's path.** A path that steps into a resource
+   (`resource.subject.resolve()`) keeps the request's scope: a `#p` contained in the entry is
+   looked for in the Bundle (a false slice minimum). A chained resolve() in a constraint
+   (`subject.resolve().generalPractitioner.resolve()`) looks for `#id` in the first resource's
+   contained resources.
+6. **A discriminator's path through another type.** An entry of another type than the path's
+   (`resource.subject` on a Patient) is reported as "Slicing cannot be evaluated"; it does not
+   match the slice.
+
+Smaller, from the same reviews: HL7's `BUNDLE_BUNDLE_POSSIBLE_MATCH_WRONG_FU` warning (a relative
+reference that does not resolve but an entry of that type and id exists); an entry with no
+fullUrl (`Bundle_BUNDLE_FullUrl_Missing`); conditional references in transactions
+(`Patient?identifier=`) and absolute URLs with a query reported as `REFERENCE_INVALID_FORMAT`; a
+contained resource inside a contained resource is not walked; `"#"` from a resource that is not
+contained is reported by ref-1, HL7 as `Reference_REF_CantResolve`; a `targetProfile` that does
+not resolve (see B5b, still open).
+
 ## Releases
 
 Plan B may ship in steps. Each release note lists the *accept → reject* changes with an example
