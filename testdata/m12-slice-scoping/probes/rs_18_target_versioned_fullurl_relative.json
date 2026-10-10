@@ -1,0 +1,50 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://b.org/fhir/Observation/root",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "root",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/rs/StructureDefinition/rr-obs"
+     ]
+    },
+    "hasMember": [
+     {
+      "reference": "Observation/x/_history/1"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://b.org/fhir/Observation/x/_history/1",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "x",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "meta": {
+     "versionId": "1"
+    }
+   }
+  }
+ ]
+}

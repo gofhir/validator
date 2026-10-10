@@ -314,7 +314,7 @@ func (w walker) nameIn(st state, sd *registry.StructureDefinition, children []*r
 				continue
 			}
 			out = append(out, state{branch: st.branch, cur: cursor{sd: sd, node: child, key: key, types: types},
-				value: v, present: v == nil, typeCode: singleTypeCode(types, v), frames: frames, in: st.in})
+				value: v, present: v == nil, typeCode: singleTypeCode(types, v), frames: frames, in: w.within(st, v)})
 		}
 	}
 	if choice {
@@ -388,6 +388,22 @@ func (w walker) extension(st state, url string) ([]state, error) {
 		out = append(out, state{branch: st.branch, cur: defCur, frames: st.frames, in: st.in})
 	}
 	return out, nil
+}
+
+// within is the scope v, a value one step below st's, is in: st's, but for a resource, which the
+// resolver gives a scope of its own (ScopedResolver.ScopeOf).
+func (w walker) within(st state, v any) *Scope {
+	res, _ := v.(map[string]any)
+	sr, scoped := w.resolver.(ScopedResolver)
+	if _, isResource := res[resourceTypeKey]; !isResource || !scoped {
+		return st.in
+	}
+	from := w.scope
+	if st.in != nil {
+		from = *st.in
+	}
+	in := sr.ScopeOf(from, res)
+	return &in
 }
 
 // resolve follows a Reference to the resource it names; on the definition side it enters the

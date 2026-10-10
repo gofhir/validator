@@ -350,5 +350,61 @@
     "file": "testdata/m12-slice-scoping/probes/tp_44_absolute_versioned.json",
     "location": "Bundle.entry[0].resource.subject",
     "messageId": "REFERENCE_TARGET_PROFILE"
+  },
+  {
+    "decision": "B-D20",
+    "reason": "bundle.html#references: a relative reference resolves from the base of the RESTful fullUrl of the entry that holds the referring resource; from another base it names another resource, and from an entry with no RESTful fullUrl (urn:uuid, none) it \"has no defined meaning\". HL7 6.10.2's FHIRPath resolve() resolves from that base when it can, else finds an entry of the reference's type and id, in any base; its reference phase does not (tp_01, tp_04).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/us_v_g3_other_base.json",
+    "location": "Bundle.entry[1].resource.subject",
+    "messageId": "EXTENSION_CONTEXT_INVARIANT"
+  },
+  {
+    "decision": "B-D20",
+    "reason": "bundle.html#references: a relative reference resolves from the base of the RESTful fullUrl of the entry that holds the referring resource; from another base it names another resource, and from an entry with no RESTful fullUrl (urn:uuid, none) it \"has no defined meaning\". HL7 6.10.2's FHIRPath resolve() resolves from that base when it can, else finds an entry of the reference's type and id, in any base; its reference phase does not (tp_01, tp_04).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/us_v_g4_urn_obs_rel.json",
+    "location": "Bundle.entry[1].resource.subject",
+    "messageId": "EXTENSION_CONTEXT_INVARIANT"
+  },
+  {
+    "decision": "B-D20",
+    "reason": "bundle.html#references: a relative reference resolves from the base of the RESTful fullUrl of the entry that holds the referring resource; from another base it names another resource, and from an entry with no RESTful fullUrl (urn:uuid, none) it \"has no defined meaning\". HL7 6.10.2's FHIRPath resolve() resolves from that base when it can, else finds an entry of the reference's type and id, in any base; its reference phase does not (tp_01, tp_04).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ci_s03_outer.json",
+    "location": "Bundle.entry[1].resource.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D20",
+    "reason": "bundle.html#references: a relative reference resolves from the base of the RESTful fullUrl of the entry that holds the referring resource; from another base it names another resource, and from an entry with no RESTful fullUrl (urn:uuid, none) it \"has no defined meaning\". HL7 6.10.2's FHIRPath resolve() resolves from that base when it can, else finds an entry of the reference's type and id, in any base; its reference phase does not (tp_01, tp_04).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/rs_13_referring_entry_no_fullurl.json",
+    "location": "Bundle.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D18",
+    "reason": "bundle.html#references: when several entries match a reference \"it is ambiguous which is correct\": the reference names no target, and resolve() returns none, so an invariant that reads the target does not hold. HL7 6.10.2 reports the ambiguity and resolves one of the entries.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/rs_12_versions_ambiguous.json",
+    "location": "Bundle.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D21",
+    "reason": "bundle.html#references: a version is removed from the reference before matching the fullUrl, and a fullUrl cannot be version specific (bdl-8): an entry whose fullUrl names a version matches no reference. HL7 6.10.2's FHIRPath resolve() finds it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/rs_18_target_versioned_fullurl_relative.json",
+    "location": "Bundle.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D21",
+    "reason": "bundle.html#references: a version is removed from the reference before matching the fullUrl, and a fullUrl cannot be version specific (bdl-8): an entry whose fullUrl names a version matches no reference. HL7 6.10.2's FHIRPath resolve() finds it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/rs_19_target_versioned_fullurl_absolute.json",
+    "location": "Bundle.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
   }
 ]

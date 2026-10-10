@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pres",
+ "url": "https://example.org/fhir/rs/StructureDefinition/pres",
+ "version": "0.1.0",
+ "name": "pres",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.gender",
+    "path": "Patient.gender",
+    "min": 1
+   }
+  ]
+ }
+}

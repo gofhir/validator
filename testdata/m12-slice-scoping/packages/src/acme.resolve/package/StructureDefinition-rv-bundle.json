@@ -1,0 +1,31 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "rv-bundle",
+ "url": "https://example.org/fhir/rs/StructureDefinition/rv-bundle",
+ "version": "0.1.0",
+ "name": "rvbundle",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle",
+    "constraint": [
+     {
+      "key": "rvb-1",
+      "severity": "error",
+      "human": "root members final",
+      "expression": "entry.resource.ofType(Observation).where(id='root').hasMember.all(resolve().status = 'final')",
+      "source": "https://example.org/fhir/rs/StructureDefinition/rv-bundle"
+     }
+    ]
+   }
+  ]
+ }
+}

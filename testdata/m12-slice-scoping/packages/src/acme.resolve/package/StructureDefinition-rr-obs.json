@@ -1,0 +1,31 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "rr-obs",
+ "url": "https://example.org/fhir/rs/StructureDefinition/rr-obs",
+ "version": "0.1.0",
+ "name": "RrObs",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation",
+    "constraint": [
+     {
+      "key": "rr-1",
+      "severity": "error",
+      "human": "members are final",
+      "expression": "hasMember.all(resolve().status = 'final')",
+      "source": "https://example.org/fhir/rs/StructureDefinition/rr-obs"
+     }
+    ]
+   }
+  ]
+ }
+}

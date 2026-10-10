@@ -46,11 +46,13 @@ type Resolver interface {
 }
 
 // ScopedResolver is a Resolver that also gives the scope of the resource it finds: the Bundle it
-// was found in, and those that hold that one, where the resource's own references resolve. A
-// Resolver that is not one leaves the resource in the scope of the reference.
+// was found in, and those that hold that one, where the resource's own references resolve; and the
+// scope of a resource a path steps into, which the resource of scope holds (ScopeOf: a contained
+// resource, a Bundle's entry). A Resolver that is not one leaves either in the scope it is in.
 type ScopedResolver interface {
 	Resolver
 	ResolveScoped(ref string, scope Scope) (map[string]any, Scope, bool)
+	ScopeOf(scope Scope, resource map[string]any) Scope
 }
 
 // Membership is the answer to a ValueSet membership question.

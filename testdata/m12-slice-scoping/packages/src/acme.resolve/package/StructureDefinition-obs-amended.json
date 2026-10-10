@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-amended",
+ "url": "https://example.org/fhir/rs/StructureDefinition/obs-amended",
+ "version": "0.1.0",
+ "name": "obsamended",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.status",
+    "path": "Observation.status",
+    "fixedCode": "amended"
+   }
+  ]
+ }
+}

@@ -1,0 +1,71 @@
+{
+ "resourceType": "Parameters",
+ "id": "p",
+ "parameter": [
+  {
+   "name": "b",
+   "resource": {
+    "resourceType": "Bundle",
+    "id": "b",
+    "type": "collection",
+    "entry": [
+     {
+      "resource": {
+       "resourceType": "Observation",
+       "id": "x",
+       "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+       },
+       "status": "preliminary",
+       "code": {
+        "text": "x"
+       }
+      },
+      "fullUrl": "http://a.org/fhir/Observation/x"
+     },
+     {
+      "resource": {
+       "resourceType": "Observation",
+       "id": "root",
+       "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+       },
+       "status": "final",
+       "code": {
+        "text": "x"
+       },
+       "meta": {
+        "profile": [
+         "https://example.org/fhir/rs/StructureDefinition/rr-obs"
+        ]
+       },
+       "hasMember": [
+        {
+         "reference": "Observation/x"
+        }
+       ]
+      },
+      "fullUrl": "http://b.org/fhir/Observation/root"
+     },
+     {
+      "resource": {
+       "resourceType": "Observation",
+       "id": "x",
+       "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+       },
+       "status": "final",
+       "code": {
+        "text": "x"
+       }
+      },
+      "fullUrl": "http://b.org/fhir/Observation/x"
+     }
+    ]
+   }
+  }
+ ]
+}

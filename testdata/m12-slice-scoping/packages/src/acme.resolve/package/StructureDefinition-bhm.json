@@ -1,0 +1,54 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "bhm",
+ "url": "https://example.org/fhir/rs/StructureDefinition/bhm",
+ "version": "0.1.0",
+ "name": "bhm",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "resource"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Bundle.entry:x",
+    "path": "Bundle.entry",
+    "sliceName": "x",
+    "min": 1,
+    "max": "1"
+   },
+   {
+    "id": "Bundle.entry:x.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Observation",
+      "profile": [
+       "https://example.org/fhir/rs/StructureDefinition/obs-hm"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
