@@ -766,6 +766,28 @@ func (r *Registry) IsResourceType(typeName string) bool {
 	return sd.Kind == KindResource
 }
 
+// HoldsResource reports whether an element of definition def holds a resource: it has types, and
+// each is a resource type (kind resource), as Bundle.entry.resource, DomainResource.contained and
+// Parameters.parameter.resource are. An element named resourceType is not one
+// (ExampleScenario.instance.resourceType is a code).
+func (r *Registry) HoldsResource(def *ElementDefinition) bool {
+	return def != nil && r.HoldsResourceTypes(def.Type)
+}
+
+// HoldsResourceTypes reports whether an element of types holds a resource: there are some, and
+// each is a resource type (HoldsResource).
+func (r *Registry) HoldsResourceTypes(types []Type) bool {
+	if len(types) == 0 {
+		return false
+	}
+	for _, t := range types {
+		if !r.IsResourceType(t.Code) {
+			return false
+		}
+	}
+	return true
+}
+
 // IsPrimitiveTypeCode reports whether code, an ElementDefinition.type.code, types a primitive: a
 // FHIR primitive type, or a FHIRPath system type (System.String), which the specification's own
 // definitions give a primitive's value and a resource's id.

@@ -1,0 +1,48 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "re-contact-type-slice",
+ "url": "https://example.org/fhir/re/StructureDefinition/re-contact-type-slice",
+ "version": "0.1.0",
+ "name": "ReContactTypeSlice",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.contact",
+    "path": "Patient.contact",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "type",
+       "path": "name"
+      }
+     ],
+     "rules": "closed"
+    }
+   },
+   {
+    "id": "Patient.contact:named",
+    "path": "Patient.contact",
+    "sliceName": "named",
+    "min": 0,
+    "max": "*"
+   },
+   {
+    "id": "Patient.contact:named.name",
+    "path": "Patient.contact.name",
+    "min": 1,
+    "type": [
+     {
+      "code": "HumanName"
+     }
+    ]
+   }
+  ]
+ }
+}

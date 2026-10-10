@@ -41,12 +41,25 @@ func ComparableGoLocation(loc string) string {
 	return goPrimitiveEl.ReplaceAllString(loc, ".$1")
 }
 
+// choiceOf reports whether h, an HL7 location segment naming a choice element ("value[x]"), is
+// the element g names with its type ("valueQuantity").
+func choiceOf(h, g string) bool {
+	base, ok := strings.CutSuffix(h, "[x]")
+	if !ok || len(g) <= len(base) || !strings.HasPrefix(g, base) {
+		return false
+	}
+	c := g[len(base)]
+	return c >= 'A' && c <= 'Z'
+}
+
 // Located reports whether a gofhir location g and an HL7 location h satisfy a family's rule.
 // "equal" requires the same element. "parent" also accepts one being the immediate parent of the
 // other, which is where HL7 reports a missing child or a required slice. No other ancestor counts
 // (an HL7 error at the resource root must not stand for every error below it), and indices must be
 // the same: a location without an index is not a wildcard for the items of its list. Measured on
-// the corpus, no real pair needed one, and allowing it let an arbitrary choice decide verdicts.
+// the corpus, no real pair needed one, and allowing it let an arbitrary choice decide verdicts. HL7
+// names a choice element it reports on as such ("Observation.value[x]"): it is the element gofhir
+// names with its type ("Observation.valueQuantity").
 func Located(rule, g, h string) bool {
 	gs, hs := strings.Split(g, "."), strings.Split(h, ".")
 	same := func(a, b []string) bool {
@@ -54,7 +67,7 @@ func Located(rule, g, h string) bool {
 			return false
 		}
 		for i := range a {
-			if a[i] != b[i] {
+			if a[i] != b[i] && !choiceOf(b[i], a[i]) {
 				return false
 			}
 		}

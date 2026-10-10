@@ -440,13 +440,13 @@ func (m *Matcher) profileMatches(ctx context.Context, req Request, slice *regist
 // contained (fhirpath.html#variables). References still resolve in the same container. A datatype
 // value keeps the resources it sits in. A value resolve() reached is in the scope of the resource
 // it is in.
-func valueScope(req Request, e end) Scope {
+func (m *Matcher) valueScope(req Request, e end) Scope {
 	scope := req.Scope
 	if e.in != nil {
 		scope = *e.in
 	}
 	res, _ := e.value.(map[string]any)
-	if _, isResource := res[resourceTypeKey]; !isResource {
+	if _, isResource := res[resourceTypeKey]; !isResource || e.def == nil || !m.reg.HoldsResource(e.def.Def) {
 		return scope
 	}
 	root := res
@@ -478,7 +478,7 @@ func (m *Matcher) profileConforms(ctx context.Context, req Request, slice *regis
 				return false, &Note{Kind: NoteCannotEvaluate, Slice: slice,
 					Message: fmt.Sprintf("profile %s on %s could not be resolved (%s)", p, slice.Def.ID, res)}
 			}
-			if m.conformer.Conforms(ctx, e.value, psd, valueScope(req, e)) {
+			if m.conformer.Conforms(ctx, e.value, psd, m.valueScope(req, e)) {
 				conforms = true
 				break
 			}

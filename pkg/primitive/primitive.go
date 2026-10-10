@@ -176,7 +176,8 @@ func (v *Validator) validateElement(
 	result *issue.Result,
 ) {
 	for key, value := range data {
-		if key == "resourceType" {
+		if key == "resourceType" && v.registry.IsResourceType(sdPath) {
+			// A resource's own type (json.html#resources), not an element: the resource's root.
 			continue
 		}
 
