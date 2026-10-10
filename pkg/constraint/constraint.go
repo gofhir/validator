@@ -14,6 +14,7 @@ import (
 	"github.com/gofhir/fhirpath/eval"
 	"github.com/gofhir/fhirpath/types"
 
+	"github.com/gofhir/validator/v2/internal/bundleref"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
@@ -23,7 +24,9 @@ import (
 // ValidateOptions holds per-call options for constraint validation.
 type ValidateOptions struct {
 	// BundleData is the parsed Bundle JSON, enabling resolve() in FHIRPath.
-	// When non-nil, a resolver is created that can find resources by fullUrl.
+	// When non-nil, a resolver is created that can find resources by fullUrl. A relative reference
+	// resolves from the fullUrl of the entry that holds the resource validated, found by identity:
+	// Data must then be that entry's resource (or one it holds), from the same parse as BundleData.
 	BundleData map[string]any
 	// OuterBundles are the Bundles that hold BundleData, innermost first, where resolve() looks for
 	// a reference BundleData does not resolve.
@@ -156,6 +159,8 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 		// The definitions that govern one value report an issue once, however the caller scopes it.
 		ctx = WithReportScope(ctx)
 	}
+	// resolve() indexes each Bundle once, for the validation.
+	ctx = bundleref.EnsureIndexes(ctx)
 	var resource map[string]any
 	if opts != nil && opts.Data != nil {
 		resource = opts.Data
@@ -202,7 +207,7 @@ func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResource
 
 	// Wire resolver if Bundle data is available.
 	if vopts != nil && vopts.BundleData != nil {
-		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData, outer: vopts.OuterBundles, exact: vopts.Exact}
+		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData, outer: vopts.OuterBundles, exact: vopts.Exact, ctx: ctx}
 	}
 	if vopts != nil {
 		opts.exact = vopts.Exact
@@ -493,6 +498,10 @@ type ScopeRoot struct {
 // needs it, and the resources it holds are nodes of that reading; what each expression selects is
 // kept.
 func (v *Validator) Scope(ctx context.Context, root ScopeRoot) *Scope {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	ctx = bundleref.EnsureIndexes(ctx)
 	s := &Scope{v: v, ctx: ctx, raw: root.Raw, data: root.Resource, exact: root.Exact, selected: map[string]map[string]struct{}{}}
 	if root.Bundle != nil {
 		s.bundles = append([]map[string]any{root.Bundle}, root.Outer...)

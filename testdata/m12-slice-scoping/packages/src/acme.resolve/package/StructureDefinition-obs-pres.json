@@ -1,0 +1,35 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-pres",
+ "url": "https://example.org/fhir/rs/StructureDefinition/obs-pres",
+ "version": "0.1.0",
+ "name": "obspres",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.subject",
+    "path": "Observation.subject",
+    "min": 1,
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/rs/StructureDefinition/pres"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

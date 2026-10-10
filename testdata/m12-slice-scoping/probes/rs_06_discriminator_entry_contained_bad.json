@@ -1,0 +1,36 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/rs/StructureDefinition/bsub"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Observation/o",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "contained": [
+     {
+      "resourceType": "Patient",
+      "id": "p"
+     }
+    ],
+    "subject": {
+     "reference": "#p"
+    }
+   }
+  }
+ ]
+}

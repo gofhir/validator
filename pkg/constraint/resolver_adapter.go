@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofhir/fhirpath/eval"
 
+	"github.com/gofhir/validator/v2/internal/bundleref"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
 )
 
@@ -25,6 +26,8 @@ type fhirpathResolver struct {
 	// exact returns the resource found with its numbers as the JSON spells them; nil returns it as
 	// found.
 	exact func(map[string]any) map[string]any
+	// ctx holds the validation's Bundle indexes (bundleref.IndexOf).
+	ctx context.Context
 }
 
 // resolverWithin is r for expressions evaluated on a resource whose %rootResource is container:
@@ -45,9 +48,9 @@ func resolverWithin(r eval.Resolver, container map[string]any, exact func(map[st
 
 // resolverInBundle is r for expressions evaluated in bundle, a Bundle that r's Bundles hold, or that
 // a resource with no Bundle around it holds (r nil): it looks in bundle first, then where r looks,
-// and returns what it finds as exact gives it.
-func resolverInBundle(r eval.Resolver, bundle map[string]any, exact func(map[string]any) map[string]any) eval.Resolver {
-	inner := &fhirpathResolver{bundleData: bundle, exact: exact}
+// and returns what it finds as exact gives it, indexing Bundles with the indexes ctx holds.
+func resolverInBundle(ctx context.Context, r eval.Resolver, bundle map[string]any, exact func(map[string]any) map[string]any) eval.Resolver {
+	inner := &fhirpathResolver{bundleData: bundle, exact: exact, ctx: ctx}
 	if fr, ok := r.(*fhirpathResolver); ok && fr != nil && fr.bundleData != nil {
 		inner.outer = append([]map[string]any{fr.bundleData}, fr.outer...)
 	}
@@ -64,19 +67,44 @@ func (r *fhirpathResolver) Resolve(_ context.Context, reference string) ([]byte,
 		}
 		return json.Marshal(exactOr(r.exact, res))
 	}
-	res, ok := ResolveReference(r.bundleData, reference)
-	for i := 0; !ok && i < len(r.outer); i++ {
-		res, ok = ResolveReference(r.outer[i], reference)
+	if strings.HasPrefix(reference, "#") {
+		res, ok := ResolveReference(r.bundleData, reference)
+		if !ok {
+			return nil, nil
+		}
+		return json.Marshal(exactOr(r.exact, res))
 	}
+	// A literal reference is made from the entry that holds the expression's %rootResource: a
+	// relative one from its fullUrl's base (bundle.html#references).
+	from := bundleref.IndexOf(r.ctx, r.bundleData).FullURLOf(r.container)
+	res, ok := ResolveFrom(r.ctx, append([]map[string]any{r.bundleData}, r.outer...), reference, from)
 	if !ok {
 		return nil, nil
 	}
 	return json.Marshal(exactOr(r.exact, res))
 }
 
+// ResolveFrom finds the resource reference, a literal reference made from an entry whose fullUrl
+// is from, names among the entries of bundles, the innermost first, as bundle.html#references
+// resolves it: a relative reference from from's base, a version matched against meta.versionId.
+// Several entries of one Bundle matching it are ambiguous: it resolves to none. The Bundles are
+// indexed with the validation's indexes ctx holds (bundleref.WithIndexes), else anew.
+func ResolveFrom(ctx context.Context, bundles []map[string]any, reference, from string) (map[string]any, bool) {
+	for _, b := range bundles {
+		res, ok, ambiguous := bundleref.IndexOf(ctx, b).Find(reference, from)
+		if ok || ambiguous {
+			return res, ok
+		}
+	}
+	return nil, false
+}
+
 // ResolveReference finds the resource a reference names inside the resource being validated,
 // root: a fragment reference (#id) among the contained resources of root or of any Bundle entry,
 // and any other reference among the Bundle entries (see ResolveInBundle).
+//
+// Deprecated: a literal reference is resolved from the referring entry's base, which root does not
+// give; use ResolveFrom, and ContainedByID for a fragment reference.
 func ResolveReference(root map[string]any, reference string) (map[string]any, bool) {
 	if reference == "" || root == nil {
 		return nil, false
@@ -99,6 +127,8 @@ func ResolveReference(root map[string]any, reference string) (map[string]any, bo
 
 // ResolveInBundle finds a Bundle entry's resource by fullUrl, or by a relative reference that ends
 // it ("Patient/123" for "http://example.org/fhir/Patient/123"). Any other resource has no entries.
+//
+// Deprecated: a relative reference is resolved from the referring entry's base; use ResolveFrom.
 func ResolveInBundle(bundle map[string]any, reference string) (map[string]any, bool) {
 	for _, entry := range bundleEntries(bundle) {
 		fullURL, _ := entry["fullUrl"].(string)
@@ -127,6 +157,24 @@ func ScopeInBundle(s slicematch.Scope, bundle map[string]any) slicematch.Scope {
 		in.Outer = append([]map[string]any{s.Container}, s.Outer...)
 	}
 	return in
+}
+
+// ScopeOf returns the scope of res, a resource the resource of s holds: a contained resource has it
+// as its %rootResource and resolves where it does; another (a Bundle's entry) is its own
+// %rootResource, in the Bundle that holds it, and a Bundle resolves its own entries first.
+func ScopeOf(s slicematch.Scope, res map[string]any) slicematch.Scope {
+	if IsContainedIn(s.Resource, res) {
+		return slicematch.Scope{Resource: res, RootResource: s.Resource, Container: s.Container, Outer: s.Outer}
+	}
+	in := s
+	if rt, _ := s.Resource[resourceTypeKey].(string); rt == bundleType {
+		in = ScopeInBundle(s, s.Resource)
+	}
+	out := slicematch.Scope{Resource: res, RootResource: res, Container: in.Container, Outer: in.Outer}
+	if rt, _ := res[resourceTypeKey].(string); rt == bundleType {
+		out = ScopeInBundle(out, res)
+	}
+	return out
 }
 
 // ContainedByID returns the contained resource of resource with this id: the target of the

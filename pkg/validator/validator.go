@@ -878,12 +878,12 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	// identity: both read the same parse.
 	constraintOpts.Data = data
 	constraintOpts.Exact = exactIn(ctx)
-	constraintOpts.Resolver, constraintOpts.Containment = referenceResolver{}, constraint.IsContainedIn
+	constraintOpts.Resolver, constraintOpts.Containment = referenceResolver{ctx: ctx}, constraint.IsContainedIn
 	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
 	result.Stats.PhasesRun++
 
 	// Phase 8: Slicing validation
-	sliceOpts := slicing.Options{Resolver: referenceResolver{}, Containment: constraint.IsContainedIn}
+	sliceOpts := slicing.Options{Resolver: referenceResolver{ctx: ctx}, Containment: constraint.IsContainedIn}
 	if vs != nil {
 		sliceOpts.Scope = &vs.scope
 	}

@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
-	"sync"
 
+	"github.com/gofhir/validator/v2/internal/bundleref"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
@@ -331,7 +331,7 @@ func rootContext(ctx context.Context, resource map[string]any, bundleCtx *Bundle
 	}
 	if in.container != nil {
 		rc.container, rc.outer = in.container, in.outer
-		rc.fullURL = indexOf(ctx, in.container).fullURLOf[reflect.ValueOf(holder).Pointer()]
+		rc.fullURL = bundleref.IndexOf(ctx, in.container).FullURLOf(holder)
 	}
 	return rc
 }
@@ -354,69 +354,12 @@ func (rc *refContext) urnType(ref string) (string, bool) {
 	return t, true
 }
 
-// entryIndex indexes a Bundle's entries: the resources by their entry's fullUrl, and the fullUrl
-// of each resource's entry.
-type entryIndex struct {
-	byFullURL map[string][]map[string]any
-	fullURLOf map[uintptr]string
-}
-
-// indexes holds the entry indexes of the Bundles one validation resolves references in, by
-// Bundle; each is built once (withIndexes).
-type indexes struct {
-	mu       sync.Mutex
-	byBundle map[uintptr]*entryIndex
-}
-
-type indexesKey struct{}
-
 // WithIndexes returns ctx with a new store of the entry indexes references are resolved with,
 // for one validation: its conformance checks share it. A store keys Bundles by address, so it
 // must not outlive the validation.
 func WithIndexes(ctx context.Context) context.Context {
-	return context.WithValue(ctx, indexesKey{}, &indexes{byBundle: map[uintptr]*entryIndex{}})
+	return bundleref.WithIndexes(ctx)
 }
-
-// withIndexes returns ctx with a store of entry indexes, unless it has one.
-func withIndexes(ctx context.Context) context.Context {
-	if _, ok := ctx.Value(indexesKey{}).(*indexes); ok {
-		return ctx
-	}
-	return WithIndexes(ctx)
-}
-
-// indexOf returns the index of bundle's entries, from ctx's store when it has one.
-func indexOf(ctx context.Context, bundle map[string]any) *entryIndex {
-	store, _ := ctx.Value(indexesKey{}).(*indexes)
-	key := reflect.ValueOf(bundle).Pointer()
-	if store != nil {
-		store.mu.Lock()
-		defer store.mu.Unlock()
-		if idx, ok := store.byBundle[key]; ok {
-			return idx
-		}
-	}
-	list, _ := bundle["entry"].([]any)
-	idx := &entryIndex{byFullURL: make(map[string][]map[string]any, len(list)), fullURLOf: make(map[uintptr]string, len(list))}
-	for _, e := range list {
-		m, _ := e.(map[string]any)
-		r, ok := m["resource"].(map[string]any)
-		if !ok {
-			continue
-		}
-		u, _ := m["fullUrl"].(string)
-		idx.byFullURL[u] = append(idx.byFullURL[u], r)
-		idx.fullURLOf[reflect.ValueOf(r).Pointer()] = u
-	}
-	if store != nil {
-		store.byBundle[key] = idx
-	}
-	return idx
-}
-
-// restfulURL matches a RESTful fullUrl: a base, then the resource's type and id
-// (references.html#literal), the type and id being the last two segments.
-var restfulURL = regexp.MustCompile(`^(.+/)[A-Z][A-Za-z]+/[A-Za-z0-9\-.]{1,64}$`)
 
 // resolveTarget finds the resource ref names, made from within rc (bundle.html#references): "#id",
 // a resource the referring resource contains; an absolute reference, the entry whose fullUrl it
@@ -451,28 +394,7 @@ func entryMatches(ref string, rc *refContext) []map[string]any {
 	if rc.container == nil {
 		return nil
 	}
-	version := ""
-	if i := strings.Index(ref, "/_history/"); i >= 0 {
-		ref, version = ref[:i], ref[i+len("/_history/"):]
-	}
-	target := ref
-	if !strings.Contains(ref, ":") {
-		m := restfulURL.FindStringSubmatch(rc.fullURL)
-		if m == nil {
-			return nil
-		}
-		target = m[1] + ref
-	}
-	var out []map[string]any
-	for _, r := range indexOf(rc.ctx, rc.container).byFullURL[target] {
-		if version != "" {
-			if meta, _ := r["meta"].(map[string]any); meta == nil || meta["versionId"] != version {
-				continue
-			}
-		}
-		out = append(out, r)
-	}
-	return out
+	return bundleref.IndexOf(rc.ctx, rc.container).Matches(ref, rc.fullURL)
 }
 
 // Validate validates all Reference elements in a resource.
@@ -518,7 +440,7 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 	}
 
 	// Build contained resource index for the root resource
-	ctx = withIndexes(ctx)
+	ctx = bundleref.EnsureIndexes(ctx)
 	rc := rootContext(ctx, resource, bundleCtx)
 
 	// Validate references in root resource

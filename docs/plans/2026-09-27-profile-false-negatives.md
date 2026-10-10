@@ -85,8 +85,10 @@ specification, gofhir follows the specification, and the divergence is declared 
 | B-D15 | `targetProfile` `[DomainResource, a Patient profile]`, a Patient that does not conform to the Patient profile | Reports it ("Unable to find a profile match ... among choices: DomainResource, ...") | ElementDefinition.type.targetProfile: the target "must conform to at least one" of them; every Patient conforms to DomainResource | Accept it. **Declared divergence** (`tp_11`, side HL7). |
 | B-D16 | A cycle of references in which one target does not conform | Reports the others or not depending on the entries' order: keeps an answer computed assuming the target conforms | Every target reaching the one that does not conform does not conform | Report them whatever the order. **Declared divergence** (`tp_30`). |
 | B-D17 | A cycle through a slice a profile discriminator assigns, the target assumed turning out not to conform | Keeps the answer computed under the assumption, and reports a false error in one order of the entries | The target conforms once the assumption is dropped | The one error, whatever the order. **Declared divergence** (`tp_22`, `tp_24`, side HL7). |
-| B-D18 | A reference several entries match (`urn:uuid` on two entries) | Reports it (`Bundle_BUNDLE_MultipleMatches`) and checks the type of one of them | bundle.html#references: "it is ambiguous which is correct"; applications "MAY return an error" | Report it (`REFERENCE_MULTIPLE_MATCHES`); the reference names no target whose type is checked. **Declared divergence** (`vs_22`, side HL7). |
+| B-D18 | A reference several entries match (`urn:uuid` on two entries) | Reports it (`Bundle_BUNDLE_MultipleMatches`) and checks the type of one of them; its resolve() returns one of them | bundle.html#references: "it is ambiguous which is correct"; applications "MAY return an error" | Report it (`REFERENCE_MULTIPLE_MATCHES`); the reference names no target whose type is checked, and resolve() returns none. **Declared divergence** (`vs_22`, side HL7; `rs_12`). |
 | B-D19 | An absolute reference with a version (`http://.../Patient/p/_history/2`) | Does not resolve it: removes the version only from relative references | bundle.html#references: "If the reference is version specific (either relative or absolute), then remove the version" | Resolve it, and check its target. **Declared divergence** (`tp_44`). |
+| B-D20 | resolve() of a relative reference whose target is not in the base of the entry that holds the referring resource, or from an entry with no RESTful fullUrl (`urn:uuid`, none) | Its FHIRPath resolve() resolves from that base when it can, else finds an entry of the reference's type and id in any base; its reference phase does not | bundle.html#references: a relative reference resolves from the referring entry's RESTful base; otherwise it "has no defined meaning" | Resolve it as bundle.html says, in resolve() as in the reference phase. **Declared divergence** (`us_v_g3`, `us_v_g4`, `ci_s03`, `rs_13`). |
+| B-D21 | resolve() of a reference to an entry whose fullUrl names a version (`.../Observation/x/_history/1`, against bdl-8) | Its FHIRPath resolve() finds it | bundle.html#references: the version is removed from the reference before matching the fullUrl; a fullUrl "cannot be a version specific reference" (bdl-8) | The entry matches no reference; bdl-8 reports its fullUrl. **Declared divergence** (`rs_18`, `rs_19`). |
 
 ## Design: definition layering
 
@@ -661,17 +663,35 @@ Each is its own task, with probes against HL7 6.10.2 first.
    declaring a profile whose slice has min 1 and is missing is not reported; HL7 reports it
    ("a matching slice is required"). A target can then fail REFERENCE_TARGET_PROFILE for a slice
    its own validation never reports. Present on `main`; the largest of these.
-3. **One resolution for resolve().** `constraint.ResolveInBundle` (discriminators' and FHIRPath's
-   resolve()) matches a fullUrl by suffix: no base from the referring entry, no version, no
-   ambiguity, unlike the reference phase (`resolveTarget`). Two entries `http://a.org/.../x` and
-   `http://b.org/.../x`: a false negative or a false positive against HL7, depending on order.
+3. **One resolution for resolve(). Done, but for gofhir/fhirpath's part.** `internal/bundleref`
+   resolves a literal reference as bundle.html#references says (a relative one from the base of
+   the RESTful fullUrl of the entry that holds the referring resource, a resource a Parameters in
+   an entry holds included, and a referring fullUrl that names a version too, as the RESTful URL
+   regex allows (a target's that does, against bdl-8, matches no reference: B-D21); an absolute
+   one as it is; a version against meta.versionId; several
+   matches ambiguous), for the reference phase, the invariants' resolve()
+   (`constraint.ResolveFrom`) and the discriminators' (`referenceResolver`), with one index per
+   Bundle and validation (`bundleref.IndexOf`, also for a Bundle a resource with no Bundle around
+   it holds, and for a caller of the constraint package): 10000 entries resolving three
+   references each took 7.0 s, now 1.5 s. resolve() then looks in the Bundles that hold the innermost, as HL7
+   does. Probes `rs_01` to `rs_19` (`acme.resolve`, group `resolve-probes`), HL7's verdicts:
+   two entries `Observation/x` in two bases gave a false error and missed one, in an invariant
+   and in a discriminator. B-D20 declares where HL7's FHIRPath resolve() also finds an entry of
+   the reference's type and id in another base, or from a urn:uuid entry, which its reference
+   phase does not (`us_v_g3`, `us_v_g4`, `ci_s03`, `rs_13`); B-D18 where an ambiguous reference
+   resolves to none in resolve() too (`rs_12`). Upstream, in gofhir/fhirpath: an expression
+   evaluated on a Bundle resolves a relative reference among its entries by fullUrl or by type and
+   id, whatever the referring entry's base, without asking the resolver (a Bundle profile's
+   invariant on `entry.resource.ofType(Observation).hasMember.resolve()`, the same two entries:
+   the false error and the missed one, against HL7); and a fragment reference in a resource
+   resolve() returned (`subject.resolve().generalPractitioner.resolve()`, `#pr` contained in the
+   Patient) is looked for in the expression's %rootResource, not in the resource it is in.
 4. **Parameters.** The reference phase does not visit `Parameters.parameter.resource`; HL7 checks
    their references (types and target profiles).
-5. **Scopes along a discriminator's path.** A path that steps into a resource
-   (`resource.subject.resolve()`) keeps the request's scope: a `#p` contained in the entry is
-   looked for in the Bundle (a false slice minimum). A chained resolve() in a constraint
-   (`subject.resolve().generalPractitioner.resolve()`) looks for `#id` in the first resource's
-   contained resources.
+5. **Scopes along a discriminator's path. Done** for a path that steps into a resource
+   (`resource.subject.resolve()`): the resource has a scope of its own
+   (`slicematch.ScopedResolver.ScopeOf`), a `#p` contained in the entry is found there (`rs_05`,
+   `rs_06`). The chained resolve() in a constraint is upstream (item 3).
 6. **A discriminator's path through another type.** An entry of another type than the path's
    (`resource.subject` on a Patient) is reported as "Slicing cannot be evaluated"; it does not
    match the slice.

@@ -10,6 +10,7 @@ import (
 	"github.com/gofhir/fhirpath"
 	"github.com/gofhir/fhirpath/types"
 
+	"github.com/gofhir/validator/v2/internal/bundleref"
 	"github.com/gofhir/validator/v2/internal/fhirpathcache"
 	"github.com/gofhir/validator/v2/pkg/constraint"
 	"github.com/gofhir/validator/v2/pkg/issue"
@@ -315,8 +316,11 @@ func (s *valueScope) constraintOptions() *constraint.ValidateOptions {
 // referenceResolver follows references for resolve(): "#id" among the contained resources of
 // the resource that makes the reference (its %rootResource, which a contained resource shares with
 // its container; references.html#contained), any other reference among the entries of the Bundle
-// the resource is in, then of the Bundles that hold it.
-type referenceResolver struct{}
+// the resource is in, then of the Bundles that hold it, as bundle.html#references resolves it from
+// the entry the %rootResource is (bundleref).
+type referenceResolver struct {
+	ctx context.Context // the validation's Bundle indexes (bundleref.IndexOf)
+}
 
 // Resolve implements slicematch.Resolver.
 func (r referenceResolver) Resolve(ref string, scope slicematch.Scope) (map[string]any, bool) {
@@ -325,19 +329,30 @@ func (r referenceResolver) Resolve(ref string, scope slicematch.Scope) (map[stri
 }
 
 // ResolveScoped implements slicematch.ScopedResolver.
-func (referenceResolver) ResolveScoped(ref string, scope slicematch.Scope) (map[string]any, slicematch.Scope, bool) {
+func (r referenceResolver) ResolveScoped(ref string, scope slicematch.Scope) (map[string]any, slicematch.Scope, bool) {
 	if id, ok := strings.CutPrefix(ref, "#"); ok {
 		res, ok := constraint.ContainedByID(scope.RootResource, id)
 		return res, slicematch.Scope{Resource: res, RootResource: scope.RootResource, Container: scope.Container, Outer: scope.Outer}, ok
 	}
 	bundles := append([]map[string]any{scope.Container}, scope.Outer...)
+	// Made from the entry that holds the resource the reference is in.
+	from := bundleref.IndexOf(r.ctx, scope.Container).FullURLOf(scope.Resource)
 	for i, bundle := range bundles {
-		if res, ok := constraint.ResolveInBundle(bundle, ref); ok {
+		res, ok, ambiguous := bundleref.IndexOf(r.ctx, bundle).Find(ref, from)
+		if ok {
 			// It is an entry of bundle, where its own references resolve.
 			return res, slicematch.Scope{Resource: res, RootResource: res, Container: bundle, Outer: bundles[i+1:]}, true
 		}
+		if ambiguous {
+			break
+		}
 	}
 	return nil, slicematch.Scope{}, false
+}
+
+// ScopeOf implements slicematch.ScopedResolver.
+func (referenceResolver) ScopeOf(scope slicematch.Scope, resource map[string]any) slicematch.Scope {
+	return constraint.ScopeOf(scope, resource)
 }
 
 // memberChecker answers ValueSet membership with the binding phase itself: the value is checked

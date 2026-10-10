@@ -233,7 +233,7 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 		opts.scope.RootResource = parent.scope.Resource
 	}
 	if rt, _ := res[resourceTypeKey].(string); rt == bundleType {
-		opts.resolver = resolverInBundle(opts.resolver, res, opts.exact)
+		opts.resolver = resolverInBundle(opts.ctx, opts.resolver, res, opts.exact)
 		opts.scope = ScopeInBundle(opts.scope, res)
 	}
 	opts.resolver = resolverWithin(opts.resolver, opts.scope.RootResource, nil)
