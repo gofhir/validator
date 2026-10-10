@@ -82,6 +82,12 @@ const (
 	DiagReferenceNotInBundle       DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
 	DiagReferenceContainedNotFound DiagnosticID = "REFERENCE_CONTAINED_NOT_FOUND"
 	DiagReferenceAggregationMode   DiagnosticID = "REFERENCE_AGGREGATION_MODE"
+	// DiagReferenceTargetProfile: the resource a reference resolves to conforms to none of the
+	// profiles of its type its element allows (ElementDefinition.type.targetProfile).
+	DiagReferenceTargetProfile DiagnosticID = "REFERENCE_TARGET_PROFILE"
+	// DiagReferenceMultipleMatches: several entries of the Bundle match a reference
+	// (bundle.html#references: "it is ambiguous which is correct").
+	DiagReferenceMultipleMatches DiagnosticID = "REFERENCE_MULTIPLE_MATCHES"
 )
 
 // Diagnostic IDs for Bundle validation.
@@ -439,6 +445,16 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeValue,
 		Template: "Invalid reference target type '{type}'. Allowed: {allowed}",
+	},
+	DiagReferenceTargetProfile: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "Unable to find a profile match for {reference} among choices: {profiles}",
+	},
+	DiagReferenceMultipleMatches: {
+		Severity: SeverityError,
+		Code:     CodeForbidden,
+		Template: "Multiple matches in bundle for reference {reference}",
 	},
 	DiagReferenceTypeMismatch: {
 		Severity: SeverityError,

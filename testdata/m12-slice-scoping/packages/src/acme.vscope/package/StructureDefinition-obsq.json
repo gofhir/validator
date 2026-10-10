@@ -1,0 +1,50 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obsq",
+ "url": "https://example.org/fhir/vs/StructureDefinition/obsq",
+ "version": "0.1.0",
+ "name": "obsq",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.focus",
+    "path": "Observation.focus",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "resolve()"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.focus:pp",
+    "path": "Observation.focus",
+    "sliceName": "pp",
+    "min": 1,
+    "max": "*",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/vs/StructureDefinition/pp"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -33,6 +33,12 @@ type ResourceContext struct {
 	// IsBundleEntry indicates if this is a Bundle entry resource.
 	IsBundleEntry bool
 
+	// Container is, for a Bundle entry resource, the Bundle whose entry it is.
+	Container map[string]any
+
+	// FullURL is, for a Bundle entry resource, its entry's fullUrl.
+	FullURL string
+
 	// ParentPath is the path to the parent resource (if any).
 	ParentPath string
 }
@@ -233,6 +239,7 @@ func (w *Walker) walkBundleEntries(data map[string]any, basePath string, visitor
 		}
 
 		entryPath := fmt.Sprintf("%s.entry[%d].resource", basePath, i)
+		fullURL, _ := entryMap["fullUrl"].(string)
 
 		ctx := &ResourceContext{
 			Data:          resourceMap,
@@ -242,6 +249,8 @@ func (w *Walker) walkBundleEntries(data map[string]any, basePath string, visitor
 			Profiles:      getMetaProfiles(resourceMap),
 			IsBundleEntry: true,
 			ParentPath:    basePath,
+			Container:     data,
+			FullURL:       fullURL,
 		}
 
 		if !visitor(ctx) {
@@ -271,7 +280,11 @@ func (w *Walker) walkBundleEntriesWithProfiles(ctx context.Context, data map[str
 
 		entryPath := fmt.Sprintf("%s.entry[%d].resource", basePath, i)
 
-		if !w.visitEntryResource(ctx, resourceMap, resourceType, entryPath, basePath, visitor) {
+		fullURL := ""
+		if entryMap, ok := entry.(map[string]any); ok {
+			fullURL, _ = entryMap["fullUrl"].(string)
+		}
+		if !w.visitEntryResource(ctx, resourceMap, resourceType, entryPath, basePath, data, fullURL, visitor) {
 			return
 		}
 
@@ -318,7 +331,7 @@ func (w *Walker) extractEntryResource(entry any) (resourceMap map[string]any, re
 
 // visitEntryResource visits a Bundle entry resource once per definition it is checked against
 // (definitions).
-func (w *Walker) visitEntryResource(ctx context.Context, resourceMap map[string]any, resourceType, entryPath, basePath string, visitor ResourceVisitor) bool {
+func (w *Walker) visitEntryResource(ctx context.Context, resourceMap map[string]any, resourceType, entryPath, basePath string, bundle map[string]any, fullURL string, visitor ResourceVisitor) bool {
 	profiles := getMetaProfiles(resourceMap)
 	for _, sd := range w.definitions(ctx, profiles, resourceType) {
 		rc := &ResourceContext{
@@ -329,6 +342,8 @@ func (w *Walker) visitEntryResource(ctx context.Context, resourceMap map[string]
 			Profiles:      profiles,
 			IsBundleEntry: true,
 			ParentPath:    basePath,
+			Container:     bundle,
+			FullURL:       fullURL,
 		}
 		if !visitor(rc) {
 			return false

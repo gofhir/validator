@@ -5,11 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
+	"reflect"
 	"regexp"
+	"slices"
 	"strings"
+	"sync"
 
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
+	"github.com/gofhir/validator/v2/pkg/slicematch"
 	"github.com/gofhir/validator/v2/pkg/walker"
 )
 
@@ -186,7 +191,9 @@ var (
 	absoluteRefPattern = regexp.MustCompile(`^https?://\S+/[A-Za-z]+/[A-Za-z0-9\-.]+(?:/_history/[A-Za-z0-9\-.]+)?$`)
 
 	// Fragment reference (contained resource).
-	fragmentRefPattern = regexp.MustCompile(`^#[A-Za-z0-9\-.]+$`)
+	// "#" alone is a contained resource's reference to the resource that contains it
+	// (references.html#contained); ref-1 reports it made from any other resource.
+	fragmentRefPattern = regexp.MustCompile(`^#[A-Za-z0-9\-.]*$`)
 
 	// URN reference patterns.
 	// Note: urn:uuid accepts any non-empty suffix to match HL7 validator behavior.
@@ -198,16 +205,274 @@ var (
 
 // Validator validates Reference elements.
 type Validator struct {
-	registry *registry.Registry
-	walker   *walker.Walker
+	registry  *registry.Registry
+	walker    *walker.Walker
+	conformer slicematch.Conformer
+}
+
+// Option configures a Validator.
+type Option func(*Validator)
+
+// WithTargets checks the target a reference resolves to against the profiles its element allows
+// (ElementDefinition.type.targetProfile: "the content must conform to at least one of them"):
+// conformer decides whether it conforms. Without it, only the target's type is checked.
+func WithTargets(conformer slicematch.Conformer) Option {
+	return func(v *Validator) { v.conformer = conformer }
 }
 
 // New creates a new reference Validator.
-func New(reg *registry.Registry) *Validator {
-	return &Validator{
+func New(reg *registry.Registry, opts ...Option) *Validator {
+	v := &Validator{
 		registry: reg,
 		walker:   walker.New(reg),
 	}
+	for _, o := range opts {
+		o(v)
+	}
+	return v
+}
+
+// refContext is what a reference is resolved within: the Bundle's index, the contained resources
+// of the resource that makes it (root), and the Bundle its targets are entries of (container).
+type refContext struct {
+	ctx       context.Context
+	bundle    *BundleContext
+	contained *ContainedContext
+	root      map[string]any
+	// container is the Bundle whose entry the resource that makes the reference is (or is
+	// contained in): its targets are entries of it (bundle.html#references).
+	container map[string]any
+	// outer are the Bundles that hold container, the innermost first: where its targets' resolve()
+	// looks after it.
+	outer []map[string]any
+	// fullURL is the fullUrl of that entry, the base of a relative reference.
+	fullURL string
+	// inContained is set when the referring resource is one root contains: "#" names root.
+	inContained bool
+}
+
+// nested returns the context of a resource the walk visits, from its parent's: an entry has its
+// own contained resources, its fullUrl and its Bundle; a contained resource shares its
+// container's.
+func (rc *refContext) nested(w *walker.ResourceContext) *refContext {
+	if !w.IsBundleEntry {
+		in := *rc
+		in.inContained = true
+		return &in
+	}
+	outer := rc.outer
+	if !sameMap(w.Container, rc.container) {
+		// An entry of a Bundle that is an entry of rc's.
+		outer = append([]map[string]any{rc.container}, rc.outer...)
+	}
+	return &refContext{ctx: rc.ctx, bundle: rc.bundle, contained: NewContainedContext(w.Data), root: w.Data,
+		container: w.Container, outer: outer, fullURL: w.FullURL}
+}
+
+type containerKey struct{}
+
+type containingKey struct{}
+
+type holdingKey struct{}
+
+// WithHoldingResource returns a context in which the value validated, a datatype, is one resource
+// holds: its references resolve as resource's do ("#id" among its contained resources, a relative
+// reference from its entry).
+func WithHoldingResource(ctx context.Context, resource map[string]any) context.Context {
+	return context.WithValue(ctx, holdingKey{}, resource)
+}
+
+// WithContainingResource returns a context in which the resource validated is one contained in
+// container: its fragment references ("#id") resolve among container's contained resources
+// (references.html#contained).
+func WithContainingResource(ctx context.Context, container map[string]any) context.Context {
+	return context.WithValue(ctx, containingKey{}, container)
+}
+
+// WithContainer returns a context in which references resolve among the entries of container, a
+// Bundle: the one the resource validated is an entry of. Outer are the Bundles that hold it, the
+// innermost first, where the targets' resolve() looks after it.
+func WithContainer(ctx context.Context, container map[string]any, outer ...map[string]any) context.Context {
+	return context.WithValue(ctx, containerKey{}, containers{container: container, outer: outer})
+}
+
+// containers are what WithContainer puts in a context.
+type containers struct {
+	container map[string]any
+	outer     []map[string]any
+}
+
+func sameMap(a, b map[string]any) bool {
+	return reflect.ValueOf(a).Pointer() == reflect.ValueOf(b).Pointer()
+}
+
+// rootContext is the context references in resource, the resource validated, resolve in: the
+// Bundle it is, or else the Bundle the context names, with the fullUrl of resource's entry in it.
+func rootContext(ctx context.Context, resource map[string]any, bundleCtx *BundleContext) *refContext {
+	rc := &refContext{ctx: ctx, bundle: bundleCtx, contained: NewContainedContext(resource), root: resource}
+	// A resource checked as one its container contains resolves as the container does: "#id"
+	// among its contained resources, "#" the container, a relative reference from the container's
+	// entry.
+	holder := resource
+	if c, ok := ctx.Value(containingKey{}).(map[string]any); ok && c != nil {
+		rc.contained, rc.root, rc.inContained, holder = NewContainedContext(c), c, true, c
+	} else if h, ok := ctx.Value(holdingKey{}).(map[string]any); ok && h != nil {
+		rc.contained, rc.root, holder = NewContainedContext(h), h, h
+	}
+	in, _ := ctx.Value(containerKey{}).(containers)
+	if rt, _ := resource["resourceType"].(string); rt == "Bundle" {
+		rc.container, rc.outer = resource, in.outer
+		if in.container != nil && !sameMap(in.container, resource) {
+			if t, _ := in.container["resourceType"].(string); t == "Bundle" {
+				rc.outer = append([]map[string]any{in.container}, in.outer...)
+			}
+		}
+		return rc
+	}
+	if in.container != nil {
+		rc.container, rc.outer = in.container, in.outer
+		rc.fullURL = indexOf(ctx, in.container).fullURLOf[reflect.ValueOf(holder).Pointer()]
+	}
+	return rc
+}
+
+// urnType is the type of the entry a URN reference names, in the Bundle whose entry the referring
+// resource is, and whether one does; or, without that Bundle, in the BundleContext the caller gave.
+func (rc *refContext) urnType(ref string) (string, bool) {
+	if rc.container == nil {
+		if rc.bundle == nil {
+			return "", false
+		}
+		t, ok := rc.bundle.FullURLIndex[ref]
+		return t, ok
+	}
+	matches := entryMatches(ref, rc)
+	if len(matches) != 1 {
+		return "", len(matches) > 0 // several: no type, the reference is ambiguous
+	}
+	t, _ := matches[0]["resourceType"].(string)
+	return t, true
+}
+
+// entryIndex indexes a Bundle's entries: the resources by their entry's fullUrl, and the fullUrl
+// of each resource's entry.
+type entryIndex struct {
+	byFullURL map[string][]map[string]any
+	fullURLOf map[uintptr]string
+}
+
+// indexes holds the entry indexes of the Bundles one validation resolves references in, by
+// Bundle; each is built once (withIndexes).
+type indexes struct {
+	mu       sync.Mutex
+	byBundle map[uintptr]*entryIndex
+}
+
+type indexesKey struct{}
+
+// WithIndexes returns ctx with a new store of the entry indexes references are resolved with,
+// for one validation: its conformance checks share it. A store keys Bundles by address, so it
+// must not outlive the validation.
+func WithIndexes(ctx context.Context) context.Context {
+	return context.WithValue(ctx, indexesKey{}, &indexes{byBundle: map[uintptr]*entryIndex{}})
+}
+
+// withIndexes returns ctx with a store of entry indexes, unless it has one.
+func withIndexes(ctx context.Context) context.Context {
+	if _, ok := ctx.Value(indexesKey{}).(*indexes); ok {
+		return ctx
+	}
+	return WithIndexes(ctx)
+}
+
+// indexOf returns the index of bundle's entries, from ctx's store when it has one.
+func indexOf(ctx context.Context, bundle map[string]any) *entryIndex {
+	store, _ := ctx.Value(indexesKey{}).(*indexes)
+	key := reflect.ValueOf(bundle).Pointer()
+	if store != nil {
+		store.mu.Lock()
+		defer store.mu.Unlock()
+		if idx, ok := store.byBundle[key]; ok {
+			return idx
+		}
+	}
+	list, _ := bundle["entry"].([]any)
+	idx := &entryIndex{byFullURL: make(map[string][]map[string]any, len(list)), fullURLOf: make(map[uintptr]string, len(list))}
+	for _, e := range list {
+		m, _ := e.(map[string]any)
+		r, ok := m["resource"].(map[string]any)
+		if !ok {
+			continue
+		}
+		u, _ := m["fullUrl"].(string)
+		idx.byFullURL[u] = append(idx.byFullURL[u], r)
+		idx.fullURLOf[reflect.ValueOf(r).Pointer()] = u
+	}
+	if store != nil {
+		store.byBundle[key] = idx
+	}
+	return idx
+}
+
+// restfulURL matches a RESTful fullUrl: a base, then the resource's type and id
+// (references.html#literal), the type and id being the last two segments.
+var restfulURL = regexp.MustCompile(`^(.+/)[A-Z][A-Za-z]+/[A-Za-z0-9\-.]{1,64}$`)
+
+// resolveTarget finds the resource ref names, made from within rc (bundle.html#references): "#id",
+// a resource the referring resource contains; an absolute reference, the entry whose fullUrl it
+// is; a relative one ([type]/[id]), the entry whose fullUrl is the referring entry's base followed
+// by it, which needs that fullUrl to be RESTful. A version (/_history/x) is removed before
+// matching the fullUrl, then matched against the resource's meta.versionId. Only the Bundle whose
+// entry the referring resource is is searched: the specification gives a reference no meaning
+// in a Bundle that holds it. Several matches are ambiguous ("it is ambiguous which is correct"):
+// the reference does not resolve.
+func resolveTarget(ref string, rc *refContext) (map[string]any, bool) {
+	if id, ok := strings.CutPrefix(ref, "#"); ok {
+		if id == "" {
+			return rc.root, rc.inContained
+		}
+		contained, _ := rc.root["contained"].([]any)
+		for _, c := range contained {
+			if m, ok := c.(map[string]any); ok && m["id"] == id {
+				return m, true
+			}
+		}
+		return nil, false
+	}
+	if matches := entryMatches(ref, rc); len(matches) == 1 {
+		return matches[0], true
+	}
+	return nil, false
+}
+
+// entryMatches are the entries of rc's Bundle a literal reference other than "#id" matches, as
+// resolveTarget matches them.
+func entryMatches(ref string, rc *refContext) []map[string]any {
+	if rc.container == nil {
+		return nil
+	}
+	version := ""
+	if i := strings.Index(ref, "/_history/"); i >= 0 {
+		ref, version = ref[:i], ref[i+len("/_history/"):]
+	}
+	target := ref
+	if !strings.Contains(ref, ":") {
+		m := restfulURL.FindStringSubmatch(rc.fullURL)
+		if m == nil {
+			return nil
+		}
+		target = m[1] + ref
+	}
+	var out []map[string]any
+	for _, r := range indexOf(rc.ctx, rc.container).byFullURL[target] {
+		if version != "" {
+			if meta, _ := r["meta"].(map[string]any); meta == nil || meta["versionId"] != version {
+				continue
+			}
+		}
+		out = append(out, r)
+	}
+	return out
 }
 
 // Validate validates all Reference elements in a resource.
@@ -232,8 +497,10 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 	v.ValidateDataWithBundle(resource, sd, nil, result)
 }
 
-// ValidateDataWithBundle validates all Reference elements in a pre-parsed FHIR resource
-// within the context of a Bundle. This enables validation of urn:uuid references.
+// ValidateDataWithBundle validates all Reference elements in a pre-parsed FHIR resource. A Bundle's
+// references resolve among its entries (bundle.html#references); bundleCtx gives the types of the
+// URN references of a resource that is not a Bundle and has no Bundle in its context
+// (WithContainer), and may be nil.
 func (v *Validator) ValidateDataWithBundle(resource map[string]any, sd *registry.StructureDefinition, bundleCtx *BundleContext, result *issue.Result) {
 	v.ValidateDataWithBundleContext(context.Background(), resource, sd, bundleCtx, result)
 }
@@ -251,31 +518,39 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 	}
 
 	// Build contained resource index for the root resource
-	containedCtx := NewContainedContext(resource)
+	ctx = withIndexes(ctx)
+	rc := rootContext(ctx, resource, bundleCtx)
 
 	// Validate references in root resource
-	v.validateElementWithPaths(resource, sd, resourceType, resourceType, bundleCtx, containedCtx, result)
+	v.validateElementWithPaths(resource, sd, resourceType, resourceType, rc, result)
 
 	// Walk all nested resources (contained + Bundle entries) using the generic walker, each against
 	// the profiles its meta.profile declares and its type's definition. A reference that several
 	// of them find wrong is reported once.
 	nested := issue.GetPooledResult()
 	defer issue.ReleaseResult(nested)
+	// Each resource's context, by its path: an entry has its own contained resources and fullUrl,
+	// and its Bundle first; a contained resource shares its container's (references.html#contained).
+	// The walk visits a resource before those it holds.
+	contexts := map[string]*refContext{resourceType: rc}
 	v.walker.WalkWithProfilesContext(ctx, resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == resourceType {
 			return true
 		}
-
-		// Each Bundle entry has its own contained scope
-		nestedContainedCtx := containedCtx
-		if ctx.IsBundleEntry {
-			nestedContainedCtx = NewContainedContext(ctx.Data)
+		parent := contexts[ctx.ParentPath]
+		if parent == nil {
+			parent = rc
+		}
+		here, seen := contexts[ctx.FHIRPath]
+		if !seen {
+			here = parent.nested(ctx)
+			contexts[ctx.FHIRPath] = here
 		}
 
 		// Validate references in the nested resource
 		// Use ResourceType for SD lookup, FHIRPath for error reporting
-		v.validateElementWithPaths(ctx.Data, ctx.SD, ctx.ResourceType, ctx.FHIRPath, bundleCtx, nestedContainedCtx, nested)
+		v.validateElementWithPaths(ctx.Data, ctx.SD, ctx.ResourceType, ctx.FHIRPath, here, nested)
 		return true
 	})
 	seen := make(map[string]bool, len(nested.Issues))
@@ -291,8 +566,10 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 // ValidateElementWithPaths validates references with separate paths for SD lookup and error reporting.
 // SdPath is used to look up ElementDefinitions in the StructureDefinition.
 // FhirPath is used for error reporting (e.g., "Bundle.entry[0].resource.subject").
-func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.StructureDefinition, sdPath, fhirPath string, bundleCtx *BundleContext, containedCtx *ContainedContext, result *issue.Result) {
-	for key, value := range data {
+func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.StructureDefinition, sdPath, fhirPath string, rc *refContext, result *issue.Result) {
+	// In the order of the keys, not the map's: a target's check depends on the checks made before.
+	for _, key := range slices.Sorted(maps.Keys(data)) {
+		value := data[key]
 		if key == "resourceType" {
 			continue
 		}
@@ -308,7 +585,7 @@ func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.S
 
 		// Check if this element is a Reference type
 		if v.isReferenceType(elemDef) {
-			v.validateReference(value, elemDef, elementFhirPath, bundleCtx, containedCtx, result)
+			v.validateReference(value, elemDef, elementFhirPath, rc, result)
 		}
 
 		// BackboneElement children are defined in the parent resource SD (e.g., Patient.link.other),
@@ -319,18 +596,18 @@ func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.S
 		switch val := value.(type) {
 		case map[string]any:
 			if isBackbone {
-				v.validateElementWithPaths(val, sd, elementSDPath, elementFhirPath, bundleCtx, containedCtx, result)
+				v.validateElementWithPaths(val, sd, elementSDPath, elementFhirPath, rc, result)
 			} else {
-				v.validateComplexElement(val, elemDef, elementFhirPath, bundleCtx, containedCtx, result)
+				v.validateComplexElement(val, elemDef, elementFhirPath, rc, result)
 			}
 		case []any:
-			v.validateArrayElement(val, sd, elemDef, elementSDPath, elementFhirPath, isBackbone, bundleCtx, containedCtx, result)
+			v.validateArrayElement(val, sd, elemDef, elementSDPath, elementFhirPath, isBackbone, rc, result)
 		}
 	}
 }
 
 // validateArrayElement validates references within array elements.
-func (v *Validator) validateArrayElement(items []any, sd *registry.StructureDefinition, elemDef *registry.ElementDefinition, elementSDPath, elementFhirPath string, isBackbone bool, bundleCtx *BundleContext, containedCtx *ContainedContext, result *issue.Result) {
+func (v *Validator) validateArrayElement(items []any, sd *registry.StructureDefinition, elemDef *registry.ElementDefinition, elementSDPath, elementFhirPath string, isBackbone bool, rc *refContext, result *issue.Result) {
 	for i, item := range items {
 		itemPath := fmt.Sprintf("%s[%d]", elementFhirPath, i)
 		mapItem, ok := item.(map[string]any)
@@ -338,18 +615,18 @@ func (v *Validator) validateArrayElement(items []any, sd *registry.StructureDefi
 			continue
 		}
 		if v.isReferenceType(elemDef) {
-			v.validateReference(mapItem, elemDef, itemPath, bundleCtx, containedCtx, result)
+			v.validateReference(mapItem, elemDef, itemPath, rc, result)
 		}
 		if isBackbone {
-			v.validateElementWithPaths(mapItem, sd, elementSDPath, itemPath, bundleCtx, containedCtx, result)
+			v.validateElementWithPaths(mapItem, sd, elementSDPath, itemPath, rc, result)
 		} else {
-			v.validateComplexElement(mapItem, elemDef, itemPath, bundleCtx, containedCtx, result)
+			v.validateComplexElement(mapItem, elemDef, itemPath, rc, result)
 		}
 	}
 }
 
 // validateComplexElement validates references within a complex element.
-func (v *Validator) validateComplexElement(data map[string]any, parentDef *registry.ElementDefinition, basePath string, bundleCtx *BundleContext, containedCtx *ContainedContext, result *issue.Result) {
+func (v *Validator) validateComplexElement(data map[string]any, parentDef *registry.ElementDefinition, basePath string, rc *refContext, result *issue.Result) {
 	if len(parentDef.Type) == 0 {
 		return
 	}
@@ -360,7 +637,8 @@ func (v *Validator) validateComplexElement(data map[string]any, parentDef *regis
 		return
 	}
 
-	for key, value := range data {
+	for _, key := range slices.Sorted(maps.Keys(data)) {
+		value := data[key]
 		elementPath := fmt.Sprintf("%s.%s", basePath, key)
 		typePath := fmt.Sprintf("%s.%s", typeName, key)
 
@@ -377,20 +655,20 @@ func (v *Validator) validateComplexElement(data map[string]any, parentDef *regis
 		}
 
 		if v.isReferenceType(elemDef) {
-			v.validateReference(value, elemDef, elementPath, bundleCtx, containedCtx, result)
+			v.validateReference(value, elemDef, elementPath, rc, result)
 		}
 
 		switch val := value.(type) {
 		case map[string]any:
-			v.validateComplexElement(val, elemDef, elementPath, bundleCtx, containedCtx, result)
+			v.validateComplexElement(val, elemDef, elementPath, rc, result)
 		case []any:
 			for i, item := range val {
 				itemPath := fmt.Sprintf("%s[%d]", elementPath, i)
 				if mapItem, ok := item.(map[string]any); ok {
 					if v.isReferenceType(elemDef) {
-						v.validateReference(mapItem, elemDef, itemPath, bundleCtx, containedCtx, result)
+						v.validateReference(mapItem, elemDef, itemPath, rc, result)
 					}
-					v.validateComplexElement(mapItem, elemDef, itemPath, bundleCtx, containedCtx, result)
+					v.validateComplexElement(mapItem, elemDef, itemPath, rc, result)
 				}
 			}
 		}
@@ -419,7 +697,7 @@ func (v *Validator) isReferenceType(elemDef *registry.ElementDefinition) bool {
 }
 
 // validateReference validates a single Reference value.
-func (v *Validator) validateReference(value any, elemDef *registry.ElementDefinition, fhirPath string, bundleCtx *BundleContext, containedCtx *ContainedContext, result *issue.Result) {
+func (v *Validator) validateReference(value any, elemDef *registry.ElementDefinition, fhirPath string, rc *refContext, result *issue.Result) {
 	refMap, ok := value.(map[string]any)
 	if !ok {
 		return
@@ -455,16 +733,15 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 		return
 	}
 
-	// Extract resource type from reference
-	extractedType := v.extractResourceType(refStr)
+	target, targetType := v.targetOf(refStr, rc)
 
-	// If type element is present, validate it matches
-	if refType != "" && extractedType != "" && refType != extractedType {
+	// Reference.type and the target "SHALL be consistent" (Reference.type).
+	if refType != "" && targetType != "" && refType != targetType {
 		result.AddErrorWithID(
 			issue.DiagReferenceTypeMismatch,
 			map[string]any{
 				"type":      refType,
-				"reference": extractedType,
+				"reference": targetType,
 			},
 			fhirPath,
 		)
@@ -472,10 +749,10 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 
 	// Validate fragment references against contained resources.
 	// Per FHIR spec (ref-1): "SHALL have a contained resource if a local reference is provided"
-	if strings.HasPrefix(refStr, "#") {
+	if strings.HasPrefix(refStr, "#") && refStr != "#" {
 		fragmentID := refStr[1:]
-		if containedCtx != nil {
-			if _, found := containedCtx.IDIndex[fragmentID]; !found {
+		if rc.contained != nil {
+			if _, found := rc.contained.IDIndex[fragmentID]; !found {
 				result.AddErrorWithID(
 					issue.DiagReferenceContainedNotFound,
 					map[string]any{
@@ -491,9 +768,9 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 	// Per FHIR spec and HL7 validator behavior:
 	// - urn:uuid and urn:oid references SHOULD resolve within the Bundle (warning if not found)
 	// - Absolute URLs (http/https) are allowed to reference external resources (no warning)
-	if bundleCtx != nil {
+	if rc.container != nil || rc.bundle != nil {
 		if strings.HasPrefix(refStr, "urn:uuid:") || strings.HasPrefix(refStr, "urn:oid:") {
-			if _, found := bundleCtx.FullURLIndex[refStr]; !found {
+			if _, found := rc.urnType(refStr); !found {
 				result.AddWarningWithID(
 					issue.DiagReferenceNotInBundle,
 					map[string]any{
@@ -505,9 +782,15 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 		}
 	}
 
+	// Several entries the reference matches: "it is ambiguous which is correct", and an
+	// application "MAY return an error" (bundle.html#references), as the HL7 validator does.
+	if !strings.HasPrefix(refStr, "#") && len(entryMatches(refStr, rc)) > 1 {
+		result.AddErrorWithID(issue.DiagReferenceMultipleMatches, map[string]any{"reference": refStr}, fhirPath)
+	}
+
 	// Validate targetProfile - check if reference target type is allowed.
 	// This validates structural conformance based on the StructureDefinition.
-	v.validateTargetProfile(extractedType, refStr, elemDef, fhirPath, bundleCtx, containedCtx, result)
+	v.validateTargetProfile(targetType, target, refStr, elemDef, fhirPath, rc, result)
 
 	// Validate aggregation mode constraints.
 	// Per FHIR spec, ElementDefinition.type.aggregation restricts how references should be resolved:
@@ -577,28 +860,27 @@ func (v *Validator) getAggregationModes(elemDef *registry.ElementDefinition) []s
 	return modes
 }
 
+// targetOf is the resource refStr resolves to within rc, or nil, and the target's type: the
+// resolved resource's, else the one its literal names ([type]/[id]), or for a URN the type the
+// caller's BundleContext gives.
+func (v *Validator) targetOf(refStr string, rc *refContext) (target map[string]any, targetType string) {
+	target, resolved := resolveTarget(refStr, rc)
+	if t, _ := target["resourceType"].(string); resolved && t != "" {
+		return target, t
+	}
+	targetType = v.extractResourceType(refStr)
+	if targetType == "" && (strings.HasPrefix(refStr, "urn:uuid:") || strings.HasPrefix(refStr, "urn:oid:")) {
+		targetType, _ = rc.urnType(refStr)
+	}
+	return nil, targetType
+}
+
 // validateTargetProfile validates that the reference target type matches allowed targetProfiles.
 // Per FHIR spec, ElementDefinition.type[].targetProfile restricts which resource types
 // can be referenced. If no targetProfile is specified, any resource type is allowed.
-func (v *Validator) validateTargetProfile(extractedType, refStr string, elemDef *registry.ElementDefinition, fhirPath string, bundleCtx *BundleContext, containedCtx *ContainedContext, result *issue.Result) {
-	// Can't validate if we couldn't extract the type.
-	// This happens for fragment (#) and URN references.
-	if extractedType == "" {
-		// For URN references in a Bundle, try to get the type from Bundle context
-		if bundleCtx != nil && (strings.HasPrefix(refStr, "urn:uuid:") || strings.HasPrefix(refStr, "urn:oid:")) {
-			if resourceType, found := bundleCtx.FullURLIndex[refStr]; found {
-				extractedType = resourceType
-			}
-		}
-		// For fragment references, try to get the type from contained context
-		if containedCtx != nil && strings.HasPrefix(refStr, "#") {
-			if rt, found := containedCtx.IDIndex[refStr[1:]]; found {
-				extractedType = rt
-			}
-		}
-		if extractedType == "" {
-			return // Still can't determine type, skip validation
-		}
+func (v *Validator) validateTargetProfile(targetType string, target map[string]any, refStr string, elemDef *registry.ElementDefinition, fhirPath string, rc *refContext, result *issue.Result) {
+	if targetType == "" {
+		return // the type cannot be determined
 	}
 
 	// Get all targetProfiles from all Reference types in the element definition
@@ -609,19 +891,66 @@ func (v *Validator) validateTargetProfile(extractedType, refStr string, elemDef 
 		return
 	}
 
-	// Check if the extracted type matches any of the allowed profiles
-	if !v.typeMatchesProfiles(extractedType, allowedProfiles) {
+	// Check if the target's type matches any of the allowed profiles
+	if !v.typeMatchesProfiles(targetType, allowedProfiles) {
 		// Build list of allowed types for error message
 		allowedTypes := v.extractTypesFromProfiles(allowedProfiles)
 		result.AddErrorWithID(
 			issue.DiagReferenceInvalidTarget,
 			map[string]any{
-				"type":    extractedType,
+				"type":    targetType,
 				"allowed": strings.Join(allowedTypes, ", "),
 			},
 			fhirPath, // the Reference, as the HL7 validator reports it (Reference_REF_BadTargetType)
 		)
+		return
 	}
+	if target != nil {
+		v.checkTargetConformance(refStr, target, targetType, allowedProfiles, fhirPath, rc, result)
+	}
+}
+
+// checkTargetConformance checks the target refStr resolves to, of type targetType, against the
+// profiles of its type among allowed: it must conform to at least one of them
+// (ElementDefinition.type.targetProfile). A target that does not resolve is not checked; nor one
+// whose type's own definition is allowed, which its type and its own validation answer. The
+// failure is reported at the Reference, as the HL7 validator reports it
+// (Reference_REF_CantMatchChoice).
+func (v *Validator) checkTargetConformance(refStr string, target map[string]any, targetType string, allowed []string, fhirPath string, rc *refContext, result *issue.Result) {
+	if v.conformer == nil || rc == nil {
+		return
+	}
+	var candidates []*registry.StructureDefinition
+	var names []string
+	for _, p := range allowed {
+		sd, _ := v.registry.ResolveCanonical(p)
+		if sd == nil || (sd.Type != targetType && !v.registry.IsSubtype(targetType, sd.Type)) {
+			continue
+		}
+		if sd.Derivation != registry.DerivationConstraint {
+			// The definition of its type or of a type it derives from (Resource, DomainResource):
+			// any resource of the type conforms to it here.
+			return
+		}
+		candidates = append(candidates, sd)
+		names = append(names, p)
+	}
+	if len(candidates) == 0 {
+		return
+	}
+	// The target is its own %resource; a contained one has the resource that contains it as its
+	// %rootResource (fhirpath.html#variables). Its own references resolve in the Bundle it is in.
+	scope := slicematch.Scope{Resource: target, RootResource: target, Container: rc.container, Outer: rc.outer}
+	if strings.HasPrefix(refStr, "#") {
+		scope.RootResource = rc.root
+	}
+	for _, sd := range candidates {
+		if v.conformer.Conforms(rc.ctx, target, sd, scope) {
+			return
+		}
+	}
+	result.AddErrorWithID(issue.DiagReferenceTargetProfile,
+		map[string]any{"reference": refStr, "profiles": strings.Join(names, ", ")}, fhirPath)
 }
 
 // getTargetProfiles extracts all targetProfile URLs from Reference types in an ElementDefinition.

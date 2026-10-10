@@ -177,9 +177,28 @@
       "hl7": [
         "Reference_REF_BadTargetType",
         "Reference_REF_BadTargetType2",
-        "Reference_REF_CantMatchChoice",
         "Reference_REF_CantMatchType",
         "Reference_REF_WrongTarget"
+      ]
+    },
+    {
+      "name": "reference-target-profile",
+      "rule": "equal",
+      "gofhir": [
+        "REFERENCE_TARGET_PROFILE"
+      ],
+      "hl7": [
+        "Reference_REF_CantMatchChoice"
+      ]
+    },
+    {
+      "name": "reference-multiple-matches",
+      "rule": "equal",
+      "gofhir": [
+        "REFERENCE_MULTIPLE_MATCHES"
+      ],
+      "hl7": [
+        "Bundle_BUNDLE_MultipleMatches"
       ]
     },
     {

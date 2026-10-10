@@ -1,0 +1,31 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "inner7",
+ "url": "https://example.org/fhir/vs/StructureDefinition/inner7",
+ "version": "0.1.0",
+ "name": "inner7",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle",
+    "constraint": [
+     {
+      "key": "vs-1",
+      "severity": "error",
+      "human": "every Observation subject resolves",
+      "expression": "entry.resource.ofType(Observation).all(subject.resolve().exists())",
+      "source": "https://example.org/fhir/vs/StructureDefinition/inner7"
+     }
+    ]
+   }
+  ]
+ }
+}

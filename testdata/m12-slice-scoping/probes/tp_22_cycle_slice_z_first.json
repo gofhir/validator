@@ -1,0 +1,78 @@
+{
+ "resourceType": "Bundle",
+ "id": "nm-zc",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Patient/z",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "z",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/nm/StructureDefinition/pz"
+     ]
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/a"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/c",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "c",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/nm/StructureDefinition/pc"
+     ]
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/b"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/a",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "a",
+    "gender": "female",
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/b"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/b",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "b",
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/a"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "resourceType": "Patient",
+ "id": "p",
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c",
+   "meta": {
+    "profile": [
+     "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+    ]
+   },
+   "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+   },
+   "status": "final",
+   "code": {
+    "text": "x"
+   },
+   "subject": {
+    "reference": "#"
+   }
+  }
+ ],
+ "identifier": [
+  {
+   "system": "http://acme-hospital.cl/ids",
+   "value": "p"
+  }
+ ]
+}

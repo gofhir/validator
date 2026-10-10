@@ -1,0 +1,38 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Observation/o",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "hasMember": [
+     {
+      "reference": "Observation/x"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Observation/x",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "x",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "version": "0.1.0",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "abstract": false,
+ "derivation": "constraint",
+ "id": "inner8",
+ "url": "https://example.org/fhir/vs/StructureDefinition/inner8",
+ "name": "Inner8",
+ "kind": "resource",
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.type",
+    "path": "Bundle.type",
+    "fixedCode": "collection"
+   }
+  ]
+ }
+}

@@ -140,6 +140,7 @@ type end struct {
 	typeCode string // the instance value's type
 	profiles []string
 	frames   []frame
+	in       *Scope // the scope of the resource resolve() reached the value in; nil: the request's
 }
 
 // isPresent reports whether the instance has the element where the walk stopped.
@@ -162,6 +163,7 @@ type state struct {
 	frames   []frame
 	resolved bool     // the last step was resolve()
 	targets  []string // targetProfile of the reference just resolved
+	in       *Scope   // the scope of the resource resolve() reached, which the value is in
 }
 
 // walk follows steps from start, for each of the start values; valueless reports a start value
@@ -184,7 +186,7 @@ func (w walker) walk(start cursor, values []any, valueless bool, steps []step) (
 	}
 	ends := make([]end, 0, len(states))
 	for _, st := range states {
-		e := end{branch: st.branch, def: st.cur.node, allowed: st.cur.allowed(), value: st.value, present: st.present, typeCode: st.typeCode, frames: st.frames}
+		e := end{branch: st.branch, def: st.cur.node, allowed: st.cur.allowed(), value: st.value, present: st.present, typeCode: st.typeCode, frames: st.frames, in: st.in}
 		if st.resolved {
 			e.profiles = st.targets
 		} else {
@@ -312,7 +314,7 @@ func (w walker) nameIn(st state, sd *registry.StructureDefinition, children []*r
 				continue
 			}
 			out = append(out, state{branch: st.branch, cur: cursor{sd: sd, node: child, key: key, types: types},
-				value: v, present: v == nil, typeCode: singleTypeCode(types, v), frames: frames})
+				value: v, present: v == nil, typeCode: singleTypeCode(types, v), frames: frames, in: st.in})
 		}
 	}
 	if choice {
@@ -325,7 +327,7 @@ func (w walker) nameIn(st state, sd *registry.StructureDefinition, children []*r
 		emit(name, nil)
 	}
 	if len(out) == 0 {
-		out = append(out, state{branch: st.branch, cur: cursor{sd: sd, node: child}, frames: frames})
+		out = append(out, state{branch: st.branch, cur: cursor{sd: sd, node: child}, frames: frames, in: st.in})
 	}
 	return out, nil
 }
@@ -379,11 +381,11 @@ func (w walker) extension(st state, url string) ([]state, error) {
 	var out []state
 	for _, v := range items(obj, extensionElement) {
 		if m, ok := v.(map[string]any); ok && m[extensionURL] == url {
-			out = append(out, state{branch: st.branch, cur: defCur, value: v, typeCode: singleTypeCode(defCur.allowed(), v), frames: st.frames})
+			out = append(out, state{branch: st.branch, cur: defCur, value: v, typeCode: singleTypeCode(defCur.allowed(), v), frames: st.frames, in: st.in})
 		}
 	}
 	if len(out) == 0 {
-		out = append(out, state{branch: st.branch, cur: defCur, frames: st.frames})
+		out = append(out, state{branch: st.branch, cur: defCur, frames: st.frames, in: st.in})
 	}
 	return out, nil
 }
@@ -400,7 +402,23 @@ func (w walker) resolve(st state) ([]state, error) {
 	if ref == "" || w.resolver == nil {
 		return []state{{branch: st.branch, cur: cursor{}, resolved: true, targets: targets}}, nil
 	}
-	res, ok := w.resolver.Resolve(ref, w.scope)
+	from := w.scope
+	if st.in != nil {
+		from = *st.in
+	}
+	// A Resolver that is not a ScopedResolver leaves the resource in the scope of the reference
+	// (in nil).
+	var res map[string]any
+	var in *Scope
+	var ok bool
+	if sr, scoped := w.resolver.(ScopedResolver); scoped {
+		var found Scope
+		res, found, ok = sr.ResolveScoped(ref, from)
+		in = &found
+	} else {
+		res, ok = w.resolver.Resolve(ref, from)
+		in = st.in
+	}
 	if !ok {
 		return []state{{branch: st.branch, cur: cursor{}, resolved: true, targets: targets}}, nil
 	}
@@ -420,7 +438,7 @@ func (w walker) resolve(st state) ([]state, error) {
 			allowed = append(allowed, registry.Type{Code: tsd.Type, Profile: []string{tp}})
 		}
 	}
-	return []state{{branch: st.branch, cur: cursor{sd: rsd, node: tree.Root(), types: allowed}, value: res, typeCode: rt, resolved: true, targets: targets}}, nil
+	return []state{{branch: st.branch, cur: cursor{sd: rsd, node: tree.Root(), types: allowed}, value: res, typeCode: rt, resolved: true, targets: targets, in: in}}, nil
 }
 
 // ofType keeps the values of one type, and restricts the definition to it.
@@ -437,7 +455,7 @@ func ofType(st state, t string) []state {
 		cur.types = []registry.Type{}
 	}
 	if (st.value != nil || st.present) && st.typeCode != t {
-		return []state{{branch: st.branch, cur: cur, frames: st.frames}}
+		return []state{{branch: st.branch, cur: cur, frames: st.frames, in: st.in}}
 	}
 	st.cur = cur
 	return []state{st}

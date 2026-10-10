@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "org8",
+ "url": "https://example.org/fhir/vs/StructureDefinition/org8",
+ "version": "0.1.0",
+ "name": "org8",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Organization",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Organization",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Organization",
+    "path": "Organization"
+   },
+   {
+    "id": "Organization.name",
+    "path": "Organization.name",
+    "min": 1
+   }
+  ]
+ }
+}

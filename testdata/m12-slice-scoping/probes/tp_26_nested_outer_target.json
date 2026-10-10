@@ -1,0 +1,75 @@
+{
+ "resourceType": "Bundle",
+ "id": "outer",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:11111111-1111-1111-1111-111111111111",
+   "resource": {
+    "resourceType": "Bundle",
+    "id": "inner",
+    "type": "collection",
+    "entry": [
+     {
+      "fullUrl": "http://example.org/fhir/Observation/o",
+      "resource": {
+       "resourceType": "Observation",
+       "id": "o",
+       "meta": {
+        "profile": [
+         "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+        ]
+       },
+       "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+       },
+       "status": "final",
+       "code": {
+        "text": "x"
+       },
+       "subject": {
+        "reference": "http://example.org/fhir/Patient/p"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/p",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "identifier": [
+     {
+      "value": "p"
+     }
+    ],
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/q"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/q",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "q",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    }
+   }
+  }
+ ]
+}

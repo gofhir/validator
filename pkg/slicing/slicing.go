@@ -252,7 +252,7 @@ func (v *Validator) validateContained(run *validation, resource map[string]any, 
 			continue
 		}
 		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
-		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource, Container: run.scope.Container}
+		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource, Container: run.scope.Container, Outer: run.scope.Outer}
 		v.walk(run, scope, containedSD, root, "", resourceMap, containedFhirPath, result)
 	}
 }

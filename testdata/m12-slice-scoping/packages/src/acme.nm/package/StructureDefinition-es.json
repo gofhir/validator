@@ -1,0 +1,53 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "es",
+ "url": "https://example.org/fhir/nm/StructureDefinition/es",
+ "name": "es",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.link",
+    "path": "Patient.link",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "other.resolve()"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.link:q",
+    "path": "Patient.link",
+    "sliceName": "q",
+    "min": 1,
+    "max": "*"
+   },
+   {
+    "id": "Patient.link:q.other",
+    "path": "Patient.link.other",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/nm/StructureDefinition/eq"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

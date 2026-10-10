@@ -1,0 +1,86 @@
+{
+ "resourceType": "Bundle",
+ "id": "out",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/vs/StructureDefinition/outerq"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-0000000000c1",
+   "resource": {
+    "resourceType": "Bundle",
+    "id": "in",
+    "type": "collection",
+    "entry": [
+     {
+      "fullUrl": "urn:uuid:00000000-0000-0000-0000-000000000001",
+      "resource": {
+       "resourceType": "Observation",
+       "id": "o",
+       "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+       },
+       "status": "final",
+       "code": {
+        "text": "x"
+       },
+       "focus": [
+        {
+         "reference": "urn:uuid:00000000-0000-0000-0000-0000000000a1"
+        }
+       ]
+      }
+     },
+     {
+      "fullUrl": "urn:uuid:00000000-0000-0000-0000-0000000000b1",
+      "resource": {
+       "resourceType": "Patient",
+       "id": "x2",
+       "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+       },
+       "gender": "female"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-0000000000a1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "gender": "male",
+    "link": [
+     {
+      "other": {
+       "reference": "urn:uuid:00000000-0000-0000-0000-0000000000b1"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-0000000000b1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "x",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "gender": "male"
+   }
+  }
+ ]
+}

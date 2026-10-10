@@ -302,5 +302,53 @@
     "file": "testdata/m12-slice-scoping/probes/cn_11_entry_profile_of_other_type.json",
     "location": "Bundle.entry[0].resource.subject",
     "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D16",
+    "reason": "ElementDefinition.type.targetProfile: c references b, which references a, which does not conform, so c does not conform, whatever the entries' order. HL7 6.10.2 keeps c's answer computed assuming a conforms when a's referrer comes first.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/tp_30_cycle_three_a_first.json",
+    "location": "Bundle.entry[1].resource.subject",
+    "messageId": "REFERENCE_TARGET_PROFILE"
+  },
+  {
+    "decision": "B-D18",
+    "reason": "bundle.html#references: when several entries match a reference \"it is ambiguous which is correct\", so the reference names no target whose type could be checked; it is reported as ambiguous (REFERENCE_MULTIPLE_MATCHES, as HL7 reports it). HL7 6.10.2 also checks the type of one of the entries it matches.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/vs_22_urn_ambiguous.json",
+    "location": "Bundle.entry[0].resource.subject",
+    "messageId": "Reference_REF_BadTargetType"
+  },
+  {
+    "decision": "B-D15",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, and every Patient conforms to DomainResource, one of them. HL7 6.10.2 reports a Patient that does not conform to the other, a Patient profile.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/tp_11_mix_domainresource.json",
+    "location": "Bundle.entry[0].resource.focus[0]",
+    "messageId": "Reference_REF_CantMatchChoice"
+  },
+  {
+    "decision": "B-D17",
+    "reason": "In a cycle through a slice a profile discriminator assigns, c's target conforms once the check assumed while computing it turns out not to conform, whatever the entries' order. HL7 6.10.2 keeps the answer computed under that assumption when the entries come in this order, and reports c's reference.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/tp_22_cycle_slice_z_first.json",
+    "location": "Bundle.entry[1].resource.link[0].other",
+    "messageId": "Reference_REF_CantMatchChoice"
+  },
+  {
+    "decision": "B-D17",
+    "reason": "In a cycle through a slice a profile discriminator assigns, d's target conforms once the check assumed while computing it turns out not to conform, whatever the entries' order. HL7 6.10.2 keeps the answer computed under that assumption when the entries come in this order, and reports d's reference.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/tp_24_cycle_slice_outer_z_first.json",
+    "location": "Bundle.entry[1].resource.link[0].other",
+    "messageId": "Reference_REF_CantMatchChoice"
+  },
+  {
+    "decision": "B-D19",
+    "reason": "bundle.html#references: \"If the reference is version specific (either relative or absolute), then remove the version from the URL before matching fullUrl, and then match the version based on Resource.meta.versionId\": an absolute versioned reference resolves, and its target that does not conform is reported. HL7 6.10.2 removes the version only from relative references.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/tp_44_absolute_versioned.json",
+    "location": "Bundle.entry[0].resource.subject",
+    "messageId": "REFERENCE_TARGET_PROFILE"
   }
 ]

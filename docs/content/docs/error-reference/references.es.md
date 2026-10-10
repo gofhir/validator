@@ -12,9 +12,11 @@ Los errores de referencias ocurren cuando las referencias a recursos FHIR están
 | ID | Severidad | Mensaje |
 |----|-----------|---------|
 | `REFERENCE_INVALID_FORMAT` | error | Reference '{value}' has invalid format |
-| `REFERENCE_INVALID_TARGET` | error | Reference at '{path}' to '{value}' is not a valid target (expected {expected}) |
+| `REFERENCE_INVALID_TARGET` | error | Invalid reference target type '{type}'. Allowed: {allowed} |
+| `REFERENCE_TARGET_PROFILE` | error | Unable to find a profile match for {reference} among choices: {profiles} |
+| `REFERENCE_MULTIPLE_MATCHES` | error | Multiple matches in bundle for reference {reference} |
 | `REFERENCE_NOT_FOUND` | warning | Referenced resource '{value}' not found |
-| `REFERENCE_TYPE_MISMATCH` | error | Reference targets {type} but only {expected} allowed |
+| `REFERENCE_TYPE_MISMATCH` | error | Reference type element '{type}' does not match reference target '{reference}' |
 
 ---
 
@@ -64,7 +66,7 @@ El valor `just-an-id` no coincide con ningún formato de referencia válido.
 
 ## REFERENCE_INVALID_TARGET
 
-La referencia apunta a un tipo de recurso que no está permitido por el ElementDefinition. Cada elemento de referencia en un StructureDefinition lista los tipos de destino permitidos a través de `ElementDefinition.type.targetProfile`.
+La referencia apunta a un tipo de recurso que no está permitido por el ElementDefinition. Cada elemento de referencia en un StructureDefinition lista los tipos de destino permitidos a través de `ElementDefinition.type.targetProfile`. El tipo del destino es el del recurso al que se resuelve la referencia (ver `REFERENCE_TARGET_PROFILE`), diga lo que diga su literal: `Patient/p` que se resuelve a una entrada que contiene un `Group` es un `Group`. Una referencia que no se resuelve tiene el tipo que nombra su literal (`[type]/[id]`).
 
 **Ejemplo -- recurso inválido:**
 
@@ -99,6 +101,42 @@ Un `targetProfile` puede fijar una versión (`http://example.org/StructureDefini
   }
 }
 ```
+
+---
+
+## REFERENCE_TARGET_PROFILE
+
+El recurso al que se resuelve una referencia no conforma con ninguno de los perfiles de su tipo que permite su elemento. `ElementDefinition.type.targetProfile` dice "the content must conform to at least one of them".
+
+El destino se verifica solo cuando se resuelve, como dice bundle.html#references: `#id`, un recurso contenido del recurso que hace la referencia (o del recurso que lo contiene), y `#`, desde un recurso contenido, el recurso que lo contiene; una referencia absoluta, la entrada cuyo `fullUrl` es; una relativa (`Patient/p`), la entrada cuyo `fullUrl` es la base de la entrada que referencia seguida de ella, lo que exige que el `fullUrl` de esa entrada sea RESTful (no un `urn:uuid:`). Se busca solo en el Bundle cuya entrada es el recurso que referencia: la especificación no da significado a una referencia en un Bundle que contenga a ese. Una versión (`/_history/1`) se quita antes de comparar el `fullUrl`, y luego se compara con el `meta.versionId` de la entrada. Una referencia que coincide con varias entradas es ambigua y no se resuelve (`REFERENCE_MULTIPLE_MATCHES`). Un destino que no se resuelve no se verifica.
+
+El destino se valida contra cada perfil de su tipo (`derivation: constraint`) con la validación completa, y conforma cuando uno de ellos no encuentra errores. Cuando el elemento permite la definición del tipo del destino, o de un tipo del que deriva (`Resource`, `DomainResource`), cualquier destino de ese tipo conforma: su propia validación reporta lo que tenga mal. Los recursos que se referencian entre sí (`Patient.link`, `Observation.hasMember`) conforman cuando no tienen ningún otro problema. El issue se reporta en el Reference, como lo reporta el validador de HL7 (`Reference_REF_CantMatchChoice`).
+
+**Ejemplo:** el `Observation.subject` de un perfil permite `Reference(https://example.org/fhir/StructureDefinition/my-patient)`, que exige un `identifier`. Una entrada de un Bundle es una Observation cuyo subject es `Patient/p`, y el `Patient/p` del Bundle no tiene identifier:
+
+```text
+ERROR: Unable to find a profile match for Patient/p among choices: https://example.org/fhir/StructureDefinition/my-patient
+  Path: Bundle.entry[0].resource.subject
+  MessageID: REFERENCE_TARGET_PROFILE
+```
+
+**Corrección:** hacer que el destino conforme con uno de los perfiles, o referenciar un recurso que lo haga.
+
+---
+
+## REFERENCE_MULTIPLE_MATCHES
+
+Varias entradas del Bundle coinciden con una referencia, según las compara bundle.html#references: el mismo `fullUrl`, y el mismo `meta.versionId` cuando la referencia nombra una versión. La especificación dice que "es ambiguo cuál es la correcta" y que las aplicaciones "PUEDEN devolver un error"; gofhir lo devuelve, como el validador de HL7 (`Bundle_BUNDLE_MultipleMatches`). La referencia no se resuelve: no se verifica tipo ni perfil de un destino para ella.
+
+**Ejemplo:** un Bundle `history` contiene dos versiones de `Patient/p` (el mismo `fullUrl`, `meta.versionId` 1 y 2), y el subject de una Observation es `Patient/p`:
+
+```text
+ERROR: Multiple matches in bundle for reference Patient/p
+  Path: Bundle.entry[0].resource.subject
+  MessageID: REFERENCE_MULTIPLE_MATCHES
+```
+
+**Corrección:** referenciar la versión que corresponde (`Patient/p/_history/2`), o dar a cada entrada su propio `fullUrl`.
 
 ---
 
@@ -165,41 +203,14 @@ Si `Patient/999` no está incluido en las entradas del Bundle, el validador prod
 
 ## REFERENCE_TYPE_MISMATCH
 
-El recurso referenciado se resolvió y su `resourceType` no coincide con los tipos de destino permitidos para este elemento de referencia. Esto difiere de `REFERENCE_INVALID_TARGET` en que el formato de referencia en sí es válido, pero el recurso resuelto real tiene el tipo incorrecto.
+El elemento `type` de la referencia nombra otro tipo que el de su destino: `Reference.type` y la referencia "SHALL be consistent" (Reference.type). El tipo del destino es el del recurso al que se resuelve la referencia, también el de una referencia `urn:uuid:` o `#id`, o si no el tipo que nombra su literal (`[type]/[id]`).
 
-**Ejemplo:**
+**Ejemplo:** el subject de una Observation es `{"reference": "urn:uuid:…", "type": "Group"}`, y la entrada del Bundle con ese `fullUrl` es un Patient:
 
-Un Bundle donde `Observation.subject` referencia una entrada que resulta ser un `Device` en lugar del `Patient` esperado:
-
-```json
-{
-  "resourceType": "Bundle",
-  "type": "collection",
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Device",
-        "id": "123"
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "Observation",
-        "status": "final",
-        "code": {
-          "coding": [{ "system": "http://loinc.org", "code": "85354-9" }]
-        },
-        "subject": {
-          "reference": "Device/123"
-        }
-      }
-    }
-  ]
-}
+```text
+ERROR: Reference type element 'Group' does not match reference target 'Patient'
+  Path: Bundle.entry[0].resource.subject
+  MessageID: REFERENCE_TYPE_MISMATCH
 ```
 
-Si el ElementDefinition para `Observation.subject` solo permite `Patient` y `Group`, esta referencia a `Device` produce un error.
-
-{{< callout type="info" >}}
-Los tipos de destino permitidos se leen de las entradas `ElementDefinition.type` donde `code` es `Reference`. Los valores `targetProfile` dentro de esas entradas de tipo especifican a qué tipos de recurso puede apuntar la referencia. El validador deriva estas restricciones completamente del StructureDefinition.
-{{< /callout >}}
+**Corrección:** hacer que `type` sea el tipo del destino, o referenciar un recurso de ese tipo.

@@ -82,6 +82,11 @@ specification, gofhir follows the specification, and the divergence is declared 
 | B-D12 | A primitive with extensions and no value (`"_status": {"extension": [...]}`) where the profile has a fixed or pattern value | Checks no fixed or pattern value (reports only the required binding) | ElementDefinition.fixed[x]: the value "SHALL be exactly the value for this element in the instance"; pattern[x]: "the value in the instance SHALL follow" | Report the missing value (`FIXED_VALUE_MISSING`, element `value`) and, for a fixed value, its extensions (`FIXED_VALUE_EXTRA`). **Declared divergence** (`fp_r02`, `fp_r10`, `fp_r26` through a type slice of an extension's `value[x]`, `fp_r28` in a contained resource). |
 | B-D13 | A literal reference to a type no `targetProfile` of the element constrains, whose target does not resolve (`DeviceMetric.parent` → `DeviceDefinition/…`) | Accepts it: checks the type only of a target it resolves | ElementDefinition.type.targetProfile: the target "must conform to at least one" of the profiles; a resource of another type cannot | Report it (`REFERENCE_INVALID_TARGET`, at the Reference). **Declared divergence** (4 R4 core examples). |
 | B-D14 | IPS all-sections: the Composition entry, whose `section[14].entry[0]` HL7 matches to two slices under `-tx n/a` | Reports `Bundle.entry:composition` missing (`Validation_VAL_Profile_Minimum_SLICE`), because the Composition does not conform with that multi-match | The pregnancyOutcome slice's required binding enumerates its codes, and 82810-3 is not one (plan A, IPS all-sections multi-match, withdrawn) | The Composition conforms, so the entry is in its slice. **Declared divergence** (side HL7). |
+| B-D15 | `targetProfile` `[DomainResource, a Patient profile]`, a Patient that does not conform to the Patient profile | Reports it ("Unable to find a profile match ... among choices: DomainResource, ...") | ElementDefinition.type.targetProfile: the target "must conform to at least one" of them; every Patient conforms to DomainResource | Accept it. **Declared divergence** (`tp_11`, side HL7). |
+| B-D16 | A cycle of references in which one target does not conform | Reports the others or not depending on the entries' order: keeps an answer computed assuming the target conforms | Every target reaching the one that does not conform does not conform | Report them whatever the order. **Declared divergence** (`tp_30`). |
+| B-D17 | A cycle through a slice a profile discriminator assigns, the target assumed turning out not to conform | Keeps the answer computed under the assumption, and reports a false error in one order of the entries | The target conforms once the assumption is dropped | The one error, whatever the order. **Declared divergence** (`tp_22`, `tp_24`, side HL7). |
+| B-D18 | A reference several entries match (`urn:uuid` on two entries) | Reports it (`Bundle_BUNDLE_MultipleMatches`) and checks the type of one of them | bundle.html#references: "it is ambiguous which is correct"; applications "MAY return an error" | Report it (`REFERENCE_MULTIPLE_MATCHES`); the reference names no target whose type is checked. **Declared divergence** (`vs_22`, side HL7). |
+| B-D19 | An absolute reference with a version (`http://.../Patient/p/_history/2`) | Does not resolve it: removes the version only from relative references | bundle.html#references: "If the reference is version specific (either relative or absolute), then remove the version" | Resolve it, and check its target. **Declared divergence** (`tp_44`). |
 
 ## Design: definition layering
 
@@ -373,10 +378,141 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
     (`cn_09`: HL7 `Reference_REF_BadTargetType`, gofhir nothing). The issue is at the Reference, as
     HL7 reports it, once however many of the resource's definitions find it. B-D13 and B-D14 are
     declared.
-- **B5b (next):** a resolved target must conform to one of the `targetProfile`s
-  (`Reference_REF_CantMatchChoice`); gofhir checks only the target's type, versioned or not. A
-  `targetProfile` that does not resolve is reported by HL7 ("Unable to resolve the profile
-  reference"); gofhir takes the last segment of its url as a type.
+- **B5b (2026-10-09): implemented.** A reference's target that resolves (a contained resource of
+  the resource that makes it, or an entry of the Bundle validated) is validated against the
+  profiles of its type its element allows, with the conformance check and the resolution slice
+  matching uses (`conformer`, injected into the reference phase: `reference.WithTargets`). It must conform to one of them; else `REFERENCE_TARGET_PROFILE`, at
+  the Reference (HL7 `Reference_REF_CantMatchChoice`). A target is not checked when the element
+  allows its type's own definition (HL7 does not either: the target's own validation reports its
+  errors) or when it does not resolve. Probes `cn_13` to `cn_17` match HL7. CH Core's examples
+  showed a false display error making a conformant Patient not conform; designations (#143)
+  fixed it first. IPS all-sections and `Bundle-dataelements` take the same time as on `main`.
+  - **The review's cases** (group `target-probes`, `acme.targets`, `acme.nm` and `acme.vscope`, 71 probes): a target resolves
+    as bundle.html#references says, in the reference phase itself: a relative reference from the
+    referring entry's RESTful fullUrl base (none from a `urn:uuid:`), an absolute one by its
+    fullUrl, in the Bundle whose entry the referring resource is, a version matched against
+    `meta.versionId`, `#id` among the container's contained
+    resources (also when a contained target is itself checked). Resources that reference each
+    other (Patient.link) conform when nothing else is wrong with them: a target check met again
+    while it runs is assumed, and an answer that relied on that is not kept while the check runs
+    (a slice discriminator still answers false there). A target conforms to the definition of a
+    type it derives from (Resource, DomainResource). All match HL7 but those B-D15 to B-D19 declare.
+  - **Second review.** Answers that relied on an assumed cycle were never kept while it ran, so a
+    graph whose nodes each reference two others took exponential time (26 Patients: 52 s against
+    0.55 s on `main`). An answer that relied on an assumption is now kept provisionally and reused,
+    its users becoming provisional too, until the outermost check ends, and kept then if what was
+    assumed holds; a check assumed true that fails drops them. A false is no exception: a third
+    review showed one caused by an assumption (a profile discriminator matching because of it put
+    a link in a slice with max 0, `tp_22`). Validating the 26 Patients takes about 11 ms
+    (`TestReferenceTargetCyclesStayPolynomial`). A contained target's
+    relative references resolve from its container's entry, and "#" from a contained resource names
+    its container (references.html#contained), which the format check accepted as no reference
+    (`tp_18` to `tp_21`).
+  - **Fourth review.** A false memoized because the check assumed true failed could still rely on
+    a check outside it, assumed and failing later (`tp_24`, the cycle of `tp_22` one check deeper:
+    HL7 reports `entry[1]` too). Each running check now records the outermost check its answer
+    relies on having assumed (`conformFrame.low`, as Tarjan's lowlink); an answer is kept when that
+    is the check itself or one within it, else it stays provisional, reported to the check that
+    runs it. A check assumed true that fails drops the provisional answers made within it. A target
+    was also checked in the referring entry's Bundle, not its own, and the answer kept for the
+    references that resolve it from there: the target's Bundle is now its scope. The search no
+    longer goes out to the Bundles that hold the referring entry's (`tp_26`, `tp_27`): bundle.html
+    gives a reference meaning only in its own Bundle, as HL7 resolves it. And a version is matched
+    against `meta.versionId`, as bundle.html#references says (`tp_28`, `tp_29`).
+  - **Fifth review.** A check's provisional answers were kept when it ended though the check
+    itself relied on one outside it, which could fail later: they now take its `low`, and are kept
+    only when the check that started the cycle ends, as Tarjan's algorithm pops a component at its
+    root (`tp_30`, `tp_31`, a cycle of three). A contained target's container leaked into the
+    checks of the targets it references, which resolved `#id` among the container's contained
+    resources: each value checked resolves in its own scope (`tp_33` to `tp_35`). Two entries that
+    match a reference are ambiguous (bundle.html#references), and the reference does not resolve
+    (`tp_32`). The entries are indexed by fullUrl once per Bundle and validation: 16000 entries
+    referencing the last one took 5.3 s, now 1.4 s.
+  - **Sixth review.** A value checked against a profile resolved its references in the wrong
+    place: a nested Bundle checked by a profile discriminator resolved its entries' references in
+    the outer Bundle, and a `urn:uuid:` reference took its type from the Bundle validated, not the
+    one the referring entry is in, so a target in a value checked was not checked, or had the type
+    of another entry (`REFERENCE_INVALID_TARGET` on a Practitioner, present on `main`). A Bundle
+    checked as a value is now where its entries resolve, and a URN's type is that of the entry it
+    resolves to. A datatype checked by a profile discriminator resolves `#id` among its resource's
+    contained resources (present on `main`: an Identifier with an `assigner` "#org" fell out of its
+    slice). The entry indexes were built once per check, not per validation: 4000 entries sliced by
+    profile took 1.5 s against 0.59 s on `main`, now 0.62 s. Probes `vs_01` to `vs_12`
+    (`acme.vscope`), HL7's verdicts.
+  - **Seventh review.** The resource a datatype checked is in leaked into the checks of its
+    targets, which resolved their `#id` among its contained resources (`vs_20`). A nested Bundle
+    the constraints walk, not checked as a value, kept the outer Bundle as the scope its entries
+    resolve in (`vs_16`, `vs_18`). And a Bundle checked as a value lost the Bundles that hold it,
+    where resolve() looks after it as HL7 looks (`vs_13`, a false slice minimum). The scope now
+    carries those Bundles (`slicematch.Scope.Outer`, `constraint.ScopeInBundle`): resolve() looks
+    in the innermost Bundle, then outwards, and the reference phase in the innermost only. A
+    reference several entries match is now reported, as HL7 reports it
+    (`REFERENCE_MULTIPLE_MATCHES`, HL7 `Bundle_BUNDLE_MultipleMatches`, `tp_32`, `vs_22`), and
+    resolves to none.
+  - **Eighth review.** A check assumed true that failed dropped every provisional answer made
+    within it, falses too, which were checked again, failing again: 25 Patients each linking four
+    others, the last with no identifier, took 48 s (HL7 0.9 s). A target's check conforms less
+    only when a target it relies on does not conform, unless a discriminator's answer that relied
+    on an assumption sways it (a value that conforms can fall in a slice it may not be in: `tp_22`,
+    `tp_24`). So a false no discriminator swayed is kept whatever the assumptions turn out to be
+    (`conformFrame.swayed`), and the same graph takes 9 ms. A swayed answer is checked again when
+    what it assumed fails, at most `maxSwayedChecks` (3) times, which bounds the work: unbounded,
+    25 Patients sorted by `acme.nm`'s discriminator took 39 s, now 40 take 81 ms. The extension
+    phase's resolve() lost the Bundles that hold a nested Bundle checked as a value (`vs_23`, a
+    false slice minimum): `extension.Data.Outer`. And `reference.WithIndexes` reused a store a
+    caller's context carried, keyed by addresses another validation's Bundles may take after a
+    collection; each validation now has its own (`TestEntryIndexesPerValidation`).
+  - **Ninth review.** A discriminator's check met again through a target's answered false, as a
+    discriminator met again within itself does, and nothing recorded it: the target's false was
+    kept, and a and b, linking each other, did not conform when the reference through the
+    discriminator was checked first (`tp_36` to `tp_38`). The reference phase visited elements in
+    the map's order, so that first check changed between runs. A cycle through a target's check
+    is now assumed for a discriminator too, its answer swayed, and the elements are visited in
+    their keys' order. And a target resolve() found in an outer Bundle was checked in the inner
+    one's scope: the resolver now gives the scope a resource is found in (`vs_26` to `vs_28`).
+  - **Tenth review** (four reviewers: the memo, resolution, scopes, tests and documentation). A
+    discriminator met again within itself answered false, and what relied on that was kept when it
+    answered true (`tp_39`, `tp_40`): the check is now marked refuted, and what relied on it is
+    dropped when it conforms, as when a check assumed true fails. A reference whose literal names
+    one type and resolves to a resource of another (`Patient/p`, an entry holding a Group) was
+    checked against the profiles of the type it names: the target's type is now the resolved
+    resource's, checked against the targetProfiles (`REFERENCE_INVALID_TARGET`, HL7
+    `Reference_REF_BadTargetType`, `tp_41`, `tp_43`) and against `Reference.type`, which "SHALL be
+    consistent" (`REFERENCE_TYPE_MISMATCH`, `tp_42`, a URN). An issue a root profile already
+    reported is not reported again by another (`tp_45`). An absolute versioned reference resolves,
+    as bundle.html#references says and HL7 does not (B-D19, `tp_44`). `slicematch.Resolver` keeps
+    its signature; the scope of the resource found comes from an optional
+    `slicematch.ScopedResolver`. hl7diff compares REFERENCE_TARGET_PROFILE with
+    `Reference_REF_CantMatchChoice` only, and B-D15 and B-D17 are now declared.
+  - **Eleventh review.** Two root profiles that each set a cardinality (QI-Core and US Core
+    requiring `Patient.identifier`) are each reported, as HL7 reports each with its profile ("(from
+    X)"): the issues of a cardinality are not reported once (`tp_46`). A `slicematch.Resolver`
+    that is not a `ScopedResolver` leaves the resource in the reference's scope, as before. The
+    documentation of REFERENCE_TYPE_MISMATCH and REFERENCE_INVALID_TARGET describes the target's
+    type as the resolved resource's.
+  - **Open, separate task:** with profile discriminators in dense cycles of references, what
+    conforms depends on what is assumed, and the specification defines no answer; HL7's depends on
+    the entries' order. gofhir's, bounded by `maxSwayedChecks`, depends on that bound: a
+    well-founded fixed point for these cycles is to be defined.
+  - **B-D18, declared:** HL7 also checks the type of one of the entries an ambiguous reference
+    matches (`vs_22`: "Found Medication"); the reference names no target, so gofhir does not.
+  - **B-D16, declared:** in a cycle where one target does not conform (`a` ↔ `b`, `a` with no
+    identifier, references to both), HL7 reports the reference to `b` or not depending on the
+    entries' order: it keeps `b`'s answer, computed assuming `a` conforms. `b` references `a`, which
+    does not conform, so gofhir reports both, whatever the order. `tp_30` and `tp_31`, a cycle of
+    three, show it: HL7 reports only `a`'s referrer in `tp_30`, declared.
+  - **B-D17, declared:** in a cycle through a slice a profile discriminator assigns (`acme.nm`), HL7
+    keeps a false computed assuming a target that turns out not to conform, and reports a second,
+    false error when the entries come in one order (`tp_22`: HL7 reports `entry[1]` too, `tp_23`
+    not; `tp_24` and `tp_25`, one check deeper). gofhir gives the one error the specification gives in both orders.
+  - **B-D15, declared:** with `targetProfile` `[DomainResource, a Patient profile]`, HL7 reports a
+    Patient that does not conform to the profile ("among choices: DomainResource, ..."); every
+    Patient conforms to DomainResource ("must conform to at least one of them"), so gofhir does
+    not (`tp_11`).
+  - **Still open:** HL7 resolves a reference among a Parameters' `parameter.resource`, which the
+    specification does not define.
+- **Still open:** a `targetProfile` that does not resolve is reported by HL7 ("Unable to resolve
+  the profile reference"); gofhir takes the last segment of its url as a type.
 
 - Acceptance: a nested resource with a versioned `meta.profile` is validated against that profile;
   a versioned `targetProfile` is enforced; a resource whose top-level `meta.profile` pins a version
@@ -491,6 +627,49 @@ error must have an HL7 equivalent, and the PR description lists the *accept → 
   choice elements.
 - Updating `gofhir/fhirpath` from v1.6.0 to v1.9.1 halves the absent-field cost. That is a separate
   dependency change, and it gets the same invariant check.
+
+## Follow-ups (found reviewing B5b)
+
+Each is its own task, with probes against HL7 6.10.2 first.
+
+1. **Fixed point of target checks.** Two parts of the same engine (`conformState`):
+   - With profile discriminators in dense cycles of references, what conforms depends on what is
+     assumed; the specification defines no answer, and HL7's depends on the entries' order.
+     gofhir's depends on `maxSwayedChecks` (3), which keeps the work polynomial: unbounded, 25
+     Patients took 39 s. A well-founded fixed point is to be defined.
+   - Without discriminators the work is polynomial but quadratic: a check assumed true that fails
+     drops what was made within it, which is checked again. A chain of n Observations each
+     reaching m roots that fail (n = m = 400) takes 45 s; HL7, 1.7 s. Record per check the
+     formula of its targets' answers (its own errors and, per reference, any of its candidates)
+     and propagate a failure over it instead of running the pipeline again.
+2. **Slicing of nested resources' profiles.** An entry's or a contained resource's `meta.profile`
+   is not used by the slicing phase: entries are not sliced, contained resources only against
+   their type (`pkg/slicing/slicing.go` `validateContained`, `walk` stops at resources). An entry
+   declaring a profile whose slice has min 1 and is missing is not reported; HL7 reports it
+   ("a matching slice is required"). A target can then fail REFERENCE_TARGET_PROFILE for a slice
+   its own validation never reports. Present on `main`; the largest of these.
+3. **One resolution for resolve().** `constraint.ResolveInBundle` (discriminators' and FHIRPath's
+   resolve()) matches a fullUrl by suffix: no base from the referring entry, no version, no
+   ambiguity, unlike the reference phase (`resolveTarget`). Two entries `http://a.org/.../x` and
+   `http://b.org/.../x`: a false negative or a false positive against HL7, depending on order.
+4. **Parameters.** The reference phase does not visit `Parameters.parameter.resource`; HL7 checks
+   their references (types and target profiles).
+5. **Scopes along a discriminator's path.** A path that steps into a resource
+   (`resource.subject.resolve()`) keeps the request's scope: a `#p` contained in the entry is
+   looked for in the Bundle (a false slice minimum). A chained resolve() in a constraint
+   (`subject.resolve().generalPractitioner.resolve()`) looks for `#id` in the first resource's
+   contained resources.
+6. **A discriminator's path through another type.** An entry of another type than the path's
+   (`resource.subject` on a Patient) is reported as "Slicing cannot be evaluated"; it does not
+   match the slice.
+
+Smaller, from the same reviews: HL7's `BUNDLE_BUNDLE_POSSIBLE_MATCH_WRONG_FU` warning (a relative
+reference that does not resolve but an entry of that type and id exists); an entry with no
+fullUrl (`Bundle_BUNDLE_FullUrl_Missing`); conditional references in transactions
+(`Patient?identifier=`) and absolute URLs with a query reported as `REFERENCE_INVALID_FORMAT`; a
+contained resource inside a contained resource is not walked; `"#"` from a resource that is not
+contained is reported by ref-1, HL7 as `Reference_REF_CantResolve`; a `targetProfile` that does
+not resolve (see B5b, still open).
 
 ## Releases
 

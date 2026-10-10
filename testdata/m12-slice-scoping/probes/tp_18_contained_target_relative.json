@@ -1,0 +1,65 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Observation/o",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "#p1"
+    },
+    "contained": [
+     {
+      "resourceType": "Patient",
+      "id": "p1",
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+      },
+      "identifier": [
+       {
+        "system": "http://acme-hospital.cl/ids",
+        "value": "p1"
+       }
+      ],
+      "link": [
+       {
+        "other": {
+         "reference": "Patient/q"
+        },
+        "type": "seealso"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/q",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "q",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    }
+   }
+  }
+ ]
+}

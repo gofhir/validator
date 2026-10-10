@@ -1,0 +1,128 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Observation/x",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "x",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "Patient/c"
+    }
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Observation/o0",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o0",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "Patient/a"
+    }
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/a",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "a",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/b"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/b",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "b",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "identifier": [
+     {
+      "system": "http://acme-hospital.cl/ids",
+      "value": "b"
+     }
+    ],
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/a"
+      },
+      "type": "seealso"
+     },
+     {
+      "other": {
+       "reference": "Patient/c"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/c",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "c",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "identifier": [
+     {
+      "system": "http://acme-hospital.cl/ids",
+      "value": "c"
+     }
+    ],
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/b"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  }
+ ]
+}

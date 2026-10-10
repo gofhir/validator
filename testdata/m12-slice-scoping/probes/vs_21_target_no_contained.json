@@ -1,0 +1,44 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://x.org/fhir/Patient/a",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "a",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/vs/StructureDefinition/pid8"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "identifier": [
+     {
+      "system": "http://x",
+      "value": "B",
+      "assigner": {
+       "reference": "Organization/o1"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://x.org/fhir/Organization/o1",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "o1",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "name": "x"
+   }
+  }
+ ]
+}

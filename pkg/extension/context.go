@@ -45,6 +45,8 @@ type ScopeRoot struct {
 	// Bundle is the Bundle being validated, which resolve() finds references in, when Resource is
 	// in one (a slice's conformance check); a Bundle is its own.
 	Bundle map[string]any
+	// Outer are the Bundles that hold Bundle, the innermost first, where resolve() looks after it.
+	Outer []map[string]any
 	// Exact returns an object of Resource, or of Bundle, with its numbers as the JSON spells them, or
 	// nil when it has none (see Data.Exact).
 	Exact func(map[string]any) map[string]any

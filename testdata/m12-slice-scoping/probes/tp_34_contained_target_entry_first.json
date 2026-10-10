@@ -1,0 +1,119 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Observation/o",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "contained": [
+     {
+      "resourceType": "Patient",
+      "id": "c1",
+      "identifier": [
+       {
+        "system": "http://acme-hospital.cl/ids",
+        "value": "c1"
+       }
+      ],
+      "link": [
+       {
+        "other": {
+         "reference": "Patient/x"
+        },
+        "type": "seealso"
+       }
+      ]
+     },
+     {
+      "resourceType": "Patient",
+      "id": "k",
+      "identifier": [
+       {
+        "system": "http://acme-hospital.cl/ids",
+        "value": "k"
+       }
+      ]
+     }
+    ],
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "#c1"
+    },
+    "performer": [
+     {
+      "reference": "#k"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Observation/o2",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o2",
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "Patient/x"
+    }
+   }
+  },
+  {
+   "fullUrl": "http://example.org/fhir/Patient/x",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "x",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "contained": [
+     {
+      "resourceType": "Patient",
+      "id": "k"
+     }
+    ],
+    "identifier": [
+     {
+      "system": "http://acme-hospital.cl/ids",
+      "value": "x"
+     }
+    ],
+    "link": [
+     {
+      "other": {
+       "reference": "#k"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  }
+ ]
+}

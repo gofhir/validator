@@ -479,6 +479,8 @@ type ScopeRoot struct {
 	// Bundle is the Bundle being validated, which resolve() finds references in, when Resource is
 	// in one (a slice's conformance check).
 	Bundle map[string]any
+	// Outer are the Bundles that hold Bundle, the innermost first, where resolve() looks after it.
+	Outer []map[string]any
 	// Exact returns an object of Resource, or of Bundle, with its numbers as the JSON spells them
 	// (1.50 is not 1.5), or nil when it has none: what resolve() returns, and what is read when Raw
 	// is nil. Nil reads the objects as parsed.
@@ -493,7 +495,7 @@ type ScopeRoot struct {
 func (v *Validator) Scope(ctx context.Context, root ScopeRoot) *Scope {
 	s := &Scope{v: v, ctx: ctx, raw: root.Raw, data: root.Resource, exact: root.Exact, selected: map[string]map[string]struct{}{}}
 	if root.Bundle != nil {
-		s.bundles = []map[string]any{root.Bundle}
+		s.bundles = append([]map[string]any{root.Bundle}, root.Outer...)
 	}
 	if rt, _ := root.Resource[resourceTypeKey].(string); rt == bundleType && root.Bundle == nil {
 		s.bundles = []map[string]any{root.Resource}
