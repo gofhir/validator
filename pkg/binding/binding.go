@@ -141,7 +141,8 @@ func (v *Validator) validateElement(ctx context.Context, data map[string]any, sd
 // FhirPath is used for error reporting (e.g., "Patient.contained[0].telecom").
 func (v *Validator) validateElementWithPaths(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, sdPath, fhirPath string, result *issue.Result) {
 	for key, value := range data {
-		if key == "resourceType" {
+		if key == "resourceType" && v.sdRegistry.IsResourceType(sdPath) {
+			// A resource's own type (json.html#resources), not an element: the resource's root.
 			continue
 		}
 

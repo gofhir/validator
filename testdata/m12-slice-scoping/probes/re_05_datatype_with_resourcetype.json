@@ -1,0 +1,11 @@
+{
+ "resourceType": "Observation",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueQuantity": {
+  "resourceType": "Quantity",
+  "value": 1
+ }
+}

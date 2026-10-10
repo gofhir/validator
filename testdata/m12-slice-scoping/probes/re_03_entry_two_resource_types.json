@@ -1,0 +1,21 @@
+{
+ "resourceType": "Bundle",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/re/StructureDefinition/re-bundle-two-types"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://x.org/fhir/Patient/p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "gender": "male",
+    "foo": 1,
+    "birthDate": "2020-13-45"
+   }
+  }
+ ]
+}
