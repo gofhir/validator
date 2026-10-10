@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.1.0](https://github.com/gofhir/validator/compare/v2.0.1...v2.1.0) (2026-10-10)
+
+
+### Features
+
+* **constraint:** an invariant whose result is empty fails, with the published corrections (plan C, C-2) ([#142](https://github.com/gofhir/validator/issues/142)) ([7c65e72](https://github.com/gofhir/validator/commit/7c65e723bdc4470bea83353916e30d6558e62d63))
+* **fixedpattern:** check fixed and pattern values on every definition that governs a value (plan B, B3) ([#138](https://github.com/gofhir/validator/issues/138)) ([5a94c1f](https://github.com/gofhir/validator/commit/5a94c1fd8777b642cf50b36e3760881e061a4178))
+* **reference:** check a reference's target against the profiles its element allows (plan B, B5b) ([#144](https://github.com/gofhir/validator/issues/144)) ([e21ed47](https://github.com/gofhir/validator/commit/e21ed4740b138348064b42b90be59b4da1909b7a))
+
+
+### Bug Fixes
+
+* **binding:** check a Coding's display in the resource's language, with the concept's designations ([#143](https://github.com/gofhir/validator/issues/143)) ([4491d71](https://github.com/gofhir/validator/commit/4491d719929989637768118e529eeb5e22fd11b4))
+* **canonical:** resolve the versioned profiles and targetProfiles of nested resources (plan B, B5) ([#140](https://github.com/gofhir/validator/issues/140)) ([1d510ec](https://github.com/gofhir/validator/commit/1d510ecf35be6d15ec4c96dc6dcbeb76e6ddbec7))
+* **constraint:** resolve() a relative reference from the referring entry's base ([#146](https://github.com/gofhir/validator/issues/146)) ([5c6b907](https://github.com/gofhir/validator/commit/5c6b907e5a5e0fba3387f19debeeee7388317b1d))
+* **slicing:** slice the resources a resource holds against the profiles they declare ([#145](https://github.com/gofhir/validator/issues/145)) ([edc263d](https://github.com/gofhir/validator/commit/edc263df1a09d08358203138625af5f368b3e42b))
+
 ## [2.0.1](https://github.com/gofhir/validator/compare/v2.0.0...v2.0.1) (2026-10-06)
 
 
