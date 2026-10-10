@@ -1,0 +1,45 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/SubscriptionStatus/x",
+   "resource": {
+    "resourceType": "SubscriptionStatus",
+    "id": "x",
+    "contained": [
+     {
+      "resourceType": "Observation",
+      "id": "c",
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+      },
+      "status": "final",
+      "code": {
+       "text": "x"
+      },
+      "meta": {
+       "profile": [
+        "https://example.org/fhir/ns/StructureDefinition/ns-obs"
+       ]
+      },
+      "identifier": [
+       {
+        "system": "urn:other",
+        "value": "1"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/ns/StructureDefinition/ns-bundle-a",
+   "https://example.org/fhir/ns/StructureDefinition/ns-bundle-b"
+  ]
+ }
+}

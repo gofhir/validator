@@ -1,0 +1,48 @@
+{
+ "resourceType": "Observation",
+ "id": "o",
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "identifier": [
+  {
+   "system": "urn:s",
+   "value": "1"
+  }
+ ],
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c",
+   "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+   },
+   "status": "final",
+   "code": {
+    "text": "x"
+   },
+   "meta": {
+    "profile": [
+     "https://example.org/fhir/ns/StructureDefinition/ns-obs"
+    ]
+   },
+   "identifier": [
+    {
+     "system": "urn:other",
+     "value": "1"
+    }
+   ]
+  }
+ ],
+ "hasMember": [
+  {
+   "reference": "#c"
+  }
+ ]
+}

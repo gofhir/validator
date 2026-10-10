@@ -642,7 +642,20 @@ Each is its own task, with probes against HL7 6.10.2 first.
      reaching m roots that fail (n = m = 400) takes 45 s; HL7, 1.7 s. Record per check the
      formula of its targets' answers (its own errors and, per reference, any of its candidates)
      and propagate a failure over it instead of running the pipeline again.
-2. **Slicing of nested resources' profiles.** An entry's or a contained resource's `meta.profile`
+2. **Slicing of nested resources' profiles. Done.** The slicing phase walks the resources a
+   resource holds as the cardinality phase does (`walker.WalkWithProfiles`): each against the
+   profiles its meta.profile declares, in a scope of its own (an entry in its Bundle, the Bundles
+   that hold it outer; a contained resource with its container as %rootResource; a nested Bundle
+   resolving its own entries first, `constraint.ScopeInBundle`). With two root
+   profiles, a nested resource's cardinality is reported once: HL7 reports a cardinality once per
+   profile that sets it on the resource validated (also at the element that holds a nested
+   resource, `ns_13`); an issue does not name the profile it comes from, and one in a resource
+   held, whose own profiles are the same whatever root profile holds it, is reported once. The
+   walker with profiles no longer walks a resource of an unknown type, nor what it holds, as
+   `Walk` and HL7 do not (`ns_18`). Probes
+   `ns_01` to `ns_18` (`acme.nested`, group `nested-slicing-probes`), HL7's verdicts; the IG
+   corpora report no new error, and IPS all-sections and `Bundle-dataelements` take about the same
+   time as before. What it was: An entry's or a contained resource's `meta.profile`
    is not used by the slicing phase: entries are not sliced, contained resources only against
    their type (`pkg/slicing/slicing.go` `validateContained`, `walk` stops at resources). An entry
    declaring a profile whose slice has min 1 and is missing is not reported; HL7 reports it
@@ -662,6 +675,17 @@ Each is its own task, with probes against HL7 6.10.2 first.
 6. **A discriminator's path through another type.** An entry of another type than the path's
    (`resource.subject` on a Patient) is reported as "Slicing cannot be evaluated"; it does not
    match the slice.
+
+7. **The profile an issue comes from.** Root profiles' issues are deduplicated by severity,
+   diagnostic, location and text; HL7 deduplicates by message, which names the profile ("(from
+   X)") for cardinalities and slicing. A closed slicing two root profiles set is reported once at
+   the root (twice in a nested resource, as HL7 does at both). Give an issue the profile it comes
+   from, and deduplicate with it.
+8. **What an element's definition says of the resource it holds.** A Bundle profile's type
+   profile on `Bundle.entry.resource`, or its own constraints on `Bundle.entry.resource.subject`,
+   are not validated (HL7 reports them, once per root profile); nor a nested resource's elements
+   against its meta.profile in the structural phase ("not allowed by the profile"); nor
+   `Bundle.entry.response.outcome`, a resource the walker does not visit (with item 4).
 
 Smaller, from the same reviews: HL7's `BUNDLE_BUNDLE_POSSIBLE_MATCH_WRONG_FU` warning (a relative
 reference that does not resolve but an entry of that type and id exists); an entry with no

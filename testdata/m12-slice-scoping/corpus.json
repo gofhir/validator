@@ -128,6 +128,12 @@
       "files": ["testdata/m12-slice-scoping/probes/tp_*.json", "testdata/m12-slice-scoping/probes/vs_*.json"]
     },
     {
+      "name": "nested-slicing-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.nested-0.1.0.tgz",
+                       "testdata/m12-slice-scoping/packages/acme.targets-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/ns_*.json"]
+    },
+    {
       "name": "canonical-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.canonicals-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/cn_*.json"]
