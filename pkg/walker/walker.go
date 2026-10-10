@@ -277,6 +277,10 @@ func (w *Walker) walkBundleEntriesWithProfiles(ctx context.Context, data map[str
 		if resourceMap == nil {
 			continue
 		}
+		// A resource of a type with no definition is not walked, nor what it holds (as Walk).
+		if sd := w.registry.GetByType(resourceType); sd == nil || sd.Snapshot == nil {
+			continue
+		}
 
 		entryPath := fmt.Sprintf("%s.entry[%d].resource", basePath, i)
 

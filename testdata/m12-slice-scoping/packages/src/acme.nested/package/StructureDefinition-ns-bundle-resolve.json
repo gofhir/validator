@@ -1,0 +1,65 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ns-bundle-resolve",
+ "url": "https://example.org/fhir/ns/StructureDefinition/ns-bundle-resolve",
+ "version": "0.1.0",
+ "name": "nsbundleresolve",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "resource.subject.resolve()"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Bundle.entry:withpat",
+    "path": "Bundle.entry",
+    "sliceName": "withpat",
+    "min": 1,
+    "max": "1"
+   },
+   {
+    "id": "Bundle.entry:withpat.resource",
+    "path": "Bundle.entry.resource",
+    "min": 1,
+    "type": [
+     {
+      "code": "Observation"
+     }
+    ]
+   },
+   {
+    "id": "Bundle.entry:withpat.resource.subject",
+    "path": "Bundle.entry.resource.subject",
+    "min": 1,
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "https://example.org/fhir/ns/StructureDefinition/ns-pat"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

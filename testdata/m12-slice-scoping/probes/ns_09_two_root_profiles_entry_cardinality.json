@@ -1,0 +1,33 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "type": "collection",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/ns/StructureDefinition/ns-bundle-a",
+   "https://example.org/fhir/ns/StructureDefinition/ns-bundle-b"
+  ]
+ },
+ "entry": [
+  {
+   "fullUrl": "http://example.org/fhir/Observation/o",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "meta": {
+     "profile": [
+      "https://example.org/fhir/rv/StructureDefinition/rv-obs-subj"
+     ]
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    }
+   }
+  }
+ ]
+}

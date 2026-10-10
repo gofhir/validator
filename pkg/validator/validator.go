@@ -27,6 +27,7 @@ import (
 	"github.com/gofhir/validator/v2/pkg/structural"
 	"github.com/gofhir/validator/v2/pkg/terminology"
 	"github.com/gofhir/validator/v2/pkg/ucumvalidator"
+	"github.com/gofhir/validator/v2/pkg/walker"
 
 	"github.com/gofhir/ucum/v4"
 )
@@ -760,12 +761,18 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	ctx = constraint.WithReportScope(ctx)
 	ctx = withExtensionScope(ctx)
 	reported := map[string]bool{}
+	var nested map[string]bool
+	if len(profilesToValidate) > 1 {
+		nested = v.nestedPaths(data, resourceType)
+	}
 	for _, sd := range profilesToValidate {
 		from := len(result.Issues)
 		v.validateAgainstProfile(ctx, data, resource, sd, nil, result)
-		// An issue a profile validated before already reported is reported once, as the HL7
-		// validator reports it, but for a cardinality, which each profile sets (HL7: "(from X)").
-		result.Issues = dropReported(result.Issues, from, reported)
+		// An issue a profile validated before already reported is reported once, but for a
+		// cardinality a root profile sets, which HL7 reports with each profile (HL7: "(from X)").
+		// An issue cannot name the profile it comes from, so one in a resource the resource holds,
+		// whose own profiles are the same whatever root profile holds it, is reported once.
+		result.Issues = dropReported(result.Issues, from, reported, nested)
 	}
 
 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
@@ -891,19 +898,48 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 }
 
 // dropReported removes, from the issues a profile reported, those at from and after, the ones the
-// profiles validated before reported, which it records in reported; a cardinality's are kept
-// (profileCardinality).
-func dropReported(issues []issue.Issue, from int, reported map[string]bool) []issue.Issue {
+// profiles validated before reported, which it records in reported; a cardinality's on the
+// resource itself are kept (profileCardinality), not on a resource it holds (at one of nested).
+func dropReported(issues []issue.Issue, from int, reported, nested map[string]bool) []issue.Issue {
 	for _, is := range issues[:from] {
 		reported[issueKey(is)] = true
 	}
 	kept := issues[:from]
 	for _, is := range issues[from:] {
-		if !reported[issueKey(is)] || profileCardinality[issue.DiagnosticID(is.MessageID)] {
+		own := profileCardinality[issue.DiagnosticID(is.MessageID)] && !within(is.Expression, nested)
+		if !reported[issueKey(is)] || own {
 			kept = append(kept, is)
 		}
 	}
 	return kept
+}
+
+// nestedPaths are the paths of the resources data, a resource of resourceType, holds: its
+// contained resources, a Bundle's entries, and theirs.
+func (v *Validator) nestedPaths(data map[string]any, resourceType string) map[string]bool {
+	paths := map[string]bool{}
+	walker.New(v.registry).Walk(data, resourceType, resourceType, func(w *walker.ResourceContext) bool {
+		if w.FHIRPath != resourceType {
+			paths[w.FHIRPath] = true
+		}
+		return true
+	})
+	return paths
+}
+
+// within reports whether an issue at expression is in a resource at one of paths: at one of its
+// elements, not at the element that holds it, which is the holder's.
+func within(expression []string, paths map[string]bool) bool {
+	if len(expression) == 0 || len(paths) == 0 {
+		return false
+	}
+	e := expression[0]
+	for i := range len(e) {
+		if e[i] == '.' && paths[e[:i]] {
+			return true
+		}
+	}
+	return false
 }
 
 // profileCardinality are the diagnostics of a cardinality a profile sets: two profiles that set the

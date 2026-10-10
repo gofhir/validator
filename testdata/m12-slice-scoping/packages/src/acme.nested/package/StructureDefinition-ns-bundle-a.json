@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ns-bundle-a",
+ "url": "https://example.org/fhir/ns/StructureDefinition/ns-bundle-a",
+ "version": "0.1.0",
+ "name": "Nsbundlea",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.type",
+    "path": "Bundle.type",
+    "min": 1
+   }
+  ]
+ }
+}

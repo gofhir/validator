@@ -104,6 +104,9 @@ func (v *Validator) selfDefinitions(ctx context.Context, inst map[string]any) fu
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
 const resourceTypeKey = "resourceType"
 
+// bundleType is the type of the resource that holds others as its entries (bundle.html).
+const bundleType = "Bundle"
+
 // governedChildren returns the children that govern an instance of node: its own in the snapshot,
 // or those of the element it slices when the snapshot does not unroll the slice.
 func governedChildren(node *registry.ElementNode) []*registry.ElementNode {

@@ -5,13 +5,14 @@ package slicing
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/gofhir/validator/v2/internal/elementvalues"
+	"github.com/gofhir/validator/v2/pkg/constraint"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
+	"github.com/gofhir/validator/v2/pkg/walker"
 )
 
 // Validator validates slicing constraints for FHIR resources.
@@ -19,6 +20,7 @@ type Validator struct {
 	registry    *registry.Registry
 	matcher     *slicematch.Matcher
 	definitions DefinitionSource
+	walker      *walker.Walker
 }
 
 // DefinitionSource names the definition a value declares for itself, which governs the value
@@ -44,7 +46,7 @@ func New(reg *registry.Registry) *Validator {
 
 // NewWithMatcher creates a slicing validator that assigns elements to slices with m.
 func NewWithMatcher(reg *registry.Registry, m *slicematch.Matcher, opts ...Option) *Validator {
-	v := &Validator{registry: reg, matcher: m}
+	v := &Validator{registry: reg, matcher: m, walker: walker.New(reg)}
 	for _, o := range opts {
 		o(v)
 	}
@@ -131,8 +133,8 @@ func (v *Validator) ValidateDataContext(goCtx context.Context, resource map[stri
 		v.walk(run, run.scope, sd, root, "", resource, resourceType, result)
 	}
 
-	// Also validate contained resources
-	v.validateContained(run, resource, resourceType, result)
+	// The resources it holds, against their own definitions.
+	v.validateNested(run, resource, resourceType, result)
 }
 
 // validation is one ValidateDataContext call.
@@ -220,39 +222,49 @@ func named(nodes []*registry.ElementNode, name string) *registry.ElementNode {
 // childValue is one value of an element in an instance.
 type childValue = elementvalues.Value
 
-// validateContained validates slicing in contained resources.
-func (v *Validator) validateContained(run *validation, resource map[string]any, baseFhirPath string, result *issue.Result) {
-	containedRaw, ok := resource["contained"]
-	if !ok {
-		return
+// validateNested checks the slicing of the resources resource holds (its contained resources, a
+// Bundle's entries, and theirs), each against the definitions it is checked against: the profiles
+// its meta.profile declares that resolve, or else its type's (walker.WalkWithProfiles). Each is in
+// a scope of its own: an entry is its own %rootResource, in the Bundle it is an entry of; a
+// contained resource has the resource that contains it as its %rootResource, and resolves where
+// that one does.
+func (v *Validator) validateNested(run *validation, resource map[string]any, rootType string, result *issue.Result) {
+	scopes := map[string]slicematch.Scope{rootType: run.scope}
+	v.walker.WalkWithProfilesContext(run.ctx, resource, rootType, rootType, func(w *walker.ResourceContext) bool {
+		if w.FHIRPath == rootType {
+			return true
+		}
+		scope, seen := scopes[w.FHIRPath]
+		if !seen {
+			parent, ok := scopes[w.ParentPath]
+			if !ok {
+				parent = run.scope
+			}
+			scope = nestedScope(parent, w)
+			scopes[w.FHIRPath] = scope
+		}
+		if w.SD == nil || w.SD.Snapshot == nil {
+			return true
+		}
+		if root := w.SD.Tree().Root(); root != nil {
+			v.walk(run, scope, w.SD, root, "", w.Data, w.FHIRPath, result)
+		}
+		return true
+	})
+}
+
+// nestedScope is the scope of the resource w visits, which the resource whose scope is parent holds.
+// A Bundle is where the references of its own entries resolve, then the Bundles that hold it, as
+// the Bundle validated is (constraint.ScopeInBundle).
+func nestedScope(parent slicematch.Scope, w *walker.ResourceContext) slicematch.Scope {
+	scope := slicematch.Scope{Resource: w.Data, RootResource: parent.Resource, Container: parent.Container, Outer: parent.Outer}
+	if w.IsBundleEntry {
+		// An entry is its own %rootResource, in the Bundle it is an entry of: parent, whose own
+		// scope has it as its Container.
+		scope = slicematch.Scope{Resource: w.Data, RootResource: w.Data, Container: parent.Container, Outer: parent.Outer}
 	}
-
-	contained, ok := containedRaw.([]any)
-	if !ok {
-		return
+	if rt, _ := w.Data[resourceTypeKey].(string); rt == bundleType {
+		scope = constraint.ScopeInBundle(scope, w.Data)
 	}
-
-	for i, item := range contained {
-		resourceMap, ok := item.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		resourceType, _ := resourceMap["resourceType"].(string)
-		if resourceType == "" {
-			continue
-		}
-
-		containedSD := v.registry.GetByType(resourceType)
-		if containedSD == nil || containedSD.Snapshot == nil {
-			continue
-		}
-		root := containedSD.Tree().Root()
-		if root == nil {
-			continue
-		}
-		containedFhirPath := fmt.Sprintf("%s.contained[%d]", baseFhirPath, i)
-		scope := slicematch.Scope{Resource: resourceMap, RootResource: run.scope.RootResource, Container: run.scope.Container, Outer: run.scope.Outer}
-		v.walk(run, scope, containedSD, root, "", resourceMap, containedFhirPath, result)
-	}
+	return scope
 }
