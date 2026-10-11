@@ -406,5 +406,197 @@
     "file": "testdata/m12-slice-scoping/probes/rs_19_target_versioned_fullurl_absolute.json",
     "location": "Bundle.entry[0].resource",
     "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/Bundle-father.json",
+    "location": "Bundle.entry[5].resource.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/Claim-760151.json",
+    "location": "Claim.item[0].quantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/Claim-760152.json",
+    "location": "Claim.item[0].quantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationDispense-meddisp0309.json",
+    "location": "MedicationDispense.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationDispense-meddisp0313.json",
+    "location": "MedicationDispense.contained[0].ingredient[0].strength.numerator.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationDispense-meddisp0313.json",
+    "location": "MedicationDispense.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationDispense-meddisp0318.json",
+    "location": "MedicationDispense.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationDispense-meddisp0324.json",
+    "location": "MedicationDispense.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationDispense-meddisp0327.json",
+    "location": "MedicationDispense.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationDispense-meddisp0328.json",
+    "location": "MedicationDispense.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationDispense-meddisp0329.json",
+    "location": "MedicationDispense.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0304.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0314.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0319.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].rateQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0322.json",
+    "location": "MedicationRequest.contained[0].ingredient[0].strength.numerator.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0322.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0325.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0326.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0328.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0329.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0334.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/MedicationRequest-medrx0335.json",
+    "location": "MedicationRequest.dosageInstruction[0].doseAndRate[0].doseQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/VisionPrescription-33124.json",
+    "location": "VisionPrescription.lensSpecification[0].duration.code",
+    "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A Quantity whose system is UCUM (http://unitsofmeasure.org) must have a code of that code system: 'ea', 'mEq', 'TAB', 'drop', 'mcg', 'month', 'tbl', 'ml/hr' are not UCUM. HL7 6.10.2 with a terminology server reports them (Unknown code 'mEq' in the CodeSystem 'http://unitsofmeasure.org', in a backbone too: MedicationRequest-medrx0322, VisionPrescription-33124, Claim-760152); under -tx n/a, the baseline, it only warns that it cannot validate them.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/VisionPrescription-33124.json",
+    "location": "VisionPrescription.lensSpecification[1].duration.code",
+    "messageId": "UCUM_INVALID_CODE"
   }
 ]

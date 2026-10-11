@@ -2,10 +2,10 @@
 package ucumvalidator
 
 import (
-	"fmt"
-	"strings"
+	"context"
 	"sync"
 
+	"github.com/gofhir/validator/v2/internal/elementvalues"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/walker"
@@ -46,72 +46,47 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 		return
 	}
 
-	v.walkElement(data, sd, resourceType, resourceType, result)
+	v.walkResource(data, sd, resourceType, result)
 
 	v.walker.Walk(data, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
 		if ctx.FHIRPath == resourceType {
 			return true
 		}
-		v.walkElement(ctx.Data, ctx.SD, ctx.ResourceType, ctx.FHIRPath, result)
+		v.walkResource(ctx.Data, ctx.SD, ctx.FHIRPath, result)
 		return true
 	})
 }
 
-// walkElement recursively walks an element looking for Quantity types.
-func (v *Validator) walkElement(data map[string]any, sd *registry.StructureDefinition, sdPath, fhirPath string, result *issue.Result) {
-	for key, value := range data {
-		if key == "resourceType" && v.registry.IsResourceType(sdPath) {
-			// A resource's own type (json.html#resources), not an element: the resource's root.
-			continue
-		}
-
-		elemDef := v.findElement(sd, sdPath+"."+key, key)
-		if elemDef == nil {
-			continue
-		}
-
-		elemFHIRPath := fhirPath + "." + key
-		if v.isQuantityType(elemDef) {
-			v.validateQuantityValue(value, elemFHIRPath, result)
-		} else {
-			v.walkChildValue(value, elemDef, elemFHIRPath, result)
-		}
+// walkResource checks the Quantities of a resource (or a datatype value validated against its own
+// definition), from the root of sd.
+func (v *Validator) walkResource(data map[string]any, sd *registry.StructureDefinition, fhirPath string, result *issue.Result) {
+	if root := sd.Tree().Root(); root != nil {
+		v.walkNode(data, sd, root, "", fhirPath, result)
 	}
 }
 
-// validateQuantityValue validates UCUM codes for a value that is a Quantity.
-func (v *Validator) validateQuantityValue(value any, fhirPath string, result *issue.Result) {
-	switch val := value.(type) {
-	case map[string]any:
-		v.validateQuantity(val, fhirPath, result)
-	case []any:
-		for i, item := range val {
-			if m, ok := item.(map[string]any); ok {
-				v.validateQuantity(m, fmt.Sprintf("%s[%d]", fhirPath, i), result)
-			}
+// walkNode checks the Quantities among the values inst holds for the children of node, and walks
+// into the others, following the definitions: a backbone's children inline, a contentReference's
+// target, a datatype's own definition (registry.ChildrenOf). A resource an element holds is the
+// walker's.
+func (v *Validator) walkNode(inst map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, result *issue.Result) {
+	children := v.registry.ChildrenOf(context.Background(), sd, node, typeCode, nil)
+	for _, child := range children.Nodes {
+		if v.registry.HoldsResource(child.Def) {
+			continue
 		}
-	}
-}
-
-// walkChildValue recursively walks a non-Quantity child value.
-func (v *Validator) walkChildValue(value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
-	typeName := v.getTypeName(elemDef)
-	if typeName == "" {
-		return
-	}
-	typeSD := v.registry.GetByType(typeName)
-	if typeSD == nil || typeSD.Kind == "primitive-type" {
-		return
-	}
-
-	switch val := value.(type) {
-	case map[string]any:
-		v.walkElement(val, typeSD, typeName, fhirPath, result)
-	case []any:
-		for i, item := range val {
-			if m, ok := item.(map[string]any); ok {
-				v.walkElement(m, typeSD, typeName, fmt.Sprintf("%s[%d]", fhirPath, i), result)
+		quantity := v.isQuantityType(child.Def)
+		for _, cv := range elementvalues.Of(child, inst, v.registry.ChoiceType) {
+			m, ok := cv.Value.(map[string]any)
+			if !ok {
+				continue
 			}
+			path := cv.Path(fhirPath)
+			if (cv.TypeCode != "" && v.derivesFromQuantity(cv.TypeCode)) || (cv.TypeCode == "" && quantity) {
+				v.validateQuantity(m, path, result)
+				continue
+			}
+			v.walkNode(m, children.SD, child, cv.TypeCode, path, result)
 		}
 	}
 }
@@ -181,34 +156,4 @@ func (v *Validator) walkBaseChain(typeName string) bool {
 		sd = v.registry.GetByURL(sd.BaseDefinition)
 	}
 	return false
-}
-
-// getTypeName returns the single type name for an element, or empty if ambiguous.
-func (v *Validator) getTypeName(elemDef *registry.ElementDefinition) string {
-	if len(elemDef.Type) == 1 {
-		return elemDef.Type[0].Code
-	}
-	return ""
-}
-
-// findElement looks up an ElementDefinition, handling choice types.
-func (v *Validator) findElement(sd *registry.StructureDefinition, path, key string) *registry.ElementDefinition {
-	for i := range sd.Snapshot.Element {
-		elem := &sd.Snapshot.Element[i]
-		if elem.Path == path {
-			return elem
-		}
-		if !strings.HasSuffix(elem.Path, "[x]") {
-			continue
-		}
-		basePath := strings.TrimSuffix(elem.Path, "[x]")
-		baseName := basePath[strings.LastIndex(basePath, ".")+1:]
-		if strings.HasPrefix(key, baseName) && len(key) > len(baseName) {
-			suffix := key[len(baseName):]
-			if suffix != "" && suffix[0] >= 'A' && suffix[0] <= 'Z' {
-				return elem
-			}
-		}
-	}
-	return nil
 }
