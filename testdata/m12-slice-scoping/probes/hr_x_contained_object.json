@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"link":[{"other":{"reference":"#q"},"type":"seealso"}],"contained":{"resourceType":"Patient","id":"q","gender":"bogus","birthDate":"x","meta":{"lastUpdated":"bad"}}}

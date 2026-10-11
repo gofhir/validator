@@ -187,8 +187,7 @@ func ContainedByID(resource map[string]any, id string) (map[string]any, bool) {
 // IsContainedIn reports whether resource is one of container's contained resources (the same
 // value, not an equal one).
 func IsContainedIn(container, resource map[string]any) bool {
-	contained, _ := container["contained"].([]any)
-	for _, item := range contained {
+	for _, item := range containedOf(container) {
 		if m, ok := item.(map[string]any); ok && sameMap(m, resource) {
 			return true
 		}
@@ -214,11 +213,7 @@ func bundleEntries(root map[string]any) []map[string]any {
 
 // findContainedByID searches a resource's contained array for a resource with the given id.
 func findContainedByID(resource map[string]any, id string) map[string]any {
-	contained, ok := resource["contained"].([]any)
-	if !ok {
-		return nil
-	}
-	for _, item := range contained {
+	for _, item := range containedOf(resource) {
 		res, ok := item.(map[string]any)
 		if !ok {
 			continue
@@ -226,6 +221,18 @@ func findContainedByID(resource map[string]any, id string) map[string]any {
 		if resID, _ := res["id"].(string); resID == id {
 			return res
 		}
+	}
+	return nil
+}
+
+// containedOf returns resource's contained resources: its array, or the one resource written where
+// the array goes, which the HL7 validator also takes as the array's one item.
+func containedOf(resource map[string]any) []any {
+	switch c := resource["contained"].(type) {
+	case []any:
+		return c
+	case map[string]any:
+		return []any{c}
 	}
 	return nil
 }

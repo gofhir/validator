@@ -80,10 +80,7 @@ type ContainedContext struct {
 func NewContainedContext(resource map[string]any) *ContainedContext {
 	ctx := &ContainedContext{IDIndex: make(map[string]string)}
 
-	contained, ok := resource["contained"].([]any)
-	if !ok {
-		return ctx
-	}
+	contained := containedOf(resource)
 
 	for _, item := range contained {
 		m, ok := item.(map[string]any)
@@ -403,8 +400,7 @@ func resolveTarget(ref string, rc *refContext) (map[string]any, bool) {
 		if id == "" {
 			return rc.root, rc.inContained
 		}
-		contained, _ := rc.root["contained"].([]any)
-		for _, c := range contained {
+		for _, c := range containedOf(rc.root) {
 			if m, ok := c.(map[string]any); ok && m["id"] == id {
 				return m, true
 			}
@@ -1038,6 +1034,18 @@ func (v *Validator) findElementDef(sd *registry.StructureDefinition, path string
 		if sd.Snapshot.Element[i].Path == path {
 			return &sd.Snapshot.Element[i]
 		}
+	}
+	return nil
+}
+
+// containedOf returns resource's contained resources: its array, or the one resource written where
+// the array goes, which the HL7 validator also takes as the array's one item.
+func containedOf(resource map[string]any) []any {
+	switch c := resource["contained"].(type) {
+	case []any:
+		return c
+	case map[string]any:
+		return []any{c}
 	}
 	return nil
 }

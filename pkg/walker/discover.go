@@ -55,12 +55,13 @@ type Discovery struct {
 	// holds.
 	Resources []*Nested
 	// Misshapen are the values of elements that hold resources that are not a resource, or not
-	// written as the element's cardinality says (json.html): not walked.
+	// written as the element's cardinality says (json.html): an array where one resource goes is
+	// not walked; a single value where an array goes is walked as its one item ([0]), as HL7 does.
 	Misshapen []Misshapen
 }
 
-// Misshapen is a value where a resource goes that is not one: a primitive, an array where one
-// resource goes (Value the array), an object where an array of them goes.
+// Misshapen is a value where a resource goes that is not one: a primitive or a null, an array where
+// one resource goes (Value the array), a single value where an array of them goes.
 type Misshapen struct {
 	Holder *registry.ElementNode
 	Path   string
@@ -103,8 +104,8 @@ func (d *Discovery) walk(ctx context.Context, reg *registry.Registry, in *Nested
 			continue
 		}
 		for _, cv := range values {
-			if m, ok := cv.Value.(map[string]any); ok && !misshapen(child, cv) {
-				d.walk(ctx, reg, in, children.SD, child, cv.TypeCode, m, inst, cv.Path(path))
+			if m, ok := cv.Value.(map[string]any); ok && shapeOf(child, cv) != arrayForOne {
+				d.walk(ctx, reg, in, children.SD, child, cv.TypeCode, m, inst, itemPath(child, cv, path))
 			}
 		}
 	}
@@ -113,17 +114,25 @@ func (d *Discovery) walk(ctx context.Context, reg *registry.Registry, in *Nested
 // found records the resource cv holds in inst, an instance of child's parent (a Bundle entry for an
 // entry's resource, whose Bundle is bundle), and walks into it.
 func (d *Discovery) found(ctx context.Context, reg *registry.Registry, in *Nested, child *registry.ElementNode, cv elementvalues.Value, inst, bundle map[string]any, path string) {
-	if misshapen(child, cv) {
-		// The whole value, once: an array where one resource goes, an object where an array goes.
-		if cv.Index == 0 && inst[cv.Key] != nil {
+	if cv.Value == nil && cv.Ext != nil {
+		return // a "_key" sibling alone, no value: an unknown property, not a value of the holder
+	}
+	switch shapeOf(child, cv) {
+	case arrayForOne:
+		// The whole array, once, not walked into (HL7 does not either).
+		if cv.Index == 0 {
 			d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: path + "." + cv.Key, Value: inst[cv.Key]})
 		}
 		return
+	case objectForMany:
+		// Recorded, and walked as the array's one item, as HL7 does.
+		d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: path + "." + cv.Key, Value: cv.Value})
 	}
-	at := cv.Path(path)
+	at := itemPath(child, cv, path)
 	res, ok := cv.Value.(map[string]any)
 	if !ok {
-		if cv.Value != nil {
+		if shapeOf(child, cv) == rightShape {
+			// A primitive, or a null, where a resource goes.
 			d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: at, Value: cv.Value})
 		}
 		return
@@ -146,15 +155,38 @@ func (d *Discovery) found(ctx context.Context, reg *registry.Registry, in *Neste
 	d.walk(ctx, reg, n, rsd, rsd.Tree().Root(), "", res, nil, at)
 }
 
-// misshapen reports whether cv is written otherwise than child's cardinality says: an array is
-// written for an element whose base allows several values, whatever a profile narrows it to
-// (json.html#arrays).
-func misshapen(child *registry.ElementNode, cv elementvalues.Value) bool {
+// shape is how a value is written against its element's cardinality.
+type shape int
+
+const (
+	rightShape    shape = iota
+	arrayForOne         // an array where one value goes
+	objectForMany       // a single value where an array goes
+)
+
+// shapeOf tells how cv is written against child's cardinality: an array is written for an element
+// whose base allows several values, whatever a profile narrows it to (json.html#arrays).
+func shapeOf(child *registry.ElementNode, cv elementvalues.Value) shape {
 	most := child.Def.Max
 	if child.Def.Base != nil && child.Def.Base.Max != "" {
 		most = child.Def.Base.Max
 	}
-	return cv.Array != (most != "1" && most != "0")
+	switch repeats := most != "1" && most != "0"; {
+	case cv.Array && !repeats:
+		return arrayForOne
+	case !cv.Array && repeats:
+		return objectForMany
+	}
+	return rightShape
+}
+
+// itemPath is the path of cv under path: a single value written where an array goes is its one
+// item ("contained[0]"), as HL7 names it.
+func itemPath(child *registry.ElementNode, cv elementvalues.Value, path string) string {
+	if shapeOf(child, cv) == objectForMany {
+		return path + "." + cv.Key + "[0]"
+	}
+	return cv.Path(path)
 }
 
 // discoveries holds what Discover found in the resources one validation walks, by resource and

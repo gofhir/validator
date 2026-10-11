@@ -815,7 +815,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	result.Stats.PhasesRun++
 
 	// Phase 3: Primitive type validation (uses cached regex)
-	primResult := v.primValidator.ValidateData(data, sd)
+	primResult := v.primValidator.ValidateDataContext(ctx, data, sd)
 	result.Merge(primResult)
 	issue.ReleaseResult(primResult)
 	result.Stats.PhasesRun++
@@ -893,7 +893,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 
 	// Phase 9: UCUM validation (Quantity.code syntax)
 	if v.ucumValidator != nil {
-		v.ucumValidator.ValidateData(data, sd, result)
+		v.ucumValidator.ValidateDataContext(ctx, data, sd, result)
 	}
 	result.Stats.PhasesRun++
 }

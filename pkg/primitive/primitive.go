@@ -2,6 +2,7 @@
 package primitive
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -86,6 +87,12 @@ func (v *Validator) Validate(resource []byte, sd *registry.StructureDefinition) 
 // ValidateData validates primitive types in a pre-parsed FHIR resource against its StructureDefinition.
 // This is the preferred method when JSON has already been parsed to avoid redundant parsing.
 func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefinition) *issue.Result {
+	return v.ValidateDataContext(context.Background(), data, sd)
+}
+
+// ValidateDataContext is ValidateData, with what ctx's store found of the resources data holds
+// (walker.WithDiscoveries).
+func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any, sd *registry.StructureDefinition) *issue.Result {
 	result := issue.GetPooledResult()
 
 	rootType := sd.Type
@@ -94,15 +101,16 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 	}
 
 	idx := v.getOrBuildIndex(sd)
-	ctx := &validationContext{
+	vctx := &validationContext{
 		rootSD:  sd,
 		rootIdx: idx,
 	}
 
-	v.validateElement(data, rootType, rootType, idx, ctx, result)
+	v.validateElement(data, rootType, rootType, idx, vctx, result)
 
-	// Walk all nested resources (contained + Bundle entries) using the generic walker.
-	v.walker.Walk(data, rootType, rootType, func(wctx *walker.ResourceContext) bool {
+	// Walk every resource it holds, at any depth (contained resources, Bundle entries, the
+	// resources other elements hold): the descent stops at the elements that hold them.
+	v.walker.WalkAllContext(ctx, data, rootType, rootType, func(wctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if wctx.FHIRPath == rootType {
 			return true
@@ -302,6 +310,10 @@ func (v *Validator) validateValue(
 ) {
 	switch val := value.(type) {
 	case map[string]any:
+		if v.registry.HoldsResource(resolved.elemDef) {
+			// A resource the walk visits, against its own type.
+			return
+		}
 		// Complex element - validate nested elements
 		v.validateComplexElement(val, resolved, sdPath, fhirPath, idx, ctx, result)
 

@@ -1,0 +1,1 @@
+{"resourceType":"Patient","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"contained":[{"resourceType":"Patient","id":"c1","meta":{"security":[{"system":"http://terminology.hl7.org/CodeSystem/v3-Confidentiality","code":"ZZ"}]},"gender":"badgender","birthDate":"2020-13-45"}],"generalPractitioner":[{"reference":"#c1"}],"gender":"male"}

@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","type":"batch-response","entry":[{"response":{"status":"200","outcome":{"resourceType":"OperationOutcome","issue":[{"severity":"bogus","code":"bogus","details":{"text":"x"},"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/iso21090-EN-use","valueCode":"BOGUS"}]}],"meta":{"lastUpdated":"bad"}}}}]}

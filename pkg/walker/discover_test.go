@@ -110,10 +110,21 @@ func TestDiscover(t *testing.T) {
 			"Bundle.entry[0].resource [2]",
 			"Bundle.entry[1].resource [2]",
 		}},
-		{"an object where an array of resources goes", `{"resourceType":"Observation","contained":{"resourceType":"Bundle","type":"collection","entry":[{"resource":{"resourceType":"Patient"}}]}}`, nil, []string{
-			"Observation.contained {}",
+		// A single value where an array goes is walked as its one item, as HL7 does.
+		{"an object where an array of resources goes", `{"resourceType":"Observation","contained":{"resourceType":"Bundle","type":"collection","entry":[{"resource":{"resourceType":"Patient"}}]}}`, []string{
+			"contained Observation.contained[0] Bundle < Observation",
+			"entry Observation.contained[0].entry[0].resource Patient < Observation.contained[0]",
+		}, []string{"Observation.contained {}"}},
+		{"an object where an array of entries goes", `{"resourceType":"Bundle","type":"collection","entry":{"resource":{"resourceType":"Patient"}}}`, []string{
+			"entry Bundle.entry[0].resource Patient < Bundle",
+		}, nil},
+		{"primitives and nulls where a resource goes", `{"resourceType":"Observation","contained":["abc",5,null],"_x":1}`, nil, []string{
+			"Observation.contained[0] abc", "Observation.contained[1] 5", "Observation.contained[2] <nil>",
 		}},
-		{"an object where an array of entries goes", `{"resourceType":"Bundle","type":"collection","entry":{"resource":{"resourceType":"Patient"}}}`, nil, nil},
+		{"a null where one resource goes", `{"resourceType":"Bundle","type":"collection","entry":[{"resource":null}]}`, nil, []string{
+			"Bundle.entry[0].resource <nil>",
+		}},
+		{"a sibling alone is no value", `{"resourceType":"Bundle","type":"collection","_entry":{"id":"x"},"entry":[{"_resource":[{"id":"y"}]}]}`, nil, nil},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			data := parse(t, tt.data)
@@ -124,7 +135,7 @@ func TestDiscover(t *testing.T) {
 			}
 			misshapen := make([]string, 0, len(d.Misshapen))
 			for _, m := range d.Misshapen {
-				misshapen = append(misshapen, m.Path+" "+shape(m.Value))
+				misshapen = append(misshapen, m.Path+" "+describeValue(m.Value))
 			}
 			if !slices.Equal(misshapen, tt.misshapen) {
 				t.Errorf("misshapen %q, want %q", misshapen, tt.misshapen)
@@ -133,8 +144,8 @@ func TestDiscover(t *testing.T) {
 	}
 }
 
-// shape is "[n]" for an array of n, "{}" for an object, the value otherwise.
-func shape(v any) string {
+// describeValue is "[n]" for an array of n, "{}" for an object, the value otherwise.
+func describeValue(v any) string {
 	switch v := v.(type) {
 	case []any:
 		return fmt.Sprintf("[%d]", len(v))
@@ -142,6 +153,19 @@ func shape(v any) string {
 		return "{}"
 	default:
 		return fmt.Sprint(v)
+	}
+}
+
+// An entry written as an object where the array goes is its one item, with its fullUrl.
+func TestDiscoverEntryObject(t *testing.T) {
+	reg := r4Registry(t)
+	data := parse(t, `{"resourceType":"Bundle","type":"collection","entry":{"fullUrl":"http://x.org/fhir/Patient/1","resource":{"resourceType":"Patient"}}}`)
+	d := Discover(context.Background(), reg, reg.GetByType("Bundle"), data, "Bundle")
+	if len(d.Resources) != 1 {
+		t.Fatalf("%d resources", len(d.Resources))
+	}
+	if n := d.Resources[0]; n.Path != "Bundle.entry[0].resource" || n.FullURL != "http://x.org/fhir/Patient/1" || n.Kind != KindEntry {
+		t.Errorf("entry: %s, fullUrl %q, kind %d", n.Path, n.FullURL, n.Kind)
 	}
 }
 
