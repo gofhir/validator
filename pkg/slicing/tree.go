@@ -29,7 +29,7 @@ const (
 func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, result *issue.Result) {
 	childSD, children := v.walkChildren(run.ctx, sd, node, typeCode, inst)
 	for _, child := range children {
-		values := elementvalues.Of(child, inst, v.registry.ChoiceType)
+		values := elementvalues.Of(child, inst, v.registry)
 		governing := make([]*registry.ElementNode, len(values))
 		for i := range values {
 			governing[i] = child

@@ -96,7 +96,7 @@ func (d *Discovery) walk(ctx context.Context, reg *registry.Registry, in *Nested
 		if !reg.MayHoldResources(children.SD, child) {
 			continue
 		}
-		values := elementvalues.Of(child, inst, reg.ChoiceType)
+		values := elementvalues.Of(child, inst, reg)
 		if reg.HoldsResource(child.Def) {
 			for _, cv := range values {
 				d.found(ctx, reg, in, child, cv, inst, holder, path)
@@ -104,8 +104,8 @@ func (d *Discovery) walk(ctx context.Context, reg *registry.Registry, in *Nested
 			continue
 		}
 		for _, cv := range values {
-			if m, ok := cv.Value.(map[string]any); ok && shapeOf(child, cv) != arrayForOne {
-				d.walk(ctx, reg, in, children.SD, child, cv.TypeCode, m, inst, itemPath(child, cv, path))
+			if m, ok := cv.Value.(map[string]any); ok && elementvalues.ShapeOf(child, cv) != elementvalues.ArrayForOne {
+				d.walk(ctx, reg, in, children.SD, child, cv.TypeCode, m, inst, elementvalues.ItemPath(child, cv, path))
 			}
 		}
 	}
@@ -117,21 +117,21 @@ func (d *Discovery) found(ctx context.Context, reg *registry.Registry, in *Neste
 	if cv.Value == nil && cv.Ext != nil {
 		return // a "_key" sibling alone, no value: an unknown property, not a value of the holder
 	}
-	switch shapeOf(child, cv) {
-	case arrayForOne:
+	switch elementvalues.ShapeOf(child, cv) {
+	case elementvalues.ArrayForOne:
 		// The whole array, once, not walked into (HL7 does not either).
 		if cv.Index == 0 {
 			d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: path + "." + cv.Key, Value: inst[cv.Key]})
 		}
 		return
-	case objectForMany:
+	case elementvalues.SingleForMany:
 		// Recorded, and walked as the array's one item, as HL7 does.
 		d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: path + "." + cv.Key, Value: cv.Value})
 	}
-	at := itemPath(child, cv, path)
+	at := elementvalues.ItemPath(child, cv, path)
 	res, ok := cv.Value.(map[string]any)
 	if !ok {
-		if shapeOf(child, cv) == rightShape {
+		if elementvalues.ShapeOf(child, cv) == elementvalues.RightShape {
 			// A primitive, or a null, where a resource goes.
 			d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: at, Value: cv.Value})
 		}
@@ -153,40 +153,6 @@ func (d *Discovery) found(ctx context.Context, reg *registry.Registry, in *Neste
 	}
 	d.Resources = append(d.Resources, n)
 	d.walk(ctx, reg, n, rsd, rsd.Tree().Root(), "", res, nil, at)
-}
-
-// shape is how a value is written against its element's cardinality.
-type shape int
-
-const (
-	rightShape    shape = iota
-	arrayForOne         // an array where one value goes
-	objectForMany       // a single value where an array goes
-)
-
-// shapeOf tells how cv is written against child's cardinality: an array is written for an element
-// whose base allows several values, whatever a profile narrows it to (json.html#arrays).
-func shapeOf(child *registry.ElementNode, cv elementvalues.Value) shape {
-	most := child.Def.Max
-	if child.Def.Base != nil && child.Def.Base.Max != "" {
-		most = child.Def.Base.Max
-	}
-	switch repeats := most != "1" && most != "0"; {
-	case cv.Array && !repeats:
-		return arrayForOne
-	case !cv.Array && repeats:
-		return objectForMany
-	}
-	return rightShape
-}
-
-// itemPath is the path of cv under path: a single value written where an array goes is its one
-// item ("contained[0]"), as HL7 names it.
-func itemPath(child *registry.ElementNode, cv elementvalues.Value, path string) string {
-	if shapeOf(child, cv) == objectForMany {
-		return path + "." + cv.Key + "[0]"
-	}
-	return cv.Path(path)
 }
 
 // discoveries holds what Discover found in the resources one validation walks, by resource and

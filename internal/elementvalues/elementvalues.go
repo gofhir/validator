@@ -30,13 +30,21 @@ func (v Value) Path(parent string) string {
 	return p
 }
 
+// Types tells what the values' types are: the type a choice property names (Registry.ChoiceType)
+// and whether a type is primitive (Registry.IsPrimitiveTypeCode). *registry.Registry is one.
+type Types interface {
+	ChoiceType(base, key string) string
+	IsPrimitiveTypeCode(code string) bool
+}
+
 // Of returns the values inst holds for child: under its name, or for a choice element
 // ("value[x]") under each name its types give it, the element name followed by the type code with
 // its first letter capitalized (formats.html#choice), then under any other property that
-// choiceType says names a type. A value of a type the element does not allow is present, with the
-// wrong type, not absent. A primitive present only through its "_name" sibling (extensions without
-// a value) is present, once per entry of a repeating one (json.html#primitive).
-func Of(child *registry.ElementNode, inst map[string]any, choiceType func(base, key string) string) []Value {
+// types.ChoiceType says names a type. A value of a type the element does not allow is present,
+// with the wrong type, not absent. Only a primitive has a "_name" sibling (json.html#primitive): a
+// primitive present only through it (extensions without a value) is present, once per entry of a
+// repeating one; another type's "_name" is no property of it, and is not read.
+func Of(child *registry.ElementNode, inst map[string]any, types Types) []Value {
 	name := child.Name()
 	base, isChoice := strings.CutSuffix(name, "[x]")
 	if !isChoice {
@@ -44,15 +52,15 @@ func Of(child *registry.ElementNode, inst map[string]any, choiceType func(base, 
 		if len(child.Def.Type) == 1 {
 			typeCode = child.Def.Type[0].Code
 		}
-		return valuesOf(inst, name, typeCode)
+		return valuesOf(inst, name, typeCode, primitive(types, typeCode))
 	}
-	props := choiceProperties(base, child.Def.Type, inst, choiceType)
+	props := choiceProperties(base, child.Def.Type, inst, types.ChoiceType)
 	if len(props) == 0 {
 		return nil
 	}
 	out := make([]Value, 0, len(props))
 	for _, p := range props {
-		out = append(out, valuesOf(inst, p.key, p.code)...)
+		out = append(out, valuesOf(inst, p.key, p.code, primitive(types, p.code))...)
 	}
 	return out
 }
@@ -116,10 +124,19 @@ func declared(types []registry.Type, suffix string) int {
 	return -1
 }
 
-// valuesOf returns the values of one property, each with its "_key" sibling.
-func valuesOf(inst map[string]any, k, typeCode string) []Value {
+// primitive reports whether typeCode is a primitive type's, which a "_key" sibling may extend.
+func primitive(types Types, typeCode string) bool {
+	return typeCode != "" && types.IsPrimitiveTypeCode(typeCode)
+}
+
+// valuesOf returns the values of one property, each with its "_key" sibling when the property is
+// a primitive.
+func valuesOf(inst map[string]any, k, typeCode string, primitive bool) []Value {
 	val, ok := inst[k]
-	ext := inst["_"+k]
+	var ext any
+	if primitive {
+		ext = inst["_"+k]
+	}
 	if !ok {
 		switch e := ext.(type) {
 		case nil:
@@ -139,11 +156,20 @@ func valuesOf(inst map[string]any, k, typeCode string) []Value {
 		return []Value{{Key: k, TypeCode: typeCode, Value: val, Ext: asMap(ext)}}
 	}
 	extArr, _ := ext.([]any)
-	out := make([]Value, 0, len(arr))
-	for i, item := range arr {
-		v := Value{Key: k, TypeCode: typeCode, Value: item, Array: true, Index: i}
+	// The items are those of both arrays, aligned by position (json.html#primitive): a "_key" item
+	// past the values is a primitive with no value, as the HL7 validator reads it.
+	n := max(len(arr), len(extArr))
+	out := make([]Value, 0, n)
+	for i := range n {
+		v := Value{Key: k, TypeCode: typeCode, Array: true, Index: i}
+		if i < len(arr) {
+			v.Value = arr[i]
+		}
 		if i < len(extArr) {
 			v.Ext = asMap(extArr[i])
+		}
+		if v.Value == nil && v.Ext == nil && i >= len(arr) {
+			continue // a null past the values pads nothing
 		}
 		out = append(out, v)
 	}
@@ -153,4 +179,43 @@ func valuesOf(inst map[string]any, k, typeCode string) []Value {
 func asMap(v any) map[string]any {
 	m, _ := v.(map[string]any)
 	return m
+}
+
+// Shape is how a value is written against its element's cardinality (json.html#arrays).
+type Shape int
+
+const (
+	// RightShape is a value written as its element's cardinality says.
+	RightShape Shape = iota
+	// ArrayForOne is an item of an array written where one value goes: the HL7 validator reports
+	// it ("must be an Object, not an Array") and validates nothing in it.
+	ArrayForOne
+	// SingleForMany is a single value written where an array goes: the HL7 validator reports it
+	// ("must be a JSON Array") and validates it as the array's one item.
+	SingleForMany
+)
+
+// ShapeOf tells how v, a value of child, is written: an array is written for an element whose
+// base allows several values, whatever a profile narrows it to (json.html#arrays).
+func ShapeOf(child *registry.ElementNode, v Value) Shape {
+	most := child.Def.Max
+	if child.Def.Base != nil && child.Def.Base.Max != "" {
+		most = child.Def.Base.Max
+	}
+	switch repeats := most != "1" && most != "0"; {
+	case v.Array && !repeats:
+		return ArrayForOne
+	case !v.Array && repeats:
+		return SingleForMany
+	}
+	return RightShape
+}
+
+// ItemPath is v's path under parent, the path of the instance that holds it: a single value
+// written where an array goes is the array's one item ("contained[0]"), as HL7 names it.
+func ItemPath(child *registry.ElementNode, v Value, parent string) string {
+	if ShapeOf(child, v) == SingleForMany {
+		return parent + "." + v.Key + "[0]"
+	}
+	return v.Path(parent)
 }

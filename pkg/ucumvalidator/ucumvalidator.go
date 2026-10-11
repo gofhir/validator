@@ -83,7 +83,7 @@ func (v *Validator) walkNode(ctx context.Context, inst map[string]any, sd *regis
 			continue
 		}
 		quantity := v.isQuantityType(child.Def)
-		for _, cv := range elementvalues.Of(child, inst, v.registry.ChoiceType) {
+		for _, cv := range elementvalues.Of(child, inst, v.registry) {
 			m, ok := cv.Value.(map[string]any)
 			if !ok {
 				continue

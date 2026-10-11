@@ -135,7 +135,7 @@ func (v *Validator) walkPrimitiveExtensions(node *registry.ElementNode, typeCode
 func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*registry.ElementNode, inst map[string]any, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
 	fields := rawFields(raw)
 	for _, child := range children {
-		for _, cv := range elementvalues.Of(child, inst, v.registry.ChoiceType) {
+		for _, cv := range elementvalues.Of(child, inst, v.registry) {
 			path := cv.Path(fhirPath)
 			valueRaw, extRaw := fields.of(cv.Key, cv), fields.of("_"+cv.Key, cv)
 			if m, ok := cv.Value.(map[string]any); ok && v.registry.HoldsResource(child.Def) {

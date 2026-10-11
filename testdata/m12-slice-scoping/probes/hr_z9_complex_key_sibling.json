@@ -1,0 +1,1 @@
+{"resourceType":"Observation","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","_code":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"unknown"}]},"_interpretation":[{"id":"i"}]}
