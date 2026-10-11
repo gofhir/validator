@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/gofhir/validator/v2/internal/versionorder"
 	"github.com/gofhir/validator/v2/pkg/loader"
@@ -319,6 +320,12 @@ type Registry struct {
 
 	// interfaces caches the interfaces of each definition's type (see Interfaces).
 	interfaces map[*StructureDefinition][]string
+	// holderPaths (by *StructureDefinition) and holdingTypes cache where values may hold
+	// resources (see MayHoldResources), read without a lock; holdingTypes is nil until worked out,
+	// and stale once holderGen, counting the times definitions were added, moves past its.
+	holderPaths  sync.Map
+	holdingTypes atomic.Pointer[holdingTypes]
+	holderGen    atomic.Uint64
 
 	model *FHIRPathModel // see FHIRPathModel
 }
@@ -372,6 +379,8 @@ func (r *Registry) refreshDerivedUnlocked() {
 	clear(r.elementDefCache)
 	clear(r.domainResources)
 	clear(r.interfaces)
+	r.holderGen.Add(1)
+	r.holderPaths.Clear()
 	r.buildTypeClassificationCaches()
 	r.model = &FHIRPathModel{reg: r}
 }

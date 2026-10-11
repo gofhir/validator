@@ -149,7 +149,7 @@ func (v *Validator) ValidateDataWith(ctx context.Context, d Data, sd *registry.S
 	languages := reslang.NewWalk(ctx, resourceType)
 
 	// Walk all nested resources (contained + Bundle entries) using the generic walker.
-	v.walker.Walk(resource, resourceType, resourceType, func(wctx *walker.ResourceContext) bool {
+	v.walker.WalkContext(ctx, resource, resourceType, resourceType, func(wctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if wctx.FHIRPath == resourceType {
 			return true

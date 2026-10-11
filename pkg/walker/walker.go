@@ -4,7 +4,6 @@ package walker
 
 import (
 	"context"
-	"fmt"
 	"slices"
 
 	"github.com/gofhir/validator/v2/pkg/registry"
@@ -57,33 +56,28 @@ func New(reg *registry.Registry) *Walker {
 	return &Walker{registry: reg}
 }
 
-// Walk traverses a resource and all its nested resources (contained, Bundle entries).
-// The visitor is called for each resource, starting with the root.
+// Walk traverses a resource and the resources it holds: its contained resources and a Bundle's
+// entries, and theirs (Discover). The visitor is called for each resource, starting with the root,
+// against its type's definition; returning false stops the walk.
 func (w *Walker) Walk(data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
-	// Get root SD
+	w.WalkContext(context.Background(), data, rootType, rootPath, visitor)
+}
+
+// WalkContext is Walk, with what ctx's store found (WithDiscoveries).
+func (w *Walker) WalkContext(ctx context.Context, data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
 	sd := w.registry.GetByType(rootType)
 	if sd == nil {
 		return
 	}
-
-	// Visit root resource
-	rootCtx := &ResourceContext{
-		Data:         data,
-		ResourceType: rootType,
-		FHIRPath:     rootPath,
-		SD:           sd,
-		Profiles:     getMetaProfiles(data),
-	}
-
-	if !visitor(rootCtx) {
+	root := &ResourceContext{Data: data, ResourceType: rootType, FHIRPath: rootPath, SD: sd, Profiles: getMetaProfiles(data)}
+	if !visitor(root) {
 		return
 	}
-
-	// Walk contained resources
-	w.walkContained(data, rootPath, visitor)
-
-	// Walk Bundle entries (if this is a Bundle)
-	w.walkBundleEntries(data, rootPath, visitor)
+	for _, n := range w.nested(ctx, sd, data, rootPath) {
+		if !visitor(resourceContext(n, n.SD, rootPath)) {
+			return
+		}
+	}
 }
 
 // WalkWithProfiles traverses a resource, visiting it once per definition it is checked against
@@ -97,263 +91,50 @@ func (w *Walker) WalkWithProfiles(data map[string]any, rootType, rootPath string
 func (w *Walker) WalkWithProfilesContext(ctx context.Context, data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
 	profiles := getMetaProfiles(data)
 	for _, sd := range w.definitions(ctx, profiles, rootType) {
-		ctx := &ResourceContext{
-			Data:         data,
-			ResourceType: rootType,
-			FHIRPath:     rootPath,
-			SD:           sd,
-			Profiles:     profiles,
-		}
-		if !visitor(ctx) {
+		rc := &ResourceContext{Data: data, ResourceType: rootType, FHIRPath: rootPath, SD: sd, Profiles: profiles}
+		if !visitor(rc) {
 			return
 		}
 	}
-
-	// Walk nested resources
-	w.walkContainedWithProfiles(ctx, data, rootPath, visitor)
-	w.walkBundleEntriesWithProfiles(ctx, data, rootPath, visitor)
-}
-
-// walkContained traverses contained resources.
-func (w *Walker) walkContained(data map[string]any, basePath string, visitor ResourceVisitor) {
-	containedRaw, ok := data["contained"]
-	if !ok {
-		return
-	}
-
-	contained, ok := containedRaw.([]any)
-	if !ok {
-		return
-	}
-
-	for i, item := range contained {
-		resourceMap, ok := item.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		resourceType, _ := resourceMap["resourceType"].(string)
-		if resourceType == "" {
-			continue
-		}
-
-		sd := w.registry.GetByType(resourceType)
-		if sd == nil || sd.Snapshot == nil {
-			continue
-		}
-
-		ctx := &ResourceContext{
-			Data:         resourceMap,
-			ResourceType: resourceType,
-			FHIRPath:     fmt.Sprintf("%s.contained[%d]", basePath, i),
-			SD:           sd,
-			Profiles:     getMetaProfiles(resourceMap),
-			IsContained:  true,
-			ParentPath:   basePath,
-		}
-
-		if !visitor(ctx) {
-			return
-		}
-	}
-}
-
-// walkContainedWithProfiles traverses contained resources, visiting per profile.
-func (w *Walker) walkContainedWithProfiles(ctx context.Context, data map[string]any, basePath string, visitor ResourceVisitor) {
-	containedRaw, ok := data["contained"]
-	if !ok {
-		return
-	}
-
-	contained, ok := containedRaw.([]any)
-	if !ok {
-		return
-	}
-
-	for i, item := range contained {
-		resourceMap, ok := item.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		resourceType, _ := resourceMap["resourceType"].(string)
-		if resourceType == "" {
-			continue
-		}
-
-		containedPath := fmt.Sprintf("%s.contained[%d]", basePath, i)
-		profiles := getMetaProfiles(resourceMap)
-		for _, sd := range w.definitions(ctx, profiles, resourceType) {
-			rc := &ResourceContext{
-				Data:         resourceMap,
-				ResourceType: resourceType,
-				FHIRPath:     containedPath,
-				SD:           sd,
-				Profiles:     profiles,
-				IsContained:  true,
-				ParentPath:   basePath,
-			}
-			if !visitor(rc) {
+	for _, n := range w.nested(ctx, w.registry.GetByType(rootType), data, rootPath) {
+		for _, sd := range w.definitions(ctx, getMetaProfiles(n.Data), n.ResourceType) {
+			if !visitor(resourceContext(n, sd, rootPath)) {
 				return
 			}
 		}
 	}
 }
 
-// walkBundleEntries traverses Bundle entry resources.
-func (w *Walker) walkBundleEntries(data map[string]any, basePath string, visitor ResourceVisitor) {
-	entriesRaw, ok := data["entry"]
-	if !ok {
-		return
+// nested returns the resources the walks visit among those data, of type definition sd, holds: its
+// contained resources and its entries, a Bundle entry's contained resources and entries, and so
+// on; not a contained resource's (dom-2), a contained Bundle's entries, nor the resources other
+// elements hold.
+func (w *Walker) nested(ctx context.Context, sd *registry.StructureDefinition, data map[string]any, rootPath string) []*Nested {
+	var out []*Nested
+	visited := map[*Nested]bool{}
+	for _, n := range discover(ctx, w.registry, sd, data, rootPath).Resources {
+		if (n.Kind == KindContained || n.Kind == KindEntry) && (n.Parent == nil || (n.Parent.Kind == KindEntry && visited[n.Parent])) {
+			visited[n] = true
+			out = append(out, n)
+		}
 	}
-
-	entries, ok := entriesRaw.([]any)
-	if !ok {
-		return
-	}
-
-	for i, entry := range entries {
-		entryMap, ok := entry.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		resourceRaw, ok := entryMap["resource"]
-		if !ok {
-			continue
-		}
-
-		resourceMap, ok := resourceRaw.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		resourceType, _ := resourceMap["resourceType"].(string)
-		if resourceType == "" {
-			continue
-		}
-
-		sd := w.registry.GetByType(resourceType)
-		if sd == nil || sd.Snapshot == nil {
-			continue
-		}
-
-		entryPath := fmt.Sprintf("%s.entry[%d].resource", basePath, i)
-		fullURL, _ := entryMap["fullUrl"].(string)
-
-		ctx := &ResourceContext{
-			Data:          resourceMap,
-			ResourceType:  resourceType,
-			FHIRPath:      entryPath,
-			SD:            sd,
-			Profiles:      getMetaProfiles(resourceMap),
-			IsBundleEntry: true,
-			ParentPath:    basePath,
-			Container:     data,
-			FullURL:       fullURL,
-		}
-
-		if !visitor(ctx) {
-			return
-		}
-
-		// Recursively walk contained within entry
-		w.walkContained(resourceMap, entryPath, visitor)
-
-		// Recursively walk nested Bundles
-		w.walkBundleEntries(resourceMap, entryPath, visitor)
-	}
+	return out
 }
 
-// walkBundleEntriesWithProfiles traverses Bundle entries, visiting per profile.
-func (w *Walker) walkBundleEntriesWithProfiles(ctx context.Context, data map[string]any, basePath string, visitor ResourceVisitor) {
-	entries := w.extractBundleEntries(data)
-	if entries == nil {
-		return
+// resourceContext is the context of n, visited against sd.
+func resourceContext(n *Nested, sd *registry.StructureDefinition, rootPath string) *ResourceContext {
+	return &ResourceContext{
+		Data:          n.Data,
+		ResourceType:  n.ResourceType,
+		FHIRPath:      n.Path,
+		SD:            sd,
+		Profiles:      getMetaProfiles(n.Data),
+		IsContained:   n.Kind == KindContained,
+		IsBundleEntry: n.Kind == KindEntry,
+		Container:     n.Bundle,
+		FullURL:       n.FullURL,
+		ParentPath:    n.parentPath(rootPath),
 	}
-
-	for i, entry := range entries {
-		resourceMap, resourceType := w.extractEntryResource(entry)
-		if resourceMap == nil {
-			continue
-		}
-		// A resource of a type with no definition is not walked, nor what it holds (as Walk).
-		if sd := w.registry.GetByType(resourceType); sd == nil || sd.Snapshot == nil {
-			continue
-		}
-
-		entryPath := fmt.Sprintf("%s.entry[%d].resource", basePath, i)
-
-		fullURL := ""
-		if entryMap, ok := entry.(map[string]any); ok {
-			fullURL, _ = entryMap["fullUrl"].(string)
-		}
-		if !w.visitEntryResource(ctx, resourceMap, resourceType, entryPath, basePath, data, fullURL, visitor) {
-			return
-		}
-
-		// Recursively walk contained and nested Bundles
-		w.walkContainedWithProfiles(ctx, resourceMap, entryPath, visitor)
-		w.walkBundleEntriesWithProfiles(ctx, resourceMap, entryPath, visitor)
-	}
-}
-
-// extractBundleEntries extracts the entry array from a Bundle.
-func (w *Walker) extractBundleEntries(data map[string]any) []any {
-	entriesRaw, ok := data["entry"]
-	if !ok {
-		return nil
-	}
-	entries, _ := entriesRaw.([]any)
-	return entries
-}
-
-// extractEntryResource extracts the resource map and type from a Bundle entry.
-func (w *Walker) extractEntryResource(entry any) (resourceMap map[string]any, resourceType string) {
-	entryMap, ok := entry.(map[string]any)
-	if !ok {
-		return nil, ""
-	}
-
-	resourceRaw, ok := entryMap["resource"]
-	if !ok {
-		return nil, ""
-	}
-
-	resourceMap, ok = resourceRaw.(map[string]any)
-	if !ok {
-		return nil, ""
-	}
-
-	resourceType, _ = resourceMap["resourceType"].(string)
-	if resourceType == "" {
-		return nil, ""
-	}
-
-	return resourceMap, resourceType
-}
-
-// visitEntryResource visits a Bundle entry resource once per definition it is checked against
-// (definitions).
-func (w *Walker) visitEntryResource(ctx context.Context, resourceMap map[string]any, resourceType, entryPath, basePath string, bundle map[string]any, fullURL string, visitor ResourceVisitor) bool {
-	profiles := getMetaProfiles(resourceMap)
-	for _, sd := range w.definitions(ctx, profiles, resourceType) {
-		rc := &ResourceContext{
-			Data:          resourceMap,
-			ResourceType:  resourceType,
-			FHIRPath:      entryPath,
-			SD:            sd,
-			Profiles:      profiles,
-			IsBundleEntry: true,
-			ParentPath:    basePath,
-			Container:     bundle,
-			FullURL:       fullURL,
-		}
-		if !visitor(rc) {
-			return false
-		}
-	}
-	return true
 }
 
 // definitions are the definitions a resource of resourceType declaring profiles is checked

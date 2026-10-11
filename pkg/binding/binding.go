@@ -118,7 +118,7 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 	// Walk all nested resources (contained + Bundle entries) using the generic walker.
 	// This replaces the duplicated validateContainedBindings, validateBundleEntryBindings,
 	// and validateContainedBindingsInEntry methods.
-	v.walker.Walk(resource, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
+	v.walker.WalkContext(ctx, resource, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if rc.FHIRPath == resourceType {
 			return true
