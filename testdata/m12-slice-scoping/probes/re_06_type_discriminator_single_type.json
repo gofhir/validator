@@ -1,0 +1,20 @@
+{
+ "resourceType": "Patient",
+ "id": "t1",
+ "meta": {
+  "profile": [
+   "https://example.org/fhir/re/StructureDefinition/re-contact-type-slice"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "contact": [
+  {
+   "name": {
+    "family": "X"
+   }
+  }
+ ]
+}

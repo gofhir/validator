@@ -46,8 +46,12 @@ func TestLocated(t *testing.T) {
 		rule, g, h string
 		want       bool
 	}{
-		{"parent", "Bundle.entry[0].request.method", "Bundle.entry[0].request", true}, // missing child at its parent
-		{"parent", "Bundle.entry", "Bundle", true},                                    // required slice at the list owner
+		{"parent", "Bundle.entry[0].request.method", "Bundle.entry[0].request", true},      // missing child at its parent
+		{"parent", "Observation.valueQuantity.resourceType", "Observation.value[x]", true}, // HL7 names the choice
+		{"equal", "Observation.valueQuantity", "Observation.value[x]", true},
+		{"equal", "Observation.valuequantity", "Observation.value[x]", false}, // not a type name
+		{"equal", "Observation.status", "Observation.value[x]", false},
+		{"parent", "Bundle.entry", "Bundle", true}, // required slice at the list owner
 		{"parent", "Observation.component", "Observation", true},
 		{"parent", "Bundle.entry", "Bundle.entry[3]", false},                      // an index is not optional
 		{"parent", "MeasureReport.extension[0].value[x]", "MeasureReport", false}, // not an immediate parent

@@ -138,11 +138,12 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 		for _, cv := range elementvalues.Of(child, inst, v.registry.ChoiceType) {
 			path := cv.Path(fhirPath)
 			valueRaw, extRaw := fields.of(cv.Key, cv), fields.of("_"+cv.Key, cv)
-			if m, ok := cv.Value.(map[string]any); ok {
+			if m, ok := cv.Value.(map[string]any); ok && v.registry.HoldsResource(child.Def) {
+				// A resource held in the element, validated as a resource of its own.
 				if _, isResource := m[resourceTypeKey]; isResource {
 					v.validateNested(child, m, valueRaw, path, opts, result)
-					continue
 				}
+				continue
 			}
 			node := v.governing(sd, child, cv, opts)
 			if cv.Value != nil {

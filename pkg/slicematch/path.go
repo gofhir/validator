@@ -173,7 +173,7 @@ func (w walker) walk(start cursor, values []any, valueless bool, steps []step) (
 	for _, v := range values {
 		tc := start.typeCode
 		if tc == "" {
-			tc = singleTypeCode(start.allowed(), v)
+			tc = w.typeOf(start.allowed(), v)
 		}
 		states = append(states, state{cur: start, value: v, present: valueless && v == nil, typeCode: tc})
 	}
@@ -314,7 +314,7 @@ func (w walker) nameIn(st state, sd *registry.StructureDefinition, children []*r
 				continue
 			}
 			out = append(out, state{branch: st.branch, cur: cursor{sd: sd, node: child, key: key, types: types},
-				value: v, present: v == nil, typeCode: singleTypeCode(types, v), frames: frames, in: w.within(st, v)})
+				value: v, present: v == nil, typeCode: w.typeOf(elementTypes(child, types), v), frames: frames, in: w.within(st, child, v)})
 		}
 	}
 	if choice {
@@ -381,7 +381,7 @@ func (w walker) extension(st state, url string) ([]state, error) {
 	var out []state
 	for _, v := range items(obj, extensionElement) {
 		if m, ok := v.(map[string]any); ok && m[extensionURL] == url {
-			out = append(out, state{branch: st.branch, cur: defCur, value: v, typeCode: singleTypeCode(defCur.allowed(), v), frames: st.frames, in: st.in})
+			out = append(out, state{branch: st.branch, cur: defCur, value: v, typeCode: w.typeOf(defCur.allowed(), v), frames: st.frames, in: st.in})
 		}
 	}
 	if len(out) == 0 {
@@ -390,12 +390,12 @@ func (w walker) extension(st state, url string) ([]state, error) {
 	return out, nil
 }
 
-// within is the scope v, a value one step below st's, is in: st's, but for a resource, which the
-// resolver gives a scope of its own (ScopedResolver.ScopeOf).
-func (w walker) within(st state, v any) *Scope {
+// within is the scope v, a value of child one step below st's, is in: st's, but for a resource the
+// element holds, which the resolver gives a scope of its own (ScopedResolver.ScopeOf).
+func (w walker) within(st state, child *registry.ElementNode, v any) *Scope {
 	res, _ := v.(map[string]any)
 	sr, scoped := w.resolver.(ScopedResolver)
-	if _, isResource := res[resourceTypeKey]; !isResource || !scoped {
+	if _, isResource := res[resourceTypeKey]; !isResource || !scoped || !w.m.reg.HoldsResource(child.Def) {
 		return st.in
 	}
 	from := w.scope
@@ -500,10 +500,11 @@ func itemAt(list []any, i int) any {
 	return nil
 }
 
-// singleTypeCode returns the type of an instance value: the resourceType of a resource, else the
-// element's type when it has exactly one.
-func singleTypeCode(types []registry.Type, v any) string {
-	if m, ok := v.(map[string]any); ok {
+// typeOf returns the type of an instance value of an element of types: the resourceType of a
+// resource the element holds (its types are resource types), else the element's type when it has
+// exactly one.
+func (w walker) typeOf(types []registry.Type, v any) string {
+	if m, ok := v.(map[string]any); ok && w.holdsResource(types) {
 		if rt, _ := m[resourceTypeKey].(string); rt != "" {
 			return rt
 		}
@@ -512,6 +513,20 @@ func singleTypeCode(types []registry.Type, v any) string {
 		return types[0].Code
 	}
 	return ""
+}
+
+// holdsResource reports whether an element of types holds a resource: each is a resource type.
+func (w walker) holdsResource(types []registry.Type) bool {
+	return w.m.reg.HoldsResourceTypes(types)
+}
+
+// elementTypes are the types of child a value read with types is of: types, for a choice
+// element's, else child's.
+func elementTypes(child *registry.ElementNode, types []registry.Type) []registry.Type {
+	if types != nil {
+		return types
+	}
+	return child.Def.Type
 }
 
 func describe(c cursor) string {

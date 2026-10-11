@@ -150,8 +150,10 @@ func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]a
 		for _, cv := range elementvalues.Of(child, inst, v.registry.ChoiceType) {
 			location := cv.Path(t.location)
 			m, isObject := cv.Value.(map[string]any)
-			if _, isResource := m[resourceTypeKey]; isObject && isResource {
-				v.checkHeld(ctx, t, child, cv, m, result)
+			if isObject && v.registry.HoldsResource(child.Def) {
+				if _, isResource := m[resourceTypeKey]; isResource {
+					v.checkHeld(ctx, t, child, cv, m, result)
+				}
 				continue
 			}
 			next := target{

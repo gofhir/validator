@@ -50,9 +50,9 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 			if m == nil {
 				continue
 			}
-			// A resource inside an element (Bundle.entry.resource, contained) is validated against
+			// A resource held in the element (Bundle.entry.resource, contained) is validated against
 			// its own definition, not the element's.
-			if _, isResource := m[resourceTypeKey]; isResource {
+			if v.registry.HoldsResource(child.Def) {
 				continue
 			}
 			nextSD, next := v.memberTree(childSD, governing[i])

@@ -139,6 +139,11 @@
       "files": ["testdata/m12-slice-scoping/probes/rs_*.json"]
     },
     {
+      "name": "resource-element-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.reselem-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/re_*.json"]
+    },
+    {
       "name": "canonical-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.canonicals-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/cn_*.json"]
@@ -146,7 +151,7 @@
     {
       "name": "r5-probes",
       "version": "5.0.0",
-      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json", "testdata/m12-slice-scoping/probes/r5_range_*.json", "testdata/m12-slice-scoping/probes/e*_*.json"]
+      "files": ["testdata/m12-slice-scoping/probes/r5_q_nested.json", "testdata/m12-slice-scoping/probes/r5_sd_minimal.json", "testdata/m12-slice-scoping/probes/r5_range_*.json", "testdata/m12-slice-scoping/probes/r5_re_*.json", "testdata/m12-slice-scoping/probes/e*_*.json"]
     },
     {
       "name": "r4b-probes",

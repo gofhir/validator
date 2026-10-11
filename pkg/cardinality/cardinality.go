@@ -169,9 +169,9 @@ func (v *Validator) validateChildren(data map[string]any, childSD *registry.Stru
 				v.validatePrimitiveElement(cv.Value, cv.Ext, childSD, child, cv.TypeCode, cv.Path(fhirPath), result)
 				continue
 			}
-			// A resource inside an element (Bundle.entry.resource, contained) is validated
+			// A resource held in the element (Bundle.entry.resource, contained) is validated
 			// against its own definition by the walker.
-			if _, isResource := m[resourceTypeKey]; isResource {
+			if v.registry.HoldsResource(child.Def) {
 				continue
 			}
 			v.validateNode(m, childSD, child, cv.TypeCode, cv.Path(fhirPath), result)
@@ -261,9 +261,6 @@ func (v *Validator) definedByPrimitive(n *registry.ElementNode) bool {
 	base := v.registry.GetByType(typeName)
 	return base != nil && base.Kind == kindPrimitive
 }
-
-// resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
-const resourceTypeKey = "resourceType"
 
 // unresolvedProfile is the profile an instance's type declares when it cannot be resolved.
 type unresolvedProfile struct {

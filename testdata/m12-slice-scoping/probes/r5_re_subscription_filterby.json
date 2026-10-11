@@ -1,0 +1,21 @@
+{
+ "resourceType": "Subscription",
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "status": "active",
+ "topic": "http://example.org/topic",
+ "channelType": {
+  "system": "http://terminology.hl7.org/CodeSystem/subscription-channel-type",
+  "code": "rest-hook"
+ },
+ "endpoint": "https://example.org/hook",
+ "filterBy": [
+  {
+   "resourceType": "Patient",
+   "filterParameter": "x",
+   "value": "y"
+  }
+ ]
+}

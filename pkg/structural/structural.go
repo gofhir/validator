@@ -179,7 +179,7 @@ func (v *Validator) validateElement(
 	// Pre-scan: detect multiple variants of the same choice type (FHIR R4 §2.6.2)
 	choiceMatches := make(map[string][]string) // choiceBasePath -> list of data keys
 	for key := range data {
-		if key == "resourceType" || strings.HasPrefix(key, "_") {
+		if (key == "resourceType" && v.registry.IsResourceType(sdPath)) || strings.HasPrefix(key, "_") {
 			continue
 		}
 		if basePath := matchChoiceType(key, sdPath, idx); basePath != "" {
@@ -198,8 +198,9 @@ func (v *Validator) validateElement(
 	}
 
 	for key, value := range data {
-		// Skip resourceType - it's handled separately
-		if key == "resourceType" {
+		// A resource's own type (json.html#resources), not an element, at the resource's root:
+		// handled separately.
+		if key == "resourceType" && v.registry.IsResourceType(sdPath) {
 			continue
 		}
 
@@ -545,6 +546,14 @@ func (v *Validator) validateComplexElement(
 		}
 	}
 
+	// A resource held in the element (Bundle.entry.resource, Parameters.parameter.resource, or a
+	// profile's concrete resource types: Bundle.entry:Solicitud.resource typed ServiceRequest) is
+	// validated as a resource of its own, against its resourceType, whatever types the element has.
+	if v.registry.HoldsResource(resolved.elemDef) {
+		v.validateResourceElement(data, fhirPath, result)
+		return
+	}
+
 	if typeName == "" {
 		// No type information - can't validate children structurally
 		return
@@ -557,15 +566,6 @@ func (v *Validator) validateComplexElement(
 		// Use the current SD index (not root) with the current sdPath
 		// This ensures we look up inline elements in the correct SD (e.g., Dosage.doseAndRate.type)
 		v.validateElement(data, sdPath, fhirPath, currentIdx, ctx, result)
-		return
-	}
-
-	// Handle Resource type elements (e.g., Bundle.entry.resource, Parameters.parameter.resource)
-	// These should be validated as standalone resources using their own resourceType
-	// Also handle concrete resource types that appear in sliced Bundle profiles
-	// (e.g., when Bundle.entry:Solicitud.resource has type "ServiceRequest")
-	if typeName == "Resource" || v.registry.IsResourceType(typeName) {
-		v.validateResourceElement(data, fhirPath, result)
 		return
 	}
 

@@ -686,8 +686,26 @@ Each is its own task, with probes against HL7 6.10.2 first.
    the false error and the missed one, against HL7); and a fragment reference in a resource
    resolve() returned (`subject.resolve().generalPractitioner.resolve()`, `#pr` contained in the
    Patient) is looked for in the expression's %rootResource, not in the resource it is in.
-4. **Parameters.** The reference phase does not visit `Parameters.parameter.resource`; HL7 checks
-   their references (types and target profiles).
+4. **Resources held in elements.** The phases that walk nested resources (cardinality, slicing,
+   references, extensions, binding, primitives, UCUM) do not visit `Parameters.parameter.resource`,
+   `part.resource` or `Bundle.entry.response.outcome`; HL7 validates them whole. Planned in three
+   steps after an adversarial analysis:
+   - **A. Done.** An element holds a resource when its definition says so: each of its types is a
+     resource type (`registry.HoldsResource`), not when its value has a resourceType. The
+     phases told a resource by its value: `ExampleScenario.instance` (whose `resourceType` is a
+     code) was skipped as a resource, losing its cardinality and binding, with a false dom-6 per
+     instance (12 in the R4 core example); a resource where a datatype goes gave a false dom-6
+     and no unknown `resourceType`; an entry a profile types as two resource types was not
+     validated structurally. The `resourceType` key is skipped only at a resource's root (a
+     datatype's is an unknown element). A slice matching `type` discriminator on an element of
+     one type matches it (a closed `contact` slicing by `name`'s type gave a false no-match).
+     Probes `re_01` to `re_06`, `r5_re_subscription_filterby` (R5 `Subscription.filterBy`).
+   - **B.** The walker discovers nested resources from the definitions (contentReference, choices),
+     memoized per validation; every phase stops its own descent there (binding and primitives
+     report `meta.*` of an entry or a contained resource twice today, through the abstract
+     Resource definition), structural and extensions use it, one scope function.
+   - **C.** Binding against the nested resources' profiles, with one final deduplication; and the
+     holder element's `type.profile` (one applies; several are alternatives, by conformance).
 5. **Scopes along a discriminator's path. Done** for a path that steps into a resource
    (`resource.subject.resolve()`): the resource has a scope of its own
    (`slicematch.ScopedResolver.ScopeOf`), a `#p` contained in the entry is found there (`rs_05`,
