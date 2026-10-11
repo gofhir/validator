@@ -69,6 +69,19 @@ func (w *Walker) Walk(data map[string]any, rootType, rootPath string, visitor Re
 
 // WalkContext is Walk, with what ctx's store found (WithDiscoveries).
 func (w *Walker) WalkContext(ctx context.Context, data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
+	w.walk(ctx, data, rootType, rootPath, w.nested, visitor)
+}
+
+// WalkAllContext is WalkContext over every resource data holds, at any depth (Discover), each
+// against its type's definition, after the one that holds it and with its Kind: besides contained
+// resources and entries, the resources other elements hold, a contained resource's contained
+// resources and a contained Bundle's entries.
+func (w *Walker) WalkAllContext(ctx context.Context, data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
+	w.walk(ctx, data, rootType, rootPath, w.all, visitor)
+}
+
+// walk visits data, then the nested resources among holds, each against its type's definition.
+func (w *Walker) walk(ctx context.Context, data map[string]any, rootType, rootPath string, among func(context.Context, *registry.StructureDefinition, map[string]any, string) []*Nested, visitor ResourceVisitor) {
 	sd := w.registry.GetByType(rootType)
 	if sd == nil {
 		return
@@ -77,7 +90,7 @@ func (w *Walker) WalkContext(ctx context.Context, data map[string]any, rootType,
 	if !visitor(root) {
 		return
 	}
-	for _, n := range w.nested(ctx, sd, data, rootPath) {
+	for _, n := range among(ctx, sd, data, rootPath) {
 		if !visitor(resourceContext(n, n.SD, rootPath)) {
 			return
 		}

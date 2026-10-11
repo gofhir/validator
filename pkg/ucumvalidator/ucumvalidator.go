@@ -37,6 +37,12 @@ func New(reg *registry.Registry, svc ucum.Service) *Validator {
 
 // ValidateData validates UCUM codes in Quantity elements of a pre-parsed resource.
 func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefinition, result *issue.Result) {
+	v.ValidateDataContext(context.Background(), data, sd, result)
+}
+
+// ValidateDataContext is ValidateData, with what ctx's store found of the resources data holds
+// (walker.WithDiscoveries).
+func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, result *issue.Result) {
 	if sd == nil || sd.Snapshot == nil {
 		return
 	}
@@ -46,22 +52,23 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 		return
 	}
 
-	v.walkResource(data, sd, resourceType, result)
+	v.walkResource(ctx, data, sd, resourceType, result)
 
-	v.walker.Walk(data, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
-		if ctx.FHIRPath == resourceType {
+	// Every resource it holds, at any depth: walkNode stops at the elements that hold them.
+	v.walker.WalkAllContext(ctx, data, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
+		if rc.FHIRPath == resourceType {
 			return true
 		}
-		v.walkResource(ctx.Data, ctx.SD, ctx.FHIRPath, result)
+		v.walkResource(ctx, rc.Data, rc.SD, rc.FHIRPath, result)
 		return true
 	})
 }
 
 // walkResource checks the Quantities of a resource (or a datatype value validated against its own
 // definition), from the root of sd.
-func (v *Validator) walkResource(data map[string]any, sd *registry.StructureDefinition, fhirPath string, result *issue.Result) {
+func (v *Validator) walkResource(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, fhirPath string, result *issue.Result) {
 	if root := sd.Tree().Root(); root != nil {
-		v.walkNode(data, sd, root, "", fhirPath, result)
+		v.walkNode(ctx, data, sd, root, "", fhirPath, result)
 	}
 }
 
@@ -69,8 +76,8 @@ func (v *Validator) walkResource(data map[string]any, sd *registry.StructureDefi
 // into the others, following the definitions: a backbone's children inline, a contentReference's
 // target, a datatype's own definition (registry.ChildrenOf). A resource an element holds is the
 // walker's.
-func (v *Validator) walkNode(inst map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, result *issue.Result) {
-	children := v.registry.ChildrenOf(context.Background(), sd, node, typeCode, nil)
+func (v *Validator) walkNode(ctx context.Context, inst map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, result *issue.Result) {
+	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, nil)
 	for _, child := range children.Nodes {
 		if v.registry.HoldsResource(child.Def) {
 			continue
@@ -86,7 +93,7 @@ func (v *Validator) walkNode(inst map[string]any, sd *registry.StructureDefiniti
 				v.validateQuantity(m, path, result)
 				continue
 			}
-			v.walkNode(m, children.SD, child, cv.TypeCode, path, result)
+			v.walkNode(ctx, m, children.SD, child, cv.TypeCode, path, result)
 		}
 	}
 }

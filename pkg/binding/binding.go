@@ -115,10 +115,10 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 	v.validateElement(ctx, resource, sd, resourceType, result)
 	languages := reslang.NewWalk(ctx, resourceType)
 
-	// Walk all nested resources (contained + Bundle entries) using the generic walker.
-	// This replaces the duplicated validateContainedBindings, validateBundleEntryBindings,
-	// and validateContainedBindingsInEntry methods.
-	v.walker.WalkContext(ctx, resource, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
+	// Walk every resource it holds, at any depth (contained resources, Bundle entries, the
+	// resources other elements hold), each against its type's definition: the descent below stops
+	// at the elements that hold them.
+	v.walker.WalkAllContext(ctx, resource, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if rc.FHIRPath == resourceType {
 			return true
@@ -151,7 +151,8 @@ func (v *Validator) validateElementWithPaths(ctx context.Context, data map[strin
 
 		// Find the ElementDefinition for this path using SD path
 		elemDef := v.findElementDef(sd, elementSDPath)
-		if elemDef == nil {
+		if elemDef == nil || v.sdRegistry.HoldsResource(elemDef) {
+			// Unknown (the structural phase reports it), or a resource the walk visits.
 			continue
 		}
 
@@ -223,7 +224,7 @@ func (v *Validator) validateComplexElement(ctx context.Context, data map[string]
 			}
 		}
 
-		if elemDef == nil {
+		if elemDef == nil || v.sdRegistry.HoldsResource(elemDef) {
 			continue
 		}
 
