@@ -89,9 +89,9 @@ func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any
 	}
 	v.validateRoot(data, sd, rootType, result)
 
-	// Walk all nested resources (contained + Bundle entries) using the generic walker.
-	// WalkWithProfiles validates against each declared profile in meta.profile.
-	v.walker.WalkWithProfilesContext(ctx, data, rootType, rootType, func(ctx *walker.ResourceContext) bool {
+	// Walk every resource it holds (contained resources, Bundle entries, the resources other
+	// elements hold), each against each profile its meta.profile declares and its type.
+	v.walker.WalkAllWithProfilesContext(ctx, data, rootType, rootType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == rootType {
 			return true

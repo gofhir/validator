@@ -598,5 +598,37 @@
     "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/VisionPrescription-33124.json",
     "location": "VisionPrescription.lensSpecification[1].duration.code",
     "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/hr_h4_entry_params_refs.json",
+    "location": "Bundle.entry[1].resource.parameter[0].resource.derivedFrom[1]",
+    "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/hr_i_relref404.json",
+    "location": "Parameters.parameter[0].resource.specimen",
+    "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D23",
+    "reason": "A contained resource SHALL NOT contain resources (references.html#contained, dom-2), so a fragment reference from one to a resource it contains (\"#c2\" from c1) has no defined target; ref-1, evaluated on the resource that contains c1, finds none, and the reference is reported unresolved with it. HL7 6.10.2 finds c2 in c1 (its own ref-1 fails).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/hr_b_ccc.json",
+    "location": "Observation.contained[0].link[0].other.reference",
+    "messageId": "REFERENCE_CONTAINED_NOT_FOUND"
+  },
+  {
+    "decision": "B-D23",
+    "reason": "A contained resource SHALL NOT contain resources (references.html#contained, dom-2), so a fragment reference from one to a resource it contains (\"#c2\" from c1) has no defined target; ref-1, evaluated on the resource that contains c1, finds none, and the reference is reported unresolved with it. HL7 6.10.2 finds c2 in c1 (its own ref-1 fails).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/hr_k_ccc2.json",
+    "location": "Observation.contained[0].link[0].other.reference",
+    "messageId": "REFERENCE_CONTAINED_NOT_FOUND"
   }
 ]

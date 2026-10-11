@@ -134,6 +134,11 @@
       "files": ["testdata/m12-slice-scoping/probes/ns_*.json"]
     },
     {
+      "name": "held-resource-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.held-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/hr_*.json"]
+    },
+    {
       "name": "resolve-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.resolve-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/rs_*.json"]

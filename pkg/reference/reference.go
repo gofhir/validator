@@ -18,7 +18,11 @@ import (
 	"github.com/gofhir/validator/v2/pkg/walker"
 )
 
-const typeCodeReference = "Reference"
+const (
+	typeCodeReference = "Reference"
+	resourceTypeKey   = "resourceType"
+	bundleType        = "Bundle"
+)
 
 // BundleContext holds information about a Bundle for reference validation.
 type BundleContext struct {
@@ -251,22 +255,47 @@ type refContext struct {
 	inContained bool
 }
 
-// nested returns the context of a resource the walk visits, from its parent's: an entry has its
-// own contained resources, its fullUrl and its Bundle; a contained resource shares its
-// container's.
+// nested returns the context of a resource the walk visits, from its parent's, by how it is held:
+// a contained resource shares its container's (references.html#contained); an entry has its own
+// contained resources, its fullUrl and its Bundle; a resource another element holds (a
+// parameter's, a response's outcome) has its own contained resources, and resolves the rest where
+// its holder does, from its holder's base (the fullUrl of the entry whose resource holds it: an
+// entry's response outcome is not the entry's resource, bundle.html#references). A Bundle is,
+// besides, where its own references resolve, then the Bundles that hold it; one that is not an
+// entry's resource has no base, as the Bundle validated has none.
 func (rc *refContext) nested(w *walker.ResourceContext) *refContext {
-	if !w.IsBundleEntry {
-		in := *rc
+	var in refContext
+	switch w.Kind {
+	case walker.KindContained:
+		in = *rc
 		in.inContained = true
-		return &in
+	case walker.KindHeld:
+		in = refContext{ctx: rc.ctx, bundle: rc.bundle, contained: NewContainedContext(w.Data), root: w.Data,
+			container: rc.container, outer: rc.outer, fullURL: rc.fullURL}
+	default:
+		in = refContext{ctx: rc.ctx, bundle: rc.bundle, contained: NewContainedContext(w.Data), root: w.Data,
+			container: rc.container, outer: rc.outer, fullURL: w.FullURL}
+		in.within(w.Container)
 	}
-	outer := rc.outer
-	if !sameMap(w.Container, rc.container) {
-		// An entry of a Bundle that is an entry of rc's.
-		outer = append([]map[string]any{rc.container}, rc.outer...)
+	if w.ResourceType == bundleType {
+		in.within(w.Data)
+		if w.Kind != walker.KindEntry {
+			in.fullURL = ""
+		}
 	}
-	return &refContext{ctx: rc.ctx, bundle: rc.bundle, contained: NewContainedContext(w.Data), root: w.Data,
-		container: w.Container, outer: outer, fullURL: w.FullURL}
+	return &in
+}
+
+// within makes bundle, a Bundle, the one rc's references resolve in, then the Bundle they resolved
+// in before and those that hold it.
+func (rc *refContext) within(bundle map[string]any) {
+	if bundle == nil || sameMap(bundle, rc.container) {
+		return
+	}
+	if t, _ := rc.container[resourceTypeKey].(string); t == bundleType {
+		rc.outer = append([]map[string]any{rc.container}, rc.outer...)
+	}
+	rc.container = bundle
 }
 
 type containerKey struct{}
@@ -446,16 +475,15 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 	// Validate references in root resource
 	v.validateElementWithPaths(resource, sd, resourceType, resourceType, rc, result)
 
-	// Walk all nested resources (contained + Bundle entries) using the generic walker, each against
-	// the profiles its meta.profile declares and its type's definition. A reference that several
-	// of them find wrong is reported once.
+	// Walk every resource it holds (contained resources, Bundle entries, the resources other
+	// elements hold), each against the profiles its meta.profile declares and its type's
+	// definition. A reference that several of them find wrong is reported once.
 	nested := issue.GetPooledResult()
 	defer issue.ReleaseResult(nested)
-	// Each resource's context, by its path: an entry has its own contained resources and fullUrl,
-	// and its Bundle first; a contained resource shares its container's (references.html#contained).
-	// The walk visits a resource before those it holds.
+	// Each resource's context, by its path (refContext.nested). The walk visits a resource before
+	// those it holds.
 	contexts := map[string]*refContext{resourceType: rc}
-	v.walker.WalkWithProfilesContext(ctx, resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
+	v.walker.WalkAllWithProfilesContext(ctx, resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == resourceType {
 			return true

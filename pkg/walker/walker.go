@@ -32,6 +32,10 @@ type ResourceContext struct {
 	// IsBundleEntry indicates if this is a Bundle entry resource.
 	IsBundleEntry bool
 
+	// Kind is how the resource that holds it holds it (zero for the resource walked): it decides
+	// the scope it is in (its %rootResource, where its references resolve).
+	Kind Kind
+
 	// Container is, for a Bundle entry resource, the Bundle whose entry it is.
 	Container map[string]any
 
@@ -89,6 +93,21 @@ func (w *Walker) WalkWithProfiles(data map[string]any, rootType, rootPath string
 // WalkWithProfilesContext is WalkWithProfiles, resolving profiles with ctx (an external profile
 // resolver honors its cancellation).
 func (w *Walker) WalkWithProfilesContext(ctx context.Context, data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
+	w.walkWithProfiles(ctx, data, rootType, rootPath, w.nested, visitor)
+}
+
+// WalkAllWithProfilesContext is WalkWithProfilesContext over every resource data holds, at any
+// depth (Discover): besides contained resources and entries, the resources other elements hold
+// (a Parameters' parameters, a Bundle entry's response outcome), a contained resource's contained
+// resources and a contained Bundle's entries. Each is visited after the resource that holds it,
+// with its Kind.
+func (w *Walker) WalkAllWithProfilesContext(ctx context.Context, data map[string]any, rootType, rootPath string, visitor ResourceVisitor) {
+	w.walkWithProfiles(ctx, data, rootType, rootPath, w.all, visitor)
+}
+
+// walkWithProfiles visits data, then the nested resources among holds, once per definition each
+// is checked against.
+func (w *Walker) walkWithProfiles(ctx context.Context, data map[string]any, rootType, rootPath string, among func(context.Context, *registry.StructureDefinition, map[string]any, string) []*Nested, visitor ResourceVisitor) {
 	profiles := getMetaProfiles(data)
 	for _, sd := range w.definitions(ctx, profiles, rootType) {
 		rc := &ResourceContext{Data: data, ResourceType: rootType, FHIRPath: rootPath, SD: sd, Profiles: profiles}
@@ -96,7 +115,7 @@ func (w *Walker) WalkWithProfilesContext(ctx context.Context, data map[string]an
 			return
 		}
 	}
-	for _, n := range w.nested(ctx, w.registry.GetByType(rootType), data, rootPath) {
+	for _, n := range among(ctx, w.registry.GetByType(rootType), data, rootPath) {
 		for _, sd := range w.definitions(ctx, getMetaProfiles(n.Data), n.ResourceType) {
 			if !visitor(resourceContext(n, sd, rootPath)) {
 				return
@@ -121,6 +140,11 @@ func (w *Walker) nested(ctx context.Context, sd *registry.StructureDefinition, d
 	return out
 }
 
+// all returns every resource data, of type definition sd, holds.
+func (w *Walker) all(ctx context.Context, sd *registry.StructureDefinition, data map[string]any, rootPath string) []*Nested {
+	return discover(ctx, w.registry, sd, data, rootPath).Resources
+}
+
 // resourceContext is the context of n, visited against sd.
 func resourceContext(n *Nested, sd *registry.StructureDefinition, rootPath string) *ResourceContext {
 	return &ResourceContext{
@@ -131,6 +155,7 @@ func resourceContext(n *Nested, sd *registry.StructureDefinition, rootPath strin
 		Profiles:      getMetaProfiles(n.Data),
 		IsContained:   n.Kind == KindContained,
 		IsBundleEntry: n.Kind == KindEntry,
+		Kind:          n.Kind,
 		Container:     n.Bundle,
 		FullURL:       n.FullURL,
 		ParentPath:    n.parentPath(rootPath),

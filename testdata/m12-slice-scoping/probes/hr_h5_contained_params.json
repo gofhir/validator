@@ -1,0 +1,1 @@
+{"resourceType":"Observation","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","code":{"text":"x"},"focus":[{"reference":"#pp"}],"contained":[{"resourceType":"Parameters","id":"pp","parameter":[{"name":"a","resource":{"resourceType":"Patient","birthDate":"2020-13-45","gender":"badgender"}}]}]}
