@@ -239,3 +239,36 @@ func TestDiscoveries(t *testing.T) {
 		t.Error("a context without a store shared a discovery")
 	}
 }
+
+// WalkAllWithProfiles visits every resource the resource holds, at any depth, after the one that
+// holds it, with how it is held: the resources other elements hold, a contained resource's
+// contained resources and a contained Bundle's entries too.
+func TestWalkAllVisits(t *testing.T) {
+	reg := r4Registry(t)
+	data := parse(t, `{"resourceType":"Bundle","type":"batch-response","entry":[
+{"fullUrl":"urn:uuid:1","resource":{"resourceType":"Observation","contained":[
+ {"resourceType":"Patient","id":"p","contained":[{"resourceType":"Device","id":"d"}]},
+ {"resourceType":"Bundle","id":"b","type":"collection","entry":[{"resource":{"resourceType":"Patient"}}]}]},
+ "response":{"status":"200","outcome":{"resourceType":"OperationOutcome","issue":[]}}},
+{"fullUrl":"urn:uuid:2","resource":{"resourceType":"Parameters","parameter":[{"name":"a","resource":{"resourceType":"Patient"}}]}}]}`)
+	kinds := map[Kind]string{0: "root", KindContained: "contained", KindEntry: "entry", KindHeld: "held"}
+	var got []string
+	New(reg).WalkAllWithProfilesContext(context.Background(), data, "Bundle", "Bundle", func(rc *ResourceContext) bool {
+		got = append(got, kinds[rc.Kind]+" "+rc.FHIRPath+" < "+rc.ParentPath)
+		return true
+	})
+	want := []string{
+		"root Bundle < ",
+		"entry Bundle.entry[0].resource < Bundle",
+		"contained Bundle.entry[0].resource.contained[0] < Bundle.entry[0].resource",
+		"contained Bundle.entry[0].resource.contained[0].contained[0] < Bundle.entry[0].resource.contained[0]",
+		"contained Bundle.entry[0].resource.contained[1] < Bundle.entry[0].resource",
+		"entry Bundle.entry[0].resource.contained[1].entry[0].resource < Bundle.entry[0].resource.contained[1]",
+		"held Bundle.entry[0].response.outcome < Bundle",
+		"entry Bundle.entry[1].resource < Bundle",
+		"held Bundle.entry[1].resource.parameter[0].resource < Bundle.entry[1].resource",
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("got\n%q\nwant\n%q", got, want)
+	}
+}

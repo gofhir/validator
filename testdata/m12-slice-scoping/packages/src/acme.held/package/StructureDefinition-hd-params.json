@@ -1,0 +1,3 @@
+{"resourceType":"StructureDefinition","id":"hd-params","url":"https://example.org/fhir/hd/StructureDefinition/hd-params","version":"0.1.0","name":"HdParams","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Parameters","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Parameters","derivation":"constraint",
+"differential":{"element":[{"id":"Parameters","path":"Parameters"},
+{"id":"Parameters.parameter.resource","path":"Parameters.parameter.resource","type":[{"code":"Observation","profile":["https://example.org/fhir/ns/StructureDefinition/ns-obs"]}]}]}}

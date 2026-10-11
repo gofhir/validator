@@ -1,6 +1,6 @@
 # Plan: nested resources discovered from the definitions (plan B follow-up 4, step B)
 
-Status: in progress (S0 and S1 done), revised after adversarial reviews. Base: `main` at 0da5c88 (step A, #147:
+Status: in progress (S0, S1 and S2 done), revised after adversarial reviews. Base: `main` at 0da5c88 (step A, #147:
 `registry.HoldsResource`).
 
 ## Goal
@@ -60,9 +60,9 @@ discovery over the definitions is today's for contained resources and entries, a
 | contained (also of a contained resource) | its direct container | the container's | the container's |
 | entry | itself | its Bundle / the Bundles that hold it | its entry's fullUrl |
 | entry of a contained Bundle | itself | that Bundle / the container's | its entry's fullUrl |
-| held (`parameter.resource`, `part`) | itself | the parent's | the fullUrl of the entry that holds it, if any |
-| `response.outcome`, R5 `issues` | itself | the Bundle | its entry's fullUrl (`outcome`) |
-| held Bundle | itself | itself / [the parent's container] + outer | — |
+| held (`parameter.resource`, `part`) | itself | the parent's | the parent's: the fullUrl of the entry whose resource holds it, if any |
+| `response.outcome`, R5 `issues` | itself | the Bundle | its Bundle's: the fullUrl of the entry whose resource that Bundle is, none for the Bundle validated; never its own entry's, whose resource it is not (bundle.html#references), as HL7 |
+| held or contained Bundle | itself | itself / [the parent's container] + outer | none: it is no entry's resource, as the Bundle validated (HL7: "Relative Reference appears inside Bundle whose entry is missing a fullUrl", which gofhir does not report) |
 
 Today `slicing.nestedScope` and `reference.refContext.nested` treat everything that is not an entry
 as contained, and containment is decided in seven places, by key or by path suffix
@@ -102,11 +102,14 @@ resources.
    without a lock, worked out again when definitions are added (`refreshDerivedUnlocked`) or a
    type's snapshot is stored, and new in a clone; computed as a fixed point over the types and the
    contentReferences (cycles converge).
-2. **One scope function** per kind (the table above), deciding containment by the holder's
-   definition, used by constraint (`validateNested`, `ScopeOf`), slicing, reference, slice matching
-   and extension contexts. Public API that changes: `slicematch.ScopedResolver.ScopeOf` takes the
-   holder, and the `Containment` fields of `slicing.Options`, `constraint.ValidateOptions` and
-   `slicematch.Request` give way to it (no caller outside the module; declared in the release).
+2. **The scope per kind** (the table above), decided by how the holder holds the resource
+   (`walker.ResourceContext.Kind`, from the holder's definition), in the walks that visit nested
+   resources: slicing (`nestedScope`) and reference (`refContext.nested`). Constraint, slice
+   matching and extension contexts keep their own containment (`constraint.ScopeOf`,
+   `IsContainedIn`): on the held probes they already give HL7's `%rootResource` and `%resource`.
+   Replacing them, and the `Containment` fields of `slicing.Options`, `constraint.ValidateOptions`
+   and `slicematch.Request` (public API), is a step of its own, taken when a probe shows them
+   disagreeing.
 3. **Cardinality, slicing, reference, binding, primitive and UCUM consume the discovery**, each
    visiting a nested resource against its definitions as today (meta.profile and type for
    cardinality, slicing and reference; type for the others until step C), and stopping their own
@@ -123,7 +126,7 @@ resources.
 | --- | --- | --- |
 | S0 | **Done.** UCUM checks Quantities in backbones (independent of step B): it walks the definitions (`registry.ChildrenOf`, `elementvalues`), as cardinality does. | up to 24 non-UCUM units in R4 core examples (`ea`, `mcg`, `drop`, ...): HL7 with a terminology server reports them as errors ("Unknown code 'mcg' in the CodeSystem `http://unitsofmeasure.org`", in a backbone too); declared against the `-tx n/a` baseline, where HL7 only warns it cannot check them |
 | S1 | **Done.** `walker.Discover` with pruning (`registry.MayHoldResources`, cached per definition, a fixed point over the types and contentReferences), the containment predicates (`registry.HoldsContained`, `HoldsEntryResource`); `Walk`/`WalkWithProfiles` over `Discover` restricted to today's kinds (contained of the root and of entries, entries), one discovery per resource and validation (`walker.WithDiscoveries`). The scope function moves to S2, where held resources first need it. | the corpus as today, issue by issue (none has a false `List.entry.resource`); 0–7 % more time on large Bundles, none validating in parallel. Off the corpus, closer to HL7: `contained` keys of a root Bundle or Parameters (no such element: HL7 reports only the unknown property), and a contained resource of an unknown type with a `meta.profile`, are no longer walked |
-| S2 | The scope function (`nestedScope`, `refContext.nested`, `ScopeOf`, slice matching, extension contexts); cardinality, slicing and reference over the whole discovery (held resources, a contained resource's contained, a contained Bundle's entries); `nestedPaths` from it. | held probes match HL7; `Bundle-bundle-response` |
+| S2 | **Done.** The scope per kind in slicing and reference (`walker.ResourceContext.Kind`); cardinality, slicing and reference over the whole discovery (`walker.WalkAllWithProfilesContext`: held resources, a contained resource's contained, a contained Bundle's entries); `nestedPaths` from it. Group `held-resource-probes` (package `acme.held`); hl7diff pairs gofhir's unresolved fragment reference with HL7's `Reference_REF_CantResolve`. | the held probes match HL7 for cardinality, slicing and references (12 HL7 errors gofhir lacked); every other corpus as on `main`, issue by issue; no time added |
 | S3 | Binding, primitive and UCUM stop descending through holders and use the discovery. | duplicates of `meta.*` gone; held resources' dates, codes and units checked |
 | S4 | The extension phase skips the held values by identity, not the keys `contained` and `entry`. | `Bundle.entry.extension`, `List.entry.extension`, `response.outcome`, held Bundles' entries checked |
 | S5 | Structural reports, from `Discovery.Misshapen`, a value where a resource goes that is not one, or not written as the element's cardinality says (HL7: "must be an Object, not a Primitive property / an Array", "must be a JSON Array, not an Object"), and the artifacts it gives today go (a primitive parse error, a dom-6 at `resource[0]`). Discover does not walk such values (main did not either). | the non-object probes match HL7 |
@@ -139,9 +142,13 @@ Parameters' sibling references (`c-relref`, `i-relref404`), R5 `issues`.
 
 - **A contained resource's contained resources** (invalid, dom-2): walked as contained resources
   of their direct container, as HL7 6.10.2 does and as constraint and structural already do; dom-2
-  reports them. A fragment reference from one (`#c2` from c1) resolves among the outermost
-  resource's contained resources (references.html#contained), where c2 is not: unresolved, while
-  HL7 finds it in c1; declared.
+  reports them. A fragment reference from one (`#c2` from c1) has no defined target (contained
+  resources SHALL NOT contain resources); ref-1, on the resource that contains c1, finds none, and
+  it is reported unresolved, while HL7's reference check finds c2 in c1 (its ref-1 fails);
+  declared, B-D23 (`hr_b_ccc`, `hr_k_ccc2`).
+- **A held resource and its holder's contained resources**: "resolution stops at the elements
+  Bundle.entry.resource and Parameters.parameter.resource" (references.html#contained): a
+  parameter's resource resolves `#id` among its own contained resources only (`hr_l`), as HL7.
 - **Relative references between the resources a root Parameters holds**: the specification defines
   resolution in a Bundle only (bundle.html#references), so they do not resolve; HL7 resolves them
   among the Parameters' resources: declared where it changes a verdict.
@@ -157,4 +164,11 @@ dom-6 on contained resources (gofhir reports, HL7 does not), dom-3's location, t
 check of `meta.security.code`, `reference.findElementDef` not following contentReference or
 choices, HL7's "Resource requires an id" for a resource in R5 `Bundle.issues`, and the reference
 phase inferring a target's type from a relative URL that does not resolve (HL7 does not), which S2
-extends to held resources.
+extends to held resources (B-D13, declared for `hr_h4` and `hr_i`), and the reference phase
+checking no reference in an extension's value (`valueReference "#nope"`: HL7 reports it
+unresolved, gofhir only ref-1; at the root too), nor reports a relative reference in a Bundle that has no base (HL7: "Relative Reference appears
+inside Bundle whose entry is missing a fullUrl"), nor the reference `"#"` (HL7 reports it
+unresolved where no contained resource references the container; gofhir only ref-1; at the root
+too). Left out of the held probes until their step: the
+holder's `type.profile` (`h2`, `t1`, `t2`: step C), non-object values (`h7`, `h8`: S5), binding and
+primitive inside held resources (the `d*` probes: S3).

@@ -915,11 +915,11 @@ func dropReported(issues []issue.Issue, from int, reported, nested map[string]bo
 	return kept
 }
 
-// nestedPaths are the paths of the resources data, a resource of resourceType, holds: its
-// contained resources, a Bundle's entries, and theirs.
+// nestedPaths are the paths of the resources data, a resource of resourceType, holds, at any depth:
+// those cardinality visits besides the root.
 func (v *Validator) nestedPaths(ctx context.Context, data map[string]any, resourceType string) map[string]bool {
 	paths := map[string]bool{}
-	walker.New(v.registry).WalkContext(ctx, data, resourceType, resourceType, func(w *walker.ResourceContext) bool {
+	walker.New(v.registry).WalkAllWithProfilesContext(ctx, data, resourceType, resourceType, func(w *walker.ResourceContext) bool {
 		if w.FHIRPath != resourceType {
 			paths[w.FHIRPath] = true
 		}

@@ -222,15 +222,13 @@ func named(nodes []*registry.ElementNode, name string) *registry.ElementNode {
 // childValue is one value of an element in an instance.
 type childValue = elementvalues.Value
 
-// validateNested checks the slicing of the resources resource holds (its contained resources, a
-// Bundle's entries, and theirs), each against the definitions it is checked against: the profiles
-// its meta.profile declares that resolve, or else its type's (walker.WalkWithProfiles). Each is in
-// a scope of its own: an entry is its own %rootResource, in the Bundle it is an entry of; a
-// contained resource has the resource that contains it as its %rootResource, and resolves where
-// that one does.
+// validateNested checks the slicing of the resources resource holds, at any depth (its contained
+// resources, a Bundle's entries, the resources other elements hold), each against the definitions
+// it is checked against: the profiles its meta.profile declares that resolve, or else its type's
+// (walker.WalkAllWithProfilesContext). Each is in a scope of its own (nestedScope).
 func (v *Validator) validateNested(run *validation, resource map[string]any, rootType string, result *issue.Result) {
 	scopes := map[string]slicematch.Scope{rootType: run.scope}
-	v.walker.WalkWithProfilesContext(run.ctx, resource, rootType, rootType, func(w *walker.ResourceContext) bool {
+	v.walker.WalkAllWithProfilesContext(run.ctx, resource, rootType, rootType, func(w *walker.ResourceContext) bool {
 		if w.FHIRPath == rootType {
 			return true
 		}
@@ -253,15 +251,17 @@ func (v *Validator) validateNested(run *validation, resource map[string]any, roo
 	})
 }
 
-// nestedScope is the scope of the resource w visits, which the resource whose scope is parent holds.
-// A Bundle is where the references of its own entries resolve, then the Bundles that hold it, as
-// the Bundle validated is (constraint.ScopeInBundle).
+// nestedScope is the scope of the resource w visits, which the resource whose scope is parent holds,
+// by how it holds it: a contained resource has its container as its %rootResource, and resolves
+// where it does (references.html#contained); an entry is its own %rootResource, in the Bundle it is
+// an entry of (parent, whose own scope has it as its Container); a resource another element holds
+// (a parameter's, a response's outcome) is its own %rootResource, and resolves where its holder
+// does. A Bundle is where the references of its own entries resolve, then the Bundles that hold
+// it, as the Bundle validated is (constraint.ScopeInBundle).
 func nestedScope(parent slicematch.Scope, w *walker.ResourceContext) slicematch.Scope {
-	scope := slicematch.Scope{Resource: w.Data, RootResource: parent.Resource, Container: parent.Container, Outer: parent.Outer}
-	if w.IsBundleEntry {
-		// An entry is its own %rootResource, in the Bundle it is an entry of: parent, whose own
-		// scope has it as its Container.
-		scope = slicematch.Scope{Resource: w.Data, RootResource: w.Data, Container: parent.Container, Outer: parent.Outer}
+	scope := slicematch.Scope{Resource: w.Data, RootResource: w.Data, Container: parent.Container, Outer: parent.Outer}
+	if w.Kind == walker.KindContained {
+		scope.RootResource = parent.Resource
 	}
 	if rt, _ := w.Data[resourceTypeKey].(string); rt == bundleType {
 		scope = constraint.ScopeInBundle(scope, w.Data)
