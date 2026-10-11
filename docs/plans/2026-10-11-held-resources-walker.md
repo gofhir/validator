@@ -144,7 +144,8 @@ Parameters' sibling references (`c-relref`, `i-relref404`), R5 `issues`.
   resolution in a Bundle only (bundle.html#references), so they do not resolve; HL7 resolves them
   among the Parameters' resources: declared where it changes a verdict.
 - **UCUM in backbones (S0)**: parity with HL7 with a terminology server; the `-tx n/a` baseline is
-  declared with that reason, and `families.json` pairs `UCUM_INVALID_CODE` with HL7's message.
+  declared with that reason (B-D22), and `families.json` notes why `UCUM_INVALID_CODE` has no
+  HL7 counterpart under `-tx n/a`.
 
 ## Out of step B
 

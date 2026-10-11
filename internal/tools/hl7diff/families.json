@@ -395,6 +395,6 @@
     "STRUCTURE_NO_TYPE": "input failure",
     "STRUCTURE_UNKNOWN_RESOURCE": "input failure",
     "TYPE_WRONG_JSON_TYPE": "no HL7 counterpart verified yet",
-    "UCUM_INVALID_CODE": "no HL7 counterpart verified yet"
+    "UCUM_INVALID_CODE": "HL7 reports it only with a terminology server (Unknown code ... in the CodeSystem http://unitsofmeasure.org); under -tx n/a it warns it cannot validate the code (B-D22)"
   }
 }

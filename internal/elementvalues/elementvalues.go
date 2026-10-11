@@ -37,45 +37,83 @@ func (v Value) Path(parent string) string {
 // wrong type, not absent. A primitive present only through its "_name" sibling (extensions without
 // a value) is present, once per entry of a repeating one (json.html#primitive).
 func Of(child *registry.ElementNode, inst map[string]any, choiceType func(base, key string) string) []Value {
-	props := properties(child, inst, choiceType)
-	out := make([]Value, 0, len(props))
-	for _, k := range props {
-		out = append(out, valuesOf(inst, k[0], k[1])...)
-	}
-	return out
-}
-
-// properties returns the JSON properties an element can be read from, each with the type it
-// names.
-func properties(child *registry.ElementNode, inst map[string]any, choiceType func(base, key string) string) [][2]string {
 	name := child.Name()
-	base, ok := strings.CutSuffix(name, "[x]")
-	if !ok {
+	base, isChoice := strings.CutSuffix(name, "[x]")
+	if !isChoice {
 		typeCode := ""
 		if len(child.Def.Type) == 1 {
 			typeCode = child.Def.Type[0].Code
 		}
-		return [][2]string{{name, typeCode}}
+		return valuesOf(inst, name, typeCode)
 	}
-	var out [][2]string
-	seen := map[string]bool{}
-	for _, t := range child.Def.Type {
-		if t.Code != "" {
-			k := base + strings.ToUpper(t.Code[:1]) + t.Code[1:]
-			out = append(out, [2]string{k, t.Code})
-			seen[k] = true
-		}
+	props := choiceProperties(base, child.Def.Type, inst, choiceType)
+	if len(props) == 0 {
+		return nil
 	}
-	var others [][2]string
+	out := make([]Value, 0, len(props))
+	for _, p := range props {
+		out = append(out, valuesOf(inst, p.key, p.code)...)
+	}
+	return out
+}
+
+// property is a JSON property a choice element is read from, with the type it names and its rank:
+// a type's position among the element's, or past them for another type choiceType names.
+type property struct {
+	key, code string
+	rank      int
+}
+
+// choiceProperties returns the properties of inst a choice element of base and types is read from:
+// those the types name (or their "_key" siblings name), in the types' order, then those choiceType
+// says name another type, by key. Only inst's own keys are looked at, not every name the types
+// give.
+func choiceProperties(base string, types []registry.Type, inst map[string]any, choiceType func(base, key string) string) []property {
+	var out []property
 	for k := range inst {
-		if !seen[k] {
-			if code := choiceType(base, k); code != "" {
-				others = append(others, [2]string{k, code})
+		key, underscored := strings.CutPrefix(k, "_")
+		if len(key) <= len(base) || !strings.HasPrefix(key, base) {
+			continue
+		}
+		if underscored {
+			if _, hasValue := inst[key]; hasValue {
+				continue // the value's key stands for both
+			}
+		}
+		if rank := declared(types, key[len(base):]); rank >= 0 {
+			out = append(out, property{key: key, code: types[rank].Code, rank: rank})
+		} else if !underscored {
+			if code := choiceType(base, key); code != "" {
+				out = append(out, property{key: key, code: code, rank: len(types)})
 			}
 		}
 	}
-	sort.Slice(others, func(i, j int) bool { return others[i][0] < others[j][0] })
-	return append(out, others...)
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].rank != out[j].rank {
+			return out[i].rank < out[j].rank
+		}
+		return out[i].key < out[j].key
+	})
+	return out
+}
+
+// declared returns the position among types of the one a choice property's suffix names, the type
+// code with its first letter capitalized (formats.html#choice), or -1.
+func declared(types []registry.Type, suffix string) int {
+	for i, t := range types {
+		c := t.Code
+		if c == "" || len(c) != len(suffix) || c[1:] != suffix[1:] {
+			continue
+		}
+		first := c[0]
+		if first >= 'a' && first <= 'z' {
+			first -= 'a' - 'A'
+		}
+		if first == suffix[0] {
+			return i
+		}
+	}
+	return -1
 }
 
 // valuesOf returns the values of one property, each with its "_key" sibling.
