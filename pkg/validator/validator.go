@@ -758,12 +758,13 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	ctx = withExact(ctx, data, resource)
 	ctx = withConformState(ctx)
 	ctx = reference.WithIndexes(ctx)
+	ctx = walker.WithDiscoveries(ctx)
 	ctx = constraint.WithReportScope(ctx)
 	ctx = withExtensionScope(ctx)
 	reported := map[string]bool{}
 	var nested map[string]bool
 	if len(profilesToValidate) > 1 {
-		nested = v.nestedPaths(data, resourceType)
+		nested = v.nestedPaths(ctx, data, resourceType)
 	}
 	for _, sd := range profilesToValidate {
 		from := len(result.Issues)
@@ -916,9 +917,9 @@ func dropReported(issues []issue.Issue, from int, reported, nested map[string]bo
 
 // nestedPaths are the paths of the resources data, a resource of resourceType, holds: its
 // contained resources, a Bundle's entries, and theirs.
-func (v *Validator) nestedPaths(data map[string]any, resourceType string) map[string]bool {
+func (v *Validator) nestedPaths(ctx context.Context, data map[string]any, resourceType string) map[string]bool {
 	paths := map[string]bool{}
-	walker.New(v.registry).Walk(data, resourceType, resourceType, func(w *walker.ResourceContext) bool {
+	walker.New(v.registry).WalkContext(ctx, data, resourceType, resourceType, func(w *walker.ResourceContext) bool {
 		if w.FHIRPath != resourceType {
 			paths[w.FHIRPath] = true
 		}

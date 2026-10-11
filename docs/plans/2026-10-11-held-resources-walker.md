@@ -1,6 +1,6 @@
 # Plan: nested resources discovered from the definitions (plan B follow-up 4, step B)
 
-Status: proposed, revised after an adversarial review. Base: `main` at 0da5c88 (step A, #147:
+Status: in progress (S0 and S1 done), revised after adversarial reviews. Base: `main` at 0da5c88 (step A, #147:
 `registry.HoldsResource`).
 
 ## Goal
@@ -86,7 +86,7 @@ resources.
 
 ## Design
 
-1. **Discovery** (`pkg/walker`). `Discover(reg, sd, data)` walks the instance over the definition it
+1. **Discovery** (`pkg/walker`). `Discover(ctx, reg, sd, data, path)` walks the instance over the definition it
    is given (a type's, or a logical model's; a profile cannot add elements that hold resources,
    only narrow a `Resource` element to concrete resource types: the holder's `type.profile` is step
    C), following contentReference and choices, and returns the nested resources in preorder: the
@@ -94,12 +94,14 @@ resources.
    `firstExtensionCheck` compare), its type, its holder `*ElementNode`, its kind (contained, from
    the holder's base path; entry; held), its parent, its path (`elementvalues`:
    `Bundle.entry[0].response.outcome`, `Parameters.parameter[1].part[0].resource`), the entry's
-   fullUrl; the set of held values by identity; and the non-object values a holder has. A resource
+   fullUrl; and the values where a resource goes that are not one, or not written as the
+   element's base cardinality says (`Misshapen`). The set of held values by identity comes with
+   S4, its first user. A resource
    of an unknown type is not walked, nor what it holds. Pruning is cached in the registry per
-   element node, in a map under the registry's lock, cleared when definitions are added
-   (`refreshDerivedUnlocked`) and new in a clone, computed as a true fixed point over the types
-   (contentReference and type cycles: a node resolved while an ancestor is in progress is not
-   cached as unreachable).
+   definition (the paths of the elements that may hold a resource and of those above them), read
+   without a lock, worked out again when definitions are added (`refreshDerivedUnlocked`) or a
+   type's snapshot is stored, and new in a clone; computed as a fixed point over the types and the
+   contentReferences (cycles converge).
 2. **One scope function** per kind (the table above), deciding containment by the holder's
    definition, used by constraint (`validateNested`, `ScopeOf`), slicing, reference, slice matching
    and extension contexts. Public API that changes: `slicematch.ScopedResolver.ScopeOf` takes the
@@ -120,11 +122,11 @@ resources.
 | Step | Change | Expected effect |
 | --- | --- | --- |
 | S0 | **Done.** UCUM checks Quantities in backbones (independent of step B): it walks the definitions (`registry.ChildrenOf`, `elementvalues`), as cardinality does. | up to 24 non-UCUM units in R4 core examples (`ea`, `mcg`, `drop`, ...): HL7 with a terminology server reports them as errors ("Unknown code 'mcg' in the CodeSystem `http://unitsofmeasure.org`", in a backbone too); declared against the `-tx n/a` baseline, where HL7 only warns it cannot check them |
-| S1 | `Discover` with pruning, the scope function, the containment predicate; `Walk`/`WalkWithProfiles` over `Discover` restricted to today's kinds (contained of the root and of entries, entries); `nestedScope`, `refContext.nested`, `ScopeOf`, slice matching and `nestedPaths` over the scope function. | the corpus as today but for the false resources of `List.entry.resource` and the like, which disappear |
-| S2 | Cardinality, slicing and reference over the whole discovery (held resources, a contained resource's contained, a contained Bundle's entries); `nestedPaths` from it. | held probes match HL7; `Bundle-bundle-response` |
+| S1 | **Done.** `walker.Discover` with pruning (`registry.MayHoldResources`, cached per definition, a fixed point over the types and contentReferences), the containment predicates (`registry.HoldsContained`, `HoldsEntryResource`); `Walk`/`WalkWithProfiles` over `Discover` restricted to today's kinds (contained of the root and of entries, entries), one discovery per resource and validation (`walker.WithDiscoveries`). The scope function moves to S2, where held resources first need it. | the corpus as today, issue by issue (none has a false `List.entry.resource`); 0–7 % more time on large Bundles, none validating in parallel. Off the corpus, closer to HL7: `contained` keys of a root Bundle or Parameters (no such element: HL7 reports only the unknown property), and a contained resource of an unknown type with a `meta.profile`, are no longer walked |
+| S2 | The scope function (`nestedScope`, `refContext.nested`, `ScopeOf`, slice matching, extension contexts); cardinality, slicing and reference over the whole discovery (held resources, a contained resource's contained, a contained Bundle's entries); `nestedPaths` from it. | held probes match HL7; `Bundle-bundle-response` |
 | S3 | Binding, primitive and UCUM stop descending through holders and use the discovery. | duplicates of `meta.*` gone; held resources' dates, codes and units checked |
 | S4 | The extension phase skips the held values by identity, not the keys `contained` and `entry`. | `Bundle.entry.extension`, `List.entry.extension`, `response.outcome`, held Bundles' entries checked |
-| S5 | Structural reports a non-object value where a resource goes (HL7: "must be an Object, not a Primitive property / an Array"), and the artifacts it gives today go (a primitive parse error, a dom-6 at `resource[0]`). Independent. | the non-object probes match HL7 |
+| S5 | Structural reports, from `Discovery.Misshapen`, a value where a resource goes that is not one, or not written as the element's cardinality says (HL7: "must be an Object, not a Primitive property / an Array", "must be a JSON Array, not an Object"), and the artifacts it gives today go (a primitive parse error, a dom-6 at `resource[0]`). Discover does not walk such values (main did not either). | the non-object probes match HL7 |
 
 Each step runs `go test -race -short ./...`, golangci-lint (the repo has no `make check`), the full
 hl7diff (light groups and R4 core) and a comparison of errors and warnings against `main`, issue by
