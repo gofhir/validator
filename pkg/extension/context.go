@@ -148,7 +148,10 @@ func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]a
 	})
 	for _, child := range children.Nodes {
 		for _, cv := range elementvalues.Of(child, inst, v.registry) {
-			location := cv.Path(t.location)
+			if !elementvalues.Written(child, cv, v.registry) {
+				continue // written otherwise than the element says: structural reports it, HL7 drops it
+			}
+			location := elementvalues.ItemPath(child, cv, t.location) // a single value for an array: its [0], as HL7
 			m, isObject := cv.Value.(map[string]any)
 			if isObject && v.registry.HoldsResource(child.Def) {
 				if _, isResource := m[resourceTypeKey]; isResource {
@@ -168,7 +171,8 @@ func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]a
 				next.extensions = v.extensionsOf(ctx, t, valueTypeOf(child, cv.TypeCode), m, result)
 				v.walkTargets(ctx, next, m, result)
 			}
-			if cv.Ext != nil {
+			if cv.Ext != nil && elementvalues.ShapeOf(child, cv) == elementvalues.RightShape {
+				// a primitive's "_key" sibling, when the primitive is written as its element says
 				v.walkTargets(ctx, next, cv.Ext, result)
 			}
 		}
@@ -178,7 +182,7 @@ func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]a
 // checkHeld checks the contexts in res, a resource t holds in child, read as a node of the root:
 // a contained resource with its container as %rootResource, any other with itself.
 func (v *Validator) checkHeld(ctx context.Context, t target, child *registry.ElementNode, cv elementvalues.Value, res map[string]any, result *issue.Result) {
-	location := cv.Path(t.location)
+	location := elementvalues.ItemPath(child, cv, t.location)
 	if t.scope == nil {
 		v.checkContexts(ctx, res, location, place{exact: t.exact}, result)
 		return

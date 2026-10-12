@@ -187,14 +187,15 @@ func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefi
 			continue
 		}
 		for _, cv := range elementvalues.Of(child, inst, v.registry) {
-			shape := elementvalues.ShapeOf(child, cv)
-			if shape == elementvalues.ArrayForOne {
+			if !elementvalues.Written(child, cv, v.registry) {
+				// Not written as the element says (an array where one value goes, an object for a
+				// primitive, a single null): the structural phase reports it, and HL7 drops it.
 				continue
 			}
 			if cv.TypeCode != "" && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
-				// A primitive's extensions are in its "_key" sibling (json.html#primitive); an object
-				// written for it, or a single value where an array goes, is not checked, as HL7 does not.
-				if cv.Ext != nil && shape == elementvalues.RightShape {
+				// A primitive's extensions are in its "_key" sibling (json.html#primitive); a single
+				// value written where an array goes is not checked, as HL7 does not.
+				if cv.Ext != nil && elementvalues.ShapeOf(child, cv) == elementvalues.RightShape {
 					sibling := path + "._" + cv.Key
 					if cv.Array {
 						sibling = fmt.Sprintf("%s[%d]", sibling, cv.Index)

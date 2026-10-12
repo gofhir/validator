@@ -19,6 +19,11 @@ const (
 	DiagStructureChoiceMutualExclusion DiagnosticID = "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
 	DiagStructureNoType                DiagnosticID = "STRUCTURE_NO_TYPE"
 	DiagContainedDuplicateID           DiagnosticID = "CONTAINED_DUPLICATE_ID"
+	// A value written otherwise than its element says (json.html): an array for an element that
+	// repeats, an object for a complex type or a resource, a simple value for a primitive.
+	DiagStructureArrayExpected  DiagnosticID = "STRUCTURE_ARRAY_EXPECTED"
+	DiagStructureObjectExpected DiagnosticID = "STRUCTURE_OBJECT_EXPECTED"
+	DiagStructureValueExpected  DiagnosticID = "STRUCTURE_VALUE_EXPECTED"
 )
 
 // Diagnostic IDs for cardinality validation (M2).
@@ -237,6 +242,21 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "StructureDefinition has no type",
+	},
+	DiagStructureArrayExpected: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "'{element}' repeats: it must be a JSON array, not {found}",
+	},
+	DiagStructureObjectExpected: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "'{element}' must be a JSON object, not {found}",
+	},
+	DiagStructureValueExpected: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "'{element}' is a primitive: it must be a simple value, not {found}",
 	},
 
 	// Cardinality (M2)
