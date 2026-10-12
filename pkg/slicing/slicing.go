@@ -173,7 +173,7 @@ func (v *Validator) checkChildren(ctx context.Context, node *registry.ElementNod
 		name := child.Name()
 		childPath := instPath + "." + name
 		childDef := defPath + "." + name
-		values := elementvalues.Of(child, inst, v.registry.ChoiceType)
+		values := elementvalues.Of(child, inst, v.registry)
 		count := len(values)
 		baseChild := named(base.Nodes, name)
 		sameMin := baseChild != nil && baseChild.Def.Min == child.Def.Min

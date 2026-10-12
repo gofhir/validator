@@ -147,7 +147,7 @@ func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]a
 		return v.DefinitionOf(ctx, typeCode, inst)
 	})
 	for _, child := range children.Nodes {
-		for _, cv := range elementvalues.Of(child, inst, v.registry.ChoiceType) {
+		for _, cv := range elementvalues.Of(child, inst, v.registry) {
 			location := cv.Path(t.location)
 			m, isObject := cv.Value.(map[string]any)
 			if isObject && v.registry.HoldsResource(child.Def) {

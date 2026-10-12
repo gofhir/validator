@@ -131,6 +131,7 @@ func TestHeldResourceValues(t *testing.T) {
 		}},
 		{"w_outcome_values", []string{
 			"BINDING_REQUIRED @ Bundle.entry[0].response.outcome.issue[0].code",
+			"BINDING_REQUIRED @ Bundle.entry[0].response.outcome.issue[0].extension[0].valueCode", // S4
 			"BINDING_REQUIRED @ Bundle.entry[0].response.outcome.issue[0].severity",
 			"TYPE_INVALID_FORMAT @ Bundle.entry[0].response.outcome.meta.lastUpdated",
 		}},
@@ -190,6 +191,104 @@ func TestHeldResourceUnits(t *testing.T) {
 		}
 	}
 	if want := []string{"Parameters.parameter[0].resource.valueQuantity.code"}; !slices.Equal(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+// The extensions of every element are checked, once, those of the resources another holds in
+// them: an entry's own (Bundle.entry.extension, List.entry.extension), a response outcome's, a
+// held resource's; the walk follows the definitions, stops at the resources elements hold (checked
+// as resources), and does not go into a value written as an array where one goes nor into an
+// element the definitions do not have. The verdicts are the HL7 validator's.
+func TestHeldResourceExtensions(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"), WithConformanceResources(definitions(t, "acme.held")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range []struct {
+		probe string
+		want  []string // "<diagnostic> @ <location>", for extensions and their values' bindings
+	}{
+		{"z1_list_entry_extension", []string{ // a URN is no URL; HL7: no definition found
+			"EXTENSION_INVALID_URL @ List.entry[0].extension[0]",
+			"EXTENSION_INVALID_URL @ List.note[0].extension[0]",
+		}},
+		{"z2_bundle_entry_extension", []string{
+			"BINDING_REQUIRED @ Bundle.entry[0].extension[0].valueCode",
+			"EXTENSION_INVALID_CONTEXT @ Bundle.entry[0]",
+			"EXTENSION_UNKNOWN @ Bundle.entry[0].extension[1]",
+		}},
+		{"w_outcome_values", []string{
+			"BINDING_REQUIRED @ Bundle.entry[0].response.outcome.issue[0].extension[0].valueCode",
+			"EXTENSION_INVALID_CONTEXT @ Bundle.entry[0].response.outcome.issue[0]",
+		}},
+		// Not walked, as HL7 does not: an array where one resource goes (HL7: "must be an Object,
+		// not an Array"), a resource of an unknown type.
+		{"z3_array_for_one_extension", nil},
+		{"z4_unknown_type_extension", nil},
+		// Not walked either, as HL7 does not: an array where one value goes, on the way to a
+		// resource or not (response, request, maritalStatus), and an unknown element.
+		{"z5_arrays_for_one_extension", nil},
+		{"z6_datatype_array_for_one_extension", nil},
+		{"z7_unknown_element_extension", nil},
+		// A primitive's extensions in its "_key" sibling (with nulls aligning the arrays), an entry
+		// written where the array goes named as its one item; not a complex element's "_key"
+		// sibling nor an object written for a primitive, which HL7 reports and does not check.
+		// The extension in the e-choice extension's "_valueString", which HL7 checks, is not: a
+		// gap of the extension value's check, on main too (the plan, S4).
+		{"z8_element_extensions", []string{
+			"EXTENSION_UNKNOWN @ Bundle.entry[0].extension[0]",
+			"EXTENSION_UNKNOWN @ Bundle.entry[0].resource.extension[0]",
+			"EXTENSION_UNKNOWN @ Bundle.entry[0].resource.name[0]._given[0].extension[0]",
+		}},
+	} {
+		t.Run(tt.probe, func(t *testing.T) {
+			data, err := os.ReadFile(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "probes", "hr_"+tt.probe+".json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			res, err := v.Validate(context.Background(), data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, is := range res.Issues {
+				loc := strings.Join(is.Expression, ",")
+				if strings.HasPrefix(is.MessageID, "EXTENSION_") || strings.Contains(loc, ".extension[") {
+					got = append(got, is.MessageID+" @ "+loc)
+				}
+			}
+			slices.Sort(got)
+			if !slices.Equal(got, tt.want) {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+// Only a primitive has a "_key" sibling (json.html#primitive): a complex element's is no property
+// of it, so it neither satisfies the element's minimum nor counts toward its maximum. The verdicts
+// are the HL7 validator's.
+func TestComplexKeySibling(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "probes", "hr_z9_complex_key_sibling.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := v.Validate(context.Background(), data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, is := range res.Issues {
+		if strings.HasPrefix(is.MessageID, "CARDINALITY_") {
+			got = append(got, is.MessageID+" @ "+strings.Join(is.Expression, ","))
+		}
+	}
+	if want := []string{"CARDINALITY_MIN @ Observation.code"}; !slices.Equal(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

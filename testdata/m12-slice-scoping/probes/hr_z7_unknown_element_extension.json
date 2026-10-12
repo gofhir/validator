@@ -1,0 +1,1 @@
+{"resourceType":"Patient","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"foo":{"resourceType":"Patient","extension":[{"url":"http://example.org/unknown-f","valueString":"x"}],"contained":[{"resourceType":"Patient","id":"x","extension":[{"url":"http://example.org/unknown-c","valueString":"x"}]}]}}

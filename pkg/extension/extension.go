@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gofhir/validator/v2/internal/elementvalues"
 	"github.com/gofhir/validator/v2/internal/exactjson"
 	"github.com/gofhir/validator/v2/internal/reslang"
 	"github.com/gofhir/validator/v2/pkg/issue"
@@ -143,57 +144,99 @@ func (v *Validator) ValidateDataWith(ctx context.Context, d Data, sd *registry.S
 	v.checkResourceContexts(ctx, d, resourceType, result)
 
 	// Validate extensions at root level and recursively, a coded value's display in the
-	// resource's language
+	// resource's language, over the definitions: each resource it holds is its own.
 	ctx = reslang.With(ctx, resource)
-	v.validateElement(ctx, resource, resourceType, result)
+	v.validateResource(ctx, v.registry.GetByType(resourceType), resource, resourceType, result)
 	languages := reslang.NewWalk(ctx, resourceType)
 
-	// Walk all nested resources (contained + Bundle entries) using the generic walker.
-	v.walker.WalkContext(ctx, resource, resourceType, resourceType, func(wctx *walker.ResourceContext) bool {
+	// Each resource it holds, at any depth (contained resources, Bundle entries, the resources
+	// other elements hold), in its language or else its holder's.
+	v.walker.WalkAllContext(ctx, resource, resourceType, resourceType, func(wctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if wctx.FHIRPath == resourceType {
 			return true
 		}
-
-		// Validate extensions in the nested resource using its own resourceType as context, in
-		// its language or else its container's
-		v.validateElement(languages.Context(ctx, wctx), wctx.Data, wctx.FHIRPath, result)
+		v.validateResource(languages.Context(ctx, wctx), wctx.SD, wctx.Data, wctx.FHIRPath, result)
 		return true
 	})
 }
 
-// validateElement recursively validates extensions in an element.
-// BasePath is the FHIRPath to this element (e.g., "Patient.name[0]" or "Observation.contained[0].name").
-func (v *Validator) validateElement(ctx context.Context, data map[string]any, basePath string, result *issue.Result) {
-	if extensions, ok := data[keyExtension]; ok {
-		v.validateExtensionArray(ctx, extensions, basePath+"."+keyExtension, false, result)
+// validateResource validates the extensions of data, a resource of definition sd at path, and of
+// its elements, following the definitions.
+func (v *Validator) validateResource(ctx context.Context, sd *registry.StructureDefinition, data map[string]any, path string, result *issue.Result) {
+	if sd == nil {
+		return
 	}
-
-	// Check for modifierExtension array
-	if modifierExts, ok := data["modifierExtension"]; ok {
-		v.validateExtensionArray(ctx, modifierExts, basePath+".modifierExtension", true, result)
+	if root := sd.Tree().Root(); root != nil {
+		v.validateNode(ctx, sd, root, "", data, path, result)
 	}
+}
 
-	// Recurse into nested elements
-	for key, value := range data {
-		// Skip special keys - contained is handled separately by validateContainedExtensions
-		// entry is handled separately by validateBundleEntryExtensions
-		if key == keyExtension || key == keyModifierExtension || key == "resourceType" || key == "contained" || key == "entry" {
+// validateNode validates the extensions of inst, an instance of node at path, then those of the
+// values it holds for node's children, following the definitions (registry.ChildrenOf: a backbone's
+// children inline, a contentReference's target, a datatype's own definition), a primitive's in its
+// "_key" sibling. It does not go into a resource an element holds (the walk visits it), a value
+// written as an array where one goes (HL7 validates nothing in it), nor an element the definitions
+// do not have (the structural phase reports it), nor a primitive written otherwise than as a
+// primitive.
+func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, path string, result *issue.Result) {
+	v.validateExtensionsOf(ctx, inst, path, result)
+	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, nil)
+	for _, child := range children.Nodes {
+		if name := child.Name(); name == keyExtension || name == keyModifierExtension || v.registry.HoldsResource(child.Def) {
 			continue
 		}
+		for _, cv := range elementvalues.Of(child, inst, v.registry) {
+			shape := elementvalues.ShapeOf(child, cv)
+			if shape == elementvalues.ArrayForOne {
+				continue
+			}
+			if cv.TypeCode != "" && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
+				// A primitive's extensions are in its "_key" sibling (json.html#primitive); an object
+				// written for it, or a single value where an array goes, is not checked, as HL7 does not.
+				if cv.Ext != nil && shape == elementvalues.RightShape {
+					sibling := path + "._" + cv.Key
+					if cv.Array {
+						sibling = fmt.Sprintf("%s[%d]", sibling, cv.Index)
+					}
+					v.validateExtensionsOf(ctx, cv.Ext, sibling, result)
+				}
+				continue
+			}
+			if m, ok := cv.Value.(map[string]any); ok {
+				// A complex element's "_key" sibling is no property of it (HL7: unrecognized).
+				v.validateNode(ctx, children.SD, child, cv.TypeCode, m, elementvalues.ItemPath(child, cv, path), result)
+			}
+		}
+	}
+}
 
-		elementPath := fmt.Sprintf("%s.%s", basePath, key)
+// validateExtensionsOf validates the extensions and modifier extensions of element, at path.
+func (v *Validator) validateExtensionsOf(ctx context.Context, element map[string]any, path string, result *issue.Result) {
+	if extensions, ok := element[keyExtension]; ok {
+		v.validateExtensionArray(ctx, extensions, path+"."+keyExtension, false, result)
+	}
+	if modifierExts, ok := element[keyModifierExtension]; ok {
+		v.validateExtensionArray(ctx, modifierExts, path+"."+keyModifierExtension, true, result)
+	}
+}
 
-		// A resource held in an element (Parameters.parameter.resource), which the walk does not
-		// visit, is in its own language, or else in the language of the resource that holds it.
+// validateValueElement validates the extensions in an extension's value, a datatype, and in the
+// values it holds, by its keys.
+func (v *Validator) validateValueElement(ctx context.Context, data map[string]any, basePath string, result *issue.Result) {
+	v.validateExtensionsOf(ctx, data, basePath, result)
+	for key, value := range data {
+		if key == keyExtension || key == keyModifierExtension || key == resourceTypeKey {
+			continue
+		}
+		elementPath := basePath + "." + key
 		switch val := value.(type) {
 		case map[string]any:
-			v.validateElement(reslang.In(ctx, val), val, elementPath, result)
+			v.validateValueElement(ctx, val, elementPath, result)
 		case []any:
 			for i, item := range val {
-				itemPath := fmt.Sprintf("%s[%d]", elementPath, i)
 				if mapItem, ok := item.(map[string]any); ok {
-					v.validateElement(reslang.In(ctx, mapItem), mapItem, itemPath, result)
+					v.validateValueElement(ctx, mapItem, fmt.Sprintf("%s[%d]", elementPath, i), result)
 				}
 			}
 		}
@@ -477,7 +520,7 @@ func (v *Validator) validateValueContent(ctx context.Context, value map[string]a
 
 	// Recursively validate any extensions within this value
 	// (e.g., CodeableConcept can have extensions on coding elements)
-	v.validateElement(ctx, value, valuePath, result)
+	v.validateValueElement(ctx, value, valuePath, result)
 }
 
 // validateValueStructure checks that all elements in the value are valid for the type.

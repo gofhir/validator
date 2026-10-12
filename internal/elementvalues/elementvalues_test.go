@@ -17,14 +17,20 @@ func node(id string, types ...string) *registry.ElementNode {
 	return &registry.ElementNode{Def: def}
 }
 
-// choiceType names the types this test knows, as Registry.ChoiceType does: the property is the
-// element name followed by the type with its first letter capitalized.
-func choiceType(base, key string) string {
+// types knows the types this test uses, as the Registry does: a choice property is the element
+// name followed by the type with its first letter capitalized; code, date and string are primitive.
+type types struct{}
+
+func (types) ChoiceType(base, key string) string {
 	suffixes := map[string]string{"Quantity": "Quantity", "String": "string", "Period": "Period"}
 	if len(key) > len(base) && key[:len(base)] == base {
 		return suffixes[key[len(base):]]
 	}
 	return ""
+}
+
+func (types) IsPrimitiveTypeCode(code string) bool {
+	return code == "code" || code == "date" || code == "string"
 }
 
 // render is a value as "path type value ext".
@@ -52,8 +58,14 @@ func TestOf(t *testing.T) {
 			[]string{`P.birthDate date null {"id":"x"}`}},
 		{"a repeating primitive, extensions aligned by index", node("P.given", "string"), `{"given":["a","b"],"_given":[null,{"id":"y"}]}`,
 			[]string{`P.given[0] string "a" null`, `P.given[1] string "b" {"id":"y"}`}},
+		{"extensions past the values are items with no value, a trailing null pads nothing", node("P.given", "string"), `{"given":["a"],"_given":[null,{"id":"y"},null]}`,
+			[]string{`P.given[0] string "a" null`, `P.given[1] string null {"id":"y"}`}},
 		{"a repeating primitive present only through its extensions", node("P.given", "string"), `{"_given":[{"id":"x"},{"id":"y"}]}`,
 			[]string{`P.given[0] string null {"id":"x"}`, `P.given[1] string null {"id":"y"}`}},
+		{"a complex element's \"_name\" is no property of it", node("P.name", "HumanName"), `{"name":[{"family":"A"}],"_name":[null,{"id":"y"}]}`,
+			[]string{`P.name[0] HumanName {"family":"A"} null`}},
+		{"a complex element present only through a \"_name\" is absent", node("P.name", "HumanName"), `{"_name":[{"id":"x"}]}`, nil},
+		{"a complex choice's \"_value\" is no property of it", node("O.value[x]", "Quantity", "string"), `{"_valueQuantity":{"id":"x"}}`, nil},
 		{"a choice of a type it allows", node("O.value[x]", "Quantity", "string"), `{"valueQuantity":{"value":1}}`,
 			[]string{`P.valueQuantity Quantity {"value":1} null`}},
 		{"a primitive choice present only through its extensions", node("O.value[x]", "Quantity", "string"), `{"_valueString":{"id":"x"}}`,
@@ -68,7 +80,7 @@ func TestOf(t *testing.T) {
 			if err := json.Unmarshal([]byte(tt.inst), &inst); err != nil {
 				t.Fatal(err)
 			}
-			values := Of(tt.node, inst, choiceType)
+			values := Of(tt.node, inst, types{})
 			got := make([]string, 0, len(values))
 			for _, v := range values {
 				got = append(got, render(v))

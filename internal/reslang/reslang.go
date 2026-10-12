@@ -20,17 +20,6 @@ func With(ctx context.Context, resource map[string]any) context.Context {
 	return ctx
 }
 
-// In returns the context to check value in, an element's value: when it is a resource held in
-// the element (it has a resourceType: Parameters.parameter.resource), its own language, as With
-// gives it; else ctx. Only a resource's language is the resource's (an Attachment's is its
-// content's).
-func In(ctx context.Context, value map[string]any) context.Context {
-	if _, isResource := value["resourceType"]; isResource {
-		return With(ctx, value)
-	}
-	return ctx
-}
-
 // Of is the language a context carries, or "".
 func Of(ctx context.Context) string {
 	lang, _ := ctx.Value(key{}).(string)
