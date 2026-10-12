@@ -9,6 +9,7 @@ package cardinality
 import (
 	"context"
 	"encoding/json"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -143,7 +144,10 @@ func (v *Validator) validateChildren(data map[string]any, childSD *registry.Stru
 	for _, child := range children {
 		name := child.Name()
 		childPath := fhirPath + "." + name
-		values := elementvalues.Of(child, data, v.registry)
+		// Only the values written as the element says are its values (elementvalues.Written).
+		values := slices.DeleteFunc(elementvalues.Of(child, data, v.registry), func(cv elementvalues.Value) bool {
+			return !elementvalues.Written(child, cv, v.registry)
+		})
 		count := len(values)
 
 		if child.Def.Min > 0 && count < int(child.Def.Min) {

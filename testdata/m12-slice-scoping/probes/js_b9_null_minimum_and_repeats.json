@@ -1,0 +1,1 @@
+{"resourceType":"Patient","text":{"status":null,"_status":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"unknown"}]},"div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"name":[{"given":[{},{}]},{"given":["a","b"],"_given":["x","y"]}]}

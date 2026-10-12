@@ -207,18 +207,7 @@ func (v *Validator) validateElement(
 		// Handle shadow elements (_elementName) for primitive extensions
 		// Per FHIR spec, for any primitive element "foo", there can be "_foo" containing id and extension
 		if strings.HasPrefix(key, "_") {
-			baseKey := key[1:] // Remove the underscore prefix
-			if v.isShadowElementValid(data, baseKey, sdPath, idx) {
-				// Valid shadow element - validate its structure (should only have id and extension)
-				v.validateShadowElement(value, fhirPath+"."+key, result)
-				continue
-			}
-			// Invalid shadow element - the base element doesn't exist or isn't a primitive
-			result.AddErrorWithID(
-				issue.DiagStructureUnknownElement,
-				map[string]any{"element": key},
-				fhirPath+"."+key,
-			)
+			v.validateShadow(data, key, value, sdPath, fhirPath, idx, result)
 			continue
 		}
 
@@ -239,41 +228,47 @@ func (v *Validator) validateElement(
 			continue
 		}
 
-		// Recursively validate children based on element type
-		v.validateChildren(value, resolved, elementSDPath, elementFHIRPath, idx, ctx, result)
+		// The value's shape (json.html), then its children, by its type
+		if content, ok := v.checkShape(data, key, value, resolved, elementFHIRPath, result); ok {
+			v.validateChildren(content, resolved, elementSDPath, elementFHIRPath, idx, ctx, result)
+		}
 	}
 }
 
-// isShadowElementValid checks if a shadow element (_foo) is valid.
-// A shadow element is valid if the corresponding base element (foo) exists and is a primitive type.
-func (v *Validator) isShadowElementValid(data map[string]any, baseKey, sdPath string, idx *elementIndex) bool {
-	// The base element should exist in the data (either with a value or as null)
-	// OR the shadow element can exist alone if the primitive value is null
-	_, hasBase := data[baseKey]
-
-	// Check if the base element is defined in the StructureDefinition
-	elementSDPath := sdPath + "." + baseKey
-	resolved := v.resolveElementDefinition(elementSDPath, baseKey, idx)
-	if resolved == nil {
-		return false
+// validateShadow validates key, a "_key" property of data at fhirPath: a primitive's sibling, its
+// shape then its structure (only id and extension), reported at its element, as HL7 does; else an
+// unknown element.
+func (v *Validator) validateShadow(data map[string]any, key string, value any, sdPath, fhirPath string, idx *elementIndex, result *issue.Result) {
+	baseKey := key[1:]
+	base := v.shadowedElement(baseKey, sdPath, idx)
+	if base == nil {
+		// The base element doesn't exist or isn't a primitive
+		result.AddErrorWithID(issue.DiagStructureUnknownElement, map[string]any{"element": key}, fhirPath+"."+key)
+		return
 	}
-
-	// Check if the element is a primitive type (shadow elements are only valid for primitives)
-	if resolved.elemDef != nil && len(resolved.elemDef.Type) > 0 {
-		typeName := resolved.resolvedType
-		if typeName == "" {
-			typeName = resolved.elemDef.Type[0].Code
-		}
-		// Primitive types in FHIR have lowercase names or are specific types
-		if v.isPrimitiveType(typeName) {
-			// Shadow element is valid if either:
-			// 1. The base element exists in data
-			// 2. The element is defined in SD (shadow can exist without base if primitive is null)
-			return hasBase || resolved.elemDef != nil
-		}
+	if _, isArray := data[baseKey].([]any); isArray && !base.elemDef.Repeats() {
+		return // its value is an array where one goes: reported, nothing in it checked
 	}
+	if v.checkShadowShape(baseKey, value, base, fhirPath+"."+baseKey, result) {
+		v.validateShadowElement(value, fhirPath+"."+key, result)
+	}
+}
 
-	return false
+// shadowedElement returns the element a "_baseKey" property is the sibling of: a primitive element
+// of sdPath (only a primitive has one, json.html#primitive), present or not; nil for any other.
+func (v *Validator) shadowedElement(baseKey, sdPath string, idx *elementIndex) *resolvedElement {
+	resolved := v.resolveElementDefinition(sdPath+"."+baseKey, baseKey, idx)
+	if resolved == nil || resolved.elemDef == nil || len(resolved.elemDef.Type) == 0 {
+		return nil
+	}
+	typeName := resolved.resolvedType
+	if typeName == "" {
+		typeName = resolved.elemDef.Type[0].Code
+	}
+	if !v.isPrimitiveType(typeName) {
+		return nil
+	}
+	return resolved
 }
 
 // isPrimitiveType returns true if the type is a FHIR primitive type.

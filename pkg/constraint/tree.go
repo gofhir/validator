@@ -136,7 +136,12 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 	fields := rawFields(raw)
 	for _, child := range children {
 		for _, cv := range elementvalues.Of(child, inst, v.registry) {
-			path := cv.Path(fhirPath)
+			if !elementvalues.Written(child, cv, v.registry) {
+				// Not written as the element says: the structural phase reports it, and the HL7
+				// validator drops it before evaluating anything.
+				continue
+			}
+			path := elementvalues.ItemPath(child, cv, fhirPath)
 			valueRaw, extRaw := fields.of(cv.Key, cv), fields.of("_"+cv.Key, cv)
 			if m, ok := cv.Value.(map[string]any); ok && v.registry.HoldsResource(child.Def) {
 				// A resource held in the element, validated as a resource of its own.
@@ -148,10 +153,9 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 			node := v.governing(sd, child, cv, opts)
 			if cv.Value != nil {
 				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, extRaw, path, opts, result)
-			} else if extRaw != nil && (cv.Array || valueRaw == nil) && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
-				// Only a primitive has a "_key" sibling (json.html#primitive). A null value is one
-				// only as an item of an array aligned with its "_key" item; a property that is null
-				// is a JSON error, which the primitive phase reports.
+			} else if extRaw != nil && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
+				// A primitive with no value, its id and extensions in its "_key" sibling
+				// (json.html#primitive): Written leaves a null only as an array's item.
 				v.checkValueless(sd, node, cv.TypeCode, extRaw, path, opts, result)
 			}
 			if cv.Ext != nil {

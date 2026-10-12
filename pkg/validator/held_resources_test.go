@@ -141,13 +141,9 @@ func TestHeldResourceValues(t *testing.T) {
 			"TYPE_INVALID_FORMAT @ Patient.contained[0].birthDate",
 			"TYPE_INVALID_FORMAT @ Patient.contained[0].meta.lastUpdated",
 		}},
-		// A number or a null where a resource goes: the primitive phase reports it, as on main, with
-		// a message that misnames it ("must be a string"), and a string not at all; structural is
-		// to report every one as HL7 does ("must be an Object, not a Primitive property", S5).
-		{"y_contained_primitives", []string{
-			"TYPE_WRONG_JSON_TYPE @ Observation.contained[1]",
-			"TYPE_WRONG_JSON_TYPE @ Observation.contained[2]",
-		}},
+		// A primitive or a null where a resource goes is the structural phase's (S5), not the
+		// primitive phase's.
+		{"y_contained_primitives", nil},
 	} {
 		t.Run(tt.probe, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "probes", "hr_"+tt.probe+".json"))

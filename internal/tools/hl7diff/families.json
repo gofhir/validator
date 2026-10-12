@@ -125,6 +125,21 @@
       ]
     },
     {
+      "name": "json-shape",
+      "rule": "equal",
+      "gofhir": [
+        "STRUCTURE_ARRAY_EXPECTED",
+        "STRUCTURE_OBJECT_EXPECTED",
+        "STRUCTURE_VALUE_EXPECTED"
+      ],
+      "hl7NoID": [
+        {
+          "code": "invalid",
+          "text": "^((The property \\S+|This( base)? property) must be (a JSON Array|an Array|an Object|an object|a simple value), not |The JSON array for .* is invalid at index)"
+        }
+      ]
+    },
+    {
       "name": "extension-value-type",
       "rule": "parent",
       "gofhir": [

@@ -151,8 +151,9 @@ func (v *Validator) validateElementWithPaths(ctx context.Context, data map[strin
 
 		// Find the ElementDefinition for this path using SD path
 		elemDef := v.findElementDef(sd, elementSDPath)
-		if elemDef == nil || v.sdRegistry.HoldsResource(elemDef) {
-			// Unknown (the structural phase reports it), or a resource the walk visits.
+		if elemDef == nil || v.sdRegistry.HoldsResource(elemDef) || arrayForOne(elemDef, value) {
+			// Unknown or an array where one value goes (the structural phase reports them, and HL7
+			// checks nothing in them), or a resource the walk visits.
 			continue
 		}
 
@@ -181,6 +182,12 @@ func (v *Validator) validateElementWithPaths(ctx context.Context, data map[strin
 			}
 		}
 	}
+}
+
+// arrayForOne reports whether value is an array written for an element that does not repeat.
+func arrayForOne(def *registry.ElementDefinition, value any) bool {
+	_, isArray := value.([]any)
+	return isArray && !def.Repeats()
 }
 
 // isStructuralType returns true for types whose children are defined in the parent resource SD
@@ -224,7 +231,7 @@ func (v *Validator) validateComplexElement(ctx context.Context, data map[string]
 			}
 		}
 
-		if elemDef == nil || v.sdRegistry.HoldsResource(elemDef) {
+		if elemDef == nil || v.sdRegistry.HoldsResource(elemDef) || arrayForOne(elemDef, value) {
 			continue
 		}
 

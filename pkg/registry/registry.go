@@ -176,6 +176,18 @@ type ElementBase struct {
 	Max  string `json:"max"`
 }
 
+// Repeats reports whether the element repeats by its base's cardinality, which decides whether the
+// JSON writes an array for it, whatever a profile narrows it to (json.html#arrays). Only a maximum
+// of 1 makes it single: a maximum of 0, a profile's prohibition of an element whose base is not at
+// hand, says nothing of how it is written.
+func (ed *ElementDefinition) Repeats() bool {
+	most := ed.Max
+	if ed.Base != nil && ed.Base.Max != "" {
+		most = ed.Base.Max
+	}
+	return most != "1"
+}
+
 // SetRaw stores the raw JSON for this ElementDefinition.
 // Called during loading to enable dynamic fixed/pattern extraction.
 func (ed *ElementDefinition) SetRaw(data json.RawMessage) {

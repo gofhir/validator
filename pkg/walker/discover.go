@@ -54,18 +54,6 @@ type Discovery struct {
 	// Resources are the resources it holds, at any depth, in preorder: a resource before those it
 	// holds.
 	Resources []*Nested
-	// Misshapen are the values of elements that hold resources that are not a resource, or not
-	// written as the element's cardinality says (json.html): an array where one resource goes is
-	// not walked; a single value where an array goes is walked as its one item ([0]), as HL7 does.
-	Misshapen []Misshapen
-}
-
-// Misshapen is a value where a resource goes that is not one: a primitive or a null, an array where
-// one resource goes (Value the array), a single value where an array of them goes.
-type Misshapen struct {
-	Holder *registry.ElementNode
-	Path   string
-	Value  any
 }
 
 // Discover finds the resources data, a resource of definition sd validated at path, holds: in the
@@ -112,29 +100,17 @@ func (d *Discovery) walk(ctx context.Context, reg *registry.Registry, in *Nested
 }
 
 // found records the resource cv holds in inst, an instance of child's parent (a Bundle entry for an
-// entry's resource, whose Bundle is bundle), and walks into it.
+// entry's resource, whose Bundle is bundle), and walks into it. A value that is not a resource, or
+// an array written where one resource goes, is not walked (the structural phase reports it, and
+// HL7 validates nothing in it); a single resource written where an array goes is the array's one
+// item, as HL7 validates it.
 func (d *Discovery) found(ctx context.Context, reg *registry.Registry, in *Nested, child *registry.ElementNode, cv elementvalues.Value, inst, bundle map[string]any, path string) {
-	if cv.Value == nil && cv.Ext != nil {
-		return // a "_key" sibling alone, no value: an unknown property, not a value of the holder
-	}
-	switch elementvalues.ShapeOf(child, cv) {
-	case elementvalues.ArrayForOne:
-		// The whole array, once, not walked into (HL7 does not either).
-		if cv.Index == 0 {
-			d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: path + "." + cv.Key, Value: inst[cv.Key]})
-		}
+	if elementvalues.ShapeOf(child, cv) == elementvalues.ArrayForOne {
 		return
-	case elementvalues.SingleForMany:
-		// Recorded, and walked as the array's one item, as HL7 does.
-		d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: path + "." + cv.Key, Value: cv.Value})
 	}
 	at := elementvalues.ItemPath(child, cv, path)
 	res, ok := cv.Value.(map[string]any)
 	if !ok {
-		if elementvalues.ShapeOf(child, cv) == elementvalues.RightShape {
-			// A primitive, or a null, where a resource goes.
-			d.Misshapen = append(d.Misshapen, Misshapen{Holder: child, Path: at, Value: cv.Value})
-		}
 		return
 	}
 	rt, _ := res["resourceType"].(string)

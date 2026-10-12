@@ -15,7 +15,8 @@ import (
 type Value struct {
 	Key      string         // the JSON property it is read from ("valueQuantity" for value[x])
 	TypeCode string         // its type: the one a choice property names, or the element's only type
-	Value    any            // nil for a primitive present only through its "_key" sibling
+	Value    any            // nil for a primitive present only through its "_key" sibling, or a null
+	Null     bool           // the property, or its array's item, is written as a JSON null
 	Array    bool           // read from an array
 	Index    int            // its position in the array, when Array
 	Ext      map[string]any // a primitive's id and extensions, from its "_key" sibling
@@ -153,7 +154,7 @@ func valuesOf(inst map[string]any, k, typeCode string, primitive bool) []Value {
 	}
 	arr, isArr := val.([]any)
 	if !isArr {
-		return []Value{{Key: k, TypeCode: typeCode, Value: val, Ext: asMap(ext)}}
+		return []Value{{Key: k, TypeCode: typeCode, Value: val, Null: val == nil, Ext: asMap(ext)}}
 	}
 	extArr, _ := ext.([]any)
 	// The items are those of both arrays, aligned by position (json.html#primitive): a "_key" item
@@ -163,7 +164,7 @@ func valuesOf(inst map[string]any, k, typeCode string, primitive bool) []Value {
 	for i := range n {
 		v := Value{Key: k, TypeCode: typeCode, Array: true, Index: i}
 		if i < len(arr) {
-			v.Value = arr[i]
+			v.Value, v.Null = arr[i], arr[i] == nil
 		}
 		if i < len(extArr) {
 			v.Ext = asMap(extArr[i])
@@ -198,11 +199,7 @@ const (
 // ShapeOf tells how v, a value of child, is written: an array is written for an element whose
 // base allows several values, whatever a profile narrows it to (json.html#arrays).
 func ShapeOf(child *registry.ElementNode, v Value) Shape {
-	most := child.Def.Max
-	if child.Def.Base != nil && child.Def.Base.Max != "" {
-		most = child.Def.Base.Max
-	}
-	switch repeats := most != "1" && most != "0"; {
+	switch repeats := child.Def.Repeats(); {
 	case v.Array && !repeats:
 		return ArrayForOne
 	case !v.Array && repeats:
@@ -218,4 +215,27 @@ func ItemPath(child *registry.ElementNode, v Value, parent string) string {
 		return parent + "." + v.Key + "[0]"
 	}
 	return v.Path(parent)
+}
+
+// Written reports whether v, a value of child, is written as its element says (json.html): not an
+// item of an array written where one value goes, an object for a complex type or a resource, a
+// simple value for a primitive, a null only as an array's item of a primitive whose "_key" item
+// holds its id and extensions (json.html#primitive); a primitive present only through its "_key"
+// sibling is one. A value written otherwise is not one of the element's: the HL7 validator drops it
+// (the structural phase reports it), so it is not counted nor evaluated. A value of an element
+// whose kind is not known (several types, not a choice) is written unless it is a null.
+func Written(child *registry.ElementNode, v Value, types Types) bool {
+	if ShapeOf(child, v) == ArrayForOne {
+		return false
+	}
+	known, prim := v.TypeCode != "" || child.Def.ContentReference != nil, primitive(types, v.TypeCode)
+	switch v.Value.(type) {
+	case nil:
+		return prim && v.Ext != nil && (v.Array || !v.Null)
+	case map[string]any:
+		return !known || !prim
+	case []any:
+		return false
+	}
+	return !known || prim
 }
