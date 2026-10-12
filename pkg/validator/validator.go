@@ -676,9 +676,6 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		return result, nil
 	}
 
-	// Extract meta.profile if present
-	metaProfiles := extractMetaProfiles(data)
-
 	// Get core resource StructureDefinition (always validate against this)
 	coreURL := registry.GetSDForResource(resourceType)
 	coreSD := v.registry.GetByURL(coreURL)
@@ -688,6 +685,17 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		result.Stats.Duration = time.Since(startTime).Nanoseconds()
 		return result, nil
 	}
+
+	// The shape of every value, checked once against the resource's type, as the HL7 validator's
+	// parser reads it: a value written otherwise than its element says is reported (at its path as
+	// written) and dropped, so that no phase reads it (an invariant of the element that holds it
+	// included), and the items after it are renumbered.
+	written := resource
+	var locate func(i int, path string) string
+	ctx, resource, locate = v.normalize(ctx, data, resource, coreSD, result)
+
+	// Extract meta.profile if present
+	metaProfiles := extractMetaProfiles(data)
 
 	// If an IG is specified, add its profiles that match this resource type
 	if vc.ig != "" {
@@ -778,7 +786,9 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 
 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
 
-	enrichLocations(resource, result)
+	// Located in the source as written: the issues of the shape check name its paths, the others
+	// the resource as left, renumbered.
+	enrichLocations(written, result, locate)
 
 	logger.Info("Validated %s in %.3fms: %d errors, %d warnings",
 		resourceType,
@@ -788,6 +798,57 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	)
 
 	return result, nil
+}
+
+// normalize checks the shape of every value of data, parsed from raw, against coreSD, the
+// resource's type, once, as the HL7 validator's parser reads it: a value written otherwise than its
+// element says is reported (at its path as written) and dropped, so that no phase reads it (an
+// invariant of the element that holds it included), and the items after it are renumbered. It
+// returns the context holding the resource as left, its JSON, and how to locate an issue in raw:
+// the shape issues by their paths, the others by theirs as written.
+func (v *Validator) normalize(ctx context.Context, data map[string]any, raw []byte, coreSD *registry.StructureDefinition, result *issue.Result) (left context.Context, leftRaw []byte, locate func(i int, path string) string) {
+	n := v.structValidator.Normalize(data, raw, coreSD)
+	asWritten := &writtenIssues{keys: map[string]bool{}}
+	for _, is := range n.Issues.Issues {
+		asWritten.add(is)
+	}
+	result.Merge(n.Issues)
+	issue.ReleaseResult(n.Issues)
+	n.Issues = nil
+	locate = func(i int, path string) string {
+		if asWritten.has(result.Issues[i]) {
+			return path
+		}
+		return n.Written(path)
+	}
+	return withWrittenIssues(withNormalized(ctx, n), asWritten), n.Raw, locate
+}
+
+// structuralPhase checks data's structure against sd. The HL7 validator's parser reports these, at
+// the paths the source writes: a value of the resource validated (vs nil) is named as written.
+func (v *Validator) structuralPhase(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, vs *valueScope, result *issue.Result) {
+	structResult := v.structValidator.ValidateData(data, sd)
+	if n := normalizedIn(ctx); vs == nil && n != nil {
+		asWritten := writtenIssuesIn(ctx)
+		for i := range structResult.Issues {
+			for j, e := range structResult.Issues[i].Expression {
+				structResult.Issues[i].Expression[j] = n.Written(e)
+			}
+			asWritten.add(structResult.Issues[i]) // located by its path as it is
+		}
+	}
+	result.Merge(structResult)
+	issue.ReleaseResult(structResult)
+}
+
+// contentJudged tells the objects whose content the shape check judged, which the invariant that an
+// element have content is not to judge again (nil-safe: none judged); a value checked for
+// conformance (vs) is judged on its content as written: an empty one has none.
+func contentJudged(ctx context.Context, vs *valueScope) func(map[string]any) bool {
+	if vs != nil {
+		return normalizedIn(ctx).HadContent
+	}
+	return normalizedIn(ctx).ContentJudged
 }
 
 // ValidateAgainstProfile runs all validation phases against a single profile.
@@ -803,9 +864,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 		vs = &in
 	}
 	// Phase 1: Structural validation (uses cached element indexes)
-	structResult := v.structValidator.ValidateData(data, sd)
-	result.Merge(structResult)
-	issue.ReleaseResult(structResult)
+	v.structuralPhase(ctx, data, sd, vs, result)
 	result.Stats.PhasesRun++
 
 	// Phase 2: Cardinality validation
@@ -880,6 +939,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	constraintOpts.Data = data
 	constraintOpts.Exact = exactIn(ctx)
 	constraintOpts.Resolver, constraintOpts.Containment = referenceResolver{ctx: ctx}, constraint.IsContainedIn
+	constraintOpts.ContentJudged = contentJudged(ctx, vs)
 	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
 	result.Stats.PhasesRun++
 
@@ -956,21 +1016,23 @@ func issueKey(is issue.Issue) string {
 }
 
 // enrichLocations adds each issue's line and column in the source JSON, locating every issue in
-// one reading of it.
-func enrichLocations(resource []byte, result *issue.Result) {
+// one reading of it, by its path as the source writes it (written: of the issue at index i, whose
+// path is path).
+func enrichLocations(resource []byte, result *issue.Result, written func(i int, path string) string) {
+	at := make([]string, len(result.Issues))
 	paths := make([]string, 0, len(result.Issues))
 	for i := range result.Issues {
 		if is := &result.Issues[i]; len(is.Expression) > 0 && is.Location == nil {
-			paths = append(paths, is.Expression[0])
+			at[i] = written(i, is.Expression[0])
+			paths = append(paths, at[i])
 		}
 	}
 	located := location.FindAll(resource, paths)
-	result.EnrichLocations(func(expr string) *issue.Location {
-		if loc := located[expr]; loc != nil {
-			return &issue.Location{Line: loc.Line, Column: loc.Column}
+	for i := range result.Issues {
+		if loc := located[at[i]]; at[i] != "" && loc != nil {
+			result.Issues[i].Location = &issue.Location{Line: loc.Line, Column: loc.Column}
 		}
-		return nil
-	})
+	}
 }
 
 // validateMode applies mode-specific validation rules.

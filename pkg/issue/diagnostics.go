@@ -24,6 +24,9 @@ const (
 	DiagStructureArrayExpected  DiagnosticID = "STRUCTURE_ARRAY_EXPECTED"
 	DiagStructureObjectExpected DiagnosticID = "STRUCTURE_OBJECT_EXPECTED"
 	DiagStructureValueExpected  DiagnosticID = "STRUCTURE_VALUE_EXPECTED"
+	// An element written as an empty object: an element has a value or children (ele-1), and an
+	// object has content (json.html).
+	DiagStructureEmptyObject DiagnosticID = "STRUCTURE_EMPTY_OBJECT"
 )
 
 // Diagnostic IDs for cardinality validation (M2).
@@ -257,6 +260,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "'{element}' is a primitive: it must be a simple value, not {found}",
+	},
+	DiagStructureEmptyObject: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "'{element}' is an empty object: an element must have a value or children",
 	},
 
 	// Cardinality (M2)

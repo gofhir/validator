@@ -55,6 +55,11 @@ type ValidateOptions struct {
 	Scope       *slicematch.Scope
 	Resolver    slicematch.Resolver
 	Containment func(container, resource map[string]any) bool
+
+	// ContentJudged reports whether the content of an object of Data was judged on the source, as a
+	// parser judges it (structural.Normalized.ContentJudged): the invariant that an element have
+	// content is not judged again on it. Nil means none was.
+	ContentJudged func(map[string]any) bool
 }
 
 // constraintEvalOpts carries all contextual data for a single constraint evaluation.
@@ -73,12 +78,19 @@ type constraintEvalOpts struct {
 	scope         slicematch.Scope
 	sliceResolver slicematch.Resolver
 	containment   func(container, resource map[string]any) bool
+
+	// contentJudged is ValidateOptions.ContentJudged.
+	contentJudged func(map[string]any) bool
 }
 
 // Validator validates constraints defined in ElementDefinitions.
 type Validator struct {
 	registry     *registry.Registry
 	termRegistry *terminology.Registry
+
+	// contentKey is the key of Element's content invariant (elementContentKey), read once.
+	contentKey     string
+	contentKeyOnce sync.Once
 
 	// Cache of compiled FHIRPath expressions.
 	exprCache   map[string]compiledExpr
@@ -210,7 +222,7 @@ func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResource
 		opts.resolver = &fhirpathResolver{bundleData: vopts.BundleData, outer: vopts.OuterBundles, exact: vopts.Exact, ctx: ctx}
 	}
 	if vopts != nil {
-		opts.exact = vopts.Exact
+		opts.exact, opts.contentJudged = vopts.Exact, vopts.ContentJudged
 		opts.sliceResolver, opts.containment = vopts.Resolver, vopts.Containment
 		if vopts.Scope != nil {
 			opts.scope = *vopts.Scope

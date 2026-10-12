@@ -378,6 +378,14 @@ func (v *Validator) contentTarget(sd *registry.StructureDefinition, node *regist
 // on it (seen). The value's JSON is built once, on the first constraint that needs it.
 func (v *Validator) evaluate(def *registry.ElementNode, defPath string, value any, raw *json.RawMessage, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
 	pending := pendingConstraints(def, seen)
+	if m, ok := value.(map[string]any); ok && opts.contentJudged != nil && opts.contentJudged(m) {
+		// An element whose content was judged on the source (an empty object, reported; one whose
+		// misshapen values were dropped, which had content): the invariant that an element have
+		// content (Element's) is not judged again on it, as the HL7 validator judges it.
+		if key := v.elementContentKey(); key != "" {
+			pending = slices.DeleteFunc(pending, func(c registry.Constraint) bool { return c.Key == key })
+		}
+	}
 	if len(pending) == 0 {
 		return
 	}
@@ -506,4 +514,27 @@ func rootCollection(raw json.RawMessage) fhirpath.Collection {
 	}
 	fhirpathcache.Enable(col)
 	return col
+}
+
+// contentInvariant is the key of the invariant every element inherits from Element that it have a
+// value or children (json.html: an element has content).
+const contentInvariant = "ele-1"
+
+// elementContentKey is contentInvariant when the registry's Element definition declares it at its
+// root, and "" otherwise: no invariant is passed over that the definitions do not declare.
+func (v *Validator) elementContentKey() string {
+	v.contentKeyOnce.Do(func() {
+		sd := v.registry.GetByType("Element")
+		if sd == nil {
+			return
+		}
+		if root := sd.Tree().Root(); root != nil {
+			for _, c := range root.Def.Constraint {
+				if c.Key == contentInvariant {
+					v.contentKey = c.Key
+				}
+			}
+		}
+	})
+	return v.contentKey
 }

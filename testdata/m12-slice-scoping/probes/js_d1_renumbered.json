@@ -1,0 +1,1 @@
+{"resourceType":"Patient","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"telecom":[5,{"value":"123"}],"name":["x",{"family":"y","given":[{},"Ann"]}],"contained":["abc",{"resourceType":"Patient","id":"c","gender":"bogus"}],"link":[{"other":{"reference":"#c"},"type":"seealso"}]}
