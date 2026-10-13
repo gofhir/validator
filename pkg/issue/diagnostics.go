@@ -43,8 +43,11 @@ const (
 	DiagBindingExtensibleUnknown  DiagnosticID = "BINDING_EXTENSIBLE_UNKNOWN_SYSTEM"
 	DiagBindingUnresolved         DiagnosticID = "BINDING_UNRESOLVED"
 	DiagBindingExtensibleNoCoding DiagnosticID = "BINDING_EXTENSIBLE_NO_CODING"
-	DiagBindingDisplayMismatch    DiagnosticID = "BINDING_DISPLAY_MISMATCH"
-	DiagBindingTextOnlyWarning    DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
+	// DiagBindingRequiredNoCoding: none of a CodeableConcept's codings is in the value set of its
+	// required binding.
+	DiagBindingRequiredNoCoding DiagnosticID = "BINDING_REQUIRED_NO_CODING"
+	DiagBindingDisplayMismatch  DiagnosticID = "BINDING_DISPLAY_MISMATCH"
+	DiagBindingTextOnlyWarning  DiagnosticID = "BINDING_TEXT_ONLY_WARNING"
 	// DiagBindingRequiredNoCode: a CodeableConcept under a required binding carries no code at all
 	// (only text, or no coding with a code), so it cannot be from the value set.
 	DiagBindingRequiredNoCode   DiagnosticID = "BINDING_REQUIRED_NO_CODE"
@@ -394,6 +397,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeCodeInvalid,
 		Template: "The code '{code}' is not among the codes the CodeSystem '{codeSystem}' includes, which are only some of its codes (content '{content}'), so it cannot be validated",
+	},
+	DiagBindingRequiredNoCoding: {
+		Severity: SeverityError,
+		Code:     CodeCodeInvalid,
+		Template: "None of the codings provided are in the value set '{valueSet}', and a coding from this value set is required (codes = {codes})",
 	},
 	DiagBindingExtensibleNoCoding: {
 		Severity: SeverityWarning,

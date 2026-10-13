@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gofhir/validator/v2/internal/slicerecord"
 	"github.com/gofhir/validator/v2/pkg/binding"
 	"github.com/gofhir/validator/v2/pkg/cardinality"
 	"github.com/gofhir/validator/v2/pkg/constraint"
@@ -769,6 +770,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	ctx = walker.WithDiscoveries(ctx)
 	ctx = constraint.WithReportScope(ctx)
 	ctx = withExtensionScope(ctx)
+	ctx = slicerecord.With(ctx)
 	reported := map[string]bool{}
 	var nested map[string]bool
 	if len(profilesToValidate) > 1 {
@@ -879,12 +881,6 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	issue.ReleaseResult(primResult)
 	result.Stats.PhasesRun++
 
-	// Phase 4: Binding validation (terminology) — skipped when NoTerminology is set
-	if !v.config.NoTerminology {
-		v.bindValidator.ValidateData(ctx, data, sd, result)
-	}
-	result.Stats.PhasesRun++
-
 	// Phase 5: Extension validation. What it checks depends on no profile: an extension against its
 	// own definition, and where it is used. It runs once per instance in a validation, not once per
 	// declared profile.
@@ -949,6 +945,13 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 		sliceOpts.Scope = &vs.scope
 	}
 	v.slicingValidator.ValidateDataContext(ctx, data, sd, sliceOpts, result)
+	result.Stats.PhasesRun++
+
+	// Binding validation (terminology) — skipped when NoTerminology is set. After slicing, which
+	// records the slice each value matched: a value is bound by the definition that governs it.
+	if !v.config.NoTerminology {
+		v.bindValidator.ValidateData(ctx, data, sd, result)
+	}
 	result.Stats.PhasesRun++
 
 	// Phase 9: UCUM validation (Quantity.code syntax)

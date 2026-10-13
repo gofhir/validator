@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"x","status":"final","code":{"coding":[{"system":"http://loinc.org","code":"8302-2"}]},"subject":{"reference":"Patient/p"},"valueQuantity":{"value":1,"comparator":"bogus","unit":"mg","system":"http://unitsofmeasure.org","code":"mg"}}

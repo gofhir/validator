@@ -84,3 +84,21 @@ func (r *Registry) childrenOf(ctx context.Context, sd *StructureDefinition, node
 	}
 	return InstanceChildren{SD: typeSD, Nodes: root.Children}
 }
+
+// MemberTree returns where the children of a value governed by node are, and the definition they
+// are in: node itself, of sd, unless node is a slice whose snapshot unrolls no children and whose
+// type declares one profile (an extension slice is defined by its extension's StructureDefinition),
+// then that profile's root. A type with no profile, or several, leaves the slice.
+func (r *Registry) MemberTree(ctx context.Context, sd *StructureDefinition, node *ElementNode) (*StructureDefinition, *ElementNode) {
+	if node.SliceOf == nil || len(node.Children) > 0 || len(node.Def.Type) != 1 || len(node.Def.Type[0].Profile) != 1 {
+		return sd, node
+	}
+	psd, _ := r.ResolveCanonical(node.Def.Type[0].Profile[0])
+	if psd == nil || r.EnsureSnapshot(ctx, psd) != nil {
+		return sd, node
+	}
+	if root := psd.Tree().Root(); root != nil {
+		return psd, root
+	}
+	return sd, node
+}

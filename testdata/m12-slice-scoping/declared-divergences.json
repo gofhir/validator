@@ -631,7 +631,84 @@
     "location": "Observation.contained[0].link[0].other.reference",
     "messageId": "REFERENCE_CONTAINED_NOT_FOUND"
   },
-  {"decision": "B-D24", "reason": "A ValueSet that excludes a whole code system has none of its codes (valueset-definitions.html#ValueSet.compose.exclude: \"Exclude one or more codes from the value set\"), so vs/a, which lists two codes of a system and excludes that system, has no member; gofhir decides it without the CodeSystem, which is not held. HL7 6.10.2 does not decide membership in a system it does not hold and reports nothing.", "side": "gofhir", "file": "testdata/m12-slice-scoping/probes/vm_a_excl_whole_named.json", "location": "Observation.code.coding[0]", "messageId": "BINDING_REQUIRED"},
-  {"decision": "B-D25", "reason": "An expansion whose total is greater than the codes it contains is a page of the expansion (valueset-definitions.html#ValueSet.expansion.total, .offset): a code it does not list may be on another page, so its membership is not known and it is accepted unchecked. HL7 6.10.2 takes the page for the whole expansion and reports the code not in the value set.", "side": "hl7", "file": "testdata/m12-slice-scoping/probes/vm_r8_pg_required_b.json", "location": "Observation.code", "messageId": "Terminology_TX_NoValid_1_CC"},
-  {"decision": "B-D25", "reason": "An expansion whose total is greater than the codes it contains is a page of the expansion (valueset-definitions.html#ValueSet.expansion.total, .offset): a code it does not list may be on another page, so its membership is not known and it is accepted unchecked. HL7 6.10.2 takes the page for the whole expansion and reports the code not in the value set.", "side": "hl7", "file": "testdata/m12-slice-scoping/probes/vm_r8_pg_required_z.json", "location": "Observation.code", "messageId": "Terminology_TX_NoValid_1_CC"}
+  {
+    "decision": "B-D25",
+    "reason": "An expansion whose total is greater than the codes it contains is a page of the expansion (valueset-definitions.html#ValueSet.expansion.total, .offset): a code it does not list may be on another page, so its membership is not known and it is accepted unchecked. HL7 6.10.2 takes the page for the whole expansion and reports the code not in the value set.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/vm_r8_pg_required_b.json",
+    "location": "Observation.code",
+    "messageId": "Terminology_TX_NoValid_1_CC"
+  },
+  {
+    "decision": "B-D25",
+    "reason": "An expansion whose total is greater than the codes it contains is a page of the expansion (valueset-definitions.html#ValueSet.expansion.total, .offset): a code it does not list may be on another page, so its membership is not known and it is accepted unchecked. HL7 6.10.2 takes the page for the whole expansion and reports the code not in the value set.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/vm_r8_pg_required_z.json",
+    "location": "Observation.code",
+    "messageId": "Terminology_TX_NoValid_1_CC"
+  },
+  {
+    "decision": "B-D24",
+    "reason": "A ValueSet that excludes a whole code system has none of its codes (valueset-definitions.html#ValueSet.compose.exclude: \"Exclude one or more codes from the value set\"), directly or through an excluded ValueSet that includes all of it; gofhir applies the exclusion without the CodeSystem, which is not held. HL7 6.10.2 does not decide membership in a system it does not hold and reports nothing.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/vm_a_excl_whole_named.json",
+    "location": "Observation.code",
+    "messageId": "BINDING_REQUIRED_NO_CODING"
+  },
+  {
+    "decision": "B-D24",
+    "reason": "A ValueSet that excludes a whole code system has none of its codes (valueset-definitions.html#ValueSet.compose.exclude: \"Exclude one or more codes from the value set\"), directly or through an excluded ValueSet that includes all of it; gofhir applies the exclusion without the CodeSystem, which is not held. HL7 6.10.2 does not decide membership in a system it does not hold and reports nothing.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/vm_g_cc_q.json",
+    "location": "Observation.code",
+    "messageId": "BINDING_REQUIRED_NO_CODING"
+  },
+  {
+    "decision": "B-D24",
+    "reason": "A ValueSet that excludes a whole code system has none of its codes (valueset-definitions.html#ValueSet.compose.exclude: \"Exclude one or more codes from the value set\"), directly or through an excluded ValueSet that includes all of it; gofhir applies the exclusion without the CodeSystem, which is not held. HL7 6.10.2 does not decide membership in a system it does not hold and reports nothing.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/vm_e_excl_vs_q.json",
+    "location": "Observation.code",
+    "messageId": "BINDING_REQUIRED_NO_CODING"
+  },
+  {
+    "decision": "B-D24",
+    "reason": "A ValueSet that excludes a whole code system has none of its codes (valueset-definitions.html#ValueSet.compose.exclude: \"Exclude one or more codes from the value set\"), directly or through an excluded ValueSet that includes all of it; gofhir applies the exclusion without the CodeSystem, which is not held. HL7 6.10.2 does not decide membership in a system it does not hold and reports nothing.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/vm_p_g_foo.json",
+    "location": "Patient.photo[0].language",
+    "messageId": "BINDING_REQUIRED"
+  },
+  {
+    "decision": "B-D26",
+    "reason": "A code an exclusion names is not a member of the ValueSet (valueset-definitions.html#ValueSet.compose.exclude), also of a system whose CodeSystem is not held, and also through a ValueSet that includes the one excluding it; gofhir applies the exclusion by the code's name. HL7 6.10.2 does not decide membership in a system it does not hold and reports nothing.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/vm_b_cc_q.json",
+    "location": "Observation.code",
+    "messageId": "BINDING_REQUIRED_NO_CODING"
+  },
+  {
+    "decision": "B-D26",
+    "reason": "A code an exclusion names is not a member of the ValueSet (valueset-definitions.html#ValueSet.compose.exclude), also of a system whose CodeSystem is not held, and also through a ValueSet that includes the one excluding it; gofhir applies the exclusion by the code's name. HL7 6.10.2 does not decide membership in a system it does not hold and reports nothing.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/vm_d_nested_q.json",
+    "location": "Observation.code",
+    "messageId": "BINDING_REQUIRED_NO_CODING"
+  },
+  {
+    "decision": "B-D26",
+    "reason": "A code an exclusion names is not a member of the ValueSet (valueset-definitions.html#ValueSet.compose.exclude), also of a system whose CodeSystem is not held, and also through a ValueSet that includes the one excluding it; gofhir applies the exclusion by the code's name. HL7 6.10.2 does not decide membership in a system it does not hold and reports nothing.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/vm_p_b_q.json",
+    "location": "Patient.photo[0].language",
+    "messageId": "BINDING_REQUIRED"
+  },
+  {
+    "decision": "B-D27",
+    "reason": "A ValueSet's composition defines it (valueset.html: the expansion is the set of codes the composition gives when expanded); gofhir decides membership by the composition, which does not include the code, and does not read the expansion the ValueSet carries, made against code system versions that may not be the ones held. HL7 6.10.2 decides by the expansion, which lists the code.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/vm_r8_both_required_b.json",
+    "location": "Observation.code",
+    "messageId": "BINDING_REQUIRED_NO_CODING"
+  }
 ]

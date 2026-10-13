@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/gofhir/validator/v2/internal/reslang"
 	"github.com/gofhir/validator/v2/pkg/issue"
@@ -39,6 +40,10 @@ type Validator struct {
 	// displayLanguage is the BCP-47 tag preferred when checking Coding.display.
 	// Empty means no preference.
 	displayLanguage string
+
+	// bindable are the types a binding applies to (bindableTypes), read once.
+	bindableOnce sync.Once
+	bindable     map[string]bool
 }
 
 // New creates a new binding Validator.
@@ -112,153 +117,32 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 	}
 
 	resourceType := sd.RootName(resource)
-	if resourceType == "" {
+	root := sd.Tree().Root()
+	if resourceType == "" || root == nil {
 		return
 	}
 
-	// Validate root resource bindings, in its language
+	// The root resource, in its language, over the definitions (walk).
+	checked := issue.GetPooledResult()
+	defer issue.ReleaseResult(checked)
 	ctx = reslang.With(ctx, resource)
-	v.validateElement(ctx, resource, sd, resourceType, result)
+	v.walk(ctx, sd, root, "", resource, resourceType, checked)
 	languages := reslang.NewWalk(ctx, resourceType)
 
-	// Walk every resource it holds, at any depth (contained resources, Bundle entries, the
-	// resources other elements hold), each against its type's definition: the descent below stops
-	// at the elements that hold them.
-	v.walker.WalkAllContext(ctx, resource, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
-		// Skip root resource (already validated above)
+	// Every resource it holds, at any depth (contained resources, Bundle entries, the resources
+	// other elements hold), against each definition it is checked against (its type, the profiles
+	// it declares), in its language or else its container's: the walk above stops at the elements
+	// that hold them.
+	v.walker.WalkAllWithProfilesContext(ctx, resource, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
 		if rc.FHIRPath == resourceType {
 			return true
 		}
-
-		// Validate bindings in the nested resource, in its language or else its container's
-		v.validateElementWithPaths(languages.Context(ctx, rc), rc.Data, rc.SD, rc.ResourceType, rc.FHIRPath, result)
+		if r := rc.SD.Tree().Root(); r != nil {
+			v.walk(languages.Context(ctx, rc), rc.SD, r, "", rc.Data, rc.FHIRPath, checked)
+		}
 		return true
 	})
-}
-
-// validateElement recursively validates bindings for an element.
-// This is a convenience wrapper where sdPath and fhirPath are the same.
-func (v *Validator) validateElement(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, basePath string, result *issue.Result) {
-	v.validateElementWithPaths(ctx, data, sd, basePath, basePath, result)
-}
-
-// ValidateElementWithPaths validates bindings with separate paths for SD lookup and error reporting.
-// SdPath is used to look up ElementDefinitions in the StructureDefinition.
-// FhirPath is used for error reporting (e.g., "Patient.contained[0].telecom").
-func (v *Validator) validateElementWithPaths(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, sdPath, fhirPath string, result *issue.Result) {
-	for key, value := range data {
-		if key == "resourceType" && v.sdRegistry.IsResourceType(sdPath) {
-			// A resource's own type (json.html#resources), not an element: the resource's root.
-			continue
-		}
-
-		elementSDPath := fmt.Sprintf("%s.%s", sdPath, key)
-		elementFhirPath := fmt.Sprintf("%s.%s", fhirPath, key)
-
-		// Find the ElementDefinition for this path using SD path
-		elemDef := v.findElementDef(sd, elementSDPath)
-		if elemDef == nil || v.sdRegistry.HoldsResource(elemDef) || arrayForOne(elemDef, value) {
-			// Unknown or an array where one value goes (the structural phase reports them, and HL7
-			// checks nothing in them), or a resource the walk visits.
-			continue
-		}
-
-		// Check if this element has a binding
-		if elemDef.Binding != nil && elemDef.Binding.ValueSet != "" {
-			v.validateBinding(ctx, value, elemDef, elementFhirPath, result)
-		}
-
-		// Independent of any binding: a Coding must name a code that exists in the
-		// system it declares.
-		v.ValidateCodedValue(ctx, value, elemDef, elementFhirPath, result)
-
-		// Recurse into complex types
-		switch val := value.(type) {
-		case map[string]any:
-			v.validateComplexElement(ctx, val, elemDef, sd, elementSDPath, elementFhirPath, result)
-		case []any:
-			for i, item := range val {
-				itemPath := fmt.Sprintf("%s[%d]", elementFhirPath, i)
-				if mapItem, ok := item.(map[string]any); ok {
-					v.validateComplexElement(ctx, mapItem, elemDef, sd, elementSDPath, itemPath, result)
-				} else if elemDef.Binding != nil {
-					// Array of primitives with binding (e.g., array of codes)
-					v.validatePrimitiveBinding(ctx, item, elemDef, itemPath, result)
-				}
-			}
-		}
-	}
-}
-
-// arrayForOne reports whether value is an array written for an element that does not repeat.
-func arrayForOne(def *registry.ElementDefinition, value any) bool {
-	_, isArray := value.([]any)
-	return isArray && !def.Repeats()
-}
-
-// isStructuralType returns true for types whose children are defined in the parent resource SD
-// rather than in their own standalone StructureDefinition.
-func isStructuralType(typeName string) bool {
-	return typeName == "BackboneElement" || typeName == "Element"
-}
-
-// validateComplexElement validates bindings within a complex element.
-// The parent SD and path are used to look up children when the element type is BackboneElement.
-func (v *Validator) validateComplexElement(ctx context.Context, data map[string]any, parentDef *registry.ElementDefinition, parentSD *registry.StructureDefinition, parentSDPath, basePath string, result *issue.Result) {
-	if len(parentDef.Type) == 0 {
-		return
-	}
-
-	typeName := parentDef.Type[0].Code
-
-	// BackboneElement/Element children are defined in the parent resource's SD,
-	// not in the generic BackboneElement SD.
-	if isStructuralType(typeName) {
-		v.validateElementWithPaths(ctx, data, parentSD, parentSDPath, basePath, result)
-		return
-	}
-
-	typeSD := v.sdRegistry.GetByType(typeName)
-	if typeSD == nil || typeSD.Snapshot == nil {
-		return
-	}
-
-	// Validate each field in the complex type
-	for key, value := range data {
-		elementPath := fmt.Sprintf("%s.%s", basePath, key)
-		typePath := fmt.Sprintf("%s.%s", typeName, key)
-
-		// Find ElementDefinition in the type's SD
-		var elemDef *registry.ElementDefinition
-		for i := range typeSD.Snapshot.Element {
-			if typeSD.Snapshot.Element[i].Path == typePath {
-				elemDef = &typeSD.Snapshot.Element[i]
-				break
-			}
-		}
-
-		if elemDef == nil || v.sdRegistry.HoldsResource(elemDef) || arrayForOne(elemDef, value) {
-			continue
-		}
-
-		// Check binding on this element
-		if elemDef.Binding != nil && elemDef.Binding.ValueSet != "" {
-			v.validateBinding(ctx, value, elemDef, elementPath, result)
-		}
-
-		// Recurse
-		switch val := value.(type) {
-		case map[string]any:
-			v.validateComplexElement(ctx, val, elemDef, typeSD, typePath, elementPath, result)
-		case []any:
-			for i, item := range val {
-				itemPath := fmt.Sprintf("%s[%d]", elementPath, i)
-				if mapItem, ok := item.(map[string]any); ok {
-					v.validateComplexElement(ctx, mapItem, elemDef, typeSD, typePath, itemPath, result)
-				}
-			}
-		}
-	}
+	(&once{seen: map[string]bool{}}).merge(checked, result)
 }
 
 // ValidateCodedValue checks a Coding against the CodeSystem the data itself declares:
@@ -422,14 +306,6 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 	}
 }
 
-func (v *Validator) validateBinding(ctx context.Context, value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
-	var typeName string
-	if len(elemDef.Type) == 1 {
-		typeName = elemDef.Type[0].Code
-	}
-	v.ValidateValueBinding(ctx, value, typeName, elemDef.Binding, fhirPath, result)
-}
-
 // ValidateValueBinding validates a value against an element binding.
 //
 // Exported for callers that hold the binding without an ElementDefinition — chiefly
@@ -506,7 +382,7 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, codin
 		return
 	}
 
-	anyValidInVS, anyDecided, codeLabels := v.validateCodings(ctx, codings, binding, fhirPath, result)
+	anyValidInVS, undecided, codeLabels := v.validateCodings(ctx, codings, binding)
 
 	// Codings without a code carry none. A required binding needs one; an extensible one is told
 	// there is none when no coding names a system either (HL7 names the codings of a system that
@@ -516,10 +392,21 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, codin
 		return
 	}
 
-	// Nothing could be decided for any coding: the binding is unresolvable, which
-	// is not the same as "none of the codings are members".
-	if !anyDecided && len(codeLabels) > 0 {
-		v.reportUnresolved(strings.Join(codeLabels, ", "), binding.ValueSet, binding.Strength, "", fhirPath, result)
+	// No coding is a member, and one could not be decided: whether the concept is from the value set
+	// is not known, which is not the same as "none of the codings are members" (HL7: "Could not
+	// confirm that the codes provided are from the value set").
+	if !anyValidInVS && len(undecided) > 0 {
+		v.reportUnresolved(strings.Join(undecided, ", "), binding.ValueSet, binding.Strength, "", fhirPath, result)
+		return
+	}
+
+	// A required binding is met by one coding of the concept (terminologies.html, "required": the
+	// concept SHALL be from the value set): none is, reported once at the concept, as HL7 reports it.
+	if !anyValidInVS && binding.Strength == strengthRequired && len(codeLabels) > 0 {
+		result.AddErrorWithID(issue.DiagBindingRequiredNoCoding, map[string]any{
+			"valueSet": binding.ValueSet,
+			"codes":    strings.Join(codeLabels, ", "),
+		}, fhirPath)
 		return
 	}
 
@@ -567,12 +454,10 @@ func anySystem(codings []any) bool {
 	return false
 }
 
-// validateCodingInCC validates a Coding within a CodeableConcept context.
-// It performs CodeSystem validation and display checks, but suppresses per-coding
-// extensible binding warnings (deferred to CC-level aggregation).
-// Returns the ValueSet resolution for the coding, so the caller can aggregate:
+// codingInValueSet decides whether a Coding of a CodeableConcept is a member of binding's value
+// set. Nothing is reported per coding: the caller reports at the concept, which one member meets.
 // Unresolved must not be reported as "not a member".
-func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) terminology.Resolution {
+func (v *Validator) codingInValueSet(ctx context.Context, coding map[string]any, binding *registry.Binding) terminology.Resolution {
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 
@@ -594,59 +479,40 @@ func (v *Validator) validateCodingInCC(ctx context.Context, coding map[string]an
 	}
 
 	if res.Resolution == terminology.Invalid {
-		// Only emit per-coding error for required bindings; extensible is deferred to CC level.
-		if binding.Strength == strengthRequired {
-			v.reportBindingViolation(system, code, res, binding, fhirPath, result)
-		}
+		// Reported at CC level, for both strengths: another coding may be a member.
 		return terminology.Invalid
 	}
 
 	return terminology.Valid
 }
 
-// validateCodings validates each Coding of a CodeableConcept and reports what the
-// set as a whole established: whether any is a member, whether anything at all
-// could be decided, and the labels for an aggregate diagnostic.
-func (v *Validator) validateCodings(ctx context.Context, codings []any, binding *registry.Binding, fhirPath string, result *issue.Result) (anyValidInVS, anyDecided bool, codeLabels []string) {
-	for i, c := range codings {
+// validateCodings decides each Coding of a CodeableConcept against binding and returns what the set
+// as a whole established, reporting nothing: whether any is a member, the labels of the codings with
+// a code that could not be decided (undecided), and the labels of all, for an aggregate diagnostic.
+func (v *Validator) validateCodings(ctx context.Context, codings []any, binding *registry.Binding) (anyValidInVS bool, undecided, codeLabels []string) {
+	for _, c := range codings {
 		codingMap, ok := c.(map[string]any)
 		if !ok {
 			continue
 		}
-		codingPath := fmt.Sprintf("%s.coding[%d]", fhirPath, i)
-
-		// Validate within CC context: suppresses per-coding extensible warnings.
-		switch v.validateCodingInCC(ctx, codingMap, binding, codingPath, result) {
-		case terminology.Valid:
-			anyValidInVS = true
-			anyDecided = true
-		case terminology.Invalid:
-			anyDecided = true
-		case terminology.Unresolved:
-			// Leaves anyDecided alone: nothing was established either way.
-		}
-
 		sys, _ := codingMap["system"].(string)
 		cd, _ := codingMap["code"].(string)
-		switch {
-		case sys != "" && cd != "":
-			codeLabels = append(codeLabels, fmt.Sprintf("%s#%s", sys, cd))
-		case cd != "":
-			codeLabels = append(codeLabels, cd)
+		if cd == "" {
+			continue // decides nothing, and names nothing
+		}
+		label := cd
+		if sys != "" {
+			label = sys + "#" + cd
+		}
+		codeLabels = append(codeLabels, label)
+		switch v.codingInValueSet(ctx, codingMap, binding) {
+		case terminology.Valid:
+			anyValidInVS = true
+		case terminology.Unresolved:
+			undecided = append(undecided, label) // nothing was established either way
 		}
 	}
-	return anyValidInVS, anyDecided, codeLabels
-}
-
-// validatePrimitiveBinding validates a primitive value against a binding.
-func (v *Validator) validatePrimitiveBinding(ctx context.Context, value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
-	if elemDef.Binding == nil {
-		return
-	}
-
-	if str, ok := value.(string); ok {
-		v.validateCodeBinding(ctx, str, "", elemDef.Binding, fhirPath, result)
-	}
+	return anyValidInVS, undecided, codeLabels
 }
 
 // validateCodeBinding validates a code against a ValueSet.
@@ -823,18 +689,4 @@ func reportExtensibleViolation(system string, membership terminology.Membership,
 	case terminology.MembershipIncluded:
 		result.AddWarningWithID(issue.DiagBindingExtensible, args, fhirPath)
 	}
-}
-
-// findElementDef finds an ElementDefinition by path in the StructureDefinition.
-func (v *Validator) findElementDef(sd *registry.StructureDefinition, path string) *registry.ElementDefinition {
-	if sd == nil || sd.Snapshot == nil {
-		return nil
-	}
-
-	for i := range sd.Snapshot.Element {
-		if sd.Snapshot.Element[i].Path == path {
-			return &sd.Snapshot.Element[i]
-		}
-	}
-	return nil
 }

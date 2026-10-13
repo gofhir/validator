@@ -125,6 +125,17 @@
       ]
     },
     {
+      "name": "display",
+      "rule": "equal",
+      "gofhir": [
+        "BINDING_DISPLAY_MISMATCH"
+      ],
+      "hl7": [
+        "Display_Name_for__should_be_one_of__instead_of",
+        "Display_Name_WS_for__should_be_one_of__instead_of"
+      ]
+    },
+    {
       "name": "empty-object",
       "rule": "equal",
       "gofhir": [
@@ -245,7 +256,8 @@
       "name": "binding-required",
       "rule": "equal",
       "gofhir": [
-        "BINDING_REQUIRED"
+        "BINDING_REQUIRED",
+        "BINDING_REQUIRED_NO_CODING"
       ],
       "hl7": [
         "Terminology_TX_NoValid_*"
@@ -399,7 +411,6 @@
   },
   "unmapped": {
     "BINDING_CANNOT_VALIDATE": "processing notice, not a finding HL7 reports as an error",
-    "BINDING_DISPLAY_MISMATCH": "display checks: no HL7 counterpart verified yet",
     "BINDING_EXTENSIBLE": "a warning in both validators",
     "BINDING_EXTENSIBLE_NO_CODING": "a warning in both validators",
     "BINDING_EXTENSIBLE_OTHER_SYSTEM": "a warning in both validators",
