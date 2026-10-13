@@ -1,0 +1,1 @@
+{"resourceType":"Observation","meta":{"profile":["http://example.org/fhir/StructureDefinition/obs-slice"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","category":[{"id":"x"}],"code":{"text":"c"},"subject":{"display":"s"},"effectiveDateTime":"2020-01-01","performer":[{"display":"p"}]}

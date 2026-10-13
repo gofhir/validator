@@ -1,0 +1,1 @@
+{"resourceType":"AuditEvent","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"type":{"id":"x"},"recorded":"2020-01-01T00:00:00Z","agent":[{"requestor":true,"who":{"display":"a"}}],"source":{"observer":{"display":"b"}}}

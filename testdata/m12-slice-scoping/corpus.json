@@ -138,6 +138,15 @@
       "files": ["testdata/m12-slice-scoping/probes/js_*.json"]
     },
     {
+      "name": "binding-probes",
+      "files": ["testdata/m12-slice-scoping/probes/bn_*.json"]
+    },
+    {
+      "name": "binding-profile-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.nocode-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/bp_*.json"]
+    },
+    {
       "name": "held-resource-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.held-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/hr_*.json"]

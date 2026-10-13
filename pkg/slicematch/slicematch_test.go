@@ -97,7 +97,7 @@ func (stubConformer) Conforms(_ context.Context, value any, p *registry.Structur
 
 type stubMembers map[string]Membership // by code
 
-func (s stubMembers) InValueSet(_ context.Context, _ string, value any) Membership {
+func (s stubMembers) InValueSet(_ context.Context, _ string, value any, _ string) Membership {
 	b, _ := json.Marshal(value)
 	for code, ans := range s {
 		if strings.Contains(string(b), `"`+code+`"`) {

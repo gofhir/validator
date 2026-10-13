@@ -1,0 +1,6 @@
+{"resourceType":"StructureDefinition","id":"ext-cc","url":"http://example.org/fhir/StructureDefinition/ext-cc","name":"ExtCC","status":"active","fhirVersion":"4.0.1","kind":"complex-type","abstract":false,"context":[{"type":"element","expression":"Element"},{"type":"element","expression":"Resource"}],"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint",
+"differential":{"element":[
+{"id":"Extension","path":"Extension","max":"1"},
+{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/fhir/StructureDefinition/ext-cc"},
+{"id":"Extension.value[x]","path":"Extension.value[x]","type":[{"code":"CodeableConcept"},{"code":"Coding"}],"binding":{"strength":"extensible","valueSet":"http://hl7.org/fhir/ValueSet/marital-status"}}
+]}}

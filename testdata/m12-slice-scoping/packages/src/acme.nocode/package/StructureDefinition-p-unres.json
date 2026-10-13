@@ -1,0 +1,5 @@
+{"resourceType":"StructureDefinition","id":"p-unres","url":"http://example.org/fhir/StructureDefinition/p-unres","name":"PUnres","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Patient","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient","derivation":"constraint",
+"differential":{"element":[
+{"id":"Patient.maritalStatus","path":"Patient.maritalStatus","binding":{"strength":"extensible","valueSet":"http://example.org/fhir/ValueSet/nope"}},
+{"id":"Patient.contact.relationship","path":"Patient.contact.relationship","binding":{"strength":"required","valueSet":"http://example.org/fhir/ValueSet/nope2"}}
+]}}

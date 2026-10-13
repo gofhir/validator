@@ -369,13 +369,13 @@ var undecided = map[issue.DiagnosticID]bool{
 }
 
 // InValueSet implements slicematch.MemberChecker.
-func (m memberChecker) InValueSet(ctx context.Context, valueSetURL string, value any) slicematch.Membership {
+func (m memberChecker) InValueSet(ctx context.Context, valueSetURL string, value any, typeCode string) slicematch.Membership {
 	if m.v.config.NoTerminology || m.v.bindValidator == nil {
 		return slicematch.MembershipUnknown
 	}
 	result := issue.NewResult()
 	binding := &registry.Binding{Strength: "required", ValueSet: valueSetURL}
-	m.v.bindValidator.ValidateValueBinding(terminology.WithStrictMembership(ctx), value, binding, "", result)
+	m.v.bindValidator.ValidateValueBinding(terminology.WithStrictMembership(ctx), value, typeCode, binding, "", result)
 	for _, is := range result.Issues {
 		if undecided[issue.DiagnosticID(is.MessageID)] {
 			return slicematch.MembershipUnknown
