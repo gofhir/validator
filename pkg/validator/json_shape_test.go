@@ -149,7 +149,10 @@ func TestJSONShape(t *testing.T) {
 			"STRUCTURE_EMPTY_OBJECT @ Patient.extension[0].valueAddress",
 		}},
 		// An element with only an id has no content either: ele-1 says so (HL7 does not judge it).
-		{"e2_empty_and_id_only", []string{"STRUCTURE_EMPTY_OBJECT @ Patient.name[0]"}},
+		{"e2_empty_and_id_only", []string{
+			"BINDING_TEXT_ONLY_WARNING @ Patient.maritalStatus", // no code, as HL7 warns
+			"STRUCTURE_EMPTY_OBJECT @ Patient.name[0]",
+		}},
 		// A resource written empty, and a primitive's "_key" sibling, are empty objects too.
 		{"e3_empty_resource_and_siblings", []string{
 			"STRUCTURE_EMPTY_OBJECT @ Patient.birthDate",

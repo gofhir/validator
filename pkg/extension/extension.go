@@ -47,7 +47,7 @@ type Validator struct {
 // *binding.Validator; an interface here so this package does not depend on the
 // concrete type, and so terminology-free callers can leave it unset.
 type BindingValidator interface {
-	ValidateValueBinding(ctx context.Context, value any, binding *registry.Binding, fhirPath string, result *issue.Result)
+	ValidateValueBinding(ctx context.Context, value any, typeName string, binding *registry.Binding, fhirPath string, result *issue.Result)
 
 	// ValidateCodedValue checks a Coding against the CodeSystem it declares, which is
 	// independent of any binding — see its implementation in pkg/binding.
@@ -474,7 +474,7 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 
 	// Validate binding if present on Extension.value[x]
 	if valueDef.Binding != nil && valueDef.Binding.ValueSet != "" {
-		v.validateExtensionBinding(ctx, value, valueDef.Binding, valuePath, result)
+		v.validateExtensionBinding(ctx, value, declaredType(valueType, valueDef.Type), valueDef.Binding, valuePath, result)
 	}
 
 	// Independent of the binding: an extension value that is a Coding must name a code
@@ -698,6 +698,17 @@ func (v *Validator) isTypeAllowed(valueType string, allowedTypes []registry.Type
 	return false
 }
 
+// declaredType is the code of the type of allowedTypes that valueType, as a value key spells it,
+// names: "codeableConcept" is CodeableConcept.
+func declaredType(valueType string, allowedTypes []registry.Type) string {
+	for _, t := range allowedTypes {
+		if strings.EqualFold(t.Code, valueType) {
+			return t.Code
+		}
+	}
+	return valueType
+}
+
 // allowedTypesString returns a comma-separated list of allowed types.
 func (v *Validator) allowedTypesString(types []registry.Type) string {
 	names := make([]string, len(types))
@@ -809,8 +820,8 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 	}
 }
 
-// validateExtensionBinding validates the binding on an extension's value[x].
-func (v *Validator) validateExtensionBinding(ctx context.Context, value any, bound *registry.Binding, valuePath string, result *issue.Result) {
+// validateExtensionBinding validates the binding on an extension's value[x], of type valueType.
+func (v *Validator) validateExtensionBinding(ctx context.Context, value any, valueType string, bound *registry.Binding, valuePath string, result *issue.Result) {
 	if v.bindValidator == nil {
 		return // binding validation not wired
 	}
@@ -820,5 +831,5 @@ func (v *Validator) validateExtensionBinding(ctx context.Context, value any, bou
 	// instead of aggregating a CodeableConcept, and treated an unresolvable binding
 	// as nothing at all. An extension value is bound like any other element and is
 	// now validated like one.
-	v.bindValidator.ValidateValueBinding(ctx, value, bound, valuePath, result)
+	v.bindValidator.ValidateValueBinding(ctx, value, valueType, bound, valuePath, result)
 }

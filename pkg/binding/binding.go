@@ -20,6 +20,12 @@ const (
 	strengthExtensible = "extensible"
 )
 
+// The datatypes that carry codes, by name.
+const (
+	codingType          = "Coding"
+	codeableConceptType = "CodeableConcept"
+)
+
 // Validator validates terminology bindings.
 type Validator struct {
 	sdRegistry   *registry.Registry
@@ -276,9 +282,9 @@ func (v *Validator) ValidateCodedValue(ctx context.Context, value any, elemDef *
 	}
 
 	switch elemDef.Type[0].Code {
-	case "Coding":
+	case codingType:
 		v.validateCodingValue(ctx, value, fhirPath, result)
-	case "CodeableConcept":
+	case codeableConceptType:
 		v.validateCodeableConceptValue(ctx, value, fhirPath, result)
 	}
 }
@@ -417,7 +423,11 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 }
 
 func (v *Validator) validateBinding(ctx context.Context, value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
-	v.ValidateValueBinding(ctx, value, elemDef.Binding, fhirPath, result)
+	var typeName string
+	if len(elemDef.Type) == 1 {
+		typeName = elemDef.Type[0].Code
+	}
+	v.ValidateValueBinding(ctx, value, typeName, elemDef.Binding, fhirPath, result)
 }
 
 // ValidateValueBinding validates a value against an element binding.
@@ -428,7 +438,10 @@ func (v *Validator) validateBinding(ctx context.Context, value any, elemDef *reg
 // drifting: display checks, CodeSystem membership, CodeableConcept aggregation, the
 // unresolved policy and the extensible severity table apply the same way to an
 // extension value as to any other element.
-func (v *Validator) ValidateValueBinding(ctx context.Context, value any, binding *registry.Binding, fhirPath string, result *issue.Result) {
+//
+// TypeName is the value's type, "" when the caller does not know it: an object is then read as a
+// Coding or a CodeableConcept by the elements it holds, and one that holds none of them is neither.
+func (v *Validator) ValidateValueBinding(ctx context.Context, value any, typeName string, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	if binding == nil {
 		return
 	}
@@ -445,32 +458,29 @@ func (v *Validator) ValidateValueBinding(ctx context.Context, value any, binding
 		v.validateCodeBinding(ctx, val, "", binding, fhirPath, result)
 
 	case map[string]any:
-		v.validateMapBinding(ctx, val, binding, fhirPath, result)
+		v.validateMapBinding(ctx, val, typeName, binding, fhirPath, result)
 
 	case []any:
 		for i, item := range val {
 			itemPath := fmt.Sprintf("%s[%d]", fhirPath, i)
-			v.ValidateValueBinding(ctx, item, binding, itemPath, result)
+			v.ValidateValueBinding(ctx, item, typeName, binding, itemPath, result)
 		}
 	}
 }
 
-// validateMapBinding validates a map value (Coding or CodeableConcept) against a binding.
-func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
+// validateMapBinding validates a map value (Coding or CodeableConcept, typeName when known) against a
+// binding.
+func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, typeName string, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	// Check if it's a CodeableConcept with coding array
 	if coding, ok := val["coding"]; ok {
-		v.validateCodeableConceptWithCoding(ctx, val, coding, binding, fhirPath, result)
+		v.validateCodeableConceptWithCoding(ctx, coding, binding, fhirPath, result)
 		return
 	}
 
-	// CodeableConcept with only text, no coding key
-	if val["text"] != nil {
-		switch binding.Strength {
-		case strengthExtensible:
-			v.emitTextOnlyWarning(binding.ValueSet, fhirPath, result)
-		case strengthRequired:
-			v.reportNoCode(binding, fhirPath, result)
-		}
+	// A CodeableConcept with no coding: only text, or nothing that is a concept (an id, extensions,
+	// an empty object), which provides no code either, as HL7 reports it.
+	if val["text"] != nil || typeName == codeableConceptType {
+		v.reportNoCode(binding, fhirPath, result)
 		return
 	}
 
@@ -489,28 +499,19 @@ func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, 
 }
 
 // validateCodeableConceptWithCoding validates a CodeableConcept that has a coding array.
-func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val map[string]any, coding any, binding *registry.Binding, fhirPath string, result *issue.Result) {
+func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, coding any, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	codings, isList := coding.([]any)
-	hasText := val["text"] != nil && val["text"] != ""
-
-	// If CodeableConcept has only text (no codings or empty array),
-	// emit a warning for extensible bindings (to match HL7 validator behavior)
-	if (!isList || len(codings) == 0) && hasText && binding.Strength == strengthExtensible {
-		v.emitTextOnlyWarning(binding.ValueSet, fhirPath, result)
-		return
-	}
-
 	if !isList || len(codings) == 0 {
-		if binding.Strength == strengthRequired {
-			v.reportNoCode(binding, fhirPath, result)
-		}
+		v.reportNoCode(binding, fhirPath, result) // no coding: text only, or nothing
 		return
 	}
 
 	anyValidInVS, anyDecided, codeLabels := v.validateCodings(ctx, codings, binding, fhirPath, result)
 
-	// A required binding needs a code; codings without one carry none.
-	if len(codeLabels) == 0 && binding.Strength == strengthRequired {
+	// Codings without a code carry none. A required binding needs one; an extensible one is told
+	// there is none when no coding names a system either (HL7 names the codings of a system that
+	// carry no code as not in the value set).
+	if len(codeLabels) == 0 && (binding.Strength == strengthRequired || !anySystem(codings)) {
 		v.reportNoCode(binding, fhirPath, result)
 		return
 	}
@@ -535,16 +536,35 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, val m
 	}
 }
 
-// reportNoCode reports a CodeableConcept that carries no code under a required binding: a
-// concept from a required value set is a code, and text alone is not one (terminologies.html,
-// "required": "the concept SHALL be from the specified value set").
+// reportNoCode reports a CodeableConcept that carries no code (only text, or nothing): an error
+// under a required binding, as a concept from a required value set is a code, and text alone is not
+// one (terminologies.html, "required": "the concept SHALL be from the specified value set"); a
+// warning under an extensible one, as the HL7 validator reports it. Against a value set that does not
+// resolve, only that it is not found, as the HL7 validator does: an unknown one says nothing about
+// what the code should have been.
 func (v *Validator) reportNoCode(binding *registry.Binding, fhirPath string, result *issue.Result) {
-	// Only against a value set that resolves, as the HL7 validator does: an unknown one says
-	// nothing about what the code should have been.
-	if v.termRegistry == nil || v.termRegistry.GetValueSet(binding.ValueSet) == nil {
-		return
+	args := map[string]any{"valueSet": binding.ValueSet}
+	switch {
+	case v.termRegistry == nil:
+	case v.termRegistry.GetValueSet(binding.ValueSet) == nil:
+		result.AddWarningWithID(issue.DiagBindingValueSetNotFound, args, fhirPath)
+	case binding.Strength == strengthRequired:
+		result.AddErrorWithID(issue.DiagBindingRequiredNoCode, args, fhirPath)
+	case binding.Strength == strengthExtensible:
+		result.AddWarningWithID(issue.DiagBindingTextOnlyWarning, args, fhirPath)
 	}
-	result.AddErrorWithID(issue.DiagBindingRequiredNoCode, map[string]any{"valueSet": binding.ValueSet}, fhirPath)
+}
+
+// anySystem reports whether one of codings names a system.
+func anySystem(codings []any) bool {
+	for _, c := range codings {
+		if m, ok := c.(map[string]any); ok {
+			if s, _ := m["system"].(string); s != "" {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // validateCodingInCC validates a Coding within a CodeableConcept context.
@@ -616,17 +636,6 @@ func (v *Validator) validateCodings(ctx context.Context, codings []any, binding 
 		}
 	}
 	return anyValidInVS, anyDecided, codeLabels
-}
-
-// emitTextOnlyWarning emits a warning for text-only CodeableConcept on extensible bindings.
-func (v *Validator) emitTextOnlyWarning(valueSet, fhirPath string, result *issue.Result) {
-	result.AddWarningWithID(
-		issue.DiagBindingTextOnlyWarning,
-		map[string]any{
-			"valueSet": valueSet,
-		},
-		fhirPath,
-	)
 }
 
 // validatePrimitiveBinding validates a primitive value against a binding.

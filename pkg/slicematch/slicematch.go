@@ -68,9 +68,9 @@ const (
 )
 
 // MemberChecker answers ValueSet membership, for discriminator values given by a required
-// binding.
+// binding: value, of type typeCode ("" when not known).
 type MemberChecker interface {
-	InValueSet(ctx context.Context, valueSetURL string, value any) Membership
+	InValueSet(ctx context.Context, valueSetURL string, value any, typeCode string) Membership
 }
 
 // NoteKind classifies a note.
@@ -339,7 +339,7 @@ func (m *Matcher) valueMatches(ctx context.Context, slice *registry.ElementNode,
 	}
 	var v any
 	_ = json.Unmarshal(actual[0], &v)
-	switch m.members.InValueSet(ctx, src.valueSet, v) {
+	switch m.members.InValueSet(ctx, src.valueSet, v, valueType(ends)) {
 	case MembershipIn:
 		return verdict{ok: true, constrained: true}
 	case MembershipUnknown:
@@ -531,6 +531,16 @@ func instanceValues(ends []end) []json.RawMessage {
 		}
 	}
 	return out
+}
+
+// valueType is the type of the instance's value where the walk ended, "" when none is known.
+func valueType(ends []end) string {
+	for _, e := range ends {
+		if e.value != nil {
+			return e.typeCode
+		}
+	}
+	return ""
 }
 
 func capitalize(s string) string {

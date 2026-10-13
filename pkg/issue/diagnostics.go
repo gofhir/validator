@@ -373,7 +373,7 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 	DiagBindingValueSetNotFound: {
 		Severity: SeverityWarning,
 		Code:     CodeNotFound,
-		Template: "ValueSet '{valueSet}' not found - code '{code}' cannot be validated",
+		Template: "ValueSet '{valueSet}' not found",
 	},
 	DiagCodeNotInCodeSystem: {
 		Severity: SeverityError,
