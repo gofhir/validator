@@ -49,6 +49,9 @@ type validationContext struct {
 	rootSD *registry.StructureDefinition
 	// rootIdx is the element index for the root SD
 	rootIdx *elementIndex
+	// edits, when set, records how the misshapen values leave the instance (Normalize); it is the
+	// same for the resources the root holds
+	edits *edits
 }
 
 // buildElementIndex creates an index for fast element lookup from a StructureDefinition.
@@ -207,7 +210,7 @@ func (v *Validator) validateElement(
 		// Handle shadow elements (_elementName) for primitive extensions
 		// Per FHIR spec, for any primitive element "foo", there can be "_foo" containing id and extension
 		if strings.HasPrefix(key, "_") {
-			v.validateShadow(data, key, value, sdPath, fhirPath, idx, result)
+			v.validateShadow(data, key, value, sdPath, fhirPath, idx, ctx, result)
 			continue
 		}
 
@@ -229,7 +232,7 @@ func (v *Validator) validateElement(
 		}
 
 		// The value's shape (json.html), then its children, by its type
-		if content, ok := v.checkShape(data, key, value, resolved, elementFHIRPath, result); ok {
+		if content, ok := v.checkShape(data, key, value, resolved, elementFHIRPath, ctx, result); ok {
 			v.validateChildren(content, resolved, elementSDPath, elementFHIRPath, idx, ctx, result)
 		}
 	}
@@ -238,7 +241,7 @@ func (v *Validator) validateElement(
 // validateShadow validates key, a "_key" property of data at fhirPath: a primitive's sibling, its
 // shape then its structure (only id and extension), reported at its element, as HL7 does; else an
 // unknown element.
-func (v *Validator) validateShadow(data map[string]any, key string, value any, sdPath, fhirPath string, idx *elementIndex, result *issue.Result) {
+func (v *Validator) validateShadow(data map[string]any, key string, value any, sdPath, fhirPath string, idx *elementIndex, ctx *validationContext, result *issue.Result) {
 	baseKey := key[1:]
 	base := v.shadowedElement(baseKey, sdPath, idx)
 	if base == nil {
@@ -249,8 +252,8 @@ func (v *Validator) validateShadow(data map[string]any, key string, value any, s
 	if _, isArray := data[baseKey].([]any); isArray && !base.elemDef.Repeats() {
 		return // its value is an array where one goes: reported, nothing in it checked
 	}
-	if v.checkShadowShape(baseKey, value, base, fhirPath+"."+baseKey, result) {
-		v.validateShadowElement(value, fhirPath+"."+key, result)
+	if v.checkShadowShape(data, baseKey, value, base, fhirPath+"."+baseKey, ctx, result) {
+		v.validateShadowContent(value, fhirPath+"."+key, ctx, result)
 	}
 }
 
@@ -277,27 +280,23 @@ func (v *Validator) isPrimitiveType(typeName string) bool {
 	return v.registry.IsPrimitiveType(typeName)
 }
 
-// validateShadowElement validates the structure of a shadow element (_foo).
-// Shadow elements can only contain "id" and "extension".
-func (v *Validator) validateShadowElement(value any, fhirPath string, result *issue.Result) {
+// validateShadowContent validates a primitive's "_key" sibling (value, at path), an object or an
+// array of objects and nulls, each the primitive's id and extensions (json.html#primitive), as an
+// Element: what it holds besides them is unknown, and its extensions are Extensions, their values
+// checked and shaped as any other.
+func (v *Validator) validateShadowContent(value any, path string, ctx *validationContext, result *issue.Result) {
+	elementSD := v.registry.GetByType("Element")
+	if elementSD == nil {
+		return
+	}
+	idx := v.getOrBuildIndex(elementSD)
 	switch val := value.(type) {
 	case map[string]any:
-		// Validate that only id and extension are present
-		for key := range val {
-			if key != "id" && key != "extension" {
-				result.AddErrorWithID(
-					issue.DiagStructureUnknownElement,
-					map[string]any{"element": key},
-					fhirPath+"."+key,
-				)
-			}
-		}
+		v.validateElement(val, elementSD.Type, path, idx, ctx, result)
 	case []any:
-		// Array of shadow elements (for arrays of primitives)
 		for i, item := range val {
-			if item != nil {
-				itemPath := fmt.Sprintf("%s[%d]", fhirPath, i)
-				v.validateShadowElement(item, itemPath, result)
+			if m, ok := item.(map[string]any); ok {
+				v.validateElement(m, elementSD.Type, fmt.Sprintf("%s[%d]", path, i), idx, ctx, result)
 			}
 		}
 	}
@@ -398,7 +397,7 @@ func (v *Validator) validateChildren(
 	case []any:
 		// Check if this is a contained resources array
 		if strings.HasSuffix(sdPath, ".contained") {
-			v.validateContainedResources(val, fhirPath, result)
+			v.validateContainedResources(val, fhirPath, ctx, result)
 			return
 		}
 
@@ -415,7 +414,7 @@ func (v *Validator) validateChildren(
 }
 
 // validateContainedResources validates each contained resource against its own StructureDefinition.
-func (v *Validator) validateContainedResources(contained []any, baseFhirPath string, result *issue.Result) {
+func (v *Validator) validateContainedResources(contained []any, baseFhirPath string, ctx *validationContext, result *issue.Result) {
 	// Ids must be distinct for a fragment reference to identify anything. FHIR R4
 	// §3.1.0.1.10 defines resolution as "internal fragment references (start with '#') refer
 	// to contained resources" — a single one — so two contained resources sharing an id make
@@ -470,6 +469,7 @@ func (v *Validator) validateContainedResources(contained []any, baseFhirPath str
 		containedCtx := &validationContext{
 			rootSD:  containedSD,
 			rootIdx: containedIdx,
+			edits:   ctx.edits,
 		}
 
 		// Validate the contained resource against its own SD
@@ -480,7 +480,7 @@ func (v *Validator) validateContainedResources(contained []any, baseFhirPath str
 
 // validateResourceElement validates a Resource-typed element against its own StructureDefinition.
 // This is used for elements like Bundle.entry.resource or Parameters.parameter.resource.
-func (v *Validator) validateResourceElement(data map[string]any, fhirPath string, result *issue.Result) {
+func (v *Validator) validateResourceElement(data map[string]any, fhirPath string, ctx *validationContext, result *issue.Result) {
 	resourceType, _ := data["resourceType"].(string)
 	if resourceType == "" {
 		result.AddErrorWithID(
@@ -507,6 +507,7 @@ func (v *Validator) validateResourceElement(data map[string]any, fhirPath string
 	resourceCtx := &validationContext{
 		rootSD:  resourceSD,
 		rootIdx: resourceIdx,
+		edits:   ctx.edits,
 	}
 
 	// Validate the resource against its own SD
@@ -545,7 +546,7 @@ func (v *Validator) validateComplexElement(
 	// profile's concrete resource types: Bundle.entry:Solicitud.resource typed ServiceRequest) is
 	// validated as a resource of its own, against its resourceType, whatever types the element has.
 	if v.registry.HoldsResource(resolved.elemDef) {
-		v.validateResourceElement(data, fhirPath, result)
+		v.validateResourceElement(data, fhirPath, ctx, result)
 		return
 	}
 

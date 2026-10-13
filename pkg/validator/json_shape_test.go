@@ -110,7 +110,68 @@ func TestJSONShape(t *testing.T) {
 			"STRUCTURE_ARRAY_EXPECTED @ Patient.contact.telecom",
 			"STRUCTURE_ARRAY_EXPECTED @ Patient.contained",
 		}},
-		// Nothing is evaluated on a value written otherwise (cpt-2, ele-1, txt-1 and txt-2 are not).
+		// A value written otherwise is dropped, as HL7's parser drops it: the items after it are
+		// renumbered (the contained Patient's binding at contained[0], cpt-2 at telecom[0]).
+		{"d1_renumbered", []string{
+			"BINDING_REQUIRED @ Patient.contained[0].gender",
+			"STRUCTURE_OBJECT_EXPECTED @ Patient.contained[0]",
+			"STRUCTURE_OBJECT_EXPECTED @ Patient.name[0]",
+			"STRUCTURE_OBJECT_EXPECTED @ Patient.telecom[0]",
+			"STRUCTURE_VALUE_EXPECTED @ Patient.name[1].given",
+		}},
+		// The invariants of the element that held it do not see it (pat-1, ext-1), and the element
+		// whose only content it was is no element without content (no ele-1), as HL7 has it.
+		{"d2_parent_invariants", []string{
+			"CARDINALITY_MIN @ Patient.extension[0].value[x]",
+			"EXTENSION_VALUE_REQUIRED @ Patient.extension[0]",
+			"STRUCTURE_OBJECT_EXPECTED @ Patient.contact[0].name",
+			"STRUCTURE_VALUE_EXPECTED @ Patient.extension[0].valueString",
+		}},
+		// A primitive written where its array goes is dropped; an object, the array's one item.
+		{"d3_single_for_many_dropped", []string{
+			"STRUCTURE_ARRAY_EXPECTED @ Observation.component",
+			"STRUCTURE_ARRAY_EXPECTED @ Observation.effectiveTiming.event",
+		}},
+		{"d4_primitive_items_renumbered", []string{
+			"EXTENSION_UNKNOWN @ Patient.name[0]._given[0].extension[0]",
+			"STRUCTURE_VALUE_EXPECTED @ Patient.name[0].given",
+		}},
+		// A primitive's "_key" sibling is an Element: its extensions are shaped and checked.
+		{"d5_sibling_extension_value", []string{
+			"EXTENSION_UNKNOWN @ Patient._birthDate.extension[0]",
+			"STRUCTURE_VALUE_EXPECTED @ Patient._birthDate.extension[0].valueString",
+		}},
+		// An element written as an empty object is reported as HL7's parser reports it, not again by
+		// ele-1, nor is the element that holds it; it is no value for FHIRPath (pat-1, ext-1 fail),
+		// and still one for cardinality, as HL7 counts it.
+		{"e1_empty_objects", []string{
+			"STRUCTURE_EMPTY_OBJECT @ Patient.contact[0].name",
+			"STRUCTURE_EMPTY_OBJECT @ Patient.extension[0].valueAddress",
+		}},
+		// An element with only an id has no content either: ele-1 says so (HL7 does not judge it).
+		{"e2_empty_and_id_only", []string{"STRUCTURE_EMPTY_OBJECT @ Patient.name[0]"}},
+		// A resource written empty, and a primitive's "_key" sibling, are empty objects too.
+		{"e3_empty_resource_and_siblings", []string{
+			"STRUCTURE_EMPTY_OBJECT @ Patient.birthDate",
+			"STRUCTURE_EMPTY_OBJECT @ Patient.contained[0]",
+			"STRUCTURE_EMPTY_OBJECT @ Patient.name[0].given",
+			"STRUCTURE_NO_RESOURCE_TYPE @ Patient.contained[0]",
+		}},
+		{"e4_empty_entry_resource", []string{
+			"STRUCTURE_EMPTY_OBJECT @ Bundle.entry[0].resource",
+			"STRUCTURE_NO_RESOURCE_TYPE @ Bundle.entry[0].resource",
+		}},
+		// A primitive's "_key" sibling written otherwise drops its value with it, as HL7's parser
+		// does: no format is checked on it, and no invariant sees it (f2: obs-6 does not fail).
+		{"f1_sibling_misshapen_drops_value", []string{"STRUCTURE_OBJECT_EXPECTED @ Patient.birthDate"}},
+		{"f2_sibling_misshapen_invariants", []string{
+			"BINDING_TEXT_ONLY_WARNING @ Observation.dataAbsentReason",
+			"STRUCTURE_OBJECT_EXPECTED @ Observation.valueString",
+		}},
+		{"f3_sibling_single_for_many", []string{"STRUCTURE_ARRAY_EXPECTED @ Patient.name[0].given"}},
+		{"f4_sibling_item_misshapen", []string{"STRUCTURE_OBJECT_EXPECTED @ Patient.name[0].given"}},
+		// Nothing is evaluated on a value written otherwise (cpt-2, ele-1, txt-1 and txt-2 are not),
+		// and the invariants of the elements that hold it do not see it (dom-6 fails, as in HL7).
 		{"b8_misshapen_invariants", []string{
 			"CARDINALITY_MIN @ Patient.text.div",
 			"STRUCTURE_ARRAY_EXPECTED @ Patient.address[0].line",
@@ -139,13 +200,70 @@ func TestJSONShape(t *testing.T) {
 			if !slices.Equal(got, tt.want) {
 				t.Errorf("got %q, want %q", got, tt.want)
 			}
-			if tt.probe == "b8_misshapen_invariants" {
+			// The invariants see the instance as HL7 does, without the values written otherwise: no
+			// cpt-2 nor ele-1 on them, dom-6 finds no div (b8); pat-1 finds no contact name, ext-1
+			// no value, and the contact the name was in is not without content (d2).
+			if want, ok := map[string][]string{
+				"b8_misshapen_invariants":         {"dom-6 @ Patient"},
+				"d2_parent_invariants":            {"ext-1 @ Patient.extension[0]", "pat-1 @ Patient.contact[0]"},
+				"e1_empty_objects":                {"ext-1 @ Patient.extension[0]", "pat-1 @ Patient.contact[0]"},
+				"e2_empty_and_id_only":            {"ele-1 @ Patient.maritalStatus", "pat-1 @ Patient.contact[0]"},
+				"f2_sibling_misshapen_invariants": nil,
+			}[tt.probe]; ok {
+				var invariants []string
 				for _, is := range res.Issues {
 					if is.MessageID == "CONSTRAINT_FAILED" {
-						t.Errorf("an invariant evaluated on a value written otherwise: %s @ %v", is.Diagnostics, is.Expression)
+						key := strings.TrimPrefix(is.Diagnostics, "Constraint failed: ")
+						key = key[:strings.IndexByte(key, ':')]
+						invariants = append(invariants, key+" @ "+strings.Join(is.Expression, ","))
 					}
+				}
+				slices.Sort(invariants)
+				if !slices.Equal(invariants, want) {
+					t.Errorf("invariants %q, want %q", invariants, want)
 				}
 			}
 		})
+	}
+}
+
+// An issue is located in the source as written: the shape check's at the value it reports, the
+// others at the value they report on, the items after a dropped one renumbered in their paths but
+// not in the source.
+func TestNormalizedLocations(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	src := "{\n" +
+		"  \"resourceType\": \"Patient\",\n" +
+		"  \"text\": {\"status\": \"generated\", \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">x</div>\"},\n" +
+		"  \"telecom\": [\n" +
+		"    5,\n" +
+		"    {\"value\": \"1\"},\n" +
+		"    {\"value\": \"2\", \"foo\": 2}\n" +
+		"  ]\n" +
+		"}\n"
+	res, err := v.Validate(context.Background(), []byte(src))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]int{}
+	for _, is := range res.Issues {
+		if is.Location != nil {
+			got[is.MessageID+" @ "+strings.Join(is.Expression, ",")] = is.Location.Line
+		}
+	}
+	want := map[string]int{
+		"STRUCTURE_OBJECT_EXPECTED @ Patient.telecom[0]": 5,
+		"CONSTRAINT_FAILED @ Patient.telecom[0]":         6,
+		// structural names it as written (telecom[2], not the renumbered telecom[1]), and it is
+		// located by that path, once
+		"STRUCTURE_UNKNOWN_ELEMENT @ Patient.telecom[2].foo": 7,
+	}
+	for k, line := range want {
+		if got[k] != line {
+			t.Errorf("%s: line %d, want %d (all: %v)", k, got[k], line, got)
+		}
 	}
 }

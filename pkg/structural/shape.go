@@ -48,12 +48,13 @@ func (v *Validator) primitiveKind(resolved *resolvedElement) (primitive, known b
 
 // checkShape reports a value of key, an element of data at path, written otherwise than the
 // element says (json.html): an array for an element that repeats and a single value otherwise, an
-// object for a complex type or a resource, a simple value for a primitive (a null only where its
-// "_key" sibling holds its id and extensions). It returns the value to check the content of, at
-// path, and false when there is none: an array written for an element that does not repeat (the
-// HL7 validator checks nothing in it). A single value written where an array goes is checked as
-// written, at the element's path without an index, as HL7's parser names what it finds in it.
-func (v *Validator) checkShape(data map[string]any, key string, value any, resolved *resolvedElement, path string, result *issue.Result) (any, bool) {
+// object for a complex type or a resource, a simple value for a primitive (a null only as an array's
+// item whose "_key" item holds its id and extensions). It returns the value to check the content
+// of, at path, and false when there is none: an array written for an element that does not repeat
+// (the HL7 validator checks nothing in it). A single value written where an array goes is checked
+// as written, at the element's path without an index, as HL7's parser names what it finds in it.
+// With ctx.edits, it records how the HL7 validator's parser leaves the instance (normalize).
+func (v *Validator) checkShape(data map[string]any, key string, value any, resolved *resolvedElement, path string, ctx *validationContext, result *issue.Result) (any, bool) {
 	primitive, known := v.primitiveKind(resolved)
 	if !known {
 		return value, true
@@ -62,63 +63,97 @@ func (v *Validator) checkShape(data map[string]any, key string, value any, resol
 	switch {
 	case isArray && !repeats(resolved):
 		v.reportShape(primitive, key, foundArray, path, result)
+		ctx.edits.drop(data, key, primitive)
 		return nil, false
 	case isArray:
 		siblings, _ := data["_"+key].([]any)
 		var reported map[string]bool // a primitive array's items are reported at the array: once per shape
-		if primitive {
-			reported = map[string]bool{}
-		}
 		for i, item := range items {
 			var sibling any
 			if i < len(siblings) {
 				sibling = siblings[i]
 			}
-			itemPath := fmt.Sprintf("%s[%d]", path, i)
-			if primitive {
+			if m, empty := v.emptyObject(ctx, primitive, item); empty {
+				v.reportEmpty(key, fmt.Sprintf("%s[%d]", path, i), result)
+				ctx.edits.empty(data, m)
+				continue
+			}
+			if !misshapenItem(primitive, item, sibling) {
+				continue
+			}
+			ctx.edits.dropItem(data, key, i, primitive, path)
+			found := foundShape(item)
+			if !primitive {
+				v.reportShape(primitive, key, found, fmt.Sprintf("%s[%d]", path, i), result)
+			} else if !reported[found] {
 				// HL7 names a primitive array's item by the array ("The JSON array for 'given' is
 				// invalid at index 1"), and reports it once.
-				if reported[foundShape(item)] {
-					continue
+				if reported == nil {
+					reported = map[string]bool{}
 				}
-				itemPath = path
-			}
-			if v.checkItem(primitive, key, item, sibling, itemPath, result) && primitive {
-				reported[foundShape(item)] = true
+				reported[found] = true
+				v.reportShape(primitive, key, found, path, result)
 			}
 		}
 		return value, true
 	case repeats(resolved):
 		result.AddErrorWithID(issue.DiagStructureArrayExpected,
 			map[string]any{"element": key, "found": foundShape(value)}, path)
-		if m, ok := value.(map[string]any); ok {
+		if m, ok := value.(map[string]any); ok && !primitive {
+			if _, empty := v.emptyObject(ctx, primitive, m); empty {
+				v.reportEmpty(key, path, result)
+				ctx.edits.empty(data, m)
+			}
+			// the array's one item, as HL7 reads it
+			ctx.edits.wrap(data, key, path)
 			return m, true
 		}
+		ctx.edits.drop(data, key, primitive) // HL7 drops it
 		return nil, false
 	}
 	// A single value has no null: the "_key" sibling holds a primitive's id and extensions when the
 	// value is absent, not null (json.html#primitive).
-	v.checkItem(primitive, key, value, nil, path, result)
+	if m, empty := v.emptyObject(ctx, primitive, value); empty {
+		v.reportEmpty(key, path, result)
+		ctx.edits.empty(data, m)
+		return value, true
+	}
+	if misshapenItem(primitive, value, nil) {
+		v.reportShape(primitive, key, foundShape(value), path, result)
+		ctx.edits.drop(data, key, primitive)
+	}
 	return value, true
 }
 
-// checkItem reports value, one value of key at path, that is not of its element's kind: a primitive
-// is a simple value, or a null where sibling, its "_key" item, holds its id and extensions; another
-// type's value is an object. It reports whether it reported.
-func (v *Validator) checkItem(primitive bool, key string, value, sibling any, path string, result *issue.Result) bool {
-	found := foundShape(value)
-	switch {
+// emptyObject reports whether value, one value of a complex element or a resource an element
+// holds, is written as an empty object: an element has a value or children
+// (ele-1), and HL7's parser reports such an object ("Object must have some content"). It is left in
+// the instance (cardinality counts it, as HL7's does), and it and the element that holds it are
+// judged by their content as written, not again by ele-1. It is judged on the source, as Normalize
+// reads it (ctx.edits): an object the normalization empties had content.
+func (v *Validator) emptyObject(ctx *validationContext, primitive bool, value any) (m map[string]any, empty bool) {
+	m, ok := value.(map[string]any)
+	return m, ok && len(m) == 0 && ctx.edits != nil && !primitive
+}
+
+// reportEmpty reports a value of key at path written as an empty object.
+func (v *Validator) reportEmpty(key, path string, result *issue.Result) {
+	result.AddErrorWithID(issue.DiagStructureEmptyObject, map[string]any{"element": key}, path)
+}
+
+// misshapenItem reports whether value, one value of an element, is not of the element's kind: a
+// primitive is a simple value, or a null where sibling, its "_key" item, holds its id and
+// extensions; another type's value is an object.
+func misshapenItem(primitive bool, value, sibling any) bool {
+	switch found := foundShape(value); {
 	case primitive && (found == foundObject || found == foundArray):
+		return true
 	case primitive && found == foundNull:
-		if _, extended := sibling.(map[string]any); extended {
-			return false
-		}
-	case !primitive && found != foundObject:
+		_, extended := sibling.(map[string]any)
+		return !extended
 	default:
-		return false
+		return !primitive && found != foundObject
 	}
-	v.reportShape(primitive, key, found, path, result)
-	return true
 }
 
 // reportShape reports a value of key at path found where a simple value (a primitive's) or an
@@ -131,28 +166,46 @@ func (v *Validator) reportShape(primitive bool, key, found, path string, result 
 	result.AddErrorWithID(id, map[string]any{"element": key, "found": found}, path)
 }
 
-// checkShadowShape reports a primitive's "_key" sibling (value, at path, its element's) written
-// otherwise than json.html#primitive says: an array of objects or nulls, aligned with the values,
-// when the element repeats; an object otherwise. It reports whether value has that shape.
-func (v *Validator) checkShadowShape(key string, value any, resolved *resolvedElement, path string, result *issue.Result) bool {
+// checkShadowShape reports a primitive's "_key" sibling (value, of data, at path, its element's)
+// written otherwise than json.html#primitive says: an array of objects or nulls, aligned with the
+// values, when the element repeats; an object otherwise. It reports whether value has that shape.
+// HL7's parser reads a primitive's value and its "_key" together: one misshapen, it drops both (the
+// element, or the item and its value).
+func (v *Validator) checkShadowShape(data map[string]any, key string, value any, resolved *resolvedElement, path string, ctx *validationContext, result *issue.Result) bool {
 	sibling := "_" + key
 	items, isArray := value.([]any)
 	if !repeats(resolved) {
-		if _, ok := value.(map[string]any); !ok {
+		m, ok := value.(map[string]any)
+		if !ok {
 			result.AddErrorWithID(issue.DiagStructureObjectExpected,
 				map[string]any{"element": sibling, "found": foundShape(value)}, path)
+			ctx.edits.drop(data, key, true)
 			return false
+		}
+		if len(m) == 0 && ctx.edits != nil {
+			// no id nor extensions: an empty object, at its element, as HL7's parser reports it
+			v.reportEmpty(sibling, path, result)
 		}
 		return true
 	}
 	if !isArray {
 		result.AddErrorWithID(issue.DiagStructureArrayExpected,
 			map[string]any{"element": sibling, "found": foundShape(value)}, path)
+		ctx.edits.drop(data, key, true)
 		return false
 	}
 	reported := map[string]bool{}
-	for _, item := range items {
-		if f := foundShape(item); f != foundObject && f != foundNull && !reported[f] {
+	for i, item := range items {
+		f := foundShape(item)
+		if m, ok := item.(map[string]any); ok && len(m) == 0 && ctx.edits != nil && !reported["empty"] {
+			reported["empty"] = true
+			v.reportEmpty(sibling, path, result)
+		}
+		if f == foundObject || f == foundNull {
+			continue
+		}
+		ctx.edits.dropItem(data, key, i, true, path)
+		if !reported[f] {
 			// at the element, once per shape, as HL7 reports it
 			reported[f] = true
 			result.AddErrorWithID(issue.DiagStructureObjectExpected,

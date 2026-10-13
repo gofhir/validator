@@ -125,6 +125,19 @@
       ]
     },
     {
+      "name": "empty-object",
+      "rule": "equal",
+      "gofhir": [
+        "STRUCTURE_EMPTY_OBJECT"
+      ],
+      "hl7NoID": [
+        {
+          "code": "invalid",
+          "text": "^Object must have some content"
+        }
+      ]
+    },
+    {
       "name": "json-shape",
       "rule": "equal",
       "gofhir": [
