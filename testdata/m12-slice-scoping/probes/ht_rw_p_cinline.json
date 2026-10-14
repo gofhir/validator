@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","meta":{"profile":["https://example.org/rev/StructureDefinition/p-cinline"]},"contained":[{"resourceType":"Observation","status":"final","code":{"text":"c"},"subject":{"reference":"#"}}]}

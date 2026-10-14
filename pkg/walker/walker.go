@@ -122,19 +122,82 @@ func (w *Walker) WalkAllWithProfilesContext(ctx context.Context, data map[string
 // is checked against.
 func (w *Walker) walkWithProfiles(ctx context.Context, data map[string]any, rootType, rootPath string, among func(context.Context, *registry.StructureDefinition, map[string]any, string) []*Nested, visitor ResourceVisitor) {
 	profiles := getMetaProfiles(data)
-	for _, sd := range w.definitions(ctx, profiles, rootType) {
+	rootDefs := w.definitions(ctx, profiles, rootType)
+	for _, sd := range rootDefs {
 		rc := &ResourceContext{Data: data, ResourceType: rootType, FHIRPath: rootPath, SD: sd, Profiles: profiles}
 		if !visitor(rc) {
 			return
 		}
 	}
+	if sd := rootDefinitionIn(ctx); sd != nil && sd.Type == rootType {
+		rootDefs = []*registry.StructureDefinition{sd} // the definition the resource is validated against
+	}
+	held := heldDefinitionsIn(ctx)
+	defsOf := map[*Nested][]*registry.StructureDefinition{}
 	for _, n := range among(ctx, w.registry.GetByType(rootType), data, rootPath) {
-		for _, sd := range w.definitions(ctx, getMetaProfiles(n.Data), n.ResourceType) {
+		defs := w.definitions(ctx, getMetaProfiles(n.Data), n.ResourceType)
+		if held != nil {
+			parentDefs, chain := rootDefs, []map[string]any{data}
+			if n.Parent != nil {
+				parentDefs = defsOf[n.Parent]
+				var up []map[string]any
+				for p := n.Parent; p != nil; p = p.Parent {
+					up = append(up, p.Data)
+				}
+				slices.Reverse(up)
+				chain = append(chain, up...)
+			}
+			for _, sd := range held(ctx, parentDefs, chain, n.Data) {
+				if !slices.Contains(defs, sd) {
+					defs = append(defs, sd)
+				}
+			}
+		}
+		defsOf[n] = defs
+		for _, sd := range defs {
 			if !visitor(resourceContext(n, sd, rootPath)) {
 				return
 			}
 		}
 	}
+}
+
+// HeldDefinitions returns the definitions a resource held in its parent is checked against for its
+// holder element in each of defs, the definitions the parent is checked against: those the holder's
+// type.profile names for it (step C of docs/plans/2026-10-11-held-resources-walker.md). Chain is the
+// resources from the one the walk starts from to the parent, each holding the next.
+type HeldDefinitions func(ctx context.Context, defs []*registry.StructureDefinition, chain []map[string]any, held map[string]any) []*registry.StructureDefinition
+
+type heldDefinitionsKey struct{}
+
+// WithHeldDefinitions returns a context in which the walks check a held resource against the
+// definitions held returns for it too.
+func WithHeldDefinitions(ctx context.Context, held HeldDefinitions) context.Context {
+	return context.WithValue(ctx, heldDefinitionsKey{}, held)
+}
+
+func heldDefinitionsIn(ctx context.Context) HeldDefinitions {
+	h, _ := ctx.Value(heldDefinitionsKey{}).(HeldDefinitions)
+	return h
+}
+
+// ChecksHolderProfiles reports whether the walks in ctx check a held resource against the profiles
+// its holder names (WithHeldDefinitions): a phase that checks one against them itself need not.
+func ChecksHolderProfiles(ctx context.Context) bool {
+	return heldDefinitionsIn(ctx) != nil
+}
+
+type rootDefinitionKey struct{}
+
+// WithRootDefinition returns a context in which the resource the walks start from is validated
+// against sd: its held resources are checked against what sd's holders name (HeldDefinitions).
+func WithRootDefinition(ctx context.Context, sd *registry.StructureDefinition) context.Context {
+	return context.WithValue(ctx, rootDefinitionKey{}, sd)
+}
+
+func rootDefinitionIn(ctx context.Context) *registry.StructureDefinition {
+	sd, _ := ctx.Value(rootDefinitionKey{}).(*registry.StructureDefinition)
+	return sd
 }
 
 // nested returns the resources the walks visit among those data, of type definition sd, holds: its

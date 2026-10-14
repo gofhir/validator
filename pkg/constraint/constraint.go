@@ -105,6 +105,37 @@ type Validator struct {
 	// values checks a value against each definition the walk finds governing it, besides its
 	// invariants: its fixed and pattern values.
 	values ValueChecker
+
+	// holderProfiles chooses the profiles a held resource is checked against among those its
+	// holder element's type.profile names.
+	holderProfiles HolderProfiles
+}
+
+// HolderProfiles chooses, among the profiles a holder element's type.profile names for a resource
+// it holds (alternatives: ElementDefinition.type.profile), those the resource is checked against:
+// the one, or those it conforms to, or, none, every one of its type. Implemented in pkg/validator.
+type HolderProfiles interface {
+	Choose(ctx context.Context, profiles []string, res map[string]any, scope slicematch.Scope) HolderChoice
+}
+
+// HolderChoice is what HolderProfiles chooses for a held resource.
+type HolderChoice struct {
+	// Chosen are the profiles the resource is checked against.
+	Chosen []*registry.StructureDefinition
+	// NotFound are the profiles that do not resolve.
+	NotFound []string
+	// NoSnapshot are the profiles that resolve but whose snapshot cannot be generated, with why.
+	NoSnapshot []ProfileFailure
+	// Unmet, when the resource conforms to none of the alternatives, lists them.
+	Unmet []string
+	// Met, when the resource conforms to more than one alternative, lists those.
+	Met []string
+}
+
+// ProfileFailure is a profile that cannot be used, with the reason.
+type ProfileFailure struct {
+	URL string
+	Err error
 }
 
 // ValueChecker checks a value against an element definition. Implemented by fixedpattern.Checker.
@@ -140,6 +171,11 @@ func WithDefinitions(d DefinitionSource) Option { return func(v *Validator) { v.
 // WithValueChecker checks every value the walk reaches against each definition that governs it, as
 // the invariants are (ValueChecker).
 func WithValueChecker(c ValueChecker) Option { return func(v *Validator) { v.values = c } }
+
+// WithHolderProfiles sets what chooses the profiles a held resource is checked against among
+// those its holder element names. Without it, a held resource is checked against its type and the
+// profiles it declares only.
+func WithHolderProfiles(h HolderProfiles) Option { return func(v *Validator) { v.holderProfiles = h } }
 
 // New creates a new constraint Validator.
 // The termRegistry may be nil to disable memberOf() support (e.g., when -tx n/a is set).

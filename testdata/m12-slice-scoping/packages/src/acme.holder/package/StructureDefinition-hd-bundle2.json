@@ -1,0 +1,3 @@
+{"resourceType":"StructureDefinition","id":"hd-bundle2","url":"https://example.org/fhir/hd/StructureDefinition/hd-bundle2","version":"0.1.0","name":"HdBundle2","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Bundle","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Bundle","derivation":"constraint",
+"differential":{"element":[{"id":"Bundle","path":"Bundle"},
+{"id":"Bundle.entry.resource","path":"Bundle.entry.resource","type":[{"code":"Observation","profile":["https://example.org/fhir/hd/StructureDefinition/hd-obsc"]}]}]}}

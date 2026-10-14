@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","meta":{"profile":["https://example.org/fhir/xr/StructureDefinition/xp-dr1"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"contained":[{"resourceType":"Observation","id":"o","language":"en","status":"final","code":{"text":"c"}}],"generalPractitioner":[{"reference":"#o"}]}

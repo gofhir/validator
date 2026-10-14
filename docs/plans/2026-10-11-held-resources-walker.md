@@ -158,8 +158,9 @@ Parameters' sibling references (`c-relref`, `i-relref404`), R5 `issues`.
 
 ## Out of step B
 
-Step C: binding against nested resources' profiles with one final deduplication, and the holder
-element's `type.profile` (one applies; several are alternatives). Seen and not caused by step B:
+Step C: binding against nested resources' profiles with one final deduplication (done with the
+binding walk, `2026-10-13-binding-definitions-walk.md`), and the holder element's `type.profile`
+(one applies; several are alternatives): done, `2026-10-14-holder-type-profile.md`. Seen and not caused by step B:
 dom-6 on contained resources (gofhir reports, HL7 does not), dom-3's location, the CodeSystem
 check of `meta.security.code`, `reference.findElementDef` not following contentReference or
 choices, HL7's "Resource requires an id" for a resource in R5 `Bundle.issues`, and the reference

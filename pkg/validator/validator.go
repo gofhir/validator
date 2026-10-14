@@ -49,7 +49,9 @@ type Validator struct {
 	refValidator        *reference.Validator
 	constraintValidator *constraint.Validator
 	slicingValidator    *slicing.Validator
-	ucumValidator       *ucumvalidator.Validator
+	// matcher tells the slice a value belongs to, for the phases and the holders' profiles.
+	matcher       *slicematch.Matcher
+	ucumValidator *ucumvalidator.Validator
 }
 
 // PackageSpec represents an additional FHIR package to load.
@@ -584,10 +586,12 @@ func New(opts ...Option) (*Validator, error) {
 	// The constraint phase's walk checks each value against every definition that governs it: its
 	// invariants, and its fixed and pattern values (plan B, B3).
 	v.constraintValidator = constraint.New(reg, constraintTermReg, constraint.WithMatcher(matcher),
-		constraint.WithDefinitions(v.extValidator), constraint.WithValueChecker(fixedpattern.NewChecker()))
+		constraint.WithDefinitions(v.extValidator), constraint.WithValueChecker(fixedpattern.NewChecker()),
+		constraint.WithHolderProfiles(holderProfiles{v: v}))
 	// An extension's context invariants are evaluated as the profiles' invariants are.
 	v.extValidator.SetFHIRPathEvaluator(contextScopes{v.constraintValidator})
 	v.slicingValidator = slicing.NewWithMatcher(reg, matcher, slicing.WithDefinitions(v.extValidator))
+	v.matcher = matcher
 
 	v.ucumValidator = initUCUMValidator(reg)
 
@@ -771,6 +775,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	ctx = constraint.WithReportScope(ctx)
 	ctx = withExtensionScope(ctx)
 	ctx = slicerecord.With(ctx)
+	ctx = walker.WithHeldDefinitions(withHolderGroups(ctx), v.heldDefinitions)
 	reported := map[string]bool{}
 	var nested map[string]bool
 	if len(profilesToValidate) > 1 {
@@ -865,6 +870,9 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 		in.scope = constraint.ScopeInBundle(vs.scope, data)
 		vs = &in
 	}
+	// The walks check the resources data holds against what sd's holders name for them.
+	ctx = withRootScope(walker.WithRootDefinition(ctx, sd), data, vs)
+
 	// Phase 1: Structural validation (uses cached element indexes)
 	v.structuralPhase(ctx, data, sd, vs, result)
 	result.Stats.PhasesRun++

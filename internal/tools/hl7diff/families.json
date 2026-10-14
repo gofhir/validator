@@ -125,6 +125,41 @@
       ]
     },
     {
+      "name": "holder-profile-not-found",
+      "rule": "equal",
+      "gofhir": [
+        "HOLDER_PROFILE_NOT_FOUND"
+      ],
+      "hl7": [
+        "Bundle_BUNDLE_Entry_NoProfile_EXPL",
+        "Bundle_BUNDLE_Entry_NoProfile_TYPE"
+      ]
+    },
+    {
+      "name": "holder-profile-no-match",
+      "rule": "equal",
+      "gofhir": [
+        "HOLDER_PROFILE_NO_MATCH"
+      ],
+      "hl7": [
+        "BUNDLE_BUNDLE_ENTRY_MULTIPLE_PROFILES_NO_MATCH",
+        "Validation_VAL_Profile_NoMatch",
+        "Validation_VAL_Profile_WrongType",
+        "Bundle_BUNDLE_Entry_Type3",
+        "Bundle_BUNDLE_Entry_Type2"
+      ]
+    },
+    {
+      "name": "holder-profile-multiple-matches",
+      "rule": "equal",
+      "gofhir": [
+        "HOLDER_PROFILE_MULTIPLE_MATCHES"
+      ],
+      "hl7": [
+        "Validation_VAL_Profile_MultipleMatches"
+      ]
+    },
+    {
       "name": "display",
       "rule": "equal",
       "gofhir": [
