@@ -56,6 +56,26 @@ func (v *Validator) checkValue(ctx context.Context, def *registry.ElementDefinit
 			v.checkCodingAgainstCodeSystem(ctx, m, path, result)
 		}
 	}
+	v.checkBinding(ctx, def, cv, path, result)
+	// A profile binds an element within its base element's binding (ElementDefinition.base), which
+	// a resource conforms to as well: where the profile's value set is not found, its binding cannot
+	// be checked and the base element's still can, as the HL7 validator checks it. Where it is found,
+	// conforming to it is conforming to the base (an extensible base binding may be replaced).
+	if base := v.baseOf(def); base != nil && otherBinding(base.Binding, def.Binding) && v.bound(def, cv.TypeCode) &&
+		v.valueSetNotFound(ctx, def.Binding) {
+		v.checkBinding(ctx, base, cv, path, result)
+	}
+}
+
+// valueSetNotFound reports whether b binds to a value set that cannot be resolved here
+// (terminology.Registry.ResolvesValueSet).
+func (v *Validator) valueSetNotFound(ctx context.Context, b *registry.Binding) bool {
+	return b != nil && b.ValueSet != "" && v.termRegistry != nil && !v.termRegistry.ResolvesValueSet(ctx, b.ValueSet)
+}
+
+// checkBinding checks one value of an element of definition def, at path, against def's binding,
+// when its type is one a binding applies to.
+func (v *Validator) checkBinding(ctx context.Context, def *registry.ElementDefinition, cv elementvalues.Value, path string, result *issue.Result) {
 	b := def.Binding
 	if b == nil || b.ValueSet == "" || !v.bound(def, cv.TypeCode) {
 		return
@@ -63,11 +83,39 @@ func (v *Validator) checkValue(ctx context.Context, def *registry.ElementDefinit
 	if cv.Value == nil {
 		// A primitive with no value, only extensions, provides no code, as HL7 reports it.
 		if b.Strength == strengthRequired {
-			v.reportNoCode(b, path, result)
+			v.reportNoCode(ctx, b, path, result)
 		}
 		return
 	}
 	v.ValidateValueBinding(ctx, cv.Value, cv.TypeCode, b, path, result)
+}
+
+// baseOf returns the element def derives from in its base resource or type (ElementDefinition.base),
+// when it is another one.
+func (v *Validator) baseOf(def *registry.ElementDefinition) *registry.ElementDefinition {
+	if def.Base == nil || def.Base.Path == "" {
+		return nil
+	}
+	if base := v.sdRegistry.GetElementDefinition(def.Base.Path); base != def {
+		return base
+	}
+	return nil
+}
+
+// otherBinding reports whether base binds to another value set than b does, or with another
+// strength: a version of the same value set is the same one.
+func otherBinding(base, b *registry.Binding) bool {
+	switch {
+	case base == nil || base.ValueSet == "":
+		return false
+	case b == nil:
+		return true
+	}
+	unversioned := func(canonical string) string {
+		url, _, _ := strings.Cut(canonical, "|")
+		return url
+	}
+	return unversioned(base.ValueSet) != unversioned(b.ValueSet) || base.Strength != b.Strength
 }
 
 // bound reports whether a binding on def applies to a value of type typeCode: a type def allows,

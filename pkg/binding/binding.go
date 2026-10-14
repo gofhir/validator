@@ -359,7 +359,7 @@ func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, 
 	// A CodeableConcept with no coding: only text, or nothing that is a concept (an id, extensions,
 	// an empty object), which provides no code either, as HL7 reports it.
 	if val["text"] != nil || typeName == codeableConceptType {
-		v.reportNoCode(binding, fhirPath, result)
+		v.reportNoCode(ctx, binding, fhirPath, result)
 		return
 	}
 
@@ -381,7 +381,7 @@ func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, 
 func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, coding any, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	codings, isList := coding.([]any)
 	if !isList || len(codings) == 0 {
-		v.reportNoCode(binding, fhirPath, result) // no coding: text only, or nothing
+		v.reportNoCode(ctx, binding, fhirPath, result) // no coding: text only, or nothing
 		return
 	}
 
@@ -391,7 +391,7 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, codin
 	// there is none when no coding names a system either (HL7 names the codings of a system that
 	// carry no code as not in the value set).
 	if len(codeLabels) == 0 && (binding.Strength == strengthRequired || !anySystem(codings)) {
-		v.reportNoCode(binding, fhirPath, result)
+		v.reportNoCode(ctx, binding, fhirPath, result)
 		return
 	}
 
@@ -432,11 +432,11 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, codin
 // warning under an extensible one, as the HL7 validator reports it. Against a value set that does not
 // resolve, only that it is not found, as the HL7 validator does: an unknown one says nothing about
 // what the code should have been.
-func (v *Validator) reportNoCode(binding *registry.Binding, fhirPath string, result *issue.Result) {
+func (v *Validator) reportNoCode(ctx context.Context, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	args := map[string]any{"valueSet": binding.ValueSet}
 	switch {
 	case v.termRegistry == nil:
-	case v.termRegistry.GetValueSet(binding.ValueSet) == nil:
+	case !v.termRegistry.ResolvesValueSet(ctx, binding.ValueSet):
 		result.AddWarningWithID(issue.DiagBindingValueSetNotFound, args, fhirPath)
 	case binding.Strength == strengthRequired:
 		result.AddErrorWithID(issue.DiagBindingRequiredNoCode, args, fhirPath)

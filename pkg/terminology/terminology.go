@@ -1170,6 +1170,26 @@ func (r *Registry) conceptOf(system, code string) (*CodeSystem, *CodeSystemCode)
 	return cs, find(cs.Concept)
 }
 
+// ResolvesValueSet reports whether the value set url names can be resolved here, where membership
+// in it is decided: by the authority, when one decides (it supports it and did not report it
+// unresolvable, which is remembered as ResolveCodeInValueSet remembers it); otherwise held, or
+// supported by an authority that is not the only source. A provider tells only whether a code is a
+// member, not whether it holds a value set: one is not resolved for it.
+func (r *Registry) ResolvesValueSet(ctx context.Context, url string) bool {
+	a, authoritative := r.authorityFor()
+	if authoritative {
+		if r.isKnownUnresolved(url) {
+			return false
+		}
+		if !a.Supports(ctx, url) {
+			r.markUnresolved(url)
+			return false
+		}
+		return true
+	}
+	return r.GetValueSet(url) != nil || (a != nil && a.Supports(ctx, url))
+}
+
 // IsSystemInValueSet checks if a system is one of the systems a ValueSet includes: those of its
 // includes, of the ValueSets they name, and of its expansion when it has no composition.
 //

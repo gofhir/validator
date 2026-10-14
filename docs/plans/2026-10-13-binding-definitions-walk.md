@@ -75,7 +75,11 @@ code is not in the value set (HL7: cannot be validated without a terminology ser
 
 ## Seen and not in this plan
 
-HL7 checks a profile's base type's bindings too ("validating against Base FHIR Standard"): a
-pipeline matter, not the binding phase's. A required binding missed on a CodeableConcept is reported
+A profile's base element's binding (ElementDefinition.base) is checked where the profile's value
+set is not found, as HL7 checks it (done after PR 2): where it is found, conforming to it is
+conforming to the base, an extensible base binding being one a profile may replace, and HL7 does
+not check the base's either (US Core `Condition.category`, CH Core `maritalStatus`). A concept whose
+codings are of a system an extensible value set does not include is a warning (HL7: information, it
+cannot confirm without a terminology server). A required binding missed on a CodeableConcept is reported
 by gofhir at `coding[i]`, by HL7 at the CodeableConcept. `Resource.language` (maxValueSet) is not
 checked. An extension whose context is the element `Element` is refused at a resource's root.
