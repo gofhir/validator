@@ -1,0 +1,79 @@
+{
+ "resourceType": "StructureDefinition",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "status": "active",
+ "id": "adv-slices",
+ "url": "http://example.org/adv/StructureDefinition/adv-slices",
+ "name": "AdvSlices",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.category",
+    "path": "Observation.category",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "coding.system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.category:cat",
+    "path": "Observation.category",
+    "sliceName": "cat",
+    "min": 0,
+    "max": "*",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://hl7.org/fhir/ValueSet/observation-category"
+    }
+   },
+   {
+    "id": "Observation.category:cat.coding",
+    "path": "Observation.category.coding",
+    "min": 1
+   },
+   {
+    "id": "Observation.category:cat.coding.system",
+    "path": "Observation.category.coding.system",
+    "min": 1,
+    "fixedUri": "http://terminology.hl7.org/CodeSystem/observation-category"
+   },
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "type",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.value[x]:valueCodeableConcept",
+    "path": "Observation.value[x]",
+    "sliceName": "valueCodeableConcept",
+    "type": [
+     {
+      "code": "CodeableConcept"
+     }
+    ],
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender"
+    }
+   }
+  ]
+ }
+}

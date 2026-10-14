@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gofhir/validator/v2/internal/elementvalues"
+	"github.com/gofhir/validator/v2/internal/slicerecord"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
@@ -30,12 +31,20 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 	childSD, children := v.walkChildren(run.ctx, sd, node, typeCode, inst)
 	for _, child := range children {
 		values := elementvalues.Of(child, inst, v.registry)
-		governing := make([]*registry.ElementNode, len(values))
+		governs := make([]*registry.ElementNode, len(values))
 		for i := range values {
-			governing[i] = child
+			governs[i] = child
 		}
 		if child.Def.Slicing != nil && len(child.Slices) > 0 {
-			governing = v.checkSlicing(run, scope, childSD, child, values, fhirPath, result)
+			governs = v.checkSlicing(run, scope, childSD, child, values, fhirPath, result)
+			// The definition that governs each value, the slice it matched or the element, in the
+			// phases that read it (slicerecord.Slices): recorded for every value, so that a later
+			// walk of the same value (another profile, a conformance check) is not read as an
+			// earlier one's.
+			record := slicerecord.In(run.ctx)
+			for i, cv := range values {
+				record.Record(child, inst, cv.Key, cv.Index, governs[i])
+			}
 		}
 		for i, cv := range values {
 			m, ok := cv.Value.(map[string]any)
@@ -43,7 +52,7 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 				m = cv.Ext
 				// A primitive whose element the snapshot unrolls (a profile that slices its
 				// extensions) is checked even with no "_key" sibling: its slices may be required.
-				if m == nil && len(governedChildren(governing[i])) > 0 {
+				if m == nil && len(governedChildren(governs[i])) > 0 {
 					m = map[string]any{}
 				}
 			}
@@ -55,29 +64,10 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 			if v.registry.HoldsResource(child.Def) {
 				continue
 			}
-			nextSD, next := v.memberTree(childSD, governing[i])
+			nextSD, next := v.registry.MemberTree(run.ctx, childSD, governs[i])
 			v.walk(run, scope, nextSD, next, cv.TypeCode, m, cv.Path(fhirPath), result)
 		}
 	}
-}
-
-// memberTree returns where the walk continues under a value governed by node: the root of the one
-// profile its type declares, when node is a slice whose snapshot unrolls no children (an extension
-// slice is defined by its extension's StructureDefinition, sub-extension slices included), else
-// node itself.
-func (v *Validator) memberTree(sd *registry.StructureDefinition, node *registry.ElementNode) (*registry.StructureDefinition, *registry.ElementNode) {
-	if node.SliceOf == nil {
-		return sd, node
-	}
-	member := v.memberDefinition(node)
-	if member == node {
-		return sd, node
-	}
-	psd, _ := v.registry.ResolveCanonical(node.Def.Type[0].Profile[0])
-	if psd == nil {
-		return sd, node
-	}
-	return psd, member
 }
 
 // walkChildren returns the children that govern an instance of node, inst, and the

@@ -1,0 +1,2 @@
+{"resourceType":"ValueSet","id":"unheldex","url":"http://example.org/vs/unheldex","status":"active",
+"compose":{"include":[{"system":"http://example.org/cs/unheld"}],"exclude":[{"system":"http://example.org/cs/unheld","filter":[{"property":"concept","op":"is-a","value":"q"}]}]}}

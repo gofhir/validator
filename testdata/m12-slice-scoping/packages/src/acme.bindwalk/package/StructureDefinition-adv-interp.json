@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "status": "active",
+ "id": "adv-interp",
+ "url": "http://example.org/adv/StructureDefinition/adv-interp",
+ "name": "AdvInterp",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.interpretation",
+    "path": "Observation.interpretation",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender"
+    }
+   },
+   {
+    "id": "Observation.method",
+    "path": "Observation.method",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender"
+    }
+   }
+  ]
+ }
+}

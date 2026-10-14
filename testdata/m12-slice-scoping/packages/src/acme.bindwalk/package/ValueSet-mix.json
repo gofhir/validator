@@ -1,0 +1,2 @@
+{"resourceType":"ValueSet","id":"mix","url":"http://example.org/vs/mix","status":"active",
+"compose":{"include":[{"system":"http://example.org/cs/a"},{"system":"http://snomed.info/sct"}]}}

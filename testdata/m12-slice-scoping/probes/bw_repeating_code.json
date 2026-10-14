@@ -1,0 +1,1 @@
+{"resourceType":"AllergyIntolerance","id":"a","category":["bogus"],"patient":{"reference":"Patient/p"}}

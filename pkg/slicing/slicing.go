@@ -144,22 +144,11 @@ type validation struct {
 	scope slicematch.Scope
 }
 
-// memberDefinition returns the definition whose children govern an instance of a slice: the slice
-// itself when the snapshot unrolls its children, else the root of the one profile its type
-// declares (an extension slice is defined by its extension's StructureDefinition). A type with no
-// profile, or several, leaves the slice's own (empty) children.
+// memberDefinition returns the definition whose children govern an instance of a slice
+// (Registry.MemberTree).
 func (v *Validator) memberDefinition(slice *registry.ElementNode) *registry.ElementNode {
-	if len(slice.Children) > 0 || len(slice.Def.Type) != 1 || len(slice.Def.Type[0].Profile) != 1 {
-		return slice
-	}
-	psd, _ := v.registry.ResolveCanonical(slice.Def.Type[0].Profile[0])
-	if psd == nil || v.registry.EnsureSnapshot(context.Background(), psd) != nil {
-		return slice
-	}
-	if root := psd.Tree().Root(); root != nil {
-		return root
-	}
-	return slice
+	_, member := v.registry.MemberTree(context.Background(), nil, slice)
+	return member
 }
 
 // checkChildren checks the cardinality of node's children in one instance of node, and recurses
