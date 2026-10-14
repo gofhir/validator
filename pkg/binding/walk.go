@@ -12,25 +12,19 @@ import (
 	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
-// extensionType is the type of the elements that hold extensions (extensibility.html): the
-// extension phase checks their values.
-const extensionType = "Extension"
-
 // walk checks the bindings of the values of node's children in one instance of node, inst, held at
 // fhirPath, each against the definition that governs it: the slice it matched (slicerecord.Slices),
 // or the element. It descends into each value under that definition (Registry.ChildrenOf: a
-// contentReference, the profile its type declares, a backbone element's children). A resource an
-// element holds is checked by the resource walk; an extension by the extension phase.
+// contentReference, the profile its type declares, a backbone element's children, the definition
+// an extension's url names, or else Extension's), a primitive's extensions included. A resource an
+// element holds is checked by the resource walk.
 func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, result *issue.Result) {
-	c := v.sdRegistry.ChildrenOf(ctx, sd, node, typeCode, nil)
+	c := v.sdRegistry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
 	if c.Unresolved.Canonical != "" {
 		return // reported by the cardinality phase
 	}
 	matched := slicerecord.In(ctx)
 	for _, child := range c.Nodes {
-		if isExtension(child.Def) {
-			continue
-		}
 		for _, cv := range elementvalues.Of(child, inst, v.sdRegistry) {
 			if !elementvalues.Written(child, cv, v.sdRegistry) {
 				continue // the structural phase reports it, and HL7 checks nothing in it
@@ -38,9 +32,15 @@ func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, 
 			gov := matched.Of(child, inst, cv.Key, cv.Index)
 			path := elementvalues.ItemPath(child, cv, fhirPath)
 			v.checkValue(ctx, gov.Def, cv, path, result)
-			m, ok := cv.Value.(map[string]any)
-			if !ok || v.sdRegistry.HoldsResource(child.Def) {
+			if v.sdRegistry.HoldsResource(child.Def) {
 				continue
+			}
+			m, ok := cv.Value.(map[string]any)
+			if !ok {
+				// A primitive's id and extensions are its "_key" sibling (json.html#primitive).
+				if m = cv.Ext; m == nil {
+					continue
+				}
 			}
 			nsd, next := v.sdRegistry.MemberTree(ctx, c.SD, gov)
 			v.walk(ctx, nsd, next, cv.TypeCode, m, path, result)
@@ -116,9 +116,27 @@ func (v *Validator) bindableTypes() map[string]bool {
 	return v.bindable
 }
 
-// isExtension reports whether def's elements are extensions.
-func isExtension(def *registry.ElementDefinition) bool {
-	return len(def.Type) == 1 && def.Type[0].Code == extensionType
+// DefinitionSource names the definition a value declares for itself, which governs the value
+// wherever it is used: an extension's url names the definition the extension conforms to
+// (extensibility.html). It returns nil for a value that declares none.
+type DefinitionSource interface {
+	DefinitionOf(ctx context.Context, typeCode string, value map[string]any) *registry.StructureDefinition
+}
+
+// SetDefinitions sets the source of the definitions values declare for themselves. Without it, an
+// extension is checked against the definitions of the element that holds it only.
+func (v *Validator) SetDefinitions(d DefinitionSource) {
+	v.definitions = d
+}
+
+// selfDefinitions returns, for an instance, the definition it declares for itself for a type.
+func (v *Validator) selfDefinitions(ctx context.Context, inst map[string]any) func(string) *registry.StructureDefinition {
+	if v.definitions == nil {
+		return nil
+	}
+	return func(typeCode string) *registry.StructureDefinition {
+		return v.definitions.DefinitionOf(ctx, typeCode, inst)
+	}
 }
 
 // once collects issues and reports each once: a resource checked against several profiles, which

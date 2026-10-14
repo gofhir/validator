@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","modifierExtension":[{"url":"http://example.org/rev/StructureDefinition/ext-mod","valueCode":"zz"}]}

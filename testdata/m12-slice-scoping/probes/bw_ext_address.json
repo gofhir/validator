@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/adv/StructureDefinition/adv-ext","valueAddress":{"use":"bogus","city":"x"}}]}

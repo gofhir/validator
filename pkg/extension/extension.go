@@ -44,8 +44,10 @@ type Validator struct {
 }
 
 // BindingValidator validates a value against an element binding. Implemented by
-// *binding.Validator; an interface here so this package does not depend on the
-// concrete type, and so terminology-free callers can leave it unset.
+// *binding.Validator.
+//
+// Deprecated: the binding phase checks extension values, under their definitions; the extension
+// phase no longer calls it.
 type BindingValidator interface {
 	ValidateValueBinding(ctx context.Context, value any, typeName string, binding *registry.Binding, fhirPath string, result *issue.Result)
 
@@ -64,8 +66,10 @@ func New(reg *registry.Registry, termReg *terminology.Registry, primVal *primiti
 	}
 }
 
-// SetBindingValidator supplies the validator used for bindings on extension
-// values, so extension values are checked by the same code as any other element.
+// SetBindingValidator supplies the validator once used for bindings on extension values.
+//
+// Deprecated: the binding phase checks extension values, under their definitions (see
+// binding.Validator.SetDefinitions); the extension phase no longer uses it.
 func (v *Validator) SetBindingValidator(b BindingValidator) {
 	v.bindValidator = b
 }
@@ -382,8 +386,10 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 // DefinitionOf returns the definition a value declares for itself, which governs it wherever it is
 // used (implements constraint.DefinitionSource): the one an extension's url names, which the
 // extension conforms to (extensibility.html). A value declares one when its url names a
-// StructureDefinition of the value's own type, typeCode; no other url does: an Attachment's names
-// no definition, and a canonical resource's names one of another type.
+// StructureDefinition of the value's own type, typeCode, that fixes the url to itself, as an
+// extension's definition fixes Extension.url; no other url does: an Attachment's url is where its
+// data is, even when it names a profile of Attachment, and a canonical resource's names one of
+// another type.
 //
 // The lookup is in memory: this phase resolves an extension's url, through the external resolver
 // too, before it asks, and the registry keeps what it resolves. A relative url (a sub-extension's)
@@ -397,10 +403,25 @@ func (v *Validator) DefinitionOf(ctx context.Context, typeCode string, value map
 	if sd == nil || sd.Type != typeCode {
 		return nil
 	}
-	if err := v.registry.EnsureSnapshot(ctx, sd); err != nil {
+	if err := v.registry.EnsureSnapshot(ctx, sd); err != nil || !fixesURL(sd, url) {
 		return nil
 	}
 	return sd
+}
+
+// fixesURL reports whether sd's snapshot fixes its type's url element to url.
+func fixesURL(sd *registry.StructureDefinition, url string) bool {
+	path := sd.Type + "." + keyURL
+	for i := range sd.Snapshot.Element {
+		e := &sd.Snapshot.Element[i]
+		if e.Path != path || e.SliceName != nil {
+			continue
+		}
+		raw, _, ok := e.GetFixed()
+		var fixed string
+		return ok && json.Unmarshal(raw, &fixed) == nil && fixed == url
+	}
+	return false
 }
 
 // validateExtensionValue validates the value[x] of an extension.
@@ -472,16 +493,8 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 		}
 	}
 
-	// Validate binding if present on Extension.value[x]
-	if valueDef.Binding != nil && valueDef.Binding.ValueSet != "" {
-		v.validateExtensionBinding(ctx, value, declaredType(valueType, valueDef.Type), valueDef.Binding, valuePath, result)
-	}
-
-	// Independent of the binding: an extension value that is a Coding must name a code
-	// that exists in the system it declares.
-	if v.bindValidator != nil {
-		v.bindValidator.ValidateCodedValue(ctx, value, valueDef, valuePath, result)
-	}
+	// The value's binding, and its codes in their code systems, are checked by the binding phase,
+	// which walks extensions under their definitions as it walks any element.
 
 	// Validate the value content recursively against its type's StructureDefinition
 	// This ensures complex types like CodeableConcept, Identifier, etc. are fully validated
@@ -698,17 +711,6 @@ func (v *Validator) isTypeAllowed(valueType string, allowedTypes []registry.Type
 	return false
 }
 
-// declaredType is the code of the type of allowedTypes that valueType, as a value key spells it,
-// names: "codeableConcept" is CodeableConcept.
-func declaredType(valueType string, allowedTypes []registry.Type) string {
-	for _, t := range allowedTypes {
-		if strings.EqualFold(t.Code, valueType) {
-			return t.Code
-		}
-	}
-	return valueType
-}
-
 // allowedTypesString returns a comma-separated list of allowed types.
 func (v *Validator) allowedTypesString(types []registry.Type) string {
 	names := make([]string, len(types))
@@ -818,18 +820,4 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 			extPath+"."+valueKey,
 		)
 	}
-}
-
-// validateExtensionBinding validates the binding on an extension's value[x], of type valueType.
-func (v *Validator) validateExtensionBinding(ctx context.Context, value any, valueType string, bound *registry.Binding, valuePath string, result *issue.Result) {
-	if v.bindValidator == nil {
-		return // binding validation not wired
-	}
-	// Delegated rather than reimplemented. This path used to have its own copy of
-	// the logic, which is how it fell behind: it never checked Coding.display or
-	// whether a code exists in its own CodeSystem, reported one issue per coding
-	// instead of aggregating a CodeableConcept, and treated an unresolvable binding
-	// as nothing at all. An extension value is bound like any other element and is
-	// now validated like one.
-	v.bindValidator.ValidateValueBinding(ctx, value, valueType, bound, valuePath, result)
 }

@@ -58,12 +58,17 @@ type Include struct {
 	Concept  []Concept `json:"concept,omitempty"`
 	Filter   []Filter  `json:"filter,omitempty"`
 	ValueSet []string  `json:"valueSet,omitempty"`
+	// ModifierExtension changes what the clause selects, in a way not known here
+	// (extensibility.html#modifierExtension).
+	ModifierExtension []json.RawMessage `json:"modifierExtension,omitempty"`
 }
 
 // Concept represents a code in a ValueSet or CodeSystem.
 type Concept struct {
 	Code    string `json:"code"`
 	Display string `json:"display,omitempty"`
+	// ModifierExtension changes what listing the concept means, in a way not known here.
+	ModifierExtension []json.RawMessage `json:"modifierExtension,omitempty"`
 }
 
 // Filter represents a filter for code selection.
@@ -71,6 +76,9 @@ type Filter struct {
 	Property string `json:"property"`
 	Op       string `json:"op"`
 	Value    string `json:"value"`
+	// ModifierExtension changes what the filter selects (VSAC's vsacOpModifier "childOf"), in a way
+	// not known here.
+	ModifierExtension []json.RawMessage `json:"modifierExtension,omitempty"`
 }
 
 // CodeSystem represents a FHIR CodeSystem resource.

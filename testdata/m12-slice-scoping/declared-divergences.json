@@ -710,5 +710,21 @@
     "file": "testdata/m12-slice-scoping/probes/vm_r8_both_required_b.json",
     "location": "Observation.code",
     "messageId": "BINDING_REQUIRED_NO_CODING"
+  },
+  {
+    "decision": "B-D28",
+    "reason": "A ValueSet whose includes list their concepts has those codes only (valueset-definitions.html#ValueSet.compose.include.concept): US Core's omb-race-category lists five CDC race codes (through VSAC 2.16.840.1.114222.4.11.836) and two NullFlavor codes, so 'bogus' is not a member, whether the CDC race CodeSystem includes its codes or not. HL7 6.10.2 does not decide membership against a CodeSystem that includes none of its codes (content not-present) and reports only that.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/bwus_race_sub_extension.json",
+    "location": "Patient.extension[0].extension[0].valueCoding",
+    "messageId": "BINDING_REQUIRED"
+  },
+  {
+    "decision": "B-D29",
+    "reason": "A modifier extension changes the meaning of the element that carries it, and one not known means the element cannot be processed as if it were not there (extensibility.html#modifierExtension): an exclusion listing a concept with a modifier extension does not tell whether the code is excluded, so its membership is not known and it is accepted unchecked. HL7 6.10.2 ignores the modifier extension and applies the exclusion.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/wx_r16_vs_mod.json",
+    "location": "Observation.code",
+    "messageId": "Terminology_TX_NoValid_1_CC"
   }
 ]

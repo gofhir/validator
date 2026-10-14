@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","id":"b","type":"collection","entry":[{"fullUrl":"http://example.org/Patient/p","resource":{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/rev/StructureDefinition/ext-code","valueCode":"zz"}]}}]}

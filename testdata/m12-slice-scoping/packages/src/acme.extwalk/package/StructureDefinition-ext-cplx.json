@@ -1,0 +1,10 @@
+{"resourceType":"StructureDefinition","id":"ext-cplx","url":"http://example.org/rev/StructureDefinition/ext-cplx","name":"ExtCplx","status":"active","fhirVersion":"4.0.1","kind":"complex-type","abstract":false,
+"context":[{"type":"element","expression":"Element"},{"type":"element","expression":"Resource"}],"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint",
+"differential":{"element":[{"id":"Extension","path":"Extension"},
+{"id":"Extension.extension","path":"Extension.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"}},
+{"id":"Extension.extension:sub","path":"Extension.extension","sliceName":"sub","min":0,"max":"1"},
+{"id":"Extension.extension:sub.url","path":"Extension.extension.url","fixedUri":"sub"},
+{"id":"Extension.extension:sub.value[x]","path":"Extension.extension.value[x]","type":[{"code":"Coding"}],"binding":{"strength":"required","valueSet":"http://example.org/rev/vs/ab"}},
+{"id":"Extension.extension:prof","path":"Extension.extension","sliceName":"prof","min":0,"max":"1","type":[{"code":"Extension","profile":["http://example.org/rev/StructureDefinition/ext-code"]}]},
+{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/rev/StructureDefinition/ext-cplx"},
+{"id":"Extension.value[x]","path":"Extension.value[x]","max":"0"}]}}

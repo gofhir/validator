@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","extension":[{"url":"http://hl7.org/fhir/StructureDefinition/patient-birthPlace","valueAddress":{"use":"bogus","city":"X"}}]}

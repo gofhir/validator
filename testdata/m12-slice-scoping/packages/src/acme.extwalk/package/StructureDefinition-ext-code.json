@@ -1,0 +1,4 @@
+{"resourceType":"StructureDefinition","id":"ext-code","url":"http://example.org/rev/StructureDefinition/ext-code","name":"ExtCode","status":"active","fhirVersion":"4.0.1","kind":"complex-type","abstract":false,
+"context":[{"type":"element","expression":"Element"},{"type":"element","expression":"Resource"}],"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint",
+"differential":{"element":[{"id":"Extension","path":"Extension"},{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/rev/StructureDefinition/ext-code"},
+{"id":"Extension.value[x]","path":"Extension.value[x]","type":[{"code":"code"},{"code":"Coding"},{"code":"CodeableConcept"}],"binding":{"strength":"required","valueSet":"http://example.org/rev/vs/ab"}}]}}

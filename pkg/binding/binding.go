@@ -41,6 +41,9 @@ type Validator struct {
 	// Empty means no preference.
 	displayLanguage string
 
+	// definitions names the definition a value declares for itself (an extension's url).
+	definitions DefinitionSource
+
 	// bindable are the types a binding applies to (bindableTypes), read once.
 	bindableOnce sync.Once
 	bindable     map[string]bool
