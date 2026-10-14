@@ -1,0 +1,8 @@
+{"resourceType":"StructureDefinition","id":"hd-root","url":"https://example.org/fhir/hd/StructureDefinition/hd-root","version":"0.1.0","name":"HdRoot","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Observation","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Observation","derivation":"constraint",
+"differential":{"element":[{"id":"Observation","path":"Observation","constraint":[
+{"key":"hd-1","severity":"warning","human":"rootResource is Observation","expression":"%rootResource is Observation"},
+{"key":"hd-2","severity":"warning","human":"resource is Observation","expression":"%resource is Observation"},
+{"key":"hd-3","severity":"warning","human":"rootResource is Parameters","expression":"%rootResource is Parameters"},
+{"key":"hd-4","severity":"warning","human":"rootResource is Bundle","expression":"%rootResource is Bundle"},
+{"key":"hd-5","severity":"warning","human":"resource is Bundle","expression":"%resource is Bundle"},
+{"key":"hd-6","severity":"warning","human":"resource is Parameters","expression":"%resource is Parameters"}]}]}}

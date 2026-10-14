@@ -143,14 +143,15 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 			}
 			path := elementvalues.ItemPath(child, cv, fhirPath)
 			valueRaw, extRaw := fields.of(cv.Key, cv), fields.of("_"+cv.Key, cv)
+			node := v.governing(sd, child, cv, opts)
 			if m, ok := cv.Value.(map[string]any); ok && v.registry.HoldsResource(child.Def) {
-				// A resource held in the element, validated as a resource of its own.
+				// A resource held in the element, validated as a resource of its own, against the
+				// profiles of the slice it matched, or of the element.
 				if _, isResource := m[resourceTypeKey]; isResource {
-					v.validateNested(child, m, valueRaw, path, opts, result)
+					v.validateNested(node, m, valueRaw, path, opts, result)
 				}
 				continue
 			}
-			node := v.governing(sd, child, cv, opts)
 			if cv.Value != nil {
 				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, extRaw, path, opts, result)
 			} else if extRaw != nil && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
@@ -243,11 +244,56 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 	}
 	opts.resolver = resolverWithin(opts.resolver, opts.scope.RootResource, nil)
 
-	for _, sd := range v.nestedDefinitions(opts.ctx, res, fhirPath, result) {
+	definitions := v.nestedDefinitions(opts.ctx, res, fhirPath, result)
+	for _, sd := range v.holderDefinitions(holder, res, fhirPath, &opts, result) {
+		if !slices.Contains(definitions, sd) {
+			definitions = append(definitions, sd)
+		}
+	}
+	for _, sd := range definitions {
 		if root := sd.Tree().Root(); root != nil {
 			v.walk(sd, root, "", res, raw, nil, fhirPath, &opts, result)
 		}
 	}
+}
+
+// holderDefinitions are the profiles a resource held at fhirPath is checked against for its holder,
+// the element (or the slice its value matched) that holds it: among those its type.profile names for
+// the resource's type (or a type it derives from), as HolderProfiles chooses them. A profile that
+// does not resolve, and a resource that conforms to none of several, are reported, as the HL7
+// validator reports them; once per location.
+func (v *Validator) holderDefinitions(holder *registry.ElementNode, res map[string]any, fhirPath string, opts *constraintEvalOpts, result *issue.Result) []*registry.StructureDefinition {
+	rt, _ := res[resourceTypeKey].(string)
+	if v.holderProfiles == nil || rt == "" {
+		return nil
+	}
+	var profiles []string
+	for _, t := range holder.Def.Type {
+		if t.Code == rt || v.registry.IsSubtype(rt, t.Code) {
+			profiles = append(profiles, t.Profile...)
+		}
+	}
+	if len(profiles) == 0 {
+		return nil
+	}
+	choice := v.holderProfiles.Choose(opts.ctx, profiles, res, opts.scope)
+	for _, url := range choice.NotFound {
+		if firstReportKey(opts.ctx, fhirPath+"\x00"+string(issue.DiagHolderProfileNotFound)+"\x00"+url) {
+			result.AddErrorWithID(issue.DiagHolderProfileNotFound, map[string]any{"url": url}, fhirPath)
+		}
+	}
+	for _, f := range choice.NoSnapshot {
+		if firstReportKey(opts.ctx, fhirPath+"\x00"+string(issue.DiagProfileSnapshotFailed)+"\x00"+f.URL) {
+			result.AddErrorWithID(issue.DiagProfileSnapshotFailed, map[string]any{"url": f.URL, "reason": f.Err.Error()}, fhirPath)
+		}
+	}
+	if len(choice.Unmet) > 0 && firstReportKey(opts.ctx, fhirPath+"\x00"+string(issue.DiagHolderProfileNoMatch)+"\x00"+strings.Join(choice.Unmet, ",")) {
+		result.AddErrorWithID(issue.DiagHolderProfileNoMatch, map[string]any{"profiles": strings.Join(choice.Unmet, ", ")}, fhirPath)
+	}
+	if len(choice.Met) > 1 && firstReportKey(opts.ctx, fhirPath+"\x00"+string(issue.DiagHolderProfileMultipleMatches)+"\x00"+strings.Join(choice.Met, ",")) {
+		result.AddWarningWithID(issue.DiagHolderProfileMultipleMatches, map[string]any{"profiles": strings.Join(choice.Met, ", ")}, fhirPath)
+	}
+	return choice.Chosen
 }
 
 // nestedDefinitions are the definitions a nested resource at fhirPath is checked against: the

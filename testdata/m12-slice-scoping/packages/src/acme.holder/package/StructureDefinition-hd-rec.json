@@ -1,0 +1,40 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "hd-rec",
+ "url": "https://example.org/fhir/hd/StructureDefinition/hd-rec",
+ "version": "0.1.0",
+ "name": "hdrec",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.entry.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Bundle",
+      "profile": [
+       "https://example.org/fhir/hd/StructureDefinition/hd-rec"
+      ]
+     },
+     {
+      "code": "Observation",
+      "profile": [
+       "https://example.org/fhir/hd/StructureDefinition/hd-obsc"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

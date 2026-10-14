@@ -43,6 +43,15 @@ const (
 	DiagBindingExtensibleUnknown  DiagnosticID = "BINDING_EXTENSIBLE_UNKNOWN_SYSTEM"
 	DiagBindingUnresolved         DiagnosticID = "BINDING_UNRESOLVED"
 	DiagBindingExtensibleNoCoding DiagnosticID = "BINDING_EXTENSIBLE_NO_CODING"
+	// DiagHolderProfileNotFound: a profile an element's type.profile names for the resource it holds
+	// does not resolve.
+	DiagHolderProfileNotFound DiagnosticID = "HOLDER_PROFILE_NOT_FOUND"
+	// DiagHolderProfileNoMatch: a held resource conforms to none of the profiles its element allows
+	// for it (alternatives).
+	DiagHolderProfileNoMatch DiagnosticID = "HOLDER_PROFILE_NO_MATCH"
+	// DiagHolderProfileMultipleMatches: a held resource conforms to more than one of the profiles its
+	// element allows for it (alternatives).
+	DiagHolderProfileMultipleMatches DiagnosticID = "HOLDER_PROFILE_MULTIPLE_MATCHES"
 	// DiagBindingRequiredNoCoding: none of a CodeableConcept's codings is in the value set of its
 	// required binding.
 	DiagBindingRequiredNoCoding DiagnosticID = "BINDING_REQUIRED_NO_CODING"
@@ -397,6 +406,21 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeCodeInvalid,
 		Template: "The code '{code}' is not among the codes the CodeSystem '{codeSystem}' includes, which are only some of its codes (content '{content}'), so it cannot be validated",
+	},
+	DiagHolderProfileNotFound: {
+		Severity: SeverityError,
+		Code:     CodeNotFound,
+		Template: "The profile '{url}' the element allows for the resource it holds is not found",
+	},
+	DiagHolderProfileNoMatch: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "The resource conforms to none of the profiles the element that holds it allows ({profiles})",
+	},
+	DiagHolderProfileMultipleMatches: {
+		Severity: SeverityWarning,
+		Code:     CodeInformational,
+		Template: "The resource conforms to more than one of the profiles the element that holds it allows ({profiles})",
 	},
 	DiagBindingRequiredNoCoding: {
 		Severity: SeverityError,

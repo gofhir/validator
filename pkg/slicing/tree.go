@@ -9,6 +9,7 @@ import (
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
+	"github.com/gofhir/validator/v2/pkg/walker"
 )
 
 // Slicing rules (ElementDefinition.slicing.rules).
@@ -229,6 +230,11 @@ func checkSliceCount(s *registry.ElementNode, count int, elementPath string, res
 func (v *Validator) checkMember(ctx context.Context, sd *registry.StructureDefinition, node, slice *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) {
 	m, ok := cv.Value.(map[string]any)
 	if !ok {
+		return
+	}
+	if v.registry.HoldsResource(node.Def) && len(slice.Children) == 0 && walker.ChecksHolderProfiles(ctx) {
+		// A held resource is checked against its slice's profiles by the resource walk; what the
+		// slice constrains inline is checked here.
 		return
 	}
 	base := v.registry.ChildrenOf(ctx, sd, node, cv.TypeCode, v.selfDefinitions(ctx, m))

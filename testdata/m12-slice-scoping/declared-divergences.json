@@ -726,5 +726,85 @@
     "file": "testdata/m12-slice-scoping/probes/wx_r16_vs_mod.json",
     "location": "Observation.code",
     "messageId": "Terminology_TX_NoValid_1_CC"
+  },
+  {
+    "decision": "B-D30",
+    "reason": "A profile may name itself in a holder element's type.profile (a Bundle whose entries are Bundles of the profile): its snapshot is the base's with its differential, and the instance bounds the recursion, so the held Bundle is checked against it as against any holder profile (ElementDefinition.type.profile). HL7 6.10.2 generates no snapshot for it ('has no snapshot') and checks nothing against it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_r1_rec.json",
+    "location": "Bundle.entry[0].resource.entry[0].resource.subject",
+    "messageId": "CARDINALITY_MIN"
+  },
+  {
+    "decision": "B-D30",
+    "reason": "A profile may name itself in a holder element's type.profile (a Bundle whose entries are Bundles of the profile): its snapshot is the base's with its differential, and the instance bounds the recursion, so the held Bundle is checked against it as against any holder profile (ElementDefinition.type.profile). HL7 6.10.2 generates no snapshot for it ('has no snapshot') and checks nothing against it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_r1_rec.json",
+    "location": "Bundle.entry[0].resource.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D31",
+    "reason": "A holder element's type.profile naming a version (hd-obsc|0.1.0) names that definition: the held resource must conform to it (ElementDefinition.type.profile), whatever other version of the same url its own meta.profile names, as each meta.profile is checked too. HL7 6.10.2 skips the holder's profile when meta.profile names its url, in any version or none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_rv_p7_ver.json",
+    "location": "Bundle.entry[0].resource.subject",
+    "messageId": "CARDINALITY_MIN"
+  },
+  {
+    "decision": "B-D31",
+    "reason": "A holder element's type.profile naming a version (hd-obsc|0.1.0) names that definition: the held resource must conform to it (ElementDefinition.type.profile), whatever other version of the same url its own meta.profile names, as each meta.profile is checked too. HL7 6.10.2 skips the holder's profile when meta.profile names its url, in any version or none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_rv_p7_ver.json",
+    "location": "Bundle.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D31",
+    "reason": "A holder element's type.profile naming a version (hd-obsc|0.1.0) names that definition: the held resource must conform to it (ElementDefinition.type.profile), whatever other version of the same url its own meta.profile names, as each meta.profile is checked too. HL7 6.10.2 skips the holder's profile when meta.profile names its url, in any version or none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_rv_p7c_ver_unversioned.json",
+    "location": "Bundle.entry[0].resource.subject",
+    "messageId": "CARDINALITY_MIN"
+  },
+  {
+    "decision": "B-D31",
+    "reason": "A holder element's type.profile naming a version (hd-obsc|0.1.0) names that definition: the held resource must conform to it (ElementDefinition.type.profile), whatever other version of the same url its own meta.profile names, as each meta.profile is checked too. HL7 6.10.2 skips the holder's profile when meta.profile names its url, in any version or none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_rv_p7c_ver_unversioned.json",
+    "location": "Bundle.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D32",
+    "reason": "Parameters.parameter.part is defined by a contentReference to Parameters.parameter, whose content rules apply to the current element (ElementDefinition.contentReference): the profile's parameter.resource type.profile applies to part.resource. HL7 6.10.2 does not apply it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_rv_p2_part.json",
+    "location": "Parameters.parameter[0].part[0].resource.identifier",
+    "messageId": "CARDINALITY_MIN"
+  },
+  {
+    "decision": "B-D32",
+    "reason": "Parameters.parameter.part is defined by a contentReference to Parameters.parameter, whose content rules apply to the current element (ElementDefinition.contentReference): the profile's parameter.resource type.profile applies to part.resource. HL7 6.10.2 does not apply it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_rv_p2_part.json",
+    "location": "Parameters.parameter[0].part[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D33",
+    "reason": "A profile a holder element's type.profile names whose snapshot cannot be generated (its base is not found) cannot be checked against, which is an error for the resource it holds, where it applies; the holder's own profile only names it (ElementDefinition.type.profile), its snapshot not depending on it. HL7 6.10.2 reports the holder's profile as having no snapshot, at the root, and checks nothing against it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_rv_x2_snapfail.json",
+    "location": "Bundle.entry[0].resource",
+    "messageId": "PROFILE_SNAPSHOT_FAILED"
+  },
+  {
+    "decision": "B-D34",
+    "reason": "A held resource that conforms to none of its holder's alternatives (ElementDefinition.type.profile) is checked against each of its type, whatever the others' types, so the reasons are errors at the elements they are about, as for alternatives all of its type (where HL7 reports them too). HL7 6.10.2 gives them only as information beside its error when one alternative is of another type (DomainResource).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ht_rw_b_dr.json",
+    "location": "Bundle.entry[0].resource.identifier",
+    "messageId": "CARDINALITY_MIN"
   }
 ]

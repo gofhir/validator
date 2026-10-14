@@ -162,6 +162,11 @@
       "files": ["testdata/m12-slice-scoping/probes/vm_*.json"]
     },
     {
+      "name": "holder-profile-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.holder-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/ht_*.json"]
+    },
+    {
       "name": "held-resource-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.held-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/hr_*.json"]
