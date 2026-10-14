@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","meta":{"profile":["http://example.org/rev/StructureDefinition/p-slice"]},"extension":[{"url":"http://example.org/rev/StructureDefinition/ext-code","valueCode":"zz"}]}

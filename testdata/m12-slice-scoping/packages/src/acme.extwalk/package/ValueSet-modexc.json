@@ -1,0 +1,1 @@
+{"resourceType":"ValueSet","id":"modexc","url":"http://example.org/rev/vs/modexc","status":"active","compose":{"include":[{"system":"http://example.org/rev/cs/r"}],"exclude":[{"system":"http://example.org/rev/cs/r","concept":[{"code":"c","modifierExtension":[{"url":"http://example.org/rev/mod","valueString":"x"}]}]}]}}

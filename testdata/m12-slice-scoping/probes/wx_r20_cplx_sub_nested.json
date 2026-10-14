@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/rev/StructureDefinition/ext-cplx","extension":[{"url":"sub","valueCoding":{"system":"http://example.org/rev/cs/r","code":"c"},"extension":[{"url":"http://example.org/rev/StructureDefinition/ext-code","valueCode":"zz"}]}]}]}

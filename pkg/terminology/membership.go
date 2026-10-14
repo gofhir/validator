@@ -183,6 +183,9 @@ func (m *membership) selects(c *Include, depth int) answer {
 	case len(c.ValueSet) == 0:
 		return answerOut // selects nothing
 	}
+	if len(c.ModifierExtension) > 0 && selected != answerOut {
+		return answerUnknown // what it selects of the code's system is changed in a way not known here
+	}
 	for _, url := range c.ValueSet {
 		if selected == answerOut {
 			return answerOut
@@ -201,7 +204,7 @@ func (m *membership) selects(c *Include, depth int) answer {
 // here: it names the system with no concept nor filter, or a ValueSet that includes all of it, and
 // any ValueSet it names includes all of it too. Each ValueSet is read once (walked).
 func (r *Registry) coversSystem(c *Include, system string, depth int, walked map[*ValueSet]walk) bool {
-	if depth > maxValueSetDepth || len(c.Concept) > 0 || len(c.Filter) > 0 {
+	if depth > maxValueSetDepth || len(c.Concept) > 0 || len(c.Filter) > 0 || len(c.ModifierExtension) > 0 {
 		return false
 	}
 	switch {
@@ -334,6 +337,8 @@ func (r *Registry) inSystem(c *Include, system, code string) answer {
 	exp := r.clauseCodes(c)
 	selected := exp.codes[system+"|"+code]
 	switch {
+	case exp.modified[system+"|"+code]:
+		return answerUnknown // listed with a modifier extension: what that means is not known here
 	case selected && !exp.undecided:
 		return answerIn
 	case selected:
@@ -351,6 +356,8 @@ type clauseExpansion struct {
 	codes     map[string]bool
 	complete  bool
 	undecided bool
+	// modified are the concepts it lists with a modifier extension.
+	modified map[string]bool
 }
 
 // clauseCodes returns what clause c selects, built once.
@@ -376,6 +383,12 @@ func (r *Registry) expandClause(c *Include) clauseExpansion {
 	if len(c.Concept) > 0 {
 		for _, concept := range c.Concept {
 			exp.codes[c.System+"|"+concept.Code] = true
+			if len(concept.ModifierExtension) > 0 {
+				if exp.modified == nil {
+					exp.modified = map[string]bool{}
+				}
+				exp.modified[c.System+"|"+concept.Code] = true
+			}
 		}
 		exp.complete = true
 		return exp
@@ -395,7 +408,7 @@ func (r *Registry) expandClause(c *Include) clauseExpansion {
 	// "the filters are combined with AND"); with none evaluated here, every code.
 	var selected map[string]bool
 	for _, f := range c.Filter {
-		if !filterOps[f.Op] {
+		if !filterOps[f.Op] || len(f.ModifierExtension) > 0 {
 			exp.undecided = true
 			continue
 		}
@@ -457,7 +470,8 @@ func (r *Registry) expansionCodes(vs *ValueSet) expandedCodes {
 }
 
 // filterOps are the filter operators evaluated here (codesystem-filter-operator.html); a clause
-// with another (regex, exists, generalizes) selects codes not known here.
+// with another (regex, exists, generalizes), or a filter a modifier extension changes, selects
+// codes not known here.
 var filterOps = map[string]bool{
 	"is-a":          true,
 	"descendent-of": true,

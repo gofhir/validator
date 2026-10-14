@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"o","meta":{"profile":["http://example.org/rev/StructureDefinition/obs-mod"]},"status":"final","code":{"coding":[{"system":"http://example.org/rev/cs/r","code":"c"}]},"method":{"coding":[{"system":"http://example.org/rev/cs/r","code":"a"}]}}

@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/rev/StructureDefinition/ext-code","valueCode":"zz"}]}

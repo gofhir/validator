@@ -560,9 +560,9 @@ func New(opts ...Option) (*Validator, error) {
 	v.bindValidator.SetUnresolvedPolicy(config.UnresolvedPolicy)
 	v.bindValidator.SetDisplayLanguage(config.DisplayLanguage)
 	v.extValidator = extension.New(reg, termReg, v.primValidator)
-	// Extension values are bound like any other element, so they are validated by
-	// the same code rather than a second copy of it.
-	v.extValidator.SetBindingValidator(v.bindValidator)
+	// Extension values are bound like any other element's, by the binding phase's walk, under the
+	// definition the extension's url names.
+	v.bindValidator.SetDefinitions(v.extValidator)
 	// An extension is checked against the definition its url names by the phases that walk
 	// definitions, as by the element that holds it.
 	v.cardValidator = cardinality.New(reg, cardinality.WithDefinitions(v.extValidator))

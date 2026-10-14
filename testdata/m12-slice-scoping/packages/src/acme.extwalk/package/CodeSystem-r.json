@@ -1,0 +1,2 @@
+{"resourceType":"CodeSystem","id":"r","url":"http://example.org/rev/cs/r","version":"1","status":"active","content":"complete","caseSensitive":true,
+"concept":[{"code":"a","display":"A"},{"code":"b","display":"B"},{"code":"c","display":"C","concept":[{"code":"c1","display":"C1"}]}]}

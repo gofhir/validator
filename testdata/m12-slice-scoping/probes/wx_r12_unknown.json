@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/unknown-ext","valueCoding":{"system":"http://example.org/rev/cs/r","code":"zz"}}]}

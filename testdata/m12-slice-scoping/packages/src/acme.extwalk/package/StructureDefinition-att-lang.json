@@ -1,0 +1,3 @@
+{"resourceType":"StructureDefinition","id":"att-lang","url":"http://example.org/rev/StructureDefinition/att-lang","name":"AttLang","status":"active","fhirVersion":"4.0.1","kind":"complex-type","abstract":false,"type":"Attachment","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Attachment","derivation":"constraint",
+"differential":{"element":[{"id":"Attachment","path":"Attachment"},
+{"id":"Attachment.language","path":"Attachment.language","binding":{"strength":"required","valueSet":"http://example.org/rev/vs/ab"}}]}}

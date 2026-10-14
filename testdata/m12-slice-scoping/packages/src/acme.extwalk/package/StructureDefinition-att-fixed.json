@@ -1,0 +1,3 @@
+{"resourceType":"StructureDefinition","id":"att-fixed","url":"http://example.org/rev/StructureDefinition/att-fixed","name":"AttFixed","status":"active","fhirVersion":"4.0.1","kind":"complex-type","abstract":false,"type":"RelatedArtifact","baseDefinition":"http://hl7.org/fhir/StructureDefinition/RelatedArtifact","derivation":"constraint",
+"differential":{"element":[{"id":"RelatedArtifact","path":"RelatedArtifact"},
+{"id":"RelatedArtifact.type","path":"RelatedArtifact.type","fixedCode":"citation"}]}}

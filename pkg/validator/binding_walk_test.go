@@ -41,6 +41,13 @@ func TestBindingWalk(t *testing.T) {
 		// A concept with a coding not in the value set and one that cannot be decided is not known
 		// to be from it: no binding error, and no member of a slice a required binding discriminates.
 		"mixed_codings": {"CODE_NOT_IN_CODESYSTEM @ Observation.code.coding[0].code"},
+		// An extension is walked under the definition its url names, or Extension's: its value's
+		// binding, and its datatype's own (valueAddress.use); a binding applies to a value of a type
+		// one can be on (eld-11), not to a dateTime nor a time.
+		"ext_datatype_binding": {"BINDING_REQUIRED @ Patient.extension[0].valueAddress.use"},
+		"ext_address":          {"BINDING_REQUIRED @ Patient.extension[0].valueAddress.use"},
+		"ext_datetime":         nil,
+		"ext_time":             nil,
 		"mixed_slice": {
 			"CODE_NOT_IN_CODESYSTEM @ Observation.category[0].coding[0].code",
 			"SLICING_CARDINALITY_MIN @ Observation.category:cat",

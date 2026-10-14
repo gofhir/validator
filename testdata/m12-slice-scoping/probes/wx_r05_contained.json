@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","contained":[{"resourceType":"Patient","id":"c","extension":[{"url":"http://example.org/rev/StructureDefinition/ext-code","valueCode":"zz"}]}],"link":[{"other":{"reference":"#c"},"type":"seealso"}]}

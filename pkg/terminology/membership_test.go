@@ -2,6 +2,7 @@ package terminology
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 )
 
@@ -113,6 +114,21 @@ func TestMembershipByDefinition(t *testing.T) {
 		Include: []Include{{System: unheld}},
 		Exclude: []Include{{ValueSet: []string{base + "unheld-via-a", base + "unheld-via-b"}}},
 	})
+	// VSAC's exclusion of a concept's children: a filter a modifier extension changes.
+	add("excluding-children", Compose{
+		Include: []Include{{System: held}},
+		Exclude: []Include{{System: held, Filter: []Filter{{Property: "concept", Op: "is-a", Value: "b",
+			ModifierExtension: []json.RawMessage{json.RawMessage(`{"url":"vsacOpModifier","valueString":"childOf"}`)}}}}},
+	})
+	modifier := []json.RawMessage{json.RawMessage(`{"url":"http://example.org/modifier","valueBoolean":true}`)}
+	add("modified-include", Compose{Include: []Include{
+		{System: held, Concept: []Concept{{Code: "a"}}, ModifierExtension: modifier},
+		{System: other, Concept: []Concept{{Code: "a"}}},
+	}})
+	add("modified-concept-excluded", Compose{
+		Include: []Include{{System: held}},
+		Exclude: []Include{{System: held, Concept: []Concept{{Code: "b", ModifierExtension: modifier}}}},
+	})
 	add("cycle-a", Compose{Include: []Include{{ValueSet: []string{base + "cycle-b"}}, {System: other, Concept: []Concept{{Code: "k"}}}}})
 	add("cycle-b", Compose{Include: []Include{{ValueSet: []string{base + "cycle-a"}}}})
 	add("missing-nested", Compose{Include: []Include{{ValueSet: []string{base + "not-held"}}}})
@@ -159,6 +175,13 @@ func TestMembershipByDefinition(t *testing.T) {
 		{"a code element's code a diamond does not hold", "diamond", "", "zz", ctx, Invalid, false},
 		{"a code element's code a diamond holds", "diamond", "", "b1", ctx, Valid, false},
 		{"a code of a system a diamond of ValueSets excludes whole", "excluding-a-diamond", unheld, "x", ctx, Invalid, false},
+		{"a code a filter a modifier extension changes may take away", "excluding-children", held, "b1", ctx, Valid, true},
+		{"any code, the filter being the only one", "excluding-children", held, "a", ctx, Valid, true},
+		{"a code an include a modifier extension changes lists", "modified-include", held, "a", ctx, Valid, true},
+		{"a code it does not list", "modified-include", held, "b", ctx, Invalid, false},
+		{"a code of another system's include", "modified-include", other, "a", strict, Valid, false},
+		{"a code an exclusion lists with a modifier extension", "modified-concept-excluded", held, "b", ctx, Valid, true},
+		{"a code it does not list", "modified-concept-excluded", held, "a", ctx, Valid, false},
 		{"a code of ValueSets that include each other", "cycle-a", other, "k", ctx, Valid, false},
 		{"another system's code, through the cycle", "cycle-a", held, "k", strict, Unresolved, false},
 		{"a code of a nested ValueSet not held", "missing-nested", held, "a", strict, Unresolved, false},
