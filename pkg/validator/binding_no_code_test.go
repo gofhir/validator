@@ -176,3 +176,34 @@ func TestBindingBaseWithProvider(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
+
+// A concept whose codings are of a system an extensible value set does not include is not from it:
+// a warning, decided without a terminology server (HL7 6.10.2 reports that it cannot confirm it, for
+// a system it consults one for, LOINC here).
+func TestBindingExtensibleOtherSystemConcept(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const resource = `{"resourceType":"Observation","status":"final","code":{"text":"x"},
+		"interpretation":[{"coding":[{"system":"http://loinc.org","code":"LA9622-7"}]}]}`
+	res, err := v.Validate(context.Background(), []byte(resource))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, is := range res.Issues {
+		if strings.HasPrefix(is.MessageID, "BINDING_") {
+			got = append(got, string(is.Severity)+" "+is.MessageID+" @ "+strings.Join(is.Expression, ","))
+		}
+	}
+	slices.Sort(got)
+	want := []string{
+		// the code in its code system, which a terminology server would tell
+		"information BINDING_CANNOT_VALIDATE @ Observation.interpretation[0].coding[0]",
+		"warning BINDING_EXTENSIBLE_NO_CODING @ Observation.interpretation[0]",
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}

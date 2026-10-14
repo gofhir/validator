@@ -78,8 +78,12 @@ code is not in the value set (HL7: cannot be validated without a terminology ser
 A profile's base element's binding (ElementDefinition.base) is checked where the profile's value
 set is not found, as HL7 checks it (done after PR 2): where it is found, conforming to it is
 conforming to the base, an extensible base binding being one a profile may replace, and HL7 does
-not check the base's either (US Core `Condition.category`, CH Core `maritalStatus`). A concept whose
-codings are of a system an extensible value set does not include is a warning (HL7: information, it
-cannot confirm without a terminology server). A required binding missed on a CodeableConcept is reported
+not check the base's either (US Core `Condition.category`, CH Core `maritalStatus`). Decided by the
+specification: a concept whose codings are of a system an extensible value set does not include is
+not from it, and is a warning (mCODE's `Observation.interpretation` in LOINC against
+`observation-interpretation`, which includes `v3-ObservationInterpretation` only); HL7 reports that it
+cannot confirm it without a terminology server (information), for a system it consults one for
+(LOINC, SNOMED CT, NCI Thesaurus), though the value set does not include the system at all, and
+warns for any other system. A required binding missed on a CodeableConcept is reported
 by gofhir at `coding[i]`, by HL7 at the CodeableConcept. `Resource.language` (maxValueSet) is not
 checked. An extension whose context is the element `Element` is refused at a resource's root.
