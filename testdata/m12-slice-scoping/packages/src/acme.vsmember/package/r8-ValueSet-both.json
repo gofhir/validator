@@ -1,0 +1,1 @@
+{"resourceType":"ValueSet","id":"both","url":"http://example.org/r8/vs/both","status":"active","compose":{"include":[{"system":"http://example.org/r8/cs/held","concept":[{"code":"a"}]}]},"expansion":{"identifier":"urn:uuid:3","timestamp":"2026-01-01","total":1,"contains":[{"system":"http://example.org/r8/cs/held","code":"b"}]}}

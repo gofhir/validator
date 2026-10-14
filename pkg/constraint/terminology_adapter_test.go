@@ -40,6 +40,14 @@ func TestFhirpathTermService_MemberOf(t *testing.T) {
 			expected: true,
 		},
 		{
+			// SNOMED CT cannot be enumerated here: membership is not known, which memberOf() does
+			// not take for one (HL7 answers false).
+			name:     "coding of a code system not enumerated here",
+			code:     map[string]any{"system": "http://snomed.info/sct", "code": "73211009"},
+			vsURL:    "http://hl7.org/fhir/ValueSet/condition-code",
+			expected: false,
+		},
+		{
 			name:     "code string NOT in administrative-gender VS",
 			code:     map[string]any{"code": "invalid-code-xyz"},
 			vsURL:    "http://hl7.org/fhir/ValueSet/administrative-gender",

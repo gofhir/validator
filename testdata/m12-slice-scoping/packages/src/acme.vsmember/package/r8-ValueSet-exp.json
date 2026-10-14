@@ -1,0 +1,1 @@
+{"resourceType":"ValueSet","id":"exp","url":"http://example.org/r8/vs/exp","status":"active","expansion":{"identifier":"urn:uuid:1","timestamp":"2026-01-01","total":1,"contains":[{"system":"http://example.org/r8/cs/held","code":"a"}]}}

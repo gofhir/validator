@@ -1,0 +1,5 @@
+{"resourceType":"StructureDefinition","id":"obs-sctex","url":"http://example.org/sd/obs-sctex","name":"ObsSctEx","status":"active","kind":"resource","abstract":false,
+"type":"Observation","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Observation","derivation":"constraint","fhirVersion":"4.0.1",
+"differential":{"element":[
+{"id":"Observation.code","path":"Observation.code","binding":{"strength":"required","valueSet":"http://example.org/vs/sctex"}}
+]}}

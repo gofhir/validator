@@ -1,0 +1,1 @@
+{"resourceType":"ValueSet","id":"b","url":"http://example.org/vs/b","status":"active","compose":{"include":[{"system":"http://example.org/cs/unheld"}],"exclude":[{"system":"http://example.org/cs/unheld","concept":[{"code":"q"}]}]}}
