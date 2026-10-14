@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p1","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"contained":[{"resourceType":"Observation","id":"obs","status":"final","code":{"text":"x"}}],"extension":[{"url":"http://example.org/StructureDefinition/ext-ref-patient","valueReference":{"reference":"#obs"}}]}

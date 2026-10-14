@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"o","meta":{"profile":["http://example.org/StructureDefinition/obs-note"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","code":{"text":"x"},"contained":[{"resourceType":"Patient","id":"pt"}],"subject":{"reference":"#pt"},"note":[{"text":"n","authorReference":{"reference":"#pt"}}]}

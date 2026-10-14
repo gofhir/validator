@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p1","contained":[{"resourceType":"Patient","id":"c"}],"extension":[{"url":"http://example.org/StructureDefinition/ext-ref-any","valueReference":{"reference":"#c","type":"Practitioner"}}]}

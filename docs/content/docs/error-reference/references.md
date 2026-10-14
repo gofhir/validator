@@ -11,12 +11,15 @@ Reference errors occur when FHIR resource references are malformed, point to inv
 
 | ID | Severity | Message |
 |----|----------|---------|
-| `REFERENCE_INVALID_FORMAT` | error | Reference '{value}' has invalid format |
+| `REFERENCE_INVALID_FORMAT` | error | Invalid reference format: '{reference}' |
 | `REFERENCE_INVALID_TARGET` | error | Invalid reference target type '{type}'. Allowed: {allowed} |
 | `REFERENCE_TARGET_PROFILE` | error | Unable to find a profile match for {reference} among choices: {profiles} |
 | `REFERENCE_MULTIPLE_MATCHES` | error | Multiple matches in bundle for reference {reference} |
-| `REFERENCE_NOT_FOUND` | warning | Referenced resource '{value}' not found |
+| `REFERENCE_NOT_IN_BUNDLE` | warning | URN reference is not locally contained within the bundle {reference} |
 | `REFERENCE_TYPE_MISMATCH` | error | Reference type element '{type}' does not match reference target '{reference}' |
+| `REFERENCE_CONTAINED_NOT_FOUND` | error | Contained resource '{id}' not found. Reference is not defined within the resource |
+| `REFERENCE_CONTAINER_NOT_FOUND` | error | The reference '#' names the resource that contains this one, but this resource is not contained |
+| `REFERENCE_AGGREGATION_MODE` | error | Reference '{reference}' is not aggregated as the element allows: its target is not found where the aggregation modes {allowed} allow it |
 
 ---
 
@@ -140,64 +143,19 @@ ERROR: Multiple matches in bundle for reference Patient/p
 
 ---
 
-## REFERENCE_NOT_FOUND
+## REFERENCE_NOT_IN_BUNDLE
 
-The referenced resource could not be resolved within the validation context. This is a warning because the resource may exist in an external server that the validator does not have access to. This error is most relevant when validating Bundles, where contained references and internal Bundle references are expected to be resolvable.
+A `urn:uuid:` or `urn:oid:` reference, made in a Bundle, names no entry of it: such a reference has no meaning outside the Bundle (bundle.html#references). It is a warning, as the HL7 validator reports it; a relative or absolute reference to a resource outside the Bundle is not reported, unless the element's aggregation modes require it in the Bundle (`REFERENCE_AGGREGATION_MODE`).
 
-**Example:**
+**Example:** an entry's Observation has `"subject": {"reference": "urn:uuid:9f1c…"}`, and no entry has that `fullUrl`:
 
-```json
-{
-  "resourceType": "Bundle",
-  "type": "transaction",
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Observation",
-        "status": "final",
-        "code": {
-          "coding": [{ "system": "http://loinc.org", "code": "85354-9" }]
-        },
-        "subject": {
-          "reference": "Patient/999"
-        }
-      }
-    }
-  ]
-}
+```text
+WARNING: URN reference is not locally contained within the bundle urn:uuid:9f1c…
+  Path: Bundle.entry[0].resource.subject
+  MessageID: REFERENCE_NOT_IN_BUNDLE
 ```
 
-If `Patient/999` is not included in the Bundle entries, the validator produces this warning.
-
-**Fix:** Include the referenced resource in the Bundle or use a contained resource:
-
-```json
-{
-  "resourceType": "Bundle",
-  "type": "transaction",
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Patient",
-        "id": "999",
-        "name": [{ "family": "Smith" }]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "Observation",
-        "status": "final",
-        "code": {
-          "coding": [{ "system": "http://loinc.org", "code": "85354-9" }]
-        },
-        "subject": {
-          "reference": "Patient/999"
-        }
-      }
-    }
-  ]
-}
-```
+**Fix:** include the resource as an entry whose `fullUrl` is the URN, or reference it by its RESTful URL.
 
 ---
 
@@ -214,3 +172,51 @@ ERROR: Reference type element 'Group' does not match reference target 'Patient'
 ```
 
 **Fix:** make `type` the target's type, or reference a resource of that type.
+
+---
+
+## REFERENCE_CONTAINED_NOT_FOUND
+
+A fragment reference `#id` names no contained resource of the resource that makes it (or of the resource that contains it): "SHALL have a contained resource if a local reference is provided" (ref-1, references.html#contained). Every value of type Reference is checked, an extension's value and a choice element's included.
+
+**Example:** a Patient's extension is `{"url": "…", "valueReference": {"reference": "#nope"}}`, and the Patient contains no resource `nope`:
+
+```text
+ERROR: Contained resource 'nope' not found. Reference is not defined within the resource
+  Path: Patient.extension[0].valueReference.reference
+  MessageID: REFERENCE_CONTAINED_NOT_FOUND
+```
+
+**Fix:** contain the resource the reference names, or reference it another way.
+
+---
+
+## REFERENCE_CONTAINER_NOT_FOUND
+
+The reference `#` names the resource that contains the one making it ("For a resource that references the container, the reference is '#'", references.html#contained): made from a resource that is not contained (the resource validated, a Bundle entry's, a parameter's), it names nothing.
+
+**Example:** an Observation that is not contained has `"focus": [{"reference": "#"}]`:
+
+```text
+ERROR: The reference '#' names the resource that contains this one, but this resource is not contained
+  Path: Observation.focus[0].reference
+  MessageID: REFERENCE_CONTAINER_NOT_FOUND
+```
+
+**Fix:** reference the resource by its id, or make the reference from a contained resource.
+
+---
+
+## REFERENCE_AGGREGATION_MODE
+
+The element allows references aggregated only some ways (`ElementDefinition.type.aggregation`), decided by where the target is found: `contained`, a resource the referring one contains (`#id`), or, from a contained resource, its container (`#`); `bundled`, an entry of the Bundle the referring resource is in (none, when it is in no Bundle); `referenced`, a resource outside it, so any literal reference that is not a fragment.
+
+**Example:** a profile allows `Patient.managingOrganization` only `bundled`, and `Organization/o9` is no entry of the Bundle:
+
+```text
+ERROR: Reference 'Organization/o9' is not aggregated as the element allows: its target is not found where the aggregation modes bundled allow it
+  Path: Bundle.entry[0].resource.managingOrganization.reference
+  MessageID: REFERENCE_AGGREGATION_MODE
+```
+
+**Fix:** include the target where the modes allow it (an entry of the Bundle, a contained resource), or reference it as the profile allows.

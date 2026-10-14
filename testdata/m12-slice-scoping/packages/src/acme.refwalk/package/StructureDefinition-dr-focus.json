@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "dr-focus",
+ "url": "http://example.org/StructureDefinition/dr-focus",
+ "name": "drfocus",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "DiagnosticReport",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/DiagnosticReport",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "DiagnosticReport",
+    "path": "DiagnosticReport"
+   },
+   {
+    "id": "DiagnosticReport.result",
+    "path": "DiagnosticReport.result",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://example.org/StructureDefinition/obs-focus"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,76 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pat-gp-slice",
+ "url": "http://example.org/StructureDefinition/pat-gp-slice",
+ "name": "patgpslice",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.generalPractitioner",
+    "path": "Patient.generalPractitioner",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "identifier.system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.generalPractitioner:pract",
+    "path": "Patient.generalPractitioner",
+    "sliceName": "pract",
+    "min": 0,
+    "max": "*",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://hl7.org/fhir/StructureDefinition/Practitioner"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.generalPractitioner:pract.identifier.system",
+    "path": "Patient.generalPractitioner.identifier.system",
+    "min": 1,
+    "fixedUri": "urn:pract"
+   },
+   {
+    "id": "Patient.generalPractitioner:prof",
+    "path": "Patient.generalPractitioner",
+    "sliceName": "prof",
+    "min": 0,
+    "max": "*",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://example.org/StructureDefinition/pract-gender"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.generalPractitioner:prof.identifier.system",
+    "path": "Patient.generalPractitioner.identifier.system",
+    "min": 1,
+    "fixedUri": "urn:prof"
+   }
+  ]
+ }
+}

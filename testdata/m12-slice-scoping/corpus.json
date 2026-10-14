@@ -167,6 +167,11 @@
       "files": ["testdata/m12-slice-scoping/probes/ht_*.json"]
     },
     {
+      "name": "reference-walk-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.refwalk-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/rw_*.json"]
+    },
+    {
       "name": "held-resource-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.held-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/hr_*.json"]

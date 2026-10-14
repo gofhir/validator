@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "annot-pract",
+ "url": "http://example.org/StructureDefinition/annot-pract",
+ "name": "annotpract",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Annotation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Annotation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Annotation",
+    "path": "Annotation"
+   },
+   {
+    "id": "Annotation.author[x]",
+    "path": "Annotation.author[x]",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://hl7.org/fhir/StructureDefinition/Practitioner"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

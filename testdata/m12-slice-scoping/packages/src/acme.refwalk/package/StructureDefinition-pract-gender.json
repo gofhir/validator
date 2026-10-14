@@ -1,0 +1,26 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pract-gender",
+ "url": "http://example.org/StructureDefinition/pract-gender",
+ "name": "practgender",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Practitioner",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Practitioner",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Practitioner",
+    "path": "Practitioner"
+   },
+   {
+    "id": "Practitioner.gender",
+    "path": "Practitioner.gender",
+    "min": 1
+   }
+  ]
+ }
+}

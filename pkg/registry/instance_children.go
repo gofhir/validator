@@ -74,7 +74,20 @@ func (r *Registry) childrenOf(ctx context.Context, sd *StructureDefinition, node
 			}
 		}
 	}
-	typeSD := r.GetByType(code)
+	return r.TypeChildrenOf(node, typeCode)
+}
+
+// TypeChildrenOf returns the children of an instance of node under its type's own definition:
+// typeCode, or node's only type. A phase that goes on below a value whose type's profile cannot be
+// used (ChildrenOf's Unresolved) takes them from here.
+func (r *Registry) TypeChildrenOf(node *ElementNode, typeCode string) InstanceChildren {
+	if typeCode == "" && len(node.Def.Type) == 1 {
+		typeCode = node.Def.Type[0].Code
+	}
+	if typeCode == "" {
+		return InstanceChildren{}
+	}
+	typeSD := r.GetByType(typeCode)
 	if typeSD == nil {
 		return InstanceChildren{}
 	}

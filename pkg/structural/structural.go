@@ -67,6 +67,12 @@ func buildElementIndex(sd *registry.StructureDefinition) *elementIndex {
 
 	for i := range sd.Snapshot.Element {
 		elem := &sd.Snapshot.Element[i]
+		// The element itself, not a slice's: a snapshot lists an element before its slices, whose
+		// elements share its paths and may allow fewer types (a slice of Parameters.parameter whose
+		// value[x] is a boolean leaves another parameter's valueString the element's).
+		if _, seen := idx.byPath[elem.Path]; seen {
+			continue
+		}
 		idx.byPath[elem.Path] = elem
 
 		// Index choice types by their base path (without [x])
@@ -321,8 +327,8 @@ func (v *Validator) resolveElementDefinition(
 		// e.g., Questionnaire.item.item has contentReference: "#Questionnaire.item"
 		var contentRefPath string
 		if elemDef.ContentReference != nil && *elemDef.ContentReference != "" {
-			// Remove the leading "#" from contentReference
-			contentRefPath = strings.TrimPrefix(*elemDef.ContentReference, "#")
+			// The element it names, "#id" or "[canonical]#id" (ElementDefinition.contentReference)
+			_, contentRefPath, _ = registry.SplitContentReference(*elemDef.ContentReference)
 		}
 
 		return &resolvedElement{

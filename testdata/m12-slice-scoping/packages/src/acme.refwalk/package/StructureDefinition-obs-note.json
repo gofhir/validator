@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-note",
+ "url": "http://example.org/StructureDefinition/obs-note",
+ "name": "obsnote",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.note",
+    "path": "Observation.note",
+    "type": [
+     {
+      "code": "Annotation",
+      "profile": [
+       "http://example.org/StructureDefinition/annot-pract"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

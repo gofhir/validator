@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"contained":[{"resourceType":"Observation","id":"o","meta":{"profile":["http://example.org/rev/obs-agg"]},"status":"final","code":{"text":"x"},"subject":{"reference":"#"},"focus":[{"reference":"#o"}]}],"link":[{"other":{"reference":"#o"},"type":"seealso"}]}

@@ -102,6 +102,9 @@ const (
 	DiagReferenceNotInBundle       DiagnosticID = "REFERENCE_NOT_IN_BUNDLE"
 	DiagReferenceContainedNotFound DiagnosticID = "REFERENCE_CONTAINED_NOT_FOUND"
 	DiagReferenceAggregationMode   DiagnosticID = "REFERENCE_AGGREGATION_MODE"
+	// DiagReferenceContainerNotFound: "#", the reference a contained resource makes to the resource
+	// that contains it, made from a resource that is not contained.
+	DiagReferenceContainerNotFound DiagnosticID = "REFERENCE_CONTAINER_NOT_FOUND"
 	// DiagReferenceTargetProfile: the resource a reference resolves to conforms to none of the
 	// profiles of its type its element allows (ElementDefinition.type.targetProfile).
 	DiagReferenceTargetProfile DiagnosticID = "REFERENCE_TARGET_PROFILE"
@@ -534,7 +537,12 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 	DiagReferenceAggregationMode: {
 		Severity: SeverityError,
 		Code:     CodeValue,
-		Template: "Reference '{reference}' is not allowed by aggregation mode. Allowed: {allowed}",
+		Template: "Reference '{reference}' is not aggregated as the element allows: its target is not found where the aggregation modes {allowed} allow it",
+	},
+	DiagReferenceContainerNotFound: {
+		Severity: SeverityError,
+		Code:     CodeInvalid,
+		Template: "The reference '#' names the resource that contains this one, but this resource is not contained",
 	},
 
 	// Bundle validation

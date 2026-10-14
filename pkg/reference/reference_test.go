@@ -1,8 +1,10 @@
 package reference
 
 import (
+	"context"
 	"testing"
 
+	"github.com/gofhir/validator/v2/internal/bundleref"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 )
@@ -383,101 +385,56 @@ func TestExtractTypesFromProfiles(t *testing.T) {
 	}
 }
 
+// A reference is allowed by the aggregation modes of its element by where its target is found:
+// "contained", among the referring resource's contained resources; "bundled", among the entries of
+// the Bundle it is in; "referenced", anywhere outside it.
 func TestValidateAggregation(t *testing.T) {
 	v := &Validator{registry: mockRegistry()}
+	patient := map[string]any{
+		"resourceType": "Patient", "id": "123",
+		"contained": []any{map[string]any{"resourceType": "Patient", "id": "pat-1"}},
+	}
+	bundle := map[string]any{
+		"resourceType": "Bundle", "type": "collection",
+		"entry": []any{
+			map[string]any{"fullUrl": "http://ex.org/fhir/Patient/123", "resource": patient},
+			map[string]any{"fullUrl": "urn:uuid:abc-123", "resource": map[string]any{"resourceType": "Patient", "id": "x"}},
+		},
+	}
+	ctx := bundleref.EnsureIndexes(context.Background())
+	inBundle := &refContext{ctx: ctx, contained: NewContainedContext(patient), root: patient,
+		container: bundle, fullURL: "http://ex.org/fhir/Patient/123"}
+	alone := &refContext{ctx: ctx, contained: NewContainedContext(patient), root: patient}
+	modes := func(m ...string) *registry.ElementDefinition {
+		return &registry.ElementDefinition{Type: []registry.Type{{Code: "Reference", Aggregation: m}}}
+	}
 
 	tests := []struct {
 		name        string
 		refStr      string
 		elemDef     *registry.ElementDefinition
+		rc          *refContext
 		expectError bool
 	}{
-		{
-			name:   "no aggregation — any reference allowed",
-			refStr: "Patient/123",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference"}},
-			},
-			expectError: false,
-		},
-		{
-			name:   "contained only — fragment reference allowed",
-			refStr: "#pat-1",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained"}}},
-			},
-			expectError: false,
-		},
-		{
-			name:   "contained only — relative reference rejected",
-			refStr: "Organization/123",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained"}}},
-			},
-			expectError: true,
-		},
-		{
-			name:   "referenced only — relative reference allowed",
-			refStr: "Patient/123",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"referenced"}}},
-			},
-			expectError: false,
-		},
-		{
-			name:   "referenced only — absolute reference allowed",
-			refStr: "http://example.org/fhir/Patient/123",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"referenced"}}},
-			},
-			expectError: false,
-		},
-		{
-			name:   "referenced only — fragment reference rejected",
-			refStr: "#pat-1",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"referenced"}}},
-			},
-			expectError: true,
-		},
-		{
-			name:   "bundled only — URN reference allowed",
-			refStr: "urn:uuid:abc-123",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"bundled"}}},
-			},
-			expectError: false,
-		},
-		{
-			name:   "bundled only — relative reference rejected",
-			refStr: "Patient/123",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"bundled"}}},
-			},
-			expectError: true,
-		},
-		{
-			name:   "contained + referenced — both fragment and relative allowed",
-			refStr: "Patient/123",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained", "referenced"}}},
-			},
-			expectError: false,
-		},
-		{
-			name:   "contained + referenced — fragment also allowed",
-			refStr: "#pat-1",
-			elemDef: &registry.ElementDefinition{
-				Type: []registry.Type{{Code: "Reference", Aggregation: []string{"contained", "referenced"}}},
-			},
-			expectError: false,
-		},
+		{"no aggregation: any reference", "Patient/999", modes(), inBundle, false},
+		{"contained: a contained resource", "#pat-1", modes("contained"), inBundle, false},
+		{"contained: a fragment not found", "#nope", modes("contained"), inBundle, true},
+		{"contained: a relative reference", "Organization/123", modes("contained"), inBundle, true},
+		{"referenced: a relative reference", "Patient/999", modes("referenced"), alone, false},
+		{"referenced: a fragment", "#pat-1", modes("referenced"), inBundle, true},
+		{"bundled: a urn found in the Bundle", "urn:uuid:abc-123", modes("bundled"), inBundle, false},
+		{"bundled: a relative reference found in the Bundle", "Patient/123", modes("bundled"), inBundle, false},
+		{"bundled: a urn not in the Bundle", "urn:uuid:zzz", modes("bundled"), inBundle, true},
+		{"bundled: a relative reference not in the Bundle", "Patient/999", modes("bundled"), inBundle, true},
+		{"bundled: no Bundle", "Patient/123", modes("bundled"), alone, true},
+		{"contained or referenced: a relative reference", "Patient/999", modes("contained", "referenced"), inBundle, false},
+		{"contained or referenced: a fragment", "#pat-1", modes("contained", "referenced"), inBundle, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := issue.NewResult()
-			v.validateAggregation(tt.refStr, tt.elemDef, "Test.ref", result)
+			v.validateAggregation(tt.refStr, tt.elemDef, "Test.ref", tt.rc, result)
 
 			hasError := result.HasErrors()
 			if hasError != tt.expectError {

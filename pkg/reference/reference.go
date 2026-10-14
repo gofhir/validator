@@ -5,13 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"maps"
 	"reflect"
 	"regexp"
 	"slices"
 	"strings"
 
 	"github.com/gofhir/validator/v2/internal/bundleref"
+	"github.com/gofhir/validator/v2/internal/elementvalues"
+	"github.com/gofhir/validator/v2/internal/slicerecord"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
@@ -209,6 +210,8 @@ type Validator struct {
 	registry  *registry.Registry
 	walker    *walker.Walker
 	conformer slicematch.Conformer
+	// definitions names the definition a value declares for itself (an extension's url).
+	definitions DefinitionSource
 }
 
 // Option configures a Validator.
@@ -468,8 +471,12 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 	ctx = bundleref.EnsureIndexes(ctx)
 	rc := rootContext(ctx, resource, bundleCtx)
 
-	// Validate references in root resource
-	v.validateElementWithPaths(resource, sd, resourceType, resourceType, rc, result)
+	// The root resource, over the definitions (walk).
+	root := sd.Tree().Root()
+	if root == nil {
+		return
+	}
+	v.walk(ctx, sd, root, "", resource, resourceType, rc, result)
 
 	// Walk every resource it holds (contained resources, Bundle entries, the resources other
 	// elements hold), each against the profiles its meta.profile declares and its type's
@@ -479,24 +486,22 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 	// Each resource's context, by its path (refContext.nested). The walk visits a resource before
 	// those it holds.
 	contexts := map[string]*refContext{resourceType: rc}
-	v.walker.WalkAllWithProfilesContext(ctx, resource, resourceType, resourceType, func(ctx *walker.ResourceContext) bool {
-		// Skip root resource (already validated above)
-		if ctx.FHIRPath == resourceType {
-			return true
+	v.walker.WalkAllWithProfilesContext(ctx, resource, resourceType, resourceType, func(w *walker.ResourceContext) bool {
+		if w.FHIRPath == resourceType {
+			return true // the root, walked above
 		}
-		parent := contexts[ctx.ParentPath]
+		parent := contexts[w.ParentPath]
 		if parent == nil {
 			parent = rc
 		}
-		here, seen := contexts[ctx.FHIRPath]
+		here, seen := contexts[w.FHIRPath]
 		if !seen {
-			here = parent.nested(ctx)
-			contexts[ctx.FHIRPath] = here
+			here = parent.nested(w)
+			contexts[w.FHIRPath] = here
 		}
-
-		// Validate references in the nested resource
-		// Use ResourceType for SD lookup, FHIRPath for error reporting
-		v.validateElementWithPaths(ctx.Data, ctx.SD, ctx.ResourceType, ctx.FHIRPath, here, nested)
+		if r := w.SD.Tree().Root(); r != nil {
+			v.walk(ctx, w.SD, r, "", w.Data, w.FHIRPath, here, nested)
+		}
 		return true
 	})
 	seen := make(map[string]bool, len(nested.Issues))
@@ -509,137 +514,81 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 	}
 }
 
-// ValidateElementWithPaths validates references with separate paths for SD lookup and error reporting.
-// SdPath is used to look up ElementDefinitions in the StructureDefinition.
-// FhirPath is used for error reporting (e.g., "Bundle.entry[0].resource.subject").
-func (v *Validator) validateElementWithPaths(data map[string]any, sd *registry.StructureDefinition, sdPath, fhirPath string, rc *refContext, result *issue.Result) {
-	// In the order of the keys, not the map's: a target's check depends on the checks made before.
-	for _, key := range slices.Sorted(maps.Keys(data)) {
-		value := data[key]
-		if key == "resourceType" {
-			continue
-		}
-
-		elementSDPath := fmt.Sprintf("%s.%s", sdPath, key)
-		elementFhirPath := fmt.Sprintf("%s.%s", fhirPath, key)
-
-		// Find the ElementDefinition for this path using SD path
-		elemDef := v.findElementDef(sd, elementSDPath)
-		if elemDef == nil {
-			continue
-		}
-
-		// Check if this element is a Reference type
-		if v.isReferenceType(elemDef) {
-			v.validateReference(value, elemDef, elementFhirPath, rc, result)
-		}
-
-		// BackboneElement children are defined in the parent resource SD (e.g., Patient.link.other),
-		// not in BackboneElement's own SD. Use validateElementWithPaths to look them up correctly.
-		isBackbone := v.isBackboneType(elemDef)
-
-		// Recurse into complex types
-		switch val := value.(type) {
-		case map[string]any:
-			if isBackbone {
-				v.validateElementWithPaths(val, sd, elementSDPath, elementFhirPath, rc, result)
-			} else {
-				v.validateComplexElement(val, elemDef, elementFhirPath, rc, result)
+// walk checks the references among the values of node's children in one instance of node, inst,
+// held at fhirPath, each under the definition that governs it: the slice it matched
+// (slicerecord.Slices), or the element. It descends into each value under that definition
+// (Registry.ChildrenOf: a contentReference, the profile its type declares, a backbone element's
+// children, the definition an extension's url names, or else Extension's), a primitive's extensions
+// included. A resource an element holds is checked by the resource walk.
+func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, rc *refContext, result *issue.Result) {
+	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
+	if c.Unresolved.Canonical != "" {
+		// The profile its type declares cannot be used (the cardinality phase reports it): the value
+		// is still one of its type, whose definition governs it, as the HL7 validator checks it.
+		c = v.registry.TypeChildrenOf(node, typeCode)
+	}
+	matched := slicerecord.In(ctx)
+	for _, child := range c.Nodes {
+		for _, cv := range elementvalues.Of(child, inst, v.registry) {
+			if !elementvalues.Written(child, cv, v.registry) || (cv.TypeCode != "" && !v.declares(child.Def, cv.TypeCode)) {
+				continue // the structural phase reports it, and HL7 checks nothing in it
 			}
-		case []any:
-			v.validateArrayElement(val, sd, elemDef, elementSDPath, elementFhirPath, isBackbone, rc, result)
-		}
-	}
-}
-
-// validateArrayElement validates references within array elements.
-func (v *Validator) validateArrayElement(items []any, sd *registry.StructureDefinition, elemDef *registry.ElementDefinition, elementSDPath, elementFhirPath string, isBackbone bool, rc *refContext, result *issue.Result) {
-	for i, item := range items {
-		itemPath := fmt.Sprintf("%s[%d]", elementFhirPath, i)
-		mapItem, ok := item.(map[string]any)
-		if !ok {
-			continue
-		}
-		if v.isReferenceType(elemDef) {
-			v.validateReference(mapItem, elemDef, itemPath, rc, result)
-		}
-		if isBackbone {
-			v.validateElementWithPaths(mapItem, sd, elementSDPath, itemPath, rc, result)
-		} else {
-			v.validateComplexElement(mapItem, elemDef, itemPath, rc, result)
-		}
-	}
-}
-
-// validateComplexElement validates references within a complex element.
-func (v *Validator) validateComplexElement(data map[string]any, parentDef *registry.ElementDefinition, basePath string, rc *refContext, result *issue.Result) {
-	if len(parentDef.Type) == 0 {
-		return
-	}
-
-	typeName := parentDef.Type[0].Code
-	typeSD := v.registry.GetByType(typeName)
-	if typeSD == nil || typeSD.Snapshot == nil {
-		return
-	}
-
-	for _, key := range slices.Sorted(maps.Keys(data)) {
-		value := data[key]
-		elementPath := fmt.Sprintf("%s.%s", basePath, key)
-		typePath := fmt.Sprintf("%s.%s", typeName, key)
-
-		var elemDef *registry.ElementDefinition
-		for i := range typeSD.Snapshot.Element {
-			if typeSD.Snapshot.Element[i].Path == typePath {
-				elemDef = &typeSD.Snapshot.Element[i]
-				break
+			gov := matched.Of(child, inst, cv.Key, cv.Index)
+			path := elementvalues.ItemPath(child, cv, fhirPath)
+			if cv.TypeCode == typeCodeReference {
+				v.validateReference(cv.Value, gov.Def, path, rc, result)
 			}
-		}
-
-		if elemDef == nil {
-			continue
-		}
-
-		if v.isReferenceType(elemDef) {
-			v.validateReference(value, elemDef, elementPath, rc, result)
-		}
-
-		switch val := value.(type) {
-		case map[string]any:
-			v.validateComplexElement(val, elemDef, elementPath, rc, result)
-		case []any:
-			for i, item := range val {
-				itemPath := fmt.Sprintf("%s[%d]", elementPath, i)
-				if mapItem, ok := item.(map[string]any); ok {
-					if v.isReferenceType(elemDef) {
-						v.validateReference(mapItem, elemDef, itemPath, rc, result)
-					}
-					v.validateComplexElement(mapItem, elemDef, itemPath, rc, result)
+			if v.registry.HoldsResource(child.Def) {
+				continue
+			}
+			m, ok := cv.Value.(map[string]any)
+			if !ok {
+				// A primitive's id and extensions are its "_key" sibling (json.html#primitive).
+				if m = cv.Ext; m == nil {
+					continue
 				}
 			}
+			nsd, next := v.registry.MemberTree(ctx, c.SD, gov)
+			v.walk(ctx, nsd, next, cv.TypeCode, m, path, rc, result)
 		}
 	}
 }
 
-// isBackboneType checks if an element is of type BackboneElement.
-// BackboneElement children are defined in the parent resource's SD, not in BackboneElement's own SD.
-func (v *Validator) isBackboneType(elemDef *registry.ElementDefinition) bool {
-	for _, t := range elemDef.Type {
-		if t.Code == "BackboneElement" {
-			return true
+// declares reports whether def's element, as its base defines it (ElementDefinition.base), has
+// typeCode among its types: a choice property naming another type is not the element's (the
+// structural phase reports it unknown, as HL7 does), while a profile narrowing the types leaves the
+// property the element's.
+func (v *Validator) declares(def *registry.ElementDefinition, typeCode string) bool {
+	types := def.Type
+	if def.Base != nil && def.Base.Path != "" {
+		if base := v.registry.GetElementDefinition(def.Base.Path); base != nil {
+			types = base.Type
 		}
 	}
-	return false
+	return len(types) == 0 || slices.ContainsFunc(types, func(t registry.Type) bool { return t.Code == typeCode })
 }
 
-// isReferenceType checks if an element is of type Reference.
-func (v *Validator) isReferenceType(elemDef *registry.ElementDefinition) bool {
-	for _, t := range elemDef.Type {
-		if t.Code == typeCodeReference {
-			return true
-		}
+// DefinitionSource names the definition a value declares for itself, which governs the value
+// wherever it is used: an extension's url names the definition the extension conforms to
+// (extensibility.html). It returns nil for a value that declares none.
+type DefinitionSource interface {
+	DefinitionOf(ctx context.Context, typeCode string, value map[string]any) *registry.StructureDefinition
+}
+
+// WithDefinitions sets the source of the definitions values declare for themselves. Without it, an
+// extension is checked against the definitions of the element that holds it only.
+func WithDefinitions(d DefinitionSource) Option {
+	return func(v *Validator) { v.definitions = d }
+}
+
+// selfDefinitions returns, for an instance, the definition it declares for itself for a type.
+func (v *Validator) selfDefinitions(ctx context.Context, inst map[string]any) func(string) *registry.StructureDefinition {
+	if v.definitions == nil {
+		return nil
 	}
-	return false
+	return func(typeCode string) *registry.StructureDefinition {
+		return v.definitions.DefinitionOf(ctx, typeCode, inst)
+	}
 }
 
 // validateReference validates a single Reference value.
@@ -693,22 +642,7 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 		)
 	}
 
-	// Validate fragment references against contained resources.
-	// Per FHIR spec (ref-1): "SHALL have a contained resource if a local reference is provided"
-	if strings.HasPrefix(refStr, "#") && refStr != "#" {
-		fragmentID := refStr[1:]
-		if rc.contained != nil {
-			if _, found := rc.contained.IDIndex[fragmentID]; !found {
-				result.AddErrorWithID(
-					issue.DiagReferenceContainedNotFound,
-					map[string]any{
-						"id": fragmentID,
-					},
-					fhirPath+".reference",
-				)
-			}
-		}
-	}
+	checkFragment(refStr, fhirPath, rc, result)
 
 	// Validate URN references exist within Bundle context.
 	// Per FHIR spec and HL7 validator behavior:
@@ -737,56 +671,70 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 	// Validate targetProfile - check if reference target type is allowed.
 	// This validates structural conformance based on the StructureDefinition.
 	v.validateTargetProfile(targetType, target, refStr, elemDef, fhirPath, rc, result)
-
-	// Validate aggregation mode constraints.
-	// Per FHIR spec, ElementDefinition.type.aggregation restricts how references should be resolved:
-	// - "contained": reference must be a fragment (#id) to a contained resource
-	// - "referenced": reference must be a literal URL (relative or absolute)
-	// - "bundled": reference must resolve within the Bundle
-	v.validateAggregation(refStr, elemDef, fhirPath, result)
-}
-
-// validateAggregation validates that the reference format matches the allowed aggregation modes.
-// When aggregation is empty, any reference format is allowed (default FHIR behavior).
-func (v *Validator) validateAggregation(refStr string, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
-	modes := v.getAggregationModes(elemDef)
-	if len(modes) == 0 {
-		return // No aggregation constraints — any format allowed
+	// Reference.type names the target's type, which must be one the element allows too, whatever the
+	// target is found to be (reported above).
+	if refType != "" && refType != targetType {
+		v.validateTargetProfile(refType, nil, refStr, elemDef, fhirPath, rc, result)
 	}
 
-	isFragment := strings.HasPrefix(refStr, "#")
-	isURN := strings.HasPrefix(refStr, "urn:uuid:") || strings.HasPrefix(refStr, "urn:oid:")
+	v.validateAggregation(refStr, elemDef, fhirPath, rc, result)
+}
 
-	allowed := false
+// checkFragment checks a fragment reference resolves (references.html#contained): "#id", to a
+// resource the referring one contains (ref-1: "SHALL have a contained resource if a local reference
+// is provided"); "#", to the resource that contains the referring one, which must be contained.
+func checkFragment(refStr, fhirPath string, rc *refContext, result *issue.Result) {
+	id, ok := strings.CutPrefix(refStr, "#")
+	switch {
+	case !ok:
+	case id == "":
+		if !rc.inContained {
+			result.AddErrorWithID(issue.DiagReferenceContainerNotFound, nil, fhirPath+".reference")
+		}
+	case rc.contained != nil:
+		if _, found := rc.contained.IDIndex[id]; !found {
+			result.AddErrorWithID(issue.DiagReferenceContainedNotFound, map[string]any{"id": id}, fhirPath+".reference")
+		}
+	}
+}
+
+// validateAggregation checks a reference against the aggregation modes its element allows
+// (ElementDefinition.type.aggregation), by where its target is found: "contained", a resource the
+// referring one contains ("#id"), or, from a contained resource, its container ("#"); "bundled",
+// an entry of the Bundle it is in; "referenced", a resource resolved outside it, so any literal
+// reference that is no fragment. Without modes, any
+// reference is allowed. A reference allowed by none of them is reported, as the HL7 validator
+// reports a bundled or contained reference not found.
+func (v *Validator) validateAggregation(refStr string, elemDef *registry.ElementDefinition, fhirPath string, rc *refContext, result *issue.Result) {
+	modes := v.getAggregationModes(elemDef)
+	if len(modes) == 0 {
+		return
+	}
+	fragment := strings.HasPrefix(refStr, "#")
 	for _, mode := range modes {
 		switch mode {
 		case "contained":
-			if isFragment {
-				allowed = true
+			if _, found := resolveTarget(refStr, rc); fragment && found {
+				return
 			}
 		case "bundled":
-			// URN references and fragment references can resolve in a Bundle
-			if isURN {
-				allowed = true
+			if _, found := resolveTarget(refStr, rc); !fragment && found {
+				return
 			}
 		case "referenced":
-			// Literal URL references (relative or absolute, not fragment, not URN)
-			if !isFragment && !isURN {
-				allowed = true
+			if !fragment {
+				return
 			}
 		}
 	}
-
-	if !allowed {
-		result.AddErrorWithID(
-			issue.DiagReferenceAggregationMode,
-			map[string]any{
-				"reference": refStr,
-				"allowed":   strings.Join(modes, ", "),
-			},
-			fhirPath+".reference",
-		)
-	}
+	result.AddErrorWithID(
+		issue.DiagReferenceAggregationMode,
+		map[string]any{
+			"reference": refStr,
+			"allowed":   strings.Join(modes, ", "),
+		},
+		fhirPath+".reference",
+	)
 }
 
 // getAggregationModes extracts aggregation modes from all Reference types in an ElementDefinition.
@@ -1022,20 +970,6 @@ func (v *Validator) extractResourceType(ref string) string {
 	}
 
 	return ""
-}
-
-// findElementDef finds an ElementDefinition by path in the StructureDefinition.
-func (v *Validator) findElementDef(sd *registry.StructureDefinition, path string) *registry.ElementDefinition {
-	if sd == nil || sd.Snapshot == nil {
-		return nil
-	}
-
-	for i := range sd.Snapshot.Element {
-		if sd.Snapshot.Element[i].Path == path {
-			return &sd.Snapshot.Element[i]
-		}
-	}
-	return nil
 }
 
 // containedOf returns resource's contained resources: its array, or the one resource written where

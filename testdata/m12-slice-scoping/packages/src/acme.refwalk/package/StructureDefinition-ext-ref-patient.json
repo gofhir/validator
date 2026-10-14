@@ -1,0 +1,55 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-ref-patient",
+ "url": "http://example.org/StructureDefinition/ext-ref-patient",
+ "name": "extrefpatient",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ],
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension",
+    "short": "ext-ref-patient"
+   },
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/StructureDefinition/ext-ref-patient"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "min": 1,
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://hl7.org/fhir/StructureDefinition/Patient"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
