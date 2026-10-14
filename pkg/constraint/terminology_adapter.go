@@ -35,12 +35,15 @@ func (ts *fhirpathTermService) MemberOf(ctx context.Context, code any, vsURL str
 		return false, nil
 	}
 
-	valid, found := ts.termRegistry.ValidateCodeContext(ctx, vsURL, system, codeVal)
-	if !found {
-		// ValueSet not loaded — return false (unknown).
-		return false, nil
-	}
-	return valid, nil
+	return ts.member(ctx, vsURL, system, codeVal), nil
+}
+
+// member reports whether code, of system, is known to be a member of the ValueSet: a code whose
+// membership cannot be decided here (a code system not held, an external one) is not, as the HL7
+// validator's memberOf() answers it.
+func (ts *fhirpathTermService) member(ctx context.Context, vsURL, system, code string) bool {
+	res, err := ts.termRegistry.ResolveCodeInValueSet(terminology.WithStrictMembership(ctx), system, code, vsURL, terminology.LookupOptions{})
+	return err == nil && res.Resolution == terminology.Valid
 }
 
 // memberOfCodeableConcept checks if any coding in a CodeableConcept is a member of the ValueSet.
@@ -60,8 +63,7 @@ func (ts *fhirpathTermService) memberOfCodeableConcept(ctx context.Context, codi
 		if code == "" {
 			continue
 		}
-		valid, found := ts.termRegistry.ValidateCodeContext(ctx, vsURL, system, code)
-		if found && valid {
+		if ts.member(ctx, vsURL, system, code) {
 			return true
 		}
 	}

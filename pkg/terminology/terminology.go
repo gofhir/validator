@@ -23,6 +23,23 @@ type ValueSet struct {
 	Name         string  `json:"name"`
 	Status       string  `json:"status"`
 	Compose      Compose `json:"compose,omitempty"`
+	// Expansion is the ValueSet's expansion: its codes, when it has no composition (one with a
+	// composition keeps none: membership is decided by the composition).
+	Expansion *Expansion `json:"expansion,omitempty"`
+}
+
+// Expansion is a ValueSet's expansion (ValueSet.expansion): total is the number of codes it has,
+// which may be more than it contains (a page of it).
+type Expansion struct {
+	Total    *int                `json:"total,omitempty"`
+	Contains []ExpansionContains `json:"contains,omitempty"`
+}
+
+// ExpansionContains is a code an expansion contains, and those it groups.
+type ExpansionContains struct {
+	System   string              `json:"system,omitempty"`
+	Code     string              `json:"code,omitempty"`
+	Contains []ExpansionContains `json:"contains,omitempty"`
 }
 
 // Compose defines the content of a ValueSet.
@@ -127,16 +144,26 @@ type Registry struct {
 	valueSetsByVersion   map[string]*ValueSet
 	codeSystemsByVersion map[string]*CodeSystem
 
-	// Cache of expanded ValueSets (URL -> set of valid codes)
-	expansionCache map[string]map[string]bool
+	// clauseCache holds what each include or exclude of a ValueSet held selects from its code
+	// system (clauseCodes).
+	clauseCache map[*Include]clauseExpansion
+	// systemsCache holds the systems each ValueSet held includes (systemsOf), and expansionCache
+	// the codes of each one's expansion (expansionCodes).
+	systemsCache   map[*ValueSet]includedSystems
+	expansionCache map[*ValueSet]expandedCodes
+	// answerCache holds each membership answer worked out (memberOf).
+	answerCache map[memberKey]answer
+	// derivedGen counts the times the caches above were cleared: what was worked out from the
+	// definitions of an earlier generation is not kept.
+	derivedGen uint64
 
 	// hierarchyMu guards hierarchyCache. Hierarchies are built lazily during
 	// expansion, which runs outside the mu critical section, so the cache needs
 	// its own lock rather than riding on mu.
 	hierarchyMu sync.RWMutex
-	// Cache of hierarchy relationships per CodeSystem (system URL -> parent code -> child codes)
+	// Cache of hierarchy relationships per CodeSystem (parent code -> child codes)
 	// Built from subsumedBy properties in CodeSystem concepts
-	hierarchyCache map[string]map[string][]string
+	hierarchyCache map[*CodeSystem]map[string][]string
 
 	// providerMu guards provider, authority and authoritative, any of which may be
 	// replaced after construction while validation is already reading them.
@@ -179,8 +206,11 @@ func NewRegistry() *Registry {
 		codeSystemsByVersion: make(map[string]*CodeSystem),
 		valueSetPackage:      make(map[string]*loaded[*ValueSet]),
 		codeSystemPackage:    make(map[string]*loaded[*CodeSystem]),
-		expansionCache:       make(map[string]map[string]bool),
-		hierarchyCache:       make(map[string]map[string][]string),
+		clauseCache:          make(map[*Include]clauseExpansion),
+		systemsCache:         make(map[*ValueSet]includedSystems),
+		expansionCache:       make(map[*ValueSet]expandedCodes),
+		answerCache:          make(map[memberKey]answer),
+		hierarchyCache:       make(map[*CodeSystem]map[string][]string),
 		unresolved:           make(map[string]time.Time),
 		unresolvedTTL:        DefaultUnresolvedCacheTTL,
 		now:                  time.Now,
@@ -305,6 +335,9 @@ func parseValueSet(data []byte) (*ValueSet, bool) {
 	var vs ValueSet
 	if err := json.Unmarshal(data, &vs); err != nil || vs.URL == "" {
 		return nil, false
+	}
+	if len(vs.Compose.Include) > 0 {
+		vs.Expansion = nil // not read (memberOf), and often large
 	}
 	return &vs, true
 }
@@ -494,7 +527,11 @@ func (r *Registry) fhirRank(fhirVersions []string) int {
 // clearDerivedUnlocked drops the expansions and hierarchies built from the resources chosen. Must
 // be called with the write lock held.
 func (r *Registry) clearDerivedUnlocked() {
+	r.derivedGen++
+	clear(r.clauseCache)
+	clear(r.systemsCache)
 	clear(r.expansionCache)
+	clear(r.answerCache)
 	r.hierarchyMu.Lock()
 	clear(r.hierarchyCache)
 	r.hierarchyMu.Unlock()
@@ -652,10 +689,10 @@ func (r *Registry) ResolveCodeInValueSet(ctx context.Context, system, code, valu
 		return res, err
 	}
 
-	valid, found, providerAnswered := r.validateCodeLocallyDetail(ctx, valueSetURL, system, code)
-	res := localCodeResult(valid, found)
+	member, found := r.localAnswer(ctx, valueSetURL, system, code)
+	res := localCodeResult(member != answerOut, found)
 	res.SystemInValueSet = r.localMembership(valueSetURL, system)
-	res.Assumed = res.Resolution == Valid && !providerAnswered && r.acceptedByWildcard(valueSetURL, system, code)
+	res.Assumed = found && member == answerUnknown
 	if res.Assumed && strictMembership(ctx) {
 		return CodeResult{Resolution: Unresolved, SystemInValueSet: res.SystemInValueSet,
 			Message: "membership cannot be checked without the code system"}, nil
@@ -675,30 +712,6 @@ func WithStrictMembership(ctx context.Context) context.Context {
 func strictMembership(ctx context.Context) bool {
 	strict, _ := ctx.Value(strictMembershipKey{}).(bool)
 	return strict
-}
-
-// acceptedByWildcard reports whether a local answer for a code could only have come from the
-// wildcard an expansion records for a code system it cannot expand. The caller rules out the
-// answers a provider gave.
-func (r *Registry) acceptedByWildcard(valueSetURL, system, code string) bool {
-	vs := r.GetValueSet(valueSetURL)
-	if vs == nil {
-		return false
-	}
-	r.mu.RLock()
-	codes, cached := r.expansionCache[canonicalOf(vs.URL, vs.Version)]
-	r.mu.RUnlock()
-	if !cached {
-		return false
-	}
-	exact := codes[code]
-	if system != "" {
-		exact = codes[system+"|"+code]
-	}
-	if system == "" {
-		return !exact && codes["*"]
-	}
-	return !exact && codes[system+"|*"]
 }
 
 // localMembership reports whether system is among the ValueSet's declared
@@ -742,44 +755,58 @@ func localCodeResult(valid, found bool) CodeResult {
 }
 
 // validateCodeLocally answers from the registry's own copies, falling back to a
-// configured Provider.
+// configured Provider. A code whose membership is not known here is accepted (fail-open).
 func (r *Registry) validateCodeLocally(ctx context.Context, valueSetURL, system, code string) (isValid, found bool) {
-	isValid, found, _ = r.validateCodeLocallyDetail(ctx, valueSetURL, system, code)
-	return isValid, found
+	member, found := r.localAnswer(ctx, valueSetURL, system, code)
+	return member != answerOut, found
 }
 
-// validateCodeLocallyDetail is validateCodeLocally that also reports whether a provider answered:
-// when none did, an answer from the expansion's wildcard is assumed, not checked.
-func (r *Registry) validateCodeLocallyDetail(ctx context.Context, valueSetURL, system, code string) (isValid, found, providerAnswered bool) {
-	// Resolve first: the ValueSet decides the cache key, so two versions of the
-	// same canonical cannot share an expansion. Keying by the version-stripped URL
-	// would let a lookup for one version be answered from another's expansion,
-	// which would make version-aware resolution pointless.
+// localAnswer tells whether code is a member of the ValueSet valueSetURL from the registry's own
+// copies (memberOf), asking a configured provider for a ValueSet not held and for an external
+// system's codes; found is false when neither holds the ValueSet.
+func (r *Registry) localAnswer(ctx context.Context, valueSetURL, system, code string) (member answer, found bool) {
 	vs := r.GetValueSet(valueSetURL)
 	if vs == nil {
 		// Not held by this registry. A configured provider may still know it —
 		// a host that owns terminology can hold ValueSets created after this
 		// registry was populated (e.g. authored over a REST API) — so ask before
 		// reporting the ValueSet unresolvable.
-		isValid, found = r.validateViaProvider(ctx, system, code, valueSetURL)
-		return isValid, found, found
+		valid, found := r.validateViaProvider(ctx, system, code, valueSetURL)
+		return inOrOut(valid), found
 	}
-
-	cacheKey := canonicalOf(vs.URL, vs.Version)
-
-	r.mu.RLock()
-	codes, cached := r.expansionCache[cacheKey]
-	r.mu.RUnlock()
-
-	if !cached {
-		codes = r.expandValueSet(vs)
-		r.mu.Lock()
-		r.expansionCache[cacheKey] = codes
-		r.mu.Unlock()
+	if system != "" && r.isExternalSystem(system) {
+		if valid, answered := r.askProvider(ctx, system, code, valueSetURL); answered {
+			return inOrOut(valid), true
+		}
 	}
+	return r.memberOf(vs, system, code), true
+}
 
-	isValid, providerAnswered = r.validateWithProviderDetail(ctx, codes, system, code, valueSetURL)
-	return isValid, true, providerAnswered
+// inOrOut is a decided answer.
+func inOrOut(member bool) answer {
+	if member {
+		return answerIn
+	}
+	return answerOut
+}
+
+// askProvider asks the configured provider whether code, of an external system, is a member of
+// the ValueSet, and reports whether it answered (an error falls back to the local answer).
+func (r *Registry) askProvider(ctx context.Context, system, code, valueSetURL string) (valid, answered bool) {
+	p := r.getProvider()
+	if p == nil {
+		return false, false
+	}
+	// Try ValueSet-specific validation first (more precise)
+	valid, vsFound, err := p.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
+	if err == nil && vsFound {
+		return valid, true
+	}
+	// Fall back to system-level validation
+	if valid, err = p.ValidateCode(ctx, system, code); err == nil {
+		return valid, true
+	}
+	return false, false
 }
 
 // canonicalOf builds the "url|version" key used by the version-scoped caches. A
@@ -789,30 +816,6 @@ func canonicalOf(url, version string) string {
 		return url
 	}
 	return url + "|" + version
-}
-
-// validateWithProviderDetail checks a code against expanded codes, delegating to the external
-// provider for external systems when one is configured, and reports whether the provider answered
-// rather than the local expansion.
-func (r *Registry) validateWithProviderDetail(ctx context.Context, codes map[string]bool, system, code, valueSetURL string) (valid, providerAnswered bool) {
-	// The cheap local checks come first so the provider lock is only taken on
-	// the external-system path.
-	if system != "" && r.isExternalSystem(system) {
-		if p := r.getProvider(); p != nil {
-			// Try ValueSet-specific validation first (more precise)
-			valid, vsFound, err := p.ValidateCodeInValueSet(ctx, system, code, valueSetURL)
-			if err == nil && vsFound {
-				return valid, true
-			}
-			// Fall back to system-level validation
-			valid, err = p.ValidateCode(ctx, system, code)
-			if err == nil {
-				return valid, true
-			}
-			// Error from provider → fall through to wildcard (fail-open)
-		}
-	}
-	return r.checkCode(codes, system, code), false
 }
 
 // validateViaProvider answers a ValueSet this registry does not hold by asking
@@ -830,196 +833,6 @@ func (r *Registry) validateViaProvider(ctx context.Context, system, code, valueS
 		return false, false
 	}
 	return valid, true
-}
-
-// checkCode checks if a code is in the expanded codes map.
-func (r *Registry) checkCode(codes map[string]bool, system, code string) bool {
-	// For code elements (no system), just check the code; the global wildcard stands for an
-	// included system that cannot be expanded, which a code without a system may belong to.
-	if system == "" {
-		return codes["*"] || codes[code]
-	}
-
-	// Check for system-specific wildcard
-	if codes[system+"|*"] {
-		return true
-	}
-
-	// For Coding elements, check system|code
-	return codes[system+"|"+code]
-}
-
-// expandValueSet expands a ValueSet to a set of valid codes.
-// Returns a map where keys are either "code" (for code elements) or "system|code" (for Coding).
-// Special marker "*" is added when the ValueSet includes external systems that can't be expanded.
-//
-// Exclusions (compose.exclude) are applied after the includes, per
-// https://hl7.org/fhir/R4/valueset-definitions.html#ValueSet.compose.exclude.
-func (r *Registry) expandValueSet(vs *ValueSet) map[string]bool {
-	codes := make(map[string]bool)
-
-	for i := range vs.Compose.Include {
-		r.expandInclude(codes, &vs.Compose.Include[i])
-	}
-
-	if len(vs.Compose.Exclude) == 0 {
-		return codes
-	}
-
-	excluded := make(map[string]bool)
-	for i := range vs.Compose.Exclude {
-		r.expandInclude(excluded, &vs.Compose.Exclude[i])
-	}
-
-	return subtractExcluded(codes, excluded)
-}
-
-// subtractExcluded removes excluded codes from an expansion while preserving the
-// dual-key representation described on expandValueSet.
-//
-// A system-qualified key is dropped when the exclusion names it exactly. A bare
-// "code" key — which exists so that primitive code elements can be validated
-// without a system — survives while any system still contributes that code, so
-// excluding one system's code does not invalidate a code another include still
-// provides.
-//
-// Wildcards never remove anything: an exclusion over a system that cannot be
-// expanded locally cannot be applied precisely, so it is ignored rather than
-// over-excluding. Those cases resolve through the terminology Provider instead.
-func subtractExcluded(codes, excluded map[string]bool) map[string]bool {
-	result := make(map[string]bool, len(codes))
-
-	for key := range codes {
-		if !isSystemQualified(key) || excluded[key] {
-			continue
-		}
-		result[key] = true
-	}
-
-	contributedBefore := countContributors(codes)
-	contributedAfter := countContributors(result)
-
-	for key := range codes {
-		if isSystemQualified(key) {
-			continue
-		}
-		switch {
-		case key == "*":
-			// Preserved: the ValueSet reaches a system we cannot enumerate.
-			result[key] = true
-		case contributedBefore[key] > 0:
-			// Some system contributed this code; keep it while one survives.
-			if contributedAfter[key] > 0 {
-				result[key] = true
-			}
-		case !excluded[key]:
-			// Contributed without a system (e.g. an include with no system).
-			result[key] = true
-		}
-	}
-
-	return result
-}
-
-// isSystemQualified reports whether a key is of the form "system|code" rather
-// than a bare code.
-func isSystemQualified(key string) bool {
-	return strings.LastIndex(key, "|") > 0
-}
-
-// countContributors counts, per bare code, how many system-qualified keys
-// provide it. Wildcard entries are not contributors.
-func countContributors(codes map[string]bool) map[string]int {
-	counts := make(map[string]int)
-	for key := range codes {
-		i := strings.LastIndex(key, "|")
-		if i <= 0 {
-			continue
-		}
-		if code := key[i+1:]; code != "*" {
-			counts[code]++
-		}
-	}
-	return counts
-}
-
-// expandInclude expands a single Include clause into the codes map.
-func (r *Registry) expandInclude(codes map[string]bool, inc *Include) {
-	// If specific concepts are listed, use them
-	if len(inc.Concept) > 0 {
-		r.addExplicitConcepts(codes, inc)
-		return
-	}
-
-	// Check for external systems
-	if inc.System != "" && r.isExternalSystem(inc.System) {
-		codes["*"] = true
-		codes[inc.System+"|*"] = true
-		return
-	}
-
-	// Expand from CodeSystem
-	r.expandFromCodeSystem(codes, inc)
-
-	// Handle nested ValueSets
-	r.expandNestedValueSets(codes, inc.ValueSet)
-}
-
-// addExplicitConcepts adds explicitly listed concepts to the codes map.
-func (r *Registry) addExplicitConcepts(codes map[string]bool, inc *Include) {
-	for _, c := range inc.Concept {
-		codes[c.Code] = true
-		if inc.System != "" {
-			codes[inc.System+"|"+c.Code] = true
-		}
-	}
-}
-
-// expandFromCodeSystem expands codes from a CodeSystem, applying filters if present.
-//
-// A requested inc.Version selects that exact version when it was loaded. When it
-// was not, expansion proceeds from the version held rather than resolving nothing:
-// see GetCodeSystemVersion for why refusing would break most of the versioned
-// includes in the published corpus.
-func (r *Registry) expandFromCodeSystem(codes map[string]bool, inc *Include) {
-	if inc.System == "" {
-		return
-	}
-
-	var cs *CodeSystem
-	if inc.Version != "" {
-		cs = r.GetCodeSystemVersion(inc.System, inc.Version)
-	} else {
-		cs = r.GetCodeSystem(inc.System)
-	}
-	if cs == nil {
-		return
-	}
-
-	if len(inc.Filter) == 0 {
-		r.addCodesFromCodeSystem(codes, cs, inc.System)
-	} else {
-		r.applyFilters(codes, cs, inc.System, inc.Filter)
-	}
-	// The codes of a CodeSystem that does not include all of them cannot be told apart from codes
-	// that are not its own: any code of the system is accepted, unchecked, as for an external one.
-	if cs.partial() {
-		codes["*"] = true
-		codes[inc.System+"|*"] = true
-	}
-}
-
-// expandNestedValueSets recursively expands nested ValueSets.
-func (r *Registry) expandNestedValueSets(codes map[string]bool, nestedURLs []string) {
-	for _, nestedVSURL := range nestedURLs {
-		nestedVS := r.GetValueSet(nestedVSURL)
-		if nestedVS == nil {
-			continue
-		}
-		for code := range r.expandValueSet(nestedVS) {
-			codes[code] = true
-		}
-	}
 }
 
 // externalSystems contains systems that cannot be locally expanded and require a terminology server.
@@ -1237,10 +1050,10 @@ func (r *Registry) applyEqualityFilter(codes map[string]bool, cs *CodeSystem, sy
 // The returned map is never mutated after publication, so callers may read it
 // without holding a lock.
 func (r *Registry) getOrBuildHierarchy(cs *CodeSystem) map[string][]string {
-	// Keyed by canonical, not URL: two versions of a CodeSystem can have different
-	// hierarchies, and sharing one cache entry between them would silently expand
-	// an is-a filter against the wrong structure.
-	key := canonicalOf(cs.URL, cs.Version)
+	// Keyed by the CodeSystem itself, not its URL nor its canonical: two versions, or two copies of
+	// one version (a package's and its publisher's), can have different hierarchies, and sharing one
+	// cache entry between them would expand an is-a filter against the wrong structure.
+	key := cs
 
 	r.hierarchyMu.RLock()
 	hierarchy, ok := r.hierarchyCache[key]
@@ -1349,7 +1162,8 @@ func (r *Registry) conceptOf(system, code string) (*CodeSystem, *CodeSystemCode)
 	return cs, find(cs.Concept)
 }
 
-// IsSystemInValueSet checks if a system is one of the systems defined in a ValueSet.
+// IsSystemInValueSet checks if a system is one of the systems a ValueSet includes: those of its
+// includes, of the ValueSets they name, and of its expansion when it has no composition.
 //
 // A versioned canonical resolves to that version of the ValueSet: which systems a
 // ValueSet declares can change between versions, and answering from the wrong one
@@ -1369,20 +1183,10 @@ func (r *Registry) IsSystemInValueSet(valueSetURL, system string) bool {
 		return false
 	}
 
-	// Check if the system is in any of the include statements
-	for _, inc := range vs.Compose.Include {
-		if inc.System == system {
-			return true
-		}
-		// Also check nested ValueSets
-		for _, nestedVS := range inc.ValueSet {
-			if r.IsSystemInValueSet(nestedVS, system) {
-				return true
-			}
-		}
-	}
-
-	return false
+	// The systems its membership is decided over (systemsOf): those of its includes, of the
+	// ValueSets they name, and of its expansion.
+	systems, _ := r.systemsOf(vs)
+	return slices.Contains(systems, system)
 }
 
 // ValidateCodeInCodeSystem checks if a code exists in a CodeSystem.

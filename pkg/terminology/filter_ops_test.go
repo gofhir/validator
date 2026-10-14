@@ -39,7 +39,7 @@ func expandFilter(t *testing.T, cs *CodeSystem, op, property, value string) map[
 		}}},
 	}
 	r.valueSets[vs.URL] = vs
-	return r.expandValueSet(vs)
+	return r.clauseCodes(&vs.Compose.Include[0]).codes
 }
 
 func TestDescendantOfExcludesSelf(t *testing.T) {
@@ -270,7 +270,7 @@ func TestIncludeVersionResolvesExactVersion(t *testing.T) {
 	}
 	r.valueSets[vs.URL] = vs
 
-	codes := r.expandValueSet(vs)
+	codes := r.clauseCodes(&vs.Compose.Include[0]).codes
 	if !codes[system+"|only-in-v1"] {
 		t.Error("the requested version was loaded, so its codes must be the ones expanded")
 	}
@@ -402,7 +402,7 @@ func TestHierarchyCacheIsScopedByVersion(t *testing.T) {
 			}}},
 		}
 		r.valueSets[vs.URL] = vs
-		return r.expandValueSet(vs)
+		return r.clauseCodes(&vs.Compose.Include[0]).codes
 	}
 
 	if !isAOver("1.0.0")[system+"|b"] {

@@ -1,0 +1,2 @@
+{"resourceType":"ValueSet","id":"sctex","url":"http://example.org/vs/sctex","status":"active",
+"compose":{"include":[{"system":"http://snomed.info/sct"}],"exclude":[{"system":"http://snomed.info/sct","filter":[{"property":"concept","op":"is-a","value":"q"}]}]}}

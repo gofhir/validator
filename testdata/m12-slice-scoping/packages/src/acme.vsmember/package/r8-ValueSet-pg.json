@@ -1,0 +1,1 @@
+{"resourceType":"ValueSet","id":"pg","url":"http://example.org/r8/vs/pg","status":"active","expansion":{"identifier":"urn:uuid:2","timestamp":"2026-01-01","total":5,"offset":0,"contains":[{"system":"http://example.org/r8/cs/held","code":"a"}]}}

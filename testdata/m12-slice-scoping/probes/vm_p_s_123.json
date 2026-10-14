@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","meta":{"profile":["http://example.org/sd/ph-s"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"photo":[{"language":"123","url":"http://x.test/a.png"}]}
