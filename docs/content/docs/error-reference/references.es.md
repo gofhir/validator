@@ -11,12 +11,15 @@ Los errores de referencias ocurren cuando las referencias a recursos FHIR están
 
 | ID | Severidad | Mensaje |
 |----|-----------|---------|
-| `REFERENCE_INVALID_FORMAT` | error | Reference '{value}' has invalid format |
+| `REFERENCE_INVALID_FORMAT` | error | Invalid reference format: '{reference}' |
 | `REFERENCE_INVALID_TARGET` | error | Invalid reference target type '{type}'. Allowed: {allowed} |
 | `REFERENCE_TARGET_PROFILE` | error | Unable to find a profile match for {reference} among choices: {profiles} |
 | `REFERENCE_MULTIPLE_MATCHES` | error | Multiple matches in bundle for reference {reference} |
-| `REFERENCE_NOT_FOUND` | warning | Referenced resource '{value}' not found |
+| `REFERENCE_NOT_IN_BUNDLE` | warning | URN reference is not locally contained within the bundle {reference} |
 | `REFERENCE_TYPE_MISMATCH` | error | Reference type element '{type}' does not match reference target '{reference}' |
+| `REFERENCE_CONTAINED_NOT_FOUND` | error | Contained resource '{id}' not found. Reference is not defined within the resource |
+| `REFERENCE_CONTAINER_NOT_FOUND` | error | The reference '#' names the resource that contains this one, but this resource is not contained |
+| `REFERENCE_AGGREGATION_MODE` | error | Reference '{reference}' is not aggregated as the element allows: its target is not found where the aggregation modes {allowed} allow it |
 
 ---
 
@@ -140,64 +143,19 @@ ERROR: Multiple matches in bundle for reference Patient/p
 
 ---
 
-## REFERENCE_NOT_FOUND
+## REFERENCE_NOT_IN_BUNDLE
 
-El recurso referenciado no se pudo resolver dentro del contexto de validación. Esto es un warning porque el recurso puede existir en un servidor externo al que el validador no tiene acceso. Este error es más relevante al validar Bundles, donde se espera que las referencias contenidas y las referencias internas del Bundle sean resolubles.
+Una referencia `urn:uuid:` o `urn:oid:`, hecha en un Bundle, no nombra ninguna de sus entradas: una referencia así no tiene significado fuera del Bundle (bundle.html#references). Es un warning, como lo reporta el validador de HL7; una referencia relativa o absoluta a un recurso fuera del Bundle no se reporta, salvo que los modos de agregación del elemento lo exijan en el Bundle (`REFERENCE_AGGREGATION_MODE`).
 
-**Ejemplo:**
+**Ejemplo:** la Observation de una entrada tiene `"subject": {"reference": "urn:uuid:9f1c…"}`, y ninguna entrada tiene ese `fullUrl`:
 
-```json
-{
-  "resourceType": "Bundle",
-  "type": "transaction",
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Observation",
-        "status": "final",
-        "code": {
-          "coding": [{ "system": "http://loinc.org", "code": "85354-9" }]
-        },
-        "subject": {
-          "reference": "Patient/999"
-        }
-      }
-    }
-  ]
-}
+```text
+WARNING: URN reference is not locally contained within the bundle urn:uuid:9f1c…
+  Path: Bundle.entry[0].resource.subject
+  MessageID: REFERENCE_NOT_IN_BUNDLE
 ```
 
-Si `Patient/999` no está incluido en las entradas del Bundle, el validador produce este warning.
-
-**Corrección:** Incluye el recurso referenciado en el Bundle o usa un recurso contenido:
-
-```json
-{
-  "resourceType": "Bundle",
-  "type": "transaction",
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Patient",
-        "id": "999",
-        "name": [{ "family": "Smith" }]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "Observation",
-        "status": "final",
-        "code": {
-          "coding": [{ "system": "http://loinc.org", "code": "85354-9" }]
-        },
-        "subject": {
-          "reference": "Patient/999"
-        }
-      }
-    }
-  ]
-}
-```
+**Corrección:** incluir el recurso como una entrada cuyo `fullUrl` sea la URN, o referenciarlo por su URL RESTful.
 
 ---
 
@@ -214,3 +172,51 @@ ERROR: Reference type element 'Group' does not match reference target 'Patient'
 ```
 
 **Corrección:** hacer que `type` sea el tipo del destino, o referenciar un recurso de ese tipo.
+
+---
+
+## REFERENCE_CONTAINED_NOT_FOUND
+
+Una referencia de fragmento `#id` no nombra ningún recurso contenido del recurso que la hace (o del recurso que lo contiene): "SHALL have a contained resource if a local reference is provided" (ref-1, references.html#contained). Se revisa todo valor de tipo Reference, también el valor de una extensión y el de un elemento de elección.
+
+**Ejemplo:** la extensión de un Patient es `{"url": "…", "valueReference": {"reference": "#nope"}}`, y el Patient no contiene ningún recurso `nope`:
+
+```text
+ERROR: Contained resource 'nope' not found. Reference is not defined within the resource
+  Path: Patient.extension[0].valueReference.reference
+  MessageID: REFERENCE_CONTAINED_NOT_FOUND
+```
+
+**Corrección:** contener el recurso que nombra la referencia, o referenciarlo de otra forma.
+
+---
+
+## REFERENCE_CONTAINER_NOT_FOUND
+
+La referencia `#` nombra el recurso que contiene al que la hace ("For a resource that references the container, the reference is '#'", references.html#contained): hecha desde un recurso que no está contenido (el recurso validado, el de una entrada de Bundle, el de un parámetro), no nombra nada.
+
+**Ejemplo:** una Observation que no está contenida tiene `"focus": [{"reference": "#"}]`:
+
+```text
+ERROR: The reference '#' names the resource that contains this one, but this resource is not contained
+  Path: Observation.focus[0].reference
+  MessageID: REFERENCE_CONTAINER_NOT_FOUND
+```
+
+**Corrección:** referenciar el recurso por su id, o hacer la referencia desde un recurso contenido.
+
+---
+
+## REFERENCE_AGGREGATION_MODE
+
+El elemento permite referencias agregadas solo de algunas formas (`ElementDefinition.type.aggregation`), decididas por dónde se encuentra el destino: `contained`, un recurso que contiene el que hace la referencia (`#id`), o, desde un recurso contenido, su contenedor (`#`); `bundled`, una entrada del Bundle en que está el recurso que hace la referencia (ninguna, si no está en un Bundle); `referenced`, un recurso fuera de él, o sea cualquier referencia literal que no sea un fragmento.
+
+**Ejemplo:** un perfil permite `Patient.managingOrganization` solo `bundled`, y `Organization/o9` no es una entrada del Bundle:
+
+```text
+ERROR: Reference 'Organization/o9' is not aggregated as the element allows: its target is not found where the aggregation modes bundled allow it
+  Path: Bundle.entry[0].resource.managingOrganization.reference
+  MessageID: REFERENCE_AGGREGATION_MODE
+```
+
+**Corrección:** incluir el destino donde los modos lo permiten (una entrada del Bundle, un recurso contenido), o referenciarlo como el perfil lo permite.

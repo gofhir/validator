@@ -675,3 +675,63 @@ func TestNullItemOfAComplexType(t *testing.T) {
 		}
 	}
 }
+
+// An element is known by its own definition, not a slice's: a slice of Parameters.parameter whose
+// value[x] allows a boolean only leaves another parameter's valueString known, as the HL7 validator
+// takes it.
+func TestElementKnownByItsOwnDefinitionNotASlice(t *testing.T) {
+	reg := setupTestRegistry(t)
+	v := New(reg)
+
+	base := reg.GetByURL("http://hl7.org/fhir/StructureDefinition/Parameters")
+	if base == nil {
+		t.Fatal("Parameters StructureDefinition not found")
+	}
+	sliceName := "flag"
+	elements := append([]registry.ElementDefinition{}, base.Snapshot.Element...)
+	elements = append(elements,
+		registry.ElementDefinition{ID: "Parameters.parameter:flag", Path: "Parameters.parameter", SliceName: &sliceName,
+			Type: []registry.Type{{Code: "BackboneElement"}}},
+		registry.ElementDefinition{ID: "Parameters.parameter:flag.value[x]", Path: "Parameters.parameter.value[x]",
+			Type: []registry.Type{{Code: "boolean"}}},
+	)
+	sd := &registry.StructureDefinition{URL: "http://example.org/StructureDefinition/params-flag", Type: "Parameters",
+		Kind: base.Kind, Snapshot: &registry.Snapshot{Element: elements}}
+
+	result := v.Validate([]byte(`{"resourceType": "Parameters", "parameter": [
+		{"name": "flag", "valueBoolean": true}, {"name": "version", "valueString": "3"}]}`), sd)
+	for _, iss := range result.Issues {
+		if iss.MessageID == string(issue.DiagStructureUnknownElement) {
+			t.Errorf("unexpected %s @ %v", iss.Diagnostics, iss.Expression)
+		}
+	}
+}
+
+// A contentReference written as a canonical ("[url]#id", as an IG publisher writes it) names the
+// element after its "#": Parameters.parameter.part's children are Parameters.parameter's.
+func TestCanonicalContentReference(t *testing.T) {
+	reg := setupTestRegistry(t)
+	v := New(reg)
+
+	base := reg.GetByURL("http://hl7.org/fhir/StructureDefinition/Parameters")
+	if base == nil {
+		t.Fatal("Parameters StructureDefinition not found")
+	}
+	elements := append([]registry.ElementDefinition{}, base.Snapshot.Element...)
+	canonical := "http://hl7.org/fhir/StructureDefinition/Parameters#Parameters.parameter"
+	for i := range elements {
+		if elements[i].Path == "Parameters.parameter.part" {
+			elements[i].ContentReference = &canonical
+		}
+	}
+	sd := &registry.StructureDefinition{URL: "http://example.org/StructureDefinition/params-canonical", Type: "Parameters",
+		Kind: base.Kind, Snapshot: &registry.Snapshot{Element: elements}}
+
+	result := v.Validate([]byte(`{"resourceType": "Parameters", "parameter": [
+		{"name": "a", "part": [{"name": "b", "valueString": "x"}]}]}`), sd)
+	for _, iss := range result.Issues {
+		if iss.MessageID == string(issue.DiagStructureUnknownElement) {
+			t.Errorf("unexpected %s @ %v", iss.Diagnostics, iss.Expression)
+		}
+	}
+}

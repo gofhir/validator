@@ -569,8 +569,10 @@ func New(opts ...Option) (*Validator, error) {
 	// definitions, as by the element that holds it.
 	v.cardValidator = cardinality.New(reg, cardinality.WithDefinitions(v.extValidator))
 	// A reference's target is checked against the profiles its element allows with the same
-	// conformance check and resolution slice matching uses.
-	v.refValidator = reference.New(reg, reference.WithTargets(conformer{v: v, assume: true}))
+	// conformance check and resolution slice matching uses; an extension's value under the
+	// definition its url names.
+	v.refValidator = reference.New(reg, reference.WithTargets(conformer{v: v, assume: true}),
+		reference.WithDefinitions(v.extValidator))
 	// Pass termRegistry to constraint validator for memberOf() support.
 	// When NoTerminology is set, pass nil to disable terminology in FHIRPath.
 	constraintTermReg := termReg
@@ -897,7 +899,34 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	}
 	result.Stats.PhasesRun++
 
-	// Phase 6: Reference validation. A Bundle's references resolve among its entries.
+	// Phase 7: Constraint validation (FHIRPath, uses cached expressions)
+	// Build constraint options: pass Bundle data for resolve() support.
+	constraintOpts := &constraint.ValidateOptions{}
+	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
+		constraintOpts.BundleData = data
+	}
+	if vs != nil {
+		constraintOpts = vs.constraintOptions()
+	}
+	// Slice matching shares what it learns about a value with the slicing phase by the value's
+	// identity: both read the same parse.
+	constraintOpts.Data = data
+	constraintOpts.Exact = exactIn(ctx)
+	constraintOpts.Resolver, constraintOpts.Containment = referenceResolver{ctx: ctx}, constraint.IsContainedIn
+	constraintOpts.ContentJudged = contentJudged(ctx, vs)
+	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
+	result.Stats.PhasesRun++
+
+	// Phase 8: Slicing validation
+	sliceOpts := slicing.Options{Resolver: referenceResolver{ctx: ctx}, Containment: constraint.IsContainedIn}
+	if vs != nil {
+		sliceOpts.Scope = &vs.scope
+	}
+	v.slicingValidator.ValidateDataContext(ctx, data, sd, sliceOpts, result)
+	result.Stats.PhasesRun++
+
+	// Reference validation. A Bundle's references resolve among its entries. After slicing, which
+	// records the slice each value matched: a reference is checked by the definition that governs it.
 	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
 		// Validate Bundle-specific rules: fullUrl must be consistent with resource.id
 		reference.ValidateBundleFullUrls(data, result)
@@ -927,32 +956,6 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 		}
 	}
 	v.refValidator.ValidateDataWithBundleContext(refCtx, data, sd, nil, result)
-	result.Stats.PhasesRun++
-
-	// Phase 7: Constraint validation (FHIRPath, uses cached expressions)
-	// Build constraint options: pass Bundle data for resolve() support.
-	constraintOpts := &constraint.ValidateOptions{}
-	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
-		constraintOpts.BundleData = data
-	}
-	if vs != nil {
-		constraintOpts = vs.constraintOptions()
-	}
-	// Slice matching shares what it learns about a value with the slicing phase by the value's
-	// identity: both read the same parse.
-	constraintOpts.Data = data
-	constraintOpts.Exact = exactIn(ctx)
-	constraintOpts.Resolver, constraintOpts.Containment = referenceResolver{ctx: ctx}, constraint.IsContainedIn
-	constraintOpts.ContentJudged = contentJudged(ctx, vs)
-	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
-	result.Stats.PhasesRun++
-
-	// Phase 8: Slicing validation
-	sliceOpts := slicing.Options{Resolver: referenceResolver{ctx: ctx}, Containment: constraint.IsContainedIn}
-	if vs != nil {
-		sliceOpts.Scope = &vs.scope
-	}
-	v.slicingValidator.ValidateDataContext(ctx, data, sd, sliceOpts, result)
 	result.Stats.PhasesRun++
 
 	// Binding validation (terminology) — skipped when NoTerminology is set. After slicing, which

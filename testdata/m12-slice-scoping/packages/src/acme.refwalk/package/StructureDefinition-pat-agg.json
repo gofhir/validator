@@ -1,0 +1,51 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pat-agg",
+ "url": "http://example.org/StructureDefinition/pat-agg",
+ "name": "patagg",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.generalPractitioner",
+    "path": "Patient.generalPractitioner",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://hl7.org/fhir/StructureDefinition/Practitioner"
+      ],
+      "aggregation": [
+       "contained"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.managingOrganization",
+    "path": "Patient.managingOrganization",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://hl7.org/fhir/StructureDefinition/Organization"
+      ],
+      "aggregation": [
+       "bundled"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

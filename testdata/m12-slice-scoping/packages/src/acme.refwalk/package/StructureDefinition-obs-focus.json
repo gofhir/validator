@@ -1,0 +1,26 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-focus",
+ "url": "http://example.org/StructureDefinition/obs-focus",
+ "name": "obsfocus",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.focus",
+    "path": "Observation.focus",
+    "min": 1
+   }
+  ]
+ }
+}

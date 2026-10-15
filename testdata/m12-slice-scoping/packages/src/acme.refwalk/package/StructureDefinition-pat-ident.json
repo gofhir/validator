@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pat-ident",
+ "url": "http://example.org/StructureDefinition/pat-ident",
+ "name": "patident",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/StructureDefinition/ident-assigned"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

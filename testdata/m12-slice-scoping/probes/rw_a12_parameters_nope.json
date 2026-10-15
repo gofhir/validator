@@ -1,0 +1,1 @@
+{"resourceType":"Parameters","parameter":[{"name":"p","resource":{"resourceType":"Patient","id":"p1","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"extension":[{"url":"http://example.org/StructureDefinition/ext-ref-any","valueReference":{"reference":"#nope"}}]}}]}

@@ -806,5 +806,21 @@
     "file": "testdata/m12-slice-scoping/probes/ht_rw_b_dr.json",
     "location": "Bundle.entry[0].resource.identifier",
     "messageId": "CARDINALITY_MIN"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/rw_a04_root_patient_relative_obs.json",
+    "location": "Patient.extension[0].valueReference",
+    "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D13",
+    "reason": "ElementDefinition.type.targetProfile: the target \"must conform to at least one\" of the profiles, so a literal reference to a type none of them constrains is an error, whether or not the target resolves. HL7 6.10.4 checks the type only of a target it resolves.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/rw_s2_slice_target_type_unresolved.json",
+    "location": "Patient.generalPractitioner[0]",
+    "messageId": "REFERENCE_INVALID_TARGET"
   }
 ]

@@ -261,10 +261,22 @@
       "name": "reference-contained-unresolved",
       "rule": "parent",
       "gofhir": [
-        "REFERENCE_CONTAINED_NOT_FOUND"
+        "REFERENCE_CONTAINED_NOT_FOUND",
+        "REFERENCE_CONTAINER_NOT_FOUND"
       ],
       "hl7": [
         "Reference_REF_CantResolve"
+      ]
+    },
+    {
+      "name": "reference-aggregation",
+      "rule": "parent",
+      "gofhir": [
+        "REFERENCE_AGGREGATION_MODE"
+      ],
+      "hl7": [
+        "Reference_REF_NotFound_Bundle",
+        "Reference_REF_Aggregation"
       ]
     },
     {
@@ -467,7 +479,6 @@
     "MODE_DELETE_REQUIRES_ID": "API mode check, not an instance finding",
     "MODE_UPDATE_REQUIRES_ID": "API mode check, not an instance finding",
     "PROFILE_DIFFERENTIAL_IGNORED": "a warning: HL7 leaves such elements out silently",
-    "REFERENCE_AGGREGATION_MODE": "no HL7 counterpart verified yet",
     "REFERENCE_INVALID_FORMAT": "no HL7 counterpart verified yet",
     "REFERENCE_NOT_IN_BUNDLE": "no HL7 counterpart verified yet",
     "SLICING_OPEN_AT_END": "D-5, declared divergence: HL7 6.10.4 does not report content before a slice when the slicing is openAtEnd",

@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ident-assigned",
+ "url": "http://example.org/StructureDefinition/ident-assigned",
+ "name": "identassigned",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.assigner",
+    "path": "Identifier.assigner",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://example.org/StructureDefinition/org-named"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

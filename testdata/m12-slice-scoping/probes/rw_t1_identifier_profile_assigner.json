@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","meta":{"profile":["http://example.org/StructureDefinition/pat-ident"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"contained":[{"resourceType":"Organization","id":"org","identifier":[{"system":"urn:x","value":"1"}]}],"identifier":[{"system":"urn:a","value":"1","assigner":{"reference":"#org"}}]}

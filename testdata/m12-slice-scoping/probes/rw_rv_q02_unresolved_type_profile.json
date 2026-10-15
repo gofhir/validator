@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","meta":{"profile":["http://example.org/rev/pat-badident"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"identifier":[{"value":"1","assigner":{"reference":"#nope"}}]}
