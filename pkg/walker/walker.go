@@ -36,8 +36,9 @@ type ResourceContext struct {
 	// the scope it is in (its %rootResource, where its references resolve).
 	Kind Kind
 
-	// Container is, for a Bundle entry resource, the Bundle whose entry it is.
+	// Container is, for a Bundle entry resource, the Bundle whose entry it is, and Entry that entry.
 	Container map[string]any
+	Entry     map[string]any
 
 	// FullURL is, for a Bundle entry resource, its entry's fullUrl.
 	FullURL string
@@ -233,6 +234,7 @@ func resourceContext(n *Nested, sd *registry.StructureDefinition, rootPath strin
 		IsBundleEntry: n.Kind == KindEntry,
 		Kind:          n.Kind,
 		Container:     n.Bundle,
+		Entry:         n.Entry,
 		FullURL:       n.FullURL,
 		ParentPath:    n.parentPath(rootPath),
 	}

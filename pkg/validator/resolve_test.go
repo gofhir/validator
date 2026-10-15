@@ -36,9 +36,14 @@ func TestResolveInBundle(t *testing.T) {
 		{"10_parameters_in_entry_discriminator", nil},
 		{"11_parameters_in_entry_two_bases", nil},
 		// Ambiguous, the reference names no target (B-D18); from an entry with no fullUrl, a relative
-		// reference has no defined meaning (B-D20).
+		// reference has no defined meaning (B-D20), and in a collection the entry must have one
+		// (bdl-15, B-D35).
 		{"12_versions_ambiguous", []string{"CONSTRAINT_FAILED @ Bundle.entry[0].resource", "REFERENCE_MULTIPLE_MATCHES @ Bundle.entry[0].resource.hasMember[0]"}},
-		{"13_referring_entry_no_fullurl", []string{"CONSTRAINT_FAILED @ Bundle.entry[0].resource"}},
+		{"13_referring_entry_no_fullurl", []string{
+			"CONSTRAINT_FAILED @ Bundle",
+			"CONSTRAINT_FAILED @ Bundle.entry[0].resource",
+			"REFERENCE_RELATIVE_NO_FULLURL @ Bundle.entry[0].resource.hasMember[0]",
+		}},
 		// A RESTful fullUrl may name a version: the base is before the type and id (bdl-8 still
 		// rejects it).
 		{"14_referring_entry_versioned_fullurl", []string{"CONSTRAINT_FAILED @ Bundle.entry[0]"}},

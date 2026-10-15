@@ -105,6 +105,9 @@ const (
 	// DiagReferenceContainerNotFound: "#", the reference a contained resource makes to the resource
 	// that contains it, made from a resource that is not contained.
 	DiagReferenceContainerNotFound DiagnosticID = "REFERENCE_CONTAINER_NOT_FOUND"
+	// DiagReferenceRelativeNoFullURL: a relative reference made in a Bundle entry that must have a
+	// fullUrl and has none, which leaves it no base.
+	DiagReferenceRelativeNoFullURL DiagnosticID = "REFERENCE_RELATIVE_NO_FULLURL"
 	// DiagReferenceTargetProfile: the resource a reference resolves to conforms to none of the
 	// profiles of its type its element allows (ElementDefinition.type.targetProfile).
 	DiagReferenceTargetProfile DiagnosticID = "REFERENCE_TARGET_PROFILE"
@@ -543,6 +546,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeInvalid,
 		Template: "The reference '#' names the resource that contains this one, but this resource is not contained",
+	},
+	DiagReferenceRelativeNoFullURL: {
+		Severity: SeverityError,
+		Code:     CodeInvalid,
+		Template: "Relative reference '{reference}' is made in a Bundle entry with no fullUrl, which it resolves from",
 	},
 
 	// Bundle validation

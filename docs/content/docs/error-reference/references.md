@@ -20,6 +20,7 @@ Reference errors occur when FHIR resource references are malformed, point to inv
 | `REFERENCE_CONTAINED_NOT_FOUND` | error | Contained resource '{id}' not found. Reference is not defined within the resource |
 | `REFERENCE_CONTAINER_NOT_FOUND` | error | The reference '#' names the resource that contains this one, but this resource is not contained |
 | `REFERENCE_AGGREGATION_MODE` | error | Reference '{reference}' is not aggregated as the element allows: its target is not found where the aggregation modes {allowed} allow it |
+| `REFERENCE_RELATIVE_NO_FULLURL` | error | Relative reference '{reference}' is made in a Bundle entry with no fullUrl, which it resolves from |
 
 ---
 
@@ -220,3 +221,19 @@ ERROR: Reference 'Organization/o9' is not aggregated as the element allows: its 
 ```
 
 **Fix:** include the target where the modes allow it (an entry of the Bundle, a contained resource), or reference it as the profile allows.
+
+---
+
+## REFERENCE_RELATIVE_NO_FULLURL
+
+A relative reference (`Patient/p`) resolves from the fullUrl of the entry that holds the referring resource (bundle.html#references). Made in an entry that must have a fullUrl and has none, it has no base. Every entry must have one but a transaction's, a batch's, their responses' and one whose request is a POST (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum, reports the missing fullUrl on the Bundle); the type of the innermost Bundle decides. The reference may be in the entry's resource, a resource it contains, or an extension.
+
+**Example:** a collection's entry has no fullUrl, and its Observation has `"subject": {"reference": "Patient/1"}`:
+
+```text
+ERROR: Relative reference 'Patient/1' is made in a Bundle entry with no fullUrl, which it resolves from
+  Path: Bundle.entry[0].resource.subject
+  MessageID: REFERENCE_RELATIVE_NO_FULLURL
+```
+
+**Fix:** give the entry its fullUrl (a RESTful one, for relative references to resolve from it).

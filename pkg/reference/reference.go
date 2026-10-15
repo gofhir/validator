@@ -253,6 +253,9 @@ type refContext struct {
 	fullURL string
 	// inContained is set when the referring resource is one root contains: "#" names root.
 	inContained bool
+	// noFullURL is set when the entry the referring resource is (or is held in) has no fullUrl
+	// where it must have one: a relative reference made there has no base.
+	noFullURL bool
 }
 
 // nested returns the context of a resource the walk visits, from its parent's, by how it is held:
@@ -271,19 +274,32 @@ func (rc *refContext) nested(w *walker.ResourceContext) *refContext {
 		in.inContained = true
 	case walker.KindHeld:
 		in = refContext{ctx: rc.ctx, bundle: rc.bundle, contained: NewContainedContext(w.Data), root: w.Data,
-			container: rc.container, outer: rc.outer, fullURL: rc.fullURL}
+			container: rc.container, outer: rc.outer, fullURL: rc.fullURL, noFullURL: rc.noFullURL}
 	default:
 		in = refContext{ctx: rc.ctx, bundle: rc.bundle, contained: NewContainedContext(w.Data), root: w.Data,
-			container: rc.container, outer: rc.outer, fullURL: w.FullURL}
+			container: rc.container, outer: rc.outer, fullURL: w.FullURL,
+			noFullURL: w.FullURL == "" && needsFullURL(w.Container, w.Entry)}
 		in.within(w.Container)
 	}
 	if w.ResourceType == bundleType {
 		in.within(w.Data)
 		if w.Kind != walker.KindEntry {
-			in.fullURL = ""
+			in.fullURL, in.noFullURL = "", false
 		}
 	}
 	return &in
+}
+
+// needsFullURL reports whether entry, of bundle, must have a fullUrl (bundle.html#bundle-unique, as
+// R5's bdl-15 states it): every entry but a transaction's, a batch's and their responses', and one
+// whose request is a POST.
+func needsFullURL(bundle, entry map[string]any) bool {
+	switch t, _ := bundle["type"].(string); t {
+	case "transaction", "transaction-response", "batch", "batch-response":
+		return false
+	}
+	request, _ := entry["request"].(map[string]any)
+	return request["method"] != "POST"
 }
 
 // within makes bundle, a Bundle, the one rc's references resolve in, then the Bundle they resolved
@@ -643,6 +659,12 @@ func (v *Validator) validateReference(value any, elemDef *registry.ElementDefini
 	}
 
 	checkFragment(refStr, fhirPath, rc, result)
+
+	// A relative reference resolves from its entry's fullUrl (bundle.html#references): made in an
+	// entry that must have one and has none, it has no base.
+	if rc.noFullURL && relativeRefPattern.MatchString(refStr) {
+		result.AddErrorWithID(issue.DiagReferenceRelativeNoFullURL, map[string]any{"reference": refStr}, fhirPath)
+	}
 
 	// Validate URN references exist within Bundle context.
 	// Per FHIR spec and HL7 validator behavior:

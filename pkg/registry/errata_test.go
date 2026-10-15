@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/gofhir/fhirpath"
+
+	"github.com/gofhir/validator/v2/pkg/loader"
 )
 
 // fhirTypeOf is the fhir-type an element declares, as loaded.
@@ -69,8 +71,8 @@ func TestErrataLeaveOtherValues(t *testing.T) {
 	other := &StructureDefinition{FHIRVersion: "4.3.0", Snapshot: &Snapshot{Element: []ElementDefinition{
 		{ID: "Patient.id", Path: "Patient.id", Base: &ElementBase{Path: "Resource.id"}, Type: ext("string")},
 	}}}
-	applyErrata(sd)
-	applyErrata(other)
+	applyErrata(sd, "")
+	applyErrata(other, "")
 	for i, want := range []string{"uri", "id"} {
 		if got := sd.Snapshot.Element[i].Type[0].Extension[0].ValueURL; got != want {
 			t.Errorf("element %d: %s, want %s", i, got, want)
@@ -148,6 +150,78 @@ func TestEveryErratumHasASource(t *testing.T) {
 			t.Errorf("incomplete erratum %+v", er)
 		}
 	}
+	for _, er := range addedConstraints {
+		c := er.constraint
+		if er.source == "" || er.fhirVersion == "" || er.path == "" || c.Key == "" || c.Expression == "" || c.Human == "" || c.Severity == "" {
+			t.Errorf("incomplete erratum %+v", er)
+		}
+	}
+}
+
+// bdl-15, which R4 and R4B state in prose only, is added to Bundle as R5 publishes it, once: R5
+// keeps its own. The added expression compiles.
+func TestAddedConstraint(t *testing.T) {
+	for _, version := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		t.Run(version, func(t *testing.T) {
+			sd := sharedVersion(t, version).GetByURL("http://hl7.org/fhir/StructureDefinition/Bundle")
+			var found []Constraint
+			for _, c := range sd.Snapshot.Element[0].Constraint {
+				if c.Key == "bdl-15" {
+					found = append(found, c)
+				}
+			}
+			if len(found) != 1 {
+				t.Fatalf("%d bdl-15 on Bundle, want 1", len(found))
+			}
+			if found[0].Expression != bdlFifteen.Expression {
+				t.Errorf("bdl-15 is %q", found[0].Expression)
+			}
+			if _, err := fhirpath.Compile(found[0].Expression); err != nil {
+				t.Errorf("bdl-15 does not compile: %v", err)
+			}
+		})
+	}
+	// An element that has a constraint with the key keeps its own.
+	own := Constraint{Key: "bdl-15", Expression: "true"}
+	sd := &StructureDefinition{FHIRVersion: "4.0.1", Snapshot: &Snapshot{Element: []ElementDefinition{
+		{ID: "Bundle", Path: "Bundle", Constraint: []Constraint{own}},
+	}}}
+	applyErrata(sd, "")
+	if got := sd.Snapshot.Element[0].Constraint; len(got) != 1 || got[0] != own {
+		t.Errorf("constraints %+v, want the element's own", got)
+	}
+	// A definition of another version of the release, or of none (corrected for the version
+	// validated), gets it too.
+	for _, tt := range []struct{ version, fallback string }{{"4.0.0", ""}, {"", "4.0.1"}, {"", "4.3.0"}} {
+		sd := &StructureDefinition{FHIRVersion: tt.version, Snapshot: &Snapshot{Element: []ElementDefinition{
+			{ID: "Bundle", Path: "Bundle", Base: &ElementBase{Path: "Bundle"}},
+		}}}
+		applyErrata(sd, tt.fallback)
+		if got := sd.Snapshot.Element[0].Constraint; len(got) != 1 || got[0].Key != "bdl-15" {
+			t.Errorf("version %q, validated %q: constraints %+v, want bdl-15", tt.version, tt.fallback, got)
+		}
+	}
+}
+
+// A Bundle profile whose snapshot is generated from its differential keeps bdl-15: the merge
+// rebuilds the elements from their published JSON.
+func TestAddedConstraintInAGeneratedSnapshot(t *testing.T) {
+	r := sharedVersion(t, "4.0.1")
+	sd := &StructureDefinition{
+		URL: "https://example.org/fhir/StructureDefinition/identified", Type: "Bundle", Kind: KindResource,
+		FHIRVersion: "4.0.1", Derivation: DerivationConstraint, BaseDefinition: "http://hl7.org/fhir/StructureDefinition/Bundle",
+		Differential: &Differential{Element: []ElementDefinition{{ID: "Bundle.identifier", Path: "Bundle.identifier", Min: 1}}},
+	}
+	for i := range sd.Differential.Element {
+		raw, _ := json.Marshal(sd.Differential.Element[i])
+		sd.Differential.Element[i].SetRaw(raw)
+	}
+	if err := r.EnsureSnapshot(context.Background(), sd); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.ContainsFunc(sd.Snapshot.Element[0].Constraint, func(c Constraint) bool { return c.Key == "bdl-15" }) {
+		t.Error("no bdl-15 on the generated snapshot's root")
+	}
 }
 
 // R5's eld-11 is corrected wherever it is inherited, and the corrected expression compiles.
@@ -209,7 +283,7 @@ func TestConstraintErratumByElement(t *testing.T) {
 		ID: "Basic.extension", Path: "Basic.extension", Base: &ElementBase{Path: "DomainResource.extension"},
 		Constraint: []Constraint{{Key: "que-7", Expression: constraintErrata[1].published}},
 	}}}}
-	applyErrata(sd)
+	applyErrata(sd, "")
 	if got := sd.Snapshot.Element[0].Constraint[0].Expression; got != constraintErrata[1].published {
 		t.Errorf("que-7 on another element corrected to %q", got)
 	}
@@ -271,7 +345,7 @@ func TestEmptyInvariantErrata(t *testing.T) {
 		{"us-core-13", usCore13, usCore13},                                                         // US Core 9.0.0
 	} {
 		sd := profile(tt.key, tt.published)
-		applyErrata(sd)
+		applyErrata(sd, "")
 		if got := sd.Snapshot.Element[0].Constraint[0].Expression; got != tt.want {
 			t.Errorf("%s published %q: %q, want %q", tt.key, tt.published, got, tt.want)
 		}
@@ -432,5 +506,41 @@ func TestR5VitalSignsErratum(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("no vs-1 on Observation.effective[x]")
+	}
+}
+
+// A profile of a profile, neither declaring a FHIR version, is corrected for the version validated
+// in its generated snapshot too: the merge rebuilds every element from the core's published JSON.
+func TestErrataForAProfileChainWithNoVersion(t *testing.T) {
+	r := sharedVersionCopy(t)
+	r.SetFHIRVersion("4.0.1")
+	a := `{"resourceType":"StructureDefinition","url":"https://example.org/fhir/StructureDefinition/a","name":"A",
+"status":"active","kind":"resource","abstract":false,"type":"Bundle","derivation":"constraint",
+"baseDefinition":"http://hl7.org/fhir/StructureDefinition/Bundle",
+"differential":{"element":[{"id":"Bundle.identifier","path":"Bundle.identifier","min":1}]}}`
+	b := `{"resourceType":"StructureDefinition","url":"https://example.org/fhir/StructureDefinition/b","name":"B",
+"status":"active","kind":"resource","abstract":false,"type":"Bundle","derivation":"constraint",
+"baseDefinition":"https://example.org/fhir/StructureDefinition/a",
+"differential":{"element":[{"id":"Bundle.timestamp","path":"Bundle.timestamp","min":1}]}}`
+	if err := r.LoadFromPackages([]*loader.Package{{Name: "acme.chain", Version: "0.1.0",
+		Resources: map[string]json.RawMessage{"a": json.RawMessage(a), "b": json.RawMessage(b)}}}); err != nil {
+		t.Fatal(err)
+	}
+	sd := r.GetByURL("https://example.org/fhir/StructureDefinition/b")
+	if sd == nil {
+		t.Fatal("b not loaded")
+	}
+	if err := r.EnsureSnapshot(context.Background(), sd); err != nil {
+		t.Fatal(err)
+	}
+	var bdl15, bdl8 bool
+	for _, e := range sd.Snapshot.Element {
+		for _, c := range e.Constraint {
+			bdl15 = bdl15 || (e.Path == "Bundle" && c.Key == "bdl-15")
+			bdl8 = bdl8 || (e.Path == "Bundle.entry" && c.Key == "bdl-8" && strings.HasPrefix(c.Expression, "fullUrl.exists() implies"))
+		}
+	}
+	if !bdl15 || !bdl8 {
+		t.Errorf("bdl-15 added %v, bdl-8 corrected %v; want both", bdl15, bdl8)
 	}
 }

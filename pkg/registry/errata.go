@@ -1,5 +1,11 @@
 package registry
 
+import (
+	"slices"
+
+	"github.com/gofhir/validator/v2/internal/versionorder"
+)
+
 // Corrections to published FHIR definitions that are wrong in the version they were published in,
 // each taken from a later official publication that corrects it: a later version of the same
 // definition, or a later HL7 publication that republishes the same constraint (its
@@ -166,6 +172,38 @@ var constraintErrata = []constraintErratum{{
 	source:    "hl7.fhir.r4b.core#4.3.0 StructureDefinition/Condition, con-3",
 }}
 
+// addedConstraint adds a constraint a version publishes in prose only, as a later version states it
+// as an invariant, to the element at path and every element derived from it, where the element has
+// no constraint with its key.
+type addedConstraint struct {
+	fhirVersion string // StructureDefinition.fhirVersion that states the rule in prose only
+	path        string // the element's path, or ElementDefinition.base.path of the elements derived from it
+	constraint  Constraint
+	source      string // the official definition that states it as an invariant
+}
+
+var addedConstraints = []addedConstraint{{
+	// R4 states in prose that every entry has a fullUrl but a transaction's or a batch's
+	// (bundle.html#bundle-unique: "Except for transactions and batches, each entry in a Bundle must
+	// have a fullUrl"; Bundle.entry.fullUrl: "can be empty on a POST"), with no invariant. R5 states
+	// it as bdl-15.
+	fhirVersion: fhirR4, path: "Bundle", constraint: bdlFifteen, source: bdlFifteenSource,
+}, {
+	// R4B states it as R4 does.
+	fhirVersion: fhirR4B, path: "Bundle", constraint: bdlFifteen, source: bdlFifteenSource,
+}}
+
+// bdl-15 as R5 publishes it.
+var bdlFifteen = Constraint{
+	Key:        "bdl-15",
+	Severity:   "error",
+	Human:      "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated",
+	Expression: "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
+	Source:     "http://hl7.org/fhir/StructureDefinition/Bundle",
+}
+
+const bdlFifteenSource = "hl7.fhir.r5.core#5.0.0 StructureDefinition/Bundle, bdl-15"
+
 // refOneCorrected is R5's ref-1, which applies only where there is a reference.
 const refOneCorrected = `reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))`
 
@@ -239,18 +277,54 @@ const regexExtension = "http://hl7.org/fhir/StructureDefinition/regex"
 var regexOnType = ExtensionContext{Type: "element", Expression: "ElementDefinition.type"}
 
 // applyErrata corrects sd: its elements, in its snapshot and its differential, and the contexts of
-// use it publishes.
-func applyErrata(sd *StructureDefinition) {
-	correctElements(sd.FHIRVersion, snapshotElements(sd))
-	correctElements(sd.FHIRVersion, differentialElements(sd))
-	correctContexts(sd)
+// use it publishes. A definition that declares no FHIR version is corrected for fallback, the
+// version validated.
+func applyErrata(sd *StructureDefinition, fallback string) {
+	version := sd.FHIRVersion
+	if version == "" {
+		version = fallback
+	}
+	sd.errataVersion = version
+	correctSnapshot(version, snapshotElements(sd))
+	correctElements(version, differentialElements(sd))
+	correctContexts(version, sd)
+}
+
+// correctSnapshot corrects the elements of a snapshot written for fhirVersion: the constraints the
+// errata add, and those they correct. A generated snapshot is corrected the same way.
+func correctSnapshot(fhirVersion string, elems []ElementDefinition) {
+	addConstraints(fhirVersion, elems)
+	correctElements(fhirVersion, elems)
+}
+
+// inRelease reports whether a definition written for fhirVersion is of the release an erratum names:
+// the defect is published in every version of it (4.0.0 and 4.0.1).
+func inRelease(erratum, fhirVersion string) bool {
+	return fhirVersion != "" && versionorder.SameRelease(erratum, fhirVersion)
+}
+
+// addConstraints adds to elements of a snapshot written for fhirVersion the constraints an erratum
+// adds, where an element has none with its key. A differential states only what its definition
+// changes, so it is left as published.
+func addConstraints(fhirVersion string, elems []ElementDefinition) {
+	for _, er := range addedConstraints {
+		if !inRelease(er.fhirVersion, fhirVersion) {
+			continue
+		}
+		for i := range elems {
+			e := &elems[i]
+			if elementAt(e, er.path) && !slices.ContainsFunc(e.Constraint, func(c Constraint) bool { return c.Key == er.constraint.Key }) {
+				e.Constraint = append(e.Constraint, er.constraint)
+			}
+		}
+	}
 }
 
 // correctContexts adds the context of use an erratum names, where sd publishes exactly the
 // defective contexts.
-func correctContexts(sd *StructureDefinition) {
+func correctContexts(fhirVersion string, sd *StructureDefinition) {
 	for _, er := range contextErrata {
-		if er.fhirVersion != sd.FHIRVersion || er.url != sd.URL || len(sd.Context) != len(er.published) {
+		if !inRelease(er.fhirVersion, fhirVersion) || er.url != sd.URL || len(sd.Context) != len(er.published) {
 			continue
 		}
 		match := true
@@ -278,7 +352,7 @@ func correctElements(fhirVersion string, elems []ElementDefinition) {
 func correctElement(fhirVersion string, e *ElementDefinition) {
 	correctConstraints(fhirVersion, e)
 	for _, er := range typeErrata {
-		if er.fhirVersion != fhirVersion || !elementAt(e, er.path) {
+		if !inRelease(er.fhirVersion, fhirVersion) || !elementAt(e, er.path) {
 			continue
 		}
 		for t := range e.Type {
@@ -296,7 +370,7 @@ func correctElement(fhirVersion string, e *ElementDefinition) {
 // element, or by expression alone.
 func correctConstraints(fhirVersion string, e *ElementDefinition) {
 	for _, er := range constraintErrata {
-		if er.fhirVersion != fhirVersion {
+		if !inRelease(er.fhirVersion, fhirVersion) {
 			continue
 		}
 		for c := range e.Constraint {
@@ -306,7 +380,7 @@ func correctConstraints(fhirVersion string, e *ElementDefinition) {
 		}
 	}
 	for _, er := range expressionErrata {
-		if er.fhirVersion != fhirVersion {
+		if !inRelease(er.fhirVersion, fhirVersion) {
 			continue
 		}
 		for c := range e.Constraint {

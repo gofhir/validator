@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","type":"searchset","link":[{"relation":"self","url":"http://ex.org/fhir/Observation"}],"entry":[{"resource":{"resourceType":"OperationOutcome","issue":[{"severity":"warning","code":"processing"}]},"search":{"mode":"outcome"}}]}
