@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","type":"searchset","entry":[{"resource":{"resourceType":"Observation","id":"o1","status":"final","code":{"text":"x"},"subject":{"reference":"urn:uuid:0d3b3f3b-1111-4a2a-9e3a-111111111111"}},"search":{"mode":"match"}},{"fullUrl":"urn:uuid:0d3b3f3b-1111-4a2a-9e3a-111111111111","resource":{"resourceType":"Patient","id":"1"},"search":{"mode":"include"}}]}

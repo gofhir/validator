@@ -68,6 +68,9 @@ type StructureDefinition struct {
 	snapshotCyclic bool
 	// snapshotGenerated reports a Snapshot generated from the differential rather than shipped.
 	snapshotGenerated bool
+	// errataVersion is the FHIR version the errata corrected it for: its own, or the version
+	// validated when it declares none.
+	errataVersion string
 
 	// tree caches the element hierarchy of Snapshot; see Tree.
 	tree treeCache
@@ -417,7 +420,7 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) 
 	}
 	sd.raw = data
 	sd.PackageID = packageID
-	applyErrata(&sd)
+	applyErrata(&sd, r.fhirVersion)
 
 	r.indexUnlocked(&sd)
 }
@@ -425,7 +428,9 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) 
 // SetFHIRVersion sets the FHIR version validated ("4.0.1"). Where several versions of a URL are
 // loaded, an unversioned canonical resolves to the highest version among the definitions written
 // for that FHIR version, and only when none is, among those of the same release (4.0), and then
-// among all. It re-indexes the definitions already loaded.
+// among all. It re-indexes the definitions already loaded. It is called before the definitions are
+// loaded: one that declares no FHIR version is corrected (the errata) for the version set when it
+// is loaded.
 func (r *Registry) SetFHIRVersion(fhirVersion string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -577,7 +582,7 @@ func (r *Registry) ResolveByCanonical(ctx context.Context, url, version string) 
 
 	// 2. No resolver configured — cannot fetch externally
 	r.mu.RLock()
-	resolver := r.resolver
+	resolver, fhirVersion := r.resolver, r.fhirVersion
 	r.mu.RUnlock()
 
 	if resolver == nil {
@@ -599,7 +604,7 @@ func (r *Registry) ResolveByCanonical(ctx context.Context, url, version string) 
 		return nil
 	}
 	sd.raw = data
-	applyErrata(&sd)
+	applyErrata(&sd, fhirVersion)
 
 	// 5. Cache in registry (check-then-set for race protection)
 	r.mu.Lock()

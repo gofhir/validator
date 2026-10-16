@@ -172,6 +172,21 @@
       "files": ["testdata/m12-slice-scoping/probes/rw_*.json"]
     },
     {
+      "name": "fullurl-probes",
+      "packageFiles": ["testdata/m12-slice-scoping/packages/acme.refwalk-0.1.0.tgz"],
+      "files": ["testdata/m12-slice-scoping/probes/fu_*.json"]
+    },
+    {
+      "name": "fullurl-probes-r4b",
+      "version": "4.3.0",
+      "files": ["testdata/m12-slice-scoping/probes/fu4b_*.json"]
+    },
+    {
+      "name": "fullurl-probes-r5",
+      "version": "5.0.0",
+      "files": ["testdata/m12-slice-scoping/probes/fu5_*.json"]
+    },
+    {
       "name": "held-resource-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.held-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/hr_*.json"]

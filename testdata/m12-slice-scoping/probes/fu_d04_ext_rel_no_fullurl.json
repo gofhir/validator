@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","type":"collection","entry":[{"resource":{"resourceType":"Patient","id":"p1","extension":[{"url":"http://example.org/StructureDefinition/ext-ref-any","valueReference":{"reference":"Patient/2"}}]}}]}

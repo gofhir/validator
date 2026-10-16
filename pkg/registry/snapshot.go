@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -198,13 +199,10 @@ func (r *Registry) generateSnapshot(ctx context.Context, sd *StructureDefinition
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot generate snapshot for %s: %w", sd.URL, err)
 	}
-	// The merge rebuilds a changed element from its base's published JSON, so the corrections are
-	// applied again, for the profile's FHIR version, or its base's when it declares none.
-	version := sd.FHIRVersion
-	if version == "" {
-		version = baseSD.FHIRVersion
-	}
-	correctElements(version, snapshot.Element)
+	// The merge rebuilds the elements from their base's published JSON, so the corrections are
+	// applied again, for the version the profile was corrected for (its own, or the version
+	// validated when it declares none), or else its base's.
+	correctSnapshot(cmp.Or(sd.errataVersion, sd.FHIRVersion, baseSD.errataVersion, baseSD.FHIRVersion), snapshot.Element)
 	return snapshot, notes, nil
 }
 

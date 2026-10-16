@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","type":"transaction-response","entry":[{"resource":{"resourceType":"Observation","id":"o1","status":"final","code":{"text":"x"},"subject":{"reference":"http://ex.org/fhir/Patient/1"}},"response":{"status":"201"}},{"fullUrl":"http://ex.org/fhir/Patient/1","resource":{"resourceType":"Patient","id":"1"},"response":{"status":"200"}}]}

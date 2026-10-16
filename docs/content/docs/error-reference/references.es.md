@@ -20,6 +20,7 @@ Los errores de referencias ocurren cuando las referencias a recursos FHIR están
 | `REFERENCE_CONTAINED_NOT_FOUND` | error | Contained resource '{id}' not found. Reference is not defined within the resource |
 | `REFERENCE_CONTAINER_NOT_FOUND` | error | The reference '#' names the resource that contains this one, but this resource is not contained |
 | `REFERENCE_AGGREGATION_MODE` | error | Reference '{reference}' is not aggregated as the element allows: its target is not found where the aggregation modes {allowed} allow it |
+| `REFERENCE_RELATIVE_NO_FULLURL` | error | Relative reference '{reference}' is made in a Bundle entry with no fullUrl, which it resolves from |
 
 ---
 
@@ -220,3 +221,19 @@ ERROR: Reference 'Organization/o9' is not aggregated as the element allows: its 
 ```
 
 **Corrección:** incluir el destino donde los modos lo permiten (una entrada del Bundle, un recurso contenido), o referenciarlo como el perfil lo permite.
+
+---
+
+## REFERENCE_RELATIVE_NO_FULLURL
+
+Una referencia relativa (`Patient/p`) se resuelve desde el fullUrl de la entrada que tiene el recurso que la hace (bundle.html#references). Hecha en una entrada que debe tener fullUrl y no lo tiene, no tiene base. Toda entrada debe tenerlo salvo la de una transaction, la de un batch, las de sus respuestas y una cuyo request es un POST (bundle.html#bundle-unique; bdl-15 de R5, que R4 y R4B llevan como erratum, reporta el fullUrl ausente en el Bundle); decide el tipo del Bundle más interno. La referencia puede estar en el recurso de la entrada, en un recurso que este contiene o en una extensión.
+
+**Ejemplo:** la entrada de una collection no tiene fullUrl, y su Observation tiene `"subject": {"reference": "Patient/1"}`:
+
+```text
+ERROR: Relative reference 'Patient/1' is made in a Bundle entry with no fullUrl, which it resolves from
+  Path: Bundle.entry[0].resource.subject
+  MessageID: REFERENCE_RELATIVE_NO_FULLURL
+```
+
+**Corrección:** darle a la entrada su fullUrl (uno RESTful, para que las referencias relativas se resuelvan desde él).

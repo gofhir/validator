@@ -280,6 +280,16 @@
       ]
     },
     {
+      "name": "reference-relative-no-fullurl",
+      "rule": "equal",
+      "gofhir": [
+        "REFERENCE_RELATIVE_NO_FULLURL"
+      ],
+      "hl7": [
+        "Bundle_BUNDLE_FullUrl_Missing"
+      ]
+    },
+    {
       "name": "reference-target-profile",
       "rule": "equal",
       "gofhir": [

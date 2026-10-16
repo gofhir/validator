@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","type":"searchset","link":[{"relation":"self","url":"http://ex.org/fhir/Observation"}],"entry":[{"resource":{"resourceType":"Observation","id":"o1","status":"final","code":{"text":"x"},"subject":{"reference":"Patient/1"}},"search":{"mode":"include"}}]}

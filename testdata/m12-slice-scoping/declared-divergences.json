@@ -822,5 +822,245 @@
     "file": "testdata/m12-slice-scoping/probes/rw_s2_slice_target_type_unresolved.json",
     "location": "Patient.generalPractitioner[0]",
     "messageId": "REFERENCE_INVALID_TARGET"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b11_searchset_outcome_with_rel.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b1_searchset_outcome_nofullurl.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b2_searchset_include_nofullurl.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b5_nested_collection_in_transaction.json",
+    "location": "Bundle.entry[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D36",
+    "reason": "A relative reference resolves from the fullUrl of the entry holding the referring resource (bundle.html#references): in an entry of a Bundle that must have a fullUrl and has none, it has no base, whichever resource holds that Bundle. HL7 6.10.2 reports it in a Bundle a parameter or a contained resource is, not in a Bundle an entry's resource is.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b5_nested_collection_in_transaction.json",
+    "location": "Bundle.entry[0].resource.entry[0].resource.subject",
+    "messageId": "REFERENCE_RELATIVE_NO_FULLURL"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b7_parameters_bundle_nofullurl.json",
+    "location": "Parameters.parameter[0].resource",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b8_contained_bundle_nofullurl.json",
+    "location": "Patient.contained[0]",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b9_history_put_nofullurl.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_collection_abs.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_collection_fragment.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_collection_none.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_collection_rel.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_collection_urn.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_document_abs.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_document_none.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_document_rel.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_document_urn.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_message_abs.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_message_none.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_message_rel.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_message_urn.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_searchset_abs.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_searchset_none.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_searchset_rel.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_b_searchset_urn.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_d04_ext_rel_no_fullurl.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu_e04_contained_in_entry_nofullurl_rel.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/fu4b_r4b_collection_nofullurl_rel.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/rs_13_referring_entry_no_fullurl.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D35",
+    "reason": "Bundle.entry.fullUrl is required on every entry but a transaction's, a batch's, their responses' and a POST's (bundle.html#bundle-unique; R5's bdl-15, which R4 and R4B carry as an erratum): gofhir reports bdl-15 where the specification defines it, on the Bundle. HL7 6.10.2 reports the same rule on each entry (BUNDLE_BUNDLE_ENTRY_FULLURL_REQUIRED), and on a nested Bundle on the Bundle.",
+    "side": "gofhir",
+    "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/Bundle-bundle-search-warning.json",
+    "location": "Bundle",
+    "messageId": "CONSTRAINT_FAILED"
   }
 ]

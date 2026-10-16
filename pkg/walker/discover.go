@@ -36,8 +36,10 @@ type Nested struct {
 	Parent *Nested
 	// Path is its path ("Bundle.entry[0].resource", "Parameters.parameter[1].part[0].resource").
 	Path string
-	// Bundle is, for an entry, the Bundle it is an entry of, and FullURL its entry's fullUrl.
+	// Bundle is, for an entry, the Bundle it is an entry of, Entry its entry, and FullURL its
+	// entry's fullUrl.
 	Bundle  map[string]any
+	Entry   map[string]any
 	FullURL string
 }
 
@@ -124,7 +126,7 @@ func (d *Discovery) found(ctx context.Context, reg *registry.Registry, in *Neste
 		n.Kind = KindContained
 	case registry.HoldsEntryResource(child.Def):
 		n.Kind = KindEntry
-		n.Bundle = bundle
+		n.Bundle, n.Entry = bundle, inst
 		n.FullURL, _ = inst["fullUrl"].(string)
 	}
 	d.Resources = append(d.Resources, n)
