@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -48,7 +49,7 @@ type Package struct {
 	Type         string                     // the manifest's type: "fhir.core" (or "Core") for a core package
 	Canonical    string                     // the manifest's canonical: the base of the URLs the package publishes
 	Dependencies map[string]string          // the packages it depends on, name to version
-	Resources    map[string]json.RawMessage // URL or resourceType/id -> raw JSON
+	Resources    map[string]json.RawMessage // URL or resourceType/id, or example/resourceType/id for the example folder's -> raw JSON (see EachResource)
 	// Deferred are resources read only when needed (see OpenPackage).
 	Deferred []DeferredResource
 }
@@ -169,7 +170,7 @@ func (l *Loader) LoadPackage(name, version string) (*Package, error) {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
 			continue
 		}
-		if entry.Name() == "package.json" || entry.Name() == ".index.json" {
+		if entry.Name() == "package.json" || entry.Name() == indexFile {
 			continue
 		}
 
@@ -199,6 +200,7 @@ func (l *Loader) LoadPackage(name, version string) (*Package, error) {
 			pkg.Resources[key] = data
 		}
 	}
+	pkg.loadExamples(filepath.Join(packageDir, exampleFolder))
 
 	return pkg, nil
 }
@@ -342,8 +344,7 @@ func (l *Loader) loadFromTgzReader(reader io.Reader, source string) (*Package, e
 		}
 
 		// Normalize path (remove leading "package/" if present)
-		name := header.Name
-		name = strings.TrimPrefix(name, "package/")
+		name := strings.TrimPrefix(strings.TrimPrefix(header.Name, "./"), "package/")
 
 		// Skip non-JSON files (except package.json)
 		if !strings.HasSuffix(name, ".json") {
@@ -361,31 +362,7 @@ func (l *Loader) loadFromTgzReader(reader io.Reader, source string) (*Package, e
 			manifestData = data
 			continue
 		}
-
-		// Skip index files
-		if name == ".index.json" {
-			continue
-		}
-
-		// Extract resourceType and id for indexing
-		var resource struct {
-			ResourceType string `json:"resourceType"`
-			ID           string `json:"id"`
-			URL          string `json:"url"`
-		}
-		if err := json.Unmarshal(data, &resource); err != nil {
-			continue
-		}
-
-		// Index by URL for StructureDefinitions and other conformance resources
-		if resource.URL != "" {
-			pkg.Resources[resource.URL] = data
-		}
-		// Also index by resourceType/id
-		if resource.ResourceType != "" && resource.ID != "" {
-			key := fmt.Sprintf("%s/%s", resource.ResourceType, resource.ID)
-			pkg.Resources[key] = data
-		}
+		pkg.addTgzFile(name, data)
 	}
 
 	// Parse manifest
@@ -408,6 +385,36 @@ func (l *Loader) loadFromTgzReader(reader io.Reader, source string) (*Package, e
 	pkg.Path = source
 
 	return pkg, nil
+}
+
+// addTgzFile adds a file of a package's .tgz, at name within its package folder: the package
+// folder's resources, and the definitions of its example folder, as a package of the cache is
+// opened (OpenPackage); no other folder's.
+func (p *Package) addTgzFile(name string, data []byte) {
+	if dir, file := path.Split(name); dir != "" {
+		if dir == exampleFolder+"/" && file != indexFile {
+			p.addExample(data)
+		}
+		return
+	}
+	if name == indexFile {
+		return
+	}
+	var resource struct {
+		ResourceType string `json:"resourceType"`
+		ID           string `json:"id"`
+		URL          string `json:"url"`
+	}
+	if err := json.Unmarshal(data, &resource); err != nil {
+		return
+	}
+	// Index by URL for StructureDefinitions and other conformance resources, and by resourceType/id
+	if resource.URL != "" {
+		p.Resources[resource.URL] = data
+	}
+	if resource.ResourceType != "" && resource.ID != "" {
+		p.Resources[fmt.Sprintf("%s/%s", resource.ResourceType, resource.ID)] = data
+	}
 }
 
 // LoadFromTgzData loads a FHIR package from .tgz bytes in memory.

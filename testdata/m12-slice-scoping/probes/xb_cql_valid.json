@@ -1,0 +1,1 @@
+{"resourceType":"Parameters","id":"p","parameter":[{"name":"c0","valueCoding":{"system":"http://hl7.org/fhir/uv/cql/CodeSystem/example","code":"example-code"}},{"name":"c1","valueCoding":{"system":"http://hl7.org/fhir/uv/crmi/CodeSystem/shareable-example","code":"ANC.A"}}]}

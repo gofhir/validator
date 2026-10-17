@@ -1,0 +1,1 @@
+{"resourceType":"Parameters","id":"p","parameter":[{"name":"c0","valueCoding":{"system":"http://hl7.org/fhir/uv/cql/CodeSystem/example","code":"bogus-xyz"}},{"name":"c1","valueCoding":{"system":"http://hl7.org/fhir/uv/crmi/CodeSystem/publishable-example","code":"bogus-xyz"}}]}

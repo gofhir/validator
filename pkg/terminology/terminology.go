@@ -392,7 +392,7 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 		if pkg.FHIRVersion != "" {
 			fhirVersions = append([]string{pkg.FHIRVersion}, fhirVersions...)
 		}
-		pkg.Each(func(data json.RawMessage) {
+		index := func(data json.RawMessage) {
 			var peek struct {
 				ResourceType string `json:"resourceType"`
 			}
@@ -405,6 +405,16 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 			case "CodeSystem":
 				r.indexCodeSystemUnlocked(data, packageID, fhirVersions)
 			}
+		}
+		// The package folder's, read and deferred, before its example folder's read ones: between
+		// equals the one loaded first is used, as the package folder's are walked first.
+		var examples []json.RawMessage
+		pkg.EachResource(func(data json.RawMessage, example bool) {
+			if example {
+				examples = append(examples, data)
+				return
+			}
+			index(data)
 		})
 		for _, d := range pkg.Deferred {
 			if d.URL == "" {
@@ -420,6 +430,9 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 				r.loadedCodeSystems = append(r.loadedCodeSystems, e)
 				r.selectCodeSystemUnlocked(e)
 			}
+		}
+		for _, data := range examples {
+			index(data)
 		}
 	}
 

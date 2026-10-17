@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 )
 
 // DeferredResource is a resource of a package that is read only when it is needed: its
@@ -18,18 +20,37 @@ type DeferredResource struct {
 }
 
 // Each calls fn once for each resource held in Resources, which keys a resource both by its URL
-// and by "resourceType/id".
+// and by "resourceType/id", and an example folder's by "example/resourceType/id"; the package
+// folder's first, in the order of their keys.
 func (p *Package) Each(fn func(data json.RawMessage)) {
-	seen := make(map[*byte]bool, len(p.Resources))
-	for _, data := range p.Resources {
-		if len(data) == 0 {
-			continue
+	p.EachResource(func(data json.RawMessage, _ bool) { fn(data) })
+}
+
+// EachResource calls fn once for each resource held in Resources, telling whether it is one of the
+// package's example folder: the package folder's first, in the order of their keys.
+func (p *Package) EachResource(fn func(data json.RawMessage, example bool)) {
+	keys := make([]string, 0, len(p.Resources))
+	for k := range p.Resources {
+		keys = append(keys, k)
+	}
+	slices.SortFunc(keys, func(a, b string) int {
+		ea, eb := strings.HasPrefix(a, exampleFolder+"/"), strings.HasPrefix(b, exampleFolder+"/")
+		if ea != eb {
+			if ea {
+				return 1
+			}
+			return -1
 		}
-		if seen[&data[0]] {
+		return strings.Compare(a, b)
+	})
+	seen := make(map[*byte]bool, len(p.Resources))
+	for _, k := range keys {
+		data := p.Resources[k]
+		if len(data) == 0 || seen[&data[0]] {
 			continue
 		}
 		seen[&data[0]] = true
-		fn(data)
+		fn(data, strings.HasPrefix(k, exampleFolder+"/"))
 	}
 }
 
@@ -52,14 +73,14 @@ type packageIndex struct {
 
 // OpenPackage opens a package of the cache for validation: from its index (.index.json), it reads
 // its StructureDefinitions, and defers its ValueSets and CodeSystems (Deferred), which are read
-// when needed; it reads no other resource. A package without a usable index is loaded whole, as
-// LoadPackage does.
+// when needed; it reads no other resource. Its example folder is opened the same way. A package
+// without a usable index is loaded whole, as LoadPackage does.
 func (l *Loader) OpenPackage(name, version string) (*Package, error) {
 	if err := checkPackageID(name, version); err != nil {
 		return nil, err
 	}
 	dir := filepath.Join(l.packageDir(name, version), "package")
-	data, err := os.ReadFile(filepath.Join(dir, ".index.json"))
+	data, err := os.ReadFile(filepath.Join(dir, indexFile))
 	if err != nil {
 		return l.LoadPackage(name, version)
 	}
@@ -82,24 +103,91 @@ func (l *Loader) OpenPackage(name, version string) (*Package, error) {
 		Dependencies: manifest.Dependencies,
 		Resources:    make(map[string]json.RawMessage),
 	}
+	if err := pkg.openIndexed(dir, index, ""); err != nil {
+		return nil, err
+	}
+	// The examples are the package's content too (packages.html: "example resources in
+	// /package/example", indexed as the package folder is): their definitions are opened as the
+	// package's are, as the HL7 validator loads them.
+	exampleDir := filepath.Join(dir, exampleFolder)
+	if data, err := os.ReadFile(filepath.Join(exampleDir, indexFile)); err == nil {
+		var exampleIndex packageIndex
+		if json.Unmarshal(data, &exampleIndex) == nil && exampleIndex.IndexVersion == 2 {
+			if err := pkg.openIndexed(exampleDir, exampleIndex, exampleFolder+"/"); err != nil {
+				return nil, err
+			}
+			return pkg, nil
+		}
+	}
+	pkg.loadExamples(exampleDir)
+	return pkg, nil
+}
+
+// exampleFolder is the package folder the NPM package specification puts example resources in, and
+// indexFile the index of a folder's resources.
+const (
+	exampleFolder = "example"
+	indexFile     = ".index.json"
+)
+
+// openIndexed opens the files of dir that index names: StructureDefinitions read at once, ValueSets
+// and CodeSystems deferred. Prefix keys the StructureDefinitions apart from another folder's.
+func (p *Package) openIndexed(dir string, index packageIndex, prefix string) error {
 	for _, f := range index.Files {
 		if f.Filename == "" || filepath.Base(f.Filename) != f.Filename {
-			continue // the index names a file outside the package directory
+			continue // the index names a file outside the folder
 		}
 		path := filepath.Join(dir, f.Filename)
 		switch {
 		case f.ResourceType == "StructureDefinition":
 			data, err := os.ReadFile(path) //nolint:gosec // G304: a file of the package directory, named by its index
 			if err != nil {
-				return nil, fmt.Errorf("package %s#%s: %w", name, version, err)
+				return fmt.Errorf("package %s#%s: %w", p.Name, p.Version, err)
 			}
-			pkg.Resources[f.ResourceType+"/"+f.ID] = data
+			p.Resources[prefix+f.ResourceType+"/"+f.ID] = data
 		case deferredTypes[f.ResourceType]:
-			pkg.Deferred = append(pkg.Deferred, DeferredResource{
+			p.Deferred = append(p.Deferred, DeferredResource{
 				ResourceType: f.ResourceType, ID: f.ID, URL: f.URL, Version: f.Version,
 				Read: func() ([]byte, error) { return os.ReadFile(path) }, //nolint:gosec // G304: as above
 			})
 		}
 	}
-	return pkg, nil
+	return nil
+}
+
+// loadExamples reads the definitions of a package's example folder that has no usable index: its
+// StructureDefinitions, ValueSets and CodeSystems, as a package opened from its index has them. A
+// package with no example folder has none.
+func (p *Package) loadExamples(dir string) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return // no example folder: nothing to load
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") || entry.Name() == indexFile {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, entry.Name())) //nolint:gosec // G304: a file of the package's example folder
+		if err != nil {
+			continue
+		}
+		p.addExample(data)
+	}
+}
+
+// exampleTypes are the resource types a package's examples contribute: the definitions the
+// validator reads from the package folder (OpenPackage).
+var exampleTypes = map[string]bool{"StructureDefinition": true, "ValueSet": true, "CodeSystem": true}
+
+// addExample adds data, a resource of the example folder, when it is one of exampleTypes, keyed
+// apart from the package folder's resources.
+func (p *Package) addExample(data []byte) {
+	var resource struct {
+		ResourceType string `json:"resourceType"`
+		ID           string `json:"id"`
+	}
+	if json.Unmarshal(data, &resource) != nil || !exampleTypes[resource.ResourceType] || resource.ID == "" {
+		return
+	}
+	p.Resources[exampleFolder+"/"+resource.ResourceType+"/"+resource.ID] = data
 }
