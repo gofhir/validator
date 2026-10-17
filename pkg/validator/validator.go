@@ -778,7 +778,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	ctx = withExtensionScope(ctx)
 	ctx = slicerecord.With(ctx)
 	ctx = walker.WithHeldDefinitions(withHolderGroups(ctx), v.heldDefinitions)
-	reported := map[string]bool{}
+	reported := map[string]int{}
 	var nested map[string]bool
 	if len(profilesToValidate) > 1 {
 		nested = v.nestedPaths(ctx, data, resourceType)
@@ -975,15 +975,24 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 // dropReported removes, from the issues a profile reported, those at from and after, the ones the
 // profiles validated before reported, which it records in reported; a cardinality's on the
 // resource itself are kept (profileCardinality), not on a resource it holds (at one of nested).
-func dropReported(issues []issue.Issue, from int, reported, nested map[string]bool) []issue.Issue {
-	for _, is := range issues[:from] {
-		reported[issueKey(is)] = true
+func dropReported(issues []issue.Issue, from int, reported map[string]int, nested map[string]bool) []issue.Issue {
+	for i, is := range issues[:from] {
+		if _, ok := reported[issueKey(is)]; !ok {
+			reported[issueKey(is)] = i
+		}
 	}
 	kept := issues[:from]
 	for _, is := range issues[from:] {
 		own := profileCardinality[issue.DiagnosticID(is.MessageID)] && !within(is.Expression, nested)
-		if !reported[issueKey(is)] || own {
+		i, seen := reported[issueKey(is)]
+		if !seen || own {
 			kept = append(kept, is)
+			continue
+		}
+		// Reported at the highest severity a profile gave it (a code system that cannot be checked
+		// is reported by the context its definition gives it).
+		if is.Severity.Outranks(kept[i].Severity) {
+			kept[i].Severity = is.Severity
 		}
 	}
 	return kept
@@ -1025,8 +1034,9 @@ var profileCardinality = map[issue.DiagnosticID]bool{
 	issue.DiagSlicingCardinalityMin: true, issue.DiagSlicingCardinalityMax: true,
 }
 
+// issueKey identifies an issue whatever its severity, which dropReported keeps the highest of.
 func issueKey(is issue.Issue) string {
-	return string(is.Severity) + "\x00" + is.MessageID + "\x00" + strings.Join(is.Expression, ",") + "\x00" + is.Diagnostics
+	return is.MessageID + "\x00" + strings.Join(is.Expression, ",") + "\x00" + is.Diagnostics
 }
 
 // enrichLocations adds each issue's line and column in the source JSON, locating every issue in

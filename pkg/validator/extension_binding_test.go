@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -194,15 +195,17 @@ func TestCodeSystemCheckIsIndependentOfBinding(t *testing.T) {
 	}
 }
 
-// TestExternalSystemIsInformationalNotWarning keeps the check from becoming noise. A
-// known external vocabulary is expected to need a terminology server, and the reference
-// reports nothing at all because it resolves these against tx.fhir.org.
+// An external vocabulary only a terminology server checks is not reported as an unknown code
+// system, nor its code as invalid. In a CodeableConcept's coding nothing is said of it; in a Coding
+// no binding checks, that it could not be checked without a server: a warning, as HL7 6.10.2
+// reports both (reportUnchecked).
 func TestExternalSystemIsInformationalNotWarning(t *testing.T) {
 	v := getSharedValidator(t)
 
 	loinc := []byte(`{
 	  "resourceType": "Observation",
 	  "status": "final",
+	  "meta": {"tag": [{"system": "http://loinc.org", "code": "29463-7"}]},
 	  "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"},
 	  "code": {"coding": [{"system": "http://loinc.org", "code": "29463-7"}]}
 	}`)
@@ -211,16 +214,15 @@ func TestExternalSystemIsInformationalNotWarning(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Validate: %v", err)
 	}
-
-	got := issueFor(t, result, issue.DiagBindingCannotValidate)
-	if got == nil {
-		t.Fatalf("an unresolvable external system should be noted; issues: %v", result.Issues)
+	var got []string
+	for _, is := range result.Issues {
+		switch issue.DiagnosticID(is.MessageID) {
+		case issue.DiagBindingCannotValidate, issue.DiagCodeSystemNotFound, issue.DiagCodeNotInCodeSystem:
+			got = append(got, string(is.Severity)+" "+is.MessageID+" @ "+strings.Join(is.Expression, ","))
+		}
 	}
-	if got.Severity != issue.SeverityInformation {
-		t.Errorf("severity = %s, want %s: a vocabulary that needs a server is not a defect",
-			got.Severity, issue.SeverityInformation)
-	}
-	if issueFor(t, result, issue.DiagCodeNotInCodeSystem) != nil {
-		t.Error("an unresolvable code must not be reported as invalid")
+	want := []string{"warning BINDING_CANNOT_VALIDATE @ Observation.meta.tag[0]"}
+	if !slices.Equal(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }

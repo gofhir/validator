@@ -1,0 +1,12 @@
+{
+ "resourceType": "CodeSystem",
+ "id": "ex",
+ "url": "http://acme.local/cs/ex",
+ "status": "active",
+ "content": "example",
+ "concept": [
+  {
+   "code": "a"
+  }
+ ]
+}

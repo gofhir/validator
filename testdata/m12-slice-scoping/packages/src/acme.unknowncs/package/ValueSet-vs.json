@@ -1,0 +1,13 @@
+{
+ "resourceType": "ValueSet",
+ "id": "vs",
+ "url": "http://acme.local/fhir/ValueSet/vs",
+ "status": "active",
+ "compose": {
+  "include": [
+   {
+    "system": "http://acme.local/cs/known"
+   }
+  ]
+ }
+}

@@ -712,6 +712,23 @@ func formatTemplate(template string, params map[string]any) string {
 	return result
 }
 
+// AddWithID adds an issue of severity s using a diagnostic template, whatever severity the
+// template gives: for a diagnostic whose severity depends on where it is reported.
+func (r *Result) AddWithID(s Severity, id DiagnosticID, params map[string]any, expression ...string) {
+	tmpl, ok := diagnosticTemplates[id]
+	if !ok {
+		r.Issues = append(r.Issues, Issue{Severity: s, Code: CodeProcessing, Diagnostics: string(id), Expression: expression})
+		return
+	}
+	r.Issues = append(r.Issues, Issue{
+		Severity:    s,
+		Code:        tmpl.Code,
+		Diagnostics: formatTemplate(tmpl.Template, params),
+		Expression:  expression,
+		MessageID:   string(id),
+	})
+}
+
 // AddErrorWithID adds an error using a diagnostic template.
 func (r *Result) AddErrorWithID(id DiagnosticID, params map[string]any, expression ...string) {
 	tmpl, ok := diagnosticTemplates[id]

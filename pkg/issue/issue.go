@@ -186,6 +186,23 @@ func ReleaseStats(s *Stats) {
 	statsPool.Put(s)
 }
 
+// Outranks reports whether s is more severe than o: fatal, error, warning, information.
+func (s Severity) Outranks(o Severity) bool {
+	return severityRank(s) > severityRank(o)
+}
+
+func severityRank(s Severity) int {
+	switch s {
+	case SeverityFatal:
+		return 3
+	case SeverityError:
+		return 2
+	case SeverityWarning:
+		return 1
+	}
+	return 0
+}
+
 // AddIssue adds an issue to the result.
 func (r *Result) AddIssue(issue Issue) {
 	r.Issues = append(r.Issues, issue)

@@ -1,0 +1,25 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "loc-ext",
+ "url": "http://acme.local/fhir/StructureDefinition/loc-ext",
+ "name": "locext",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Location",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Location",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Location.operationalStatus",
+    "path": "Location.operationalStatus",
+    "binding": {
+     "strength": "extensible",
+     "valueSet": "http://acme.local/fhir/ValueSet/vs"
+    }
+   }
+  ]
+ }
+}

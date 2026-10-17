@@ -11,14 +11,24 @@ Terminology errors occur when coded values do not conform to the terminology bin
 
 | ID | Severity | Message |
 |----|----------|---------|
-| `CODING_NO_CODE` | error | Coding at '{path}' has no code |
-| `CODING_NO_SYSTEM` | warning | Coding at '{path}' has no system |
-| `CODING_INVALID_SYSTEM` | error | System '{value}' is not a valid URI |
-| `BINDING_REQUIRED_MISSING` | error | Value '{value}' is not in required ValueSet '{valueSet}' |
-| `BINDING_EXTENSIBLE_MISSING` | warning | Value '{value}' is not in extensible ValueSet '{valueSet}' |
-| `BINDING_UNKNOWN_SYSTEM` | error | Unknown code system for code '{value}' |
-| `BINDING_INVALID_CODE` | error | Code '{value}' is not valid in system '{system}' |
-| `BINDING_VALUESET_NOT_FOUND` | warning | ValueSet '{valueSet}' could not be resolved |
+| `CODING_NO_SYSTEM` | warning | Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided |
+| `CODING_NO_CODE` | error | Coding has no code for system {system} and cannot be validated |
+| `CODE_NOT_IN_CODESYSTEM` | error | The code '{code}' is not valid in the CodeSystem '{system}' |
+| `CODESYSTEM_NOT_FOUND` | see below | CodeSystem is unknown and can't be validated: {system} for '{systemCode}' |
+| `CODESYSTEM_NO_CODES` | see below | The CodeSystem '{codeSystem}' includes none of its codes (content '{content}'), so the code '{code}' cannot be validated |
+| `CODE_NOT_IN_PARTIAL_CODESYSTEM` | see below | The code '{code}' is not among the codes the CodeSystem '{codeSystem}' includes, which are only some of its codes (content '{content}'), so it cannot be validated |
+| `BINDING_CANNOT_VALIDATE` | see below | Code '{code}' in system '{system}' cannot be validated - external terminology system requires a terminology server |
+| `BINDING_REQUIRED` | error | The value provided ('{code}') is not in the value set '{valueSet}' (required){detail} |
+| `BINDING_REQUIRED_NO_CODING` | error | None of the codings provided are in the value set '{valueSet}', and a coding from this value set is required (codes = {codes}) |
+| `BINDING_REQUIRED_NO_CODE` | error | No code provided, and a code is required from the value set '{valueSet}' |
+| `BINDING_EXTENSIBLE` | warning | The value provided ('{code}') is not in the value set '{valueSet}' (extensible){detail} |
+| `BINDING_EXTENSIBLE_NO_CODING` | warning | None of the codings provided are in the value set '{valueSet}', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = {codes}) |
+| `BINDING_EXTENSIBLE_OTHER_SYSTEM` | information | The value provided ('{code}') is not in the value set '{valueSet}', and comes from a system the value set does not declare (extensible bindings permit this){detail} |
+| `BINDING_EXTENSIBLE_UNKNOWN_SYSTEM` | warning | The value provided ('{code}') is not in the value set '{valueSet}' (extensible); whether its system belongs to the value set could not be determined{detail} |
+| `BINDING_TEXT_ONLY_WARNING` | warning | No code provided, and a code should be provided from the value set '{valueSet}' (extensible) |
+| `BINDING_DISPLAY_MISMATCH` | error | Display '{provided}' for code '{code}' does not match expected '{expected}' |
+| `BINDING_UNRESOLVED` | information (the unresolved policy: `warn`, the default, information; `error`, error) | The value provided ('{code}') could not be checked against value set '{valueSet}': no terminology source could resolve it{detail} |
+| `BINDING_VALUESET_NOT_FOUND` | warning | ValueSet '{valueSet}' not found |
 
 ---
 
@@ -100,98 +110,6 @@ A Coding element has a `code` but no `system`. While not always an error (hence 
 
 ---
 
-## CODING_INVALID_SYSTEM
-
-The `system` value in a Coding is not a valid URI. Code system identifiers in FHIR must be valid URIs.
-
-**Example:**
-
-```json
-{
-  "coding": [
-    {
-      "system": "not a valid uri",
-      "code": "12345"
-    }
-  ]
-}
-```
-
----
-
-## BINDING_REQUIRED_MISSING
-
-The coded value is not a member of the ValueSet specified in a **required** binding. Required bindings are the strictest -- the code must be in the ValueSet.
-
-**Example -- invalid resource:**
-
-```json
-{
-  "resourceType": "Patient",
-  "gender": "m"
-}
-```
-
-`Patient.gender` has a required binding to `http://hl7.org/fhir/ValueSet/administrative-gender`, which only accepts `male`, `female`, `other`, and `unknown`. The value `m` is not in that ValueSet.
-
-**Fix:**
-
-```json
-{
-  "resourceType": "Patient",
-  "gender": "male"
-}
-```
-
----
-
-## BINDING_EXTENSIBLE_MISSING
-
-The coded value is not a member of the ValueSet specified in an **extensible** binding. This produces a warning rather than an error, because extensible bindings allow codes from other systems when no appropriate code exists in the bound ValueSet.
-
-**Example:**
-
-```json
-{
-  "resourceType": "Condition",
-  "code": {
-    "coding": [
-      {
-        "system": "http://example.org/custom-codes",
-        "code": "custom-condition"
-      }
-    ]
-  }
-}
-```
-
-If the profile has an extensible binding to a standard ValueSet and the custom code is not a member, the validator produces a warning.
-
----
-
-## BINDING_UNKNOWN_SYSTEM
-
-The code system referenced in a Coding could not be found in the loaded terminology resources. The validator cannot determine whether the code is valid without access to the CodeSystem.
-
----
-
-## BINDING_INVALID_CODE
-
-The code was found in a known CodeSystem, but it is not a valid code within that system. This indicates the code system was loaded, but the specific code does not exist.
-
-**Example:**
-
-```json
-{
-  "resourceType": "Patient",
-  "gender": "m"
-}
-```
-
-The code system `http://hl7.org/fhir/administrative-gender` is known and loaded, but `m` is not a valid code in it.
-
----
-
 ## BINDING_VALUESET_NOT_FOUND
 
 The ValueSet referenced by a binding could not be resolved. The validator cannot validate the code against the binding because the ValueSet is not available.
@@ -211,6 +129,30 @@ v, err := validator.New(
     validator.WithValueSets(myValueSets...),
 )
 ```
+
+## Codes that cannot be checked
+
+A code whose code system cannot be checked here (`CODESYSTEM_NOT_FOUND`: no CodeSystem with its url; `CODESYSTEM_NO_CODES`: one with content `not-present`; `CODE_NOT_IN_PARTIAL_CODESYSTEM`: one with content `example` or `fragment`; `BINDING_CANNOT_VALIDATE`: a system only a terminology server checks) is reported with the severity the HL7 validator gives it. The specification sets none, and allows locally defined systems for tags (resource.html#tags). The severity follows from the definitions, never from the element's name:
+
+| Where the Coding is | Severity |
+|---------------------|----------|
+| A CodeableConcept's coding (`Observation.code`) | warning, `CODESYSTEM_NOT_FOUND` at `.system`, a `not-present` or `example` CodeSystem too |
+| A Coding a binding checks (not example, its value set resolving: `meta.security`, extensible) | warning |
+| either, under a required binding (a CodeableConcept's coding: the concept's), the system in HL7's namespaces (`http://hl7.org/fhir`, `http://terminology.hl7.org`); for a Coding, not a `not-present` or `example` CodeSystem, which stays a warning | error |
+| A Coding no binding checks (`meta.tag`, an extension's `valueCoding`) | information; a warning for an `example` CodeSystem |
+
+The systems the HL7 validator treats apart are treated as it treats them:
+
+| System | A CodeableConcept's coding | A Coding a binding checks | A Coding no binding checks |
+|--------|----------------------------|---------------------------|----------------------------|
+| LOINC, SNOMED CT, RxNorm, CPT | nothing | information (`BINDING_CANNOT_VALIDATE`) | warning |
+| UCUM | warning (`CODESYSTEM_NOT_FOUND`) | warning (`BINDING_CANNOT_VALIDATE`) | warning |
+| NDC, CVX, ICD-9-CM, ICD-10, ICD-10-CM | nothing | information | nothing |
+| HL7's other known SIDs (`http://hl7.org/fhir/sid/srt`, `icd-9`, `icpc-2`, ...) | warning (an error under a required binding) | warning (an error under a required binding) | nothing |
+| NDF-RT | nothing | information | warning |
+| bcp47, ISO 3166 | warning | warning (`BINDING_CANNOT_VALIDATE`) | information |
+
+A code a `fragment` CodeSystem does not have is a warning, at `.code`.
 
 ## Binding Strength and Severity
 

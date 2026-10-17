@@ -1,0 +1,17 @@
+{
+ "resourceType": "CodeSystem",
+ "id": "known",
+ "url": "http://acme.local/cs/known",
+ "status": "active",
+ "content": "complete",
+ "concept": [
+  {
+   "code": "a",
+   "display": "A"
+  },
+  {
+   "code": "b",
+   "display": "B"
+  }
+ ]
+}

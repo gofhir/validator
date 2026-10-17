@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"pe","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/patient-religion","valueCodeableConcept":{"coding":[{"system":"http://acme.local/cs/x","code":"x"}]}}],"maritalStatus":{"coding":[{"system":"http://acme.local/cs/x","code":"x"}]}}

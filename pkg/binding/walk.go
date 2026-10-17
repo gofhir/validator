@@ -18,7 +18,7 @@ import (
 // contentReference, the profile its type declares, a backbone element's children, the definition
 // an extension's url names, or else Extension's), a primitive's extensions included. A resource an
 // element holds is checked by the resource walk.
-func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, result *issue.Result) {
+func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, holder *registry.ElementDefinition, fhirPath string, result *issue.Result) {
 	c := v.sdRegistry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
 	if c.Unresolved.Canonical != "" {
 		return // reported by the cardinality phase
@@ -31,7 +31,7 @@ func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, 
 			}
 			gov := matched.Of(child, inst, cv.Key, cv.Index)
 			path := elementvalues.ItemPath(child, cv, fhirPath)
-			v.checkValue(ctx, gov.Def, cv, path, result)
+			v.checkValue(ctx, gov.Def, conceptOf(typeCode, holder), cv, path, result)
 			if v.sdRegistry.HoldsResource(child.Def) {
 				continue
 			}
@@ -43,17 +43,18 @@ func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, 
 				}
 			}
 			nsd, next := v.sdRegistry.MemberTree(ctx, c.SD, gov)
-			v.walk(ctx, nsd, next, cv.TypeCode, m, path, result)
+			v.walk(ctx, nsd, next, cv.TypeCode, m, gov.Def, path, result)
 		}
 	}
 }
 
 // checkValue checks one value of an element of definition def, at path: against def's binding, when
-// its type is one a binding applies to, and, a Coding, against the CodeSystem it names.
-func (v *Validator) checkValue(ctx context.Context, def *registry.ElementDefinition, cv elementvalues.Value, path string, result *issue.Result) {
+// its type is one a binding applies to, and, a Coding, against the CodeSystem it names, in the
+// context concept gives it (the definition of the CodeableConcept it is a coding of, or nil).
+func (v *Validator) checkValue(ctx context.Context, def, concept *registry.ElementDefinition, cv elementvalues.Value, path string, result *issue.Result) {
 	if cv.TypeCode == codingType {
 		if m, ok := cv.Value.(map[string]any); ok {
-			v.checkCodingAgainstCodeSystem(ctx, m, path, result)
+			v.checkCodingAgainstCodeSystem(ctx, m, func() codingContext { return v.codingContextOf(ctx, def, concept) }, path, result)
 		}
 	}
 	v.checkBinding(ctx, def, cv, path, result)
@@ -65,6 +66,15 @@ func (v *Validator) checkValue(ctx context.Context, def *registry.ElementDefinit
 		v.valueSetNotFound(ctx, def.Binding) {
 		v.checkBinding(ctx, base, cv, path, result)
 	}
+}
+
+// conceptOf returns holder when it governs a CodeableConcept, the instance of type typeCode whose
+// children are walked: its codings are checked in its context.
+func conceptOf(typeCode string, holder *registry.ElementDefinition) *registry.ElementDefinition {
+	if typeCode == codeableConceptType {
+		return holder
+	}
+	return nil
 }
 
 // valueSetNotFound reports whether b binds to a value set that cannot be resolved here
@@ -190,16 +200,22 @@ func (v *Validator) selfDefinitions(ctx context.Context, inst map[string]any) fu
 // once collects issues and reports each once: a resource checked against several profiles, which
 // share the bindings their base defines, reports them once.
 type once struct {
-	seen map[string]bool
+	seen map[string]int // an issue's index in the result merged into
 }
 
+// merge adds from's issues to into, each once, at the highest severity it was reported with: a
+// code system that cannot be checked is reported by the context the definitions give it, which two
+// profiles may give differently.
 func (o *once) merge(from, into *issue.Result) {
 	for _, is := range from.Issues {
-		key := string(is.Severity) + "|" + is.MessageID + "|" + strings.Join(is.Expression, ",") + "|" + is.Diagnostics
-		if o.seen[key] {
+		key := is.MessageID + "|" + strings.Join(is.Expression, ",") + "|" + is.Diagnostics
+		if i, ok := o.seen[key]; ok {
+			if is.Severity.Outranks(into.Issues[i].Severity) {
+				into.Issues[i].Severity = is.Severity
+			}
 			continue
 		}
-		o.seen[key] = true
+		o.seen[key] = len(into.Issues)
 		into.AddIssue(is)
 	}
 }

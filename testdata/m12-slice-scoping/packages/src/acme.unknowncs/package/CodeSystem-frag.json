@@ -1,0 +1,12 @@
+{
+ "resourceType": "CodeSystem",
+ "id": "frag",
+ "url": "http://acme.local/cs/frag",
+ "status": "active",
+ "content": "fragment",
+ "concept": [
+  {
+   "code": "a"
+  }
+ ]
+}
