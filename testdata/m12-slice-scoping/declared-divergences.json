@@ -1062,5 +1062,53 @@
     "file": "fhir-cache:/hl7.fhir.r4.examples#4.0.1/package/Bundle-bundle-search-warning.json",
     "location": "Bundle",
     "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D37",
+    "reason": "A Coding with a system and no code under a required binding provides no code, and a required binding asks the concept to come from the value set (terminologies.html#required), as for a CodeableConcept with none (BINDING_REQUIRED_NO_CODE). HL7 6.10.2 reports nothing for a Coding.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ux_a2_n2_loc_req.json",
+    "location": "Location.operationalStatus",
+    "messageId": "BINDING_REQUIRED_NO_CODE"
+  },
+  {
+    "decision": "B-D37",
+    "reason": "A Coding with a system and no code under a required binding provides no code, and a required binding asks the concept to come from the value set (terminologies.html#required), as for a CodeableConcept with none (BINDING_REQUIRED_NO_CODE). HL7 6.10.2 reports nothing for a Coding.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ux_a2_n3_loc_req_known.json",
+    "location": "Location.operationalStatus",
+    "messageId": "BINDING_REQUIRED_NO_CODE"
+  },
+  {
+    "decision": "B-D37",
+    "reason": "A Coding with a system and no code under a required binding provides no code, and a required binding asks the concept to come from the value set (terminologies.html#required), as for a CodeableConcept with none (BINDING_REQUIRED_NO_CODE). HL7 6.10.2 reports nothing for a Coding.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ux_a2_n8_loc_req_hl7_known.json",
+    "location": "Location.operationalStatus",
+    "messageId": "BINDING_REQUIRED_NO_CODE"
+  },
+  {
+    "decision": "B-D37",
+    "reason": "A Coding with a system and no code under a required binding provides no code, and a required binding asks the concept to come from the value set (terminologies.html#required), as for a CodeableConcept with none (BINDING_REQUIRED_NO_CODE). HL7 6.10.2 reports nothing for a Coding.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ux_r28r_rel_nc_req.json",
+    "location": "Location.operationalStatus",
+    "messageId": "BINDING_REQUIRED_NO_CODE"
+  },
+  {
+    "decision": "B-D37",
+    "reason": "A Coding with a system and no code under a required binding provides no code, and a required binding asks the concept to come from the value set (terminologies.html#required), as for a CodeableConcept with none (BINDING_REQUIRED_NO_CODE). HL7 6.10.2 reports nothing for a Coding.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ux_r28r_upper_nc_req.json",
+    "location": "Location.operationalStatus",
+    "messageId": "BINDING_REQUIRED_NO_CODE"
+  },
+  {
+    "decision": "B-D37",
+    "reason": "A Coding with a system and no code under a required binding provides no code, and a required binding asks the concept to come from the value set (terminologies.html#required), as for a CodeableConcept with none (BINDING_REQUIRED_NO_CODE). HL7 6.10.2 reports nothing for a Coding.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ux_r29d_codingbound_nc.json",
+    "location": "Observation.method.coding[0]",
+    "messageId": "BINDING_REQUIRED_NO_CODE"
   }
 ]

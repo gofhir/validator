@@ -64,6 +64,14 @@ const (
 	DiagBindingValueSetNotFound DiagnosticID = "BINDING_VALUESET_NOT_FOUND"
 	DiagCodeNotInCodeSystem     DiagnosticID = "CODE_NOT_IN_CODESYSTEM"
 	DiagCodeSystemNotFound      DiagnosticID = "CODESYSTEM_NOT_FOUND"
+	// DiagCodeSystemURIInvalid: a Coding's system, no CodeSystem's, is not a valid code system
+	// URI (a build.fhir.org URL, one in HL7's namespace HL7 does not publish, a value set's URL).
+	DiagCodeSystemURIInvalid DiagnosticID = "CODESYSTEM_URI_INVALID"
+	// DiagCodeSystemExampleContent: a Coding's CodeSystem has example content only, which cannot tell
+	// whether its code is right.
+	DiagCodeSystemExampleContent DiagnosticID = "CODESYSTEM_EXAMPLE_CONTENT"
+	// DiagCodingNoCodeInConcept: a CodeableConcept's coding names a known code system and no code.
+	DiagCodingNoCodeInConcept DiagnosticID = "CODING_NO_CODE_IN_CONCEPT"
 	// DiagCodeSystemNoCodes: the CodeSystem includes none of its codes (content not-present), so
 	// a code cannot be checked against it.
 	DiagCodeSystemNoCodes DiagnosticID = "CODESYSTEM_NO_CODES"
@@ -71,7 +79,10 @@ const (
 	// some of its codes (content fragment or example) includes, so it may still be one of its codes.
 	DiagCodeNotInPartialCodeSystem DiagnosticID = "CODE_NOT_IN_PARTIAL_CODESYSTEM"
 	DiagCodingNoSystem             DiagnosticID = "CODING_NO_SYSTEM"
-	DiagCodingNoCode               DiagnosticID = "CODING_NO_CODE"
+	// DiagCodingNoCode was a Coding with a system and no code, which Coding.code (0..1) allows.
+	//
+	// Deprecated: no longer reported; a required binding reports DiagBindingRequiredNoCode.
+	DiagCodingNoCode DiagnosticID = "CODING_NO_CODE"
 )
 
 // Diagnostic IDs for extension validation (M8).
@@ -345,13 +356,13 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Code:     CodeCodeInvalid,
 		Template: "The value provided ('{code}') is not in the value set '{valueSet}' (extensible){detail}",
 	},
-	// The code's system is not among those the ValueSet declares, which is the
-	// case extensible bindings exist to permit. Informational rather than a
-	// warning so it stays non-failing under strict mode.
+	// The code's system is not among those the ValueSet declares: an extensible binding permits it
+	// only where the value set has no suitable code, which cannot be judged, so a warning, as HL7
+	// reports it (information for a system HL7 checks on a server only).
 	DiagBindingExtensibleOther: {
-		Severity: SeverityInformation,
-		Code:     CodeInformational,
-		Template: "The value provided ('{code}') is not in the value set '{valueSet}', and comes from a system the value set does not declare (extensible bindings permit this){detail}",
+		Severity: SeverityWarning,
+		Code:     CodeCodeInvalid,
+		Template: "The value provided ('{code}') is not in the value set '{valueSet}', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code){detail}",
 	},
 	// Membership could not be established, so neither acceptance nor rejection
 	// can be justified; reported at the same severity as a plain extensible miss.
@@ -402,6 +413,21 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeProcessing,
 		Template: "CodeSystem is unknown and can't be validated: {system} for '{systemCode}'",
+	},
+	DiagCodingNoCodeInConcept: {
+		Severity: SeverityWarning,
+		Code:     CodeCodeInvalid,
+		Template: "No code is provided for the code system '{system}'",
+	},
+	DiagCodeSystemExampleContent: {
+		Severity: SeverityWarning,
+		Code:     CodeProcessing,
+		Template: "The CodeSystem '{codeSystem}' has example content only (content '{content}'), so the code '{code}' cannot be validated",
+	},
+	DiagCodeSystemURIInvalid: {
+		Severity: SeverityError,
+		Code:     CodeCodeInvalid,
+		Template: "The code system URI '{system}' is not valid: {reason}",
 	},
 	DiagCodeSystemNoCodes: {
 		Severity: SeverityInformation,

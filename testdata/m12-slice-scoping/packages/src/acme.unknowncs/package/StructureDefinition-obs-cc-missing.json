@@ -1,0 +1,25 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "obs-cc-missing",
+  "url": "http://acme.local/fhir/StructureDefinition/obs-cc-missing",
+  "name": "ObsCcMissing",
+  "status": "active",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Observation",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Observation.code",
+        "path": "Observation.code",
+        "binding": {
+          "strength": "extensible",
+          "valueSet": "http://acme.local/fhir/ValueSet/nope"
+        }
+      }
+    ]
+  }
+}

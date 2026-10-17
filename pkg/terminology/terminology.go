@@ -151,6 +151,12 @@ type Registry struct {
 	// version was impossible rather than merely unimplemented.
 	valueSetsByVersion   map[string]*ValueSet
 	codeSystemsByVersion map[string]*CodeSystem
+	// nsMu guards namingSystems, the preferred uri unique ids of the NamingSystems of kind
+	// codesystem loaded, and pendingNamingSystems, which reads those a package deferred
+	// (NamesCodeSystem): reading them does not hold mu.
+	nsMu                 sync.Mutex
+	namingSystems        map[string]bool
+	pendingNamingSystems []func() ([]byte, error)
 
 	// clauseCache holds what each include or exclude of a ValueSet held selects from its code
 	// system (clauseCodes).
@@ -404,6 +410,10 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 				r.indexValueSetUnlocked(data, packageID, fhirVersions)
 			case "CodeSystem":
 				r.indexCodeSystemUnlocked(data, packageID, fhirVersions)
+			case "NamingSystem":
+				if hl7Terminology(pkg) {
+					r.indexNamingSystem(data)
+				}
 			}
 		}
 		// The package folder's, read and deferred, before its example folder's read ones: between
@@ -416,27 +426,41 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 			}
 			index(data)
 		})
-		for _, d := range pkg.Deferred {
-			if d.URL == "" {
-				continue
-			}
-			switch d.ResourceType {
-			case "ValueSet":
-				e := &loaded[*ValueSet]{url: d.URL, version: d.Version, packageID: packageID, fhirVersions: fhirVersions, read: d.Read}
-				r.loadedValueSets = append(r.loadedValueSets, e)
-				r.selectValueSetUnlocked(e)
-			case "CodeSystem":
-				e := &loaded[*CodeSystem]{url: d.URL, version: d.Version, packageID: packageID, fhirVersions: fhirVersions, read: d.Read}
-				r.loadedCodeSystems = append(r.loadedCodeSystems, e)
-				r.selectCodeSystemUnlocked(e)
-			}
-		}
+		r.loadDeferredUnlocked(pkg, packageID, fhirVersions)
 		for _, data := range examples {
 			index(data)
 		}
 	}
 
 	return nil
+}
+
+// loadDeferredUnlocked holds the resources pkg deferred, to be read when needed: its ValueSets and
+// CodeSystems by their url, and, HL7's terminology package's, its NamingSystems.
+func (r *Registry) loadDeferredUnlocked(pkg *loader.Package, packageID string, fhirVersions []string) {
+	for _, d := range pkg.Deferred {
+		if d.ResourceType == "NamingSystem" {
+			if hl7Terminology(pkg) {
+				r.nsMu.Lock()
+				r.pendingNamingSystems = append(r.pendingNamingSystems, d.Read)
+				r.nsMu.Unlock()
+			}
+			continue
+		}
+		if d.URL == "" {
+			continue
+		}
+		switch d.ResourceType {
+		case "ValueSet":
+			e := &loaded[*ValueSet]{url: d.URL, version: d.Version, packageID: packageID, fhirVersions: fhirVersions, read: d.Read}
+			r.loadedValueSets = append(r.loadedValueSets, e)
+			r.selectValueSetUnlocked(e)
+		case "CodeSystem":
+			e := &loaded[*CodeSystem]{url: d.URL, version: d.Version, packageID: packageID, fhirVersions: fhirVersions, read: d.Read}
+			r.loadedCodeSystems = append(r.loadedCodeSystems, e)
+			r.selectCodeSystemUnlocked(e)
+		}
+	}
 }
 
 // indexValueSetUnlocked adds a ValueSet to both indexes. Must be called with the

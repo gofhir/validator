@@ -52,9 +52,17 @@ func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, 
 // its type is one a binding applies to, and, a Coding, against the CodeSystem it names, in the
 // context concept gives it (the definition of the CodeableConcept it is a coding of, or nil).
 func (v *Validator) checkValue(ctx context.Context, def, concept *registry.ElementDefinition, cv elementvalues.Value, path string, result *issue.Result) {
-	if cv.TypeCode == codingType {
-		if m, ok := cv.Value.(map[string]any); ok {
-			v.checkCodingAgainstCodeSystem(ctx, m, func() codingContext { return v.codingContextOf(ctx, def, concept) }, path, result)
+	switch m, ok := cv.Value.(map[string]any); {
+	case !ok:
+	case cv.TypeCode == codingType:
+		v.checkCodingAgainstCodeSystem(ctx, m, func() codingContext { return v.codingContextOf(ctx, def, concept) }, path, result)
+	case v.isQuantity(cv.TypeCode):
+		// A Quantity's system and code are a coded unit, its system checked as a Coding's is, as HL7
+		// checks it; UCUM's are the ucumvalidator phase's, which checks them.
+		system, _ := m["system"].(string)
+		code, _ := m["code"].(string)
+		if system != "" && code != "" && system != ucumSystem {
+			v.checkCodingAgainstCodeSystem(ctx, m, func() codingContext { return v.codingContextOf(ctx, def, nil) }, path, result)
 		}
 	}
 	v.checkBinding(ctx, def, cv, path, result)
@@ -66,6 +74,13 @@ func (v *Validator) checkValue(ctx context.Context, def, concept *registry.Eleme
 		v.valueSetNotFound(ctx, def.Binding) {
 		v.checkBinding(ctx, base, cv, path, result)
 	}
+}
+
+// isQuantity reports whether typeCode is Quantity itself (SimpleQuantity and MoneyQuantity are
+// profiles of it): HL7 checks the unit of a Quantity only, not of a type derived from it (Age,
+// Duration), whose own invariants say which units it takes.
+func (v *Validator) isQuantity(typeCode string) bool {
+	return typeCode == quantityType
 }
 
 // conceptOf returns holder when it governs a CodeableConcept, the instance of type typeCode whose

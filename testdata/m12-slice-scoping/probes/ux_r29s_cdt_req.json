@@ -1,0 +1,1 @@
+{"resourceType":"Location","id":"a","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"operationalStatus":{"system":"http://www.ada.org/cdt","code":"x"},"meta":{"profile":["http://acme.local/fhir/StructureDefinition/loc-req"]}}

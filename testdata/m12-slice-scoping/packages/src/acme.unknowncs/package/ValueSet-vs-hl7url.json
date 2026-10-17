@@ -1,0 +1,13 @@
+{
+ "resourceType": "ValueSet",
+ "id": "vs-hl7url",
+ "url": "http://hl7.org/fhir/ValueSet/acme-probe",
+ "status": "active",
+ "compose": {
+  "include": [
+   {
+    "system": "http://acme.local/cs/known"
+   }
+  ]
+ }
+}

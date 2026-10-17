@@ -1,7 +1,7 @@
 // Package specs provides embedded FHIR specification packages for R4, R4B, and R5.
 //
-// Each .tgz contains only StructureDefinition, ValueSet, and CodeSystem resources,
-// filtered from the full FHIR NPM packages to minimize binary size.
+// Each .tgz contains only StructureDefinition, ValueSet, and CodeSystem resources, and the
+// NamingSystems of kind codesystem, filtered from the full FHIR NPM packages to minimize binary size.
 //
 // R4 and R4B share the same terminology and extensions packages.
 package specs

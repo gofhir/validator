@@ -57,12 +57,12 @@ func TestReportUnchecked(t *testing.T) {
 		{"not-present, no binding", noCodes, acme, bare, r(issue.SeverityInformation, issue.DiagCodeSystemNoCodes, "")},
 		{"not-present, checked", noCodes, acme, checked, r(issue.SeverityWarning, issue.DiagCodeSystemNoCodes, "")},
 		{"not-present, a concept's", noCodes, acme, concept, r(issue.SeverityWarning, issue.DiagCodeSystemNotFound, ".system")},
-		{"example, no binding", exampleCodes, acme, bare, r(issue.SeverityWarning, issue.DiagCodeNotInPartialCodeSystem, "")},
+		{"example, no binding", exampleCodes, acme, bare, r(issue.SeverityWarning, issue.DiagCodeSystemExampleContent, "")},
 		{"example, a concept's", exampleCodes, acme, concept, r(issue.SeverityWarning, issue.DiagCodeSystemNotFound, ".system")},
 		{"fragment, anywhere", fragmentCodes, acme, conceptRequired, r(issue.SeverityWarning, issue.DiagCodeNotInPartialCodeSystem, ".code")},
 		// Not usable, not unknown: no error under a required binding, in HL7's namespaces too.
 		{"not-present, required, HL7's namespace", noCodes, tho, required, r(issue.SeverityWarning, issue.DiagCodeSystemNoCodes, "")},
-		{"example, required, HL7's namespace", exampleCodes, tho, required, r(issue.SeverityWarning, issue.DiagCodeNotInPartialCodeSystem, "")},
+		{"example, required, HL7's namespace", exampleCodes, tho, required, r(issue.SeverityWarning, issue.DiagCodeSystemExampleContent, "")},
 		{"UCUM, no binding", notFound, ucum, bare, r(issue.SeverityWarning, issue.DiagBindingCannotValidate, "")},
 		{"UCUM, checked", notFound, ucum, checked, r(issue.SeverityWarning, issue.DiagBindingCannotValidate, "")},
 		{"UCUM, a concept's", notFound, ucum, concept, r(issue.SeverityWarning, issue.DiagCodeSystemNotFound, ".system")},
@@ -77,28 +77,28 @@ func TestReportUnchecked(t *testing.T) {
 // paths: as a concept's, and as a Coding that binding checks.
 func TestReportUncheckedCodingBinding(t *testing.T) {
 	c := codingContext{inConcept: true, checked: true, codingBound: true, codingChecked: true}
-	got := reportUnchecked(notFound, "http://loinc.org", c)
+	got := reportUnchecked(notFound, "http://loinc.org", c, systemFacts{})
 	want := []uncheckedReport{{severity: issue.SeverityInformation, id: issue.DiagBindingCannotValidate, report: true}}
 	if len(got) != 1 || got[0] != want[0] {
 		t.Errorf("LOINC: %+v, want %+v", got, want)
 	}
-	got = reportUnchecked(notFound, "urn:ietf:bcp:47", c)
+	got = reportUnchecked(notFound, "urn:ietf:bcp:47", c, systemFacts{})
 	if len(got) != 2 || got[0].id != issue.DiagCodeSystemNotFound || got[1].id != issue.DiagBindingCannotValidate || got[1].severity != issue.SeverityWarning {
 		t.Errorf("bcp47: %+v, want the concept's unknown and the Coding's warning", got)
 	}
 	// An example binding on the coding: the Coding is reported as one no binding checks.
-	got = reportUnchecked(notFound, "http://loinc.org", codingContext{inConcept: true, codingBound: true})
+	got = reportUnchecked(notFound, "http://loinc.org", codingContext{inConcept: true, codingBound: true}, systemFacts{})
 	if len(got) != 1 || got[0].severity != issue.SeverityWarning || got[0].id != issue.DiagBindingCannotValidate {
 		t.Errorf("LOINC under an example binding on the coding: %+v, want the Coding's warning", got)
 	}
 	// A required binding on the coding escalates the Coding's report, not the concept's: a
 	// not-present CodeSystem in HL7's namespace, two warnings.
-	got = reportUnchecked(noCodes, "http://terminology.hl7.org/CodeSystem/acme-np", codingContext{inConcept: true, checked: true, codingBound: true, codingChecked: true, codingRequired: true})
+	got = reportUnchecked(noCodes, "http://terminology.hl7.org/CodeSystem/acme-np", codingContext{inConcept: true, checked: true, codingBound: true, codingChecked: true, codingRequired: true}, systemFacts{})
 	if len(got) != 2 || got[0].severity != issue.SeverityWarning || got[1].severity != issue.SeverityWarning {
 		t.Errorf("not-present under a required binding on the coding: %+v, want two warnings", got)
 	}
 	// The concept's binding alone, not the coding's: the concept's report only.
-	if got := reportUnchecked(notFound, "http://loinc.org", codingContext{inConcept: true, checked: true}); len(got) != 0 {
+	if got := reportUnchecked(notFound, "http://loinc.org", codingContext{inConcept: true, checked: true}, systemFacts{}); len(got) != 0 {
 		t.Errorf("LOINC under the concept's binding: %+v, want nothing", got)
 	}
 }
@@ -112,5 +112,50 @@ func TestOnceKeepsTheHighestSeverity(t *testing.T) {
 	(&once{seen: map[string]int{}}).merge(from, into)
 	if len(into.Issues) != 1 || into.Issues[0].Severity != issue.SeverityWarning {
 		t.Errorf("merged %+v, want one warning", into.Issues)
+	}
+}
+
+// A Coding no binding checks whose system no CodeSystem has is checked as a URI first, as HL7 6.10.2
+// checks it: an error for each problem, and the unknown system besides only where HL7 reports it.
+func TestReportUncheckedURIs(t *testing.T) {
+	bare := codingContext{}
+	for _, tt := range []struct {
+		system  string
+		f       systemFacts
+		errors  int
+		unknown bool
+	}{
+		{"http://acme.local/cs", systemFacts{}, 0, true},
+		{"http://hl7.org/fhir/acme-unknown", systemFacts{}, 1, false},
+		{"https://www.hl7.org/fhir/acme-unknown", systemFacts{}, 1, false},
+		{"http://hl7.org/fhirx/acme", systemFacts{}, 1, false},
+		{"http://hl7.org/fhir/sid/us-npi", systemFacts{}, 1, false}, // an identifier system, no code system
+		{"http://hl7.org/fhir/test/acme", systemFacts{}, 0, false},
+		{"http://hl7.org/fhir/acme.html", systemFacts{}, 1, false},
+		{"http://build.fhir.org/ig/acme/cs", systemFacts{}, 1, false},
+		{"http://snomed.info/sct/900000000000207008", systemFacts{}, 1, false},
+		{"https://loinc.org", systemFacts{}, 1, false},
+		{"https://acme.local/cs", systemFacts{httpKnown: true}, 1, false},
+		{"https://acme.local/cs", systemFacts{}, 0, true},
+		{"http://acme.local/vs", systemFacts{valueSet: true}, 1, false},
+		{"http://hl7.org/fhir/ValueSet/administrative-gender", systemFacts{valueSet: true}, 1, false},
+	} {
+		got := reportUnchecked(notFound, tt.system, bare, tt.f)
+		errors, unknown := 0, false
+		for _, r := range got {
+			switch r.id {
+			case issue.DiagCodeSystemURIInvalid:
+				errors++
+			case issue.DiagCodeSystemNotFound:
+				unknown = true
+			}
+		}
+		if errors != tt.errors || unknown != tt.unknown {
+			t.Errorf("%s %+v: %+v", tt.system, tt.f, got)
+		}
+	}
+	// In a CodeableConcept's coding the system is unknown, not checked as a URI.
+	if got := reportUnchecked(notFound, "http://hl7.org/fhir/acme-unknown", codingContext{inConcept: true}, systemFacts{}); len(got) != 1 || got[0].id != issue.DiagCodeSystemNotFound {
+		t.Errorf("a concept's: %+v", got)
 	}
 }

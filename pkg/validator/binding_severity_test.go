@@ -204,8 +204,8 @@ func TestExtensibleBindingSeverityTable(t *testing.T) {
 			name:       "system not declared by the ValueSet",
 			membership: terminology.MembershipExcluded,
 			wantID:     issue.DiagBindingExtensibleOther,
-			wantSev:    issue.SeverityInformation,
-			why:        "this is the extension extensible bindings permit; must stay non-failing under -strict",
+			wantSev:    issue.SeverityWarning,
+			why:        "permitted only where the value set has no suitable code, which cannot be judged: a warning, as HL7 reports it",
 		},
 		{
 			name:       "membership undeterminable",

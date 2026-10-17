@@ -1,0 +1,25 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "loc-inc0203",
+ "url": "http://acme.local/fhir/StructureDefinition/loc-inc0203",
+ "name": "locinc0203",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Location",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Location",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Location.operationalStatus",
+    "path": "Location.operationalStatus",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://acme.local/fhir/ValueSet/vs-inc-0203"
+    }
+   }
+  ]
+ }
+}

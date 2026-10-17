@@ -1,0 +1,1 @@
+{"resourceType":"Condition","id":"n6","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"code":{"text":"x"},"subject":{"display":"x"},"clinicalStatus":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/condition-clinical"}]}}

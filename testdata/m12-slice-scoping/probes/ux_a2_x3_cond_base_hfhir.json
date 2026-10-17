@@ -1,0 +1,1 @@
+{"resourceType":"Condition","id":"x3","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"code":{"text":"x"},"subject":{"display":"x"},"verificationStatus":{"coding":[{"system":"http://hl7.org/fhir/acme-unknown","code":"x"}]}}

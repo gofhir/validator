@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"t08","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","code":{"text":"x"},"subject":{"display":"x"},"meta":{"tag":[{"system":"https://terminology.hl7.org/CodeSystem/v3-ActCode","code":"AMB"}]}}

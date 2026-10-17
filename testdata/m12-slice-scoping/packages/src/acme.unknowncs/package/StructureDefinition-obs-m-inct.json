@@ -1,0 +1,25 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-m-inct",
+ "url": "http://acme.local/fhir/StructureDefinition/obs-m-inct",
+ "name": "obsminct",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.method",
+    "path": "Observation.method",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://acme.local/fhir/ValueSet/vs-inc-t"
+    }
+   }
+  ]
+ }
+}

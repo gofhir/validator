@@ -68,7 +68,8 @@ func TestBindingNoCode(t *testing.T) {
 }
 
 // A CodeableConcept whose codings carry neither a code nor a system provides no code, nor does an
-// empty coding list (HL7 warns on both); codings of a system without a code are not told so.
+// empty coding list (HL7 warns on both); codings of a system, without a code, that none of them is
+// from the value set, whether it declares their system or not (HL7's Terminology_TX_NoValid_2_CC).
 func TestBindingNoCodeInCodings(t *testing.T) {
 	v, err := New(WithVersion("4.0.1"))
 	if err != nil {
@@ -79,9 +80,10 @@ func TestBindingNoCodeInCodings(t *testing.T) {
 		maritalStatus string
 		want          []string
 	}{
-		"empty coding list":  {`{"coding":[]}`, []string{"BINDING_TEXT_ONLY_WARNING @ Patient.maritalStatus"}},
-		"coding with an id":  {`{"coding":[{"id":"y"}]}`, []string{"BINDING_TEXT_ONLY_WARNING @ Patient.maritalStatus"}},
-		"coding of a system": {`{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"}]}`, nil},
+		"empty coding list":        {`{"coding":[]}`, []string{"BINDING_TEXT_ONLY_WARNING @ Patient.maritalStatus"}},
+		"coding with an id":        {`{"coding":[{"id":"y"}]}`, []string{"BINDING_TEXT_ONLY_WARNING @ Patient.maritalStatus"}},
+		"coding of a system":       {`{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"}]}`, []string{"BINDING_EXTENSIBLE_NO_CODING @ Patient.maritalStatus"}},
+		"coding of another system": {`{"coding":[{"system":"http://acme.local/cs/x"}]}`, []string{"BINDING_EXTENSIBLE_NO_CODING @ Patient.maritalStatus"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			res, err := v.Validate(context.Background(),
@@ -204,6 +206,32 @@ func TestBindingExtensibleOtherSystemConcept(t *testing.T) {
 		"warning BINDING_EXTENSIBLE_NO_CODING @ Observation.interpretation[0]",
 	}
 	if !slices.Equal(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+// Codings of a system with no code under an extensible binding to a value set that does not resolve:
+// only that it is not found, as HL7 reports it, no verdict on a value set not loaded.
+func TestBindingNoCodeUnresolvedValueSet(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"), WithPackageTgz(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "packages", "acme.unknowncs-0.1.0.tgz")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "probes", "ux_r31_unres_ext_nocode.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := v.Validate(context.Background(), data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, is := range res.Issues {
+		if strings.HasPrefix(is.MessageID, "BINDING_") {
+			got = append(got, string(is.Severity)+" "+is.MessageID+" @ "+strings.Join(is.Expression, ","))
+		}
+	}
+	if want := []string{"warning BINDING_VALUESET_NOT_FOUND @ Observation.code"}; !slices.Equal(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

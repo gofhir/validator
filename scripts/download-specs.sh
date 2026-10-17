@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Downloads FHIR NPM packages and repackages them with only the resource types
-# needed by the validator: StructureDefinition, ValueSet, CodeSystem.
+# Downloads FHIR NPM packages and repackages them with only the resources needed
+# by the validator: StructureDefinition, ValueSet, CodeSystem, and NamingSystem of
+# kind codesystem (which names a code system a Coding's system may be).
 # This reduces the embedded binary size significantly.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,7 +22,8 @@ download_and_filter() {
     mkdir -p "${tmp}/extracted"
     tar -xzf "${tmp}/original.tgz" -C "${tmp}/extracted"
 
-    # Filter: keep only package.json and files whose resourceType is SD, VS, or CS
+    # Filter: keep only package.json and files whose resourceType is SD, VS, or CS,
+    # or NamingSystem of kind codesystem
     mkdir -p "${tmp}/filtered/package"
     cp "${tmp}/extracted/package/package.json" "${tmp}/filtered/package/"
 
@@ -31,9 +33,9 @@ download_and_filter() {
         [ "$(basename "$f")" = "package.json" ] && continue
         [ "$(basename "$f")" = ".index.json" ] && continue
         total=$((total + 1))
-        rt=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('resourceType',''))" "$f" 2>/dev/null || echo "")
+        rt=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get('resourceType','') + ('/' + d.get('kind','') if d.get('resourceType') == 'NamingSystem' else ''))" "$f" 2>/dev/null || echo "")
         case "$rt" in
-            StructureDefinition|ValueSet|CodeSystem)
+            StructureDefinition|ValueSet|CodeSystem|NamingSystem/codesystem)
                 cp "$f" "${tmp}/filtered/package/"
                 kept=$((kept + 1))
                 ;;
@@ -52,7 +54,7 @@ download_and_filter() {
     rm -rf "$tmp"
 }
 
-echo "Downloading and filtering FHIR packages (SD+VS+CS only)..."
+echo "Downloading and filtering FHIR packages (SD+VS+CS, NamingSystems of code systems)..."
 echo ""
 
 # R4

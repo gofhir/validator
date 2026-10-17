@@ -12,10 +12,12 @@ Los errores de terminología ocurren cuando los valores codificados no se ajusta
 | ID | Severidad | Mensaje |
 |----|-----------|---------|
 | `CODING_NO_SYSTEM` | warning | Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided |
-| `CODING_NO_CODE` | error | Coding has no code for system {system} and cannot be validated |
+| `CODING_NO_CODE_IN_CONCEPT` | warning | No code is provided for the code system '{system}' |
 | `CODE_NOT_IN_CODESYSTEM` | error | The code '{code}' is not valid in the CodeSystem '{system}' |
 | `CODESYSTEM_NOT_FOUND` | ver abajo | CodeSystem is unknown and can't be validated: {system} for '{systemCode}' |
+| `CODESYSTEM_URI_INVALID` | error | The code system URI '{system}' is not valid: {reason} |
 | `CODESYSTEM_NO_CODES` | ver abajo | The CodeSystem '{codeSystem}' includes none of its codes (content '{content}'), so the code '{code}' cannot be validated |
+| `CODESYSTEM_EXAMPLE_CONTENT` | warning | The CodeSystem '{codeSystem}' has example content only (content '{content}'), so the code '{code}' cannot be validated |
 | `CODE_NOT_IN_PARTIAL_CODESYSTEM` | ver abajo | The code '{code}' is not among the codes the CodeSystem '{codeSystem}' includes, which are only some of its codes (content '{content}'), so it cannot be validated |
 | `BINDING_CANNOT_VALIDATE` | ver abajo | Code '{code}' in system '{system}' cannot be validated - external terminology system requires a terminology server |
 | `BINDING_REQUIRED` | error | The value provided ('{code}') is not in the value set '{valueSet}' (required){detail} |
@@ -23,51 +25,12 @@ Los errores de terminología ocurren cuando los valores codificados no se ajusta
 | `BINDING_REQUIRED_NO_CODE` | error | No code provided, and a code is required from the value set '{valueSet}' |
 | `BINDING_EXTENSIBLE` | warning | The value provided ('{code}') is not in the value set '{valueSet}' (extensible){detail} |
 | `BINDING_EXTENSIBLE_NO_CODING` | warning | None of the codings provided are in the value set '{valueSet}', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = {codes}) |
-| `BINDING_EXTENSIBLE_OTHER_SYSTEM` | information | The value provided ('{code}') is not in the value set '{valueSet}', and comes from a system the value set does not declare (extensible bindings permit this){detail} |
+| `BINDING_EXTENSIBLE_OTHER_SYSTEM` | warning (information para un sistema que HL7 revisa solo con servidor) | The value provided ('{code}') is not in the value set '{valueSet}', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code){detail} |
 | `BINDING_EXTENSIBLE_UNKNOWN_SYSTEM` | warning | The value provided ('{code}') is not in the value set '{valueSet}' (extensible); whether its system belongs to the value set could not be determined{detail} |
 | `BINDING_TEXT_ONLY_WARNING` | warning | No code provided, and a code should be provided from the value set '{valueSet}' (extensible) |
 | `BINDING_DISPLAY_MISMATCH` | error | Display '{provided}' for code '{code}' does not match expected '{expected}' |
 | `BINDING_UNRESOLVED` | information (según la política para lo no resuelto: `warn`, por defecto, information; `error`, error) | The value provided ('{code}') could not be checked against value set '{valueSet}': no terminology source could resolve it{detail} |
 | `BINDING_VALUESET_NOT_FOUND` | warning | ValueSet '{valueSet}' not found |
-
----
-
-## CODING_NO_CODE
-
-Se encontró un elemento Coding que tiene un `system` pero no tiene `code`. Un Coding solo es significativo cuando contiene un valor de código.
-
-**Ejemplo -- recurso inválido:**
-
-```json
-{
-  "resourceType": "Observation",
-  "status": "final",
-  "code": {
-    "coding": [
-      {
-        "system": "http://loinc.org"
-      }
-    ]
-  }
-}
-```
-
-**Corrección:** Agrega la propiedad `code`:
-
-```json
-{
-  "resourceType": "Observation",
-  "status": "final",
-  "code": {
-    "coding": [
-      {
-        "system": "http://loinc.org",
-        "code": "85354-9"
-      }
-    ]
-  }
-}
-```
 
 ---
 
@@ -132,7 +95,7 @@ v, err := validator.New(
 
 ## Códigos que no se pueden revisar
 
-Un código cuyo code system no se puede revisar aquí (`CODESYSTEM_NOT_FOUND`: ningún CodeSystem con su url; `CODESYSTEM_NO_CODES`: uno con content `not-present`; `CODE_NOT_IN_PARTIAL_CODESYSTEM`: uno con content `example` o `fragment`; `BINDING_CANNOT_VALIDATE`: un sistema que solo un servidor de terminología revisa) se reporta con la severidad que le da el validador de HL7. La especificación no fija ninguna, y admite sistemas definidos localmente para los tags (resource.html#tags). La severidad sale de las definiciones, nunca del nombre del elemento:
+Un código cuyo code system no se puede revisar aquí (`CODESYSTEM_NOT_FOUND`: ningún CodeSystem con su url; `CODESYSTEM_NO_CODES`: uno con content `not-present`; `CODESYSTEM_EXAMPLE_CONTENT`: uno con content `example`, que no puede decir que un código es correcto aunque lo liste; `CODE_NOT_IN_PARTIAL_CODESYSTEM`: un código que uno con content `fragment` no lista; `BINDING_CANNOT_VALIDATE`: un sistema que solo un servidor de terminología revisa) se reporta con la severidad que le da el validador de HL7. La especificación no fija ninguna, y admite sistemas definidos localmente para los tags (resource.html#tags). La severidad sale de las definiciones, nunca del nombre del elemento:
 
 | Dónde está el Coding | Severidad |
 |----------------------|-----------|
@@ -153,6 +116,8 @@ Los sistemas que el validador de HL7 trata aparte se tratan como él los trata:
 | bcp47, ISO 3166 | warning | warning (`BINDING_CANNOT_VALIDATE`) | information |
 
 Un código que un CodeSystem `fragment` no tiene es un warning, en `.code`.
+
+En un Coding que ningún binding revisa, un sistema que ningún CodeSystem tiene se revisa primero como URI, como lo hace HL7: un error (`CODESYSTEM_URI_INVALID`) para una URL de build.fhir.org, un sistema en el espacio de nombres de HL7 (`http://hl7.org/fhir`, con https o www) que HL7 no publica (un sistema bajo `http://hl7.org/fhir` que un NamingSystem de kind `codesystem` del paquete de terminología de HL7 tiene como su unique id preferido está publicado: desconocido, un warning, salvo en el coding de un CodeableConcept bajo un binding required, un error), una página web (`.html`), una variante de la URL de SNOMED CT, LOINC, UCUM o RxNorm, o un sistema conocido escrito con https. La URL de un value set como sistema es un error en todo Coding, en su `.system` donde un binding lo revisa (la especificación: el sistema SHALL NOT contener una referencia a un value set), salvo en el coding de un CodeableConcept que ningún binding propio revisa, donde HL7 no lo reporta. El sistema de una Quantity (una Quantity misma, no un tipo derivado, como lo revisa HL7) se revisa como el de un Coding, salvo UCUM, que valida la revisión de UCUM; un Coding o una Quantity que un binding revisa, donde ninguno revisa su elemento base (el binding de un perfil o de una extensión sobre un elemento que su base deja sin binding o con uno example), se revisa además como uno que ninguno revisa, como lo hace HL7. Un Coding con sistema y sin código está permitido (`Coding.code` 0..1); el de un CodeableConcept, con un sistema conocido, da un warning (`CODING_NO_CODE_IN_CONCEPT`); bajo un binding required un Coding no aporta código (`BINDING_REQUIRED_NO_CODE`); una Quantity sin código no tiene unidad codificada, que su binding no pide. Bajo un binding extensible, un CodeableConcept cuyos codings nombran sistemas, sin código, no es del value set (`BINDING_EXTENSIBLE_NO_CODING`).
 
 ## Fuerza de Binding y Severidad
 

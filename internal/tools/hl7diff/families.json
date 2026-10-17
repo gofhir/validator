@@ -472,6 +472,34 @@
         "UNKNOWN_CODESYSTEM_VERSION_NONE",
         "TERMINOLOGY_TX_SYSTEM_NOT_USABLE"
       ]
+    },
+    {
+      "name": "codesystem-uri-invalid",
+      "rule": "equal",
+      "gofhir": [
+        "CODESYSTEM_URI_INVALID"
+      ],
+      "hl7": [
+        "Terminology_TX_System_Unknown",
+        "Terminology_TX_System_Invalid",
+        "Terminology_TX_System_ValueSet",
+        "Terminology_TX_System_ValueSet2",
+        "TERMINOLOGY_TX_SYSTEM_HTTPS",
+        "TERMINOLOGY_TX_SYSTEM_WRONG_BUILD",
+        "TERMINOLOGY_TX_SYSTEM_WRONG_HTML"
+      ]
+    },
+    {
+      "name": "coding-no-code-in-concept",
+      "rule": "parent",
+      "gofhir": [
+        "CODING_NO_CODE_IN_CONCEPT"
+      ],
+      "hl7": [
+        "NO_CODE_PROVIDED_VERSION",
+        "TERMINOLOGY_TX_SYSTEM_NO_CODE",
+        "NO_CODE_PROVIDED"
+      ]
     }
   ],
   "constraint": {
@@ -484,14 +512,13 @@
     "BINDING_CANNOT_VALIDATE": "processing notice, not a finding HL7 reports as an error",
     "BINDING_EXTENSIBLE": "a warning in both validators",
     "BINDING_EXTENSIBLE_NO_CODING": "a warning in both validators",
-    "BINDING_EXTENSIBLE_OTHER_SYSTEM": "a warning in both validators",
+    "BINDING_EXTENSIBLE_OTHER_SYSTEM": "a warning in both validators (HL7: Terminology_TX_NoValid_13), information for a system HL7 checks on a server only",
     "BINDING_EXTENSIBLE_UNKNOWN_SYSTEM": "a warning in both validators",
     "PROFILE_NOT_FOUND": "a warning in both validators (VALIDATION_VAL_PROFILE_UNKNOWN_ERROR)",
     "BINDING_TEXT_ONLY_WARNING": "a warning",
     "BINDING_UNRESOLVED": "processing notice",
     "BINDING_VALUESET_NOT_FOUND": "processing notice",
     "CODE_NOT_IN_PARTIAL_CODESYSTEM": "a warning: the code cannot be checked against a fragment or example CodeSystem",
-    "CODING_NO_CODE": "no HL7 counterpart verified yet",
     "CODING_NO_SYSTEM": "no HL7 counterpart verified yet",
     "CONSTRAINT_EVAL_ERROR": "processing notice: the evaluation hit the validator's time limit",
     "CONTAINED_DUPLICATE_ID": "no HL7 counterpart verified yet",
@@ -512,6 +539,8 @@
     "STRUCTURE_NO_TYPE": "input failure",
     "STRUCTURE_UNKNOWN_RESOURCE": "input failure",
     "TYPE_WRONG_JSON_TYPE": "no HL7 counterpart verified yet",
-    "UCUM_INVALID_CODE": "HL7 reports it only with a terminology server (Unknown code ... in the CodeSystem http://unitsofmeasure.org); under -tx n/a it warns it cannot validate the code (B-D22)"
+    "UCUM_INVALID_CODE": "HL7 reports it only with a terminology server (Unknown code ... in the CodeSystem http://unitsofmeasure.org); under -tx n/a it warns it cannot validate the code (B-D22)",
+    "CODING_NO_CODE": "deprecated, no longer reported (Coding.code 0..1)",
+    "CODESYSTEM_EXAMPLE_CONTENT": "processing notice, a warning: the code cannot be checked (HL7: Unable to validate code without using server, no message id)"
   }
 }
