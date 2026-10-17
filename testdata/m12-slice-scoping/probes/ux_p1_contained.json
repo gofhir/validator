@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"oc","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","code":{"text":"x"},"subject":{"reference":"#p1"},"contained":[{"resourceType":"Patient","id":"p1","meta":{"tag":[{"system":"http://acme.local/cs/x","code":"x"}]}}]}

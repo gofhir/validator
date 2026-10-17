@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"identifier":[{"type":{"coding":[{"system":"http://acme.local/cs/x","code":"x"}]},"system":"http://acme.local/ids","value":"1"}]}

@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-coding",
+ "url": "http://acme.local/fhir/StructureDefinition/obs-coding",
+ "name": "obscoding",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.category.coding",
+    "path": "Observation.category.coding",
+    "binding": {
+     "strength": "example",
+     "valueSet": "http://acme.local/fhir/ValueSet/vs"
+    }
+   },
+   {
+    "id": "Observation.code.coding",
+    "path": "Observation.code.coding",
+    "binding": {
+     "strength": "extensible",
+     "valueSet": "http://acme.local/fhir/ValueSet/vs"
+    }
+   },
+   {
+    "id": "Observation.method.coding",
+    "path": "Observation.method.coding",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://acme.local/fhir/ValueSet/vs"
+    }
+   }
+  ]
+ }
+}

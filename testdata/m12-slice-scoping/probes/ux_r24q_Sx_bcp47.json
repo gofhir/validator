@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"o","meta":{"profile":["http://acme.local/fhir/StructureDefinition/q24-sx"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","code":{"coding":[{"system":"urn:ietf:bcp:47","code":"zz","display":"x"}]},"subject":{"display":"x"}}

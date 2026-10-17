@@ -458,6 +458,20 @@
       "hl7": [
         "Profile_EXT_Not_Here"
       ]
+    },
+    {
+      "name": "codesystem-unknown",
+      "rule": "equal",
+      "gofhir": [
+        "CODESYSTEM_NOT_FOUND",
+        "CODESYSTEM_NO_CODES"
+      ],
+      "hl7": [
+        "UNKNOWN_CODESYSTEM",
+        "UNKNOWN_CODESYSTEM_VERSION",
+        "UNKNOWN_CODESYSTEM_VERSION_NONE",
+        "TERMINOLOGY_TX_SYSTEM_NOT_USABLE"
+      ]
     }
   ],
   "constraint": {
@@ -476,8 +490,6 @@
     "BINDING_TEXT_ONLY_WARNING": "a warning",
     "BINDING_UNRESOLVED": "processing notice",
     "BINDING_VALUESET_NOT_FOUND": "processing notice",
-    "CODESYSTEM_NOT_FOUND": "processing notice",
-    "CODESYSTEM_NO_CODES": "processing notice: the code cannot be checked (HL7: TERMINOLOGY_TX_SYSTEM_NOT_USABLE, information)",
     "CODE_NOT_IN_PARTIAL_CODESYSTEM": "a warning: the code cannot be checked against a fragment or example CodeSystem",
     "CODING_NO_CODE": "no HL7 counterpart verified yet",
     "CODING_NO_SYSTEM": "no HL7 counterpart verified yet",

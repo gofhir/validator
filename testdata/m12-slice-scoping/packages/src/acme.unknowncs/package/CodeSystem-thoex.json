@@ -1,0 +1,1 @@
+{"resourceType": "CodeSystem", "id": "thoex", "url": "http://terminology.hl7.org/CodeSystem/acme-ex23", "status": "active", "content": "example", "concept": [{"code": "a"}], "name": "THOEX"}

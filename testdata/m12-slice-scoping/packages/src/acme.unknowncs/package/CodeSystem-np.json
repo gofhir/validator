@@ -1,0 +1,7 @@
+{
+ "resourceType": "CodeSystem",
+ "id": "np",
+ "url": "http://acme.local/cs/np",
+ "status": "active",
+ "content": "not-present"
+}

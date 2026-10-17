@@ -1,0 +1,1 @@
+{"resourceType": "ValueSet", "id": "r23c", "url": "http://acme.local/fhir/ValueSet/r23c", "status": "active", "compose": {"include": [{"system": "http://acme.local/cs/np23"}]}}

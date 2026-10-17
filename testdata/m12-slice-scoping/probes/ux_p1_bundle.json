@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","id":"b","type":"collection","entry":[{"fullUrl":"http://acme.local/fhir/Patient/p2","resource":{"resourceType":"Patient","id":"p2","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"meta":{"tag":[{"system":"http://acme.local/cs/x","code":"x"}]}}}]}

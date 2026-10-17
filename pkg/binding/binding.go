@@ -19,6 +19,7 @@ import (
 const (
 	strengthRequired   = "required"
 	strengthExtensible = "extensible"
+	strengthExample    = "example"
 )
 
 // The datatypes that carry codes, by name.
@@ -129,7 +130,7 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 	checked := issue.GetPooledResult()
 	defer issue.ReleaseResult(checked)
 	ctx = reslang.With(ctx, resource)
-	v.walk(ctx, sd, root, "", resource, resourceType, checked)
+	v.walk(ctx, sd, root, "", resource, nil, resourceType, checked)
 	languages := reslang.NewWalk(ctx, resourceType)
 
 	// Every resource it holds, at any depth (contained resources, Bundle entries, the resources
@@ -141,11 +142,11 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 			return true
 		}
 		if r := rc.SD.Tree().Root(); r != nil {
-			v.walk(languages.Context(ctx, rc), rc.SD, r, "", rc.Data, rc.FHIRPath, checked)
+			v.walk(languages.Context(ctx, rc), rc.SD, r, "", rc.Data, nil, rc.FHIRPath, checked)
 		}
 		return true
 	})
-	(&once{seen: map[string]bool{}}).merge(checked, result)
+	(&once{seen: map[string]int{}}).merge(checked, result)
 }
 
 // ValidateCodedValue checks a Coding against the CodeSystem the data itself declares:
@@ -162,7 +163,11 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 // preferred or unbound — Observation.code, Condition.code, Procedure.code, most
 // clinical codes in FHIR — accepted codes that do not exist in a CodeSystem we hold.
 // Verified against HL7 validator_cli 6.9.12, which reports these as errors regardless
-// of binding strength.
+// of binding strength. A code its code system cannot check is reported as the binding phase's
+// walk reports it, in the context elemDef gives it.
+//
+// Deprecated: the binding phase checks every Coding in its walk; this remains for
+// [extension.BindingValidator].
 func (v *Validator) ValidateCodedValue(ctx context.Context, value any, elemDef *registry.ElementDefinition, fhirPath string, result *issue.Result) {
 	if elemDef == nil || len(elemDef.Type) == 0 {
 		return
@@ -170,21 +175,21 @@ func (v *Validator) ValidateCodedValue(ctx context.Context, value any, elemDef *
 
 	switch elemDef.Type[0].Code {
 	case codingType:
-		v.validateCodingValue(ctx, value, fhirPath, result)
+		v.validateCodingValue(ctx, value, func() codingContext { return v.codingContextOf(ctx, elemDef, nil) }, fhirPath, result)
 	case codeableConceptType:
-		v.validateCodeableConceptValue(ctx, value, fhirPath, result)
+		v.validateCodeableConceptValue(ctx, value, func() codingContext { return v.codingContextOf(ctx, nil, elemDef) }, fhirPath, result)
 	}
 }
 
 // validateCodingValue handles a Coding, or an array of them.
-func (v *Validator) validateCodingValue(ctx context.Context, value any, fhirPath string, result *issue.Result) {
+func (v *Validator) validateCodingValue(ctx context.Context, value any, c func() codingContext, fhirPath string, result *issue.Result) {
 	switch val := value.(type) {
 	case map[string]any:
-		v.checkCodingAgainstCodeSystem(ctx, val, fhirPath, result)
+		v.checkCodingAgainstCodeSystem(ctx, val, c, fhirPath, result)
 	case []any:
 		for i, item := range val {
 			if m, ok := item.(map[string]any); ok {
-				v.checkCodingAgainstCodeSystem(ctx, m, fmt.Sprintf("%s[%d]", fhirPath, i), result)
+				v.checkCodingAgainstCodeSystem(ctx, m, c, fmt.Sprintf("%s[%d]", fhirPath, i), result)
 			}
 		}
 	}
@@ -192,28 +197,28 @@ func (v *Validator) validateCodingValue(ctx context.Context, value any, fhirPath
 
 // validateCodeableConceptValue handles a CodeableConcept, or an array of them, checking
 // each of its codings.
-func (v *Validator) validateCodeableConceptValue(ctx context.Context, value any, fhirPath string, result *issue.Result) {
+func (v *Validator) validateCodeableConceptValue(ctx context.Context, value any, c func() codingContext, fhirPath string, result *issue.Result) {
 	switch val := value.(type) {
 	case map[string]any:
-		v.checkConceptCodings(ctx, val, fhirPath, result)
+		v.checkConceptCodings(ctx, val, c, fhirPath, result)
 	case []any:
 		for i, item := range val {
 			if m, ok := item.(map[string]any); ok {
-				v.checkConceptCodings(ctx, m, fmt.Sprintf("%s[%d]", fhirPath, i), result)
+				v.checkConceptCodings(ctx, m, c, fmt.Sprintf("%s[%d]", fhirPath, i), result)
 			}
 		}
 	}
 }
 
 // checkConceptCodings visits each coding of one CodeableConcept.
-func (v *Validator) checkConceptCodings(ctx context.Context, cc map[string]any, fhirPath string, result *issue.Result) {
+func (v *Validator) checkConceptCodings(ctx context.Context, cc map[string]any, cctx func() codingContext, fhirPath string, result *issue.Result) {
 	codings, ok := cc["coding"].([]any)
 	if !ok {
 		return
 	}
 	for i, c := range codings {
 		if m, ok := c.(map[string]any); ok {
-			v.checkCodingAgainstCodeSystem(ctx, m, fmt.Sprintf("%s.coding[%d]", fhirPath, i), result)
+			v.checkCodingAgainstCodeSystem(ctx, m, cctx, fmt.Sprintf("%s.coding[%d]", fhirPath, i), result)
 		}
 	}
 }
@@ -224,7 +229,7 @@ func (v *Validator) checkConceptCodings(ctx context.Context, cc map[string]any, 
 // The code diagnostic is reported on the .code child rather than the element, matching
 // where the reference puts it: the defect is in that value, not in the element as a
 // whole, and a CodeableConcept with several codings needs to say which one is wrong.
-func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map[string]any, fhirPath string, result *issue.Result) {
+func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map[string]any, cctx func() codingContext, fhirPath string, result *issue.Result) {
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 
@@ -257,42 +262,28 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 
 	switch res.Resolution {
 	case terminology.Unresolved:
-		// A CodeSystem that does not include all its codes cannot tell the code is not one.
+		// A code its code system cannot check, reported as the HL7 validator reports it in this
+		// context (reportUnchecked).
+		why := notFound
+		params := map[string]any{"system": system, "systemCode": code, "code": code, "codeSystem": system}
 		if p := res.Partial; p != nil {
-			codeSystem := system
 			if p.Version != "" {
-				codeSystem += "|" + p.Version
+				params["codeSystem"] = system + "|" + p.Version
 			}
-			params := map[string]any{"code": code, "system": system, "codeSystem": codeSystem, "content": p.Content}
-			if p.Content == "not-present" {
-				result.AddInfoWithID(issue.DiagCodeSystemNoCodes, params, fhirPath)
-			} else {
-				result.AddWarningWithID(issue.DiagCodeNotInPartialCodeSystem, params, fhirPath)
+			params["content"] = p.Content
+			switch p.Content {
+			case "not-present":
+				why = noCodes
+			case "example":
+				why = exampleCodes
+			default:
+				why = fragmentCodes
 			}
-			return
 		}
-		// Unchecked rather than wrong, and the two reasons deserve different weight.
-		//
-		// A known external vocabulary — SNOMED, LOINC, RxNorm — is expected to need a
-		// terminology server, so saying so is informational. The reference does not warn
-		// here at all because it resolves these against tx.fhir.org; a deployment that
-		// configures an Authority gets the same verdicts and this note disappears.
-		//
-		// A CodeSystem that is simply unknown is a weaker position: nothing says it needs
-		// a server, so it may well be a typo or a missing package. That stays a warning.
-		if v.termRegistry.IsExternalSystem(system) {
-			result.AddInfoWithID(
-				issue.DiagBindingCannotValidate,
-				map[string]any{"code": code, "system": system},
-				fhirPath,
-			)
-			return
+		// The context is worked out only here: it resolves the value sets that bind the Coding.
+		for _, r := range reportUnchecked(why, system, cctx()) {
+			result.AddWithID(r.severity, r.id, params, fhirPath+r.at)
 		}
-		result.AddWarningWithID(
-			issue.DiagCodeSystemNotFound,
-			map[string]any{"system": system, "systemCode": code},
-			fhirPath,
-		)
 		return
 	case terminology.Invalid:
 		result.AddErrorWithID(
@@ -468,8 +459,8 @@ func (v *Validator) codingInValueSet(ctx context.Context, coding map[string]any,
 		return terminology.Unresolved
 	}
 
-	// The CodeSystem check runs separately, in ValidateCodedValue: a code missing from
-	// its own system is reported there, and the reference reports value set membership
+	// The CodeSystem check runs separately, in the walk (checkCodingAgainstCodeSystem): a code
+	// missing from its own system is reported there, and the reference reports value set membership
 	// alongside it rather than instead of it.
 
 	// Check ValueSet.

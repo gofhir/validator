@@ -199,8 +199,8 @@ func TestBindingExtensibleOtherSystemConcept(t *testing.T) {
 	}
 	slices.Sort(got)
 	want := []string{
-		// the code in its code system, which a terminology server would tell
-		"information BINDING_CANNOT_VALIDATE @ Observation.interpretation[0].coding[0]",
+		// LOINC in a CodeableConcept's coding is not reported on its own: HL7 6.10.2 says nothing
+		// of it there (reportUnchecked).
 		"warning BINDING_EXTENSIBLE_NO_CODING @ Observation.interpretation[0]",
 	}
 	if !slices.Equal(got, want) {

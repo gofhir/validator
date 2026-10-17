@@ -1,0 +1,1 @@
+{"resourceType":"Location","id":"l","meta":{"profile":["http://acme.local/fhir/StructureDefinition/loc-req"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"operationalStatus":{"system":"urn:iso:std:iso:3166","code":"zz"}}
