@@ -68,6 +68,7 @@ func (sd *StructureDefinition) unpublishedCopy() *StructureDefinition {
 	}
 	c.raw = sd.raw
 	c.PackageID = sd.PackageID
+	c.example = sd.example
 	applyErrata(&c, sd.errataVersion)
 	return &c
 }

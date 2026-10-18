@@ -68,6 +68,9 @@ type StructureDefinition struct {
 	snapshotCyclic bool
 	// snapshotGenerated reports a Snapshot generated from the differential rather than shipped.
 	snapshotGenerated bool
+	// example reports a definition of its package's example folder: resolved by its url, not one
+	// of the package's profiles (GetProfilesByPackage).
+	example bool
 	// errataVersion is the FHIR version the errata corrected it for: its own, or the version
 	// validated when it declares none.
 	errataVersion string
@@ -379,7 +382,7 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 	for _, pkg := range packages {
 		packageID := pkg.Name + "#" + pkg.Version
-		pkg.Each(func(data json.RawMessage) { r.loadResourceUnlocked(data, packageID) })
+		pkg.EachResource(func(data json.RawMessage, example bool) { r.loadResourceUnlocked(data, packageID, example) })
 	}
 
 	// The definitions loaded may change which version of a URL or type is used.
@@ -403,7 +406,7 @@ func (r *Registry) refreshDerivedUnlocked() {
 // loadResourceUnlocked parses and indexes a single resource if it is a StructureDefinition.
 // PackageID identifies the source package (e.g., "hl7.fhir.us.core#6.1.0"); empty if unknown.
 // Must be called while the write lock is held.
-func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) {
+func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string, example bool) {
 	var peek struct {
 		ResourceType string `json:"resourceType"`
 	}
@@ -420,6 +423,7 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string) 
 	}
 	sd.raw = data
 	sd.PackageID = packageID
+	sd.example = example
 	applyErrata(&sd, r.fhirVersion)
 
 	r.indexUnlocked(&sd)
@@ -539,7 +543,9 @@ func (r *Registry) GetByURL(url string) *StructureDefinition {
 	return r.byURL[url]
 }
 
-// GetProfilesByPackage returns all constraint StructureDefinitions (profiles) from a given package.
+// GetProfilesByPackage returns all constraint StructureDefinitions (profiles) from a given package:
+// its package folder's, not its examples', which resolve by their url but are no profile the
+// package declares.
 // The packageID should match the format "name#version" (e.g., "hl7.fhir.us.core#6.1.0").
 // Returns nil if no profiles are found for the given package.
 func (r *Registry) GetProfilesByPackage(packageID string) []*StructureDefinition {
@@ -548,7 +554,7 @@ func (r *Registry) GetProfilesByPackage(packageID string) []*StructureDefinition
 
 	var profiles []*StructureDefinition
 	for _, sd := range r.all {
-		if sd.PackageID == packageID && sd.Derivation == DerivationConstraint {
+		if sd.PackageID == packageID && sd.Derivation == DerivationConstraint && !sd.example {
 			profiles = append(profiles, sd)
 		}
 	}

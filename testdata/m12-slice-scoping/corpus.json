@@ -172,6 +172,16 @@
       "files": ["testdata/m12-slice-scoping/probes/rw_*.json"]
     },
     {
+      "name": "package-example-cpg-probes",
+      "igs": ["fhir.cqf.common#4.0.1"],
+      "files": ["testdata/m12-slice-scoping/probes/xa_*.json"]
+    },
+    {
+      "name": "package-example-cql-probes",
+      "igs": ["hl7.fhir.us.cqfmeasures#5.0.0"],
+      "files": ["testdata/m12-slice-scoping/probes/xb_*.json"]
+    },
+    {
       "name": "unknown-codesystem-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.unknowncs-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/ux_*.json"]

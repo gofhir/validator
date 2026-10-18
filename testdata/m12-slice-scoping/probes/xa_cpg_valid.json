@@ -1,0 +1,1 @@
+{"resourceType":"Parameters","id":"p","parameter":[{"name":"c0","valueCoding":{"system":"http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes","code":"jvp"}},{"name":"c1","valueCoding":{"system":"http://hl7.org/fhir/uv/cpg/CodeSystem/cpg-common-persona","code":"C000"}}]}
