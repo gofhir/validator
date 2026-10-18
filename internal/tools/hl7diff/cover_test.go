@@ -41,6 +41,7 @@ example.org/x/x.go:7.20,8.7 1 3
 example.org/x/x.go:16.17,16.19 1 0
 example.org/y/x.go.bak:3.14,5.2 1 9
 example.org/y/xx/x.go:3.14,5.2 1 9
+other.org/x/x.go:3.14,5.2 1 5
 `), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +60,8 @@ example.org/y/xx/x.go:3.14,5.2 1 9
 	for _, s := range summarize(funcs, blocks) {
 		got[s.name] = [3]int{s.blocks, s.executed, s.executions}
 	}
-	want := map[string][3]int{"a": {1, 1, 4}, "b": {3, 2, 7}, "*T.c": {1, 0, 0}}
+	// dos archivos terminan en /x/x.go: el mismo bloque de cada uno cuenta aparte
+	want := map[string][3]int{"a": {2, 2, 9}, "b": {3, 2, 7}, "*T.c": {1, 0, 0}}
 	for name, w := range want {
 		if got[name] != w {
 			t.Errorf("%s: blocks, executed, executions %v, want %v", name, got[name], w)

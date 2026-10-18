@@ -27,6 +27,12 @@ func TestMembershipCycleOrder(t *testing.T) {
 	// Los mismos ValueSets con los nombres cambiados: el resultado no puede depender del nombre.
 	add("cx", Compose{Include: []Include{{ValueSet: []string{base + "cy"}}}})
 	add("cy", Compose{Include: []Include{{ValueSet: []string{base + "cx"}}, {System: other, Concept: []Concept{{Code: "a"}}}}})
+	// m1 y m2 se incluyen mutuamente; m2 incluye además uno que no está cargado: lo que no se sabe de
+	// él sube por el ciclo.
+	add("m1", Compose{Include: []Include{{ValueSet: []string{base + "m2"}}, {System: other, Concept: []Concept{{Code: "a"}}}}})
+	add("m2", Compose{Include: []Include{{ValueSet: []string{base + "m1"}}, {ValueSet: []string{base + "not-held"}}}})
+	// Un ValueSet que solo se incluye a sí mismo: la menor solución es vacía.
+	add("self", Compose{Include: []Include{{ValueSet: []string{base + "self"}}}})
 	// r1 = ca − cb y r3 = cb − ca: los dos vacíos.
 	add("r1", Compose{Include: []Include{{ValueSet: []string{base + "ca"}}}, Exclude: []Include{{ValueSet: []string{base + "cb"}}}})
 	add("r3", Compose{Include: []Include{{ValueSet: []string{base + "cb"}}}, Exclude: []Include{{ValueSet: []string{base + "ca"}}}})
@@ -49,6 +55,8 @@ func TestMembershipCycleOrder(t *testing.T) {
 		// Un código que ningún ValueSet del ciclo lista: la menor solución no lo tiene, pero la lógica
 		// de tres valores lo deja sin decidir, de modo conservador.
 		{"cb", "k", Unresolved},
+		{"m1", "a", Valid},
+		{"m1", "z", Unresolved},
 	} {
 		// El mismo código como Coding y como el de un elemento code, cuyo sistema implica el ValueSet:
 		// los sistemas de un ciclo son la unión de los de sus ValueSets.
@@ -131,5 +139,54 @@ func TestMembershipCyclicDiamond(t *testing.T) {
 		if res.Resolution != want {
 			t.Errorf("%s: got %v, want %v", code, res.Resolution, want)
 		}
+	}
+}
+
+// Un ValueSet que solo se incluye a sí mismo no tiene sistemas ni códigos (la menor solución es
+// vacía): preguntado como el código de un elemento code, que no es de ningún sistema que incluya, no
+// es miembro; preguntado como Coding, la lógica de tres valores lo deja sin decidir, de modo
+// conservador. Las dos respuestas quedan fijadas.
+func TestMembershipSelfOnly(t *testing.T) {
+	const (
+		other = "http://example.org/cs/other"
+		base  = "http://example.org/vs/"
+	)
+	r := NewRegistry()
+	r.codeSystems[other] = &CodeSystem{URL: other, Concept: []CodeSystemCode{{Code: "a"}}}
+	r.valueSets[base+"self"] = &ValueSet{URL: base + "self", Compose: Compose{Include: []Include{{ValueSet: []string{base + "self"}}}}}
+	ctx := WithStrictMembership(context.Background())
+	for system, want := range map[string]Resolution{"": Invalid, other: Unresolved} {
+		res, err := r.ResolveCodeInValueSet(ctx, system, "a", base+"self", LookupOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if res.Resolution != want {
+			t.Errorf("system %q: got %v, want %v", system, res.Resolution, want)
+		}
+	}
+}
+
+// Lo que no se sabe de un ValueSet que no está cargado, dos niveles más abajo, llega a la raíz para el
+// código de un elemento code: los sistemas que se conocen (aquí excluido entero) no deciden que no sea
+// miembro, porque el que falta puede incluir otros.
+func TestMembershipUnknownSystemsPropagate(t *testing.T) {
+	const (
+		other = "http://example.org/cs/other"
+		base  = "http://example.org/vs/"
+	)
+	r := NewRegistry()
+	r.codeSystems[other] = &CodeSystem{URL: other, Concept: []CodeSystemCode{{Code: "a"}}}
+	add := func(name string, c Compose) {
+		r.valueSets[base+name] = &ValueSet{URL: base + name, Compose: c}
+	}
+	add("root", Compose{Include: []Include{{ValueSet: []string{base + "n1"}}}, Exclude: []Include{{System: other}}})
+	add("n1", Compose{Include: []Include{{System: other, Concept: []Concept{{Code: "a"}}}, {ValueSet: []string{base + "n2"}}}})
+	add("n2", Compose{Include: []Include{{ValueSet: []string{base + "not-held"}}}})
+	res, err := r.ResolveCodeInValueSet(WithStrictMembership(context.Background()), "", "z", base+"root", LookupOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Resolution != Unresolved {
+		t.Errorf("got %v, want unresolved", res.Resolution)
 	}
 }

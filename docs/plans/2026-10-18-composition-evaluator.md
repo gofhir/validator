@@ -1,6 +1,6 @@
 # Plan: un solo evaluador de composiciones de ValueSet
 
-Estado: paso 4 (aprobado), 18-10-2026; incremento 1 de 3 en curso. Base: `main` en eabdce4.
+Estado: incremento 1 de 3 cerrado, 18-10-2026; sigue el incremento 2. Base: `main` en eabdce4.
 
 ## Objetivo
 
@@ -211,6 +211,12 @@ que slicing y `memberOf` usen pertenencia estricta.
 | 1 | (baja) Mutantes de hl7diff que sobrevivían (la falla fuera de la firma, `count = 1`, el resumen de cobertura reimplementado en el test) | Casos nuevos: una falla cambiada y un duplicado solo en la base. `summarize` se testea directamente. Las cuatro mutaciones se detectan |
 | 1 | (baja) `readCoverBlocks`: la clave sin el archivo, el sufijo sin anclar, el 0/0 silencioso. `funcRanges` sin el receptor. `slices.Sorted(maps.Keys)` | Corregidos: la clave es archivo más posición, el sufijo `"/"+file`, falla sin bloques, el método lleva su receptor |
 | 1 | (baja) La evidencia del benchmark no demuestra igualdad (p≈0,2) | El registro dice "sin regresión medible", con las corridas y la carga de la máquina |
+| 2 | Los siete de la ronda 1, verificados como corregidos (con mutaciones) | — |
+| 2 | (baja) N1: un ValueSet que solo se incluye a sí mismo responde distinto como elemento `code` (Out) y como Coding (Unknown) | Fijado con `TestMembershipSelfOnly`: Out es la menor solución; Unknown es lo conservador de los tres valores |
+| 2 | (baja) N2: ningún test fijaba que lo no sabido de un ValueSet anidado ausente suba en `collectSystems` | `TestMembershipUnknownSystemsPropagate`; la mutación ahora se detecta |
+| 2 | (sugerencia) N3: la clave de `readCoverBlocks` con dos rutas que terminan igual | Agregado al perfil del test; la mutación se detecta |
+
+**Convergencia:** la ronda 2 no dejó hallazgos de severidad media o mayor. El incremento 1 está cerrado.
 
 ## Registro
 

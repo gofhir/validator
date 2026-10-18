@@ -4,17 +4,11 @@ Se lee primero al empezar, al reanudar y después de cada compactación (carta, 
 
 ## Incremento activo
 
-**Un solo evaluador de composiciones de ValueSet**, incremento 1 de 3 (punto fijo en el modo
-cargado): plan aprobado, [2026-10-18-composition-evaluator.md](2026-10-18-composition-evaluator.md).
-Paso 5 (tests primero) en curso:
-- `pkg/terminology/membership_fixpoint_test.go` (ciclo sin depender del orden, cadena de 40) falla en
-  `main`, como se espera;
-- `TestMembershipByDefinition` (44 casos) fija lo que se conserva;
-- `hl7diff run -identical` (HEAD igual a la base, todos los issues) y `-cover <archivo.go>` (lo que
-  el corpus ejercita, por función), con `identical_test.go` como mutaciones del arnés.
-
-Próximo paso: leer la cobertura de base de `membership.go` en el corpus y, después, implementar el
-punto fijo (paso 6). Rama `refactor/composition-evaluator`.
+**Un solo evaluador de composiciones de ValueSet**, [2026-10-18-composition-evaluator.md](2026-10-18-composition-evaluator.md):
+el **incremento 1 de 3 está cerrado** (el punto fijo en el modo cargado, con code review convergido en
+dos rondas y la evidencia en [evidence/2026-10-18-composition-evaluator-inc1/](evidence/2026-10-18-composition-evaluator-inc1/)).
+Próximo paso: el incremento 2 (excludes por evidencia de existencia, que retira `coversSystem`),
+empezando por sus tests (paso 5). Rama `refactor/composition-evaluator`, sin push.
 
 ## Último incremento cerrado
 
