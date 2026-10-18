@@ -2,6 +2,7 @@ package terminology
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 )
 
@@ -85,6 +86,104 @@ func TestMembershipExcludeEvidence(t *testing.T) {
 		{"a code listed of a supplemented system", "supplement-listed", supp, "z", Valid},
 		{"a complete code system excluded whole keeps another system's code", "complete-whole-excluded", unheld, "z", Valid},
 		{"a ValueSet both included and excluded", "samex", unheld, "q", Invalid},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := r.ResolveCodeInValueSet(ctx, tt.system, tt.code, base+tt.vs, LookupOptions{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if res.Resolution != tt.want {
+				t.Errorf("got %v, want %v", res.Resolution, tt.want)
+			}
+		})
+	}
+}
+
+// Los bordes de la regla de evidencia (valueset.html#compositions y #expansion): la edición que
+// nombra la cláusula, el contenido de su code system y los ciclos que pasan por un exclude.
+func TestMembershipEvidenceEdges(t *testing.T) {
+	const (
+		versioned  = "http://example.org/cs/versioned"
+		fragment   = "http://example.org/cs/fragment"
+		notPresent = "http://example.org/cs/not-present"
+		example    = "http://example.org/cs/example"
+		unheld     = "http://example.org/cs/unheld"
+		snomed     = "http://snomed.info/sct" // externo: solo un servidor lo revisa
+		base       = "http://example.org/vs/"
+	)
+	r := NewRegistry()
+	// la versión 1 tiene a y z; la 2, la más alta, b y x
+	v1 := &CodeSystem{URL: versioned, Version: "1", Concept: []CodeSystemCode{{Code: "a"}, {Code: "z"}}}
+	v2 := &CodeSystem{URL: versioned, Version: "2", Concept: []CodeSystemCode{{Code: "b"}, {Code: "x"}}}
+	r.codeSystems[versioned] = v2
+	r.codeSystemsByVersion[versioned+"|1"] = v1
+	r.codeSystemsByVersion[versioned+"|2"] = v2
+	r.codeSystems[fragment] = &CodeSystem{URL: fragment, Content: "fragment", Concept: []CodeSystemCode{{Code: "a"}}}
+	r.codeSystems[notPresent] = &CodeSystem{URL: notPresent, Content: "not-present"}
+	r.codeSystems[example] = &CodeSystem{URL: example, Content: "example", Concept: []CodeSystemCode{{Code: "a"}}}
+	// un code system externo cargado como completo: sus códigos igual se deciden en un servidor
+	r.codeSystems[snomed] = &CodeSystem{URL: snomed, Concept: []CodeSystemCode{{Code: "a"}}}
+	add := func(name string, c Compose) {
+		r.valueSets[base+name] = &ValueSet{URL: base + name, Compose: c}
+	}
+	listing := func(system, version string, codes ...string) Include {
+		c := Include{System: system, Version: version}
+		for _, code := range codes {
+			c.Concept = append(c.Concept, Concept{Code: code})
+		}
+		return c
+	}
+	valueSets := func(names ...string) Include {
+		var c Include
+		for _, name := range names {
+			c.ValueSet = append(c.ValueSet, base+name)
+		}
+		return c
+	}
+	modified := listing(versioned, "", "z")
+	modified.Concept[0].ModifierExtension = []json.RawMessage{json.RawMessage(`{"url":"http://example.org/modifier"}`)}
+
+	add("unheld-all", Compose{Include: []Include{{System: unheld}}})
+	add("via", Compose{Include: []Include{valueSets("unheld-all")}})
+	// C6: X|2, cargada y completa, no tiene a, así que su exclude no lo quita
+	add("other-edition-excluded", Compose{Include: []Include{listing(versioned, "1", "a")}, Exclude: []Include{{System: versioned, Version: "2"}}})
+	add("unheld-version", Compose{Include: []Include{listing(versioned, "9", "q")}})
+	add("held-older-version", Compose{Include: []Include{listing(versioned, "1", "z")}})
+	add("fragment-listed", Compose{Include: []Include{listing(fragment, "", "c")}})
+	add("example-listed", Compose{Include: []Include{listing(example, "", "c")}})
+	add("not-present-listed", Compose{Include: []Include{listing(notPresent, "", "c")}})
+	add("not-present-whole", Compose{Include: []Include{{System: notPresent}}})
+	add("not-present-excluded", Compose{Include: []Include{listing(notPresent, "", "c")}, Exclude: []Include{{System: notPresent}}})
+	add("external-listed", Compose{Include: []Include{listing(snomed, "", "1")}})
+	add("modified", Compose{Include: []Include{modified}})
+	add("filtered-out", Compose{Include: []Include{listing(versioned, "", "x")}, Exclude: []Include{{System: versioned, Filter: []Filter{{Property: "code", Op: "regex", Value: ".*"}}}}})
+	// Y = C ∪ {x}, C = Y: la menor solución es Y = C = {x}
+	add("cycle-root", Compose{Include: []Include{valueSets("cycle-y", "cycle-c")}})
+	add("cycle-y", Compose{Include: []Include{valueSets("cycle-c"), listing(versioned, "", "x")}})
+	add("cycle-c", Compose{Include: []Include{valueSets("cycle-y")}})
+	// R = U − V, V = U − R: la composición no decide si un código de U está en R
+	add("cycle-r", Compose{Include: []Include{{System: unheld}}, Exclude: []Include{valueSets("cycle-v")}})
+	add("cycle-v", Compose{Include: []Include{{System: unheld}}, Exclude: []Include{valueSets("cycle-r")}})
+
+	ctx := WithStrictMembership(context.Background())
+	for _, tt := range []struct {
+		name, vs, system, code string
+		want                   Resolution
+	}{
+		{"an unheld system taken whole through an included ValueSet", "via", unheld, "q", Unresolved},
+		{"C6: a complete edition excluded whole keeps a code it lacks", "other-edition-excluded", versioned, "a", Valid},
+		{"a code listed of an edition not held", "unheld-version", versioned, "q", Valid},
+		{"a code listed of a held edition other than the latest", "held-older-version", versioned, "z", Valid},
+		{"a code a fragment does not list, listed", "fragment-listed", fragment, "c", Valid},
+		{"a code an example code system does not list, listed", "example-listed", example, "c", Valid},
+		{"a code of a not-present code system, listed", "not-present-listed", notPresent, "c", Valid},
+		{"a not-present code system taken whole", "not-present-whole", notPresent, "c", Unresolved},
+		{"a listed code minus its not-present code system whole", "not-present-excluded", notPresent, "c", Invalid},
+		{"a code listed of an external system held as complete", "external-listed", snomed, "1", Valid},
+		{"a listed code with a modifier extension the code system lacks", "modified", versioned, "z", Unresolved},
+		{"a code no include selects, with an exclude not decided", "filtered-out", versioned, "b", Invalid},
+		{"a cycle whose root is decided by the fixed point", "cycle-root", versioned, "x", Valid},
+		{"a cycle through excludes", "cycle-r", unheld, "q", Unresolved},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			res, err := r.ResolveCodeInValueSet(ctx, tt.system, tt.code, base+tt.vs, LookupOptions{})

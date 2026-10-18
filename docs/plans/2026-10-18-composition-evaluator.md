@@ -255,6 +255,20 @@ que slicing y `memberOf` usen pertenencia estricta.
   [evidence/2026-10-18-composition-evaluator-inc2/](evidence/2026-10-18-composition-evaluator-inc2/).
 - Lint (golangci-lint v2.11.3 con Go 1.25.13) sin issues; `go test -race -short ./...` en verde.
 
+## Code review del incremento 2 (paso 8)
+
+| Ronda | Hallazgo | Resolución |
+| --- | --- | --- |
+| 1 | Ninguna respuesta incorrecta ni dependiente del orden. El supuesto de existencia vale cuando include y exclude hablan de la misma edición; con ediciones mezcladas es B6 | — |
+| 1 | (media) Sin fila para un sistema no cargado tomado entero a través de un ValueSet incluido (mutación: el anidado siempre con existencia) | Fila en `TestMembershipEvidenceEdges`; la mutación se detecta |
+| 1 | (media) C6 sin fila: X\|2 cargada y completa, excluida entera, no quita el `a` que no tiene | Fila; la mutación (el supuesto aunque la cláusula dé Out) se detecta |
+| 1 | (media) La regla de evidencia ausente sin filas: una edición no cargada, un fragment | Filas, más `example` y `not-present`; las mutaciones (sin el chequeo de versión, sin `partial()`) se detectan |
+| 1 | (baja) `GetCodeSystem` en lugar de la edición que nombra la cláusula; la raíz sin releer tras el punto fijo (incremento 1); sin el corte cuando ningún include selecciona; sin `isExternalSystem` en `editionLacks` | Una fila por cada una; las cuatro mutaciones se detectan |
+| 1 | (sugerencia) El orden entre el modifier y C3: un código enumerado con modifierExtension que el sistema completo no tiene | Se mantiene Unknown: un modifier no entendido hace desconocido lo que la cláusula significa. Fijado con una fila; invertir el orden se detecta |
+| 1 | (baja) Faltaba un ciclo que pasa por excludes (R = U − V, V = U − R) | Fila: Unresolved, la menor solución en el orden de Kleene |
+| 1 | (baja) La rama del supplement solo cuenta cuando una cláusula nombra la URL del supplement | Comentario en `contentSupplement` |
+| 1 | (estilo) El comentario de `selects` mezclaba inglés y español | En español |
+
 ## Registro
 
 | Paso | Estado |

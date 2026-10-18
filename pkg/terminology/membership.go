@@ -201,11 +201,11 @@ func (m *membership) composition(d decision) answer {
 	return in
 }
 
-// selects tells whether a clause (an include or an exclude) selects the code: its system's codes,
-// the concepts it lists or its filters select, and, when it names ValueSets, a member of each of
-// them too (valueset-definitions.html#ValueSet.compose.include.valueSet: "the content of the value
-// set is the intersection"). Con exists, una cláusula que toma la edición entera del sistema, cuyos
-// códigos no se conocen aquí, selecciona el código (composition).
+// selects dice si una cláusula (un include o un exclude) selecciona el código: los códigos de su
+// sistema, los códigos que enumera o los que seleccionan sus filtros, y, si nombra ValueSets, además
+// un miembro de cada uno (valueset-definitions.html#ValueSet.compose.include.valueSet: "the content
+// of the value set is the intersection"). Con exists, una cláusula que toma la edición entera del
+// sistema, cuyos códigos no se conocen aquí, selecciona el código (composition).
 func (m *membership) selects(c *Include, exists bool) answer {
 	selected := answerIn
 	switch {
@@ -354,6 +354,9 @@ func (r *Registry) editionLacks(c *Include, code string) bool {
 
 // contentSupplement is the content of a CodeSystem that adds to another's concepts
 // (codesystem-content-mode): it does not carry that system's codes.
+//
+// Un supplement se registra por su propia URL, no por la del sistema que suplementa
+// (CodeSystem.supplements); esta rama solo cuenta cuando una cláusula nombra esa URL como sistema.
 const contentSupplement = "supplement"
 
 // clauseExpansion is what a clause selects, keyed "system|code": the concepts it lists, or what it
