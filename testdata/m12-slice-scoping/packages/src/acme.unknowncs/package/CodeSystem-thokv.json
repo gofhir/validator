@@ -1,0 +1,19 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "thokv",
+  "url": "http://terminology.hl7.org/CodeSystem/acme-kv23",
+  "version": "1.0.0",
+  "name": "THOKV",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "a",
+      "display": "A"
+    },
+    {
+      "code": "b",
+      "display": "B"
+    }
+  ]
+}

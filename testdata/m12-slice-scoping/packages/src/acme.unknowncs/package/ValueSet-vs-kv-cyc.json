@@ -1,0 +1,25 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-cyc",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-cyc",
+  "name": "VSKVCYC",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://acme.local/cs/kv",
+        "version": "9.9.9",
+        "concept": [
+          {
+            "code": "a"
+          }
+        ]
+      },
+      {
+        "valueSet": [
+          "http://acme.local/fhir/ValueSet/vs-kv-cyc"
+        ]
+      }
+    ]
+  }
+}

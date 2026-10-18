@@ -1,0 +1,21 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-excvs",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-excvs",
+  "name": "VSKVEXCVS",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/acme-kv23"
+      }
+    ],
+    "exclude": [
+      {
+        "valueSet": [
+          "http://acme.local/fhir/ValueSet/vs-kv-enum"
+        ]
+      }
+    ]
+  }
+}

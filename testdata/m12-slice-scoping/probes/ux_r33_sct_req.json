@@ -1,0 +1,1 @@
+{"resourceType":"Location","id":"a","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"meta":{"profile":["http://acme.local/fhir/StructureDefinition/loc-kv-req"]},"operationalStatus":{"system":"http://snomed.info/sct","version":"http://snomed.info/sct/731000124108/version/20230301","code":"38341003"}}

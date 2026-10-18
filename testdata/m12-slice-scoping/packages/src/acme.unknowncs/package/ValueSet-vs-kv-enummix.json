@@ -1,0 +1,24 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-enummix",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-enummix",
+  "name": "VSKVENUMMIX",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/acme-kv23",
+        "concept": [
+          {
+            "code": "a"
+          }
+        ]
+      },
+      {
+        "valueSet": [
+          "http://acme.local/fhir/ValueSet/vs-kv"
+        ]
+      }
+    ]
+  }
+}

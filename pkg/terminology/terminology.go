@@ -44,8 +44,11 @@ type ExpansionContains struct {
 
 // Compose defines the content of a ValueSet.
 type Compose struct {
-	Include []Include `json:"include,omitempty"`
-	Exclude []Include `json:"exclude,omitempty"`
+	// LockedDate fixes the version of each code system a clause names without one: the one in force
+	// at that date (ValueSet.compose.lockedDate).
+	LockedDate string    `json:"lockedDate,omitempty"`
+	Include    []Include `json:"include,omitempty"`
+	Exclude    []Include `json:"exclude,omitempty"`
 }
 
 // Include defines a set of codes to include/exclude.
@@ -138,6 +141,9 @@ type Registry struct {
 	// package, so the choice above can be made again when publishers changes.
 	loadedValueSets   []*loaded[*ValueSet]
 	loadedCodeSystems []*loaded[*CodeSystem]
+	// codeSystemVersions holds, by url, the versions of it loaded, in the order loaded ("" for one
+	// with none), a version a CodeSystem's url carries after a "|" with them (CodeSystemVersions).
+	codeSystemVersions map[string][]string
 	// valueSetPackage and codeSystemPackage hold, by URL and by "url|version", the
 	// entry chosen, with its package, to compare with the next one loaded and to
 	// read a deferred resource from.
@@ -458,6 +464,7 @@ func (r *Registry) loadDeferredUnlocked(pkg *loader.Package, packageID string, f
 		case "CodeSystem":
 			e := &loaded[*CodeSystem]{url: d.URL, version: d.Version, packageID: packageID, fhirVersions: fhirVersions, read: d.Read}
 			r.loadedCodeSystems = append(r.loadedCodeSystems, e)
+			r.noteCodeSystemVersionUnlocked(e.url, e.version)
 			r.selectCodeSystemUnlocked(e)
 		}
 	}
@@ -484,6 +491,7 @@ func (r *Registry) indexCodeSystemUnlocked(data json.RawMessage, packageID strin
 	}
 	entry := &loaded[*CodeSystem]{resource: cs, url: cs.URL, version: cs.Version, packageID: packageID, fhirVersions: fhirVersions}
 	r.loadedCodeSystems = append(r.loadedCodeSystems, entry)
+	r.noteCodeSystemVersionUnlocked(entry.url, entry.version)
 	r.selectCodeSystemUnlocked(entry)
 }
 
@@ -651,6 +659,44 @@ func (r *Registry) GetValueSetVersion(url, version string) *ValueSet {
 	}
 	vs, _ := resolve(r, r.valueSets, r.valueSetPackage, url, parseValueSet)
 	return vs
+}
+
+// CodeSystemVersionUnknown reports whether version of url is one this registry knows is not loaded:
+// a CodeSystem with url is, in other versions only (or with none), and no authoritative terminology
+// port decides lookups, which may hold that version.
+func (r *Registry) CodeSystemVersionUnknown(url, version string) bool {
+	if version == "" {
+		return false
+	}
+	if _, authoritative := r.authorityFor(); authoritative {
+		return false
+	}
+	r.mu.RLock()
+	_, known := r.codeSystemVersions[url]
+	r.mu.RUnlock()
+	return known && !r.CodeSystemVersionMatches(url, version)
+}
+
+// CodeSystemVersions returns the versions of url loaded, in the order loaded; "" for one with no
+// version, and a version a CodeSystem's url carries after a "|" (url|2.7, as R4's v2 tables).
+func (r *Registry) CodeSystemVersions(url string) []string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return slices.Clone(r.codeSystemVersions[url])
+}
+
+// noteCodeSystemVersionUnlocked records version of a CodeSystem loaded with url: under its url, or,
+// a url carrying a version after a "|", under the url before it with that version.
+func (r *Registry) noteCodeSystemVersionUnlocked(url, version string) {
+	if base, v, ok := strings.Cut(url, "|"); ok {
+		url, version = base, v
+	}
+	if r.codeSystemVersions == nil {
+		r.codeSystemVersions = make(map[string][]string)
+	}
+	if !slices.Contains(r.codeSystemVersions[url], version) {
+		r.codeSystemVersions[url] = append(r.codeSystemVersions[url], version)
+	}
 }
 
 // CodeSystemVersionMatches reports whether the requested version of url is the one

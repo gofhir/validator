@@ -1,6 +1,9 @@
 package validator
 
 import (
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
 	"context"
 	"os"
 	"path/filepath"
@@ -272,6 +275,35 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 			"warning CODESYSTEM_NOT_FOUND @ Basic.extension[0].valueCoding.system",
 		}},
 		{"r29b_np_tagext", []string{"warning CODESYSTEM_NO_CODES @ Observation.meta.tag[0]"}},
+		// A version of a known CodeSystem that is not loaded: reported as an unknown system is, neither
+		// its code nor its display checked, its membership in a value set not decided; a CodeSystem
+		// loaded in that version checks them. SNOMED CT's edition URIs are no CodeSystem's version.
+		{"r32v_kv_bad_z_cc", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system"}},
+		{"r32v_kv_bad_z_tag", []string{"information CODESYSTEM_VERSION_NOT_FOUND @ Basic.meta.tag[0].system"}},
+		// Never an error, a required binding and HL7's namespace too: a version not loaded is no version
+		// that does not exist.
+		{"r32v_thokv_bad_a_req", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Location.operationalStatus.system"}},
+		{"r32v_kv_bad_z_ccreq", []string{
+			"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.code.coding[0].system",
+			"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system",
+		}},
+		{"r32v_known_bad_a_cc", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system"}},
+		{"r32v_kv_ok_z_cc", []string{"error CODE_NOT_IN_CODESYSTEM @ Observation.method.coding[0].code"}},
+		{"r33_disp_cc", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system"}},
+		{"r33_disp_ok_cc", []string{"error BINDING_DISPLAY_MISMATCH @ Observation.method.coding[0].display"}},
+		{"r33_np_cc", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system"}},
+		{"r33_sct_cc", nil},
+		// A CodeableConcept's coding a required binding of its own checks, a value set taking value sets
+		// in or including the system directly: a warning all the same.
+		{"r34_cb_thokv", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system"}},
+		{"r35_nest_tho", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Location.operationalStatus.system"}},
+		{"r36_mix_a_loc", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Location.operationalStatus.system"}},
+		// A Coding with no code reports its version too, not that no code is provided.
+		{"r37_nocode_cc", []string{"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system"}},
+		{"r37_nocode_ccreq", []string{
+			"error BINDING_REQUIRED_NO_CODE @ Observation.method",
+			"warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system",
+		}},
 		// LOINC in a CodeableConcept: nothing of its code system.
 		{"sev_t1", nil},
 	} {
@@ -289,7 +321,109 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 				switch is.MessageID {
 				case "CODESYSTEM_NOT_FOUND", "CODESYSTEM_NO_CODES", "BINDING_CANNOT_VALIDATE", "CODE_NOT_IN_PARTIAL_CODESYSTEM",
 					"CODESYSTEM_URI_INVALID", "BINDING_EXTENSIBLE_OTHER_SYSTEM", "BINDING_REQUIRED_NO_CODE", "CODING_NO_CODE_IN_CONCEPT",
+					"CODESYSTEM_VERSION_NOT_FOUND", "CODE_NOT_IN_CODESYSTEM", "BINDING_DISPLAY_MISMATCH",
 					"CODESYSTEM_EXAMPLE_CONTENT":
+					got = append(got, string(is.Severity)+" "+is.MessageID+" @ "+strings.Join(is.Expression, ","))
+				}
+			}
+			slices.Sort(got)
+			if !slices.Equal(got, tt.want) {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+// bcp47, which HL7's terminology has with no codes, keeps its report whatever its version where no
+// binding checks the Coding; a CodeableConcept's coding reports the version.
+func TestVersionUnusableSystem(t *testing.T) {
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+	for name, content := range map[string]string{
+		"package/package.json":          `{"name":"acme.bcp","version":"0.1.0","fhirVersions":["4.0.1"]}`,
+		"package/CodeSystem-bcp47.json": `{"resourceType":"CodeSystem","id":"bcp47","url":"urn:ietf:bcp:47","version":"2.0.1","status":"active","content":"not-present"}`,
+	} {
+		if err := tw.WriteHeader(&tar.Header{Name: name, Mode: 0o600, Size: int64(len(content))}); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := tw.Write([]byte(content)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := tw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := gz.Close(); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "acme.bcp.tgz")
+	if err := os.WriteFile(path, buf.Bytes(), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	v, err := New(WithVersion("4.0.1"), WithPackageTgz(path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const text = `"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}`
+	coding := `{"system":"urn:ietf:bcp:47","version":"9","code":"en"}`
+	for name, tt := range map[string]struct{ resource, want string }{
+		"unbound": {`{"resourceType":"Basic",` + text + `,"meta":{"tag":[` + coding + `]},"code":{"text":"x"}}`, "information BINDING_CANNOT_VALIDATE @ Basic.meta.tag[0]"},
+		"concept": {`{"resourceType":"Observation",` + text + `,"status":"final","code":{"text":"x"},"method":{"coding":[` + coding + `]}}`, "warning CODESYSTEM_VERSION_NOT_FOUND @ Observation.method.coding[0].system"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			res, err := v.Validate(context.Background(), []byte(tt.resource))
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, is := range res.Issues {
+				if strings.HasPrefix(is.MessageID, "CODESYSTEM_") || is.MessageID == "BINDING_CANNOT_VALIDATE" {
+					got = append(got, string(is.Severity)+" "+is.MessageID+" @ "+strings.Join(is.Expression, ","))
+				}
+			}
+			if !slices.Equal(got, []string{tt.want}) {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+// Under a binding, a Coding of a version of its code system that is not loaded is in the value set as
+// its composition tells: not in it, the binding's error or warning; not known, that it could not be
+// checked, never an error of its own.
+func TestVersionBindingVerdicts(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"), WithPackageTgz(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "packages", "acme.unknowncs-0.1.0.tgz")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range []struct {
+		probe string
+		want  []string
+	}{
+		{"r32v_kv_bad_z_ccreq", []string{
+			"information BINDING_UNRESOLVED @ Observation.code",
+			"information BINDING_UNRESOLVED @ Observation.method",
+		}},
+		{"r32v_kv_bad_a_req", []string{"information BINDING_UNRESOLVED @ Location.operationalStatus"}},
+		{"r34_enum_a", []string{"error BINDING_REQUIRED @ Location.operationalStatus"}},
+		{"r34_enum_zz", nil},
+		{"r34_pin_a", []string{"error BINDING_REQUIRED @ Location.operationalStatus"}},
+		{"r34_other_vs", []string{"error BINDING_REQUIRED @ Location.operationalStatus"}},
+		{"r36_mix_zz_cc", []string{"information BINDING_UNRESOLVED @ Observation.method"}},
+	} {
+		t.Run(tt.probe, func(t *testing.T) {
+			data, err := os.ReadFile(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "probes", "ux_"+tt.probe+".json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			res, err := v.Validate(context.Background(), data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, is := range res.Issues {
+				if strings.HasPrefix(is.MessageID, "BINDING_") {
 					got = append(got, string(is.Severity)+" "+is.MessageID+" @ "+strings.Join(is.Expression, ","))
 				}
 			}

@@ -21,6 +21,7 @@ func (r *Registry) Clone() *Registry {
 		codeSystems:          maps.Clone(r.codeSystems),
 		loadedValueSets:      slices.Clone(r.loadedValueSets),
 		loadedCodeSystems:    slices.Clone(r.loadedCodeSystems),
+		codeSystemVersions:   cloneVersions(r.codeSystemVersions),
 		valueSetPackage:      maps.Clone(r.valueSetPackage),
 		codeSystemPackage:    maps.Clone(r.codeSystemPackage),
 		publishers:           r.publishers.Clone(),
@@ -41,4 +42,14 @@ func (r *Registry) Clone() *Registry {
 		unresolvedTTL:        r.unresolvedTTL,
 		now:                  r.now,
 	}
+}
+
+// cloneVersions copies versions, each url's list too, so that one registry's loads do not append
+// to the other's.
+func cloneVersions(versions map[string][]string) map[string][]string {
+	out := make(map[string][]string, len(versions))
+	for url, v := range versions {
+		out[url] = slices.Clone(v)
+	}
+	return out
 }

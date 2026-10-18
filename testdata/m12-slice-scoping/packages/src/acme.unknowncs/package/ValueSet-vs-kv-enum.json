@@ -1,0 +1,20 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-enum",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-enum",
+  "name": "VSKVENUM",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://acme.local/cs/kv",
+        "version": "9.9.9",
+        "concept": [
+          {
+            "code": "zz"
+          }
+        ]
+      }
+    ]
+  }
+}

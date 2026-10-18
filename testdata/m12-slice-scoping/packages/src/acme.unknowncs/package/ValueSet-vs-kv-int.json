@@ -1,0 +1,17 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-int",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-int",
+  "name": "VSKVINT",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://acme.local/cs/kv",
+        "valueSet": [
+          "http://acme.local/fhir/ValueSet/vs-kv-enum"
+        ]
+      }
+    ]
+  }
+}

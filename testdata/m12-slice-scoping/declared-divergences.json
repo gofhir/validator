@@ -1110,5 +1110,125 @@
     "file": "testdata/m12-slice-scoping/probes/ux_r29d_codingbound_nc.json",
     "location": "Observation.method.coding[0]",
     "messageId": "BINDING_REQUIRED_NO_CODE"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (datatypes.html#Coding: version is the version of the code system used when choosing the code; codesystem.html: CodeSystem.version is an arbitrary value, no other version stands for it), so the code is not checked (CODESYSTEM_VERSION_NOT_FOUND). HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r32v_known_bad_z_ext.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (datatypes.html#Coding: version is the version of the code system used when choosing the code; codesystem.html: CodeSystem.version is an arbitrary value, no other version stands for it), so the code is not checked (CODESYSTEM_VERSION_NOT_FOUND). HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r32v_known_bad_z_req.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (datatypes.html#Coding: version is the version of the code system used when choosing the code; codesystem.html: CodeSystem.version is an arbitrary value, no other version stands for it), so the code is not checked (CODESYSTEM_VERSION_NOT_FOUND). HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r32v_kv_bad_z_ext.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (datatypes.html#Coding: version is the version of the code system used when choosing the code; codesystem.html: CodeSystem.version is an arbitrary value, no other version stands for it), so the code is not checked (CODESYSTEM_VERSION_NOT_FOUND). HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r32v_kv_bad_z_req.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (datatypes.html#Coding: version is the version of the code system used when choosing the code; codesystem.html: CodeSystem.version is an arbitrary value, no other version stands for it), so the code is not checked (CODESYSTEM_VERSION_NOT_FOUND). HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r32v_thokv_bad_z_ext.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (datatypes.html#Coding: version is the version of the code system used when choosing the code; codesystem.html: CodeSystem.version is an arbitrary value, no other version stands for it), so the code is not checked (CODESYSTEM_VERSION_NOT_FOUND). HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r32v_thokv_bad_z_req.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded, its display is not checked either: what the code's display is in that version is not known (codesystem.html: CodeSystem.version is an arbitrary value). HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r33_disp_req.json",
+    "location": "Location.operationalStatus.display",
+    "messageId": "Display_Name_for__should_be_one_of__instead_of"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "Version 1.0.1 of a CodeSystem loaded at 1.0.0 only is not loaded: R4 defines no order nor partial match of versions (codesystem.html: CodeSystem.version is an arbitrary value, no expectation that versions can be placed in a lexicographical sequence), so the code is not checked against 1.0.0. HL7 6.10.2 matches versions by major and minor, and checks it.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r33_semver_cc.json",
+    "location": "Observation.method.coding[0].code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding of a version of its CodeSystem that is not loaded, its code listed by the value set's include of that version: in the value set (valueset.html#compositions), its code not checked against another version. HL7 6.10.2 checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r34_enum_zz.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding of a version of its CodeSystem that is not loaded, the value set's only include of that system pinned to another version: not in the value set (valueset.html#compositions: an include with a version selects that version's codes), BINDING_REQUIRED at the Coding. HL7 6.10.2 reports the version mismatch at .version (VALUESET_VALUE_MISMATCH), an error too.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ux_r34_pin_a.json",
+    "location": "Location.operationalStatus",
+    "messageId": "BINDING_REQUIRED"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (codesystem.html: CodeSystem.version is an arbitrary value), so the code is not checked. HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r36_enummix_zz_loc.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (codesystem.html: CodeSystem.version is an arbitrary value), so the code is not checked. HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r36_excvs_zz_loc.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (codesystem.html: CodeSystem.version is an arbitrary value), so the code is not checked. HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r36_mix_zz_loc.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding names a version of its CodeSystem that is not loaded: what its code is in that version is not known (codesystem.html: CodeSystem.version is an arbitrary value), so the code is not checked. HL7 6.10.2, under a binding, checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r36_mixrev_zz_loc.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D38",
+    "reason": "A Coding of a version of its CodeSystem that is not loaded, its code listed by the value set's include of that version: in the value set (valueset.html#compositions), its code not checked against another version. HL7 6.10.2 checks it against the version loaded.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/ux_r38_int_zz.json",
+    "location": "Location.operationalStatus.code",
+    "messageId": "Unknown_Code_in_Version"
   }
 ]

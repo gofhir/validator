@@ -1,0 +1,19 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "kv",
+  "url": "http://acme.local/cs/kv",
+  "version": "1.0.0",
+  "name": "KV",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "a",
+      "display": "A"
+    },
+    {
+      "code": "b",
+      "display": "B"
+    }
+  ]
+}

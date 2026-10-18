@@ -1,0 +1,26 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-lockexc",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-lockexc",
+  "name": "VSKVLOCKEXC",
+  "status": "active",
+  "compose": {
+    "lockedDate": "2020-01-01",
+    "include": [
+      {
+        "system": "http://acme.local/cs/kv",
+        "version": "9.9.9",
+        "concept": [
+          {
+            "code": "a"
+          }
+        ]
+      }
+    ],
+    "exclude": [
+      {
+        "system": "http://acme.local/cs/kv"
+      }
+    ]
+  }
+}

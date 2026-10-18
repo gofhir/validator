@@ -1,0 +1,16 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-nest",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-nest",
+  "name": "VSKVNEST",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://acme.local/fhir/ValueSet/vs-kv"
+        ]
+      }
+    ]
+  }
+}

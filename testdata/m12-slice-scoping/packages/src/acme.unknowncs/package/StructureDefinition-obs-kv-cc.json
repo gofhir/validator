@@ -1,0 +1,33 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "obs-kv-cc",
+  "url": "http://acme.local/fhir/StructureDefinition/obs-kv-cc",
+  "name": "OBSKVCC",
+  "status": "active",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Observation",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Observation.code",
+        "path": "Observation.code",
+        "binding": {
+          "strength": "extensible",
+          "valueSet": "http://acme.local/fhir/ValueSet/vs-kv"
+        }
+      },
+      {
+        "id": "Observation.method",
+        "path": "Observation.method",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://acme.local/fhir/ValueSet/vs-kv"
+        }
+      }
+    ]
+  }
+}
