@@ -1,10 +1,33 @@
 # Go Validator - Validation Gaps Analysis
 
-> Gaps identified by comparing against YAFV (Node.js FHIR validator).
+> Gaps found against a reference validator. The first entries compared against YAFV (Node.js
+> FHIR validator); the reference is now the HL7 FHIR Validator, compared through
+> `internal/tools/hl7diff` and, since 2026-10-16, by spec-driven mutation (go-fhir-mutator,
+> `github.com/gofhir/mutator`, not yet published): a valid instance per
+> core resource with one rule broken at a time, each case confirmed by the HL7 validator.
 > Date: 2026-03-06
-> Updated: 2026-07-31 (fhirpath v1.5.1, ucum/v4 v4.2.0)
+> Updated: 2026-10-17 (GO-GAP-012 to GO-GAP-018 opened, GO-GAP-015 resolved after v2.1.0; 2026-10-16: GO-GAP-010 opened, GO-GAP-011 resolved)
 
 ## Resolved Gaps
+
+### ~~GO-GAP-011~~: Required bindings below choice elements — RESOLVED (#157, after v2.1.0)
+
+Up to v2.1.0 a required binding on an element of a data type reached through a choice element
+was not checked. `Observation.valueQuantity.comparator` or
+`Observation.effectiveTiming.repeat.periodUnit` with a code outside its value set validated
+clean, while the same data types on a direct path (`SupplyRequest.quantity`, `Dosage.timing`)
+were checked. The HL7 validator reports both.
+
+```json
+{"resourceType":"Observation","status":"final","code":{"text":"x"},
+ "valueQuantity":{"value":1,"comparator":"not-a-real-code"}}
+```
+
+Found by mutation (3 false negatives in 1,132 mutants over 20 core resources, all
+`Quantity.comparator`). Fixed by #157 (`3818a4d`, "bind each value by the definition that
+governs it"): the instance above gives 0 errors at its parent commit and 1 at `3818a4d`.
+
+---
 
 ### ~~GO-GAP-001~~: ValueSet compose.exclude — RESOLVED
 
@@ -292,6 +315,207 @@ would fail the official FHIR example resources. Not implemented.
 
 ## Gaps to Address
 
+### GO-GAP-010: Primitive values below a contentReference element are not checked
+
+**Priority**: High — false accepts
+**Found**: 2026-10-16, by mutation, at `74afca6`
+
+An element defined by `contentReference` reuses the definition of another element:
+`Observation.component.referenceRange` is `#Observation.referenceRange`, and likewise
+`Questionnaire.item.item`, `CodeSystem.concept.concept`, `StructureMap.group.rule.rule`. Below
+such an element the validator checks structure (an unknown property is reported) but not the
+values of primitives: an empty string, or a decimal written as a string, passes. The same values
+on the referenced element's own path are errors, and the HL7 validator reports both.
+
+```json
+{"resourceType":"Observation","status":"final","code":{"text":"x"},
+ "component":[{"code":{"text":"y"},"referenceRange":[{"text":""}]}]}
+```
+
+| Instance | gofhir `74afca6` | HL7 validator |
+| --- | --- | --- |
+| `""` in `Observation.referenceRange[0].text` (direct path) | 1 error | 2 errors |
+| `""` in `Observation.component[0].referenceRange[0].text` | **0 errors** | 2 errors (`value cannot be empty`, `ele-1`) |
+| `"1.5"` (a string) in `component[0].referenceRange[0].low.value` | **0 errors** | 1 error |
+| unknown property in `component[0].referenceRange[0]` | 1 error | 1 error |
+
+**Scope.** Over the 145 R4 core resources the mutation run makes 70,039 mutants (with choice and list
+variants, 2026-10-17; 207 of 30,599 with choice variants only, 155 of 27,076 before them), and 900
+are false negatives: every one is below a `contentReference` element, none elsewhere. The count grows as the
+generator reaches more of the core (100 on the first run: string 73, decimal 8, uri 8, id 4,
+canonical 3, boolean 2, code 1, dateTime 1), never outside that pattern. By resource:
+SubstanceSpecification 25, PlanDefinition 13, MedicinalProductPackaged 12, ClaimResponse 10,
+Consent 9, ExplanationOfBenefit 9, Provenance 4, ValueSet 4, and others. The R4 core has 55
+`contentReference` elements in 30 resources.
+
+**Where.** Not traced in the code yet. The structural phase follows the reference (it reports
+unknown properties there); the phase that checks primitive values apparently does not.
+
+**Regression check.** go-fhir-mutator's canary (`internal/pipeline`, pinned to v2.1.0) lists the
+three Observation cases among the false negatives it must find. A fix released in a later version
+does not touch that canary; running the mutation over all resources against the fix is what
+confirms it (0 false negatives below `contentReference`).
+
+---
+
+### GO-GAP-012: Choice property names are matched without regard to case
+
+**Priority**: High — false accepts
+**Found**: 2026-10-17, by mutation, at `7cf05aa` (also in v2.1.0)
+
+A choice element's JSON property is its name followed by the type code with its first letter
+capitalized (formats.html#choice): `valueString`, `valueQuantity`. The validator matches the type
+suffix with `strings.EqualFold`, so `valuestring`, `valueSTRING` or `valuequantity` are taken for
+the real property, and their values are even validated as that type. The HL7 validator reports
+each as an unrecognized property.
+
+```json
+{"resourceType":"Observation","status":"final","code":{"text":"x"},"valuequantity":{"value":1}}
+```
+
+| Instance | gofhir `7cf05aa` | HL7 validator |
+| --- | --- | --- |
+| `valuequantity: {"value": 1}` | **0 errors** | 1 error (`Unrecognized property 'valuequantity'`) |
+| `valueSTRING: "a"` | **0 errors** | 1 error |
+| `valuestring: "a"` | **0 errors** | 1 error |
+| `valuestring: ""` | 1 error (empty string, at `Observation.valuestring`) | 1 error (unrecognized property) |
+
+**Scope.** Over the 145 R4 core resources (31,789 mutants, 2026-10-17), the `choice-case` operator
+gives 395 false negatives: every optional choice element it reaches (533 of 70,039 once list
+variants reach second items too). The other 232 are detected
+only through a consequence: the choice element is required and reported missing (229), or an
+invariant reads it (`fhs-2`, 3).
+
+**Where.** `findMatchingChoiceType` in `pkg/structural/structural.go` (comment: "Compare
+case-insensitively"), and its twin in `pkg/primitive/primitive.go`. `registry.ChoiceType` already
+requires the capital letter, so the two disagree within one run: on a required choice element
+(`UsageContext.value[x]`), `valuequantity` raises no unknown-property error, yet the cardinality
+check reports `value[x]` missing.
+
+**Regression check.** go-fhir-mutator's `choice-case` operator writes each choice element of its
+seeds with the type in lower case.
+
+---
+
+### GO-GAP-013: The choice mutual-exclusion message lists variants in map order
+
+**Priority**: Low — same verdict, unstable text
+**Found**: 2026-10-17, by mutation (determinism test), at `7cf05aa` (also in v2.1.0)
+
+`STRUCTURE_CHOICE_MUTUAL_EXCLUSION` collects the keys of the object with `for key := range data`
+(`validateElement`, `pkg/structural/structural.go`), so two runs on the same resource give
+`found: valueString, valueQuantity` or `found: valueQuantity, valueString`. Issue #59 fixed the
+same map-order dependence in which choice element a key matched; the message order remains.
+Sorting the keys makes the output reproducible.
+
+---
+
+### GO-GAP-014: An empty list is accepted
+
+**Priority**: High — false accepts
+**Found**: 2026-10-17, by mutation, at `7cf05aa` (also in v2.1.0)
+
+A repeating element is a JSON array that is never empty (json.html: an empty array is no value,
+the property is left out). The validator checks the shape of each property (`pkg/structural/
+shape.go`: an object where an array belongs, `null`), but not an array with no items: it
+iterates over none and reports nothing. The HL7 validator reports `Array cannot be empty - the
+property should not be present if it has no values`.
+
+```json
+{"resourceType":"Patient","name":[]}
+```
+
+| Instance | gofhir `7cf05aa` | HL7 validator |
+| --- | --- | --- |
+| `"name": []` | **0 errors** | 1 error |
+| `"identifier": [{"type": {"coding": []}}]` | 1 error, through a consequence: `ele-1` on `type`, left empty | 1 error on `coding` |
+| `"given": []` (a list of primitives) | 0 errors | 0 errors: HL7 does not check these either |
+
+**Scope.** Over the 145 R4 core resources (70,039 mutants with list variants, 2026-10-17), the
+`list-empty` operator gave 1,847 false negatives out of 2,453; the other 606 were detected only
+through a consequence (the owner left empty, a required list). Since 2026-10-17 the operator
+empties only optional lists whose owner keeps other content, so the empty array is the one rule
+broken: 1,895 false negatives out of 1,899 (128,561 mutants), and the 4 others are misplaced,
+where gofhir reports only an owner invariant that reads the list (`trd-2`, `rqg-1`).
+
+**Where.** `pkg/structural/shape.go` is where the shape checks are; `normalize.go` already drops
+an array its edits leave empty, citing the same rule.
+
+---
+
+### GO-GAP-017: A code with no system passes a required binding
+
+**Priority**: High — false accepts
+**Found**: 2026-10-17, by mutation, at `7cf05aa` (also in v2.1.0)
+
+A required binding means the concept SHALL be from the value set (terminologies.html#required).
+A coding whose `system` is missing is from no value set: its code has no defined meaning. The
+validator only warns `Coding has no system`, and accepts the resource. The HL7 validator reports
+`None of the codings provided are in the value set` as an error.
+
+```json
+{"resourceType":"AllergyIntolerance","patient":{"display":"x"},
+ "clinicalStatus":{"coding":[{"code":"active"}]}}
+```
+
+| Instance | gofhir `7cf05aa` | HL7 validator |
+| --- | --- | --- |
+| `clinicalStatus.coding[0]` without `system`, code `active` | **0 errors** (a warning) | 1 error at `clinicalStatus` |
+| the same with `system` set to an unknown URI | 1 error | 1 error |
+
+**Scope.** The `binding-no-system` operator over the 145 R4 core resources (2026-10-17): 9 of 9
+required CodeableConcept and Coding bindings it reaches are false negatives (AdverseEvent
+severity and outcome, AllergyIntolerance and Condition statuses, among others).
+
+---
+
+### GO-GAP-016: An unknown code is reported as `invalid`, not `code-invalid`
+
+**Priority**: Low — same verdict, wrong IssueType
+**Found**: 2026-10-17, by mutation, at `7cf05aa`
+
+A code a CodeSystem does not define is reported with IssueType `invalid`
+(`The code 'x' is not valid in the CodeSystem ...`). The issue-type value set has `code-invalid`
+for it, and the HL7 validator uses it (`Unknown code 'x' in the CodeSystem ...`). A client
+that routes terminology errors by IssueType misses these. Over R4: 486 `code-unknown` mutants
+are detected with the wrong IssueType.
+
+---
+
+### ~~GO-GAP-015~~: A code its CodeSystem does not define was not reported under an extensible binding — RESOLVED (after v2.1.0)
+
+**Found**: 2026-10-17, by mutation. v2.1.0 accepts `Identifier.type` with
+`{"system": "http://terminology.hl7.org/CodeSystem/v2-0203", "code": "not-a-real-code"}`,
+with only the extensible binding's warning; `7cf05aa` reports the unknown code, as the HL7
+validator does. The same holds for a bare Coding: `useContext.code` with an undefined
+usage-context-type code (a complete CodeSystem) gets only the warning in v2.1.0, and
+`CODE_NOT_IN_CODESYSTEM` at HEAD (there the HL7 validator says nothing). go-fhir-mutator's canary (pinned to v2.1.0) lists these misses as GO-GAP-015.
+
+---
+
+### GO-GAP-018: A narrative div outside the XHTML namespace is accepted
+
+**Priority**: Medium — false accepts
+**Found**: 2026-10-17, by mutation (go-fhir-mutator plan 001, resource variants), in v2.1.0 and at `d5d3887`
+
+narrative.html#xhtml: the narrative is an XHTML fragment in a `div` element in the XHTML namespace
+(`http://www.w3.org/1999/xhtml`). The validator accepts a `div` with no namespace. The HL7 validator
+reports `Wrong namespace on the XHTML ('null', should be 'http://www.w3.org/1999/xhtml')`.
+
+```json
+{"resourceType":"Patient","active":true,"text":{"status":"generated","div":"<div>x</div>"}}
+```
+
+| Instance | gofhir | HL7 validator |
+| --- | --- | --- |
+| `text.div` = `<div>x</div>` | **0 errors** | 1 error at `Patient.text.div` |
+| `text.div` = `<div xmlns="…"><script>x</script></div>` | `txt-1` (and `txt-2`) | `txt-1` and an invalid element |
+
+**Scope.** The fixture's resource variants (Flag, Patient, Observation, StructureMap; Parameters has no
+narrative): 4 of 4 `format` mutants on `text.div` are false negatives.
+
+---
+
 ### GO-GAP-004: No Fail-Fast Mode
 
 **Priority**: Low
@@ -352,9 +576,16 @@ read.
 ## Implementation Priority
 
 ```text
-No conformance work is outstanding on our side.
+Conformance work outstanding:
+  GO-GAP-010: Primitive values below contentReference elements - 989 false accepts in the core
+  GO-GAP-012: Choice property names matched without regard to case - 571 false accepts
+  GO-GAP-014: Empty lists accepted - 1,895 false accepts
+  GO-GAP-017: A code with no system passes a required binding - 9 false accepts
+  GO-GAP-018: Narrative div outside the XHTML namespace accepted
+  GO-GAP-016: Unknown codes reported as invalid, not code-invalid - IssueType only
+  GO-GAP-013: Choice mutual-exclusion message in map order - text only, verdict stable
 
-What remains is ergonomics, neither of which changes a verdict:
+What else remains is ergonomics, neither of which changes a verdict:
   GO-GAP-004: Fail-fast mode
   GO-GAP-009: Configurable best-practice severity
 
@@ -384,4 +615,5 @@ resolution — see Resolved Gaps above.
 > Every entry below "Gaps to Address" was verified against the code on 2026-07-30. GO-GAP-003
 > through GO-GAP-007 are real and unimplemented; GO-GAP-009 was restated, since its previous
 > description claimed behaviour that already works. Verifying beats trusting this file: two
-> entries had drifted into claiming the opposite of what the code did.
+> entries had drifted into claiming the opposite of what the code did. GO-GAP-010 was verified
+> against `74afca6` on 2026-10-16, with the instances in its entry.
