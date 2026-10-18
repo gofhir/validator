@@ -4,7 +4,14 @@ Se lee primero al empezar, al reanudar y después de cada compactación (carta, 
 
 ## Incremento activo
 
-Ninguno.
+**Un solo evaluador de composiciones de ValueSet**, [2026-10-18-composition-evaluator.md](2026-10-18-composition-evaluator.md):
+los **incrementos 1 y 2 de 3 están cerrados**. El 1 es el punto fijo en el modo cargado
+([evidence/2026-10-18-composition-evaluator-inc1/](evidence/2026-10-18-composition-evaluator-inc1/)). El 2
+son los excludes por evidencia de existencia, que retiran `coversSystem`, con C1, C2, C2b y C3, y C6 al
+backlog B6; su code review convergió en dos rondas
+([evidence/2026-10-18-composition-evaluator-inc2/](evidence/2026-10-18-composition-evaluator-inc2/)).
+Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
+Rama `refactor/composition-evaluator`, sin push.
 
 ## Último incremento cerrado
 
@@ -22,8 +29,6 @@ Antes: severidad de un code system desconocido, PR 1 a PR 3 (#164, #166, #167),
 
 ## Próximos frentes (a elegir)
 
-- Unificar `VersionMembership` con `membership.go`: un solo evaluador de composiciones, con la
-  versión no cargada como un modo (deuda del PR 3).
 - Migrar a golangci-lint v2.14 o posterior con Go 1.27: decidir qué hacer con los 28 issues nuevos
   de goconst y gocritic.
 - Brechas anotadas: `ACR` y `umls` bajo un Coding con binding required (HL7: warning, gofhir:
@@ -33,4 +38,5 @@ Antes: severidad de un code system desconocido, PR 1 a PR 3 (#164, #166, #167),
 
 ## Decisiones pendientes del usuario
 
-- Cuál es el próximo frente.
+- Ninguna por ahora. Después del evaluador viene el backlog B1 (la caída de versión de
+  `GetCodeSystemVersion`), cuyo impacto se mide antes de decidir.

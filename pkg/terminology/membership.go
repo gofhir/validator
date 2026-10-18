@@ -9,14 +9,12 @@ type answer int
 const (
 	answerOut answer = iota
 	answerIn
-	// Not known: a definition it depends on cannot be enumerated here (an external code system, one
-	// not held, a version not held, or one that does not include all its codes), a filter cannot be
-	// evaluated, or a ValueSet is not held, or includes itself; a code is not known not to be a member.
+	// No se sabe: una definición de la que depende no se puede enumerar aquí (un code system externo,
+	// uno que no está cargado, una versión que no está cargada, o uno que no incluye todos sus
+	// códigos), un filtro no se puede evaluar, o un ValueSet no está cargado, o lo que un ValueSet que
+	// se incluye a sí mismo deja sin decidir; no se sabe que el código no sea miembro.
 	answerUnknown
 )
-
-// maxValueSetDepth bounds the ValueSets a ValueSet includes or excludes, one in another.
-const maxValueSetDepth = 16
 
 // either is the answer of one of two alternatives: a member of either is a member.
 func either(a, b answer) answer {
@@ -40,13 +38,21 @@ func both(a, b answer) answer {
 	return answerIn
 }
 
-// membership asks, for one code, whether it is a member of ValueSets: each ValueSet is decided once
-// (a ValueSet several others include), and one that includes itself, through others, is not known.
+// membership pregunta, para un código, si es miembro de ValueSets, como el menor punto fijo de sus
+// composiciones: cada ValueSet empieza sin decidir, y los ValueSets que una composición incluye se
+// deciden antes, cada uno una vez (un ValueSet que varios incluyen). Uno al que se vuelve mientras se
+// decide (un ciclo) queda ahí sin decidir todavía; cuando un recorrido encuentra uno, todos los
+// ValueSets que decidió se deciden de nuevo, con las respuestas que hay, hasta que ninguno cambia.
+// Una respuesta solo pasa de no decidida a decidida (either, both y la exclusión son monótonas en ese
+// orden), así que esto termina, y las respuestas no dependen del orden de las cláusulas ni de cuán
+// profundo se incluyen los ValueSets; uno que se incluye a sí mismo se decide hasta donde lo dicen sus
+// otras cláusulas.
 type membership struct {
 	r            *Registry
 	system, code string
-	decided      map[*ValueSet]answer
-	deciding     map[*ValueSet]bool
+	value        map[decision]answer
+	deciding     map[decision]bool
+	cyclic       bool
 }
 
 // memberKey is a code of a system ("" for a code element) asked of a ValueSet.
@@ -83,7 +89,7 @@ const maxAnswers = 1 << 16
 
 func (r *Registry) decideMember(vs *ValueSet, system, code string) answer {
 	if system != "" {
-		return r.newMembership(system, code).of(vs, 0)
+		return r.newMembership(system, code).of(vs)
 	}
 	// A code element's code is a member when it is one as a code of a system the ValueSet includes:
 	// excluding one system's code leaves another's.
@@ -93,7 +99,7 @@ func (r *Registry) decideMember(vs *ValueSet, system, code string) answer {
 		member = answerUnknown
 	}
 	for _, s := range systems {
-		if member = either(member, r.newMembership(s, code).of(vs, 0)); member == answerIn {
+		if member = either(member, r.newMembership(s, code).of(vs)); member == answerIn {
 			break
 		}
 	}
@@ -101,7 +107,13 @@ func (r *Registry) decideMember(vs *ValueSet, system, code string) answer {
 }
 
 func (r *Registry) newMembership(system, code string) *membership {
-	return &membership{r: r, system: system, code: code, decided: map[*ValueSet]answer{}, deciding: map[*ValueSet]bool{}}
+	return &membership{r: r, system: system, code: code, value: map[decision]answer{}, deciding: map[decision]bool{}}
+}
+
+// decision es un ValueSet decidido y si se toma que el código existe en su edición (selects).
+type decision struct {
+	vs     *ValueSet
+	exists bool
 }
 
 // of tells whether the code is a member of vs: one an include selects and no exclude does
@@ -110,23 +122,44 @@ func (r *Registry) newMembership(system, code string) *membership {
 // defines the ValueSet; one without is its expansion's codes. An expansion a composition carries is
 // not read: it is the codes the composition gave when it was expanded, against code system versions
 // that may not be the ones held (a VSAC set's SNOMED CT).
-func (m *membership) of(vs *ValueSet, depth int) answer {
-	if a, ok := m.decided[vs]; ok {
-		return a
+func (m *membership) of(vs *ValueSet) answer {
+	root := decision{vs, false}
+	a := m.taken(root)
+	for changed := m.cyclic; changed; {
+		changed = false
+		for d, before := range m.value {
+			if after := m.compose(d); after != before {
+				m.value[d], changed = after, true
+			}
+		}
 	}
-	if m.deciding[vs] || depth > maxValueSetDepth {
-		return answerUnknown
+	if m.cyclic {
+		a = m.value[root]
 	}
-	m.deciding[vs] = true
-	a := m.compose(vs, depth)
-	delete(m.deciding, vs)
-	m.decided[vs] = a
 	return a
 }
 
-func (m *membership) compose(vs *ValueSet, depth int) answer {
+// taken devuelve la respuesta de un ValueSet que una composición incluye: decidida una vez, y sin
+// decidir todavía mientras se decide (el punto fijo lo decide de nuevo, of).
+func (m *membership) taken(d decision) answer {
+	if m.deciding[d] {
+		m.cyclic = true
+		return answerUnknown
+	}
+	if a, ok := m.value[d]; ok {
+		return a
+	}
+	m.deciding[d] = true
+	a := m.compose(d)
+	delete(m.deciding, d)
+	m.value[d] = a
+	return a
+}
+
+func (m *membership) compose(d decision) answer {
+	vs := d.vs
 	if len(vs.Compose.Include) > 0 {
-		return m.composition(vs, depth)
+		return m.composition(d)
 	}
 	if vs.Expansion == nil {
 		return answerUnknown
@@ -141,11 +174,16 @@ func (m *membership) compose(vs *ValueSet, depth int) answer {
 	return answerOut
 }
 
-// composition decides the code by vs's composition (of).
-func (m *membership) composition(vs *ValueSet, depth int) answer {
+// composition decide el código por la composición de d.vs: los códigos que sus includes
+// seleccionan, menos los que sus excludes seleccionan. Un exclude se evalúa tomando que el código
+// existe en la edición de cada cláusula: si existe, la cláusula que toma la edición entera lo quita;
+// si no existe, ningún include lo seleccionó. Así un exclude del sistema entero, directo o a través
+// de un ValueSet que lo incluye entero, quita el código aunque sus códigos no se conozcan aquí.
+func (m *membership) composition(d decision) answer {
+	vs := d.vs
 	in := answerOut
 	for i := range vs.Compose.Include {
-		if in = either(in, m.selects(&vs.Compose.Include[i], depth)); in == answerIn {
+		if in = either(in, m.selects(&vs.Compose.Include[i], d.exists)); in == answerIn {
 			break
 		}
 	}
@@ -153,12 +191,7 @@ func (m *membership) composition(vs *ValueSet, depth int) answer {
 		return answerOut
 	}
 	for i := range vs.Compose.Exclude {
-		e := &vs.Compose.Exclude[i]
-		if m.r.coversSystem(e, m.system, depth, map[*ValueSet]walk{}) {
-			// The whole system is excluded: whatever an include selected of it, known or not.
-			return answerOut
-		}
-		switch m.selects(e, depth) {
+		switch m.selects(&vs.Compose.Exclude[i], true) {
 		case answerIn:
 			return answerOut
 		case answerUnknown:
@@ -168,11 +201,12 @@ func (m *membership) composition(vs *ValueSet, depth int) answer {
 	return in
 }
 
-// selects tells whether a clause (an include or an exclude) selects the code: its system's codes,
-// the concepts it lists or its filters select, and, when it names ValueSets, a member of each of
-// them too (valueset-definitions.html#ValueSet.compose.include.valueSet: "the content of the value
-// set is the intersection").
-func (m *membership) selects(c *Include, depth int) answer {
+// selects dice si una cláusula (un include o un exclude) selecciona el código: los códigos de su
+// sistema, los códigos que enumera o los que seleccionan sus filtros, y, si nombra ValueSets, además
+// un miembro de cada uno (valueset-definitions.html#ValueSet.compose.include.valueSet: "the content
+// of the value set is the intersection"). Con exists, una cláusula que toma la edición entera del
+// sistema, cuyos códigos no se conocen aquí, selecciona el código (composition).
+func (m *membership) selects(c *Include, exists bool) answer {
 	selected := answerIn
 	switch {
 	case c.System != "":
@@ -180,6 +214,9 @@ func (m *membership) selects(c *Include, depth int) answer {
 			return answerOut
 		}
 		selected = m.r.inSystem(c, m.system, m.code)
+		if selected == answerUnknown && exists && len(c.Concept) == 0 && len(c.Filter) == 0 {
+			selected = answerIn
+		}
 	case len(c.ValueSet) == 0:
 		return answerOut // selects nothing
 	}
@@ -195,65 +232,9 @@ func (m *membership) selects(c *Include, depth int) answer {
 			selected = both(selected, answerUnknown)
 			continue
 		}
-		selected = both(selected, m.of(nested, depth+1))
+		selected = both(selected, m.taken(decision{nested, exists}))
 	}
 	return selected
-}
-
-// coversSystem reports whether clause c selects every code of system, whether or not they are known
-// here: it names the system with no concept nor filter, or a ValueSet that includes all of it, and
-// any ValueSet it names includes all of it too. Each ValueSet is read once (walked).
-func (r *Registry) coversSystem(c *Include, system string, depth int, walked map[*ValueSet]walk) bool {
-	if depth > maxValueSetDepth || len(c.Concept) > 0 || len(c.Filter) > 0 || len(c.ModifierExtension) > 0 {
-		return false
-	}
-	switch {
-	case c.System == system:
-	case c.System == "" && len(c.ValueSet) > 0:
-	default:
-		return false
-	}
-	for _, url := range c.ValueSet {
-		nested := r.GetValueSet(url)
-		if nested == nil || !r.includesSystem(nested, system, depth+1, walked) {
-			return false
-		}
-	}
-	return true
-}
-
-// includesSystem reports whether vs includes every code of system: a clause covers it, and no
-// exclusion can take any away.
-func (r *Registry) includesSystem(vs *ValueSet, system string, depth int, walked map[*ValueSet]walk) bool {
-	switch walked[vs] {
-	case walking:
-		return false // it includes itself: not known to include all of it
-	case walkedTrue:
-		return true
-	case walkedFalse:
-		return false
-	}
-	walked[vs] = walking
-	includes := r.includesWholeSystem(vs, system, depth, walked)
-	walked[vs] = walkedFalse
-	if includes {
-		walked[vs] = walkedTrue
-	}
-	return includes
-}
-
-func (r *Registry) includesWholeSystem(vs *ValueSet, system string, depth int, walked map[*ValueSet]walk) bool {
-	for i := range vs.Compose.Exclude {
-		if e := &vs.Compose.Exclude[i]; e.System == system || e.System == "" {
-			return false
-		}
-	}
-	for i := range vs.Compose.Include {
-		if r.coversSystem(&vs.Compose.Include[i], system, depth, walked) {
-			return true
-		}
-	}
-	return false
 }
 
 // walk is where a walk over ValueSets, one in another, is with one: being walked (one reached
@@ -274,9 +255,9 @@ type includedSystems struct {
 	unknown bool
 }
 
-// systemsOf returns the systems vs includes, its own and those of the ValueSets it includes, and
-// whether one it includes is not held, or includes itself (its systems are not known); worked out
-// once per ValueSet.
+// systemsOf devuelve los sistemas que vs incluye, los suyos y los de los ValueSets que incluye, y si
+// uno que incluye no está cargado (sus sistemas no se conocen); se calcula una vez por ValueSet. Los
+// sistemas de ValueSets que se incluyen unos a otros son la unión de los de todos ellos.
 func (r *Registry) systemsOf(vs *ValueSet) (systems []string, unknown bool) {
 	r.mu.RLock()
 	s, cached := r.systemsCache[vs]
@@ -286,7 +267,7 @@ func (r *Registry) systemsOf(vs *ValueSet) (systems []string, unknown bool) {
 		return s.systems, s.unknown
 	}
 	found := map[string]bool{}
-	unknown = r.collectSystems(vs, found, map[*ValueSet]walk{}, 0)
+	unknown = r.collectSystems(vs, found, map[*ValueSet]walk{})
 	for system := range found {
 		systems = append(systems, system)
 	}
@@ -298,12 +279,11 @@ func (r *Registry) systemsOf(vs *ValueSet) (systems []string, unknown bool) {
 	return systems, unknown
 }
 
-func (r *Registry) collectSystems(vs *ValueSet, found map[string]bool, walked map[*ValueSet]walk, depth int) (unknown bool) {
-	switch {
-	case walked[vs] == walking || depth > maxValueSetDepth:
-		return true // it includes itself: its systems are not known
-	case walked[vs] != notWalked:
-		return false // reached before by another path: its systems are found
+func (r *Registry) collectSystems(vs *ValueSet, found map[string]bool, walked map[*ValueSet]walk) (unknown bool) {
+	if walked[vs] != notWalked {
+		// Alcanzado antes por otro camino, o de nuevo en un ciclo: sus sistemas ya se juntan en este
+		// recorrido, y los de un ciclo son la unión de los de sus ValueSets.
+		return false
 	}
 	walked[vs] = walking
 	defer func() { walked[vs] = walkedTrue }()
@@ -313,7 +293,7 @@ func (r *Registry) collectSystems(vs *ValueSet, found map[string]bool, walked ma
 		}
 		for _, url := range c.ValueSet {
 			nested := r.GetValueSet(url)
-			if nested == nil || r.collectSystems(nested, found, walked, depth+1) {
+			if nested == nil || r.collectSystems(nested, found, walked) {
 				unknown = true
 			}
 		}
@@ -339,6 +319,10 @@ func (r *Registry) inSystem(c *Include, system, code string) answer {
 	switch {
 	case exp.modified[system+"|"+code]:
 		return answerUnknown // listed with a modifier extension: what that means is not known here
+	case selected && len(c.Concept) > 0 && r.editionLacks(c, code):
+		// Un código enumerado tiene que ser válido en su code system (valueset.html#expansion): la
+		// edición de la cláusula, cargada y completa, no lo tiene.
+		return answerOut
 	case selected && !exp.undecided:
 		return answerIn
 	case selected:
@@ -348,6 +332,31 @@ func (r *Registry) inSystem(c *Include, system, code string) answer {
 	}
 	return answerOut
 }
+
+// editionLacks dice si la edición del sistema de c que c nombra (su versión, o la cargada) está
+// cargada, completa y sin el código: lo que no lista no es uno de sus códigos. Un supplement no trae
+// los códigos de su sistema, y un sistema externo solo se revisa en un servidor.
+func (r *Registry) editionLacks(c *Include, code string) bool {
+	if r.isExternalSystem(c.System) {
+		return false
+	}
+	var cs *CodeSystem
+	if c.Version != "" {
+		if !r.CodeSystemVersionMatches(c.System, c.Version) {
+			return false // another edition answers for it, which is no evidence of this one
+		}
+		cs = r.GetCodeSystemVersion(c.System, c.Version)
+	} else {
+		cs = r.GetCodeSystem(c.System)
+	}
+	return cs != nil && !cs.partial() && cs.Content != contentSupplement && findConcept(cs.Concept, code) == nil
+}
+
+// contentSupplement es el content de un CodeSystem que agrega propiedades a los códigos de otro
+// (codesystem-content-mode): no trae los códigos de ese sistema. Un supplement se registra por su
+// propia URL, no por la del sistema que suplementa (CodeSystem.supplements): esta rama solo cuenta
+// cuando una cláusula nombra esa URL como sistema.
+const contentSupplement = "supplement"
 
 // clauseExpansion is what a clause selects, keyed "system|code": the concepts it lists, or what it
 // selects from a code system this registry holds; complete when those are all it may select, and
@@ -399,8 +408,8 @@ func (r *Registry) expandClause(c *Include) clauseExpansion {
 	} else {
 		cs = r.GetCodeSystem(c.System)
 	}
-	if cs == nil {
-		return exp
+	if cs == nil || cs.Content == contentSupplement {
+		return exp // un supplement no trae los códigos de su sistema: no se sabe qué selecciona
 	}
 	// A version asked for that is not held is answered from another, whose codes may differ.
 	exp.complete = !cs.partial() && (c.Version == "" || r.CodeSystemVersionMatches(c.System, c.Version))

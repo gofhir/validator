@@ -1,0 +1,482 @@
+# hl7diff: baseline origin/main vs working tree
+
+HL7 validator: validator_cli.jar sha256:a3addadfa18dfa23, java version "24" 2025-03-18
+
+decisions: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.decisions#0.3.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## decisions: PASS
+
+files: 15, findings: 0, unexplained errors removed: 0, declared divergences: 4
+
+
+decisions: identical to the baseline: true (0 differences)
+
+multimatch: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.multimatch#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## multimatch: PASS
+
+files: 3, findings: 0, unexplained errors removed: 0, declared divergences: 8
+
+
+multimatch: identical to the baseline: true (0 differences)
+
+core-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## core-probes: PASS
+
+files: 7, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+core-probes: identical to the baseline: true (0 differences)
+
+type-profile-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.typeprofiles#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## type-profile-probes: PASS
+
+files: 47, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+type-profile-probes: identical to the baseline: true (0 differences)
+
+nested-resource-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.multiprofile#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## nested-resource-probes: PASS
+
+files: 4, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+nested-resource-probes: identical to the baseline: true (0 differences)
+
+review-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.review#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## review-probes: PASS
+
+files: 5, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+review-probes: identical to the baseline: true (0 differences)
+
+extension-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.extdefs#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## extension-probes: PASS
+
+files: 14, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+extension-probes: identical to the baseline: true (0 differences)
+
+primitive-extension-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.prim#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## primitive-extension-probes: PASS
+
+files: 5, findings: 0, unexplained errors removed: 0, declared divergences: 2
+
+
+primitive-extension-probes: identical to the baseline: true (0 differences)
+
+context-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.ctx#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## context-probes: PASS
+
+files: 33, findings: 0, unexplained errors removed: 0, declared divergences: 6
+
+
+context-probes: identical to the baseline: true (0 differences)
+
+context-eval-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.ctxeval#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## context-eval-probes: PASS
+
+files: 31, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+context-eval-probes: identical to the baseline: true (0 differences)
+
+context-scope-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.ctxscope#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## context-scope-probes: PASS
+
+files: 198, findings: 0, unexplained errors removed: 0, declared divergences: 6
+
+
+context-scope-probes: identical to the baseline: true (0 differences)
+
+interface-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.ifaces#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## interface-probes: PASS
+
+files: 9, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+interface-probes: identical to the baseline: true (0 differences)
+
+interface-probes-r5: packages: the HL7 validator loaded hl7.fhir.r5.core#5.0.0,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r5#6.2.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology#7.4.0,acme.ifaces.r5#0.1.0; gofhir ran with the base packages hl7.fhir.r5.core#5.0.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.4.0, the baseline with the same
+
+## interface-probes-r5: PASS
+
+files: 16, findings: 0, unexplained errors removed: 0, declared divergences: 8
+
+
+interface-probes-r5: identical to the baseline: true (0 differences)
+
+interface-probes-r4b: packages: the HL7 validator loaded hl7.fhir.r4b.core#4.3.0,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.ifaces.r4b#0.1.0; gofhir ran with the base packages hl7.fhir.r4b.core#4.3.0,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## interface-probes-r4b: PASS
+
+files: 9, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+interface-probes-r4b: identical to the baseline: true (0 differences)
+
+constraint-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.constraints#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## constraint-probes: PASS
+
+files: 81, findings: 0, unexplained errors removed: 0, declared divergences: 2
+
+
+constraint-probes: identical to the baseline: true (0 differences)
+
+invariant-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.invariants#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## invariant-probes: PASS
+
+files: 61, findings: 0, unexplained errors removed: 0, declared divergences: 2
+
+
+invariant-probes: identical to the baseline: true (0 differences)
+
+fixedpattern-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.fixedpattern#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## fixedpattern-probes: PASS
+
+files: 50, findings: 0, unexplained errors removed: 0, declared divergences: 32
+
+
+fixedpattern-probes: identical to the baseline: true (0 differences)
+
+target-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.targets#0.1.0,acme.nm#0.1.0,acme.vscope#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## target-probes: PASS
+
+files: 71, findings: 0, unexplained errors removed: 0, declared divergences: 12
+
+
+target-probes: identical to the baseline: true (0 differences)
+
+nested-slicing-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.nested#0.1.0,acme.targets#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## nested-slicing-probes: PASS
+
+files: 18, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+nested-slicing-probes: identical to the baseline: true (0 differences)
+
+json-shape-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## json-shape-probes: PASS
+
+files: 34, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+json-shape-probes: identical to the baseline: true (0 differences)
+
+binding-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## binding-probes: PASS
+
+files: 5, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+binding-probes: identical to the baseline: true (0 differences)
+
+binding-walk-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.bindwalk#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## binding-walk-probes: PASS
+
+files: 14, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+binding-walk-probes: identical to the baseline: true (0 differences)
+
+extension-walk-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.extwalk#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## extension-walk-probes: PASS
+
+files: 20, findings: 0, unexplained errors removed: 0, declared divergences: 2
+
+
+extension-walk-probes: identical to the baseline: true (0 differences)
+
+binding-profile-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.nocode#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## binding-profile-probes: PASS
+
+files: 10, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+binding-profile-probes: identical to the baseline: true (0 differences)
+
+valueset-membership-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.vsmember#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## valueset-membership-probes: PASS
+
+files: 43, findings: 0, unexplained errors removed: 0, declared divergences: 20
+
+
+valueset-membership-probes: identical to the baseline: true (0 differences)
+
+holder-profile-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.holder#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## holder-profile-probes: PASS
+
+files: 50, findings: 0, unexplained errors removed: 0, declared divergences: 18
+
+
+holder-profile-probes: identical to the baseline: true (0 differences)
+
+reference-walk-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.refwalk#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## reference-walk-probes: PASS
+
+files: 56, findings: 0, unexplained errors removed: 0, declared divergences: 4
+
+
+reference-walk-probes: identical to the baseline: true (0 differences)
+
+package-example-cpg-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.fhir.uv.cpg#1.0.0,fhir.cqf.common#4.0.1; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+package-example-cpg-probes: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## package-example-cpg-probes: PASS
+
+files: 4, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+package-example-cpg-probes: identical to the baseline: true (0 differences)
+
+package-example-cql-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#6.0.2,hl7.fhir.uv.extensions.r4#5.1.0,hl7.fhir.uv.extensions.r4#1.0.0,hl7.terminology#5.5.0,hl7.fhir.uv.crmi#1.0.0,hl7.fhir.uv.cql#1.0.0,hl7.fhir.us.cqfmeasures#5.0.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+package-example-cql-probes: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## package-example-cql-probes: PASS
+
+files: 2, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+package-example-cql-probes: identical to the baseline: true (0 differences)
+
+unknown-codesystem-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.unknowncs#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## unknown-codesystem-probes: PASS
+
+files: 521, findings: 0, unexplained errors removed: 0, declared divergences: 42
+
+
+unknown-codesystem-probes: identical to the baseline: true (0 differences)
+
+fullurl-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.refwalk#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## fullurl-probes: PASS
+
+files: 48, findings: 0, unexplained errors removed: 0, declared divergences: 54
+
+
+fullurl-probes: identical to the baseline: true (0 differences)
+
+fullurl-probes-r4b: packages: the HL7 validator loaded hl7.fhir.r4b.core#4.3.0,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0; gofhir ran with the base packages hl7.fhir.r4b.core#4.3.0,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## fullurl-probes-r4b: PASS
+
+files: 1, findings: 0, unexplained errors removed: 0, declared divergences: 2
+
+
+fullurl-probes-r4b: identical to the baseline: true (0 differences)
+
+fullurl-probes-r5: packages: the HL7 validator loaded hl7.fhir.r5.core#5.0.0,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r5#6.2.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology#7.4.0; gofhir ran with the base packages hl7.fhir.r5.core#5.0.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.4.0, the baseline with the same
+
+## fullurl-probes-r5: PASS
+
+files: 4, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+fullurl-probes-r5: identical to the baseline: true (0 differences)
+
+held-resource-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.held#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## held-resource-probes: PASS
+
+files: 39, findings: 0, unexplained errors removed: 0, declared divergences: 8
+
+
+held-resource-probes: identical to the baseline: true (0 differences)
+
+resolve-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.resolve#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## resolve-probes: PASS
+
+files: 19, findings: 0, unexplained errors removed: 0, declared divergences: 10
+
+
+resolve-probes: identical to the baseline: true (0 differences)
+
+resource-element-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.reselem#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## resource-element-probes: PASS
+
+files: 6, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+resource-element-probes: identical to the baseline: true (0 differences)
+
+canonical-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,acme.canonicals#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## canonical-probes: PASS
+
+files: 17, findings: 0, unexplained errors removed: 0, declared divergences: 2
+
+
+canonical-probes: identical to the baseline: true (0 differences)
+
+r5-probes: packages: the HL7 validator loaded hl7.fhir.r5.core#5.0.0,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r5#6.2.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology#7.4.0; gofhir ran with the base packages hl7.fhir.r5.core#5.0.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.4.0, the baseline with the same
+
+## r5-probes: PASS
+
+files: 8, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+r5-probes: identical to the baseline: true (0 differences)
+
+r4b-probes: packages: the HL7 validator loaded hl7.fhir.r4b.core#4.3.0,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0; gofhir ran with the base packages hl7.fhir.r4b.core#4.3.0,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## r4b-probes: PASS
+
+files: 1, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+r4b-probes: identical to the baseline: true (0 differences)
+
+deqm-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#6.3.0,us.nlm.vsac#0.22.0,hl7.fhir.uv.extensions.r4#1.0.0,hl7.terminology.r4#5.0.0,hl7.fhir.uv.bulkdata#2.0.0,hl7.fhir.uv.smart-app-launch#2.1.0,us.nlm.vsac#0.11.0,hl7.fhir.r4.examples#4.0.1,hl7.fhir.uv.sdc#3.0.0,us.cdc.phinvads#0.12.0,ihe.formatcode.fhir#1.1.0,hl7.fhir.us.core#6.1.0,fhir.dicom#2024.1.20240120,hl7.terminology#5.4.0,hl7.fhir.us.qicore#6.0.0,hl7.terminology.r4#6.0.2,hl7.fhir.uv.extensions.r4#5.1.0,hl7.terminology#5.5.0,hl7.fhir.uv.crmi#1.0.0,hl7.fhir.uv.cql#1.0.0,hl7.fhir.us.cqfmeasures#5.0.0,hl7.fhir.uv.cpg#1.0.0,fhir.cqf.common#4.0.1,hl7.fhir.us.davinci-deqm#5.0.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+deqm-probes: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## deqm-probes: PASS
+
+files: 15, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+deqm-probes: identical to the baseline: true (0 differences)
+
+deqm-examples: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#6.3.0,us.nlm.vsac#0.22.0,hl7.fhir.uv.extensions.r4#1.0.0,hl7.terminology.r4#5.0.0,hl7.fhir.uv.bulkdata#2.0.0,hl7.fhir.uv.smart-app-launch#2.1.0,us.nlm.vsac#0.11.0,hl7.fhir.r4.examples#4.0.1,hl7.fhir.uv.sdc#3.0.0,us.cdc.phinvads#0.12.0,ihe.formatcode.fhir#1.1.0,hl7.fhir.us.core#6.1.0,fhir.dicom#2024.1.20240120,hl7.terminology#5.4.0,hl7.fhir.us.qicore#6.0.0,hl7.terminology.r4#6.0.2,hl7.fhir.uv.extensions.r4#5.1.0,hl7.terminology#5.5.0,hl7.fhir.uv.crmi#1.0.0,hl7.fhir.uv.cql#1.0.0,hl7.fhir.us.cqfmeasures#5.0.0,hl7.fhir.uv.cpg#1.0.0,fhir.cqf.common#4.0.1,hl7.fhir.us.davinci-deqm#5.0.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+deqm-examples: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## deqm-examples: PASS
+
+files: 108, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+deqm-examples: identical to the baseline: true (0 differences)
+
+uscore-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#5.0.0,hl7.fhir.uv.extensions.r4#1.0.0,hl7.fhir.uv.bulkdata#2.0.0,hl7.fhir.uv.smart-app-launch#2.1.0,us.nlm.vsac#0.11.0,hl7.fhir.r4.examples#4.0.1,hl7.fhir.uv.sdc#3.0.0,us.cdc.phinvads#0.12.0,ihe.formatcode.fhir#1.1.0,hl7.fhir.us.core#6.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+uscore-probes: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## uscore-probes: PASS
+
+files: 7, findings: 0, unexplained errors removed: 0, declared divergences: 2
+
+
+uscore-probes: identical to the baseline: true (0 differences)
+
+uscore-examples: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#5.0.0,hl7.fhir.uv.extensions.r4#1.0.0,hl7.fhir.uv.bulkdata#2.0.0,hl7.fhir.uv.smart-app-launch#2.1.0,us.nlm.vsac#0.11.0,hl7.fhir.r4.examples#4.0.1,hl7.fhir.uv.sdc#3.0.0,us.cdc.phinvads#0.12.0,ihe.formatcode.fhir#1.1.0,hl7.fhir.us.core#6.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+uscore-examples: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## uscore-examples: PASS
+
+files: 183, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+uscore-examples: identical to the baseline: true (0 differences)
+
+ips: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#7.1.0,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.2.0,hl7.fhir.uv.smart-app-launch#2.0.0,hl7.fhir.uv.ipa#1.1.0,hl7.fhir.uv.ips#2.0.1; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+ips: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0
+
+## ips: PASS
+
+files: 44, findings: 0, unexplained errors removed: 0, declared divergences: 2
+
+
+ips: identical to the baseline: true (0 differences)
+
+mcode-examples: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.fhir.uv.genomics-reporting#2.0.0,hl7.terminology.r4#5.0.0,hl7.fhir.uv.extensions.r4#1.0.0,hl7.fhir.uv.bulkdata#2.0.0,hl7.fhir.uv.smart-app-launch#2.1.0,us.nlm.vsac#0.11.0,hl7.fhir.r4.examples#4.0.1,hl7.fhir.uv.sdc#3.0.0,us.cdc.phinvads#0.12.0,ihe.formatcode.fhir#1.1.0,hl7.fhir.us.core#6.1.0,hl7.fhir.us.mcode#4.0.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+mcode-examples: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## mcode-examples: PASS
+
+files: 179, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+mcode-examples: identical to the baseline: true (0 differences)
+
+aucore-examples: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#7.0.1,hl7.fhir.au.base#6.0.0,hl7.terminology.r5#5.3.0,hl7.fhir.uv.extensions#5.1.0-snapshot1,hl7.fhir.uv.extensions.r4#1.0.0,hl7.terminology#5.5.0,hl7.fhir.uv.smart-app-launch#2.2.0,hl7.fhir.uv.smart-app-launch#2.0.0,hl7.fhir.uv.ipa#1.1.0,hl7.fhir.au.core#2.0.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+aucore-examples: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1,hl7.fhir.r5.core#5.0.0
+
+## aucore-examples: PASS
+
+files: 65, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+aucore-examples: identical to the baseline: true (0 differences)
+
+chcore-examples: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#6.3.0,ihe.formatcode.fhir#1.4.0,hl7.terminology.r4#7.0.1,ch.fhir.ig.ch-term#3.3.0,hl7.terminology.r4#6.5.0,hl7.fhir.uv.extensions.r4#5.3.0-ballot-tc1,ch.fhir.ig.ch-core#6.0.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+chcore-examples: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## chcore-examples: PASS
+
+files: 48, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+chcore-examples: identical to the baseline: true (0 differences)
+
+clcore-examples: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0,hl7.terminology.r4#6.5.0,hl7.terminology.r4#6.1.0,hl7.fhir.uv.extensions.r4#5.1.0,hl7.fhir.cl.minsal.eis#0.1.0,hl7.fhir.cl.clcore#1.9.4; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+clcore-examples: packages left out of the closure (base packages, or core packages): hl7.fhir.r4.core#4.0.1
+
+## clcore-examples: PASS
+
+files: 20, findings: 0, unexplained errors removed: 0, declared divergences: 0
+
+
+clcore-examples: identical to the baseline: true (0 differences)
+
+## coverage of pkg/terminology/membership.go
+
+| function | blocks executed | executions |
+| --- | --- | --- |
+| either | 4/4 | 7914 |
+| both | 4/4 | 1146 |
+| *Registry.memberOf | 6/7 | 32817 |
+| *Registry.decideMember | 7/8 | 5846 |
+| *Registry.newMembership | 1/1 | 1618 |
+| *membership.of | 3/7 | 4854 |
+| *membership.taken | 3/5 | 6573 |
+| *membership.compose | 7/8 | 4394 |
+| *membership.composition | 12/12 | 12424 |
+| *membership.selects | 11/14 | 17636 |
+| *Registry.coversSystem | 9/10 | 194 |
+| *Registry.includesSystem | 4/7 | 19 |
+| *Registry.includesWholeSystem | 5/7 | 24 |
+| *Registry.systemsOf | 7/7 | 12200 |
+| *Registry.collectSystems | 13/15 | 9172 |
+| *Registry.inSystem | 8/8 | 4855 |
+| *Registry.clauseCodes | 5/5 | 4050 |
+| *Registry.expandClause | 21/24 | 88311 |
+| *Registry.expansionCodes | 10/10 | 32 |
+
