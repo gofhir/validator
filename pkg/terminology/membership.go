@@ -333,9 +333,9 @@ func (r *Registry) inSystem(c *Include, system, code string) answer {
 	return answerOut
 }
 
-// editionLacks reports whether the edition of c's system that c names (its version, or the one held)
-// is held, complete, and has no concept code: what it does not list is not one of its codes. A
-// supplement does not carry its system's codes, and an external system is checked on a server only.
+// editionLacks dice si la edición del sistema de c que c nombra (su versión, o la cargada) está
+// cargada, completa y sin el código: lo que no lista no es uno de sus códigos. Un supplement no trae
+// los códigos de su sistema, y un sistema externo solo se revisa en un servidor.
 func (r *Registry) editionLacks(c *Include, code string) bool {
 	if r.isExternalSystem(c.System) {
 		return false
@@ -352,11 +352,10 @@ func (r *Registry) editionLacks(c *Include, code string) bool {
 	return cs != nil && !cs.partial() && cs.Content != contentSupplement && findConcept(cs.Concept, code) == nil
 }
 
-// contentSupplement is the content of a CodeSystem that adds to another's concepts
-// (codesystem-content-mode): it does not carry that system's codes.
-//
-// Un supplement se registra por su propia URL, no por la del sistema que suplementa
-// (CodeSystem.supplements); esta rama solo cuenta cuando una cláusula nombra esa URL como sistema.
+// contentSupplement es el content de un CodeSystem que agrega propiedades a los códigos de otro
+// (codesystem-content-mode): no trae los códigos de ese sistema. Un supplement se registra por su
+// propia URL, no por la del sistema que suplementa (CodeSystem.supplements): esta rama solo cuenta
+// cuando una cláusula nombra esa URL como sistema.
 const contentSupplement = "supplement"
 
 // clauseExpansion is what a clause selects, keyed "system|code": the concepts it lists, or what it

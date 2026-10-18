@@ -268,6 +268,11 @@ que slicing y `memberOf` usen pertenencia estricta.
 | 1 | (baja) Faltaba un ciclo que pasa por excludes (R = U − V, V = U − R) | Fila: Unresolved, la menor solución en el orden de Kleene |
 | 1 | (baja) La rama del supplement solo cuenta cuando una cláusula nombra la URL del supplement | Comentario en `contentSupplement` |
 | 1 | (estilo) El comentario de `selects` mezclaba inglés y español | En español |
+| 2 | Los ocho de la ronda 1, verificados como cerrados (11 mutaciones, todas detectadas); los valores esperados se siguen de valueset.html#compositions y #expansion | — |
+| 2 | (baja) Los comentarios de `editionLacks` y `contentSupplement` mezclaban inglés y español | En español |
+
+**Convergencia:** la ronda 2 no dejó hallazgos de severidad media o mayor. El incremento 2 está cerrado
+(`make test` y lint en verde).
 
 ## Registro
 
