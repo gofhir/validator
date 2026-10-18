@@ -1,0 +1,13 @@
+{
+ "resourceType": "ValueSet",
+ "id": "vs-inc-t",
+ "url": "http://acme.local/fhir/ValueSet/vs-inc-t",
+ "status": "active",
+ "compose": {
+  "include": [
+   {
+    "system": "http://terminology.hl7.org/CodeSystem/acme-unknown"
+   }
+  ]
+ }
+}

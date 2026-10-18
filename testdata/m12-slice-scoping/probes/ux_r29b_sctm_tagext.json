@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"a","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","code":{"text":"x"},"meta":{"tag":[{"system":"http://snomed.info/sct/731000124108","code":"x"}],"profile":["http://acme.local/fhir/StructureDefinition/obs-tag"]}}

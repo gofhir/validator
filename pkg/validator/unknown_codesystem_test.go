@@ -28,6 +28,7 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 		// coding, and meta.security (extensible), a warning; in an entry and a contained resource too.
 		{"p1_obs_acme", []string{
 			"information CODESYSTEM_NOT_FOUND @ Observation.meta.tag[0].system",
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.meta.security[0]",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.category[0].coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.interpretation[0].coding[0].system",
@@ -48,6 +49,7 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 		}},
 		{"p1_obs_tho", []string{
 			"information CODESYSTEM_NOT_FOUND @ Observation.meta.tag[0].system",
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.meta.security[0]",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.category[0].coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.interpretation[0].coding[0].system",
@@ -75,14 +77,15 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 			"warning CODESYSTEM_NO_CODES @ Observation.meta.security[0]",
 		}},
 		{"p2_obs_ex_zz", []string{
+			"warning CODESYSTEM_EXAMPLE_CONTENT @ Observation.meta.security[0]",
+			"warning CODESYSTEM_EXAMPLE_CONTENT @ Observation.meta.tag[0]",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.bodySite.coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.category[0].coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.method.coding[0].system",
-			"warning CODE_NOT_IN_PARTIAL_CODESYSTEM @ Observation.meta.security[0]",
-			"warning CODE_NOT_IN_PARTIAL_CODESYSTEM @ Observation.meta.tag[0]",
 		}},
 		{"p2_obs_frag_zz", []string{
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.meta.security[0]",
 			"warning CODE_NOT_IN_PARTIAL_CODESYSTEM @ Observation.bodySite.coding[0].code",
 			"warning CODE_NOT_IN_PARTIAL_CODESYSTEM @ Observation.category[0].coding[0].code",
 			"warning CODE_NOT_IN_PARTIAL_CODESYSTEM @ Observation.code.coding[0].code",
@@ -91,19 +94,27 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 			"warning CODE_NOT_IN_PARTIAL_CODESYSTEM @ Observation.method.coding[0].code",
 		}},
 		// A profile binding meta.tag extensible checks it: no rule for Meta.
-		{"p3_obs_tag", []string{"warning CODESYSTEM_NOT_FOUND @ Observation.meta.tag[0].system"}},
+		{"p3_obs_tag", []string{
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.meta.tag[0]",
+			"warning CODESYSTEM_NOT_FOUND @ Observation.meta.tag[0].system",
+		}},
 		// IANA MIME types are unknown; RxNorm, NDC, bcp47 are the systems HL7 treats apart.
 		{"p10_s00", []string{
 			"information CODESYSTEM_NOT_FOUND @ Observation.meta.tag[0].system",
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.meta.security[0]",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.category[0].coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system",
 			"warning CODESYSTEM_NOT_FOUND @ Observation.meta.security[0].system",
 		}},
 		{"p10_s03", []string{
 			"information BINDING_CANNOT_VALIDATE @ Observation.meta.security[0]",
+			"information BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.meta.security[0]",
 			"warning BINDING_CANNOT_VALIDATE @ Observation.meta.tag[0]",
 		}},
-		{"p10_s07", []string{"information BINDING_CANNOT_VALIDATE @ Observation.meta.security[0]"}},
+		{"p10_s07", []string{
+			"information BINDING_CANNOT_VALIDATE @ Observation.meta.security[0]",
+			"information BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.meta.security[0]",
+		}},
 		{"p10_s10", []string{
 			"information BINDING_CANNOT_VALIDATE @ Observation.meta.tag[0]",
 			"warning BINDING_CANNOT_VALIDATE @ Observation.meta.security[0]",
@@ -133,7 +144,7 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 			"warning CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system",
 		}},
 		{"r23t_thonp_loc_a", []string{"warning CODESYSTEM_NO_CODES @ Location.operationalStatus"}},
-		{"r23u_ex_loc_a", []string{"warning CODE_NOT_IN_PARTIAL_CODESYSTEM @ Location.operationalStatus"}},
+		{"r23u_ex_loc_a", []string{"warning CODESYSTEM_EXAMPLE_CONTENT @ Location.operationalStatus"}},
 		{"r23r_np_coding_code", []string{
 			"warning CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system",
 			"warning CODESYSTEM_NO_CODES @ Observation.code.coding[0]",
@@ -141,11 +152,13 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 		{"r23m_obscod_loinc", []string{
 			"information BINDING_CANNOT_VALIDATE @ Observation.code.coding[0]",
 			"information BINDING_CANNOT_VALIDATE @ Observation.method.coding[0]",
+			"information BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.code.coding[0]",
 			"warning BINDING_CANNOT_VALIDATE @ Observation.category[0].coding[0]",
 		}},
 		{"r23m_obscod_cpt", []string{
 			"information BINDING_CANNOT_VALIDATE @ Observation.code.coding[0]",
 			"information BINDING_CANNOT_VALIDATE @ Observation.method.coding[0]",
+			"information BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.code.coding[0]",
 			"warning BINDING_CANNOT_VALIDATE @ Observation.category[0].coding[0]",
 		}},
 		{"r23m_obscod_bcp47", []string{
@@ -163,6 +176,102 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 			"warning CODESYSTEM_NO_CODES @ Observation.code.coding[0]",
 		}},
 		{"r24q_Ur_tho", []string{"error CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system"}},
+		// A Coding no binding checks, its system checked as a URI (HL7's namespace, a web page, an SD's url);
+		// a Quantity's system as a Coding's (not UCUM's, which ucumvalidator checks); a Coding with no code
+		// under a required binding (B-D37); a system an extensible binding's value set does not declare.
+		{"a2_h00_tag", []string{"error CODESYSTEM_URI_INVALID @ Observation.meta.tag[0]"}},
+		{"a2_h01_tag", []string{"error CODESYSTEM_URI_INVALID @ Observation.meta.tag[0]"}},
+		{"a2_h03_tag", []string{"error CODESYSTEM_URI_INVALID @ Observation.meta.tag[0]"}},
+		{"a2_h04_tag", nil},
+		{"a2_h05_tag", []string{"error CODESYSTEM_URI_INVALID @ Observation.meta.tag[0]"}},
+		{"a2_h06_tag", nil},
+		{"a2_h08_tag", []string{"error CODESYSTEM_URI_INVALID @ Observation.meta.tag[0]"}},
+		{"a2_h11_tag", []string{"information CODESYSTEM_NOT_FOUND @ Observation.meta.tag[0].system"}},
+		{"a2_q1_acme_nocode", nil},
+		{"a2_q3_hfhir", []string{"error CODESYSTEM_URI_INVALID @ Observation.valueQuantity"}},
+		{"a2_q4_req_acme", []string{"warning CODESYSTEM_NOT_FOUND @ Observation.valueQuantity.system"}},
+		{"a2_q5_ext_acme", []string{
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.valueQuantity",
+			"warning CODESYSTEM_NOT_FOUND @ Observation.valueQuantity.system",
+		}},
+		{"a2_q6_ucum_ok", nil},
+		{"a2_n2_loc_req", []string{"error BINDING_REQUIRED_NO_CODE @ Location.operationalStatus"}},
+		{"a2_n6_cc_req", []string{
+			"error BINDING_REQUIRED_NO_CODE @ Condition.clinicalStatus",
+			"warning CODING_NO_CODE_IN_CONCEPT @ Condition.clinicalStatus.coding[0].code",
+		}},
+		{"a2_e0_loc_ext", []string{
+			"information BINDING_CANNOT_VALIDATE @ Location.operationalStatus",
+			"information BINDING_EXTENSIBLE_OTHER_SYSTEM @ Location.operationalStatus",
+		}},
+		{"a2_e2_loc_ext", []string{
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Location.operationalStatus",
+			"warning CODESYSTEM_NOT_FOUND @ Location.operationalStatus.system",
+		}},
+		{"p1_qty", []string{"information CODESYSTEM_NOT_FOUND @ Observation.valueQuantity.system"}},
+		// A type derived from Quantity is not checked (HL7 checks a Quantity only); a value set's URL as
+		// a system, one error; a CodeableConcept's coding with a known system and no code, a warning.
+		{"r26_a02_age_hfhir", nil},
+		{"r26_t01_vs_tho", []string{"error CODESYSTEM_URI_INVALID @ Observation.meta.tag[0]"}},
+		{"r26_c01_cc_known_nocode", []string{"warning CODING_NO_CODE_IN_CONCEPT @ Observation.category[0].coding[0].code"}},
+		// An example CodeSystem that lists the code cannot tell it is right; a CodeableConcept's coding with
+		// no code: a code system not usable or unknown reported as with one (an error under a required
+		// binding for a system in HL7's namespaces), a usable one that no code is provided.
+		{"r27l1", []string{"warning CODESYSTEM_EXAMPLE_CONTENT @ Location.operationalStatus"}},
+		{"r27g3", []string{"warning CODESYSTEM_EXAMPLE_CONTENT @ Basic.meta.tag[0]"}},
+		{"r27n1", []string{"warning CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system"}},
+		{"r27n3", []string{"warning CODESYSTEM_NOT_FOUND @ Observation.code.coding[0].system"}},
+		{"r27n5", []string{"warning CODING_NO_CODE_IN_CONCEPT @ Observation.code.coding[0].code"}},
+		{"r27f2", []string{
+			"error BINDING_REQUIRED_NO_CODE @ Observation.method",
+			"error CODESYSTEM_NOT_FOUND @ Observation.method.coding[0].system",
+		}},
+		// A CodeableConcept's coding with no code under a required binding, its system in HL7's
+		// namespaces: unknown, an error. A Quantity with a system and no code: nothing, its binding asks
+		// for no unit. UCUM under an extensible binding: that it cannot be validated only.
+		{"r28n_hfu_ccreq", []string{
+			"error BINDING_REQUIRED_NO_CODE @ Observation.method",
+			"error CODESYSTEM_NOT_FOUND @ Observation.method.coding[0].system",
+		}},
+		{"r28q_nc_hfu_req", nil},
+		{"r28u_loc_ext", []string{"warning BINDING_CANNOT_VALIDATE @ Location.operationalStatus"}},
+		// A value set's URL as a system: an error in every Coding, at its system where a binding checks
+		// it; not in a CodeableConcept's coding no binding of its own checks.
+		{"r28v_ext", []string{
+			"error CODESYSTEM_URI_INVALID @ Location.operationalStatus.system",
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Location.operationalStatus",
+		}},
+		{"r28v_cc", []string{"warning CODESYSTEM_NOT_FOUND @ Observation.method.coding[0].system"}},
+		// A Quantity a binding checks is checked besides as one no binding checks.
+		{"r28v_qty_ext", []string{
+			"error CODESYSTEM_URI_INVALID @ Observation.valueQuantity",
+			"error CODESYSTEM_URI_INVALID @ Observation.valueQuantity.system",
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.valueQuantity",
+		}},
+		{"r28b_hfu_ext", []string{
+			"error CODESYSTEM_URI_INVALID @ Observation.valueQuantity",
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.valueQuantity",
+			"warning CODESYSTEM_NOT_FOUND @ Observation.valueQuantity.system",
+		}},
+		// A system in HL7's namespace a NamingSystem names is published: unknown, a warning, not an
+		// invalid URI. A Coding a profile binds where its base element is bound by example only is
+		// checked besides as one no binding checks, as an extension's value is.
+		{"r29s_icd10nl_tag", []string{"warning CODESYSTEM_NOT_FOUND @ Basic.meta.tag[0].system"}},
+		// but a CodeableConcept's coding under a required binding: an error; an alias the NamingSystem
+		// does not prefer is no published system.
+		{"r30s_icd10nl_ccreq", []string{"error CODESYSTEM_NOT_FOUND @ Observation.method.coding[0].system"}},
+		{"r30s_npnalias_tag", []string{"error CODESYSTEM_URI_INVALID @ Basic.meta.tag[0]"}},
+		{"r29b_bfo_tagext", []string{
+			"error CODESYSTEM_URI_INVALID @ Observation.meta.tag[0]",
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Observation.meta.tag[0]",
+			"warning CODESYSTEM_NOT_FOUND @ Observation.meta.tag[0].system",
+		}},
+		{"r29b_hfu_xcext", []string{
+			"error CODESYSTEM_URI_INVALID @ Basic.extension[0].valueCoding",
+			"warning BINDING_EXTENSIBLE_OTHER_SYSTEM @ Basic.extension[0].valueCoding",
+			"warning CODESYSTEM_NOT_FOUND @ Basic.extension[0].valueCoding.system",
+		}},
+		{"r29b_np_tagext", []string{"warning CODESYSTEM_NO_CODES @ Observation.meta.tag[0]"}},
 		// LOINC in a CodeableConcept: nothing of its code system.
 		{"sev_t1", nil},
 	} {
@@ -178,7 +287,9 @@ func TestUnknownCodeSystemSeverity(t *testing.T) {
 			var got []string
 			for _, is := range res.Issues {
 				switch is.MessageID {
-				case "CODESYSTEM_NOT_FOUND", "CODESYSTEM_NO_CODES", "BINDING_CANNOT_VALIDATE", "CODE_NOT_IN_PARTIAL_CODESYSTEM":
+				case "CODESYSTEM_NOT_FOUND", "CODESYSTEM_NO_CODES", "BINDING_CANNOT_VALIDATE", "CODE_NOT_IN_PARTIAL_CODESYSTEM",
+					"CODESYSTEM_URI_INVALID", "BINDING_EXTENSIBLE_OTHER_SYSTEM", "BINDING_REQUIRED_NO_CODE", "CODING_NO_CODE_IN_CONCEPT",
+					"CODESYSTEM_EXAMPLE_CONTENT":
 					got = append(got, string(is.Severity)+" "+is.MessageID+" @ "+strings.Join(is.Expression, ","))
 				}
 			}

@@ -1,0 +1,1 @@
+{"resourceType":"Location","id":"e4","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"operationalStatus":{"system":"urn:oid:1.2.3","code":"x"},"meta":{"profile":["http://acme.local/fhir/StructureDefinition/loc-ext"]}}

@@ -6,14 +6,16 @@ import (
 	"time"
 )
 
-// Clone returns a registry holding the ValueSets and CodeSystems this one holds, to which more can
-// be loaded without changing this one, with the same provider and authority. The resources are
+// Clone returns a registry holding the ValueSets, CodeSystems and NamingSystems this one holds, to
+// which more can be loaded without changing this one, with the same provider and authority. The resources are
 // shared, as loaded resources are only read; expansions are built again by each registry.
 func (r *Registry) Clone() *Registry {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	r.providerMu.RLock()
 	defer r.providerMu.RUnlock()
+	r.nsMu.Lock()
+	defer r.nsMu.Unlock()
 	return &Registry{
 		valueSets:            maps.Clone(r.valueSets),
 		codeSystems:          maps.Clone(r.codeSystems),
@@ -25,6 +27,8 @@ func (r *Registry) Clone() *Registry {
 		fhirVersion:          r.fhirVersion,
 		valueSetsByVersion:   maps.Clone(r.valueSetsByVersion),
 		codeSystemsByVersion: maps.Clone(r.codeSystemsByVersion),
+		namingSystems:        maps.Clone(r.namingSystems),
+		pendingNamingSystems: slices.Clone(r.pendingNamingSystems),
 		clauseCache:          make(map[*Include]clauseExpansion),
 		systemsCache:         make(map[*ValueSet]includedSystems),
 		expansionCache:       make(map[*ValueSet]expandedCodes),

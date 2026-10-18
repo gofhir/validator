@@ -1,0 +1,25 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "cond-acmevs",
+ "url": "http://acme.local/fhir/StructureDefinition/cond-acmevs",
+ "name": "condacmevs",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Condition",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Condition",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Condition.verificationStatus",
+    "path": "Condition.verificationStatus",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://acme.local/fhir/ValueSet/vs"
+    }
+   }
+  ]
+ }
+}

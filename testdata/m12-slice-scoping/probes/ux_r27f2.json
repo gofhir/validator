@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"r27f2","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","code":{"text":"x"},"method":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/acme-np23"}]},"meta":{"profile":["http://acme.local/fhir/StructureDefinition/obs-cc"]}}

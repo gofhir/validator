@@ -1,0 +1,1 @@
+{"resourceType":"Location","id":"a","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"meta":{"security":[{"system":"http://acme.local/fhir/ValueSet/vs","code":"x"}]}}

@@ -26,6 +26,10 @@ const (
 const (
 	codingType          = "Coding"
 	codeableConceptType = "CodeableConcept"
+	quantityType        = "Quantity"
+	contentNotPresent   = "not-present"
+	contentExample      = "example"
+	ucumSystem          = "http://unitsofmeasure.org"
 )
 
 // Validator validates terminology bindings.
@@ -233,21 +237,16 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 
-	// A Coding that names no system cannot be placed in any vocabulary, and one that names
-	// a system without a code identifies nothing in it. Neither is decidable, so both are
-	// reported here rather than falling through to a lookup that cannot answer.
-	//
-	// The severities differ, and follow the reference: a missing system is a warning because
-	// the concept may still be conveyed by CodeableConcept.text, whereas a system with no
-	// code is an error — the instance committed to a vocabulary and then said nothing in it.
-	// Verified against HL7 validator_cli 6.9.12; both are reported on the Coding itself, not
-	// on a child, since the defect is the combination rather than either value.
+	// A Coding that names no system cannot be placed in any vocabulary: a warning, as the
+	// concept may still be conveyed by CodeableConcept.text. One that names a system and no code
+	// is allowed (Coding.code 0..1): only a CodeableConcept's is reported (checkNoCode), as HL7
+	// 6.10.2 reports it; a required binding asks for a code (validateCodingBinding).
 	switch {
 	case system == "":
 		result.AddWarningWithID(issue.DiagCodingNoSystem, nil, fhirPath)
 		return
 	case code == "":
-		result.AddErrorWithID(issue.DiagCodingNoCode, map[string]any{"system": system}, fhirPath)
+		v.checkNoCode(system, cctx(), fhirPath, result)
 		return
 	}
 
@@ -258,6 +257,13 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 		terminology.LookupOptions{SystemVersion: systemVersion})
 	if err != nil {
 		return
+	}
+	// A CodeSystem with example content only cannot tell a code is right, though it lists it: it
+	// is not usable, as HL7 6.10.2 treats it.
+	if res.Resolution == terminology.Valid {
+		if cs := v.codeSystemOf(system, systemVersion); cs != nil && cs.Content == contentExample {
+			res = terminology.CodeResult{Resolution: terminology.Unresolved, Partial: &terminology.PartialCodeSystem{Content: cs.Content, Version: cs.Version}}
+		}
 	}
 
 	switch res.Resolution {
@@ -272,16 +278,25 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 			}
 			params["content"] = p.Content
 			switch p.Content {
-			case "not-present":
+			case contentNotPresent:
 				why = noCodes
-			case "example":
+			case contentExample:
 				why = exampleCodes
 			default:
 				why = fragmentCodes
 			}
 		}
 		// The context is worked out only here: it resolves the value sets that bind the Coding.
-		for _, r := range reportUnchecked(why, system, cctx()) {
+		facts := systemFacts{
+			valueSet:     v.termRegistry.GetValueSet(system) != nil,
+			structure:    v.sdRegistry.GetByURL(system) != nil,
+			namingSystem: v.termRegistry.NamesCodeSystem(system),
+		}
+		if rest, ok := strings.CutPrefix(system, "https:"); ok {
+			facts.httpKnown = v.termRegistry.GetCodeSystem("http:"+rest) != nil
+		}
+		for _, r := range reportUnchecked(why, system, cctx(), facts) {
+			params["reason"] = r.reason
 			result.AddWithID(r.severity, r.id, params, fhirPath+r.at)
 		}
 		return
@@ -297,6 +312,29 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 
 	if providedDisplay != "" {
 		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
+	}
+}
+
+// checkNoCode checks a Coding with a system and no code, in context c. Only a CodeableConcept's is
+// reported: a code system it cannot use as with a code (reportOne), one it can use that no code is
+// provided, a warning, as HL7 reports them (UNKNOWN_CODESYSTEM, NO_CODE_PROVIDED); nothing of a
+// system HL7 checks on a server only.
+func (v *Validator) checkNoCode(system string, c codingContext, fhirPath string, result *issue.Result) {
+	cs := v.termRegistry.GetCodeSystem(system)
+	switch class := hl7SystemClasses[system]; {
+	case !c.inConcept || class.serverChecked():
+	case cs != nil && class == 0 && cs.Content != contentNotPresent && cs.Content != contentExample:
+		result.AddWarningWithID(issue.DiagCodingNoCodeInConcept, map[string]any{"system": system}, fhirPath+".code")
+	default:
+		why := notFound
+		if cs != nil && cs.Content == contentNotPresent {
+			why = noCodes
+		} else if cs != nil && cs.Content == contentExample {
+			why = exampleCodes
+		}
+		if r := reportOne(why, system, c); r.report {
+			result.AddWithID(r.severity, r.id, map[string]any{"system": system, "systemCode": ""}, fhirPath+r.at)
+		}
 	}
 }
 
@@ -356,7 +394,7 @@ func (v *Validator) validateMapBinding(ctx context.Context, val map[string]any, 
 
 	// Looks like a Coding with system
 	if _, ok := val["system"]; ok {
-		v.validateCodingBinding(ctx, val, binding, fhirPath, result)
+		v.validateCodingBinding(ctx, val, typeName, binding, fhirPath, result)
 		return
 	}
 
@@ -379,11 +417,20 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, codin
 	anyValidInVS, undecided, codeLabels := v.validateCodings(ctx, codings, binding)
 
 	// Codings without a code carry none. A required binding needs one; an extensible one is told
-	// there is none when no coding names a system either (HL7 names the codings of a system that
-	// carry no code as not in the value set).
+	// there is none when no coding names a system either, else that none of them is in the value set,
+	// named by their systems (HL7's Terminology_TX_NoValid_2_CC).
 	if len(codeLabels) == 0 && (binding.Strength == strengthRequired || !anySystem(codings)) {
 		v.reportNoCode(ctx, binding, fhirPath, result)
 		return
+	}
+	if len(codeLabels) == 0 {
+		// Codings of systems with no code: a concept with no code is none of the value set's; of a
+		// value set that does not resolve, only that it is not found (reportNoCode).
+		if !v.termRegistry.ResolvesValueSet(ctx, binding.ValueSet) {
+			v.reportNoCode(ctx, binding, fhirPath, result)
+			return
+		}
+		codeLabels = systemLabels(codings)
 	}
 
 	// No coding is a member, and one could not be decided: whether the concept is from the value set
@@ -415,6 +462,19 @@ func (v *Validator) validateCodeableConceptWithCoding(ctx context.Context, codin
 			fhirPath,
 		)
 	}
+}
+
+// systemLabels labels the codings that name a system, and carry no code, by their system.
+func systemLabels(codings []any) []string {
+	var labels []string
+	for _, c := range codings {
+		if m, ok := c.(map[string]any); ok {
+			if s, _ := m["system"].(string); s != "" {
+				labels = append(labels, s+"#")
+			}
+		}
+	}
+	return labels
 }
 
 // reportNoCode reports a CodeableConcept that carries no code (only text, or nothing): an error
@@ -530,13 +590,21 @@ func (v *Validator) validateCodeBinding(ctx context.Context, code, system string
 	}
 }
 
-// validateCodingBinding validates a Coding against a ValueSet and its CodeSystem.
-func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string]any, binding *registry.Binding, fhirPath string, result *issue.Result) {
+// validateCodingBinding validates a Coding, or a Quantity's coded unit (typeName), against a ValueSet
+// and its CodeSystem.
+func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string]any, typeName string, binding *registry.Binding, fhirPath string, result *issue.Result) {
 	system, _ := coding["system"].(string)
 	code, _ := coding["code"].(string)
 
 	if code == "" {
-		return // Empty code is handled elsewhere
+		// A Coding with a system and no code provides no code: under a required binding the
+		// concept must come from the value set, as for a CodeableConcept with none (decided by the
+		// specification; HL7 6.10.2 reports nothing for a Coding). A Quantity with no code is a
+		// value with no coded unit, which its binding does not ask for (HL7 reports nothing).
+		if binding.Strength == strengthRequired && typeName != quantityType {
+			v.reportNoCode(ctx, binding, fhirPath, result)
+		}
+		return
 	}
 
 	// Validate against the ValueSet binding
@@ -659,12 +727,31 @@ func (v *Validator) reportBindingViolation(system, code string, res terminology.
 	case strengthRequired:
 		result.AddErrorWithID(issue.DiagBindingRequired, args, fhirPath)
 	case strengthExtensible:
-		reportExtensibleViolation(system, membership, args, fhirPath, result)
+		v.reportExtensibleViolation(system, membership, args, fhirPath, result)
 	}
 }
 
+// notUsable reports whether system is one whose codes cannot be told under a binding: one HL7's
+// terminology has with no codes, UCUM (whose codes HL7 says it cannot validate without a server), or
+// a CodeSystem loaded with content not-present or example.
+func (v *Validator) notUsable(system string) bool {
+	if class := hl7SystemClasses[system]; class == classNotUsable || class == classUCUM {
+		return true
+	}
+	cs := v.termRegistry.GetCodeSystem(system)
+	return cs != nil && (cs.Content == contentNotPresent || cs.Content == contentExample)
+}
+
+// codeSystemOf returns the CodeSystem a Coding names, in the version it names, or nil.
+func (v *Validator) codeSystemOf(system, version string) *terminology.CodeSystem {
+	if version != "" {
+		return v.termRegistry.GetCodeSystemVersion(system, version)
+	}
+	return v.termRegistry.GetCodeSystem(system)
+}
+
 // reportExtensibleViolation picks the extensible diagnostic for a non-member code.
-func reportExtensibleViolation(system string, membership terminology.Membership, args map[string]any, fhirPath string, result *issue.Result) {
+func (v *Validator) reportExtensibleViolation(system string, membership terminology.Membership, args map[string]any, fhirPath string, result *issue.Result) {
 	// A primitive code element carries no system — it is implied by the ValueSet
 	// — so there is no other system to be extending with.
 	if system == "" {
@@ -674,10 +761,19 @@ func reportExtensibleViolation(system string, membership terminology.Membership,
 
 	switch membership {
 	case terminology.MembershipExcluded:
-		// A code from a system the ValueSet does not declare: exactly the
-		// extension an extensible binding exists to permit. Informational so it
-		// stays non-failing under strict mode, where a warning would fail.
-		result.AddInfoWithID(issue.DiagBindingExtensibleOther, args, fhirPath)
+		// A code from a system the ValueSet does not declare: an extensible binding permits it
+		// only where the value set has no suitable code, which the validator cannot judge, so a
+		// warning, as HL7 6.10.2 reports it (Terminology_TX_NoValid_13); information for a system
+		// HL7 checks only on a terminology server (Terminology_TX_Binding_NoServer).
+		switch {
+		case hl7SystemClasses[system].serverChecked():
+			result.AddInfoWithID(issue.DiagBindingExtensibleOther, args, fhirPath)
+			return
+		case v.notUsable(system):
+			// HL7 says only that the code cannot be validated (reportUnchecked reports it).
+			return
+		}
+		result.AddWarningWithID(issue.DiagBindingExtensibleOther, args, fhirPath)
 	case terminology.MembershipUnknown:
 		result.AddWarningWithID(issue.DiagBindingExtensibleUnknown, args, fhirPath)
 	case terminology.MembershipIncluded:

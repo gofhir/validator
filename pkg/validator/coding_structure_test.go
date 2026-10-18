@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -69,41 +70,43 @@ func TestCodingWithNoSystemIsWarnedWithoutACode(t *testing.T) {
 	}
 }
 
-// TestCodingWithSystemButNoCodeIsError is the more severe half. Naming a vocabulary and
-// then saying nothing in it is not a judgement call the reader can recover from, unlike a
-// missing system where text may still carry the meaning.
-func TestCodingWithSystemButNoCodeIsError(t *testing.T) {
-	v := getSharedValidator(t)
-
-	resource := []byte(`{
-	  "resourceType": "Observation",
-	  "status": "final",
-	  "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"},
-	  "code": {"coding": [{"system": "http://loinc.org", "display": "d"}]}
-	}`)
-
-	result, err := v.Validate(context.Background(), resource)
+// A Coding that names a system and no code is allowed (Coding.code 0..1): nothing is reported of
+// it, as HL7 6.10.2 reports nothing, but under a required binding, which asks for a code
+// (BINDING_REQUIRED_NO_CODE, decided by the specification; HL7 reports nothing for a Coding).
+func TestCodingWithSystemButNoCode(t *testing.T) {
+	v, err := New(WithVersion("4.0.1"), WithPackageTgz(filepath.Join("..", "..", "testdata", "m12-slice-scoping", "packages", "acme.unknowncs-0.1.0.tgz")))
 	if err != nil {
-		t.Fatalf("Validate: %v", err)
+		t.Fatal(err)
 	}
 
-	got := issueFor(t, result, issue.DiagCodingNoCode)
-	if got == nil {
-		t.Fatalf("a Coding naming a system with no code must be reported; issues: %v",
-			result.Issues)
-	}
-	if got.Severity != issue.SeverityError {
-		t.Errorf("severity = %s, want %s", got.Severity, issue.SeverityError)
-	}
-	// The system belongs in the message — it says which vocabulary was left unanswered.
-	if !strings.Contains(got.Diagnostics, "http://loinc.org") {
-		t.Errorf("diagnostics = %q, want the system named", got.Diagnostics)
-	}
-	// LOINC is external and unresolvable here, but that is a separate matter: an absent
-	// code is decidable without consulting any terminology source.
-	if issueFor(t, result, issue.DiagBindingCannotValidate) != nil {
-		t.Error("an absent code needs no terminology lookup, so it must not be reported " +
-			"as merely unvalidatable")
+	for _, tt := range []struct {
+		name, resource string
+		want           issue.DiagnosticID // "" for none
+	}{
+		{"no binding requires a code", `{"resourceType": "Observation", "status": "final",
+		  "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"},
+		  "code": {"coding": [{"system": "http://loinc.org", "display": "d"}]}}`, ""},
+		{"a required binding", `{"resourceType": "Location", "id": "l",
+		  "meta": {"profile": ["http://acme.local/fhir/StructureDefinition/loc-req"]},
+		  "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"},
+		  "operationalStatus": {"system": "http://acme.local/cs/known"}}`, issue.DiagBindingRequiredNoCode},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := v.Validate(context.Background(), []byte(tt.resource))
+			if err != nil {
+				t.Fatalf("Validate: %v", err)
+			}
+			if issueFor(t, result, issue.DiagnosticID("CODING_NO_CODE")) != nil {
+				t.Errorf("CODING_NO_CODE reported: %v", result.Issues)
+			}
+			switch got := issueFor(t, result, tt.want); {
+			case tt.want == "":
+			case got == nil:
+				t.Errorf("want %s; issues: %v", tt.want, result.Issues)
+			case got.Severity != issue.SeverityError:
+				t.Errorf("severity %s, want error", got.Severity)
+			}
+		})
 	}
 }
 
@@ -125,7 +128,7 @@ func TestCodeableConceptWithOnlyTextIsSilent(t *testing.T) {
 		t.Fatalf("Validate: %v", err)
 	}
 
-	for _, id := range []issue.DiagnosticID{issue.DiagCodingNoSystem, issue.DiagCodingNoCode} {
+	for _, id := range []issue.DiagnosticID{issue.DiagCodingNoSystem, issue.DiagnosticID("CODING_NO_CODE")} {
 		if issueFor(t, result, id) != nil {
 			t.Errorf("%s fired on a CodeableConcept with no coding; text alone is valid", id)
 		}

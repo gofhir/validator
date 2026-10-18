@@ -1,0 +1,1 @@
+{"resourceType":"MedicationRequest","id":"a03","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"active","intent":"order","medicationCodeableConcept":{"text":"x"},"subject":{"display":"x"},"dispenseRequest":{"expectedSupplyDuration":{"value":3,"system":"http://hl7.org/fhir/acme-unknown","code":"x"}}}

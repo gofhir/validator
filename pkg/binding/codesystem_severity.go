@@ -28,6 +28,10 @@ type codingContext struct {
 	codingBound    bool
 	codingChecked  bool
 	codingRequired bool
+	// A binding checks the Coding (or Quantity) and none checks its base element (a profile's or an
+	// extension's binding on an element the base resource or type leaves unbound, or binds by
+	// example): HL7 checks it besides as one no binding checks.
+	baseUnchecked bool
 }
 
 // codingContextOf returns the context of a Coding governed by def, held by holder: the definition
@@ -53,6 +57,11 @@ func (v *Validator) codingContextOf(ctx context.Context, def, holder *registry.E
 		}
 	}
 	c.inConcept = holder != nil
+	if holder == nil && c.checked {
+		if base := v.baseOf(def); base != nil && v.checkingBinding(ctx, base) == nil {
+			c.baseUnchecked = true
+		}
+	}
 	return c
 }
 
@@ -161,6 +170,7 @@ type uncheckedReport struct {
 	severity issue.Severity
 	id       issue.DiagnosticID
 	at       string
+	reason   string // why the system URI is not valid, for DiagCodeSystemURIInvalid
 	report   bool
 }
 
@@ -170,18 +180,112 @@ type uncheckedReport struct {
 // warning (an error under a required binding for a system in HL7's namespaces); a Coding no binding
 // checks gets a hint, information, but for the systems it treats apart. A CodeableConcept's coding
 // a binding on the coding itself binds is reported, besides, as a Coding that binding checks, or
-// none does (an example binding).
-func reportUnchecked(why unchecked, system string, c codingContext) []uncheckedReport {
-	var out []uncheckedReport
-	if r := reportOne(why, system, c); r.report {
-		out = append(out, r)
-	}
+// none does (an example binding). A Coding or Quantity a binding checks where none checks its base
+// element is reported, besides, as one no binding checks.
+func reportUnchecked(why unchecked, system string, c codingContext, f systemFacts) []uncheckedReport {
+	out := reportPath(why, system, c, f)
 	if c.inConcept && c.codingBound {
-		if r := reportOne(why, system, codingContext{checked: c.codingChecked, required: c.codingRequired}); r.report {
-			out = append(out, r)
-		}
+		out = append(out, reportPath(why, system, codingContext{checked: c.codingChecked, required: c.codingRequired}, f)...)
+	}
+	if c.baseUnchecked {
+		out = append(out, reportPath(why, system, codingContext{}, f)...)
 	}
 	return out
+}
+
+// systemFacts are what the definitions loaded say of a system no CodeSystem has: whether a value
+// set has it as its url, and whether, written with https, a CodeSystem has it with http.
+type systemFacts struct {
+	valueSet  bool
+	httpKnown bool
+	structure bool // a StructureDefinition has it as its url, which HL7 takes as a code system of its elements
+	// A NamingSystem of kind codesystem has it as its preferred unique id: the code system is
+	// published, its codes are not here.
+	namingSystem bool
+}
+
+// reportPath is the reports of one of HL7's paths: a Coding whose system is a value set's URL is
+// that error alone, which the specification states (datatypes.html#Coding: the system SHALL NOT
+// contain a reference to a value set), wherever the Coding is but as a CodeableConcept's coding no
+// binding of its own checks, where HL7 does not say it (at the system where a binding checks the
+// Coding, as HL7 places it); a Coding no binding checks, its system unknown, is first checked as a
+// URI (uriProblems).
+func reportPath(why unchecked, system string, c codingContext, f systemFacts) []uncheckedReport {
+	if why == notFound && f.valueSet && !c.inConcept {
+		r := uncheckedReport{severity: issue.SeverityError, id: issue.DiagCodeSystemURIInvalid, reason: "it is a value set's URL, not a code system's", report: true}
+		if c.checked {
+			r.at = ".system"
+		}
+		return []uncheckedReport{r}
+	}
+	r := reportOne(why, system, c)
+	if f.namingSystem && strings.HasPrefix(system, "http://hl7.org/fhir") && r.id == issue.DiagCodeSystemNotFound &&
+		(!c.inConcept || !c.required) {
+		// A code system HL7 publishes under its namespace whose codes are not here: unknown, a
+		// warning, as HL7 reports it (its terminology package has a CodeSystem with no codes for
+		// it), but a CodeableConcept's coding under a required binding, still an error.
+		r.severity = issue.SeverityWarning
+	}
+	if c.inConcept || c.checked || why != notFound || hl7SystemClasses[system] != 0 {
+		if r.report {
+			return []uncheckedReport{r}
+		}
+		return nil
+	}
+	reasons, keepUnknown := uriProblems(system, f)
+	var out []uncheckedReport
+	for _, reason := range reasons {
+		out = append(out, uncheckedReport{severity: issue.SeverityError, id: issue.DiagCodeSystemURIInvalid, reason: reason, report: true})
+	}
+	if keepUnknown && r.report {
+		out = append(out, r)
+	}
+	return out
+}
+
+// noHTTPS are the systems HL7 reports written with https (InstanceValidator.NO_HTTPS_LIST).
+var noHTTPS = map[string]bool{
+	"https://loinc.org": true, "https://unitsofmeasure.org": true, "https://snomed.info/sct": true,
+	"https://www.nlm.nih.gov/research/umls/rxnorm": true,
+}
+
+// uriProblems are the reasons the HL7 validator 6.10.2 gives a system URI no CodeSystem has, in a
+// Coding no binding checks, an error each (InstanceValidator.checkCode); and whether the system is
+// besides reported unknown. A system in HL7's namespace that HL7 does not publish is no local one,
+// as the specification reserves that namespace (terminologies-systems.html).
+func uriProblems(system string, f systemFacts) (reasons []string, keepUnknown bool) {
+	switch {
+	case strings.HasPrefix(system, "http://build.fhir.org") || strings.HasPrefix(system, "https://build.fhir.org"):
+		return []string{"it is a build.fhir.org URL, not a canonical one"}, false
+	case hasAnyPrefix(system, "http://hl7.org/fhir", "https://hl7.org/fhir", "http://www.hl7.org/fhir", "https://www.hl7.org/fhir"):
+		switch {
+		case f.structure, f.namingSystem:
+			return nil, true
+		case strings.HasPrefix(system, "http://hl7.org/fhir/test"):
+			return nil, false
+		case strings.HasSuffix(system, ".html"):
+			return []string{"it is the URL of a web page, not of a code system"}, false
+		}
+		return []string{"it is in HL7's namespace, and no code system HL7 publishes"}, false
+	}
+	for _, base := range []string{"http://snomed.info/sct", "http://loinc.org", "http://unitsofmeasure.org", "http://www.nlm.nih.gov/research/umls/rxnorm"} {
+		if strings.HasPrefix(system, base) && system != base {
+			return []string{"it starts with " + base + " and is not it"}, false
+		}
+	}
+	if strings.HasPrefix(system, "https:") && (f.httpKnown || noHTTPS[system]) {
+		return []string{"it is a code system's URL written with https"}, false
+	}
+	return nil, true
+}
+
+func hasAnyPrefix(s string, prefixes ...string) bool {
+	for _, p := range prefixes {
+		if strings.HasPrefix(s, p) {
+			return true
+		}
+	}
+	return false
 }
 
 // reportOne is reportUnchecked's report for one of HL7's paths.
@@ -231,7 +335,7 @@ func reportOne(why unchecked, system string, c codingContext) uncheckedReport {
 		}
 		return r
 	case why == exampleCodes:
-		return uncheckedReport{severity: issue.SeverityWarning, id: issue.DiagCodeNotInPartialCodeSystem, report: true}
+		return uncheckedReport{severity: issue.SeverityWarning, id: issue.DiagCodeSystemExampleContent, report: true}
 	case c.checked:
 		return unknown
 	}

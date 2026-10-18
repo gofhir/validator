@@ -1,0 +1,1 @@
+{"resourceType":"Basic","id":"a","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"code":{"text":"x"},"extension":[{"url":"http://acme.local/fhir/StructureDefinition/ext-coding-ext","valueCoding":{"system":"http://hl7.org/fhir/unknown-x","code":"x"}}]}

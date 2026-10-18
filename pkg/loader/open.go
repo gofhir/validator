@@ -55,9 +55,10 @@ func (p *Package) EachResource(fn func(data json.RawMessage, example bool)) {
 }
 
 // deferredTypes are the resource types a package opened with OpenPackage defers: the validator's
-// terminology reads a ValueSet or CodeSystem when a validation needs it. StructureDefinitions are
-// read at once, as the registry indexes them by type; other resource types are not read.
-var deferredTypes = map[string]bool{"ValueSet": true, "CodeSystem": true}
+// terminology reads a ValueSet, CodeSystem or NamingSystem when a validation needs it.
+// StructureDefinitions are read at once, as the registry indexes them by type; other resource types
+// are not read.
+var deferredTypes = map[string]bool{"ValueSet": true, "CodeSystem": true, "NamingSystem": true}
 
 // packageIndex is a package's .index.json, version 2 of the NPM package specification's index.
 type packageIndex struct {
@@ -72,7 +73,7 @@ type packageIndex struct {
 }
 
 // OpenPackage opens a package of the cache for validation: from its index (.index.json), it reads
-// its StructureDefinitions, and defers its ValueSets and CodeSystems (Deferred), which are read
+// its StructureDefinitions, and defers its ValueSets, CodeSystems and NamingSystems (Deferred), which are read
 // when needed; it reads no other resource. Its example folder is opened the same way. A package
 // without a usable index is loaded whole, as LoadPackage does.
 func (l *Loader) OpenPackage(name, version string) (*Package, error) {
@@ -130,8 +131,8 @@ const (
 	indexFile     = ".index.json"
 )
 
-// openIndexed opens the files of dir that index names: StructureDefinitions read at once, ValueSets
-// and CodeSystems deferred. Prefix keys the StructureDefinitions apart from another folder's.
+// openIndexed opens the files of dir that index names: StructureDefinitions read at once, ValueSets,
+// CodeSystems and NamingSystems deferred. Prefix keys the StructureDefinitions apart from another folder's.
 func (p *Package) openIndexed(dir string, index packageIndex, prefix string) error {
 	for _, f := range index.Files {
 		if f.Filename == "" || filepath.Base(f.Filename) != f.Filename {
@@ -177,7 +178,7 @@ func (p *Package) loadExamples(dir string) {
 
 // exampleTypes are the resource types a package's examples contribute: the definitions the
 // validator reads from the package folder (OpenPackage).
-var exampleTypes = map[string]bool{"StructureDefinition": true, "ValueSet": true, "CodeSystem": true}
+var exampleTypes = map[string]bool{"StructureDefinition": true, "ValueSet": true, "CodeSystem": true, "NamingSystem": true}
 
 // addExample adds data, a resource of the example folder, when it is one of exampleTypes, keyed
 // apart from the package folder's resources.
