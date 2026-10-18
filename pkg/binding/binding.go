@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 
@@ -246,12 +247,21 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 		result.AddWarningWithID(issue.DiagCodingNoSystem, nil, fhirPath)
 		return
 	case code == "":
-		v.checkNoCode(system, cctx(), fhirPath, result)
+		if version, _ := coding["version"].(string); !v.reportedVersionUnknown(system, version, code, cctx, fhirPath, result) {
+			v.checkNoCode(system, cctx(), fhirPath, result)
+		}
 		return
 	}
 
 	systemVersion, _ := coding["version"].(string)
 	providedDisplay, _ := coding["display"].(string)
+
+	// A version of a known CodeSystem that is not loaded: what its code and display are in that
+	// version is not known (CodeSystem.version is an arbitrary value, no other version stands for
+	// it), so neither is checked; that the version is unknown is reported as an unknown system is.
+	if v.reportedVersionUnknown(system, systemVersion, code, cctx, fhirPath, result) {
+		return
+	}
 
 	res, err := v.termRegistry.ResolveCodeInCodeSystem(ctx, system, code,
 		terminology.LookupOptions{SystemVersion: systemVersion})
@@ -313,6 +323,52 @@ func (v *Validator) checkCodingAgainstCodeSystem(ctx context.Context, coding map
 	if providedDisplay != "" {
 		v.validateDisplayMismatch(ctx, system, systemVersion, code, providedDisplay, fhirPath, result)
 	}
+}
+
+// versionUnknown reports whether version of system is a version of a known CodeSystem that is not
+// loaded, for a system HL7 does not check on a terminology server only (whose versions, SNOMED CT's
+// edition URIs among them, are no CodeSystem's here).
+func (v *Validator) versionUnknown(system, version string) bool {
+	return version != "" && !hl7SystemClasses[system].serverChecked() && v.termRegistry.CodeSystemVersionUnknown(system, version)
+}
+
+// reportedVersionUnknown reports version of system when it is a version of a known CodeSystem that is
+// not loaded (reportVersionUnknown), but for a system kept unusable in context, and whether it did.
+func (v *Validator) reportedVersionUnknown(system, version, code string, cctx func() codingContext, fhirPath string, result *issue.Result) bool {
+	if !v.versionUnknown(system, version) {
+		return false
+	}
+	c := cctx()
+	if v.keepsUnusable(system, c) {
+		return false
+	}
+	v.reportVersionUnknown(system, version, code, c, fhirPath, result)
+	return true
+}
+
+// keepsUnusable reports whether a Coding no binding checks names a system HL7's terminology has with
+// no codes (bcp47, iso3166): it is reported as unusable whatever its version, as HL7 reports it.
+func (v *Validator) keepsUnusable(system string, c codingContext) bool {
+	return hl7SystemClasses[system] == classNotUsable && !c.inConcept && !c.checked
+}
+
+// reportVersionUnknown reports a version of system that is not loaded, at the system: a warning
+// where a binding checks the Coding, or it is a CodeableConcept's, information where none does. Never
+// an error: the code system is known, and a version not loaded here is no version that does not
+// exist (CodeSystem.version is an arbitrary value; a package carries one of a code system's
+// versions), so nothing is told of the instance but that its code cannot be checked; whether it is
+// in a bound value set is the binding's to decide (VersionMembership).
+func (v *Validator) reportVersionUnknown(system, version, code string, c codingContext, fhirPath string, result *issue.Result) {
+	severity := issue.SeverityInformation
+	if c.inConcept || c.checked || c.codingChecked {
+		severity = issue.SeverityWarning
+	}
+	known := "no version of it is known"
+	if versions := slices.DeleteFunc(v.termRegistry.CodeSystemVersions(system), func(s string) bool { return s == "" }); len(versions) > 0 {
+		known = "versions known: " + strings.Join(versions, ", ")
+	}
+	result.AddWithID(severity, issue.DiagCodeSystemVersionNotFound,
+		map[string]any{"system": system, "version": version, "code": code, "known": known}, fhirPath+".system")
 }
 
 // checkNoCode checks a Coding with a system and no code, in context c. Only a CodeableConcept's is
@@ -518,6 +574,9 @@ func (v *Validator) codingInValueSet(ctx context.Context, coding map[string]any,
 	if code == "" {
 		return terminology.Unresolved
 	}
+	if version, _ := coding["version"].(string); v.versionUnknown(system, version) {
+		return v.termRegistry.VersionMembership(binding.ValueSet, system, version, code)
+	}
 
 	// The CodeSystem check runs separately, in the walk (checkCodingAgainstCodeSystem): a code
 	// missing from its own system is reported there, and the reference reports value set membership
@@ -603,6 +662,27 @@ func (v *Validator) validateCodingBinding(ctx context.Context, coding map[string
 		// value with no coded unit, which its binding does not ask for (HL7 reports nothing).
 		if binding.Strength == strengthRequired && typeName != quantityType {
 			v.reportNoCode(ctx, binding, fhirPath, result)
+		}
+		return
+	}
+
+	if version, _ := coding["version"].(string); v.versionUnknown(system, version) {
+		// In a version of its code system that is not loaded, the code is in the value set as far as
+		// its composition tells (VersionMembership).
+		switch v.termRegistry.VersionMembership(binding.ValueSet, system, version, code) {
+		case terminology.Unresolved:
+			v.reportUnresolved(fmt.Sprintf("%s#%s", system, code), binding.ValueSet, binding.Strength,
+				fmt.Sprintf("the version '%s' of its code system is not known", version), fhirPath, result)
+		case terminology.Invalid:
+			membership := terminology.MembershipExcluded
+			if v.termRegistry.IsSystemInValueSet(binding.ValueSet, system) {
+				membership = terminology.MembershipIncluded
+			}
+			v.reportBindingViolation(system, code, terminology.CodeResult{
+				Resolution: terminology.Invalid, SystemInValueSet: membership,
+				Message: fmt.Sprintf("its composition does not select it in version '%s' of its code system", version),
+			}, binding, fhirPath, result)
+		case terminology.Valid:
 		}
 		return
 	}

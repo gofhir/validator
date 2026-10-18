@@ -1,0 +1,20 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv",
+  "name": "VSKV",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://acme.local/cs/kv"
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/acme-kv23"
+      },
+      {
+        "system": "http://acme.local/cs/known"
+      }
+    ]
+  }
+}

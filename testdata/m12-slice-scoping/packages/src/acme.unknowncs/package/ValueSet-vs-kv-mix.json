@@ -1,0 +1,19 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-mix",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-mix",
+  "name": "VSKVMIX",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/acme-kv23"
+      },
+      {
+        "valueSet": [
+          "http://acme.local/fhir/ValueSet/vs-kv"
+        ]
+      }
+    ]
+  }
+}

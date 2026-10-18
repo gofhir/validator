@@ -75,6 +75,9 @@ const (
 	// DiagCodeSystemNoCodes: the CodeSystem includes none of its codes (content not-present), so
 	// a code cannot be checked against it.
 	DiagCodeSystemNoCodes DiagnosticID = "CODESYSTEM_NO_CODES"
+	// DiagCodeSystemVersionNotFound: a Coding names a version of a known CodeSystem that is not
+	// loaded, so its code cannot be checked in that version.
+	DiagCodeSystemVersionNotFound DiagnosticID = "CODESYSTEM_VERSION_NOT_FOUND"
 	// DiagCodeNotInPartialCodeSystem: the code is not among those a CodeSystem that includes only
 	// some of its codes (content fragment or example) includes, so it may still be one of its codes.
 	DiagCodeNotInPartialCodeSystem DiagnosticID = "CODE_NOT_IN_PARTIAL_CODESYSTEM"
@@ -428,6 +431,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeCodeInvalid,
 		Template: "The code system URI '{system}' is not valid: {reason}",
+	},
+	DiagCodeSystemVersionNotFound: {
+		Severity: SeverityWarning,
+		Code:     CodeNotFound,
+		Template: "The CodeSystem '{system}' version '{version}' is not known ({known}), so its codes cannot be validated",
 	},
 	DiagCodeSystemNoCodes: {
 		Severity: SeverityInformation,

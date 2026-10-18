@@ -1,0 +1,25 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "loc-kv-nest-req",
+  "url": "http://acme.local/fhir/StructureDefinition/loc-kv-nest-req",
+  "name": "LOCKVNESTREQ",
+  "status": "active",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Location",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Location",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Location.operationalStatus",
+        "path": "Location.operationalStatus",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://acme.local/fhir/ValueSet/vs-kv-nest"
+        }
+      }
+    ]
+  }
+}

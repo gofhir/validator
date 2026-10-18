@@ -1,0 +1,15 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-pin",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-pin",
+  "name": "VSKVPIN",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://acme.local/cs/kv",
+        "version": "1.0.0"
+      }
+    ]
+  }
+}

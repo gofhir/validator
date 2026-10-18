@@ -1,0 +1,1 @@
+{"resourceType":"Location","id":"a","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"meta":{"profile":["http://acme.local/fhir/StructureDefinition/loc-kv-ext"]},"operationalStatus":{"system":"http://acme.local/cs/kv","code":"a","version":"1.0.0"}}

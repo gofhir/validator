@@ -464,7 +464,8 @@
       "rule": "equal",
       "gofhir": [
         "CODESYSTEM_NOT_FOUND",
-        "CODESYSTEM_NO_CODES"
+        "CODESYSTEM_NO_CODES",
+        "CODESYSTEM_VERSION_NOT_FOUND"
       ],
       "hl7": [
         "UNKNOWN_CODESYSTEM",

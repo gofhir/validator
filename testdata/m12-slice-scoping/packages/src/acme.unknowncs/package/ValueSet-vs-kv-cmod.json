@@ -1,0 +1,25 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-kv-cmod",
+  "url": "http://acme.local/fhir/ValueSet/vs-kv-cmod",
+  "name": "VSKVCMOD",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://acme.local/cs/kv",
+        "concept": [
+          {
+            "code": "a",
+            "modifierExtension": [
+              {
+                "url": "http://acme.local/fhir/StructureDefinition/mod",
+                "valueBoolean": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
