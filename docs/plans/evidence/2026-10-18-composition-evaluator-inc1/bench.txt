@@ -1,0 +1,20 @@
+# Corridas intercaladas, 6 de cada una; carga al empezar: 11.62 12.69 12.47
+head: BenchmarkMembershipNested-12    	    3430	    349291 ns/op	       264.0 asks/op	  260777 B/op	    3092 allocs/op
+main: BenchmarkMembershipNested-12    	    4044	    272055 ns/op	       264.0 asks/op	  260586 B/op	    3091 allocs/op
+head: BenchmarkMembershipNested-12    	    4077	    270017 ns/op	       264.0 asks/op	  260577 B/op	    3091 allocs/op
+main: BenchmarkMembershipNested-12    	    4101	    281288 ns/op	       264.0 asks/op	  260570 B/op	    3091 allocs/op
+head: BenchmarkMembershipNested-12    	    4104	    260376 ns/op	       264.0 asks/op	  260566 B/op	    3091 allocs/op
+main: BenchmarkMembershipNested-12    	    4646	    257964 ns/op	       264.0 asks/op	  260446 B/op	    3090 allocs/op
+head: BenchmarkMembershipNested-12    	    3936	    264875 ns/op	       264.0 asks/op	  260614 B/op	    3091 allocs/op
+main: BenchmarkMembershipNested-12    	    4003	    266184 ns/op	       264.0 asks/op	  260597 B/op	    3091 allocs/op
+head: BenchmarkMembershipNested-12    	    3925	    261108 ns/op	       264.0 asks/op	  260618 B/op	    3091 allocs/op
+main: BenchmarkMembershipNested-12    	    4677	    255173 ns/op	       264.0 asks/op	  260443 B/op	    3090 allocs/op
+head: BenchmarkMembershipNested-12    	    4076	    262384 ns/op	       264.0 asks/op	  260572 B/op	    3091 allocs/op
+main: BenchmarkMembershipNested-12    	    4130	    272165 ns/op	       264.0 asks/op	  260564 B/op	    3091 allocs/op
+# HEAD, caché caliente y ciclo
+BenchmarkMembershipNestedWarm-12       	  408858	      2578 ns/op	      10 B/op	       0 allocs/op
+BenchmarkMembershipNestedWarm-12       	  388567	      2832 ns/op	      11 B/op	       0 allocs/op
+BenchmarkMembershipNestedWarm-12       	  411890	      2651 ns/op	      10 B/op	       0 allocs/op
+BenchmarkMembershipCyclicDiamond-12    	   75382	     18652 ns/op	    6960 B/op	      20 allocs/op
+BenchmarkMembershipCyclicDiamond-12    	   91280	     13527 ns/op	    6960 B/op	      20 allocs/op
+BenchmarkMembershipCyclicDiamond-12    	   92458	     13461 ns/op	    6960 B/op	      20 allocs/op

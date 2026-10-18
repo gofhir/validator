@@ -1,9 +1,0 @@
-# HEAD (incremento 1)
-goos: darwin
-goarch: arm64
-cpu: Apple M4 Pro
-BenchmarkMembershipNested-12    	    4034	    269915 ns/op	       264.0 asks/op	  260584 B/op	    3091 allocs/op
-BenchmarkMembershipNested-12    	    4066	    265751 ns/op	       264.0 asks/op	  260573 B/op	    3091 allocs/op
-BenchmarkMembershipNested-12    	    4027	    267972 ns/op	       264.0 asks/op	  260584 B/op	    3091 allocs/op
-BenchmarkMembershipNested-12    	    4452	    268795 ns/op	       264.0 asks/op	  260482 B/op	    3090 allocs/op
-BenchmarkMembershipNested-12    	    3958	    272790 ns/op	       264.0 asks/op	  260602 B/op	    3091 allocs/op

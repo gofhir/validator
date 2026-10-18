@@ -31,6 +31,8 @@ func TestDifferencesDetectsEveryAlteration(t *testing.T) {
 `,
 		"a file added": base + `{"file":"c.json"}
 `,
+		"a failure changed": `{"file":"a.json","failure":"timeout"}
+` + strings.SplitN(base, "\n", 2)[1],
 	} {
 		t.Run(name, func(t *testing.T) {
 			if d := differencesOf(t, base, head); len(d) == 0 {
@@ -38,6 +40,21 @@ func TestDifferencesDetectsEveryAlteration(t *testing.T) {
 			}
 		})
 	}
+	t.Run("an issue the baseline has twice, the head once", func(t *testing.T) {
+		twice := base + `{"file":"b.json","severity":"warning","code":"processing","messageId":"Y","expression":["Patient.id"],"diagnostics":"meh"}
+`
+		if d := differencesOf(t, twice, base); len(d) == 0 {
+			t.Error("no difference found")
+		}
+	})
+	t.Run("a failure the baseline gives otherwise", func(t *testing.T) {
+		withFailure := `{"file":"a.json","failure":"timeout"}
+` + strings.SplitN(base, "\n", 2)[1]
+		other := strings.Replace(withFailure, `"timeout"`, `"panic"`, 1)
+		if d := differencesOf(t, withFailure, other); len(d) == 0 {
+			t.Error("no difference found")
+		}
+	})
 	t.Run("the same run, issues in another order", func(t *testing.T) {
 		lines := strings.Split(strings.TrimSpace(base), "\n")
 		reordered := lines[2] + "\n" + lines[0] + "\n" + lines[1] + "\n"

@@ -9,13 +9,15 @@ type answer int
 const (
 	answerOut answer = iota
 	answerIn
-	// Not known: a definition it depends on cannot be enumerated here (an external code system, one
-	// not held, a version not held, or one that does not include all its codes), a filter cannot be
-	// evaluated, or a ValueSet is not held, or includes itself; a code is not known not to be a member.
+	// No se sabe: una definición de la que depende no se puede enumerar aquí (un code system externo,
+	// uno que no está cargado, una versión que no está cargada, o uno que no incluye todos sus
+	// códigos), un filtro no se puede evaluar, o un ValueSet no está cargado, o lo que un ValueSet que
+	// se incluye a sí mismo deja sin decidir; no se sabe que el código no sea miembro.
 	answerUnknown
 )
 
-// maxValueSetDepth bounds the ValueSets a ValueSet includes or excludes, one in another.
+// maxValueSetDepth acota cuán profundo coversSystem busca un ValueSet que incluye un sistema entero,
+// uno dentro de otro.
 const maxValueSetDepth = 16
 
 // either is the answer of one of two alternatives: a member of either is a member.
@@ -145,7 +147,6 @@ func (m *membership) taken(vs *ValueSet) answer {
 		return a
 	}
 	m.deciding[vs] = true
-	m.value[vs] = answerUnknown
 	a := m.compose(vs)
 	delete(m.deciding, vs)
 	m.value[vs] = a
@@ -302,9 +303,9 @@ type includedSystems struct {
 	unknown bool
 }
 
-// systemsOf returns the systems vs includes, its own and those of the ValueSets it includes, and
-// whether one it includes is not held, or includes itself (its systems are not known); worked out
-// once per ValueSet.
+// systemsOf devuelve los sistemas que vs incluye, los suyos y los de los ValueSets que incluye, y si
+// uno que incluye no está cargado (sus sistemas no se conocen); se calcula una vez por ValueSet. Los
+// sistemas de ValueSets que se incluyen unos a otros son la unión de los de todos ellos.
 func (r *Registry) systemsOf(vs *ValueSet) (systems []string, unknown bool) {
 	r.mu.RLock()
 	s, cached := r.systemsCache[vs]
@@ -314,7 +315,7 @@ func (r *Registry) systemsOf(vs *ValueSet) (systems []string, unknown bool) {
 		return s.systems, s.unknown
 	}
 	found := map[string]bool{}
-	unknown = r.collectSystems(vs, found, map[*ValueSet]walk{}, 0)
+	unknown = r.collectSystems(vs, found, map[*ValueSet]walk{})
 	for system := range found {
 		systems = append(systems, system)
 	}
@@ -326,12 +327,11 @@ func (r *Registry) systemsOf(vs *ValueSet) (systems []string, unknown bool) {
 	return systems, unknown
 }
 
-func (r *Registry) collectSystems(vs *ValueSet, found map[string]bool, walked map[*ValueSet]walk, depth int) (unknown bool) {
-	switch {
-	case walked[vs] == walking || depth > maxValueSetDepth:
-		return true // it includes itself: its systems are not known
-	case walked[vs] != notWalked:
-		return false // reached before by another path: its systems are found
+func (r *Registry) collectSystems(vs *ValueSet, found map[string]bool, walked map[*ValueSet]walk) (unknown bool) {
+	if walked[vs] != notWalked {
+		// Alcanzado antes por otro camino, o de nuevo en un ciclo: sus sistemas ya se juntan en este
+		// recorrido, y los de un ciclo son la unión de los de sus ValueSets.
+		return false
 	}
 	walked[vs] = walking
 	defer func() { walked[vs] = walkedTrue }()
@@ -341,7 +341,7 @@ func (r *Registry) collectSystems(vs *ValueSet, found map[string]bool, walked ma
 		}
 		for _, url := range c.ValueSet {
 			nested := r.GetValueSet(url)
-			if nested == nil || r.collectSystems(nested, found, walked, depth+1) {
+			if nested == nil || r.collectSystems(nested, found, walked) {
 				unknown = true
 			}
 		}

@@ -23,23 +23,23 @@ r4-core-examples: identical to the baseline: true (0 differences)
 
 | function | blocks executed | executions |
 | --- | --- | --- |
-| either | 4/4 | 87350 |
+| either | 4/4 | 87442 |
 | both | 3/4 | 46 |
-| memberOf | 6/7 | 530213 |
-| decideMember | 7/8 | 46968 |
-| newMembership | 1/1 | 14921 |
-| of | 3/7 | 44763 |
-| taken | 3/5 | 44832 |
-| compose | 2/8 | 29888 |
-| composition | 9/12 | 76067 |
-| selects | 10/14 | 131750 |
-| coversSystem | 2/10 | 14 |
-| includesSystem | 0/7 | 0 |
-| includesWholeSystem | 0/7 | 0 |
-| systemsOf | 7/7 | 41758 |
-| collectSystems | 10/16 | 2655 |
-| inSystem | 6/8 | 44639 |
-| clauseCodes | 5/5 | 30268 |
-| expandClause | 16/24 | 2321 |
-| expansionCodes | 0/10 | 0 |
+| *Registry.memberOf | 6/7 | 530213 |
+| *Registry.decideMember | 7/8 | 46980 |
+| *Registry.newMembership | 1/1 | 14933 |
+| *membership.of | 3/7 | 44799 |
+| *membership.taken | 3/5 | 44868 |
+| *membership.compose | 2/8 | 29912 |
+| *membership.composition | 9/12 | 76137 |
+| *membership.selects | 10/14 | 131888 |
+| *Registry.coversSystem | 2/10 | 14 |
+| *Registry.includesSystem | 0/7 | 0 |
+| *Registry.includesWholeSystem | 0/7 | 0 |
+| *Registry.systemsOf | 7/7 | 41758 |
+| *Registry.collectSystems | 10/15 | 2655 |
+| *Registry.inSystem | 6/8 | 44675 |
+| *Registry.clauseCodes | 5/5 | 30292 |
+| *Registry.expandClause | 16/24 | 2321 |
+| *Registry.expansionCodes | 0/10 | 0 |
 

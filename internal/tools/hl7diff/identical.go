@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -58,13 +59,7 @@ func Differences(base, head map[string][]string) []string {
 		files[f] = true
 	}
 	var out []string
-	for _, f := range slices.Sorted(func(yield func(string) bool) {
-		for f := range files {
-			if !yield(f) {
-				return
-			}
-		}
-	}) {
+	for _, f := range slices.Sorted(maps.Keys(files)) {
 		b, inBase := base[f]
 		h, inHead := head[f]
 		switch {
@@ -82,13 +77,7 @@ func Differences(base, head map[string][]string) []string {
 		for _, s := range h {
 			count[s]--
 		}
-		for _, s := range slices.Sorted(func(yield func(string) bool) {
-			for s := range count {
-				if !yield(s) {
-					return
-				}
-			}
-		}) {
+		for _, s := range slices.Sorted(maps.Keys(count)) {
 			switch n := count[s]; {
 			case n > 0:
 				out = append(out, fmt.Sprintf("%s: baseline only (x%d): %s", f, n, s))

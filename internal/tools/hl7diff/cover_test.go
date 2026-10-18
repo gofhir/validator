@@ -24,6 +24,10 @@ func b(v bool) int {
 	}
 	return 3
 }
+
+type T struct{}
+
+func (t *T) c() {}
 `), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +38,9 @@ example.org/x/x.go:7.20,8.7 1 2
 example.org/x/x.go:8.7,10.3 1 0
 example.org/x/x.go:11.2,11.10 1 2
 example.org/x/x.go:7.20,8.7 1 3
+example.org/x/x.go:16.17,16.19 1 0
 example.org/y/x.go.bak:3.14,5.2 1 9
+example.org/y/xx/x.go:3.14,5.2 1 9
 `), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -42,25 +48,18 @@ example.org/y/x.go.bak:3.14,5.2 1 9
 	if err != nil {
 		t.Fatal(err)
 	}
+	if none, err := readCoverBlocks(profile, "z/x.go"); err != nil || len(none) != 0 {
+		t.Errorf("blocks of a file not in the profile: %v, %v", none, err)
+	}
 	funcs, err := funcRanges(src)
 	if err != nil {
 		t.Fatal(err)
 	}
 	got := map[string][3]int{}
-	for _, f := range funcs {
-		var s [3]int
-		for _, bl := range blocks {
-			if bl.line >= f.start && bl.line <= f.end {
-				s[0]++
-				if bl.count > 0 {
-					s[1]++
-				}
-				s[2] += bl.count
-			}
-		}
-		got[f.name] = s
+	for _, s := range summarize(funcs, blocks) {
+		got[s.name] = [3]int{s.blocks, s.executed, s.executions}
 	}
-	want := map[string][3]int{"a": {1, 1, 4}, "b": {3, 2, 7}}
+	want := map[string][3]int{"a": {1, 1, 4}, "b": {3, 2, 7}, "*T.c": {1, 0, 0}}
 	for name, w := range want {
 		if got[name] != w {
 			t.Errorf("%s: blocks, executed, executions %v, want %v", name, got[name], w)

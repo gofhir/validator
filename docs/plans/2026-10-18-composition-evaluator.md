@@ -114,14 +114,19 @@ nombrados.
 ## Criterio de salida (por incremento)
 
 - **Incremento 1:** salida idéntica a `main` en todos los corpus, salvo los cambios nombrados, que no
-  aparecen en el corpus. Ya no quedan `deciding`/`decided` ni `maxValueSetDepth` en el recorrido de la
-  composición.
+  aparecen en el corpus. El recorrido de la composición ya no tiene tope de profundidad ni `decided`;
+  `deciding` queda como la marca de "en curso" del recorrido en profundidad. Los cambios nombrados
+  valen también para un elemento `code`: `collectSystems` toma los sistemas de un ciclo como la unión
+  y no tiene tope (ronda 1, hallazgo 1).
 - **Incremento 2:** idéntica a `main`, salvo C1, C2, C2b, C3 y C6, cada uno con su fila y con su
   conteo en el diferencial. Ya no quedan `coversSystem`, `includesSystem` ni `includesWholeSystem`.
 - **Incremento 3:** los mismos resultados que el PR 3 en el modo versión no cargada, y un solo
   recorrido de la composición. Ya no queda el `versionWalk` aparte.
-- En los tres: `go test -race`, `go vet` y lint en verde, y un benchmark que mide tiempo, asignaciones
-  y aristas recorridas, en caché fría y caliente, sin regresión frente a `main` (Codex #10).
+- En los tres: `go test -race`, `go vet` y lint en verde, y benchmarks de tiempo y asignaciones en
+  caché fría (`BenchmarkMembershipNested`), caliente (`...Warm`) y con un ciclo
+  (`BenchmarkMembershipCyclicDiamond`), sin regresión medible frente a `main` (Codex #10). Contar las
+  aristas recorridas exigiría instrumentar el código de producción: se descarta, y el benchmark del
+  ciclo mide el costo del punto fijo.
 
 ## Tests (paso 5) y datos (paso 7)
 
@@ -194,6 +199,18 @@ de leer el código.
 
 Sólido según Codex: la intersección de `include.valueSet` (H7), las claves por `*ValueSet` (H10) y
 que slicing y `memberOf` usen pertenencia estricta.
+
+## Code review del incremento 1 (paso 8)
+
+| Ronda | Hallazgo | Resolución |
+| --- | --- | --- |
+| 1 | (media) Los cambios nombrados no valían para un elemento `code`: `collectSystems` tenía tope 16 y daba Unknown ante un ciclo | Corregido: los sistemas de un ciclo son la unión, sin tope (el mapa `walked` evita repetir). Filas de elemento `code` en `membership_fixpoint_test.go`, que fallaban antes |
+| 1 | (baja) El criterio de salida decía que ya no quedaba `deciding`, y el benchmark era solo de caché fría | Se corrigió el texto del criterio. Se agregaron los benchmarks de caché caliente y de ciclo |
+| 1 | (baja) `m.value[vs] = answerUnknown` sobraba (mutante equivalente) | Eliminada |
+| 1 | (baja) Comentarios desactualizados (`answerUnknown`, `maxValueSetDepth`) y un `nolint` en inglés | Corregidos, en español |
+| 1 | (baja) Mutantes de hl7diff que sobrevivían (la falla fuera de la firma, `count = 1`, el resumen de cobertura reimplementado en el test) | Casos nuevos: una falla cambiada y un duplicado solo en la base. `summarize` se testea directamente. Las cuatro mutaciones se detectan |
+| 1 | (baja) `readCoverBlocks`: la clave sin el archivo, el sufijo sin anclar, el 0/0 silencioso. `funcRanges` sin el receptor. `slices.Sorted(maps.Keys)` | Corregidos: la clave es archivo más posición, el sufijo `"/"+file`, falla sin bloques, el método lleva su receptor |
+| 1 | (baja) La evidencia del benchmark no demuestra igualdad (p≈0,2) | El registro dice "sin regresión medible", con las corridas y la carga de la máquina |
 
 ## Registro
 

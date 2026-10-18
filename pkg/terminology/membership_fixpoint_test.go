@@ -50,15 +50,19 @@ func TestMembershipCycleOrder(t *testing.T) {
 		// de tres valores lo deja sin decidir, de modo conservador.
 		{"cb", "k", Unresolved},
 	} {
-		t.Run(tt.vs+"/"+tt.code, func(t *testing.T) {
-			res, err := r.ResolveCodeInValueSet(ctx, other, tt.code, base+tt.vs, LookupOptions{})
-			if err != nil {
-				t.Fatal(err)
-			}
-			if res.Resolution != tt.want {
-				t.Errorf("got %v, want %v", res.Resolution, tt.want)
-			}
-		})
+		// El mismo código como Coding y como el de un elemento code, cuyo sistema implica el ValueSet:
+		// los sistemas de un ciclo son la unión de los de sus ValueSets.
+		for _, system := range []string{other, ""} {
+			t.Run(tt.vs+"/"+tt.code+"/"+system, func(t *testing.T) {
+				res, err := r.ResolveCodeInValueSet(ctx, system, tt.code, base+tt.vs, LookupOptions{})
+				if err != nil {
+					t.Fatal(err)
+				}
+				if res.Resolution != tt.want {
+					t.Errorf("got %v, want %v", res.Resolution, tt.want)
+				}
+			})
+		}
 	}
 }
 
@@ -80,12 +84,14 @@ func TestMembershipDeepChain(t *testing.T) {
 		url := fmt.Sprintf("%sd%d", base, i)
 		r.valueSets[url] = &ValueSet{URL: url, Compose: c}
 	}
-	res, err := r.ResolveCodeInValueSet(WithStrictMembership(context.Background()), other, "a", base+"d0", LookupOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if res.Resolution != Valid {
-		t.Errorf("got %v, want valid", res.Resolution)
+	for _, system := range []string{other, ""} { // como Coding y como el de un elemento code
+		res, err := r.ResolveCodeInValueSet(WithStrictMembership(context.Background()), system, "a", base+"d0", LookupOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if res.Resolution != Valid {
+			t.Errorf("system %q: got %v, want valid", system, res.Resolution)
+		}
 	}
 }
 
