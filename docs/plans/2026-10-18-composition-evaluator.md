@@ -59,18 +59,26 @@ nombrados.
   `version`, `*` para todas, o ninguna, en cuyo caso es la cargada o la que fija `lockedDate`.
 - La evidencia sobre el código tiene tres valores: **positiva**, **negativa** o **ausente** (Codex
   #3).
-  - La evidencia es positiva o negativa solo si la edición de la cláusula está cargada y completa.
-    Un `supplement`, un `fragment`, un `example`, un `not-present`, un sistema externo o una edición
-    que no está cargada dan evidencia ausente.
+  - Un código que la edición lista es evidencia **positiva**, también en un `fragment` (el código
+    existe). Que no lo liste es evidencia **negativa** solo si la edición está cargada y completa. Un
+    `supplement` (que no trae los códigos de su sistema), un `fragment` o `example` que no lo lista, un
+    `not-present`, un sistema externo o una edición que no está cargada dan evidencia **ausente**.
 - Un exclude quita el código cuando lo selecciona con evidencia positiva, o cuando la evidencia está
   ausente y el exclude toma la edición entera (el supuesto de existencia).
 - Esto reemplaza a `coversSystem`, `includesSystem` e `includesWholeSystem`.
 - **C3** (include `X concept [z]`, X cargado y completo sin `z`): el algoritmo de expansión exige
   comprobar que los códigos enumerados son válidos (valueset.html#expansion), y `z` no lo es. Pasa de
   In a **Out**. Es un cambio nombrado, con su fila.
-- **C6** (excludes por edición): un exclude de X|2 entero no quita un código de X|1. La edición se
-  aplica a includes y excludes, directos y anidados (Codex #4).
+- **C6** (excludes por edición): por la regla de evidencia, un exclude de una edición cargada y
+  completa que no tiene el código ya no lo quita. Por ejemplo, X\|2 entero sin `a` no quita `a`. Lo
+  que queda de C6 se va al backlog **B6**: la pertenencia por edición cuando se mezclan cláusulas con y
+  sin versión, que la especificación no define. Medición: 0 excludes con una versión distinta a la del
+  include en los 8 paquetes medidos (decisión del usuario, 18-10-2026).
 - **C1, C2 y C2b:** pasan de Unknown a Out. Son cambios nombrados.
+- **Impacto medido de C3:** 2 ValueSets de THO 7.4.0 enumeran códigos que su CodeSystem cargado y
+  completo no tiene. `image-reference-type` enumera DICOM `130401`, `130488` y `130489`;
+  `citation-artifact-classifier` enumera `cds-artifact`, `dataset-unpublished` e
+  `interactive-form`. Esos códigos dejan de ser miembros.
 
 ### Incremento 3: el modo versión no cargada como un modo del evaluador
 
@@ -98,6 +106,8 @@ nombrados.
   `SetProvider`.
 - **B4 (Codex #9):** en R5, una expansión paginada con `next` y sin `total` da Out para un código de
   otra página.
+- **B6:** la pertenencia por edición cuando se mezclan cláusulas con y sin versión (lo que queda de
+  C6).
 - **B5 (Codex #8, H8):** ADR para `externalSystems`, cuyo efecto es mayor que una copia `complete`: un
   `fragment` de un URI ordinario sí se consulta.
 
@@ -118,8 +128,9 @@ nombrados.
   `deciding` queda como la marca de "en curso" del recorrido en profundidad. Los cambios nombrados
   valen también para un elemento `code`: `collectSystems` toma los sistemas de un ciclo como la unión
   y no tiene tope (ronda 1, hallazgo 1).
-- **Incremento 2:** idéntica a `main`, salvo C1, C2, C2b, C3 y C6, cada uno con su fila y con su
-  conteo en el diferencial. Ya no quedan `coversSystem`, `includesSystem` ni `includesWholeSystem`.
+- **Incremento 2:** idéntica a `main`, salvo C1, C2, C2b, C3 y la parte de C6 que decide la
+  evidencia, cada uno con su fila. El diferencial muestra, como cambios esperados, solo los de los dos
+  ValueSets de C3. Ya no quedan `coversSystem`, `includesSystem` ni `includesWholeSystem`.
 - **Incremento 3:** los mismos resultados que el PR 3 en el modo versión no cargada, y un solo
   recorrido de la composición. Ya no queda el `versionWalk` aparte.
 - En los tres: `go test -race`, `go vet` y lint en verde, y benchmarks de tiempo y asignaciones en
@@ -217,6 +228,32 @@ que slicing y `memberOf` usen pertenencia estricta.
 | 2 | (sugerencia) N3: la clave de `readCoverBlocks` con dos rutas que terminan igual | Agregado al perfil del test; la mutación se detecta |
 
 **Convergencia:** la ronda 2 no dejó hallazgos de severidad media o mayor. El incremento 1 está cerrado.
+
+## Validación del incremento 2 (pasos 5 a 7)
+
+- **Tests primero:** `TestMembershipExcludeEvidence` (`membership_exclude_test.go`), con los valores
+  esperados según el álgebra de composiciones y la regla de evidencia. Antes de implementar, 7
+  filas fallaban: justo C1, C2, C2b, C3 y el supplement. Al implementarse, la fixture del ciclo de
+  `membership_test.go` tuvo que listar `k` en su code system `other`: por C3, un código enumerado que
+  el sistema cargado no tiene deja de ser miembro.
+- **Mutaciones** (a mano, en una copia de `membership.go`; cuántos tests fallan):
+
+  | Mutación | Fallas |
+  | --- | --- |
+  | sin el supuesto de existencia en el exclude | 9 |
+  | el ValueSet anidado sin el supuesto de existencia | 8 |
+  | el exclude ignorado | 29 |
+  | sin C3 (`editionLacks` siempre falso) | 3 |
+  | el supplement tomado como evidencia negativa | 2 |
+  | la raíz decidida con existencia | 9 |
+  | la clave del memo sin `exists` | 0 → 2, con la fila `samex` (el mismo ValueSet incluido y excluido) |
+
+- **Corpus** (`hl7diff run -identical -cover pkg/terminology/membership.go`, contra `origin/main`):
+  los 48 grupos livianos y `r4-core-examples`, idénticos issue por issue. Los cambios nombrados no
+  cambian ningún resultado del corpus: ningún ejemplo usa los dos ValueSets de THO que toca C3
+  (`editionLacks` sí se ejecuta: 782 y 284 veces). Evidencia:
+  [evidence/2026-10-18-composition-evaluator-inc2/](evidence/2026-10-18-composition-evaluator-inc2/).
+- Lint (golangci-lint v2.11.3 con Go 1.25.13) sin issues; `go test -race -short ./...` en verde.
 
 ## Registro
 

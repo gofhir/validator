@@ -1,0 +1,44 @@
+# hl7diff: baseline origin/main vs working tree
+
+HL7 validator: validator_cli.jar sha256:a3addadfa18dfa23, java version "24" 2025-03-18
+
+r4-core-examples: excluded Bundle-valuesets.json: HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): ValueSet/media-modality includes an unresolvable ValueSet, and the crash aborts the whole batch
+
+r4-core-examples: excluded ValueSet-media-modality.json: HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): compose.include.valueSet dicom-cid29 is unresolvable
+
+r4-core-examples: excluded ValueSet-use-context.json: HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): compose.include.valueSet entries are unresolvable
+
+r4-core-examples: excluded Bundle-valueset-expansions.json: HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915) when CodeSystem-snomedct.json (content not-present) is in the same batch
+
+r4-core-examples: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.4.0,hl7.fhir.uv.extensions.r5#5.2.0,hl7.terminology.r5#7.1.0,hl7.fhir.uv.extensions#5.3.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0, the baseline with the same
+
+## r4-core-examples: PASS
+
+files: 5301, findings: 0, unexplained errors removed: 0, declared divergences: 58
+
+
+r4-core-examples: identical to the baseline: true (0 differences)
+
+## coverage of pkg/terminology/membership.go
+
+| function | blocks executed | executions |
+| --- | --- | --- |
+| either | 4/4 | 87362 |
+| both | 3/4 | 46 |
+| *Registry.memberOf | 6/7 | 530213 |
+| *Registry.decideMember | 7/8 | 46970 |
+| *Registry.newMembership | 1/1 | 14923 |
+| *membership.of | 3/7 | 44769 |
+| *membership.taken | 3/5 | 44838 |
+| *membership.compose | 2/8 | 29892 |
+| *membership.composition | 8/10 | 76070 |
+| *membership.selects | 10/15 | 131768 |
+| *Registry.systemsOf | 7/7 | 41758 |
+| *Registry.collectSystems | 10/15 | 2655 |
+| *Registry.inSystem | 6/9 | 44645 |
+| *Registry.editionLacks | 5/8 | 284 |
+| *Registry.clauseCodes | 5/5 | 30272 |
+| *Registry.expandClause | 16/24 | 2321 |
+| *Registry.expansionCodes | 0/10 | 0 |
+
+report: ~/Library/Caches/gofhir-hl7diff/23d805c56424/report.md

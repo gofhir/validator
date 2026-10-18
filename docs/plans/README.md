@@ -7,8 +7,10 @@ Se lee primero al empezar, al reanudar y después de cada compactación (carta, 
 **Un solo evaluador de composiciones de ValueSet**, [2026-10-18-composition-evaluator.md](2026-10-18-composition-evaluator.md):
 el **incremento 1 de 3 está cerrado** (el punto fijo en el modo cargado, con code review convergido en
 dos rondas y la evidencia en [evidence/2026-10-18-composition-evaluator-inc1/](evidence/2026-10-18-composition-evaluator-inc1/)).
-Próximo paso: el incremento 2 (excludes por evidencia de existencia, que retira `coversSystem`),
-empezando por sus tests (paso 5). Rama `refactor/composition-evaluator`, sin push.
+Incremento 2 en el paso 8 (code review): excludes por evidencia de existencia, que retira
+`coversSystem`; C6 pasa al backlog B6 (decisión del usuario). Implementado, con las mutaciones
+detectadas y el corpus idéntico a main ([evidence/2026-10-18-composition-evaluator-inc2/](evidence/2026-10-18-composition-evaluator-inc2/)).
+Próximo paso: ronda 1 del code review sobre el commit del incremento 2. Rama `refactor/composition-evaluator`, sin push.
 
 ## Último incremento cerrado
 

@@ -27,7 +27,9 @@ func TestMembershipByDefinition(t *testing.T) {
 			{Code: "b1", Property: []CodeSystemProperty{{Code: "kind", ValueCode: "x"}}},
 		}},
 	}}
-	r.codeSystems[other] = &CodeSystem{URL: other, Concept: []CodeSystemCode{{Code: "a"}}}
+	// k es el código que lista el ciclo de cycle-a y cycle-b: un código enumerado tiene que existir
+	// en su code system completo (valueset.html#expansion).
+	r.codeSystems[other] = &CodeSystem{URL: other, Concept: []CodeSystemCode{{Code: "a"}, {Code: "k"}}}
 	r.codeSystems[partial] = &CodeSystem{URL: partial, Content: "fragment", Concept: []CodeSystemCode{{Code: "f1"}, {Code: "f2"}}}
 	add := func(name string, c Compose) {
 		r.valueSets[base+name] = &ValueSet{URL: base + name, Compose: c}
