@@ -40,13 +40,21 @@ func both(a, b answer) answer {
 	return answerIn
 }
 
-// membership asks, for one code, whether it is a member of ValueSets: each ValueSet is decided once
-// (a ValueSet several others include), and one that includes itself, through others, is not known.
+// membership pregunta, para un código, si es miembro de ValueSets, como el menor punto fijo de sus
+// composiciones: cada ValueSet empieza sin decidir, y los ValueSets que una composición incluye se
+// deciden antes, cada uno una vez (un ValueSet que varios incluyen). Uno al que se vuelve mientras se
+// decide (un ciclo) queda ahí sin decidir todavía; cuando un recorrido encuentra uno, todos los
+// ValueSets que decidió se deciden de nuevo, con las respuestas que hay, hasta que ninguno cambia.
+// Una respuesta solo pasa de no decidida a decidida (either, both y la exclusión son monótonas en ese
+// orden), así que esto termina, y las respuestas no dependen del orden de las cláusulas ni de cuán
+// profundo se incluyen los ValueSets; uno que se incluye a sí mismo se decide hasta donde lo dicen sus
+// otras cláusulas.
 type membership struct {
 	r            *Registry
 	system, code string
-	decided      map[*ValueSet]answer
+	value        map[*ValueSet]answer
 	deciding     map[*ValueSet]bool
+	cyclic       bool
 }
 
 // memberKey is a code of a system ("" for a code element) asked of a ValueSet.
@@ -83,7 +91,7 @@ const maxAnswers = 1 << 16
 
 func (r *Registry) decideMember(vs *ValueSet, system, code string) answer {
 	if system != "" {
-		return r.newMembership(system, code).of(vs, 0)
+		return r.newMembership(system, code).of(vs)
 	}
 	// A code element's code is a member when it is one as a code of a system the ValueSet includes:
 	// excluding one system's code leaves another's.
@@ -93,7 +101,7 @@ func (r *Registry) decideMember(vs *ValueSet, system, code string) answer {
 		member = answerUnknown
 	}
 	for _, s := range systems {
-		if member = either(member, r.newMembership(s, code).of(vs, 0)); member == answerIn {
+		if member = either(member, r.newMembership(s, code).of(vs)); member == answerIn {
 			break
 		}
 	}
@@ -101,7 +109,7 @@ func (r *Registry) decideMember(vs *ValueSet, system, code string) answer {
 }
 
 func (r *Registry) newMembership(system, code string) *membership {
-	return &membership{r: r, system: system, code: code, decided: map[*ValueSet]answer{}, deciding: map[*ValueSet]bool{}}
+	return &membership{r: r, system: system, code: code, value: map[*ValueSet]answer{}, deciding: map[*ValueSet]bool{}}
 }
 
 // of tells whether the code is a member of vs: one an include selects and no exclude does
@@ -110,23 +118,43 @@ func (r *Registry) newMembership(system, code string) *membership {
 // defines the ValueSet; one without is its expansion's codes. An expansion a composition carries is
 // not read: it is the codes the composition gave when it was expanded, against code system versions
 // that may not be the ones held (a VSAC set's SNOMED CT).
-func (m *membership) of(vs *ValueSet, depth int) answer {
-	if a, ok := m.decided[vs]; ok {
-		return a
+func (m *membership) of(vs *ValueSet) answer {
+	a := m.taken(vs)
+	for changed := m.cyclic; changed; {
+		changed = false
+		for v, before := range m.value {
+			if after := m.compose(v); after != before {
+				m.value[v], changed = after, true
+			}
+		}
 	}
-	if m.deciding[vs] || depth > maxValueSetDepth {
-		return answerUnknown
+	if m.cyclic {
+		a = m.value[vs]
 	}
-	m.deciding[vs] = true
-	a := m.compose(vs, depth)
-	delete(m.deciding, vs)
-	m.decided[vs] = a
 	return a
 }
 
-func (m *membership) compose(vs *ValueSet, depth int) answer {
+// taken devuelve la respuesta de un ValueSet que una composición incluye: decidida una vez, y sin
+// decidir todavía mientras se decide (el punto fijo lo decide de nuevo, of).
+func (m *membership) taken(vs *ValueSet) answer {
+	if m.deciding[vs] {
+		m.cyclic = true
+		return answerUnknown
+	}
+	if a, ok := m.value[vs]; ok {
+		return a
+	}
+	m.deciding[vs] = true
+	m.value[vs] = answerUnknown
+	a := m.compose(vs)
+	delete(m.deciding, vs)
+	m.value[vs] = a
+	return a
+}
+
+func (m *membership) compose(vs *ValueSet) answer {
 	if len(vs.Compose.Include) > 0 {
-		return m.composition(vs, depth)
+		return m.composition(vs)
 	}
 	if vs.Expansion == nil {
 		return answerUnknown
@@ -142,10 +170,10 @@ func (m *membership) compose(vs *ValueSet, depth int) answer {
 }
 
 // composition decides the code by vs's composition (of).
-func (m *membership) composition(vs *ValueSet, depth int) answer {
+func (m *membership) composition(vs *ValueSet) answer {
 	in := answerOut
 	for i := range vs.Compose.Include {
-		if in = either(in, m.selects(&vs.Compose.Include[i], depth)); in == answerIn {
+		if in = either(in, m.selects(&vs.Compose.Include[i])); in == answerIn {
 			break
 		}
 	}
@@ -154,11 +182,11 @@ func (m *membership) composition(vs *ValueSet, depth int) answer {
 	}
 	for i := range vs.Compose.Exclude {
 		e := &vs.Compose.Exclude[i]
-		if m.r.coversSystem(e, m.system, depth, map[*ValueSet]walk{}) {
+		if m.r.coversSystem(e, m.system, 0, map[*ValueSet]walk{}) {
 			// The whole system is excluded: whatever an include selected of it, known or not.
 			return answerOut
 		}
-		switch m.selects(e, depth) {
+		switch m.selects(e) {
 		case answerIn:
 			return answerOut
 		case answerUnknown:
@@ -172,7 +200,7 @@ func (m *membership) composition(vs *ValueSet, depth int) answer {
 // the concepts it lists or its filters select, and, when it names ValueSets, a member of each of
 // them too (valueset-definitions.html#ValueSet.compose.include.valueSet: "the content of the value
 // set is the intersection").
-func (m *membership) selects(c *Include, depth int) answer {
+func (m *membership) selects(c *Include) answer {
 	selected := answerIn
 	switch {
 	case c.System != "":
@@ -195,7 +223,7 @@ func (m *membership) selects(c *Include, depth int) answer {
 			selected = both(selected, answerUnknown)
 			continue
 		}
-		selected = both(selected, m.of(nested, depth+1))
+		selected = both(selected, m.taken(nested))
 	}
 	return selected
 }

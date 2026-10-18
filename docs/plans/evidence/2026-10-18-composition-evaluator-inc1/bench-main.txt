@@ -1,0 +1,7 @@
+# main (origin/main)
+BenchmarkMembershipNested-12    	    4023	    260275 ns/op	       264.0 asks/op	  260591 B/op	    3091 allocs/op
+BenchmarkMembershipNested-12    	    4125	    259771 ns/op	       264.0 asks/op	  260558 B/op	    3091 allocs/op
+BenchmarkMembershipNested-12    	    4094	    269378 ns/op	       264.0 asks/op	  260566 B/op	    3091 allocs/op
+BenchmarkMembershipNested-12    	    4156	    262118 ns/op	       264.0 asks/op	  260551 B/op	    3090 allocs/op
+BenchmarkMembershipNested-12    	    4228	    269246 ns/op	       264.0 asks/op	  260533 B/op	    3090 allocs/op
+ok  	github.com/gofhir/validator/v2/pkg/terminology	8.262s

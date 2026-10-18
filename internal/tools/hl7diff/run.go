@@ -60,6 +60,10 @@ type runEnv struct {
 	baseline string
 	out      io.Writer
 	registry string // where base packages missing from the cache are fetched from
+	// identical exige que la salida de la cabeza sea la de la línea base, cada issue de cada severidad.
+	identical bool
+	// cover es un archivo Go, relativo al repositorio, cuyos bloques cuentan las corridas de la cabeza.
+	cover string
 	// baseReplaces is whether the baseline's library can replace the base packages it embeds
 	// (validator.WithBasePackages): a baseline that cannot runs with its own.
 	baseReplaces bool
@@ -74,6 +78,8 @@ func cmdRun(ctx context.Context, args []string, out io.Writer) (bool, error) {
 	heavy := flags.Bool("heavy", false, "also run the groups marked heavy")
 	only := flags.String("group", "", "run only these groups (comma-separated); unknown names are an error")
 	registry := flags.String("registry", "https://packages.fhir.org", "FHIR package registry, for the base packages the HL7 validator uses that are not in the cache")
+	cover := flags.String("cover", "", "a Go file, repository-relative, whose code the head's runs count and the report shows, by function (what the corpus exercises of it)")
+	identical := flags.Bool("identical", false, "also require the head to give the baseline's output exactly, every issue of every severity (for a change that must not change the output)")
 	if err := flags.Parse(args); err != nil {
 		return false, err
 	}
@@ -96,11 +102,18 @@ func cmdRun(ctx context.Context, args []string, out io.Writer) (bool, error) {
 		return false, err
 	}
 
-	env, unlock, err := newRunEnv(ctx, root, m, *jar, *work, *baseline, *registry, out)
+	env, unlock, err := newRunEnv(ctx, root, m, *jar, *work, *baseline, *registry, *cover, out)
 	if err != nil {
 		return false, err
 	}
 	defer unlock()
+	env.identical = *identical
+	if env.cover != "" {
+		// Los conteos son solo de esta corrida.
+		if err := os.RemoveAll(env.coverDir()); err != nil {
+			return false, err
+		}
+	}
 
 	// Writes to a strings.Builder cannot fail.
 	var report strings.Builder
@@ -115,6 +128,11 @@ func cmdRun(ctx context.Context, args []string, out io.Writer) (bool, error) {
 			continue
 		}
 		allOK = allOK && ok
+	}
+	if env.cover != "" {
+		if err := writeCover(ctx, env, &report); err != nil {
+			return false, err
+		}
 	}
 	path := filepath.Join(env.work, "report.md")
 	if err := writeAtomic(path, []byte(report.String())); err != nil {
@@ -177,12 +195,12 @@ func cmdFetch(ctx context.Context, args []string, out io.Writer) (bool, error) {
 
 // newRunEnv prepares a run: the jar's identity, the family table and divergences, the locked work
 // directory, and both corpusrun builds.
-func newRunEnv(ctx context.Context, root string, m Manifest, jar, work, baseline, registry string, out io.Writer) (*runEnv, func(), error) {
+func newRunEnv(ctx context.Context, root string, m Manifest, jar, work, baseline, registry, cover string, out io.Writer) (*runEnv, func(), error) {
 	cache, err := DefaultCache()
 	if err != nil {
 		return nil, nil, err
 	}
-	env := &runEnv{root: root, cache: cache, out: out, baseline: baseline, registry: registry}
+	env := &runEnv{root: root, cache: cache, out: out, baseline: baseline, registry: registry, cover: cover}
 	if env.jar, err = filepath.Abs(jar); err != nil {
 		return nil, nil, err
 	}
@@ -360,7 +378,23 @@ func runGofhir(ctx context.Context, env *runEnv, p *groupPlan, bin, out string, 
 	if len(p.pkgFiles) > 0 {
 		args = append(args, "-package-file", strings.Join(p.pkgFiles, ","))
 	}
-	return runQuiet(ctx, env.root, bin, append(args, p.files...)...)
+	cmd := exec.CommandContext(ctx, bin, append(args, p.files...)...) //nolint:gosec // G204: corpusrun, launched by design
+	cmd.Dir = env.root
+	if env.cover != "" && bin == env.headBin {
+		dir := env.coverDir()
+		if err := os.MkdirAll(dir, 0o750); err != nil {
+			return err
+		}
+		cmd.Env = append(os.Environ(), "GOCOVERDIR="+dir)
+	}
+	if out, err := cmd.CombinedOutput(); err != nil {
+		tail := strings.ToValidUTF8(string(out), "")
+		if len(tail) > 2000 {
+			tail = tail[len(tail)-2000:]
+		}
+		return fmt.Errorf("%s: %w\n%s", filepath.Base(bin), err, tail)
+	}
+	return nil
 }
 
 // runHL7 returns the HL7 validator's output for the group and the packages it loaded, from the
@@ -471,23 +505,65 @@ func runGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool
 			return false, err
 		}
 	}
+	if err := writePackages(report, env, g.Name, loaded, basePkgs, p.skipped); err != nil {
+		return false, err
+	}
+	if err := writeReport(report, g.Name, rep); err != nil {
+		return false, err
+	}
+	same := true
+	if env.identical {
+		if same, err = reportIdentical(report, g.Name, baseOut, headOut); err != nil {
+			return false, err
+		}
+	}
+	return rep.OK() && same, nil
+}
+
+// writePackages escribe los paquetes con que cada validador corrió un grupo.
+func writePackages(report io.Writer, env *runEnv, group string, loaded, basePkgs, skipped []PackageID) error {
 	baselineUses := "the same"
 	if !env.baseReplaces {
 		baselineUses = "its embedded ones (its library cannot replace them)"
 	}
 	if _, err := fmt.Fprintf(report, "%s: packages: the HL7 validator loaded %s; gofhir ran with the base packages %s, the baseline with %s\n\n",
-		g.Name, joinIDs(loaded), joinIDs(basePkgs), baselineUses); err != nil {
+		group, joinIDs(loaded), joinIDs(basePkgs), baselineUses); err != nil {
+		return err
+	}
+	if len(skipped) > 0 {
+		if _, err := fmt.Fprintf(report, "%s: packages left out of the closure (base packages, or core packages): %s\n\n", group, joinIDs(skipped)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// reportIdentical escribe en qué difiere la salida de la cabeza de la de la línea base, cada issue de
+// cada severidad, y dice si no difiere.
+func reportIdentical(report io.Writer, group, baseOut, headOut string) (bool, error) {
+	base, err := ReadIssues(baseOut)
+	if err != nil {
 		return false, err
 	}
-	if len(p.skipped) > 0 {
-		if _, err := fmt.Fprintf(report, "%s: packages left out of the closure (base packages, or core packages): %s\n\n", g.Name, joinIDs(p.skipped)); err != nil {
+	head, err := ReadIssues(headOut)
+	if err != nil {
+		return false, err
+	}
+	diffs := Differences(base, head)
+	if _, err := fmt.Fprintf(report, "%s: identical to the baseline: %v (%d differences)\n\n", group, len(diffs) == 0, len(diffs)); err != nil {
+		return false, err
+	}
+	for _, d := range diffs {
+		if _, err := fmt.Fprintf(report, "- %s\n", d); err != nil {
 			return false, err
 		}
 	}
-	if err := writeReport(report, g.Name, rep); err != nil {
-		return false, err
+	if len(diffs) > 0 {
+		if _, err := io.WriteString(report, "\n"); err != nil {
+			return false, err
+		}
 	}
-	return rep.OK(), nil
+	return len(diffs) == 0, nil
 }
 
 func coversAll(r HL7Run, files []string) bool {
@@ -730,7 +806,12 @@ func jarIdentity(ctx context.Context, jar string) (string, error) {
 // buildHead compiles corpusrun from the working tree.
 func buildHead(ctx context.Context, env *runEnv) (string, error) {
 	bin := filepath.Join(env.work, "corpusrun-head")
-	return bin, run(ctx, env.root, "go", "build", "-tags", "basepackages", "-o", bin, "./internal/tools/corpusrun")
+	args := []string{"build", "-tags", "basepackages", "-o", bin}
+	if env.cover != "" {
+		// El paquete main también: sin él, el binario no escribe contadores.
+		args = append(args, "-cover", "-covermode=atomic", "-coverpkg=./"+filepath.ToSlash(filepath.Dir(env.cover))+",./internal/tools/corpusrun")
+	}
+	return bin, run(ctx, env.root, "go", append(args, "./internal/tools/corpusrun")...)
 }
 
 // buildBaseline compiles the working tree's corpusrun against the baseline's library, in a

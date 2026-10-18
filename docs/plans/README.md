@@ -6,8 +6,15 @@ Se lee primero al empezar, al reanudar y después de cada compactación (carta, 
 
 **Un solo evaluador de composiciones de ValueSet**, incremento 1 de 3 (punto fijo en el modo
 cargado): plan aprobado, [2026-10-18-composition-evaluator.md](2026-10-18-composition-evaluator.md).
-Próximo paso: tests primero (paso 5): la tabla de álgebra y el comando diferencial con sus
-mutaciones. Rama `refactor/composition-evaluator`.
+Paso 5 (tests primero) en curso:
+- `pkg/terminology/membership_fixpoint_test.go` (ciclo sin depender del orden, cadena de 40) falla en
+  `main`, como se espera;
+- `TestMembershipByDefinition` (44 casos) fija lo que se conserva;
+- `hl7diff run -identical` (HEAD igual a la base, todos los issues) y `-cover <archivo.go>` (lo que
+  el corpus ejercita, por función), con `identical_test.go` como mutaciones del arnés.
+
+Próximo paso: leer la cobertura de base de `membership.go` en el corpus y, después, implementar el
+punto fijo (paso 6). Rama `refactor/composition-evaluator`.
 
 ## Último incremento cerrado
 
