@@ -50,6 +50,7 @@ func (r *Registry) Clone() *Registry {
 		interfaces:      map[*StructureDefinition][]string{}, // worked out again for the clone's
 	}
 	c.model = &FHIRPathModel{reg: c}
+	c.publishTypesUnlocked() // el clon aún no es visible para nadie: no hace falta su lock
 	return c
 }
 

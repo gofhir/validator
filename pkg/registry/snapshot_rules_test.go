@@ -168,6 +168,7 @@ func addDefinition(t *testing.T, r *Registry, data string) *StructureDefinition 
 	r.mu.Lock()
 	r.indexUnlocked(&sd)
 	r.refreshDerivedUnlocked()
+	r.publishTypesUnlocked()
 	r.mu.Unlock()
 	return &sd
 }
