@@ -20,7 +20,7 @@ Rama `refactor/composition-evaluator`, sin push.
 del registro para que `GetByType` e `IsDomainResource` no tomen el lock. Resultados idénticos a la base
 (`make compare-baseline`), mutaciones A 9/9 y B 11/11, benchmarks en
 [evidence/2026-10-18-1859-bench-compare-74afca6243c1/](evidence/2026-10-18-1859-bench-compare-74afca6243c1/).
-Defectos previos publicados: #171 (orden de los issues) y #172 (dos `fixed[x]` en un snapshot).
+Defectos previos publicados: #174 (orden de los issues) y #175 (dos `fixed[x]` en un snapshot).
 Rebasada sobre `main` (`a2ac6ea`) y validada contra esa base: `make check`, `make compare-baseline`
 idéntico, mutaciones 20/20, benchmarks en
 [evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/](evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/).
