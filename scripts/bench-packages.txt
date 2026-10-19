@@ -1,0 +1,13 @@
+# Packages FHIR de los benchmarks con guías (make bench-deps): nombre, versión y SHA-256 del .tgz
+# de packages.fhir.org. US Core 6.1.0 y su clausura de dependencias (sin el core, que va embebido),
+# más los ejemplos oficiales de R4 para la variante rotativa.
+hl7.fhir.us.core 6.1.0 ec096f29bc4ce8f04117dfc4ef82e7289c67a7e2188892e86288c45389d158d9
+hl7.terminology.r4 5.0.0 c863bef14eddb01d2884d8f14826b9b152f9fcef6b99e107025136af69ce2c18
+hl7.fhir.uv.extensions.r4 1.0.0 b270eb5b0ea3d015398a5af6c86cab2718070cbb850e366ef050ce6d6eb4a9d3
+hl7.fhir.uv.bulkdata 2.0.0 2dca9c8aeebad2c3db8e0d8db919cb3a65a24b9fcf6d46f02badbb1ae89b86cb
+hl7.fhir.uv.smart-app-launch 2.1.0 c1f26d40e5b58fc0c101f7f7e109ddc40b8156015e1632439d2cb34cf67a612c
+us.nlm.vsac 0.11.0 37aa3f718c68283ec7123bfa77adf8c5fcdd90b35be37e19d76a8b66121bc88d
+hl7.fhir.uv.sdc 3.0.0 be5c3f0a7f82e072b40739e05fb68f3e58e44c9bd040cd901b1b55c62f23dca2
+us.cdc.phinvads 0.12.0 cf565971a6bcca3193de4d7ff71f5c443fc4e00adaeef8c88416d21c778e3a3f
+ihe.formatcode.fhir 1.1.0 3c9bf67d35d5b090ce5a2215ea7e650c9e826918ebddc95eaa35439a436f7d84
+hl7.fhir.r4.examples 4.0.1 e18b31e7a52145a31f1f3f409cf6847583b08b7306cc4e9460a95a7b5efba930
