@@ -21,8 +21,10 @@ del registro para que `GetByType` e `IsDomainResource` no tomen el lock. Resulta
 (`make compare-baseline`), mutaciones A 9/9 y B 11/11, benchmarks en
 [evidence/2026-10-18-1859-bench-compare-74afca6243c1/](evidence/2026-10-18-1859-bench-compare-74afca6243c1/).
 Defectos previos publicados: #171 (orden de los issues) y #172 (dos `fixed[x]` en un snapshot).
-Próximo paso: tras el rebase sobre `main`, repetir `make check`, `make compare-baseline` y
-`make bench-compare` contra la nueva base; luego PR (sin push hasta que el usuario lo pida).
+Rebasada sobre `main` (`a2ac6ea`) y validada contra esa base: `make check`, `make compare-baseline`
+idéntico, mutaciones 20/20, benchmarks en
+[evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/](evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/).
+Próximo paso: PR, cuando el usuario lo pida (sin push hasta entonces).
 Worktree aparte (`go-validator-wt-registry`); no tocar el checkout principal.
 
 ## Último incremento cerrado

@@ -345,4 +345,4 @@ Mutaciones de B: 11 de 11 detectadas (B1a, B1b, B1c, B2–B9).
 
 - El usuario aceptó el cierre tras la ronda 3 (19-10-2026): el hallazgo restante era de cobertura de tests, corregido y verificado con su mutación.
 - `make check` en verde (versiones de CI); `make compare-baseline BASE=74afca6`: idéntico; mutaciones de B 11/11 y de A 9/9.
-- Para un PR: rebase sobre `origin/main` y repetir `make check`, `make compare-baseline` y `make bench-compare` contra la nueva base.
+- Rebase sobre `origin/main` (`a2ac6ea`, 19-10-2026), con dos conflictos resueltos (`docs/plans/README.md`, que upstream agregó; `newRunEnv` de `hl7diff`, que ganó el parámetro `cover`). Contra la nueva base: `make check` en verde; `make compare-baseline BASE=a2ac6ea`: idéntico; mutaciones 20/20; benchmarks en [`evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/report.md`](evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/report.md): `Profiled` en serie y en paralelo mejoran (p ≤ 0,015), `ValidateParallel` con 4 y 8 CPU también; creación y heap vivo sin cambio de tiempo significativo (+1,7 % bytes, +1,4 % heap).
