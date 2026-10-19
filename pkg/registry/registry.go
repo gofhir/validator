@@ -2,9 +2,11 @@
 package registry
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -122,6 +124,7 @@ func (s *Snapshot) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		s.Element[i].raw = elemRaw
+		s.Element[i].keepPrefixedValues()
 	}
 	return nil
 }
@@ -172,6 +175,10 @@ type ElementDefinition struct {
 	// Raw JSON for dynamic access to fixed[x] and pattern[x] without hardcoding types.
 	// This allows support for all 45+ FHIR types without explicit fields.
 	raw json.RawMessage
+	// prefixed guarda fixed[x], pattern[x] y sus "_" extraídos una vez (snapshots) de prefixedSrc;
+	// solo vale mientras raw sea ese mismo slice (ver cachedPrefixed).
+	prefixed    *prefixedValues
+	prefixedSrc json.RawMessage
 }
 
 // ElementBase is ElementDefinition.base: the element of the base resource or type that an element
@@ -194,73 +201,36 @@ func (ed *ElementDefinition) Repeats() bool {
 	return most != "1"
 }
 
-// SetRaw stores the raw JSON for this ElementDefinition.
-// Called during loading to enable dynamic fixed/pattern extraction.
+// SetRaw guarda el JSON crudo de la ElementDefinition, una copia de data: el llamador puede
+// cambiar data después.
 func (ed *ElementDefinition) SetRaw(data json.RawMessage) {
-	ed.raw = data
+	ed.raw = bytes.Clone(data)
 }
 
-// GetFixed extracts fixed[x] value dynamically from raw JSON.
-// Returns the value, type suffix (e.g., "Uri", "Code", "Coding"), and whether it exists.
-// This approach avoids hardcoding the 45+ possible fixed[x] types.
+// GetFixed devuelve el valor de fixed[x], el sufijo de su tipo ("Uri", "Code", "Coding") y si la
+// definición tiene uno. El valor es una copia: el llamador puede cambiarlo.
 func (ed *ElementDefinition) GetFixed() (value json.RawMessage, typeSuffix string, exists bool) {
-	return extractPrefixedValue(ed.raw, "fixed")
+	return ed.prefixedValuesOf().fixed.answer()
 }
 
-// GetPattern extracts pattern[x] value dynamically from raw JSON.
-// Returns the value, type suffix (e.g., "Coding", "CodeableConcept"), and whether it exists.
-// This approach avoids hardcoding the 45+ possible pattern[x] types.
+// GetPattern devuelve el valor de pattern[x], el sufijo de su tipo ("Coding", "CodeableConcept") y
+// si la definición tiene uno. El valor es una copia: el llamador puede cambiarlo.
 func (ed *ElementDefinition) GetPattern() (value json.RawMessage, typeSuffix string, exists bool) {
-	return extractPrefixedValue(ed.raw, "pattern")
+	return ed.prefixedValuesOf().pattern.answer()
 }
 
-// GetFixedElement returns the "_" sibling of the fixed[x] value, its id and extensions when it is a
-// primitive (json.html#primitive), if the definition has one: "_fixedCode" for fixedCode, or, for a
-// fixed primitive with extensions and no value, the "_fixed" property alone.
+// GetFixedElement devuelve el hermano "_" del valor de fixed[x], su id y extensiones cuando es un
+// primitivo (json.html#primitive), si la definición lo tiene: "_fixedCode" para fixedCode o, para
+// un primitivo fijo con extensiones y sin valor, la propiedad "_fixed…" sola. Es una copia.
 func (ed *ElementDefinition) GetFixedElement() (json.RawMessage, bool) {
-	return extractPrimitiveElement(ed.raw, "fixed")
-}
-
-// GetPatternElement returns the "_" sibling of the pattern[x] value, its id and extensions when it
-// is a primitive (json.html#primitive), if the definition has one, as GetFixedElement does.
-func (ed *ElementDefinition) GetPatternElement() (json.RawMessage, bool) {
-	return extractPrimitiveElement(ed.raw, "pattern")
-}
-
-// extractPrimitiveElement returns the "_" sibling of the property raw has whose name starts with
-// prefix: the one of that property's type, or, when raw has no such property, any.
-func extractPrimitiveElement(raw json.RawMessage, prefix string) (json.RawMessage, bool) {
-	if _, typeSuffix, ok := extractPrefixedValue(raw, prefix); ok {
-		var obj map[string]json.RawMessage
-		if err := json.Unmarshal(raw, &obj); err != nil {
-			return nil, false
-		}
-		value, ok := obj["_"+prefix+typeSuffix]
-		return value, ok
-	}
-	value, _, ok := extractPrefixedValue(raw, "_"+prefix)
+	value, _, ok := ed.prefixedValuesOf().fixedElement.answer()
 	return value, ok
 }
 
-// extractPrefixedValue finds a key with the given prefix in the raw JSON.
-// Used for polymorphic properties like fixed[x] and pattern[x].
-func extractPrefixedValue(raw json.RawMessage, prefix string) (json.RawMessage, string, bool) {
-	if raw == nil {
-		return nil, "", false
-	}
-
-	var obj map[string]json.RawMessage
-	if err := json.Unmarshal(raw, &obj); err != nil {
-		return nil, "", false
-	}
-
-	for key, value := range obj {
-		if strings.HasPrefix(key, prefix) {
-			typeSuffix := strings.TrimPrefix(key, prefix)
-			return value, typeSuffix, true
-		}
-	}
-	return nil, "", false
+// GetPatternElement devuelve el hermano "_" del valor de pattern[x], como GetFixedElement.
+func (ed *ElementDefinition) GetPatternElement() (json.RawMessage, bool) {
+	value, _, ok := ed.prefixedValuesOf().patternElement.answer()
+	return value, ok
 }
 
 // Type represents an allowed type for an element.
@@ -308,6 +278,8 @@ type Discriminator struct {
 }
 
 // Registry holds loaded StructureDefinitions indexed by URL.
+//
+// Un Registry se crea con New o Clone: el valor cero no se puede usar (no tiene tipos publicados).
 type Registry struct {
 	mu sync.RWMutex
 	// snapshotGen serializes snapshot generation (EnsureSnapshot): it is held once per call chain,
@@ -345,6 +317,15 @@ type Registry struct {
 	holdingTypes atomic.Pointer[holdingTypes]
 	holderGen    atomic.Uint64
 
+	// types es la copia publicada de byType y domainResources, que GetByType e IsDomainResource leen
+	// sin lock: se consultan por cada elemento de cada recurso validado, y el RWMutex compartido por
+	// todos los núcleos limitaba la validación en paralelo. Los escritores la reemplazan, bajo mu,
+	// cada vez que byType cambia (publishTypesUnlocked); una copia publicada no se modifica.
+	types atomic.Pointer[typeIndex]
+	// publishes cuenta las publicaciones de types: cada operación pública que cambia los tipos
+	// publica exactamente una vez (los tests lo verifican). Solo lo tocan los escritores.
+	publishes atomic.Uint64
+
 	model *FHIRPathModel // see FHIRPathModel
 }
 
@@ -360,7 +341,22 @@ func New() *Registry {
 		interfaces: map[*StructureDefinition][]string{},
 	}
 	r.model = &FHIRPathModel{reg: r}
+	r.publishTypesUnlocked()
 	return r
+}
+
+// typeIndex son los tipos publicados de un registro (ver Registry.types).
+type typeIndex struct {
+	byType          map[string]*StructureDefinition
+	domainResources map[string]bool
+}
+
+// publishTypesUnlocked publica una copia de byType y domainResources. Se llama con el lock de
+// escritura tomado, al final de cada operación pública que cambia byType (no dentro de
+// reindexUnlocked ni de refreshDerivedUnlocked, que son pasos intermedios), o al crear el registro.
+func (r *Registry) publishTypesUnlocked() {
+	r.types.Store(&typeIndex{byType: maps.Clone(r.byType), domainResources: maps.Clone(r.domainResources)})
+	r.publishes.Add(1)
 }
 
 // LoadFromPackages loads StructureDefinitions from a slice of packages. Several versions of a
@@ -387,6 +383,8 @@ func (r *Registry) LoadFromPackages(packages []*loader.Package) error {
 
 	// The definitions loaded may change which version of a URL or type is used.
 	r.refreshDerivedUnlocked()
+	// Se publica una vez, al terminar: el reindexado del principio no debe verse.
+	r.publishTypesUnlocked()
 	return nil
 }
 
@@ -440,6 +438,7 @@ func (r *Registry) SetFHIRVersion(fhirVersion string) {
 	defer r.mu.Unlock()
 	r.fhirVersion = fhirVersion
 	r.reindexUnlocked()
+	r.publishTypesUnlocked()
 }
 
 // reindexUnlocked indexes again the definitions loaded, after what decides which version of a URL
@@ -628,6 +627,7 @@ func (r *Registry) ResolveByCanonical(ctx context.Context, url, version string) 
 		r.indexUnlocked(&sd)
 		if r.byType[sd.Type] != typeDef {
 			r.refreshDerivedUnlocked() // a type is defined now
+			r.publishTypesUnlocked()
 		}
 	}
 
@@ -657,9 +657,7 @@ func (r *Registry) ResolveBaseChain(ctx context.Context, sd *StructureDefinition
 
 // GetByType returns a StructureDefinition for a type name (e.g., "Patient", "HumanName").
 func (r *Registry) GetByType(typeName string) *StructureDefinition {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.byType[typeName]
+	return r.types.Load().byType[typeName]
 }
 
 // ChoiceType returns the type a JSON property names for a choice element: for the element base
@@ -855,9 +853,7 @@ func (r *Registry) IsDataType(typeName string) bool {
 // Non-DomainResources: Bundle, Binary, Parameters (inherit directly from Resource).
 // Uses pre-computed cache for O(1) lookups.
 func (r *Registry) IsDomainResource(typeName string) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.domainResources[typeName]
+	return r.types.Load().domainResources[typeName]
 }
 
 // IsCanonicalResource reports whether a resource type is a canonical resource: one that implements

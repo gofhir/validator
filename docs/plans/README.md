@@ -13,6 +13,20 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
+## Otro frente: camino caliente de la validación (rama `perf/registry-lockfree`)
+
+[2026-10-18-validation-hot-path.md](2026-10-18-validation-hot-path.md): **incrementos A y B cerrados**
+(§9 y §11). A extrae `fixed[x]`/`pattern[x]` una vez por elemento de snapshot; B publica los tipos
+del registro para que `GetByType` e `IsDomainResource` no tomen el lock. Resultados idénticos a la base
+(`make compare-baseline`), mutaciones A 9/9 y B 11/11, benchmarks en
+[evidence/2026-10-18-1859-bench-compare-74afca6243c1/](evidence/2026-10-18-1859-bench-compare-74afca6243c1/).
+Defectos previos publicados: #174 (orden de los issues) y #175 (dos `fixed[x]` en un snapshot).
+Rebasada sobre `main` (`a2ac6ea`) y validada contra esa base: `make check`, `make compare-baseline`
+idéntico, mutaciones 20/20, benchmarks en
+[evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/](evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/).
+Próximo paso: PR, cuando el usuario lo pida (sin push hasta entonces).
+Worktree aparte (`go-validator-wt-registry`); no tocar el checkout principal.
+
 ## Último incremento cerrado
 
 **Contexto `Element` en la raíz de un recurso** (18-10-2026): se mantiene B-D2, de
@@ -30,7 +44,8 @@ Antes: severidad de un code system desconocido, PR 1 a PR 3 (#164, #166, #167),
 ## Próximos frentes (a elegir)
 
 - Migrar a golangci-lint v2.14 o posterior con Go 1.27: decidir qué hacer con los 28 issues nuevos
-  de goconst y gocritic.
+  de goconst y gocritic. Mientras tanto, `make lint` y `make check` fijan las versiones de CI
+  (Go 1.25, golangci-lint v2.11.3), con las que hay 0 issues (rama `perf/registry-lockfree`).
 - Brechas anotadas: `ACR` y `umls` bajo un Coding con binding required (HL7: warning, gofhir:
   error); `memberOf` de FHIRPath sin `Coding.version`; `VALUESET_CIRCULAR_REFERENCE`, que HL7
   reporta y gofhir no; el perfil de prueba `fp-fix` de `acme.fixedpattern`, con el differential
