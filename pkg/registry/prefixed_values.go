@@ -15,8 +15,8 @@ type prefixedValue struct {
 }
 
 // prefixedValues son las respuestas de GetFixed, GetPattern, GetFixedElement y GetPatternElement
-// para un raw, calculadas en una sola decodificación. Una vez creado no cambia: se comparte entre
-// copias por valor de la ElementDefinition y entre goroutines.
+// para un raw, calculadas en una sola decodificación. Una vez creado no cambia, así que las copias
+// por valor de la ElementDefinition y las goroutines lo usan sin copiarlo.
 type prefixedValues struct {
 	fixed, pattern               prefixedValue
 	fixedElement, patternElement prefixedValue
@@ -77,7 +77,7 @@ func smallestWithPrefix(obj map[string]json.RawMessage, prefix string) prefixedV
 }
 
 // siblingOf devuelve el hermano "_" de la propiedad elegida (fixedCode → _fixedCode); sin propiedad
-// (un primitivo con extensiones y sin valor), cualquier "_" del prefijo.
+// (un primitivo con extension y sin valor), cualquier "_" del prefijo.
 func siblingOf(obj map[string]json.RawMessage, prefix string, chosen prefixedValue) prefixedValue {
 	if chosen.ok {
 		value, ok := obj["_"+prefix+chosen.suffix]

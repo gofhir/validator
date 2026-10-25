@@ -18,10 +18,10 @@ import (
 const maxShownLines = 20
 
 // cmdSame comprueba que un cambio no altera ningún resultado: corre corpusrun compilado contra la
-// línea base y contra el árbol de trabajo, con los mismos argumentos, sobre cada grupo del
+// línea base y contra el árbol de trabajo, con los mismos parámetros, sobre cada grupo del
 // manifiesto, y exige las mismas líneas, byte a byte, con todas las severidades y todos los campos
 // de cada issue. El orden de las líneas no cuenta: el validador no emite los issues de un recurso
-// en un orden determinista (recorre mapas; la línea base da salidas en distinto orden de una
+// en un orden determinista (itera mapas; la línea base da salidas en distinto orden de una
 // corrida a otra), así que se comparan ordenadas. Cada versión corre con los packages base que
 // embebe: si un cambio actualiza los embebidos, same lo informa como diferencia. No usa el
 // validador de HL7.
@@ -89,7 +89,8 @@ func cmdSame(ctx context.Context, args []string, out io.Writer) (bool, error) {
 	return allOK, nil
 }
 
-// sameGroup corre las dos versiones sobre un grupo, con los mismos argumentos, y compara.
+// sameGroup corre la línea base y el árbol de trabajo sobre un grupo, con los mismos parámetros, y
+// compara.
 func sameGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool, error) {
 	p, err := planGroup(env, g)
 	if err != nil {

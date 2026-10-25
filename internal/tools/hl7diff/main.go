@@ -6,7 +6,7 @@
 // HL7 errors with no gofhir equivalent (false negatives). A change holds the invariant when it adds
 // neither, relative to a baseline release, except where a divergence is declared.
 //
-//	hl7diff run   -jar validator_cli.jar [-manifest corpus.json] [-baseline ref] [-group a,b] [-heavy]
+//	hl7diff run   -jar validator_cli.jar [-manifest corpus.json] [-baseline ref] [-group a,b] [-heavy] [-identical]
 //	hl7diff fetch [-manifest corpus.json] [-heavy]
 //	hl7diff diff  -base base.jsonl -head head.jsonl -hl7 hl7.json [-divergences d.json]
 //	hl7diff same  -baseline ref [-manifest corpus.json] [-group a,b] [-heavy]
@@ -16,7 +16,9 @@
 // manifest, and writes report.md. "fetch" installs the manifest's packages, and their dependency
 // closure, into the standard FHIR package cache. "diff" checks outputs that already exist. "same"
 // checks that a change alters no result: corpusrun built against the baseline and against the working
-// tree, run with the same arguments, must write byte-identical outputs (no HL7 validator involved).
+// tree, run with the same arguments, must write the same lines, compared sorted, and validate every
+// file of each group. It does what "run -identical" does without the HL7 validator, so it needs no
+// JVM and takes a fraction of the time; it says nothing about HL7, which only "run" compares against.
 package main
 
 import (

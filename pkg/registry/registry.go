@@ -219,9 +219,9 @@ func (ed *ElementDefinition) GetPattern() (value json.RawMessage, typeSuffix str
 	return ed.prefixedValuesOf().pattern.answer()
 }
 
-// GetFixedElement devuelve el hermano "_" del valor de fixed[x], su id y extensiones cuando es un
+// GetFixedElement devuelve el hermano "_" del valor de fixed[x], su id y sus extension cuando es un
 // primitivo (json.html#primitive), si la definición lo tiene: "_fixedCode" para fixedCode o, para
-// un primitivo fijo con extensiones y sin valor, la propiedad "_fixed…" sola. Es una copia.
+// un primitivo fijo con extension y sin valor, la propiedad "_fixed…" sola. Es una copia.
 func (ed *ElementDefinition) GetFixedElement() (json.RawMessage, bool) {
 	value, _, ok := ed.prefixedValuesOf().fixedElement.answer()
 	return value, ok

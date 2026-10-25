@@ -10,7 +10,7 @@ import (
 
 // Oráculo de T1 y T2: la extracción de fixed[x]/pattern[x] tal como estaba en 74afca6
 // (registry.go:229-261), copiada sin cambios. Es la referencia de un refactor: el resultado no
-// debe cambiar. Recorre un mapa, así que con dos claves del mismo prefijo su respuesta es
+// debe cambiar. Itera un mapa, así que con dos claves del mismo prefijo su respuesta es
 // aleatoria; por eso T1 y T2 exigen además que no haya empates (ver prefixKeys).
 func oracleValue(raw json.RawMessage, prefix string) (value json.RawMessage, suffix string, ok bool) {
 	if raw == nil {
@@ -90,7 +90,7 @@ func checkAgainstOracle(t *testing.T, where string, ed *ElementDefinition) {
 var prefixedVersions = []string{"4.0.1", "4.3.0", "5.0.0"}
 
 // T1: toda ElementDefinition de los snapshots publicados en los packages embebidos (core,
-// terminología, extensiones) tiene su valor guardado vigente, y sus cuatro respuestas son las del
+// terminología, extension) tiene su valor guardado vigente, y sus cuatro respuestas son las del
 // oráculo. Además, metamórfico: reordenar las claves del JSON no cambia las respuestas.
 func TestPrefixedValuesPublishedSnapshots(t *testing.T) {
 	for _, version := range prefixedVersions {
@@ -324,14 +324,14 @@ func TestPrefixedValuesCases(t *testing.T) {
 			pattern: answer{`{"coding":[{"system":"http://loinc.org","code":"8480-6"}]}`, "CodeableConcept"},
 		},
 		{
-			// json.html#primitive: el id y las extensiones de un primitivo van en la propiedad con "_".
+			// json.html#primitive: el id y las extension de un primitivo van en la propiedad con "_".
 			name:      "fixedCode with its _fixedCode",
 			element:   `{"path":"Observation.status","fixedCode":"final","_fixedCode":{"extension":[{"url":"http://example.org/e","valueString":"x"}]}}`,
 			fixed:     answer{`"final"`, "Code"},
 			fixedElem: `{"extension":[{"url":"http://example.org/e","valueString":"x"}]}`,
 		},
 		{
-			// json.html#primitive: un primitivo puede tener extensiones y no tener valor.
+			// json.html#primitive: un primitivo puede tener extension y no tener valor.
 			name:      "_fixedCode without a value",
 			element:   `{"path":"Observation.status","_fixedCode":{"id":"a"}}`,
 			fixedElem: `{"id":"a"}`,

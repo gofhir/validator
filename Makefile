@@ -5,7 +5,7 @@ BASE ?=
 
 # Las mismas versiones que .github/workflows/ci.yml: con otras, el lint da otro resultado (con Go
 # 1.27 y golangci-lint 2.15 aparecen 27 avisos goconst que CI no ve; v2.11.3 no analiza Go 1.27).
-LINT_GO ?= go1.25.0
+LINT_GO ?= go1.25.13
 LINT_VERSION ?= v2.11.3
 LINT = GOTOOLCHAIN=$(LINT_GO) go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(LINT_VERSION)
 

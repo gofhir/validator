@@ -24,7 +24,9 @@ Defectos previos publicados: #174 (orden de los issues) y #175 (dos `fixed[x]` e
 Rebasada sobre `main` (`a2ac6ea`) y validada contra esa base: `make check`, `make compare-baseline`
 idéntico, mutaciones 20/20, benchmarks en
 [evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/](evidence/2026-10-19-0043-bench-compare-0e7b0c9416ef/).
-Próximo paso: PR, cuando el usuario lo pida (sin push hasta entonces).
+PR [#173](https://github.com/gofhir/validator/pull/173); los pendientes de su revisión, resueltos el 25-10-2026
+(lint con `go1.25.13` y sin `ignore-rules`; `hl7diff same` se mantiene, documentado frente a
+`run -identical`). Próximo paso: push y merge, con el verbo del usuario; después #175, #174 y #176.
 Worktree aparte (`go-validator-wt-registry`); no tocar el checkout principal.
 
 ## Último incremento cerrado

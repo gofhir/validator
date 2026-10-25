@@ -82,14 +82,6 @@ linters:
       under: 20
     misspell:
       locale: US
-      # Los comentarios van en español (NUCLEO.md §3): palabras españolas que misspell toma por
-      # errores de inglés.
-      ignore-rules:
-        - argumentos
-        - comparte
-        - extensiones
-        - recorre
-        - versiones
     revive:
       rules:
         - name: blank-imports
