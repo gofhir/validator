@@ -24,6 +24,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/validator"
 )
 
@@ -35,7 +36,11 @@ type Line struct {
 	MessageID   string   `json:"messageId,omitempty"`
 	Expression  []string `json:"expression,omitempty"`
 	Diagnostics string   `json:"diagnostics,omitempty"`
-	Failure     string   `json:"failure,omitempty"`
+	// Location y Source completan los campos de issue.Issue: con ellos, dos salidas iguales byte
+	// a byte son dos resultados iguales (hl7diff same).
+	Location *issue.Location `json:"location,omitempty"`
+	Source   string          `json:"source,omitempty"`
+	Failure  string          `json:"failure,omitempty"`
 }
 
 func main() {
@@ -126,6 +131,8 @@ func validateFile(v *validator.Validator, file string) []Line {
 			MessageID:   iss.MessageID,
 			Expression:  iss.Expression,
 			Diagnostics: iss.Diagnostics,
+			Location:    iss.Location,
+			Source:      iss.Source,
 		})
 	}
 	return lines

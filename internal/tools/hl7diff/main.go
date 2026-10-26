@@ -6,14 +6,19 @@
 // HL7 errors with no gofhir equivalent (false negatives). A change holds the invariant when it adds
 // neither, relative to a baseline release, except where a divergence is declared.
 //
-//	hl7diff run   -jar validator_cli.jar [-manifest corpus.json] [-baseline ref] [-group a,b] [-heavy]
+//	hl7diff run   -jar validator_cli.jar [-manifest corpus.json] [-baseline ref] [-group a,b] [-heavy] [-identical]
 //	hl7diff fetch [-manifest corpus.json] [-heavy]
 //	hl7diff diff  -base base.jsonl -head head.jsonl -hl7 hl7.json [-divergences d.json]
+//	hl7diff same  -baseline ref [-manifest corpus.json] [-group a,b] [-heavy]
 //
 // "run" produces the three outputs and checks them: it builds corpusrun from the working tree and
 // from a git worktree of the baseline, runs both and the HL7 validator on every group of the
 // manifest, and writes report.md. "fetch" installs the manifest's packages, and their dependency
-// closure, into the standard FHIR package cache. "diff" checks outputs that already exist.
+// closure, into the standard FHIR package cache. "diff" checks outputs that already exist. "same"
+// checks that a change alters no result: corpusrun built against the baseline and against the working
+// tree, run with the same arguments, must write the same lines, compared sorted, and validate every
+// file of each group. It does what "run -identical" does without the HL7 validator, so it needs no
+// JVM and takes a fraction of the time; it says nothing about HL7, which only "run" compares against.
 package main
 
 import (
@@ -39,7 +44,7 @@ func main() {
 
 func dispatch(args []string, out io.Writer) (bool, error) {
 	if len(args) == 0 {
-		return false, errors.New("usage: hl7diff run|fetch|diff [flags] (see the package doc)")
+		return false, errors.New("usage: hl7diff run|fetch|diff|same [flags] (see the package doc)")
 	}
 	ctx := context.Background()
 	switch args[0] {
@@ -49,6 +54,8 @@ func dispatch(args []string, out io.Writer) (bool, error) {
 		return cmdFetch(ctx, args[1:], out)
 	case "diff":
 		return cmdDiff(args[1:], out)
+	case "same":
+		return cmdSame(ctx, args[1:], out)
 	default:
 		return false, fmt.Errorf("unknown command %q", args[0])
 	}

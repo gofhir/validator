@@ -203,6 +203,12 @@ func (r *Registry) generateSnapshot(ctx context.Context, sd *StructureDefinition
 	// applied again, for the version the profile was corrected for (its own, or the version
 	// validated when it declares none), or else its base's.
 	correctSnapshot(cmp.Or(sd.errataVersion, sd.FHIRVersion, baseSD.errataVersion, baseSD.FHIRVersion), snapshot.Element)
+	// fixed[x] y pattern[x] se extraen aquí, sobre el snapshot terminado y antes de que otra
+	// goroutine lo vea: sus elementos llegan por varios caminos (copia de la base, mezcla con el
+	// diferencial, el elemento del diferencial tal cual).
+	for i := range snapshot.Element {
+		snapshot.Element[i].keepPrefixedValues()
+	}
 	return snapshot, notes, nil
 }
 

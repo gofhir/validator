@@ -201,11 +201,14 @@ func newRunEnv(ctx context.Context, root string, m Manifest, jar, work, baseline
 		return nil, nil, err
 	}
 	env := &runEnv{root: root, cache: cache, out: out, baseline: baseline, registry: registry, cover: cover}
-	if env.jar, err = filepath.Abs(jar); err != nil {
-		return nil, nil, err
-	}
-	if env.jarID, err = jarIdentity(ctx, env.jar); err != nil {
-		return nil, nil, err
+	// Sin jar (hl7diff same), el validador de HL7 no se usa.
+	if jar != "" {
+		if env.jar, err = filepath.Abs(jar); err != nil {
+			return nil, nil, err
+		}
+		if env.jarID, err = jarIdentity(ctx, env.jar); err != nil {
+			return nil, nil, err
+		}
 	}
 	if env.fam, err = LoadFamilies(); err != nil {
 		return nil, nil, err

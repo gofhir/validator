@@ -69,3 +69,6 @@ docs/.hugo_build.lock
 
 # Local development worktrees
 .worktrees/
+
+# Packages de los benchmarks (make bench-deps)
+/.cache/

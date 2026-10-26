@@ -1,0 +1,15 @@
+{"resourceType":"Patient","id":"bench-patient",
+ "meta":{"profile":["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]},
+ "extension":[
+  {"url":"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race","extension":[
+   {"url":"ombCategory","valueCoding":{"system":"urn:oid:2.16.840.1.113883.6.238","code":"2106-3","display":"White"}},
+   {"url":"text","valueString":"White"}]},
+  {"url":"http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity","extension":[
+   {"url":"ombCategory","valueCoding":{"system":"urn:oid:2.16.840.1.113883.6.238","code":"2186-5","display":"Not Hispanic or Latino"}},
+   {"url":"text","valueString":"Not Hispanic or Latino"}]},
+  {"url":"http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex","valueCode":"F"}],
+ "identifier":[{"system":"http://example.org/mrn","value":"BENCH-0001"}],
+ "name":[{"family":"Synthetic","given":["Test","Bench"]}],
+ "telecom":[{"system":"phone","value":"555-0100","use":"home"},{"system":"email","value":"test@example.org"}],
+ "gender":"female","birthDate":"1987-02-20",
+ "address":[{"line":["1 Example St"],"city":"Exampleton","state":"OK","postalCode":"00000","country":"US"}]}
