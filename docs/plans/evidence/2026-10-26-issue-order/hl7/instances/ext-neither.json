@@ -1,0 +1,11 @@
+{
+ "resourceType": "Patient",
+ "id": "ext-neither",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/name-ext",
+   "valueString": "a",
+   "valueBoolean": true
+  }
+ ]
+}

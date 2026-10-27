@@ -1,0 +1,19 @@
+# ./run-mutations.sh <copia del repo> <copia intacta>, después de la ronda 2 del code review (2026-10-27)
+m1-structural-map-order killed
+m2-structural-prescan-map-order killed
+m3-choice-bases-map-order killed
+m4-primitive-map-order killed
+m5-fixedpattern-map-order killed
+m6-extension-element-map-order SURVIVED
+m7-extension-value-structure-map-order SURVIVED
+m8-extension-nested-map-order SURVIVED
+m9-first-value-only killed
+m10-stop-after-first-value killed
+m11-nested-stop-after-first-value killed
+m12-no-content-of-allowed-value SURVIVED
+m13-template-successive-replace killed
+m14-keys-not-sorted killed
+m15-location-column-shifted killed
+m16-template-drops-unknown-placeholder killed
+m17-template-drops-unclosed-rest killed
+m18-release-keeps-keys killed

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gofhir/validator/v2/internal/objectkeys"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 )
@@ -185,9 +186,13 @@ func (v *Validator) validateElement(
 	ctx *validationContext,
 	result *issue.Result,
 ) {
+	// Las claves en orden de nombre: los issues salen siempre en el mismo orden (#174)
+	keys := objectkeys.Sorted(data)
+	defer keys.Release()
+
 	// Pre-scan: detect multiple variants of the same choice type (FHIR R4 §2.6.2)
 	choiceMatches := make(map[string][]string) // choiceBasePath -> list of data keys
-	for key := range data {
+	for _, key := range keys.List {
 		if (key == "resourceType" && v.registry.IsResourceType(sdPath)) || strings.HasPrefix(key, "_") {
 			continue
 		}
@@ -195,18 +200,21 @@ func (v *Validator) validateElement(
 			choiceMatches[basePath] = append(choiceMatches[basePath], key)
 		}
 	}
-	for basePath, keys := range choiceMatches {
-		if len(keys) > 1 {
+	bases := objectkeys.Sorted(choiceMatches)
+	defer bases.Release()
+	for _, basePath := range bases.List {
+		if variants := choiceMatches[basePath]; len(variants) > 1 {
 			baseName := basePath[strings.LastIndex(basePath, ".")+1:]
 			result.AddErrorWithID(
 				issue.DiagStructureChoiceMutualExclusion,
-				map[string]any{"basePath": baseName, "variants": strings.Join(keys, ", ")},
+				map[string]any{"basePath": baseName, "variants": strings.Join(variants, ", ")},
 				fhirPath,
 			)
 		}
 	}
 
-	for key, value := range data {
+	for _, key := range keys.List {
+		value := data[key]
 		// A resource's own type (json.html#resources), not an element, at the resource's root:
 		// handled separately.
 		if key == "resourceType" && v.registry.IsResourceType(sdPath) {

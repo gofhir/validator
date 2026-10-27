@@ -22,12 +22,14 @@ build:
 	go build ./...
 
 # check es la verificación de cierre de un incremento (NUCLEO.md §10, paso 9): formato, vet, lint y
-# tests con el detector de carreras (-short deja fuera las regeneraciones de guías completas).
+# tests con el detector de carreras (-short deja fuera las regeneraciones de guías completas), y sin él
+# los que cuentan asignaciones, que -race altera.
 check:
 	@test -z "$$(gofmt -l .)" || { echo "gofmt needed:"; gofmt -l .; exit 1; }
 	go vet ./...
 	$(LINT) run
 	go test -race -short ./...
+	go test -run DoesNotAllocate ./internal/objectkeys
 
 # compare-baseline exige que ningún resultado cambie respecto de BASE: corpusrun de la base y del
 # árbol de trabajo sobre todo el manifiesto de hl7diff, las mismas líneas (hl7diff same).

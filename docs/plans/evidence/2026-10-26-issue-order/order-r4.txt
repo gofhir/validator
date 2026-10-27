@@ -1,0 +1,2 @@
+# sonda TestZZOrderProbe (order_probe_test.go.txt), 8 validaciones por recurso, 2026-10-26
+TOTAL files=4658 unstable=0 sameSet=0 diffSet=0

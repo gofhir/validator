@@ -1,0 +1,30 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateMinimalPatient-12     	   53924	     21055 ns/op	   17954 B/op	     237 allocs/op
+BenchmarkValidateMinimalPatient-12     	   54834	     24348 ns/op	   17953 B/op	     237 allocs/op
+BenchmarkValidateMinimalPatient-12     	   57730	     26717 ns/op	   17951 B/op	     237 allocs/op
+BenchmarkValidateMinimalPatient-12     	   52822	     24155 ns/op	   17955 B/op	     237 allocs/op
+BenchmarkValidateMinimalPatient-12     	   57824	     24120 ns/op	   17951 B/op	     237 allocs/op
+BenchmarkValidateMinimalPatient-12     	   55203	     21253 ns/op	   17952 B/op	     237 allocs/op
+BenchmarkValidateMinimalPatient-12     	   52336	     21982 ns/op	   17954 B/op	     237 allocs/op
+BenchmarkValidateMinimalPatient-12     	   58245	     23543 ns/op	   17950 B/op	     237 allocs/op
+BenchmarkValidatePatientWithData-12    	    8750	    141563 ns/op	   88548 B/op	    1806 allocs/op
+BenchmarkValidatePatientWithData-12    	    8466	    134315 ns/op	   88570 B/op	    1806 allocs/op
+BenchmarkValidatePatientWithData-12    	    9074	    132031 ns/op	   88528 B/op	    1806 allocs/op
+BenchmarkValidatePatientWithData-12    	   10540	    113858 ns/op	   88501 B/op	    1805 allocs/op
+BenchmarkValidatePatientWithData-12    	    9668	    118341 ns/op	   88548 B/op	    1806 allocs/op
+BenchmarkValidatePatientWithData-12    	    8731	    123506 ns/op	   88539 B/op	    1806 allocs/op
+BenchmarkValidatePatientWithData-12    	    9364	    117801 ns/op	   88544 B/op	    1806 allocs/op
+BenchmarkValidatePatientWithData-12    	    9704	    117937 ns/op	   88536 B/op	    1806 allocs/op
+BenchmarkValidateObservation-12        	   12417	    108551 ns/op	   75027 B/op	    1401 allocs/op
+BenchmarkValidateObservation-12        	   12147	     99961 ns/op	   75033 B/op	    1401 allocs/op
+BenchmarkValidateObservation-12        	   10000	    102999 ns/op	   75076 B/op	    1402 allocs/op
+BenchmarkValidateObservation-12        	   10000	    114530 ns/op	   75089 B/op	    1402 allocs/op
+BenchmarkValidateObservation-12        	   10773	     96639 ns/op	   75054 B/op	    1402 allocs/op
+BenchmarkValidateObservation-12        	   10000	    112527 ns/op	   75096 B/op	    1402 allocs/op
+BenchmarkValidateObservation-12        	   10000	    100669 ns/op	   75075 B/op	    1402 allocs/op
+BenchmarkValidateObservation-12        	   11193	     93651 ns/op	   75062 B/op	    1402 allocs/op
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/validator	41.297s

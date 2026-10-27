@@ -737,13 +737,39 @@ func GetDiagnosticTemplate(id DiagnosticID) (DiagnosticTemplate, bool) {
 }
 
 // formatTemplate replaces {placeholder} with values from params.
+//
+// En una sola pasada sobre la plantilla: un valor que contiene un marcador (un código literal
+// "{valueSet}") se escribe tal cual, sin volver a reemplazarlo, y el resultado no depende del orden
+// de los parámetros (#174). Un marcador sin parámetro queda como está.
 func formatTemplate(template string, params map[string]any) string {
-	result := template
-	for key, value := range params {
-		placeholder := "{" + key + "}"
-		result = strings.ReplaceAll(result, placeholder, fmt.Sprint(value))
+	if !strings.Contains(template, "{") {
+		return template
 	}
-	return result
+	var b strings.Builder
+	b.Grow(len(template))
+	rest := template
+	for {
+		open := strings.IndexByte(rest, '{')
+		if open < 0 {
+			b.WriteString(rest)
+			return b.String()
+		}
+		closing := strings.IndexByte(rest[open:], '}')
+		if closing < 0 {
+			b.WriteString(rest)
+			return b.String()
+		}
+		closing += open
+		value, ok := params[rest[open+1:closing]]
+		if !ok {
+			b.WriteString(rest[:open+1])
+			rest = rest[open+1:]
+			continue
+		}
+		b.WriteString(rest[:open])
+		fmt.Fprint(&b, value)
+		rest = rest[closing+1:]
+	}
 }
 
 // AddWithID adds an issue of severity s using a diagnostic template, whatever severity the

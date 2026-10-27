@@ -1,0 +1,43 @@
+== ext-content: 4 distinct SETS
+-- set x31
+error|CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2|Patient.extension[0].value[x]
+error|EXTENSION_INVALID_VALUE_TYPE|Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'string'. Allowed: Address|Patient.extension[0].valueString
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueAddress|Patient.extension[0]
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'bogus'|Patient.extension[0].valueAddress.bogus
+error|TYPE_INVALID_FORMAT|Value 'not-a-date' does not match expected format for type dateTime|Patient.extension[0].valueAddress.period.start
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+-- set x4
+error|CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2|Patient.extension[0].value[x]
+error|EXTENSION_INVALID_VALUE_TYPE|Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'string'. Allowed: Address|Patient.extension[0].valueString
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueAddress, valueString|Patient.extension[0]
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'bogus'|Patient.extension[0].valueAddress.bogus
+error|TYPE_INVALID_FORMAT|Value 'not-a-date' does not match expected format for type dateTime|Patient.extension[0].valueAddress.period.start
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+-- set x4
+error|CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2|Patient.extension[0].value[x]
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueAddress|Patient.extension[0]
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'bogus'|Patient.extension[0].valueAddress.bogus
+error|TYPE_INVALID_FORMAT|Value 'not-a-date' does not match expected format for type dateTime|Patient.extension[0].valueAddress.period.start
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+-- set x1
+error|CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2|Patient.extension[0].value[x]
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueAddress, valueString|Patient.extension[0]
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'bogus'|Patient.extension[0].valueAddress.bogus
+error|TYPE_INVALID_FORMAT|Value 'not-a-date' does not match expected format for type dateTime|Patient.extension[0].valueAddress.period.start
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+== ext-both-bad: 3 distinct SETS
+-- set x31
+error|CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2|Patient.extension[0].value[x]
+error|EXTENSION_INVALID_VALUE_TYPE|Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'string'. Allowed: Address|Patient.extension[0].valueString
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueInteger|Patient.extension[0]
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+-- set x7
+error|CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2|Patient.extension[0].value[x]
+error|EXTENSION_INVALID_VALUE_TYPE|Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'string'. Allowed: Address|Patient.extension[0].valueString
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueInteger, valueString|Patient.extension[0]
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+-- set x2
+error|CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2|Patient.extension[0].value[x]
+error|EXTENSION_INVALID_VALUE_TYPE|Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'integer'. Allowed: Address|Patient.extension[0].valueInteger
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueInteger|Patient.extension[0]
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient

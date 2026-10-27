@@ -1,0 +1,53 @@
+== choice: 6 distinct outputs
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'effective[x]' is allowed, but found: effectivePeriod, effectiveDateTime|Observation
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueInteger, valueBoolean|Observation
+CARDINALITY_MAX|Maximum cardinality of 'Observation.effective[x]' is 1, but found 2|Observation.effective[x]
+CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+--
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString, valueInteger|Observation
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'effective[x]' is allowed, but found: effectiveDateTime, effectivePeriod|Observation
+CARDINALITY_MAX|Maximum cardinality of 'Observation.effective[x]' is 1, but found 2|Observation.effective[x]
+CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+--
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'effective[x]' is allowed, but found: effectiveDateTime, effectivePeriod|Observation
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueInteger, valueBoolean|Observation
+CARDINALITY_MAX|Maximum cardinality of 'Observation.effective[x]' is 1, but found 2|Observation.effective[x]
+CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+--
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueInteger, valueBoolean, valueString|Observation
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'effective[x]' is allowed, but found: effectiveDateTime, effectivePeriod|Observation
+CARDINALITY_MAX|Maximum cardinality of 'Observation.effective[x]' is 1, but found 2|Observation.effective[x]
+CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+--
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'effective[x]' is allowed, but found: effectiveDateTime, effectivePeriod|Observation
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueInteger, valueBoolean, valueString|Observation
+CARDINALITY_MAX|Maximum cardinality of 'Observation.effective[x]' is 1, but found 2|Observation.effective[x]
+CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+--
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueInteger, valueBoolean|Observation
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'effective[x]' is allowed, but found: effectiveDateTime, effectivePeriod|Observation
+CARDINALITY_MAX|Maximum cardinality of 'Observation.effective[x]' is 1, but found 2|Observation.effective[x]
+CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+--
+== ext: 3 distinct outputs
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueInteger, valueBoolean, valueString|Patient.extension[0]
+CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 3|Patient.extension[0].value[x]
+EXTENSION_UNKNOWN|Unknown extension 'http://example.org/x'|Patient.extension[0]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+--
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueInteger, valueBoolean|Patient.extension[0]
+CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 3|Patient.extension[0].value[x]
+EXTENSION_UNKNOWN|Unknown extension 'http://example.org/x'|Patient.extension[0]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+--
+STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString, valueInteger|Patient.extension[0]
+CARDINALITY_MAX|Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 3|Patient.extension[0].value[x]
+EXTENSION_UNKNOWN|Unknown extension 'http://example.org/x'|Patient.extension[0]
+CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Patient
+--

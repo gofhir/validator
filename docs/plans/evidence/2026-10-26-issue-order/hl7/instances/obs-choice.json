@@ -1,0 +1,11 @@
+{
+ "resourceType": "Observation",
+ "id": "obs-choice",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "a",
+ "valueInteger": 1,
+ "valueBoolean": true
+}

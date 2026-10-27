@@ -72,6 +72,9 @@ jobs:
       - name: Run tests
         run: go test -v -race -short -coverprofile=coverage.txt -covermode=atomic ./...
 
+      - name: Run allocation tests without the race detector
+        run: go test -run DoesNotAllocate ./internal/objectkeys
+
       - name: Upload coverage
         uses: codecov/codecov-action@v5
         with:

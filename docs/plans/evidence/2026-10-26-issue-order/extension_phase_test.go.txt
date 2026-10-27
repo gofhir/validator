@@ -1,0 +1,153 @@
+package extension
+
+import (
+	"context"
+	"slices"
+	"strings"
+	"testing"
+
+	"github.com/gofhir/validator/v2/internal/testfhir"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/loader"
+	"github.com/gofhir/validator/v2/pkg/primitive"
+	"github.com/gofhir/validator/v2/pkg/registry"
+)
+
+// La fase de extensiones, sola, da sus issues siempre en el mismo orden (#174): toma las claves de
+// cada objeto por nombre y valida cada value[x] de una extensión. Desde Validate no se ve todo: la
+// fase estructural ya informa los elementos desconocidos de un valor y el resultado no los repite.
+// Las extensiones de los elementos del recurso las recorre en el orden de la definición, que ya es
+// determinista.
+
+// nameExt es una extensión de Patient, CodeableConcept y Period cuyo value[x] admite HumanName e
+// Identifier.
+const nameExt = `{
+  "resourceType": "StructureDefinition",
+  "url": "http://example.org/StructureDefinition/name-ext",
+  "name": "NameExt",
+  "status": "active",
+  "kind": "complex-type",
+  "abstract": false,
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "context": [
+    {"type": "element", "expression": "Patient"},
+    {"type": "element", "expression": "CodeableConcept"},
+    {"type": "element", "expression": "Period"}
+  ],
+  "differential": {
+    "element": [
+      {"id": "Extension", "path": "Extension"},
+      {"id": "Extension.extension", "path": "Extension.extension", "max": "0"},
+      {"id": "Extension.url", "path": "Extension.url", "fixedUri": "http://example.org/StructureDefinition/name-ext"},
+      {"id": "Extension.value[x]", "path": "Extension.value[x]", "min": 1, "type": [{"code": "HumanName"}, {"code": "Identifier"}]}
+    ]
+  }
+}`
+
+func phaseFor(t *testing.T, version string) (*Validator, *registry.StructureDefinition) {
+	t.Helper()
+	reg := testfhir.Registry(t, version)
+	pkg, err := loader.NewLoader("").LoadFromResources([][]byte{[]byte(nameExt)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := reg.LoadFromPackages([]*loader.Package{pkg}); err != nil {
+		t.Fatal(err)
+	}
+	// La extensión trae solo el diferencial: la fase lee el snapshot, que Validate genera antes.
+	if err := reg.EnsureSnapshot(context.Background(), reg.GetByURL("http://example.org/StructureDefinition/name-ext")); err != nil {
+		t.Fatal(err)
+	}
+	patient := reg.GetByType("Patient")
+	if patient == nil {
+		t.Fatal("no Patient")
+	}
+	return New(reg, testfhir.Terminology(t, version), primitive.New(reg)), patient
+}
+
+// phaseIssues valida data con la fase 30 veces, exige el mismo resultado en todas y lo devuelve.
+func phaseIssues(t *testing.T, v *Validator, sd *registry.StructureDefinition, data string) []issue.Issue {
+	t.Helper()
+	var want []issue.Issue
+	for i := range 30 {
+		result := issue.NewResult()
+		v.Validate(context.Background(), []byte(data), sd, result)
+		if i == 0 {
+			want = result.Issues
+			continue
+		}
+		if !slices.EqualFunc(result.Issues, want, func(a, b issue.Issue) bool {
+			return a.MessageID == b.MessageID && a.Diagnostics == b.Diagnostics && slices.Equal(a.Expression, b.Expression)
+		}) {
+			t.Fatalf("validation %d differs from the first:\n%v\nfirst:\n%v", i, result.Issues, want)
+		}
+	}
+	return want
+}
+
+// inNameOrder exige que los issues con ese MessageID cuya expresión tiene el mismo padre salgan en
+// orden de nombre.
+func inNameOrder(t *testing.T, issues []issue.Issue, id issue.DiagnosticID) {
+	t.Helper()
+	last := map[string]string{}
+	for _, is := range issues {
+		if is.MessageID != string(id) || len(is.Expression) == 0 {
+			continue
+		}
+		expr := is.Expression[0]
+		parent, name := expr[:strings.LastIndex(expr, ".")], expr[strings.LastIndex(expr, ".")+1:]
+		if prev, ok := last[parent]; ok && name < prev {
+			t.Errorf("%s: %s after %s", id, expr, parent+"."+prev)
+		}
+		last[parent] = name
+	}
+}
+
+func TestPhaseIssueOrder(t *testing.T) {
+	const url = "http://example.org/StructureDefinition/name-ext"
+	for _, version := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		t.Run(version, func(t *testing.T) {
+			v, patient := phaseFor(t, version)
+
+			// Elementos desconocidos en el valor y en un elemento anidado del valor.
+			issues := phaseIssues(t, v, patient, `{"resourceType":"Patient","extension":[{"url":"`+url+
+				`","valueHumanName":{"zulu":1,"family":"x","mike":2,"alpha":3,"period":{"yankee":1,"start":"2020","bravo":2}}}]}`)
+			if n := len(expressionsWith(issues, issue.DiagStructureUnknownElement)); n != 5 {
+				t.Errorf("%d unknown elements, want 5: %v", n, issues)
+			}
+			inNameOrder(t, issues, issue.DiagStructureUnknownElement)
+
+			// Extensiones en dos elementos hermanos dentro de un valor: por nombre del elemento (period antes
+			// que type; en la definición de Identifier, type va primero).
+			issues = phaseIssues(t, v, patient, `{"resourceType":"Patient","extension":[{"url":"`+url+`","valueIdentifier":{`+
+				`"type":{"text":"x","extension":[{"url":"`+url+`","valueBoolean":true}]},`+
+				`"period":{"start":"2020","extension":[{"url":"`+url+`","valueBoolean":true}]}}}]}`)
+			want := []string{
+				"Patient.extension[0].valueIdentifier.period.extension[0].valueBoolean",
+				"Patient.extension[0].valueIdentifier.type.extension[0].valueBoolean",
+			}
+			if got := expressionsWith(issues, issue.DiagExtensionInvalidValueType); !slices.Equal(got, want) {
+				t.Errorf("EXTENSION_INVALID_VALUE_TYPE at %v, want %v", got, want)
+			}
+
+			// El valor permitido va después del que no por nombre: su contenido se valida igual.
+			issues = phaseIssues(t, v, patient, `{"resourceType":"Patient","extension":[{"url":"`+url+
+				`","valueHumanName":{"family":"x","bogus":1},"valueBoolean":true}]}`)
+			if got := expressionsWith(issues, issue.DiagStructureUnknownElement); !slices.Equal(got, []string{"Patient.extension[0].valueHumanName.bogus"}) {
+				t.Errorf("unknown elements at %v, want the valueHumanName's bogus", got)
+			}
+		})
+	}
+}
+
+func expressionsWith(issues []issue.Issue, id issue.DiagnosticID) []string {
+	var out []string
+	for _, is := range issues {
+		if is.MessageID == string(id) {
+			out = append(out, strings.Join(is.Expression, ","))
+		}
+	}
+	return out
+}

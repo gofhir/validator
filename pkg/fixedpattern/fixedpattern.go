@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gofhir/validator/v2/internal/objectkeys"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 )
@@ -129,7 +130,11 @@ func (v *Validator) validateElement(
 	elemIndex map[string]*registry.ElementDefinition,
 	result *issue.Result,
 ) {
-	for key, value := range data {
+	// Las claves en orden de nombre: los issues salen siempre en el mismo orden (#174)
+	keys := objectkeys.Sorted(data)
+	defer keys.Release()
+	for _, key := range keys.List {
+		value := data[key]
 		// Skip resourceType and shadow elements
 		if key == "resourceType" || strings.HasPrefix(key, "_") {
 			continue
