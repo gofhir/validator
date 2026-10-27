@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "to-string",
+ "url": "http://example.org/StructureDefinition/to-string",
+ "name": "tostring",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "derivation": "constraint",
+ "baseDefinition": "http://example.org/StructureDefinition/base-integer",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "fixedString": "a"
+   }
+  ]
+ }
+}

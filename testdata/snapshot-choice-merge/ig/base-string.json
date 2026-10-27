@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "base-string",
+ "url": "http://example.org/StructureDefinition/base-string",
+ "name": "basestring",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "derivation": "constraint",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ],
+    "fixedString": "a"
+   }
+  ]
+ }
+}

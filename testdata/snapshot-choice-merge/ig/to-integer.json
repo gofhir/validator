@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "to-integer",
+ "url": "http://example.org/StructureDefinition/to-integer",
+ "name": "tointeger",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "derivation": "constraint",
+ "baseDefinition": "http://example.org/StructureDefinition/base-string",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "fixedInteger": 5
+   }
+  ]
+ }
+}
