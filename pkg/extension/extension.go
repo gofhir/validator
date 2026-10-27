@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofhir/validator/v2/internal/elementvalues"
 	"github.com/gofhir/validator/v2/internal/exactjson"
+	"github.com/gofhir/validator/v2/internal/objectkeys"
 	"github.com/gofhir/validator/v2/internal/reslang"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/primitive"
@@ -230,7 +231,11 @@ func (v *Validator) validateExtensionsOf(ctx context.Context, element map[string
 // values it holds, by its keys.
 func (v *Validator) validateValueElement(ctx context.Context, data map[string]any, basePath string, result *issue.Result) {
 	v.validateExtensionsOf(ctx, data, basePath, result)
-	for key, value := range data {
+	// Las claves en orden de nombre: los issues salen siempre en el mismo orden (#174)
+	keys := objectkeys.Sorted(data)
+	defer keys.Release()
+	for _, key := range keys.List {
+		value := data[key]
 		if key == keyExtension || key == keyModifierExtension || key == resourceTypeKey {
 			continue
 		}
@@ -460,12 +465,18 @@ func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]a
 		return
 	}
 
-	// Validate value type if present
-	valueKey := v.findValueKey(ext)
-	if valueKey == "" {
-		return
+	// Cada valor presente, en orden de nombre. Más de uno ya lo informan la cardinalidad y la exclusión
+	// mutua; lo que se valida de cada uno no depende de cuál salió primero (#174).
+	valueKeys := v.valueKeys(ext)
+	defer valueKeys.Release()
+	for _, valueKey := range valueKeys.List {
+		v.validateValueOf(ctx, ext, valueKey, valueDef, extSD, extPath, result)
 	}
+}
 
+// validateValueOf valida el valor de valueKey de una extensión: su tipo y, si está permitido, su
+// contenido.
+func (v *Validator) validateValueOf(ctx context.Context, ext map[string]any, valueKey string, valueDef *registry.ElementDefinition, extSD *registry.StructureDefinition, extPath string, result *issue.Result) {
 	// Extract type from value key (e.g., "valueString" -> "string")
 	valueType := v.extractValueType(valueKey)
 
@@ -545,8 +556,10 @@ func (v *Validator) validateValueStructure(ctx context.Context, value map[string
 
 	validElements, choiceTypes := v.buildValidElementSets(typeSD, typeName)
 
-	// Validate each element in the value
-	for key := range value {
+	// Cada elemento del valor, en orden de nombre (#174)
+	keys := objectkeys.Sorted(value)
+	defer keys.Release()
+	for _, key := range keys.List {
 		if v.isSkippableKey(key) || validElements[key] {
 			continue
 		}
@@ -612,7 +625,11 @@ func (v *Validator) isValidChoiceType(key string, choiceTypes map[string][]strin
 
 // validateNestedElements recursively validates nested complex elements.
 func (v *Validator) validateNestedElements(ctx context.Context, value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
-	for key, val := range value {
+	// Las claves en orden de nombre (#174)
+	keys := objectkeys.Sorted(value)
+	defer keys.Release()
+	for _, key := range keys.List {
+		val := value[key]
 		if v.isSkippableKey(key) {
 			continue
 		}
@@ -675,14 +692,18 @@ func (v *Validator) hasValue(ext map[string]any) bool {
 	return false
 }
 
-// findValueKey finds the value[x] key in an extension.
-func (v *Validator) findValueKey(ext map[string]any) string {
-	for key := range ext {
+// valueKeys devuelve las claves value[x] de una extensión, en orden de nombre; se devuelven con
+// Release.
+func (v *Validator) valueKeys(ext map[string]any) objectkeys.Keys {
+	keys := objectkeys.Sorted(ext)
+	values := keys.List[:0]
+	for _, key := range keys.List {
 		if strings.HasPrefix(key, "value") && key != "valueSet" {
-			return key
+			values = append(values, key)
 		}
 	}
-	return ""
+	keys.List = values
+	return keys
 }
 
 // extractValueType extracts the type from a value key.
@@ -794,8 +815,9 @@ func findNestedExtensionDef(parentSD *registry.StructureDefinition, url string) 
 
 // validateNestedExtensionValue validates the value of a nested extension.
 func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *registry.ElementDefinition, parentSD *registry.StructureDefinition, extPath string, result *issue.Result) {
-	valueKey := v.findValueKey(ext)
-	if valueKey == "" {
+	valueKeys := v.valueKeys(ext)
+	defer valueKeys.Release()
+	if len(valueKeys.List) == 0 {
 		if valueDef.Min > 0 {
 			result.AddErrorWithID(
 				issue.DiagExtensionValueRequired,
@@ -808,16 +830,19 @@ func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *r
 		return
 	}
 
-	valueType := v.extractValueType(valueKey)
-	if !v.isTypeAllowed(valueType, valueDef.Type) {
-		result.AddErrorWithID(
-			issue.DiagExtensionInvalidValueType,
-			map[string]any{
-				keyURL:     parentSD.URL,
-				"provided": valueType,
-				"allowed":  v.allowedTypesString(valueDef.Type),
-			},
-			extPath+"."+valueKey,
-		)
+	// Cada valor presente, en orden de nombre (#174)
+	for _, valueKey := range valueKeys.List {
+		valueType := v.extractValueType(valueKey)
+		if !v.isTypeAllowed(valueType, valueDef.Type) {
+			result.AddErrorWithID(
+				issue.DiagExtensionInvalidValueType,
+				map[string]any{
+					keyURL:     parentSD.URL,
+					"provided": valueType,
+					"allowed":  v.allowedTypesString(valueDef.Type),
+				},
+				extPath+"."+valueKey,
+			)
+		}
 	}
 }

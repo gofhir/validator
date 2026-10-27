@@ -1,0 +1,65 @@
+// maprange lista los range sobre mapas en funciones que emiten issues (sonda de #174).
+package main
+
+import (
+	"fmt"
+	"go/ast"
+	"go/types"
+	"os"
+	"strings"
+
+	"golang.org/x/tools/go/packages"
+)
+
+func main() {
+	cfg := &packages.Config{Mode: packages.NeedName | packages.NeedFiles | packages.NeedSyntax | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedImports | packages.NeedDeps, Dir: os.Args[1]}
+	pkgs, err := packages.Load(cfg, "./pkg/...")
+	if err != nil {
+		panic(err)
+	}
+	for _, p := range pkgs {
+		for _, f := range p.Syntax {
+			name := p.Fset.Position(f.Pos()).Filename
+			if strings.HasSuffix(name, "_test.go") {
+				continue
+			}
+			for _, d := range f.Decls {
+				fn, ok := d.(*ast.FuncDecl)
+				if !ok || fn.Body == nil {
+					continue
+				}
+				ast.Inspect(fn.Body, func(n ast.Node) bool {
+					rs, ok := n.(*ast.RangeStmt)
+					if !ok {
+						return true
+					}
+					t := p.TypesInfo.TypeOf(rs.X)
+					if t == nil {
+						return true
+					}
+					if _, isMap := t.Underlying().(*types.Map); !isMap {
+						return true
+					}
+					// ¿el cuerpo emite issues o llama a algo con result?
+					emits := false
+					ast.Inspect(rs.Body, func(m ast.Node) bool {
+						if c, ok := m.(*ast.CallExpr); ok {
+							if se, ok := c.Fun.(*ast.SelectorExpr); ok && strings.HasPrefix(se.Sel.Name, "Add") {
+								emits = true
+							}
+							for _, a := range c.Args {
+								if id, ok := a.(*ast.Ident); ok && (id.Name == "result" || id.Name == "res") {
+									emits = true
+								}
+							}
+						}
+						return true
+					})
+					pos := p.Fset.Position(rs.Pos())
+					fmt.Printf("%v\t%s\t%s:%d\t%s\n", emits, fn.Name.Name, strings.TrimPrefix(pos.Filename, os.Args[1]+"/"), pos.Line, types.TypeString(t, nil))
+					return true
+				})
+			}
+		}
+	}
+}

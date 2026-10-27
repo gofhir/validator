@@ -1,0 +1,28 @@
+# go test ./pkg/validator -run TestIssueOrderSweep -issue-order-sweep=<archivo> (2026-10-27); 550.59 s, RSS 1144 MB
+## rama (fix/issue-order)
+4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package mutated=false: 5306 resources, 60929 issues
+4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package mutated=true: 5306 resources, 1750886 issues
+4.3.0 ~/.fhir/packages/hl7.fhir.r4b.examples#4.3.0/package mutated=false: 2840 resources, 27730 issues
+4.3.0 ~/.fhir/packages/hl7.fhir.r4b.examples#4.3.0/package mutated=true: 2840 resources, 748168 issues
+5.0.0 ~/.fhir/packages/hl7.fhir.r5.examples#5.0.0/package mutated=false: 2822 resources, 29255 issues
+5.0.0 ~/.fhir/packages/hl7.fhir.r5.examples#5.0.0/package mutated=true: 2822 resources, 978850 issues
+4.0.1 ../../testdata mutated=false: 2115 resources, 4888 issues
+4.0.1 ../../testdata mutated=true: 2115 resources, 49753 issues
+TOTAL unstable 0
+
+## base a127801 (con el mismo test)
+4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package mutated=false: 5306 resources, 60929 issues
+4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package mutated=true: 5306 resources, 1750886 issues
+4.3.0 ~/.fhir/packages/hl7.fhir.r4b.examples#4.3.0/package mutated=false: 2840 resources, 27730 issues
+4.3.0 ~/.fhir/packages/hl7.fhir.r4b.examples#4.3.0/package mutated=true: 2840 resources, 748168 issues
+5.0.0 ~/.fhir/packages/hl7.fhir.r5.examples#5.0.0/package mutated=false: 2822 resources, 29255 issues
+5.0.0 ~/.fhir/packages/hl7.fhir.r5.examples#5.0.0/package mutated=true: 2822 resources, 978850 issues
+4.0.1 ../../testdata mutated=false: 2115 resources, 4888 issues
+4.0.1 ../../testdata mutated=true: 2115 resources, 49753 issues
+TOTAL unstable 13089
+primeros inestables de la base:
+UNSTABLE 4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Account-ewg.json mutated=true
+UNSTABLE 4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Account-example.json mutated=true
+UNSTABLE 4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/ActivityDefinition-administer-zika-virus-exposure-assessment.json mutated=true
+UNSTABLE 4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/ActivityDefinition-blood-tubes-supply.json mutated=true
+UNSTABLE 4.0.1 ~/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/ActivityDefinition-citalopramPrescription.json mutated=true

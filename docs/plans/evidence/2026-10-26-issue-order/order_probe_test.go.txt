@@ -1,0 +1,119 @@
+package validator
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"testing"
+)
+
+// Sonda de #174: valida cada ejemplo N veces y cuenta órdenes distintos de los issues.
+func TestZZOrderProbe(t *testing.T) {
+	dir := os.Getenv("PROBE_DIR")
+	var files []string
+	_ = filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
+		if err == nil && !d.IsDir() && strings.HasSuffix(p, ".json") {
+			files = append(files, p)
+		}
+		return nil
+	})
+	mutate := os.Getenv("PROBE_MUTATE") == "1"
+	v, err := New(WithVersion(os.Getenv("PROBE_VERSION")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const runs = 8
+	unstableFiles := 0
+	sameSetDiffOrder := 0
+	diffSet := 0
+	byID := map[string]int{}
+	total := 0
+	out, _ := os.Create(os.Getenv("PROBE_OUT"))
+	defer out.Close()
+	for _, f := range files {
+		data, _ := os.ReadFile(f)
+		if !strings.Contains(string(data), `"resourceType"`) || strings.HasPrefix(filepath.Base(f), "package") || strings.Contains(string(data), `"resourceType":"StructureDefinition"`) {
+			continue
+		}
+		if mutate {
+			var m map[string]any
+			if json.Unmarshal(data, &m) != nil {
+				continue
+			}
+			addUnknown(m, 0)
+			data, _ = json.Marshal(m)
+		}
+		total++
+		var orders []string
+		var sets []string
+		for range runs {
+			res, err := v.Validate(context.Background(), data)
+			if err != nil {
+				break
+			}
+			var lines []string
+			for _, is := range res.Issues {
+				lines = append(lines, fmt.Sprintf("%s|%s|%s|%v", is.Severity, is.MessageID, is.Diagnostics, is.Expression))
+			}
+			orders = append(orders, strings.Join(lines, "\n"))
+			sorted := append([]string(nil), lines...)
+			sort.Strings(sorted)
+			sets = append(sets, strings.Join(sorted, "\n"))
+		}
+		distinct := map[string]bool{}
+		distinctSets := map[string]bool{}
+		for i := range orders {
+			distinct[orders[i]] = true
+			distinctSets[sets[i]] = true
+		}
+		if len(distinct) > 1 {
+			unstableFiles++
+			if len(distinctSets) > 1 {
+				diffSet++
+			} else {
+				sameSetDiffOrder++
+			}
+			// IDs cuyo orden relativo cambia: los que aparecen en posición distinta entre corridas
+			a := strings.Split(orders[0], "\n")
+			for _, o := range orders[1:] {
+				b := strings.Split(o, "\n")
+				for i := range a {
+					if i < len(b) && a[i] != b[i] {
+						byID[strings.Split(a[i], "|")[1]]++
+					}
+				}
+			}
+			fmt.Fprintf(out, "%s distinct=%d sets=%d\n", filepath.Base(f), len(distinct), len(distinctSets))
+		}
+	}
+	fmt.Fprintf(out, "TOTAL files=%d unstable=%d sameSet=%d diffSet=%d\n", total, unstableFiles, sameSetDiffOrder, diffSet)
+	for id, n := range byID {
+		fmt.Fprintf(out, "ID %s %d\n", id, n)
+	}
+}
+
+// addUnknown agrega tres propiedades desconocidas a cada objeto hasta la profundidad 2.
+func addUnknown(v any, depth int) {
+	if depth > 2 {
+		return
+	}
+	switch x := v.(type) {
+	case map[string]any:
+		for k, c := range x {
+			if k != "contained" {
+				addUnknown(c, depth+1)
+			}
+		}
+		x["alphaUnknown"] = 1
+		x["bravoUnknown"] = 2
+		x["charlieUnknown"] = 3
+	case []any:
+		for _, c := range x {
+			addUnknown(c, depth)
+		}
+	}
+}

@@ -1,0 +1,34 @@
+# sonda TestZZOrderProbe (order_probe_test.go.txt), 8 validaciones por recurso, 2026-10-26
+TOTAL files=2056 unstable=26 sameSet=26 diffSet=0
+ID STRUCTURE_OBJECT_EXPECTED 23
+ID STRUCTURE_VALUE_EXPECTED 27
+ID STRUCTURE_EMPTY_OBJECT 21
+ID STRUCTURE_UNKNOWN_ELEMENT 97
+ID TYPE_INVALID_FORMAT 4
+ID STRUCTURE_ARRAY_EXPECTED 21
+invalid-patient-unknown-element.json distinct=2 sets=1
+hr_x_contained_object.json distinct=2 sets=1
+hr_z9_complex_key_sibling.json distinct=2 sets=1
+js_a8_complex_primitive.json distinct=3 sets=1
+js_a9_complex_single_for_many.json distinct=2 sets=1
+js_b1_sibling_shapes.json distinct=2 sets=1
+js_b2_nulls.json distinct=2 sets=1
+js_b4_array_for_one_content.json distinct=2 sets=1
+js_b7_primitive_array_items.json distinct=2 sets=1
+js_b8_misshapen_invariants.json distinct=2 sets=1
+js_b9_null_minimum_and_repeats.json distinct=2 sets=1
+js_c1_array_for_one_siblings.json distinct=2 sets=1
+js_c2_single_for_many_sibling_context.json distinct=2 sets=1
+js_c3_single_for_many_context_paths.json distinct=2 sets=1
+js_d1_renumbered.json distinct=2 sets=1
+js_e1_empty_objects.json distinct=2 sets=1
+js_e3_empty_resource_and_siblings.json distinct=3 sets=1
+r5_re_subscription_filterby.json distinct=3 sets=1
+re_02_misplaced_resource.json distinct=5 sets=1
+re_04_profile_of_other_type.json distinct=2 sets=1
+rw_rv_u2_r4_pat_badchoice.json distinct=2 sets=1
+mixed-array-humanname.json distinct=2 sets=1
+mixed-array-identifier.json distinct=2 sets=1
+mixed-array-observation-component.json distinct=3 sets=1
+mixed-array-patient-contact.json distinct=2 sets=1
+nested-mixed-errors.json distinct=2 sets=1

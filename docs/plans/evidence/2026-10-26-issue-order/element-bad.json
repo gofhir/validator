@@ -1,0 +1,7 @@
+{
+  "resourceType": "Patient",
+  "maritalStatus": {
+    "text": "x",
+    "extension": [{"url": "http://example.org/StructureDefinition/id-ext", "valueBoolean": true}]
+  }
+}

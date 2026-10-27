@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "id": "ext-content",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/name-ext",
+   "valueHumanName": {
+    "family": "x",
+    "bogus": 1
+   },
+   "valueBoolean": true,
+   "_valueBoolean": {
+    "id": "b"
+   }
+  }
+ ]
+}

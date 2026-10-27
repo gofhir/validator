@@ -1,0 +1,13 @@
+{
+ "resourceType": "Patient",
+ "id": "ext-one-allowed",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/name-ext",
+   "valueHumanName": {
+    "family": "x"
+   },
+   "valueBoolean": true
+  }
+ ]
+}

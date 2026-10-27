@@ -1,0 +1,63 @@
+== choice-profile: 5 distinct orders, 5 distinct SETS
+-- set x20
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueInteger, valueBoolean|Observation
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+-- set x4
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString, valueInteger|Observation
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+-- set x6
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueInteger, valueBoolean, valueString|Observation
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+-- set x4
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueInteger, valueString, valueBoolean|Observation
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+-- set x6
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.value[x]' is 1, but found 3|Observation.value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueBoolean, valueInteger|Observation
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+== ext-profile: 4 distinct orders, 4 distinct SETS
+-- set x5
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.extension[0].value[x]' is 1, but found 2|Observation.extension[0].value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|EXTENSION_INVALID_VALUE_TYPE|Extension 'http://hl7.org/fhir/StructureDefinition/observation-bodyPosition' has invalid value type 'string'. Allowed: CodeableConcept|Observation.extension[0].valueString
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueCodeableConcept, valueString|Observation.extension[0]
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+-- set x6
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.extension[0].value[x]' is 1, but found 2|Observation.extension[0].value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueCodeableConcept|Observation.extension[0]
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+-- set x1
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.extension[0].value[x]' is 1, but found 2|Observation.extension[0].value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueCodeableConcept, valueString|Observation.extension[0]
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+-- set x28
+error|CARDINALITY_MAX|Maximum cardinality of 'Observation.extension[0].value[x]' is 1, but found 2|Observation.extension[0].value[x]
+error|CONSTRAINT_FAILED|Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'|Observation.effectiveDateTime
+error|EXTENSION_INVALID_VALUE_TYPE|Extension 'http://hl7.org/fhir/StructureDefinition/observation-bodyPosition' has invalid value type 'string'. Allowed: CodeableConcept|Observation.extension[0].valueString
+error|STRUCTURE_CHOICE_MUTUAL_EXCLUSION|Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueCodeableConcept|Observation.extension[0]
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Observation
+== bundle-unknown: 7 distinct orders, 1 distinct SETS
+-- set x40
+error|CONSTRAINT_FAILED|Constraint failed: bdl-15: 'Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)|Bundle
+error|CONSTRAINT_FAILED|Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource)|Bundle.entry[0].resource
+error|CONSTRAINT_FAILED|Constraint failed: org-1: 'The organization SHALL at least have a name or an identifier, and possibly more than one'|Bundle.entry[0].resource.contained[0]
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'aa'|Bundle.entry[0].resource.contained[0].aa
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'alpha'|Bundle.entry[0].resource.alpha
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'bravo'|Bundle.entry[1].resource.bravo
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'delta'|Bundle.entry[1].resource.delta
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'yy'|Bundle.entry[0].resource.contained[0].yy
+error|STRUCTURE_UNKNOWN_ELEMENT|Unknown element 'zeta'|Bundle.entry[0].resource.zeta
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Bundle.entry[0].resource
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Bundle.entry[0].resource.contained[0]
+warning|CONSTRAINT_FAILED|Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)|Bundle.entry[1].resource

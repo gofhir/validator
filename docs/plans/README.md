@@ -13,15 +13,21 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #175, un elemento de elección de ElementDefinition al fusionar (rama `fix/snapshot-fixed-choice`)
+## Frente activo: #174, orden no determinista de los issues (rama `fix/issue-order`)
 
-[2026-10-25-snapshot-choice-merge.md](2026-10-25-snapshot-choice-merge.md): **cerrado** (26-10-2026),
-pasos 1 a 9. Code review convergido en 3 rondas (C1–C5, F1–F13, §9 del plan); `make check` en verde,
-mutaciones 21/21, barrido 4.283 perfiles sin diferencias, `hl7diff same` idéntico en 49 grupos, costo
-igual a la base. Sin commit. Próximo paso: el verbo del usuario para commit y PR (sin trailers);
-pendientes fuera de #175 al final del plan (§9, paso 9), incluido el issue del NPE de HL7.
+[2026-10-26-issue-order.md](2026-10-26-issue-order.md): pasos 1 a 7 hechos (§9): barrido 0
+inestables (13.089 en la base), mutaciones 11/15. Las 4 que sobreviven están en código inalcanzable
+por un defecto previo de `pkg/extension` (`extractValueType`): falso negativo con extensiones dentro de
+un valor de extensión complejo, publicado como #178 (incremento propio, decisión del usuario). Costo sin
+regresión (bench-compare). Cerrado (paso 9, plan §12): el review convergió en la ronda 2 y `hl7diff same` sale IDENTICAL. Falta el commit y el PR, cuando el usuario lo pida.
+Worktree `go-validator-wt-registry`, sin commit.
 HL7: tope de 2 instancias de Java simultáneas (no de corridas).
-Después: #174, #176 y el release.
+Después: #178 (extensiones dentro de un valor de extensión), #176 (fhirpath v1.16.6, ucum v4.3.0) y el release v2.2.0.
+
+**Cerrado:** #175, un elemento de elección de ElementDefinition al fusionar
+([2026-10-25-snapshot-choice-merge.md](2026-10-25-snapshot-choice-merge.md)), mergeado como #177
+(`a127801`, 26-10-2026). Sus pendientes fuera de alcance están al final del plan (§9, paso 9),
+incluido el issue del NPE de HL7.
 
 ## Otro frente: camino caliente de la validación (rama `perf/registry-lockfree`)
 

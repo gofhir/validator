@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "ext-nested-neither",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/nested-ext",
+   "extension": [
+    {
+     "url": "part",
+     "valueString": "a",
+     "valueBoolean": true
+    }
+   ]
+  }
+ ]
+}

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gofhir/validator/v2/internal/objectkeys"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/walker"
@@ -183,7 +184,11 @@ func (v *Validator) validateElement(
 	ctx *validationContext,
 	result *issue.Result,
 ) {
-	for key, value := range data {
+	// Las claves en orden de nombre: los issues salen siempre en el mismo orden (#174)
+	keys := objectkeys.Sorted(data)
+	defer keys.Release()
+	for _, key := range keys.List {
+		value := data[key]
 		if key == "resourceType" && v.registry.IsResourceType(sdPath) {
 			// A resource's own type (json.html#resources), not an element: the resource's root.
 			continue

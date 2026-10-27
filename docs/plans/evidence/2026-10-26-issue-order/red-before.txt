@@ -1,0 +1,61 @@
+# go test ./pkg/issue -run TestFormatTemplate; go test ./pkg/validator -run '<los 4 tests de issue_order_test.go>' -v, sobre a127801 (antes de la corrección), 2026-10-27
+--- FAIL: TestFormatTemplateReplacesOnlyTheTemplatesPlaceholders (0.00s)
+    format_template_test.go:19: formatTemplate(map[code:{valueSet} valueSet:http://example.org/vs]) = "code http://example.org/vs in http://example.org/vs", want "code {valueSet} in http://example.org
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/issue	0.323s
+FAIL
+    issue_order_test.go:94: validation 1 differs from the first:
+    issue_order_test.go:94: validation 2 differs from the first:
+    issue_order_test.go:94: validation 1 differs from the first:
+--- FAIL: TestUnknownElementsInNameOrder (2.18s)
+    --- FAIL: TestUnknownElementsInNameOrder/4.0.1 (0.67s)
+    --- FAIL: TestUnknownElementsInNameOrder/4.3.0 (0.72s)
+    --- FAIL: TestUnknownElementsInNameOrder/5.0.0 (0.80s)
+    issue_order_test.go:148: validation 1 differs from the first:
+    issue_order_test.go:148: validation 1 differs from the first:
+    issue_order_test.go:148: validation 1 differs from the first:
+--- FAIL: TestIssuesDoNotDependOnKeyOrder (0.01s)
+    --- FAIL: TestIssuesDoNotDependOnKeyOrder/4.0.1 (0.01s)
+    --- FAIL: TestIssuesDoNotDependOnKeyOrder/4.3.0 (0.00s)
+    --- FAIL: TestIssuesDoNotDependOnKeyOrder/5.0.0 (0.00s)
+    issue_order_test.go:189: validation 1 differs from the first:
+    issue_order_test.go:189: validation 3 differs from the first:
+    issue_order_test.go:189: validation 1 differs from the first:
+--- FAIL: TestChoiceMutualExclusionListsVariantsByName (0.01s)
+    --- FAIL: TestChoiceMutualExclusionListsVariantsByName/4.0.1 (0.00s)
+    --- FAIL: TestChoiceMutualExclusionListsVariantsByName/4.3.0 (0.00s)
+    --- FAIL: TestChoiceMutualExclusionListsVariantsByName/5.0.0 (0.00s)
+    issue_order_test.go:306: validation 5 differs from the first:
+    issue_order_test.go:306: validation 4 differs from the first:
+    issue_order_test.go:306: validation 2 differs from the first:
+    issue_order_test.go:306: validation 1 differs from the first:
+    issue_order_test.go:306: validation 1 differs from the first:
+    issue_order_test.go:306: validation 1 differs from the first:
+    issue_order_test.go:306: validation 1 differs from the first:
+    issue_order_test.go:306: validation 2 differs from the first:
+    issue_order_test.go:306: validation 1 differs from the first:
+    issue_order_test.go:306: validation 4 differs from the first:
+    issue_order_test.go:306: validation 1 differs from the first:
+    issue_order_test.go:306: validation 1 differs from the first:
+    issue_order_test.go:306: validation 4 differs from the first:
+    issue_order_test.go:306: validation 6 differs from the first:
+    issue_order_test.go:306: validation 1 differs from the first:
+--- FAIL: TestExtensionWithSeveralValues (0.02s)
+    --- FAIL: TestExtensionWithSeveralValues/4.0.1/one_allowed,_one_not (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.0.1/neither_allowed (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.0.1/the_allowed_value's_content (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.0.1/nested_extension (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.0.1/nested_extension,_neither_allowed (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.3.0/one_allowed,_one_not (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.3.0/neither_allowed (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.3.0/the_allowed_value's_content (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.3.0/nested_extension (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/4.3.0/nested_extension,_neither_allowed (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/5.0.0/one_allowed,_one_not (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/5.0.0/neither_allowed (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/5.0.0/the_allowed_value's_content (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/5.0.0/nested_extension (0.00s)
+    --- FAIL: TestExtensionWithSeveralValues/5.0.0/nested_extension,_neither_allowed (0.00s)
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	2.763s
+FAIL
