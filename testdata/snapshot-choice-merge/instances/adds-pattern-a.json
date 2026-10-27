@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "adds-pattern-a",
+ "meta": {
+  "profile": [
+   "http://example.org/StructureDefinition/adds-pattern"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "a"
+}

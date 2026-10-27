@@ -1,0 +1,12 @@
+# go test ./pkg/registry -run TestDumpRegenerated -regenerated-dump=<archivo>, en 7292a80 (base) y en la rama (head)
+# Rondas 1 a 3 del code review (26-10-2026; repetido después de cada ronda, mismo resultado): con US Core 6.1.0 en vez de 5.0.1, que no está en la caché
+base: TOTAL attempted 4283 generated 4283 failed 0
+head: TOTAL attempted 4283 generated 4283 failed 0
+líneas distintas entre base y head: 0  (archivos de 76372 líneas)
+
+# Antes de la ronda 1 (con US Core 5.0.1, omitida en los dos):
+base: TOTAL attempted 4224 generated 4224 failed 0
+head: TOTAL attempted 4224 generated 4224 failed 0
+líneas distintas entre base y head: 0  (archivos de    73407 líneas)
+omitida en los dos: hl7.fhir.us.core 5.0.1 (no está en la caché de packages)
+oráculo: con la mutación que borra 'short' al fusionar, 20346 líneas distintas

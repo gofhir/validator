@@ -11,6 +11,12 @@ import (
 	"strings"
 )
 
+// elementDefinitionURL es la definición del tipo de los elementos de un snapshot (profiling.html: un
+// snapshot es una lista de ElementDefinition). Es el único nombre del metamodelo escrito aquí (ADR-001,
+// docs/adr/ADR-001-elementdefinition-metamodel.md): sus elementos de elección y sus tipos se leen de
+// esa definición, en la versión del perfil.
+const elementDefinitionURL = "http://hl7.org/fhir/StructureDefinition/ElementDefinition"
+
 // accumulateFields lists ElementDefinition fields whose values are appended (not replaced)
 // when merging differential onto base. All other fields use override semantics.
 var accumulateFields = map[string]bool{
@@ -195,7 +201,11 @@ func (r *Registry) generateSnapshot(ctx context.Context, sd *StructureDefinition
 	if baseSnapshot == nil {
 		return nil, nil, permanentError{fmt.Errorf("cannot generate snapshot for %s: base %s has no snapshot", sd.URL, sd.BaseDefinition)}
 	}
-	snapshot, notes, err := r.applyDifferential(ctx, baseSnapshot, sd.Differential)
+	choices, err := r.choiceIndexFor(ctx, cmp.Or(sd.FHIRVersion, baseSD.FHIRVersion))
+	if err != nil {
+		return nil, nil, fmt.Errorf("cannot generate snapshot for %s: %w", sd.URL, err)
+	}
+	snapshot, notes, err := r.applyDifferential(ctx, baseSnapshot, sd.Differential, choices)
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot generate snapshot for %s: %w", sd.URL, err)
 	}
@@ -236,7 +246,13 @@ type snapshotBuilder struct {
 // let a slice's child overwrite the base element (Extension.extension:a.url and
 // Extension.extension.url share a path). An element that names nothing the base has is left out,
 // as the HL7 validator leaves it out, and returned with why.
-func (r *Registry) applyDifferential(ctx context.Context, base *Snapshot, diff *Differential) (*Snapshot, []string, error) {
+//
+// El índice choices dice qué propiedades son un mismo elemento de elección; un diferencial con
+// elementos lo necesita.
+func (r *Registry) applyDifferential(ctx context.Context, base *Snapshot, diff *Differential, choices *choiceIndex) (*Snapshot, []string, error) {
+	if choices == nil && len(diff.Element) > 0 {
+		return nil, nil, errNoElementDefinition
+	}
 	elements, err := deepCopyElements(base.Element)
 	if err != nil {
 		return nil, nil, fmt.Errorf("deep copy failed: %w", err)
@@ -270,9 +286,13 @@ func (r *Registry) applyDifferential(ctx context.Context, base *Snapshot, diff *
 			return nil, nil, err
 		}
 		before := typeCodesOf(&b.elements[idx])
-		merged, err := mergeElements(&b.elements[idx], placed)
+		merged, left, err := mergeElements(&b.elements[idx], placed, choices)
 		if err != nil {
 			return nil, nil, fmt.Errorf("merge failed for %s: %w", id, err)
+		}
+		for _, key := range left {
+			name, _ := choices.foreign(key)
+			notes = append(notes, fmt.Sprintf("differential element %s: property %s is left out: %s[x] has no such type in FHIR %s", id, key, name, choices.version))
 		}
 		b.elements[idx] = *merged
 		keys, err := rawToMap(placed.raw)
@@ -1065,16 +1085,45 @@ func deepCopyElements(src []ElementDefinition) ([]ElementDefinition, error) {
 
 // mergeElements merges a differential element onto a base element using raw JSON.
 // Override fields are replaced; accumulate fields (constraint, mapping, code, alias) are appended.
-func mergeElements(base, diff *ElementDefinition) (*ElementDefinition, error) {
+//
+// Devuelve las propiedades del diferencial que deja fuera (ver choiceIndex.foreign).
+func mergeElements(base, diff *ElementDefinition, choices *choiceIndex) (*ElementDefinition, []string, error) {
 	baseMap, err := rawToMap(base.raw)
 	if err != nil {
-		return nil, fmt.Errorf("parse base raw: %w", err)
+		return nil, nil, fmt.Errorf("parse base raw: %w", err)
 	}
 
 	diffMap, err := rawToMap(diff.raw)
 	if err != nil {
-		return nil, fmt.Errorf("parse diff raw: %w", err)
+		return nil, nil, fmt.Errorf("parse diff raw: %w", err)
 	}
+
+	// Un elemento de elección (fixed[x]…) es uno solo, escrito con el tipo en el nombre de la
+	// propiedad (json.html#choice): si el diferencial lo trae, reemplaza entero al de la base, con
+	// cualquier tipo y su "_" (HL7: base.setFixed(derived.getFixed().copy())). Una propiedad con un
+	// tipo que la versión no declara no es de ElementDefinition y queda fuera.
+	var left []string
+	replaced := map[string]bool{}
+	for key := range diffMap {
+		if name, ok := choices.choiceOf(key); ok {
+			replaced[name] = true
+		} else if _, ok := choices.foreign(key); ok {
+			left = append(left, key)
+			delete(diffMap, key)
+		}
+	}
+	// De la base se quita todo el elemento reemplazado, también una propiedad con un tipo que la
+	// versión no declara.
+	for key := range baseMap {
+		name, ok := choices.choiceOf(key)
+		if !ok {
+			name, ok = choices.foreign(key)
+		}
+		if ok && replaced[name] {
+			delete(baseMap, key)
+		}
+	}
+	slices.Sort(left)
 
 	// Merge each field from the differential.
 	for key, diffVal := range diffMap {
@@ -1093,17 +1142,17 @@ func mergeElements(base, diff *ElementDefinition) (*ElementDefinition, error) {
 	// Marshal back to raw JSON.
 	mergedRaw, err := json.Marshal(baseMap)
 	if err != nil {
-		return nil, fmt.Errorf("marshal merged: %w", err)
+		return nil, nil, fmt.Errorf("marshal merged: %w", err)
 	}
 
 	// Unmarshal into ElementDefinition struct.
 	var result ElementDefinition
 	if err := json.Unmarshal(mergedRaw, &result); err != nil {
-		return nil, fmt.Errorf("unmarshal merged: %w", err)
+		return nil, nil, fmt.Errorf("unmarshal merged: %w", err)
 	}
 	result.raw = mergedRaw
 
-	return &result, nil
+	return &result, left, nil
 }
 
 // rawToMap parses raw JSON into a map of field name → raw value.

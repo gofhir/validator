@@ -1,0 +1,75 @@
+# ./run-mutations.sh <copia del repo> <copia intacta>, después de la ronda 3 del code review (26-10-2026)
+m1-keep-base-underscore killed
+m2-fixed-pattern-only killed
+m3-text-prefix killed
+m4-only-on-type-change killed
+m5-one-version killed
+m6-key-by-key killed
+m7-drop-diff-too killed
+m8-base-wins killed
+m9-not-in-slices killed
+m10-keep-foreign killed
+m11-permanent-error killed
+m12-no-resolver killed
+m13-empty-diff-errors killed
+m14-definition-error-permanent killed
+m15-base-keeps-foreign killed
+m16-resolver-first killed
+m17-other-release-in-memory killed
+m18-no-same-release-retry killed
+m19-other-release-from-resolver killed
+m20-no-fallback-without-resolver killed
+m21-unversioned-definition-rejected killed
+
+# ./run-mutations.sh <copia del repo> <copia intacta>, después de la ronda 2 del code review (26-10-2026)
+m1-keep-base-underscore killed
+m2-fixed-pattern-only killed
+m3-text-prefix killed
+m4-only-on-type-change killed
+m5-one-version killed
+m6-key-by-key killed
+m7-drop-diff-too killed
+m8-base-wins killed
+m9-not-in-slices killed
+m10-keep-foreign killed
+m11-permanent-error killed
+m12-no-resolver killed
+m13-empty-diff-errors killed
+m14-definition-error-permanent killed
+m15-base-keeps-foreign killed
+m16-resolver-first killed
+m17-other-release-in-memory killed
+m18-no-same-release-retry killed
+
+# ./run-mutations.sh <copia del repo> <copia intacta>, después de la ronda 1 del code review (26-10-2026)
+m1-keep-base-underscore killed
+m2-fixed-pattern-only killed
+m3-text-prefix killed
+m4-only-on-type-change killed
+m5-one-version killed
+m6-key-by-key killed
+m7-drop-diff-too killed
+m8-base-wins killed
+m9-not-in-slices killed
+m10-keep-foreign killed
+m11-permanent-error killed
+m12-no-resolver killed
+m13-empty-diff-errors killed
+m14-definition-error-permanent killed
+m15-base-keeps-foreign killed
+m16-resolver-first killed
+
+# Antes de la ronda 1:
+m1-keep-base-underscore killed
+m2-fixed-pattern-only killed
+m3-text-prefix killed
+m4-only-on-type-change killed
+m5-one-version killed
+m6-key-by-key killed
+m7-drop-diff-too killed
+m8-base-wins killed
+m9-not-in-slices killed
+m10-keep-foreign killed
+m11-permanent-error killed
+m12-no-resolver killed
+m13-empty-diff-errors killed

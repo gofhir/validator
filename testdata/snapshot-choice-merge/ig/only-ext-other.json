@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "only-ext-other",
+ "url": "http://example.org/StructureDefinition/only-ext-other",
+ "name": "onlyextother",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "derivation": "constraint",
+ "baseDefinition": "http://example.org/StructureDefinition/base-string",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "_fixedInteger": {
+     "extension": [
+      {
+       "url": "http://example.org/StructureDefinition/note",
+       "valueString": "x"
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

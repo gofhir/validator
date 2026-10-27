@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "to-string-integer-5",
+ "meta": {
+  "profile": [
+   "http://example.org/StructureDefinition/to-string"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueInteger": 5
+}

@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "only-ext-other-ext",
+ "meta": {
+  "profile": [
+   "http://example.org/StructureDefinition/only-ext-other"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "a",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/StructureDefinition/note",
+    "valueString": "x"
+   }
+  ]
+ }
+}

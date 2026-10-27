@@ -13,6 +13,16 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
+## Frente activo: #175, un elemento de elección de ElementDefinition al fusionar (rama `fix/snapshot-fixed-choice`)
+
+[2026-10-25-snapshot-choice-merge.md](2026-10-25-snapshot-choice-merge.md): **cerrado** (26-10-2026),
+pasos 1 a 9. Code review convergido en 3 rondas (C1–C5, F1–F13, §9 del plan); `make check` en verde,
+mutaciones 21/21, barrido 4.283 perfiles sin diferencias, `hl7diff same` idéntico en 49 grupos, costo
+igual a la base. Sin commit. Próximo paso: el verbo del usuario para commit y PR (sin trailers);
+pendientes fuera de #175 al final del plan (§9, paso 9), incluido el issue del NPE de HL7.
+HL7: tope de 2 instancias de Java simultáneas (no de corridas).
+Después: #174, #176 y el release.
+
 ## Otro frente: camino caliente de la validación (rama `perf/registry-lockfree`)
 
 [2026-10-18-validation-hot-path.md](2026-10-18-validation-hot-path.md): **incrementos A y B cerrados**

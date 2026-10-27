@@ -230,6 +230,16 @@ func sharedVersionCopy(t *testing.T) *Registry {
 	return sharedVersion(t, "4.0.1").Clone()
 }
 
+// regenerationGuides son las guías cuyos snapshots se regeneran (aquí y en TestDumpRegenerated).
+// Las que no están en la caché de packages se saltan.
+var regenerationGuides = [][2]string{
+	{"hl7.fhir.us.qicore", "6.0.0"}, {"hl7.fhir.us.mcode", "4.0.0"}, {"hl7.fhir.uv.ips", "2.0.1"},
+	{"hl7.fhir.au.core", "2.0.0"}, {"hl7.fhir.au.base", "6.0.0"}, {"ch.fhir.ig.ch-core", "6.0.0"},
+	{"hl7.fhir.cl.clcore", "1.9.4"}, {"hl7.fhir.uv.sdc", "3.0.0"}, {"hl7.fhir.uv.genomics-reporting", "2.0.0"},
+	{"hl7.fhir.us.cqfmeasures", "5.0.0"}, {"hl7.fhir.uv.ipa", "1.1.0"}, {"hl7.fhir.us.core", "6.1.0"},
+	{"hl7.fhir.uv.cpg", "1.0.0"}, {"hl7.fhir.uv.crmi", "1.0.0"}, {"hl7.fhir.uv.extensions.r4", "5.2.0"},
+}
+
 // Every guide in the package cache with profiles that ship a snapshot and a differential: their
 // snapshots stripped and regenerated match the published ones (see snapshotMismatches). Guides
 // missing from the cache are skipped.
@@ -237,13 +247,7 @@ func TestRegeneratedSnapshotsAcrossGuides(t *testing.T) {
 	if testing.Short() {
 		t.Skip("regenerates whole guides; run without -short")
 	}
-	for _, guide := range [][2]string{
-		{"hl7.fhir.us.qicore", "6.0.0"}, {"hl7.fhir.us.mcode", "4.0.0"}, {"hl7.fhir.uv.ips", "2.0.1"},
-		{"hl7.fhir.au.core", "2.0.0"}, {"hl7.fhir.au.base", "6.0.0"}, {"ch.fhir.ig.ch-core", "6.0.0"},
-		{"hl7.fhir.cl.clcore", "1.9.4"}, {"hl7.fhir.uv.sdc", "3.0.0"}, {"hl7.fhir.uv.genomics-reporting", "2.0.0"},
-		{"hl7.fhir.us.cqfmeasures", "5.0.0"}, {"hl7.fhir.uv.ipa", "1.1.0"}, {"hl7.fhir.us.core", "5.0.1"},
-		{"hl7.fhir.uv.cpg", "1.0.0"}, {"hl7.fhir.uv.crmi", "1.0.0"}, {"hl7.fhir.uv.extensions.r4", "5.2.0"},
-	} {
+	for _, guide := range regenerationGuides {
 		t.Run(guide[0], func(t *testing.T) {
 			r := guideRegistry(t, guide[0], guide[1])
 			profiles, mismatches := snapshotMismatches(t, r, guide[0]+"#"+guide[1])
