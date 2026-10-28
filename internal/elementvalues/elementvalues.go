@@ -55,7 +55,7 @@ func Of(child *registry.ElementNode, inst map[string]any, types Types) []Value {
 		}
 		return valuesOf(inst, name, typeCode, primitive(types, typeCode))
 	}
-	props := choiceProperties(base, child.Def.Type, inst, types.ChoiceType)
+	props := choiceProperties(base, child.Def.Type, inst, types)
 	if len(props) == 0 {
 		return nil
 	}
@@ -74,10 +74,10 @@ type property struct {
 }
 
 // choiceProperties returns the properties of inst a choice element of base and types is read from:
-// those the types name (or their "_key" siblings name), in the types' order, then those choiceType
-// says name another type, by key. Only inst's own keys are looked at, not every name the types
-// give.
-func choiceProperties(base string, types []registry.Type, inst map[string]any, choiceType func(base, key string) string) []property {
+// those the types name (or their "_key" siblings name), in the types' order, then those
+// Types.ChoiceType says name another type (or, for a primitive one, their "_key" siblings), by key.
+// Only inst's own keys are looked at, not every name the types give.
+func choiceProperties(base string, types []registry.Type, inst map[string]any, t Types) []property {
 	var out []property
 	for k := range inst {
 		key, underscored := strings.CutPrefix(k, "_")
@@ -91,10 +91,10 @@ func choiceProperties(base string, types []registry.Type, inst map[string]any, c
 		}
 		if rank := declared(types, key[len(base):]); rank >= 0 {
 			out = append(out, property{key: key, code: types[rank].Code, rank: rank})
-		} else if !underscored {
-			if code := choiceType(base, key); code != "" {
-				out = append(out, property{key: key, code: code, rank: len(types)})
-			}
+		} else if code := t.ChoiceType(base, key); code != "" && (!underscored || primitive(t, code)) {
+			// Un tipo que el elemento no permite también es un valor, con el tipo equivocado; su
+			// hermano "_key" lo es solo si es de un primitivo (json.html#primitive; #178).
+			out = append(out, property{key: key, code: code, rank: len(types)})
 		}
 	}
 	sort.Slice(out, func(i, j int) bool {

@@ -1,0 +1,294 @@
+4.0.1 a-valid-extension-inside-a-value
+4.0.1 a-value-of-a-type-not-allowed-with-an-extension-inside
+    Patient.extension[0] | The Extension 'id-ext' definition allows for the types [Identifier] but found type HumanName
+    Patient.extension[0].value.ofType(HumanName).family | This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Identifier|4.0.1
+    Patient.extension[0].value.ofType(HumanName).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(HumanName).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 array-value
+    Patient.extension[0].value[x] | The property valueIdentifier must be an Object, not an Array (at Patient.extension[0].value[x])
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'id-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from id-ext)
+4.0.1 CodeableReference-value-before-R4B
+    Patient.extension[0] | Unrecognized property 'valueCodeableReference'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'any-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from any-ext)
+4.0.1 deep-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0].extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0].extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 in-the-value-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].value.ofType(HumanName).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].extension[0].value.ofType(HumanName).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 in-the-value-of-an-extension-inside-a-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(Identifier).type.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 inside-a-choice-element-of-a-value
+    Patient.extension[0].value.ofType(Timing).repeat.bounds.ofType(Period).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Timing).repeat.bounds.ofType(Period).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 integer64-value-before-R5
+    Patient.extension[0] | Unrecognized property 'valueInteger64'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'any-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from any-ext)
+4.0.1 invalid-primitive-inside-a-value
+    Patient.extension[0].value.ofType(Identifier).period.start | Not a valid date/time format: 'not-a-date'
+4.0.1 invalid-primitive-value
+    Patient.extension[0].value[x] | Error parsing JSON: the primitive value must be a boolean
+    Patient.extension[0].value.ofType(boolean) | Boolean values must be 'true' or 'false'
+4.0.1 Meta-value
+    Patient.extension[0].value.ofType(Meta).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Meta).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 misspelled-value-key-optional-value-180
+    Patient.extension[0] | Unrecognized property 'valueuri'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'opt-str-ext' definition is for a simple extension, so it must contain a value
+4.0.1 misspelled-value-key
+    Patient.extension[0] | Unrecognized property 'valueuri'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'str-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from str-ext)
+4.0.1 modifierExtension-where-the-type-has-none-in-a-value
+    Patient.extension[0].value[x].type | Unrecognized property 'modifierExtension'
+4.0.1 modifierExtension-where-the-type-has-none
+    Patient.maritalStatus | Unrecognized property 'modifierExtension'
+4.0.1 null-value
+    Patient.extension[0].value[x] | This property must be a simple value, not a Null (valueString at Patient.extension[0].value[x])
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'str-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from str-ext)
+4.0.1 on-a-primitive-in-the-value-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].value.ofType(HumanName).family.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].extension[0].value.ofType(HumanName).family.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 on-a-primitive-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).system.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).system.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 on-a-primitive-value
+    Patient.extension[0].value.ofType(string).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 on-the-value-itself
+    Patient.extension[0].value.ofType(Identifier).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 sub-extension-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].extension[0].value.ofType(string) | The Profile 'deep-ext' definition allows for the type boolean but found type string
+    Patient.extension[0].extension[0].extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 type-profile-not-resolved
+    Patient.extension[0].value.ofType(Identifier) | Unknown profile missing-identifier
+    Patient.extension[0].value.ofType(Identifier).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 underscore-sibling-of-a-type-not-allowed
+    Patient.extension[0] | The Extension 'bool-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.0.1 unknown-element-of-a-value
+    Patient.extension[0].value[x] | Unrecognized property 'foo'
+4.0.1 unknown-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0] | The extension unknown-ext could not be found so is not allowed here
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].url | Example URLs are not allowed in this context (unknown-ext)
+4.0.1 value-not-allowed
+    Patient.extension[0] | The Extension 'nested-ext' definition allows for the types [] but found type string
+    Patient.extension[0] | Extension.value[x]: max allowed = 0, but found 1 (from nested-ext)
+4.0.1 value-present-only-through-its-underscore-sibling
+4.0.1 value-required
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'bool-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from bool-ext)
+4.0.1 valueSet-key
+    Patient.extension[0] | Unrecognized property 'valueSet'
+4.3.0 a-valid-extension-inside-a-value
+4.3.0 a-value-of-a-type-not-allowed-with-an-extension-inside
+    Patient.extension[0] | The Extension 'id-ext' definition allows for the types [Identifier] but found type HumanName
+    Patient.extension[0].value.ofType(HumanName).family | This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Identifier|4.3.0
+    Patient.extension[0].value.ofType(HumanName).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(HumanName).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 array-value
+    Patient.extension[0].value[x] | The property valueIdentifier must be an Object, not an Array (at Patient.extension[0].value[x])
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'id-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from id-ext)
+4.3.0 CodeableReference-value
+    Patient.extension[0].value.ofType(CodeableReference).concept.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(CodeableReference).concept.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 deep-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0].extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0].extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 in-the-value-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].value.ofType(HumanName).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].extension[0].value.ofType(HumanName).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 in-the-value-of-an-extension-inside-a-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(Identifier).type.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 inside-a-choice-element-of-a-value
+    Patient.extension[0].value.ofType(Timing).repeat.bounds.ofType(Period).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Timing).repeat.bounds.ofType(Period).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 integer64-value-before-R5
+    Patient.extension[0] | Unrecognized property 'valueInteger64'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'any-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from any-ext)
+4.3.0 invalid-primitive-inside-a-value
+    Patient.extension[0].value.ofType(Identifier).period.start | Not a valid date/time format: 'not-a-date'
+4.3.0 invalid-primitive-value
+    Patient.extension[0].value[x] | Error parsing JSON: the primitive value must be a boolean
+    Patient.extension[0].value.ofType(boolean) | Boolean values must be 'true' or 'false'
+4.3.0 Meta-value-after-R4
+    Patient.extension[0] | Unrecognized property 'valueMeta'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'any-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from any-ext)
+4.3.0 misspelled-value-key-optional-value-180
+    Patient.extension[0] | Unrecognized property 'valueuri'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'opt-str-ext' definition is for a simple extension, so it must contain a value
+4.3.0 misspelled-value-key
+    Patient.extension[0] | Unrecognized property 'valueuri'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'str-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from str-ext)
+4.3.0 modifierExtension-where-the-type-has-none-in-a-value
+    Patient.extension[0].value[x].type | Unrecognized property 'modifierExtension'
+4.3.0 modifierExtension-where-the-type-has-none
+    Patient.maritalStatus | Unrecognized property 'modifierExtension'
+4.3.0 null-value
+    Patient.extension[0].value[x] | This property must be a simple value, not a Null (valueString at Patient.extension[0].value[x])
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'str-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from str-ext)
+4.3.0 on-a-primitive-in-the-value-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].value.ofType(HumanName).family.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].extension[0].value.ofType(HumanName).family.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 on-a-primitive-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).system.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).system.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 on-a-primitive-value
+    Patient.extension[0].value.ofType(string).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 on-the-value-itself
+    Patient.extension[0].value.ofType(Identifier).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 sub-extension-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].extension[0].value.ofType(string) | The Profile 'deep-ext' definition allows for the type boolean but found type string
+    Patient.extension[0].extension[0].extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 type-profile-not-resolved
+    Patient.extension[0].value.ofType(Identifier) | Unknown profile missing-identifier
+    Patient.extension[0].value.ofType(Identifier).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 underscore-sibling-of-a-type-not-allowed
+    Patient.extension[0] | The Extension 'bool-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+4.3.0 unknown-element-of-a-value
+    Patient.extension[0].value[x] | Unrecognized property 'foo'
+4.3.0 unknown-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0] | The extension unknown-ext could not be found so is not allowed here
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].url | Example URLs are not allowed in this context (unknown-ext)
+4.3.0 value-not-allowed
+    Patient.extension[0] | The Extension 'nested-ext' definition allows for the types [] but found type string
+    Patient.extension[0] | Extension.value[x]: max allowed = 0, but found 1 (from nested-ext)
+4.3.0 value-present-only-through-its-underscore-sibling
+4.3.0 value-required
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'bool-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from bool-ext)
+4.3.0 valueSet-key
+    Patient.extension[0] | Unrecognized property 'valueSet'
+5.0.0 a-valid-extension-inside-a-value
+5.0.0 a-value-of-a-type-not-allowed-with-an-extension-inside
+    Patient.extension[0] | The Extension 'id-ext' definition allows for the types [Identifier] but found type HumanName
+    Patient.extension[0].value.ofType(HumanName).family | This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Identifier|5.0.0
+    Patient.extension[0].value.ofType(HumanName).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(HumanName).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 array-value
+    Patient.extension[0].value[x] | The property valueIdentifier must be an Object, not an Array (at Patient.extension[0].value[x])
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'id-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from id-ext)
+5.0.0 CodeableReference-value
+    Patient.extension[0].value.ofType(CodeableReference).concept.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(CodeableReference).concept.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 deep-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0].extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0].extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 in-the-value-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].value.ofType(HumanName).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].extension[0].value.ofType(HumanName).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 in-the-value-of-an-extension-inside-a-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(Identifier).type.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 inside-a-choice-element-of-a-value
+    Patient.extension[0].value.ofType(Timing).repeat.bounds.ofType(Period).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Timing).repeat.bounds.ofType(Period).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 integer64-value
+    Patient.extension[0].value.ofType(integer64).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(integer64).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 invalid-primitive-inside-a-value
+    Patient.extension[0].value.ofType(Identifier).period.start | Not a valid date/time format: 'not-a-date'
+5.0.0 invalid-primitive-value
+    Patient.extension[0].value[x] | Error parsing JSON: the primitive value must be a boolean
+    Patient.extension[0].value.ofType(boolean) | Boolean values must be 'true' or 'false'
+5.0.0 Meta-value-after-R4
+5.0.0 misspelled-value-key-optional-value-180
+    Patient.extension[0] | Unrecognized property 'valueuri'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'opt-str-ext' definition is for a simple extension, so it must contain a value
+5.0.0 misspelled-value-key
+    Patient.extension[0] | Unrecognized property 'valueuri'
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'str-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from str-ext)
+5.0.0 modifierExtension-where-the-type-has-none-in-a-value
+    Patient.extension[0].value[x].type | Unrecognized property 'modifierExtension'
+5.0.0 modifierExtension-where-the-type-has-none
+    Patient.maritalStatus | Unrecognized property 'modifierExtension'
+5.0.0 null-value
+    Patient.extension[0].value[x] | This property must be a simple value, not a Null (valueString at Patient.extension[0].value[x])
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'str-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from str-ext)
+5.0.0 on-a-primitive-in-the-value-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].value.ofType(HumanName).family.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].extension[0].value.ofType(HumanName).family.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 on-a-primitive-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).system.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).system.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 on-a-primitive-value
+    Patient.extension[0].value.ofType(string).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 on-the-value-itself
+    Patient.extension[0].value.ofType(Identifier).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 sub-extension-of-a-declared-sub-extension
+    Patient.extension[0].extension[0].extension[0].value.ofType(string) | The Profile 'deep-ext' definition allows for the type boolean but found type string
+    Patient.extension[0].extension[0].extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 type-profile-not-resolved
+    Patient.extension[0].value.ofType(Identifier) | Unknown profile missing-identifier
+    Patient.extension[0].value.ofType(Identifier).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(Identifier).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 underscore-sibling-of-a-type-not-allowed
+    Patient.extension[0] | The Extension 'bool-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+    Patient.extension[0].value.ofType(string).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+5.0.0 unknown-element-of-a-value
+    Patient.extension[0].value[x] | Unrecognized property 'foo'
+5.0.0 unknown-inside-a-complex-value
+    Patient.extension[0].value.ofType(Identifier).type.extension[0] | The extension unknown-ext could not be found so is not allowed here
+    Patient.extension[0].value.ofType(Identifier).type.extension[0].url | Example URLs are not allowed in this context (unknown-ext)
+5.0.0 value-not-allowed
+    Patient.extension[0] | The Extension 'nested-ext' definition allows for the types [] but found type string
+    Patient.extension[0] | Extension.value[x]: max allowed = 0, but found 1 (from nested-ext)
+5.0.0 value-present-only-through-its-underscore-sibling
+5.0.0 value-required
+    Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+    Patient.extension[0] | The Extension 'bool-ext' definition is for a simple extension, so it must contain a value
+    Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from bool-ext)
+5.0.0 valueSet-key
+    Patient.extension[0] | Unrecognized property 'valueSet'

@@ -1,0 +1,170 @@
+# hl7diff same: baseline 6c0db79 vs working tree
+
+decisions: identical (15 files, 26 lines)
+
+multimatch: identical (3 files, 9 lines)
+
+core-probes: identical (7 files, 12 lines)
+
+type-profile-probes: identical (47 files, 92 lines)
+
+nested-resource-probes: identical (4 files, 6 lines)
+
+review-probes: identical (5 files, 9 lines)
+
+extension-probes: identical (14 files, 27 lines)
+
+primitive-extension-probes: identical (5 files, 5 lines)
+
+context-probes: identical (33 files, 131 lines)
+
+context-eval-probes: identical (31 files, 55 lines)
+
+context-scope-probes: identical (198 files, 369 lines)
+
+interface-probes: identical (9 files, 35 lines)
+
+interface-probes-r5: identical (16 files, 20 lines)
+
+interface-probes-r4b: identical (9 files, 36 lines)
+
+constraint-probes: identical (81 files, 162 lines)
+
+invariant-probes: identical (61 files, 107 lines)
+
+fixedpattern-probes: identical (50 files, 86 lines)
+
+target-probes: identical (71 files, 104 lines)
+
+nested-slicing-probes: identical (18 files, 23 lines)
+
+json-shape-probes: identical (34 files, 103 lines)
+
+binding-probes: identical (5 files, 10 lines)
+
+binding-walk-probes: identical (14 files, 31 lines)
+
+extension-walk-probes: identical (20 files, 42 lines)
+
+binding-profile-probes: identical (10 files, 19 lines)
+
+valueset-membership-probes: identical (43 files, 52 lines)
+
+holder-profile-probes: identical (50 files, 93 lines)
+
+## reference-walk-probes: 1 lines differ (56 files, 139 baseline lines)
+
+- sorted line 139
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_w3_ext_forbids_reference.json","severity":"error","code":"value","messageId":"EXTENSION_INVALID_VALUE_TYPE","expression":["Patient.extension[0].valueReference"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'reference'. Allowed: Address","location":{"Line":1,"Column":223}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_w3_ext_forbids_reference.json","severity":"error","code":"value","messageId":"EXTENSION_INVALID_VALUE_TYPE","expression":["Patient.extension[0].valueReference"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'Reference'. Allowed: Address","location":{"Line":1,"Column":223}}
+
+package-example-cpg-probes: identical (4 files, 10 lines)
+
+package-example-cql-probes: identical (2 files, 3 lines)
+
+unknown-codesystem-probes: identical (521 files, 1035 lines)
+
+fullurl-probes: identical (48 files, 135 lines)
+
+fullurl-probes-r4b: identical (1 files, 3 lines)
+
+fullurl-probes-r5: identical (4 files, 8 lines)
+
+held-resource-probes: identical (39 files, 146 lines)
+
+resolve-probes: identical (19 files, 31 lines)
+
+resource-element-probes: identical (6 files, 17 lines)
+
+canonical-probes: identical (17 files, 19 lines)
+
+r5-probes: identical (8 files, 12 lines)
+
+r4b-probes: identical (1 files, 1 lines)
+
+deqm-probes: identical (15 files, 65 lines)
+
+deqm-examples: identical (108 files, 451 lines)
+
+uscore-probes: identical (7 files, 18 lines)
+
+uscore-examples: identical (183 files, 409 lines)
+
+ips: identical (44 files, 88 lines)
+
+mcode-examples: identical (179 files, 471 lines)
+
+aucore-examples: identical (65 files, 108 lines)
+
+chcore-examples: identical (48 files, 76 lines)
+
+clcore-examples: identical (20 files, 24 lines)
+
+## r4-core-examples: 33484 lines differ (5301 files, 55205 baseline lines)
+
+- sorted line 21723
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"error","code":"required","messageId":"EXTENSION_VALUE_REQUIRED","expression":["Bundle.entry[435].resource.concept[0].extension[0]"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments' requires a value","location":{"Line":25849,"Column":24}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[0].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19012,"Column":16}}
+- sorted line 21724
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"error","code":"required","messageId":"EXTENSION_VALUE_REQUIRED","expression":["Bundle.entry[475].resource.concept[2].extension[0]"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments' requires a value","location":{"Line":45071,"Column":24}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[10].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19212,"Column":16}}
+- sorted line 21725
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"error","code":"required","messageId":"EXTENSION_VALUE_REQUIRED","expression":["Bundle.entry[510].resource.concept[1].extension[0]"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments' requires a value","location":{"Line":57047,"Column":24}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[11].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19232,"Column":16}}
+- sorted line 21726
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"error","code":"required","messageId":"EXTENSION_VALUE_REQUIRED","expression":["Bundle.entry[529].resource.concept[1].extension[0]"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments' requires a value","location":{"Line":58937,"Column":24}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[12].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19252,"Column":16}}
+- sorted line 21727
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"error","code":"required","messageId":"EXTENSION_VALUE_REQUIRED","expression":["Bundle.entry[529].resource.concept[42].extension[0]"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments' requires a value","location":{"Line":59525,"Column":24}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[13].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19272,"Column":16}}
+- sorted line 21728
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"error","code":"required","messageId":"EXTENSION_VALUE_REQUIRED","expression":["Bundle.entry[546].resource.concept[4].extension[0]"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments' requires a value","location":{"Line":64743,"Column":24}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[14].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19292,"Column":16}}
+- sorted line 21729
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[0].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19012,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[15].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19312,"Column":16}}
+- sorted line 21730
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[10].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19212,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[16].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19332,"Column":16}}
+- sorted line 21731
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[11].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19232,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[17].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19352,"Column":16}}
+- sorted line 21732
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[12].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19252,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[18].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19372,"Column":16}}
+- sorted line 21733
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[13].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19272,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[19].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19392,"Column":16}}
+- sorted line 21734
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[14].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19292,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[1].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19032,"Column":16}}
+- sorted line 21735
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[15].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19312,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[20].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19412,"Column":16}}
+- sorted line 21736
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[16].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19332,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[21].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19432,"Column":16}}
+- sorted line 21737
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[17].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19352,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[22].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19452,"Column":16}}
+- sorted line 21738
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[18].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19372,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[23].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19472,"Column":16}}
+- sorted line 21739
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[19].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19392,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[24].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19492,"Column":16}}
+- sorted line 21740
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[1].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19032,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[25].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19512,"Column":16}}
+- sorted line 21741
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[20].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19412,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[26].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19532,"Column":16}}
+- sorted line 21742
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[21].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19432,"Column":16}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-v2-valuesets.json","severity":"warning","code":"code-invalid","messageId":"BINDING_EXTENSIBLE_OTHER_SYSTEM","expression":["Bundle.entry[428].resource.concept[27].designation[0].use"],"diagnostics":"The value provided ('http://terminology.hl7.org/CodeSystem/designation-usage#display') is not in the value set 'http://hl7.org/fhir/ValueSet/designation-use', and comes from a system the value set does not declare (an extensible binding permits it only where the value set has no suitable code)","location":{"Line":19552,"Column":16}}
+
+**DIFFERENT**
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/same-report.md
+exit status 1
+      332.48 real       172.41 user        17.82 sys
+exit=1

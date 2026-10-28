@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/StructureDefinition/deep-ext","extension":[{"url":"outer","valueString":"x","extension":[{"url":"inner","valueBoolean":true}]}]}]}

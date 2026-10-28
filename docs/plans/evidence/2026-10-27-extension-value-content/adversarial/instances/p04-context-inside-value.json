@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p", "extension": [{"url": "http://example.org/StructureDefinition/id-ext", "valueIdentifier": {"value": "1", "extension": [{"url": "http://example.org/StructureDefinition/id-ext", "valueIdentifier": {"value": "2"}}]}}]}

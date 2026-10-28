@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "q1", "extension": [{"url": "http://example.org/StructureDefinition/flag-ext", "_valueString": {"extension": [{"url": "http://example.org/StructureDefinition/flag-ext", "valueString": "bad"}]}}]}

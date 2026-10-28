@@ -1,0 +1,20 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/id-ext",
+   "valueIdentifier": {
+    "system": "urn:x",
+    "_system": {
+     "extension": [
+      {
+       "url": "http://example.org/StructureDefinition/flag-ext",
+       "valueString": "bad"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "id": "c09-inner-primitive-ext-bad"
+}

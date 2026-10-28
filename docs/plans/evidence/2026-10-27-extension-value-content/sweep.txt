@@ -1,0 +1,9 @@
+4.0.1 /Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package mutated=false: 5306 resources, 60917 issues
+4.0.1 /Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package mutated=true: 5306 resources, 1750874 issues
+4.3.0 /Users/robertoaraneda/.fhir/packages/hl7.fhir.r4b.examples#4.3.0/package mutated=false: 2840 resources, 27730 issues
+4.3.0 /Users/robertoaraneda/.fhir/packages/hl7.fhir.r4b.examples#4.3.0/package mutated=true: 2840 resources, 748168 issues
+5.0.0 /Users/robertoaraneda/.fhir/packages/hl7.fhir.r5.examples#5.0.0/package mutated=false: 2822 resources, 29255 issues
+5.0.0 /Users/robertoaraneda/.fhir/packages/hl7.fhir.r5.examples#5.0.0/package mutated=true: 2822 resources, 978850 issues
+4.0.1 ../../testdata mutated=false: 2116 resources, 4900 issues
+4.0.1 ../../testdata mutated=true: 2116 resources, 49990 issues
+TOTAL unstable 0

@@ -1,0 +1,20 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/id-ext",
+   "valueIdentifier": {
+    "type": {
+     "text": "x",
+     "extension": [
+      {
+       "url": "http://example.org/StructureDefinition/flag-ext",
+       "valueBoolean": true
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "id": "c11-inner-ok"
+}

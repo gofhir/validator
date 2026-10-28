@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"x","maritalStatus":{"text":"x","extension":[{"url":"http://example.org/StructureDefinition/flag-ext","valueBoolean":"yes"}]}}

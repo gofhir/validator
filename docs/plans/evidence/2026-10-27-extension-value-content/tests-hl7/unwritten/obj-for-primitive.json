@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/StructureDefinition/str-ext","valueString":{"extension":[{"url":"http://example.org/StructureDefinition/flag-ext","valueString":"bad"}]}}]}

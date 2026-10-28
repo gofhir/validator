@@ -1,0 +1,90 @@
+== p01-modifier-outside
+  hl7 E Patient.maritalStatus | Unrecognized property 'modifierExtension'
+  hl7 W Patient.maritalStatus | No code provided, and a code should be provided from the value set 'MaritalStatus' (http://hl7.org/fhir/ValueSet/marital-status|4.0.1)
+  go  E Patient.maritalStatus.modifierExtension | Unknown element 'modifierExtension'
+  go  E Patient.maritalStatus.modifierExtension[0] | Unknown modifier extension 'unknown-ext'
+  go  W Patient.maritalStatus | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/marital-status' (extensible)
+== p02-required-missing
+  hl7 E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+  hl7 E Patient.extension[0] | The Extension 'flag-ext' definition is for a simple extension, so it must contain a value
+  hl7 E Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from flag-ext)
+  go  E Patient.extension[0].value[x] | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  go  E Patient | Extension 'flag-ext' is not allowed in context 'Patient, DomainResource, Resource'
+  go  E Patient.extension[0] | Extension 'flag-ext' requires a value
+  go  E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+== p03-value-not-allowed
+  hl7 E Patient.extension[0] | The Extension 'nested-ext' definition allows for the types [] but found type string
+  hl7 E Patient.extension[0] | Extension.value[x]: max allowed = 0, but found 1 (from nested-ext)
+  go  E Patient.extension[0].value[x] | Maximum cardinality of 'Patient.extension[0].value[x]' is 0, but found 1
+  go  E Patient.extension[0] | Extension 'nested-ext' does not allow a value (complex extension)
+== p04-context-inside-value
+  hl7 E Patient.extension[0].value.ofType(Identifier) | The extension id-ext is not allowed to be used at this point (this element is [Extension.value, Extension.value.ofType(Identifier), Extension.valueIde
+  go  E Patient.extension[0].valueIdentifier | Extension 'id-ext' is not allowed in context 'Extension.value[x], Patient.extension.value[x], Identifier, Element'
+== p05-deceased-wrong-type
+  hl7 E Patient | Unrecognized property 'deceasedString'
+  go  E Patient.deceasedString | Unknown element 'deceasedString'
+== p06-value-null
+  hl7 E Patient.extension[0].value[x] | This property must be a simple value, not a Null (valueBoolean at Patient.extension[0].value[x])
+  hl7 E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+  hl7 E Patient.extension[0] | The Extension 'flag-ext' definition is for a simple extension, so it must contain a value
+  hl7 E Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from flag-ext)
+  go  E Patient.extension[0].valueBoolean | 'valueBoolean' is a primitive: it must be a simple value, not null
+  go  E Patient.extension[0].value[x] | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  go  E Patient | Extension 'flag-ext' is not allowed in context 'Patient, DomainResource, Resource'
+  go  E Patient.extension[0] | Extension 'flag-ext' requires a value
+  go  E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+== p07-value-only-underscore
+  go  E Patient | Extension 'flag-ext' is not allowed in context 'Patient, DomainResource, Resource'
+  go  E Patient.extension[0] | Extension 'flag-ext' requires a value
+== p08-value-array
+  hl7 E Patient.extension[0].value[x] | The property valueIdentifier must be an Object, not an Array (at Patient.extension[0].value[x])
+  hl7 E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+  hl7 E Patient.extension[0] | The Extension 'id-ext' definition is for a simple extension, so it must contain a value
+  hl7 E Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from id-ext)
+  go  E Patient.extension[0].valueIdentifier | 'valueIdentifier' must be a JSON object, not an array
+  go  E Patient.extension[0].value[x] | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  go  E Patient.extension[0] | Extension 'id-ext' requires a value
+  go  E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+== p09-misspelled-key
+  hl7 E Patient.extension[0] | Unrecognized property 'valueuri'
+  hl7 E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+  hl7 E Patient.extension[0] | The Extension 'str-ext' definition is for a simple extension, so it must contain a value
+  hl7 E Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from str-ext)
+  go  E Patient.extension[0].value[x] | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  go  E Patient.extension[0].valueuri | Extension 'str-ext' has invalid value type 'uri'. Allowed: string
+  go  E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+== p10-subext-primitive-ext
+  hl7 E Patient.extension[0].extension[0].value.ofType(HumanName).family.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].extension[0].value.ofType(HumanName).family.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+== p11-required-with-subext
+  hl7 E Patient.extension[0] | The Extension 'flag-ext' definition is for a simple extension, so it must contain a value, not extensions
+  hl7 E Patient.extension[0] | Extension.extension: max allowed = 0, but found 1 (from flag-ext)
+  hl7 E Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from flag-ext)
+  hl7 E Patient.extension[0] | The extension str-ext is not allowed to be used at this point (this element is [Extension, Patient.extension]; allowed for this version = e:Patient)
+  go  E Patient.extension[0].extension | Maximum cardinality of 'Patient.extension[0].extension' is 0, but found 1
+  go  E Patient.extension[0].value[x] | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  go  E Patient | Extension 'flag-ext' is not allowed in context 'Patient, DomainResource, Resource'
+  go  E Patient.extension[0] | Extension 'str-ext' is not allowed in context 'Patient.extension, DomainResource.extension, Extension, Element'
+== p12-two-values
+  hl7 E Patient.extension[0] | Unrecognized property 'valueString'
+  go  E Patient.extension[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString
+  go  E Patient.extension[0].value[x] | Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2
+  go  E Patient | Extension 'flag-ext' is not allowed in context 'Patient, DomainResource, Resource'
+  go  E Patient.extension[0].valueString | Extension 'flag-ext' has invalid value type 'string'. Allowed: boolean
+== p13-obs-lower
+  hl7 E Observation | Unrecognized property 'valuestring'
+  hl7 W Observation | Best Practice Recommendation: In general, all observations should have a subject
+  hl7 W Observation | Best Practice Recommendation: In general, all observations should have a performer
+  hl7 W Observation | Best Practice Recommendation: In general, all observations should have an effective[x] ()
+== q1-underscore-disallowed
+  hl7 E Patient.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(string).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(string).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+  go  E Patient.extension[0].value[x] | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  go  E Patient | Extension 'flag-ext' is not allowed in context 'Patient, DomainResource, Resource'
+  go  E Patient.extension[0] | Extension 'flag-ext' requires a value
+== q2-missing-type-profile
+  hl7 E Patient.extension[0].value.ofType(Identifier) | Unknown profile missing-identifier
+  hl7 E Patient.extension[0].value.ofType(Identifier).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(Identifier).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+  go  E Patient.extension[0].valueIdentifier | Profile 'missing-identifier' of type Identifier cannot be used: not-found

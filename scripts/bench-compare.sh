@@ -19,16 +19,16 @@ BENCHTIME="${BENCHTIME:-1s}"
 # Patrones de go test -bench. Uno con dos niveles no corre los benchmarks sin sub-benchmarks, así
 # que los de Profiled (con sub-benchmarks) van aparte de los demás.
 SERIAL_BENCH='^Benchmark(ValidateRotating|ValidatePatientWithData|ValidateObservation|ValidatorCreation|ValidatorLiveHeap)$'
-SERIAL_SUB_BENCH='^BenchmarkValidateProfiled$/^(patient|blood-pressure)$'
+SERIAL_SUB_BENCH='^BenchmarkValidateProfiled$/^(patient|blood-pressure|extension-values)$'
 PARALLEL_BENCH='^BenchmarkValidateParallel$'
 PARALLEL_SUB_BENCH='^BenchmarkValidateProfiled$/-parallel$'
 # Benchmarks que deben aparecer en ambas salidas: los en serie con un CPU (nombre sin sufijo) y los
 # paralelos con cada valor de CPUS (sufijo -N, salvo N = 1).
 REQUIRED_SERIAL="BenchmarkValidateProfiled/patient BenchmarkValidateProfiled/blood-pressure
-BenchmarkValidateRotating BenchmarkValidatePatientWithData BenchmarkValidateObservation
+BenchmarkValidateProfiled/extension-values BenchmarkValidateRotating BenchmarkValidatePatientWithData BenchmarkValidateObservation
 BenchmarkValidatorCreation BenchmarkValidatorLiveHeap"
 REQUIRED_PARALLEL="BenchmarkValidateProfiled/patient-parallel BenchmarkValidateProfiled/blood-pressure-parallel
-BenchmarkValidateParallel"
+BenchmarkValidateProfiled/extension-values-parallel BenchmarkValidateParallel"
 BENCHSTAT="golang.org/x/perf/cmd/benchstat@v0.0.0-20260929162123-406019bb8b68"
 export BENCH_PACKAGES="${BENCH_PACKAGES:-${ROOT_DIR}/.cache/bench-packages}"
 

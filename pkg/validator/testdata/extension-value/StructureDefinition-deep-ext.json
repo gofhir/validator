@@ -1,0 +1,103 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "deep-ext",
+ "url": "http://example.org/StructureDefinition/deep-ext",
+ "name": "DeepExt",
+ "status": "active",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Extension.extension:outer",
+    "path": "Extension.extension",
+    "sliceName": "outer",
+    "max": "1"
+   },
+   {
+    "id": "Extension.extension:outer.extension",
+    "path": "Extension.extension.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Extension.extension:outer.extension:inner",
+    "path": "Extension.extension.extension",
+    "sliceName": "inner",
+    "max": "1"
+   },
+   {
+    "id": "Extension.extension:outer.extension:inner.extension",
+    "path": "Extension.extension.extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.extension:outer.extension:inner.url",
+    "path": "Extension.extension.extension.url",
+    "fixedUri": "inner"
+   },
+   {
+    "id": "Extension.extension:outer.extension:inner.value[x]",
+    "path": "Extension.extension.extension.value[x]",
+    "type": [
+     {
+      "code": "boolean"
+     }
+    ]
+   },
+   {
+    "id": "Extension.extension:outer.url",
+    "path": "Extension.extension.url",
+    "fixedUri": "outer"
+   },
+   {
+    "id": "Extension.extension:outer.value[x]",
+    "path": "Extension.extension.value[x]",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/StructureDefinition/deep-ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "max": "0"
+   }
+  ]
+ }
+}

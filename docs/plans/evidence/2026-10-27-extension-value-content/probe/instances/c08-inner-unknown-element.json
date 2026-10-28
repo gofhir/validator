@@ -1,0 +1,13 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/id-ext",
+   "valueIdentifier": {
+    "foo": "bar",
+    "system": "urn:x"
+   }
+  }
+ ],
+ "id": "c08-inner-unknown-element"
+}

@@ -1,0 +1,11 @@
+                                  │  base.txt   │            head.txt            │
+                                  │   sec/op    │    sec/op     vs base          │
+ValidateProfiled/extension-values   1.940m ± 5%   1.991m ± 11%  ~ (p=0.242 n=20)
+
+                                  │   base.txt   │              head.txt               │
+                                  │     B/op     │     B/op      vs base               │
+ValidateProfiled/extension-values   1.342Mi ± 0%   1.349Mi ± 0%  +0.54% (p=0.000 n=20)
+
+                                  │  base.txt   │              head.txt              │
+                                  │  allocs/op  │  allocs/op   vs base               │
+ValidateProfiled/extension-values   25.52k ± 0%   25.53k ± 0%  +0.05% (p=0.000 n=20)
