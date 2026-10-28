@@ -1,0 +1,344 @@
+{
+ "resourceType": "Patient",
+ "id": "extension-values",
+ "meta": {
+  "profile": [
+   "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Extension values</div>"
+ },
+ "extension": [
+  {
+   "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+   "extension": [
+    {
+     "url": "ombCategory",
+     "valueCoding": {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "code": "2106-3",
+      "display": "White"
+     }
+    },
+    {
+     "url": "detailed",
+     "valueCoding": {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "code": "2108-9",
+      "display": "European"
+     }
+    },
+    {
+     "url": "text",
+     "valueString": "Mixed"
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+   "extension": [
+    {
+     "url": "ombCategory",
+     "valueCoding": {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "code": "2186-5",
+      "display": "Not Hispanic or Latino"
+     }
+    },
+    {
+     "url": "text",
+     "valueString": "Not Hispanic or Latino"
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+   "valueCode": "F"
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+   "valueAddress": {
+    "line": [
+     "49 Meadow St"
+    ],
+    "city": "Mounds",
+    "state": "OK",
+    "postalCode": "74047",
+    "country": "US",
+    "_line": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetName",
+        "valueString": "Meadow St"
+       },
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber",
+        "valueString": "49"
+       }
+      ]
+     }
+    ],
+    "period": {
+     "start": "2000-01-01",
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName",
+   "valueString": "Smith"
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+   "extension": [
+    {
+     "url": "code",
+     "valueCodeableConcept": {
+      "coding": [
+       {
+        "system": "urn:iso:std:iso:3166",
+        "code": "US",
+        "extension": [
+         {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+         }
+        ]
+       }
+      ],
+      "text": "US"
+     }
+    },
+    {
+     "url": "period",
+     "valuePeriod": {
+      "start": "2001-01-01"
+     }
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+   "extension": [
+    {
+     "url": "code",
+     "valueCodeableConcept": {
+      "coding": [
+       {
+        "system": "urn:iso:std:iso:3166",
+        "code": "CA",
+        "extension": [
+         {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+         }
+        ]
+       }
+      ],
+      "text": "CA"
+     }
+    },
+    {
+     "url": "period",
+     "valuePeriod": {
+      "start": "2001-01-01"
+     }
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+   "extension": [
+    {
+     "url": "code",
+     "valueCodeableConcept": {
+      "coding": [
+       {
+        "system": "urn:iso:std:iso:3166",
+        "code": "MX",
+        "extension": [
+         {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+         }
+        ]
+       }
+      ],
+      "text": "MX"
+     }
+    },
+    {
+     "url": "period",
+     "valuePeriod": {
+      "start": "2001-01-01"
+     }
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+   "extension": [
+    {
+     "url": "code",
+     "valueCodeableConcept": {
+      "coding": [
+       {
+        "system": "urn:iso:std:iso:3166",
+        "code": "CL",
+        "extension": [
+         {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+         }
+        ]
+       }
+      ],
+      "text": "CL"
+     }
+    },
+    {
+     "url": "period",
+     "valuePeriod": {
+      "start": "2001-01-01"
+     }
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+   "extension": [
+    {
+     "url": "code",
+     "valueCodeableConcept": {
+      "coding": [
+       {
+        "system": "urn:iso:std:iso:3166",
+        "code": "AR",
+        "extension": [
+         {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+         }
+        ]
+       }
+      ],
+      "text": "AR"
+     }
+    },
+    {
+     "url": "period",
+     "valuePeriod": {
+      "start": "2001-01-01"
+     }
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-citizenship",
+   "extension": [
+    {
+     "url": "code",
+     "valueCodeableConcept": {
+      "coding": [
+       {
+        "system": "urn:iso:std:iso:3166",
+        "code": "US"
+       }
+      ]
+     }
+    },
+    {
+     "url": "period",
+     "valuePeriod": {
+      "start": "2001-01-01",
+      "end": "2020-01-01"
+     }
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-citizenship",
+   "extension": [
+    {
+     "url": "code",
+     "valueCodeableConcept": {
+      "coding": [
+       {
+        "system": "urn:iso:std:iso:3166",
+        "code": "CL"
+       }
+      ]
+     }
+    },
+    {
+     "url": "period",
+     "valuePeriod": {
+      "start": "2001-01-01",
+      "end": "2020-01-01"
+     }
+    }
+   ]
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-disability",
+   "valueCodeableConcept": {
+    "text": "a",
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+      "valueCode": "unknown"
+     }
+    ]
+   }
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-disability",
+   "valueCodeableConcept": {
+    "text": "b",
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+      "valueCode": "unknown"
+     }
+    ]
+   }
+  },
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-disability",
+   "valueCodeableConcept": {
+    "text": "c",
+    "extension": [
+     {
+      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+      "valueCode": "unknown"
+     }
+    ]
+   }
+  }
+ ],
+ "identifier": [
+  {
+   "system": "http://hospital.example.org",
+   "value": "1032702"
+  }
+ ],
+ "name": [
+  {
+   "family": "Shaw",
+   "given": [
+    "Amy",
+    "V."
+   ]
+  }
+ ],
+ "gender": "female",
+ "birthDate": "1987-02-20"
+}

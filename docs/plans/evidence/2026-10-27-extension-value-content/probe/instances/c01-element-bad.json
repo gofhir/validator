@@ -1,0 +1,13 @@
+{
+ "resourceType": "Patient",
+ "maritalStatus": {
+  "text": "x",
+  "extension": [
+   {
+    "url": "http://example.org/StructureDefinition/flag-ext",
+    "valueString": "bad"
+   }
+  ]
+ },
+ "id": "c01-element-bad"
+}

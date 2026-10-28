@@ -1,0 +1,80 @@
+== c01-element-bad
+  hl7 W Patient.maritalStatus | No code provided, and a code should be provided from the value set 'Marital Status Codes' (http://hl7.org/fhir/ValueSet/marital-status|5.0.0)
+  hl7 E Patient.maritalStatus.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.maritalStatus.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+  go  E Patient.maritalStatus.extension[0].valueString | Extension 'flag-ext' has invalid value type 'string'. Allowed: boolean
+  go  W Patient.maritalStatus | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/marital-status' (extensible)
+== c02-inner-bad
+  hl7 W Patient.extension[0].value.ofType(Identifier).type | No code provided, and a code should be provided from the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type|5.0.0)
+  hl7 E Patient.extension[0].value.ofType(Identifier).type.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(Identifier).type.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier.type | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)
+== c03-inner-unknown
+  hl7 W Patient.extension[0].value.ofType(Identifier).type | No code provided, and a code should be provided from the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type|5.0.0)
+  hl7 E Patient.extension[0].value.ofType(Identifier).type.extension[0] | The extension unknown-ext could not be found so is not allowed here
+  hl7 E Patient.extension[0].value.ofType(Identifier).type.extension[0].url | Example URLs are not allowed in this context (unknown-ext)
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier.type | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)
+== c04-deep-bad
+  hl7 W Patient.extension[0].value.ofType(Identifier).assigner | A Reference without an actual reference or identifier should have a display
+  hl7 W Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0] | Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided
+  hl7 W Patient.extension[0].value.ofType(Identifier).assigner.identifier.type | None of the codings provided are in the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type|5.0.0), and a coding should co
+  hl7 E Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0].extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(Identifier).assigner.identifier.type.coding[0].extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+  hl7 W Patient.extension[0].value.ofType(Identifier).assigner.identifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier.assigner.identifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier.assigner.identifier.type | None of the codings provided are in the value set 'http://hl7.org/fhir/ValueSet/identifier-type', and a coding should come from this value set unless 
+  go  W Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0] | Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided
+== c05-subext-value-bad
+  hl7 E Patient.extension[0].extension[0].value.ofType(HumanName).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].extension[0].value.ofType(HumanName).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+== c06-inner-modifier-unknown
+  hl7 E Patient.extension[0].value[x].type | Unrecognized property 'modifierExtension'
+  hl7 W Patient.extension[0].value.ofType(Identifier).type | No code provided, and a code should be provided from the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type|5.0.0)
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  E Patient.extension[0].valueIdentifier.type.modifierExtension | Unknown element 'modifierExtension'
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier.type | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)
+== c07-wrongtype-with-content
+  hl7 E Patient.extension[0] | The Extension 'id-ext' definition allows for the types [Identifier] but found type HumanName
+  hl7 E Patient.extension[0].value.ofType(HumanName).family | This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Identifier|5.0.0
+  hl7 E Patient.extension[0].value.ofType(HumanName).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(HumanName).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+  hl7 W Patient.extension[0].value.ofType(HumanName) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  E Patient.extension[0].valueHumanName | Extension 'id-ext' has invalid value type 'humanName'. Allowed: Identifier
+== c08-inner-unknown-element
+  hl7 E Patient.extension[0].value[x] | Unrecognized property 'foo'
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  E Patient.extension[0].valueIdentifier.foo | Unknown element 'foo'
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+== c09-inner-primitive-ext-bad
+  hl7 E Patient.extension[0].value.ofType(Identifier).system.extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(Identifier).system.extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+== c10-on-value-bad
+  hl7 E Patient.extension[0].value.ofType(Identifier).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(Identifier).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+== c11-inner-ok
+  hl7 W Patient.extension[0].value.ofType(Identifier).type | No code provided, and a code should be provided from the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type|5.0.0)
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  W Patient.extension[0].valueIdentifier.type | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)
+== c12-value-primitive-ext-bad
+  hl7 E Patient.extension[0].value.ofType(string).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(string).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+== c13-choice-in-value-bad
+  hl7 E Patient.extension[0].value.ofType(Timing).repeat.bounds.ofType(Period).extension[0] | The Extension 'flag-ext' definition allows for the types [boolean] but found type string
+  hl7 E Patient.extension[0].value.ofType(Timing).repeat.bounds.ofType(Period).extension[0].value.ofType(string) | Boolean values must be 'true' or 'false'
+== c14-inner-bad-format
+  hl7 E Patient.extension[0].value.ofType(Identifier).period.start | Not a valid date/time format: 'not-a-date'
+  hl7 W Patient.extension[0].value.ofType(Identifier) | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 
+  go  E Patient.extension[0].valueIdentifier.period.start | Value 'not-a-date' does not match expected format for type dateTime
+  go  W Patient.extension[0].valueIdentifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, 

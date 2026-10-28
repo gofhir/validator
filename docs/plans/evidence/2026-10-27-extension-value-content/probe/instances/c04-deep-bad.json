@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/id-ext",
+   "valueIdentifier": {
+    "assigner": {
+     "identifier": {
+      "type": {
+       "coding": [
+        {
+         "code": "a",
+         "extension": [
+          {
+           "url": "http://example.org/StructureDefinition/flag-ext",
+           "valueString": "bad"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   }
+  }
+ ],
+ "id": "c04-deep-bad"
+}

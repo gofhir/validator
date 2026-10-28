@@ -1,0 +1,76 @@
+{
+ "resourceType": "StructureDefinition",
+ "url": "http://example.org/StructureDefinition/nested-ext",
+ "name": "NestedExt",
+ "status": "active",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Extension.extension:part",
+    "path": "Extension.extension",
+    "sliceName": "part",
+    "min": 0,
+    "max": "1"
+   },
+   {
+    "id": "Extension.extension:part.extension",
+    "path": "Extension.extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.extension:part.url",
+    "path": "Extension.extension.url",
+    "fixedUri": "part"
+   },
+   {
+    "id": "Extension.extension:part.value[x]",
+    "path": "Extension.extension.value[x]",
+    "type": [
+     {
+      "code": "HumanName"
+     }
+    ]
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/StructureDefinition/nested-ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "max": "0"
+   }
+  ]
+ },
+ "id": "nested-ext",
+ "fhirVersion": "4.0.1"
+}

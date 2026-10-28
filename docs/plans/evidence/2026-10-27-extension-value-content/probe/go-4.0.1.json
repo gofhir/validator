@@ -1,0 +1,350 @@
+[
+  {
+    "resource": "instances/c01-element-bad.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' has invalid value type 'string'. Allowed: boolean",
+        "expression": [
+          "Patient.maritalStatus.extension[0].valueString"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/marital-status' (extensible)",
+        "expression": [
+          "Patient.maritalStatus"
+        ]
+      }
+    ],
+    "duration": "5.572ms"
+  },
+  {
+    "resource": "instances/c02-inner-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type"
+        ]
+      }
+    ],
+    "duration": "540µs"
+  },
+  {
+    "resource": "instances/c03-inner-unknown.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type"
+        ]
+      }
+    ],
+    "duration": "131µs"
+  },
+  {
+    "resource": "instances/c04-deep-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "None of the codings provided are in the value set 'http://hl7.org/fhir/ValueSet/identifier-type', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = a)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.assigner.identifier.type"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0]"
+        ]
+      }
+    ],
+    "duration": "1.473ms"
+  },
+  {
+    "resource": "instances/c05-subext-value-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "698µs"
+  },
+  {
+    "resource": "instances/c06-inner-modifier-unknown.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'modifierExtension'",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type.modifierExtension"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type"
+        ]
+      }
+    ],
+    "duration": "174µs"
+  },
+  {
+    "resource": "instances/c07-wrongtype-with-content.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/id-ext' has invalid value type 'humanName'. Allowed: Identifier",
+        "expression": [
+          "Patient.extension[0].valueHumanName"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "149µs"
+  },
+  {
+    "resource": "instances/c08-inner-unknown-element.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'foo'",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.foo"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "115µs"
+  },
+  {
+    "resource": "instances/c09-inner-primitive-ext-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "133µs"
+  },
+  {
+    "resource": "instances/c10-on-value-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "229µs"
+  },
+  {
+    "resource": "instances/c11-inner-ok.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type"
+        ]
+      }
+    ],
+    "duration": "153µs"
+  },
+  {
+    "resource": "instances/c12-value-primitive-ext-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "312µs"
+  },
+  {
+    "resource": "instances/c13-choice-in-value-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "746µs"
+  },
+  {
+    "resource": "instances/c14-inner-bad-format.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value 'not-a-date' does not match expected format for type dateTime",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.period.start"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "127µs"
+  }
+]

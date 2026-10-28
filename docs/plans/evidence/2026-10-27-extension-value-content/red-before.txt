@@ -1,0 +1,301 @@
+--- FAIL: TestExtensionValueContent (3.43s)
+    --- FAIL: TestExtensionValueContent/4.0.1/inside_a_complex_value (0.01s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.type.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/4.0.1/unknown_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_UNKNOWN at Patient.extension[0].valueIdentifier.type.extension[0] ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/4.0.1/deep_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0].extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_EXTENSIBLE_NO_CODING | None of the codings provided are in the value set 'http://hl7.org/fhir/ValueSet/identifier-type', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = a) | Patient.extension[0].valueIdentifier.assigner.identifier.type
+            warning | CODING_NO_SYSTEM | Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided | Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0]
+    --- FAIL: TestExtensionValueContent/4.0.1/in_the_value_of_an_extension_inside_a_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.type.extension[0].valueIdentifier.type.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/4.0.1/in_the_value_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueHumanName.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/on_a_primitive_in_the_value_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueHumanName._family.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/sub-extension_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/modifierExtension_where_the_type_has_none (0.00s)
+        extension_value_test.go:339: unexpected MODIFIER_EXTENSION_UNKNOWN at Patient.maritalStatus.modifierExtension[0]
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'modifierExtension' | Patient.maritalStatus.modifierExtension
+            error | MODIFIER_EXTENSION_UNKNOWN | Unknown modifier extension 'http://example.org/StructureDefinition/unknown-ext' | Patient.maritalStatus.modifierExtension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/marital-status' (extensible) | Patient.maritalStatus
+    --- FAIL: TestExtensionValueContent/4.0.1/a_value_of_a_type_not_allowed,_with_an_extension_inside (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueHumanName "'HumanName'"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/id-ext' has invalid value type 'humanName'. Allowed: Identifier | Patient.extension[0].valueHumanName
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueHumanName.extension[0].valueString ""
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/id-ext' has invalid value type 'humanName'. Allowed: Identifier | Patient.extension[0].valueHumanName
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/on_a_primitive_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier._system.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/on_the_value_itself (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/on_a_primitive_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0]._valueString.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/inside_a_choice_element_of_a_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueTiming.repeat.boundsPeriod.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/invalid_primitive_value (0.00s)
+        extension_value_test.go:348: issue reported twice: error | TYPE_WRONG_JSON_TYPE | Error parsing JSON: the primitive value must be a boolean | Patient.extension[0].valueBoolean
+    --- FAIL: TestExtensionValueContent/4.0.1/value_present_only_through_its_underscore_sibling (0.00s)
+        extension_value_test.go:339: unexpected EXTENSION_VALUE_REQUIRED at Patient.extension[0]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/underscore_sibling_of_a_type_not_allowed (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueString "'string'"
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0]._valueString.extension[0].valueString ""
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/type_profile_not_resolved (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.extension[0].valueString ""
+            error | TYPE_PROFILE_NOT_FOUND | Profile 'http://example.org/StructureDefinition/missing-identifier' of type Identifier cannot be used: not-found | Patient.extension[0].valueIdentifier
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.0.1/misspelled_value_key (0.00s)
+        extension_value_test.go:334: no EXTENSION_VALUE_REQUIRED at Patient.extension[0] ""
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/str-ext' has invalid value type 'uri'. Allowed: string | Patient.extension[0].valueuri
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+        extension_value_test.go:339: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueuri
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/str-ext' has invalid value type 'uri'. Allowed: string | Patient.extension[0].valueuri
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+    --- FAIL: TestExtensionValueContent/4.0.1/CodeableReference_value,_before_R4B (0.00s)
+        extension_value_test.go:334: no EXTENSION_VALUE_REQUIRED at Patient.extension[0] ""
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueCodeableReference' | Patient.extension[0].valueCodeableReference
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/any-ext' has invalid value type 'codeableReference'. Allowed: base64Binary, boolean, canonical, code, date, dateTime, decimal, id, instant, integer, markdown, oid, positiveInt, string, time, unsignedInt, uri, url, uuid, Address, Age, Annotation, Attachment, CodeableConcept, Coding, ContactPoint, Count, Distance, Duration, HumanName, Identifier, Money, Period, Quantity, Range, Ratio, Reference, SampledData, Signature, Timing, ContactDetail, Contributor, DataRequirement, Expression, ParameterDefinition, RelatedArtifact, TriggerDefinition, UsageContext, Dosage, Meta | Patient.extension[0].valueCodeableReference
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+    --- FAIL: TestExtensionValueContent/4.0.1/integer64_value,_before_R5 (0.00s)
+        extension_value_test.go:334: no EXTENSION_VALUE_REQUIRED at Patient.extension[0] ""
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger64' | Patient.extension[0].valueInteger64
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/any-ext' has invalid value type 'integer64'. Allowed: base64Binary, boolean, canonical, code, date, dateTime, decimal, id, instant, integer, markdown, oid, positiveInt, string, time, unsignedInt, uri, url, uuid, Address, Age, Annotation, Attachment, CodeableConcept, Coding, ContactPoint, Count, Distance, Duration, HumanName, Identifier, Money, Period, Quantity, Range, Ratio, Reference, SampledData, Signature, Timing, ContactDetail, Contributor, DataRequirement, Expression, ParameterDefinition, RelatedArtifact, TriggerDefinition, UsageContext, Dosage, Meta | Patient.extension[0].valueInteger64
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+    --- FAIL: TestExtensionValueContent/4.0.1/Meta_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueMeta.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/inside_a_complex_value (0.01s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.type.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/4.3.0/unknown_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_UNKNOWN at Patient.extension[0].valueIdentifier.type.extension[0] ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/4.3.0/deep_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0].extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_EXTENSIBLE_NO_CODING | None of the codings provided are in the value set 'http://hl7.org/fhir/ValueSet/identifier-type', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = a) | Patient.extension[0].valueIdentifier.assigner.identifier.type
+            warning | CODING_NO_SYSTEM | Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided | Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0]
+    --- FAIL: TestExtensionValueContent/4.3.0/in_the_value_of_an_extension_inside_a_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.type.extension[0].valueIdentifier.type.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/4.3.0/in_the_value_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueHumanName.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/on_a_primitive_in_the_value_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueHumanName._family.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/sub-extension_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/modifierExtension_where_the_type_has_none (0.00s)
+        extension_value_test.go:339: unexpected MODIFIER_EXTENSION_UNKNOWN at Patient.maritalStatus.modifierExtension[0]
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'modifierExtension' | Patient.maritalStatus.modifierExtension
+            error | MODIFIER_EXTENSION_UNKNOWN | Unknown modifier extension 'http://example.org/StructureDefinition/unknown-ext' | Patient.maritalStatus.modifierExtension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/marital-status' (extensible) | Patient.maritalStatus
+    --- FAIL: TestExtensionValueContent/4.3.0/a_value_of_a_type_not_allowed,_with_an_extension_inside (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueHumanName "'HumanName'"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/id-ext' has invalid value type 'humanName'. Allowed: Identifier | Patient.extension[0].valueHumanName
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueHumanName.extension[0].valueString ""
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/id-ext' has invalid value type 'humanName'. Allowed: Identifier | Patient.extension[0].valueHumanName
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/on_a_primitive_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier._system.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/on_the_value_itself (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/on_a_primitive_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0]._valueString.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/inside_a_choice_element_of_a_value (0.01s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueTiming.repeat.boundsPeriod.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/invalid_primitive_value (0.00s)
+        extension_value_test.go:348: issue reported twice: error | TYPE_WRONG_JSON_TYPE | Error parsing JSON: the primitive value must be a boolean | Patient.extension[0].valueBoolean
+    --- FAIL: TestExtensionValueContent/4.3.0/value_present_only_through_its_underscore_sibling (0.00s)
+        extension_value_test.go:339: unexpected EXTENSION_VALUE_REQUIRED at Patient.extension[0]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/underscore_sibling_of_a_type_not_allowed (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueString "'string'"
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0]._valueString.extension[0].valueString ""
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/type_profile_not_resolved (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.extension[0].valueString ""
+            error | TYPE_PROFILE_NOT_FOUND | Profile 'http://example.org/StructureDefinition/missing-identifier' of type Identifier cannot be used: not-found | Patient.extension[0].valueIdentifier
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/misspelled_value_key (0.00s)
+        extension_value_test.go:334: no EXTENSION_VALUE_REQUIRED at Patient.extension[0] ""
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/str-ext' has invalid value type 'uri'. Allowed: string | Patient.extension[0].valueuri
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+        extension_value_test.go:339: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueuri
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/str-ext' has invalid value type 'uri'. Allowed: string | Patient.extension[0].valueuri
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+    --- FAIL: TestExtensionValueContent/4.3.0/CodeableReference_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueCodeableReference.concept.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/4.3.0/integer64_value,_before_R5 (0.00s)
+        extension_value_test.go:334: no EXTENSION_VALUE_REQUIRED at Patient.extension[0] ""
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger64' | Patient.extension[0].valueInteger64
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/any-ext' has invalid value type 'integer64'. Allowed: base64Binary, boolean, canonical, code, date, dateTime, decimal, id, instant, integer, markdown, oid, positiveInt, string, time, unsignedInt, uri, url, uuid, Address, Age, Annotation, Attachment, CodeableConcept, CodeableReference, Coding, ContactPoint, Count, Distance, Duration, HumanName, Identifier, Money, Period, Quantity, Range, Ratio, RatioRange, Reference, SampledData, Signature, Timing, ContactDetail, Contributor, DataRequirement, Expression, ParameterDefinition, RelatedArtifact, TriggerDefinition, UsageContext, Dosage | Patient.extension[0].valueInteger64
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+    --- FAIL: TestExtensionValueContent/4.3.0/Meta_value,_R4B (0.00s)
+        extension_value_test.go:334: no EXTENSION_VALUE_REQUIRED at Patient.extension[0] ""
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueMeta' | Patient.extension[0].valueMeta
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/any-ext' has invalid value type 'meta'. Allowed: base64Binary, boolean, canonical, code, date, dateTime, decimal, id, instant, integer, markdown, oid, positiveInt, string, time, unsignedInt, uri, url, uuid, Address, Age, Annotation, Attachment, CodeableConcept, CodeableReference, Coding, ContactPoint, Count, Distance, Duration, HumanName, Identifier, Money, Period, Quantity, Range, Ratio, RatioRange, Reference, SampledData, Signature, Timing, ContactDetail, Contributor, DataRequirement, Expression, ParameterDefinition, RelatedArtifact, TriggerDefinition, UsageContext, Dosage | Patient.extension[0].valueMeta
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+    --- FAIL: TestExtensionValueContent/5.0.0/inside_a_complex_value (0.01s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.type.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/5.0.0/unknown_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_UNKNOWN at Patient.extension[0].valueIdentifier.type.extension[0] ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/5.0.0/deep_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0].extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier.assigner.identifier
+            warning | BINDING_EXTENSIBLE_NO_CODING | None of the codings provided are in the value set 'http://hl7.org/fhir/ValueSet/identifier-type', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = a) | Patient.extension[0].valueIdentifier.assigner.identifier.type
+            warning | CODING_NO_SYSTEM | Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided | Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0]
+    --- FAIL: TestExtensionValueContent/5.0.0/in_the_value_of_an_extension_inside_a_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.type.extension[0].valueIdentifier.type.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier.type.extension[0].valueIdentifier
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible) | Patient.extension[0].valueIdentifier.type.extension[0].valueIdentifier.type
+    --- FAIL: TestExtensionValueContent/5.0.0/in_the_value_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueHumanName.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/on_a_primitive_in_the_value_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueHumanName._family.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/sub-extension_of_a_declared_sub-extension (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/modifierExtension_where_the_type_has_none (0.00s)
+        extension_value_test.go:339: unexpected MODIFIER_EXTENSION_UNKNOWN at Patient.maritalStatus.modifierExtension[0]
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'modifierExtension' | Patient.maritalStatus.modifierExtension
+            error | MODIFIER_EXTENSION_UNKNOWN | Unknown modifier extension 'http://example.org/StructureDefinition/unknown-ext' | Patient.maritalStatus.modifierExtension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | BINDING_TEXT_ONLY_WARNING | No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/marital-status' (extensible) | Patient.maritalStatus
+    --- FAIL: TestExtensionValueContent/5.0.0/a_value_of_a_type_not_allowed,_with_an_extension_inside (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueHumanName "'HumanName'"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/id-ext' has invalid value type 'humanName'. Allowed: Identifier | Patient.extension[0].valueHumanName
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueHumanName.extension[0].valueString ""
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/id-ext' has invalid value type 'humanName'. Allowed: Identifier | Patient.extension[0].valueHumanName
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/on_a_primitive_inside_a_complex_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier._system.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier
+    --- FAIL: TestExtensionValueContent/5.0.0/on_the_value_itself (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier
+    --- FAIL: TestExtensionValueContent/5.0.0/on_a_primitive_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0]._valueString.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/inside_a_choice_element_of_a_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueTiming.repeat.boundsPeriod.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/invalid_primitive_value (0.00s)
+        extension_value_test.go:348: issue reported twice: error | TYPE_WRONG_JSON_TYPE | Error parsing JSON: the primitive value must be a boolean | Patient.extension[0].valueBoolean
+    --- FAIL: TestExtensionValueContent/5.0.0/value_present_only_through_its_underscore_sibling (0.00s)
+        extension_value_test.go:339: unexpected EXTENSION_VALUE_REQUIRED at Patient.extension[0]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/underscore_sibling_of_a_type_not_allowed (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueString "'string'"
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0]._valueString.extension[0].valueString ""
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_VALUE_REQUIRED | Extension 'http://example.org/StructureDefinition/bool-ext' requires a value | Patient.extension[0]
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/type_profile_not_resolved (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueIdentifier.extension[0].valueString ""
+            error | TYPE_PROFILE_NOT_FOUND | Profile 'http://example.org/StructureDefinition/missing-identifier' of type Identifier cannot be used: not-found | Patient.extension[0].valueIdentifier
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            warning | CONSTRAINT_FAILED | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation) | Patient.extension[0].valueIdentifier
+    --- FAIL: TestExtensionValueContent/5.0.0/misspelled_value_key (0.00s)
+        extension_value_test.go:334: no EXTENSION_VALUE_REQUIRED at Patient.extension[0] ""
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/str-ext' has invalid value type 'uri'. Allowed: string | Patient.extension[0].valueuri
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+        extension_value_test.go:339: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueuri
+            error | CARDINALITY_MIN | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0 | Patient.extension[0].value[x]
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/StructureDefinition/str-ext' has invalid value type 'uri'. Allowed: string | Patient.extension[0].valueuri
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+            error | CONSTRAINT_FAILED | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension) | Patient.extension[0]
+    --- FAIL: TestExtensionValueContent/5.0.0/CodeableReference_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueCodeableReference.concept.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/integer64_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0]._valueInteger64.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestExtensionValueContent/5.0.0/Meta_value (0.00s)
+        extension_value_test.go:334: no EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueMeta.extension[0].valueString ""
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	4.052s
+FAIL

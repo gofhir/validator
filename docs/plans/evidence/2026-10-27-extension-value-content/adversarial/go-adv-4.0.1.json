@@ -1,0 +1,568 @@
+[
+  {
+    "resource": "adv/p01-modifier-outside.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'modifierExtension'",
+        "expression": [
+          "Patient.maritalStatus.modifierExtension"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Unknown modifier extension 'http://example.org/StructureDefinition/unknown-ext'",
+        "expression": [
+          "Patient.maritalStatus.modifierExtension[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/marital-status' (extensible)",
+        "expression": [
+          "Patient.maritalStatus"
+        ]
+      }
+    ],
+    "duration": "7.516ms"
+  },
+  {
+    "resource": "adv/p02-required-missing.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' is not allowed in context 'Patient, DomainResource, Resource'",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      }
+    ],
+    "duration": "674µs"
+  },
+  {
+    "resource": "adv/p03-value-not-allowed.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Maximum cardinality of 'Patient.extension[0].value[x]' is 0, but found 1",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/nested-ext' does not allow a value (complex extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "420µs"
+  },
+  {
+    "resource": "adv/p04-context-inside-value.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/id-ext' is not allowed in context 'Extension.value[x], Patient.extension.value[x], Identifier, Element'",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "310µs"
+  },
+  {
+    "resource": "adv/p05-deceased-wrong-type.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'deceasedString'",
+        "expression": [
+          "Patient.deceasedString"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "123µs"
+  },
+  {
+    "resource": "adv/p06-value-null.json",
+    "valid": false,
+    "errors": 5,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "'valueBoolean' is a primitive: it must be a simple value, not null",
+        "expression": [
+          "Patient.extension[0].valueBoolean"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' is not allowed in context 'Patient, DomainResource, Resource'",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      }
+    ],
+    "duration": "128µs"
+  },
+  {
+    "resource": "adv/p07-value-only-underscore.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' is not allowed in context 'Patient, DomainResource, Resource'",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "196µs"
+  },
+  {
+    "resource": "adv/p08-value-array.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "'valueIdentifier' must be a JSON object, not an array",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/id-ext' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      }
+    ],
+    "duration": "109µs"
+  },
+  {
+    "resource": "adv/p09-misspelled-key.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/str-ext' has invalid value type 'uri'. Allowed: string",
+        "expression": [
+          "Patient.extension[0].valueuri"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      }
+    ],
+    "duration": "470µs"
+  },
+  {
+    "resource": "adv/p10-subext-primitive-ext.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "655µs"
+  },
+  {
+    "resource": "adv/p11-required-with-subext.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Maximum cardinality of 'Patient.extension[0].extension' is 0, but found 1",
+        "expression": [
+          "Patient.extension[0].extension"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' is not allowed in context 'Patient, DomainResource, Resource'",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/str-ext' is not allowed in context 'Patient.extension, DomainResource.extension, Extension, Element'",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "194µs"
+  },
+  {
+    "resource": "adv/p12-two-values.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Maximum cardinality of 'Patient.extension[0].value[x]' is 1, but found 2",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' is not allowed in context 'Patient, DomainResource, Resource'",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' has invalid value type 'string'. Allowed: boolean",
+        "expression": [
+          "Patient.extension[0].valueString"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "119µs"
+  },
+  {
+    "resource": "adv/p13-obs-lower.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      }
+    ],
+    "duration": "220µs"
+  },
+  {
+    "resource": "adv/q1-underscore-disallowed.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' is not allowed in context 'Patient, DomainResource, Resource'",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "159µs"
+  },
+  {
+    "resource": "adv/q2-missing-type-profile.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "not-found",
+        "diagnostics": "Profile 'http://example.org/StructureDefinition/missing-identifier' of type Identifier cannot be used: not-found",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "317µs"
+  }
+]

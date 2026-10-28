@@ -5,11 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/gofhir/validator/v2/internal/elementvalues"
 	"github.com/gofhir/validator/v2/internal/exactjson"
-	"github.com/gofhir/validator/v2/internal/objectkeys"
 	"github.com/gofhir/validator/v2/internal/reslang"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/primitive"
@@ -185,8 +185,19 @@ func (v *Validator) validateResource(ctx context.Context, sd *registry.Structure
 // do not have (the structural phase reports it), nor a primitive written otherwise than as a
 // primitive.
 func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, path string, result *issue.Result) {
-	v.validateExtensionsOf(ctx, inst, path, result)
 	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, nil)
+	if children.Unresolved.Canonical != "" {
+		// El perfil que declara su tipo no se puede usar (otra fase lo informa): el valor sigue siendo
+		// de su tipo, cuya definición lo gobierna, y HL7 lo valida así (#178).
+		children = v.registry.TypeChildrenOf(node, typeCode)
+	}
+	v.validateChildren(ctx, children, inst, path, result)
+}
+
+// validateChildren valida lo que children declara como extensión en inst, una instancia en path, y
+// después lo que tienen adentro los valores de cada uno de los otros hijos.
+func (v *Validator) validateChildren(ctx context.Context, children registry.InstanceChildren, inst map[string]any, path string, result *issue.Result) {
+	v.validateDeclaredExtensions(ctx, children, inst, path, result)
 	for _, child := range children.Nodes {
 		if name := child.Name(); name == keyExtension || name == keyModifierExtension || v.registry.HoldsResource(child.Def) {
 			continue
@@ -198,56 +209,21 @@ func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefi
 				continue
 			}
 			if cv.TypeCode != "" && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
-				// A primitive's extensions are in its "_key" sibling (json.html#primitive); a single
-				// value written where an array goes is not checked, as HL7 does not.
+				// A primitive's extensions are in its "_key" sibling (json.html#primitive), an instance
+				// of its type; a single value written where an array goes is not checked, as HL7 does
+				// not.
 				if cv.Ext != nil && elementvalues.ShapeOf(child, cv) == elementvalues.RightShape {
 					sibling := path + "._" + cv.Key
 					if cv.Array {
 						sibling = fmt.Sprintf("%s[%d]", sibling, cv.Index)
 					}
-					v.validateExtensionsOf(ctx, cv.Ext, sibling, result)
+					v.validateNode(ctx, children.SD, child, cv.TypeCode, cv.Ext, sibling, result)
 				}
 				continue
 			}
 			if m, ok := cv.Value.(map[string]any); ok {
 				// A complex element's "_key" sibling is no property of it (HL7: unrecognized).
 				v.validateNode(ctx, children.SD, child, cv.TypeCode, m, elementvalues.ItemPath(child, cv, path), result)
-			}
-		}
-	}
-}
-
-// validateExtensionsOf validates the extensions and modifier extensions of element, at path.
-func (v *Validator) validateExtensionsOf(ctx context.Context, element map[string]any, path string, result *issue.Result) {
-	if extensions, ok := element[keyExtension]; ok {
-		v.validateExtensionArray(ctx, extensions, path+"."+keyExtension, false, result)
-	}
-	if modifierExts, ok := element[keyModifierExtension]; ok {
-		v.validateExtensionArray(ctx, modifierExts, path+"."+keyModifierExtension, true, result)
-	}
-}
-
-// validateValueElement validates the extensions in an extension's value, a datatype, and in the
-// values it holds, by its keys.
-func (v *Validator) validateValueElement(ctx context.Context, data map[string]any, basePath string, result *issue.Result) {
-	v.validateExtensionsOf(ctx, data, basePath, result)
-	// Las claves en orden de nombre: los issues salen siempre en el mismo orden (#174)
-	keys := objectkeys.Sorted(data)
-	defer keys.Release()
-	for _, key := range keys.List {
-		value := data[key]
-		if key == keyExtension || key == keyModifierExtension || key == resourceTypeKey {
-			continue
-		}
-		elementPath := basePath + "." + key
-		switch val := value.(type) {
-		case map[string]any:
-			v.validateValueElement(ctx, val, elementPath, result)
-		case []any:
-			for i, item := range val {
-				if mapItem, ok := item.(map[string]any); ok {
-					v.validateValueElement(ctx, mapItem, fmt.Sprintf("%s[%d]", elementPath, i), result)
-				}
 			}
 		}
 	}
@@ -379,12 +355,8 @@ func (v *Validator) validateSingleExtension(ctx context.Context, ext map[string]
 		return
 	}
 
-	// Validate value[x]
-	v.validateExtensionValue(ctx, ext, extSD, extPath, result)
-
-	// Validate nested extensions
-	if nestedExts, ok := ext[keyExtension]; ok {
-		v.validateNestedExtensions(ctx, nestedExts, extSD, extPath, result)
+	if root := extSD.Tree().Root(); root != nil {
+		v.validateExtension(ctx, extSD, root, ext, extPath, result)
 	}
 }
 
@@ -429,303 +401,132 @@ func fixesURL(sd *registry.StructureDefinition, url string) bool {
 	return false
 }
 
-// validateExtensionValue validates the value[x] of an extension.
-func (v *Validator) validateExtensionValue(ctx context.Context, ext map[string]any, extSD *registry.StructureDefinition, extPath string, result *issue.Result) {
-	// Find the value[x] element definition
-	valueDef := v.findValueDefinition(extSD)
-	if valueDef == nil {
+// validateDeclaredExtensions valida cada extensión de inst, solo donde la definición la tiene: un
+// modifierExtension en un tipo que no lo tiene es un elemento desconocido, que informa la fase
+// estructural, y HL7 informa solo eso (#178).
+func (v *Validator) validateDeclaredExtensions(ctx context.Context, children registry.InstanceChildren, inst map[string]any, path string, result *issue.Result) {
+	for _, child := range children.Nodes {
+		if name := child.Name(); name == keyExtension || name == keyModifierExtension {
+			if extensions, ok := inst[name]; ok {
+				v.validateExtensionArray(ctx, extensions, path+"."+name, name == keyModifierExtension, result)
+			}
+		}
+	}
+}
+
+// validateExtension valida ext, una instancia en extPath de node en sd (la raíz de la definición de
+// una extensión, o la slice de una subextensión que declara): su valor y sus subextensiones, cada uno
+// contra el elemento de node que lo gobierna. El valor es el elemento de elección de node, el de
+// nombre terminado en "[x]" (elementdefinition.html#id): Extension tiene uno, su value[x] (#178).
+func (v *Validator) validateExtension(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, ext map[string]any, extPath string, result *issue.Result) {
+	children := v.registry.ChildrenOf(ctx, sd, node, "", nil)
+	var nested *registry.ElementNode
+	for _, child := range children.Nodes {
+		switch name := child.Name(); {
+		case strings.HasSuffix(name, "[x]"):
+			v.validateExtensionValue(ctx, children.SD, child, ext, sd.URL, extPath, result)
+		case name == keyExtension:
+			nested = child
+		}
+	}
+	if nestedExts, ok := ext[keyExtension]; ok {
+		v.validateNestedExtensions(ctx, children.SD, nested, nestedExts, sd.URL, extPath, result)
+	}
+}
+
+// validateExtensionValue valida los valores que ext tiene para valueNode, su elemento value[x] en sd:
+// si puede o debe tener uno, el tipo de cada uno y lo que cada uno tiene adentro (extensibility.html:
+// el valor es un elemento como cualquier otro). El parámetro url nombra la definición de la extensión
+// en los mensajes.
+func (v *Validator) validateExtensionValue(ctx context.Context, sd *registry.StructureDefinition, valueNode *registry.ElementNode, ext map[string]any, url, extPath string, result *issue.Result) {
+	// Los valores de este elemento son los de un tipo que permite su elemento en la definición del tipo
+	// de la extensión (Extension, en la versión cargada). Una clave de otro tipo (valueMeta en R4B) es
+	// una propiedad desconocida, que informa la fase estructural, como HL7 (#178).
+	baseTypes := v.baseTypes(sd, valueNode)
+	values := elementvalues.Of(valueNode, ext, v.registry)
+	values = slices.DeleteFunc(values, func(cv elementvalues.Value) bool {
+		return baseTypes != nil && !declares(baseTypes, cv.TypeCode)
+	})
+	// Un valor es uno escrito como dice su elemento: un null o un array no lo son, y HL7 informa que
+	// falta (json.html). Un primitivo presente solo por su "_key" sí lo es (json.html#primitive).
+	written := 0
+	for _, cv := range values {
+		if elementvalues.Written(valueNode, cv, v.registry) {
+			written++
+		}
+	}
+	if valueNode.Def.Max == "0" {
+		// Una extensión compleja no tiene valor.
+		if written > 0 {
+			result.AddErrorWithID(issue.DiagExtensionValueNotAllowed, map[string]any{keyURL: url}, extPath)
+		}
 		return
 	}
-
-	// Check if value is not allowed (max = 0, meaning complex extension)
-	if valueDef.Max == "0" {
-		// Complex extension - value is not allowed
-		if v.hasValue(ext) {
+	if valueNode.Def.Min > 0 && written == 0 && ext[keyExtension] == nil {
+		result.AddErrorWithID(issue.DiagExtensionValueRequired, map[string]any{keyURL: url}, extPath)
+		return
+	}
+	// Cada valor, en el orden de elementvalues. Más de uno ya lo informan la cardinalidad y la
+	// exclusión mutua; lo que se valida de cada uno no depende de los otros (#174).
+	for _, cv := range values {
+		if !elementvalues.Written(valueNode, cv, v.registry) {
+			continue // lo informa la fase estructural
+		}
+		allowed := declares(valueNode.Def, cv.TypeCode)
+		if !allowed {
+			// El tipo es el código que nombra la clave (json.html#choice), como lo informa HL7.
 			result.AddErrorWithID(
-				issue.DiagExtensionValueNotAllowed,
+				issue.DiagExtensionInvalidValueType,
 				map[string]any{
-					keyURL: extSD.URL,
+					keyURL:     url,
+					"provided": cv.TypeCode,
+					"allowed":  v.allowedTypesString(valueNode.Def.Type),
 				},
-				extPath,
+				extPath+"."+cv.Key,
 			)
 		}
-		return
-	}
-
-	// Check if value is required (min > 0)
-	hasNested := ext[keyExtension] != nil
-	if valueDef.Min > 0 && !v.hasValue(ext) && !hasNested {
-		result.AddErrorWithID(
-			issue.DiagExtensionValueRequired,
-			map[string]any{
-				keyURL: extSD.URL,
-			},
-			extPath,
-		)
-		return
-	}
-
-	// Cada valor presente, en orden de nombre. Más de uno ya lo informan la cardinalidad y la exclusión
-	// mutua; lo que se valida de cada uno no depende de cuál salió primero (#174).
-	valueKeys := v.valueKeys(ext)
-	defer valueKeys.Release()
-	for _, valueKey := range valueKeys.List {
-		v.validateValueOf(ctx, ext, valueKey, valueDef, extSD, extPath, result)
-	}
-}
-
-// validateValueOf valida el valor de valueKey de una extensión: su tipo y, si está permitido, su
-// contenido.
-func (v *Validator) validateValueOf(ctx context.Context, ext map[string]any, valueKey string, valueDef *registry.ElementDefinition, extSD *registry.StructureDefinition, extPath string, result *issue.Result) {
-	// Extract type from value key (e.g., "valueString" -> "string")
-	valueType := v.extractValueType(valueKey)
-
-	// Check if type is allowed
-	if !v.isTypeAllowed(valueType, valueDef.Type) {
-		result.AddErrorWithID(
-			issue.DiagExtensionInvalidValueType,
-			map[string]any{
-				keyURL:     extSD.URL,
-				"provided": valueType,
-				"allowed":  v.allowedTypesString(valueDef.Type),
-			},
-			extPath+"."+valueKey,
-		)
-		return // Don't validate content if type is wrong
-	}
-
-	value := ext[valueKey]
-	valuePath := extPath + "." + valueKey
-
-	// For primitive types, validate JSON type and format using primitive validator
-	if v.primValidator != nil && v.primValidator.IsPrimitiveType(valueType) {
-		if !v.validatePrimitiveExtensionValue(value, valueType, valuePath, result) {
-			return // Don't continue if primitive validation failed
+		// Lo que tiene adentro: un complejo, en su objeto; un primitivo, en su "_key".
+		inst, at := cv.Ext, extPath+"._"+cv.Key
+		if m, ok := cv.Value.(map[string]any); ok {
+			inst, at = m, extPath+"."+cv.Key
 		}
-	}
-
-	// The value's binding, and its codes in their code systems, are checked by the binding phase,
-	// which walks extensions under their definitions as it walks any element.
-
-	// Validate the value content recursively against its type's StructureDefinition
-	// This ensures complex types like CodeableConcept, Identifier, etc. are fully validated
-	if valueMap, ok := value.(map[string]any); ok {
-		v.validateValueContent(ctx, valueMap, valueType, valuePath, result)
-	}
-}
-
-// validatePrimitiveExtensionValue validates a primitive extension value using the primitive validator.
-// Returns true if valid, false if invalid.
-func (v *Validator) validatePrimitiveExtensionValue(value any, typeName, fhirPath string, result *issue.Result) bool {
-	// Primitive values should not be objects (except for special cases handled elsewhere)
-	if _, isMap := value.(map[string]any); isMap {
-		// Complex value for primitive type - will be handled by validateValueContent
-		return true
-	}
-
-	return v.primValidator.ValidateSinglePrimitive(value, typeName, fhirPath, result)
-}
-
-// validateValueContent validates the content of a complex extension value against its type's SD.
-func (v *Validator) validateValueContent(ctx context.Context, value map[string]any, typeName, valuePath string, result *issue.Result) {
-	// Get the StructureDefinition for this type
-	typeSD := v.registry.GetByType(typeName)
-	if typeSD == nil {
-		// Type not found - this is OK for primitive types or unknown types
-		return
-	}
-
-	// Only validate complex types (not primitive types)
-	if typeSD.Kind == "primitive-type" {
-		return
-	}
-
-	// Validate structural elements - check for unknown elements in the value
-	v.validateValueStructure(ctx, value, typeSD, typeName, valuePath, result)
-
-	// Recursively validate any extensions within this value
-	// (e.g., CodeableConcept can have extensions on coding elements)
-	v.validateValueElement(ctx, value, valuePath, result)
-}
-
-// validateValueStructure checks that all elements in the value are valid for the type.
-func (v *Validator) validateValueStructure(ctx context.Context, value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
-	if typeSD.Snapshot == nil {
-		return
-	}
-
-	validElements, choiceTypes := v.buildValidElementSets(typeSD, typeName)
-
-	// Cada elemento del valor, en orden de nombre (#174)
-	keys := objectkeys.Sorted(value)
-	defer keys.Release()
-	for _, key := range keys.List {
-		if v.isSkippableKey(key) || validElements[key] {
+		if inst == nil {
 			continue
 		}
-		if !v.isValidChoiceType(key, choiceTypes) {
-			result.AddErrorWithID(
-				issue.DiagStructureUnknownElement,
-				map[string]any{"element": key},
-				valuePath+"."+key,
-			)
-		}
-	}
-
-	// Recursively validate nested complex elements
-	v.validateNestedElements(ctx, value, typeSD, typeName, valuePath, result)
-}
-
-// buildValidElementSets builds the set of valid elements and choice types from a SD.
-func (v *Validator) buildValidElementSets(typeSD *registry.StructureDefinition, typeName string) (validElements map[string]bool, choiceTypes map[string][]string) {
-	validElements = make(map[string]bool)
-	choiceTypes = make(map[string][]string)
-
-	for _, elem := range typeSD.Snapshot.Element {
-		if elem.Path == typeName {
+		if allowed {
+			v.validateNode(ctx, sd, valueNode, cv.TypeCode, inst, at, result)
 			continue
 		}
-
-		parts := strings.Split(elem.Path, ".")
-		if len(parts) < 2 {
-			continue
-		}
-		elementName := parts[1]
-
-		if strings.HasSuffix(elementName, "[x]") {
-			baseName := strings.TrimSuffix(elementName, "[x]")
-			for _, t := range elem.Type {
-				suffix := strings.ToUpper(t.Code[:1]) + t.Code[1:]
-				choiceTypes[baseName] = append(choiceTypes[baseName], suffix)
-			}
-		} else {
-			validElements[elementName] = true
-		}
-	}
-
-	return validElements, choiceTypes
-}
-
-// isSkippableKey returns true if the key should be skipped during validation.
-func (v *Validator) isSkippableKey(key string) bool {
-	return key == keyExtension || key == "id" || key == keyModifierExtension
-}
-
-// isValidChoiceType checks if key is a valid choice type element.
-func (v *Validator) isValidChoiceType(key string, choiceTypes map[string][]string) bool {
-	for baseName, suffixes := range choiceTypes {
-		for _, suffix := range suffixes {
-			if key == baseName+suffix {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// validateNestedElements recursively validates nested complex elements.
-func (v *Validator) validateNestedElements(ctx context.Context, value map[string]any, typeSD *registry.StructureDefinition, typeName, valuePath string, result *issue.Result) {
-	// Las claves en orden de nombre (#174)
-	keys := objectkeys.Sorted(value)
-	defer keys.Release()
-	for _, key := range keys.List {
-		val := value[key]
-		if v.isSkippableKey(key) {
-			continue
-		}
-
-		elementPath := valuePath + "." + key
-		nestedType := v.findElementType(typeSD, typeName+"."+key)
-		if nestedType == "" {
-			continue
-		}
-
-		switch typedVal := val.(type) {
-		case map[string]any:
-			v.validateValueContent(ctx, typedVal, nestedType, elementPath, result)
-		case []any:
-			for i, item := range typedVal {
-				if itemMap, ok := item.(map[string]any); ok {
-					v.validateValueContent(ctx, itemMap, nestedType, fmt.Sprintf("%s[%d]", elementPath, i), result)
-				}
-			}
-		}
+		// Un valor de un tipo que el elemento no permite es de ese tipo, no del que el elemento
+		// restringe: se valida con la definición del tipo, y HL7 informa lo que tiene adentro (#178).
+		v.validateChildren(ctx, v.registry.TypeChildrenOf(valueNode, cv.TypeCode), inst, at, result)
 	}
 }
 
-// findElementType finds the type of an element in a StructureDefinition.
-func (v *Validator) findElementType(sd *registry.StructureDefinition, path string) string {
-	if sd.Snapshot == nil {
-		return ""
-	}
-
-	for _, elem := range sd.Snapshot.Element {
-		if elem.Path == path && len(elem.Type) > 0 {
-			return elem.Type[0].Code
-		}
-	}
-	return ""
-}
-
-// findValueDefinition finds the Extension.value[x] element definition.
-func (v *Validator) findValueDefinition(extSD *registry.StructureDefinition) *registry.ElementDefinition {
-	if extSD.Snapshot == nil {
+// baseTypes devuelve el elemento que corresponde a valueNode en la definición del tipo de sd, cuyos
+// tipos son los que una clave puede nombrar, o nil si no está.
+func (v *Validator) baseTypes(sd *registry.StructureDefinition, valueNode *registry.ElementNode) *registry.ElementDefinition {
+	base := v.registry.GetByType(sd.Type)
+	if base == nil {
 		return nil
 	}
-
-	for i := range extSD.Snapshot.Element {
-		elem := &extSD.Snapshot.Element[i]
-		if elem.Path == "Extension.value[x]" {
-			return elem
+	root := base.Tree().Root()
+	if root == nil {
+		return nil
+	}
+	for _, child := range root.Children {
+		if child.Name() == valueNode.Name() {
+			return child.Def
 		}
 	}
 	return nil
 }
 
-// hasValue checks if the extension has any value[x] element.
-func (v *Validator) hasValue(ext map[string]any) bool {
-	for key := range ext {
-		if strings.HasPrefix(key, "value") && key != "valueSet" {
-			return true
-		}
-	}
-	return false
-}
-
-// valueKeys devuelve las claves value[x] de una extensión, en orden de nombre; se devuelven con
-// Release.
-func (v *Validator) valueKeys(ext map[string]any) objectkeys.Keys {
-	keys := objectkeys.Sorted(ext)
-	values := keys.List[:0]
-	for _, key := range keys.List {
-		if strings.HasPrefix(key, "value") && key != "valueSet" {
-			values = append(values, key)
-		}
-	}
-	keys.List = values
-	return keys
-}
-
-// extractValueType extracts the type from a value key.
-func (v *Validator) extractValueType(valueKey string) string {
-	if !strings.HasPrefix(valueKey, "value") {
-		return ""
-	}
-	typeName := strings.TrimPrefix(valueKey, "value")
-	// Convert first letter to lowercase for primitive types
-	if typeName != "" {
-		return strings.ToLower(typeName[:1]) + typeName[1:]
-	}
-	return ""
-}
-
-// isTypeAllowed checks if valueType is in the allowed types.
-func (v *Validator) isTypeAllowed(valueType string, allowedTypes []registry.Type) bool {
-	for _, t := range allowedTypes {
-		// Normalize type codes for comparison
-		code := strings.ToLower(t.Code)
-		vt := strings.ToLower(valueType)
-		if code == vt {
+// declares dice si def permite el tipo code, exacto: el tipo que nombra la clave de un elemento de
+// elección es su código (json.html#choice).
+func declares(def *registry.ElementDefinition, code string) bool {
+	for _, t := range def.Type {
+		if t.Code == code {
 			return true
 		}
 	}
@@ -741,14 +542,15 @@ func (v *Validator) allowedTypesString(types []registry.Type) string {
 	return strings.Join(names, ", ")
 }
 
-// validateNestedExtensions validates the extensions inside a complex extension. A relative url names
-// a part of the parent's definition (extensibility.html: "the identity of the parts of the
-// extension are local/relative to the reference to the extension definition"): it must be one the
-// definition declares, as the HL7 validator requires (Extension_EXT_SubExtension_Invalid). An
-// absolute url names an extension defined separately, which the slicing of Extension.extension
-// (open) allows: one the parent does not declare is validated as any extension, against its own
-// definition.
-func (v *Validator) validateNestedExtensions(ctx context.Context, nestedExts any, parentSD *registry.StructureDefinition, parentPath string, result *issue.Result) {
+// validateNestedExtensions valida cada extensión dentro de una extensión compleja; nested es su
+// elemento Extension.extension en sd (nil si la definición no lo tiene). Una url relativa nombra una
+// parte de la definición del padre (extensibility.html: "the identity of the parts of the extension
+// are local/relative to the reference to the extension definition"): tiene que ser una que la
+// definición declara, como exige HL7 (Extension_EXT_SubExtension_Invalid), y se valida contra esa
+// slice, con sus propias subextensiones. Una url absoluta nombra una extensión definida aparte, que el
+// slicing abierto de Extension.extension permite: una que el padre no declara se valida como cualquier
+// extensión, contra su propia definición. El parámetro parentURL nombra la definición del padre.
+func (v *Validator) validateNestedExtensions(ctx context.Context, sd *registry.StructureDefinition, nested *registry.ElementNode, nestedExts any, parentURL, parentPath string, result *issue.Result) {
 	extArray, ok := nestedExts.([]any)
 	if !ok {
 		return
@@ -763,10 +565,8 @@ func (v *Validator) validateNestedExtensions(ctx context.Context, nestedExts any
 		extPath := fmt.Sprintf("%s.extension[%d]", parentPath, i)
 		url, _ := extMap[keyURL].(string)
 
-		if valueDef, declared := findNestedExtensionDef(parentSD, url); declared {
-			if valueDef != nil {
-				v.validateNestedExtensionValue(extMap, valueDef, parentSD, extPath, result)
-			}
+		if slice := declaredSlice(nested, url); slice != nil {
+			v.validateExtension(ctx, sd, slice, extMap, extPath, result)
 			continue
 		}
 		if url != "" && absoluteURLDefect(url) == "" {
@@ -775,74 +575,29 @@ func (v *Validator) validateNestedExtensions(ctx context.Context, nestedExts any
 		}
 		result.AddErrorWithID(
 			issue.DiagExtensionSubExtensionInvalid,
-			map[string]any{keyURL: url, "parent": parentSD.URL},
+			map[string]any{keyURL: url, "parent": parentURL},
 			extPath,
 		)
 	}
 }
 
-// findNestedExtensionDef reports whether the parent's definition declares a slice of
-// Extension.extension whose url is fixed to url, and returns that slice's value[x] element (nil when
-// the snapshot has none). The slice's elements are found by their ids ("Extension.extension:a.url").
-func findNestedExtensionDef(parentSD *registry.StructureDefinition, url string) (valueDef *registry.ElementDefinition, declared bool) {
-	if parentSD.Snapshot == nil || url == "" {
-		return nil, false
+// declaredSlice devuelve la slice de nested, un elemento Extension.extension, cuyo elemento url está
+// fijado a url, o nil.
+func declaredSlice(nested *registry.ElementNode, url string) *registry.ElementNode {
+	if nested == nil || url == "" {
+		return nil
 	}
-	elems := parentSD.Snapshot.Element
-	for i := range elems {
-		elem := &elems[i]
-		slice, isURL := strings.CutSuffix(elem.ID, ".url")
-		if !isURL || elem.Path != "Extension.extension.url" || !strings.HasPrefix(slice, "Extension.extension:") {
-			continue
-		}
-		fixed, suffix, ok := elem.GetFixed()
-		if !ok || suffix != "Uri" {
-			continue
-		}
-		var fixedURI string
-		if json.Unmarshal(fixed, &fixedURI) != nil || fixedURI != url {
-			continue
-		}
-		for j := range elems {
-			if elems[j].ID == slice+".value[x]" {
-				return &elems[j], true
+	for _, slice := range nested.Slices {
+		for _, child := range slice.Children {
+			if child.Name() != keyURL {
+				continue
+			}
+			fixed, _, ok := child.Def.GetFixed()
+			var fixedURI string
+			if ok && json.Unmarshal(fixed, &fixedURI) == nil && fixedURI == url {
+				return slice
 			}
 		}
-		return nil, true
 	}
-	return nil, false
-}
-
-// validateNestedExtensionValue validates the value of a nested extension.
-func (v *Validator) validateNestedExtensionValue(ext map[string]any, valueDef *registry.ElementDefinition, parentSD *registry.StructureDefinition, extPath string, result *issue.Result) {
-	valueKeys := v.valueKeys(ext)
-	defer valueKeys.Release()
-	if len(valueKeys.List) == 0 {
-		if valueDef.Min > 0 {
-			result.AddErrorWithID(
-				issue.DiagExtensionValueRequired,
-				map[string]any{
-					keyURL: parentSD.URL,
-				},
-				extPath,
-			)
-		}
-		return
-	}
-
-	// Cada valor presente, en orden de nombre (#174)
-	for _, valueKey := range valueKeys.List {
-		valueType := v.extractValueType(valueKey)
-		if !v.isTypeAllowed(valueType, valueDef.Type) {
-			result.AddErrorWithID(
-				issue.DiagExtensionInvalidValueType,
-				map[string]any{
-					keyURL:     parentSD.URL,
-					"provided": valueType,
-					"allowed":  v.allowedTypesString(valueDef.Type),
-				},
-				extPath+"."+valueKey,
-			)
-		}
-	}
+	return nil
 }

@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p", "extension": [{"url": "http://example.org/StructureDefinition/nested-ext", "extension": [{"url": "part", "valueHumanName": {"family": "x", "_family": {"extension": [{"url": "http://example.org/StructureDefinition/flag-ext", "valueString": "bad"}]}}}]}]}

@@ -58,12 +58,14 @@ func readBench(b *testing.B, name string) []byte {
 }
 
 // BenchmarkValidateProfiled valida un Patient y una Observation de presión arterial contra sus
-// perfiles de US Core, en serie y en paralelo (con -cpu).
+// perfiles de US Core, en serie y en paralelo (con -cpu), y un Patient cuyos valores de extensión son
+// complejos y anidan otras (extension-values, #178).
 func BenchmarkValidateProfiled(b *testing.B) {
 	v := usCore(b)
 	for _, c := range []struct{ name, file string }{
 		{"patient", "uscore-patient.json"},
 		{"blood-pressure", "uscore-blood-pressure.json"},
+		{"extension-values", "extension-values.json"},
 	} {
 		resource := readBench(b, c.file)
 		ctx := context.Background()

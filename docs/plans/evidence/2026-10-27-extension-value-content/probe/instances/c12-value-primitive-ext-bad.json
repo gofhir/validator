@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/str-ext",
+   "valueString": "a",
+   "_valueString": {
+    "extension": [
+     {
+      "url": "http://example.org/StructureDefinition/flag-ext",
+      "valueString": "bad"
+     }
+    ]
+   }
+  }
+ ],
+ "id": "c12-value-primitive-ext-bad"
+}

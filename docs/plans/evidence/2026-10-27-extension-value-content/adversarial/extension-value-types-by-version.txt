@@ -1,0 +1,3 @@
+hl7.fhir.r4.core#4.0.1 50 added vs R4: [] removed vs R4: []
+hl7.fhir.r4b.core#4.3.0 51 added vs R4: ['CodeableReference', 'RatioRange'] removed vs R4: ['Meta']
+hl7.fhir.r5.core#5.0.0 54 added vs R4: ['Availability', 'CodeableReference', 'ExtendedContactDetail', 'RatioRange', 'integer64'] removed vs R4: ['Contributor']

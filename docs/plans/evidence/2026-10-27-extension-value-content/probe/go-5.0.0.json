@@ -1,0 +1,430 @@
+[
+  {
+    "resource": "instances/c01-element-bad.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/flag-ext' has invalid value type 'string'. Allowed: boolean",
+        "expression": [
+          "Patient.maritalStatus.extension[0].valueString"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/marital-status' (extensible)",
+        "expression": [
+          "Patient.maritalStatus"
+        ]
+      }
+    ],
+    "duration": "4.746ms"
+  },
+  {
+    "resource": "instances/c02-inner-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type"
+        ]
+      }
+    ],
+    "duration": "653µs"
+  },
+  {
+    "resource": "instances/c03-inner-unknown.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type"
+        ]
+      }
+    ],
+    "duration": "110µs"
+  },
+  {
+    "resource": "instances/c04-deep-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 5,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.assigner.identifier"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "None of the codings provided are in the value set 'http://hl7.org/fhir/ValueSet/identifier-type', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = a)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.assigner.identifier.type"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.assigner.identifier.type.coding[0]"
+        ]
+      }
+    ],
+    "duration": "530µs"
+  },
+  {
+    "resource": "instances/c05-subext-value-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "530µs"
+  },
+  {
+    "resource": "instances/c06-inner-modifier-unknown.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'modifierExtension'",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type.modifierExtension"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type"
+        ]
+      }
+    ],
+    "duration": "85µs"
+  },
+  {
+    "resource": "instances/c07-wrongtype-with-content.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Extension 'http://example.org/StructureDefinition/id-ext' has invalid value type 'humanName'. Allowed: Identifier",
+        "expression": [
+          "Patient.extension[0].valueHumanName"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "94µs"
+  },
+  {
+    "resource": "instances/c08-inner-unknown-element.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'foo'",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.foo"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      }
+    ],
+    "duration": "76µs"
+  },
+  {
+    "resource": "instances/c09-inner-primitive-ext-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      }
+    ],
+    "duration": "104µs"
+  },
+  {
+    "resource": "instances/c10-on-value-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      }
+    ],
+    "duration": "160µs"
+  },
+  {
+    "resource": "instances/c11-inner-ok.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "code-invalid",
+        "diagnostics": "No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.type"
+        ]
+      }
+    ],
+    "duration": "91µs"
+  },
+  {
+    "resource": "instances/c12-value-primitive-ext-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "209µs"
+  },
+  {
+    "resource": "instances/c13-choice-in-value-bad.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "549µs"
+  },
+  {
+    "resource": "instances/c14-inner-bad-format.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value 'not-a-date' does not match expected format for type dateTime",
+        "expression": [
+          "Patient.extension[0].valueIdentifier.period.start"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.extension[0].valueIdentifier"
+        ]
+      }
+    ],
+    "duration": "87µs"
+  }
+]

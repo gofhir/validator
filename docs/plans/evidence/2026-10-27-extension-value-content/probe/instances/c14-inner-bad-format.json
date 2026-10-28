@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/id-ext",
+   "valueIdentifier": {
+    "period": {
+     "start": "not-a-date"
+    }
+   }
+  }
+ ],
+ "id": "c14-inner-bad-format"
+}

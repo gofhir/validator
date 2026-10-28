@@ -1,0 +1,49 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "prof-ext",
+ "url": "http://example.org/StructureDefinition/prof-ext",
+ "name": "ProfExt",
+ "status": "active",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/StructureDefinition/prof-ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "min": 1,
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/StructureDefinition/missing-identifier"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/StructureDefinition/req-part-ext","extension":[{"url":"part"}]}]}

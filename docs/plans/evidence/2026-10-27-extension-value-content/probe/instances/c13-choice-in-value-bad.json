@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/timing-ext",
+   "valueTiming": {
+    "repeat": {
+     "boundsPeriod": {
+      "start": "2020-01-01",
+      "extension": [
+       {
+        "url": "http://example.org/StructureDefinition/flag-ext",
+        "valueString": "bad"
+       }
+      ]
+     }
+    }
+   }
+  }
+ ],
+ "id": "c13-choice-in-value-bad"
+}

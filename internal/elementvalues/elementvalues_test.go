@@ -74,6 +74,11 @@ func TestOf(t *testing.T) {
 			[]string{`P.valuePeriod Period {} null`}},
 		{"declared types first, then others by name", node("O.value[x]", "string"), `{"valuePeriod":{},"valueQuantity":{},"valueString":"s"}`,
 			[]string{`P.valueString string "s" null`, `P.valuePeriod Period {} null`, `P.valueQuantity Quantity {} null`}},
+		// Un primitivo de un tipo que el elemento no permite, presente solo por su "_valueString", es un
+		// valor con ese tipo (json.html#primitive; HL7 informa su tipo, #178).
+		{"a primitive choice it does not allow, present only through its extensions", node("O.value[x]", "Quantity"), `{"_valueString":{"id":"x"}}`,
+			[]string{`P.valueString string null {"id":"x"}`}},
+		{"a complex choice it does not allow, through a \"_value\", is no property of it", node("O.value[x]", "string"), `{"_valuePeriod":{"id":"x"}}`, nil},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			var inst map[string]any

@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/id-ext",
+   "valueHumanName": {
+    "family": "f",
+    "extension": [
+     {
+      "url": "http://example.org/StructureDefinition/flag-ext",
+      "valueString": "bad"
+     }
+    ]
+   }
+  }
+ ],
+ "id": "c07-wrongtype-with-content"
+}

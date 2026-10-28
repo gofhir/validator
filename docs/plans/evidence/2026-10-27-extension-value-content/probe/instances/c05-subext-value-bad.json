@@ -1,0 +1,23 @@
+{
+ "resourceType": "Patient",
+ "extension": [
+  {
+   "url": "http://example.org/StructureDefinition/nested-ext",
+   "extension": [
+    {
+     "url": "part",
+     "valueHumanName": {
+      "family": "f",
+      "extension": [
+       {
+        "url": "http://example.org/StructureDefinition/flag-ext",
+        "valueString": "bad"
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "id": "c05-subext-value-bad"
+}

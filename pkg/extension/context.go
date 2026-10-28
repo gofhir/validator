@@ -146,6 +146,11 @@ func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]a
 	children := v.registry.ChildrenOf(ctx, t.sd, t.node, t.typeCode, func(typeCode string) *registry.StructureDefinition {
 		return v.DefinitionOf(ctx, typeCode, inst)
 	})
+	if children.Unresolved.Canonical != "" {
+		// El perfil que declara su tipo no se puede usar (otra fase lo informa): el valor sigue siendo
+		// de su tipo, y HL7 revisa el contexto de cada extensión que tiene adentro (#178).
+		children = v.registry.TypeChildrenOf(t.node, t.typeCode)
+	}
 	for _, child := range children.Nodes {
 		for _, cv := range elementvalues.Of(child, inst, v.registry) {
 			if !elementvalues.Written(child, cv, v.registry) {
