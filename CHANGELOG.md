@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.2.0](https://github.com/gofhir/validator/compare/v2.1.0...v2.2.0) (2026-10-29)
+
+
+### Features
+
+* **binding:** bind each value by the definition that governs it, over the definitions ([#157](https://github.com/gofhir/validator/issues/157)) ([3818a4d](https://github.com/gofhir/validator/commit/3818a4d02254c92e1550cfe2a5dbaa46a5bd9151))
+* **binding:** check a Quantity's system, a Coding's system URI, and a Coding with no code as HL7 does ([#166](https://github.com/gofhir/validator/issues/166)) ([17a6dee](https://github.com/gofhir/validator/commit/17a6dee4b535755a147a0df172489fc1f4185a93))
+* **binding:** check the base element's binding where a profile's value set is not found ([#160](https://github.com/gofhir/validator/issues/160)) ([9642050](https://github.com/gofhir/validator/commit/9642050461003e65f04298b61c06c677476e23e8))
+* **binding:** report a code its code system cannot check with the severity HL7 gives it ([#164](https://github.com/gofhir/validator/issues/164)) ([c582c55](https://github.com/gofhir/validator/commit/c582c555032c47a9961783e9674d5c9dacf6bc84))
+* **binding:** report a Coding's version its code system is not loaded in, and check its code in no other ([#167](https://github.com/gofhir/validator/issues/167)) ([c7b2205](https://github.com/gofhir/validator/commit/c7b2205536ee6cc880a6f2cb1f992e87f47d3705))
+* **binding:** walk extensions under their definitions in the binding phase ([#159](https://github.com/gofhir/validator/issues/159)) ([9de43fd](https://github.com/gofhir/validator/commit/9de43fd6514524f42e5c873393ee9a3f5c10c78d))
+* check a held resource against its holder element's type.profile ([#161](https://github.com/gofhir/validator/issues/161)) ([f7b9b6e](https://github.com/gofhir/validator/commit/f7b9b6ed858811a922cb453d5fb57c9635198620))
+* **loader:** load a package's example folder as the HL7 validator loads it ([#165](https://github.com/gofhir/validator/issues/165)) ([5cb0071](https://github.com/gofhir/validator/commit/5cb007124b4867465a2a03ef97f6741ac07574b3))
+* **reference:** check references over the definitions, by the element that governs each ([#162](https://github.com/gofhir/validator/issues/162)) ([2f947af](https://github.com/gofhir/validator/commit/2f947af59fab2a60fe30ef0598970551f8a1bd88))
+* **reference:** report entries without a fullUrl and relative references they leave without a base ([#163](https://github.com/gofhir/validator/issues/163)) ([74afca6](https://github.com/gofhir/validator/commit/74afca6243c131b2b6e3125b6c45c01067d11cfa))
+
+
+### Bug Fixes
+
+* **deps:** update fhirpath to v1.16.6 and ucum to v4.3.4, and stop registering htmlChecks() globally ([#184](https://github.com/gofhir/validator/issues/184)) ([0a0f891](https://github.com/gofhir/validator/commit/0a0f8917adf373ff323e95d84f2850daea7ff823)), closes [#176](https://github.com/gofhir/validator/issues/176)
+* **extension:** validate what an extension's value holds, and compare its type exactly ([#181](https://github.com/gofhir/validator/issues/181)) ([5c0001c](https://github.com/gofhir/validator/commit/5c0001ce50d9c3b807c8c27f3ee285387bbc64d0))
+* match a choice key to its type exactly, from the types of the element's base ([#182](https://github.com/gofhir/validator/issues/182)) ([548ad1f](https://github.com/gofhir/validator/commit/548ad1f61d1d3923ab6ccdf67833bcfb3a82346f)), closes [#180](https://github.com/gofhir/validator/issues/180)
+* **registry:** merge a choice element of the differential as one element ([#177](https://github.com/gofhir/validator/issues/177)) ([a127801](https://github.com/gofhir/validator/commit/a12780150511f7eba877018e140e14a2ffb4f8a9))
+* report issues in a deterministic order, and check every value[x] of an extension ([#179](https://github.com/gofhir/validator/issues/179)) ([6c0db79](https://github.com/gofhir/validator/commit/6c0db79d9d4819f3fbf2ab4350d41fc88c70340b))
+* **terminology:** decide nested ValueSets as a least fixed point, and excludes by the evidence of a code's existence ([#170](https://github.com/gofhir/validator/issues/170)) ([a2ac6ea](https://github.com/gofhir/validator/commit/a2ac6ea6050e636e771245820ac420e6adee7e33))
+* **terminology:** decide ValueSet membership by the ValueSet's definition ([#156](https://github.com/gofhir/validator/issues/156)) ([b622f78](https://github.com/gofhir/validator/commit/b622f786a189a63e83c9057229acad1626f3bd53))
+
+
+### Performance Improvements
+
+* **registry:** extract fixed[x]/pattern[x] once, and read types without a lock ([#173](https://github.com/gofhir/validator/issues/173)) ([7292a80](https://github.com/gofhir/validator/commit/7292a809d6c3353863b2c2d0ed0dc7cdceca65a4))
+
 ## [2.1.0](https://github.com/gofhir/validator/compare/v2.0.1...v2.1.0) (2026-10-13)
 
 
