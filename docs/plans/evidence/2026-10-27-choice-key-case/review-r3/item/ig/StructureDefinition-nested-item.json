@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "nested-item",
+ "url": "http://example.org/StructureDefinition/nested-item",
+ "name": "NestedItem",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Questionnaire",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Questionnaire",
+    "path": "Questionnaire"
+   },
+   {
+    "id": "Questionnaire.item.item.answerOption.value[x]",
+    "path": "Questionnaire.item.item.answerOption.value[x]",
+    "type": [
+     {
+      "code": "Coding"
+     }
+    ]
+   }
+  ]
+ }
+}

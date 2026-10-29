@@ -1,0 +1,419 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "collection",
+  "entry" : [{
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>CarePlan.activity[0].detail</td><td>Structural Issue</td><td>Unrecognized property 'fooBar'</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[0]</td><td>Invalid Content</td><td>The contained resource 'doce' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[1]</td><td>Invalid Content</td><td>The contained resource 'cisp' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[2]</td><td>Invalid Content</td><td>The contained resource 'fluo' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[3]</td><td>Invalid Content</td><td>The contained resource 'tpf' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "in/unk.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 2760
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unrecognized property 'fooBar'"
+        },
+        "expression" : ["CarePlan.activity[0].detail"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1206
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'doce' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[0]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1356
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'cisp' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[1]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1508
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'fluo' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[2]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1723
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'tpf' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[3]"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>CarePlan.contained[0]</td><td>Invalid Content</td><td>The contained resource 'doce' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[1]</td><td>Invalid Content</td><td>The contained resource 'cisp' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[2]</td><td>Invalid Content</td><td>The contained resource 'fluo' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[3]</td><td>Invalid Content</td><td>The contained resource 'tpf' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "in/del.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1206
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'doce' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[0]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1356
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'cisp' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[1]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1508
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'fluo' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[2]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1723
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'tpf' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[3]"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>CarePlan.activity[0].detail</td><td>Structural Issue</td><td>Unrecognized property 'productreference'</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[0]</td><td>Invalid Content</td><td>The contained resource 'doce' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[1]</td><td>Invalid Content</td><td>The contained resource 'cisp' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[2]</td><td>Invalid Content</td><td>The contained resource 'fluo' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>CarePlan.contained[3]</td><td>Invalid Content</td><td>The contained resource 'tpf' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "in/alt.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 2770
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unrecognized property 'productreference'"
+        },
+        "expression" : ["CarePlan.activity[0].detail"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1206
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'doce' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[0]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1356
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'cisp' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[1]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1508
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'fluo' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[2]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 1723
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CONTAINED_ORPHAN_DOM3"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Goal|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invalid",
+        "details" : {
+          "text" : "The contained resource 'tpf' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+        },
+        "expression" : ["CarePlan.contained[3]"]
+      }]
+    }
+  }]
+}

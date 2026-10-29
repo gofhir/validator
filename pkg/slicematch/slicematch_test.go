@@ -578,3 +578,31 @@ func TestValuelessPrimitive(t *testing.T) {
 		})
 	}
 }
+
+// La clave de un elemento de elección nombra un tipo que declara su elemento base, lo permita o no el
+// elemento rebanado (formats.html#choice): valueUri es uri aunque el perfil deje solo string; una
+// clave con otras mayúsculas o de un tipo que la base no declara no nombra ninguno (#180).
+func TestKeyType(t *testing.T) {
+	reg := newRegistry(t, nil, `{"resourceType":"StructureDefinition","id":"restricted","url":"http://example.org/StructureDefinition/restricted","name":"Restricted","status":"active","kind":"complex-type","abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint","snapshot":{"element":[
+ {"id":"Extension","path":"Extension","base":{"path":"Extension","min":0,"max":"*"}},
+ {"id":"Extension.value[x]","path":"Extension.value[x]","min":1,"max":"1","base":{"path":"Extension.value[x]","min":0,"max":"1"},"type":[{"code":"string"}]}]}}`)
+	m := New(reg)
+	restricted := reg.GetByURL("http://example.org/StructureDefinition/restricted").Tree().ByID("Extension.value[x]")
+	answer := reg.GetByType("Questionnaire").Tree().ByID("Questionnaire.item.answerOption.value[x]")
+	status := reg.GetByType("Observation").Tree().ByID("Observation.status")
+	for _, tt := range []struct {
+		node      *registry.ElementNode
+		key, want string
+	}{
+		{restricted, "valueString", "string"},
+		{restricted, "valueUri", "uri"},
+		{restricted, "valueuri", ""},
+		{answer, "valueDate", "date"},
+		{answer, "valueDateTime", ""},
+		{status, "status", ""},
+	} {
+		if got := m.keyType(tt.node, tt.key); got != tt.want {
+			t.Errorf("keyType(%s, %q) = %q, want %q", tt.node.Def.Path, tt.key, got, tt.want)
+		}
+	}
+}

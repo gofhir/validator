@@ -1,0 +1,194 @@
+######## 4.0.1
+== a-variant-and-a-miscased-key.json
+   Observation Unrecognized property 'valuestring'
+== abstract-type-BackboneElement.json
+   Observation Unrecognized property 'valueBackboneElement'
+== abstract-type-Element.json
+   Observation Unrecognized property 'valueElement'
+== asNeeded-boolean-where-it-is-a-choice.json
+== control-codeable-concept.json
+== control-complex.json
+== control-fixed-value.json
+   Observation.value.ofType(string) Value is 'bad' but is fixed to 'ok' in the profile http://example.org/StructureDefinition/obs-fixed#Observation.value[x]
+== control-primitive-with-its-extensions.json
+== inner-letter-in-another-case.json
+   Observation Unrecognized property 'effectiveDatetime'
+== logical-model-as-a-type.json
+   Observation Unrecognized property 'valueRequest'
+== logical-model-as-an-extension's-type.json
+   Patient.extension[0] Unrecognized property 'valueRequest'
+   Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureD
+   Patient.extension[0] The Extension 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' definition is for a simple extension, 
+   Patient.extension[0] Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/patient-mothers
+== lowercase-complex-type.json
+   Observation Unrecognized property 'valuequantity'
+== lowercase-primitive-type.json
+   Observation Unrecognized property 'valuestring'
+== miscased-key-in-a-backbone-element.json
+   Observation.component[0] Unrecognized property 'valuestring'
+== miscased-key-in-a-bundle-entry.json
+   Bundle.entry[0].resource Unrecognized property 'valuestring'
+== miscased-key-in-a-contained-resource.json
+   Patient.contained[0] Unrecognized property 'valuestring'
+   Patient.contained[0] The contained resource 'o' is not referenced to from elsewhere in the containing resource nor does it refer to the conta
+== miscased-key-in-a-patient.json
+   Patient Unrecognized property 'deceasedboolean'
+== miscased-key-under-a-content-reference.json
+   Questionnaire.item[0].item[0].initial[0] Unrecognized property 'valuestring'
+   Questionnaire.item[0].item[0].initial[0] Questionnaire.item.initial.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinitio
+== miscased-key-under-a-fixed-value.json
+   Observation Unrecognized property 'valuestring'
+== miscased-key-under-a-pattern.json
+   Observation Unrecognized property 'valuequantity'
+== miscased-key-with-a-bad-value.json
+   Observation Unrecognized property 'effectivedateTime'
+== miscased-value-of-an-extension.json
+   Patient.extension[0] Unrecognized property 'valuedateTime'
+   Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureD
+   Patient The extension http://hl7.org/fhir/StructureDefinition/patient-birthTime v5.4.0 is not allowed to be used at this point (
+   Patient.extension[0] The Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' definition is for a simple extension, so it mu
+   Patient.extension[0] Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/patient-birthTi
+== resource-as-a-type.json
+   Observation Unrecognized property 'valuePatient'
+== type-a-profile-restricts-everywhere.json
+   Observation.value.ofType(dateTime) Not a valid date/time format: 'bad'
+   Observation.value.ofType(dateTime) The Profile 'http://example.org/StructureDefinition/obs-q' definition allows for the type Quantity but found type dateTi
+== type-a-profile-restricts-in-a-backbone-element.json
+   Observation.component[0].value.ofType(dateTime) Not a valid date/time format: 'bad'
+   Observation.component[0].value.ofType(dateTime) The Profile 'http://example.org/StructureDefinition/obs-levels' definition allows for the type Quantity but found type d
+== type-of-a-choice-at-another-level.json
+   Questionnaire.item[0].answerOption[0] Unrecognized property 'valueDateTime'
+   Questionnaire.item[0].answerOption[0] Questionnaire.item.answerOption.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefi
+== underscore-of-a-miscased-key.json
+   Observation Unrecognized property '_valuestring'
+== uppercase-type.json
+   Observation Unrecognized property 'valueSTRING'
+######## 4.3.0
+== a-variant-and-a-miscased-key.json
+   Observation Unrecognized property 'valuestring'
+== abstract-type-BackboneElement.json
+   Observation Unrecognized property 'valueBackboneElement'
+== abstract-type-Element.json
+   Observation Unrecognized property 'valueElement'
+== asNeeded-boolean-where-it-is-a-choice.json
+== control-codeable-concept.json
+== control-complex.json
+== control-fixed-value.json
+   Observation.value.ofType(string) Value is 'bad' but is fixed to 'ok' in the profile http://example.org/StructureDefinition/obs-fixed#Observation.value[x]
+== control-primitive-with-its-extensions.json
+== inner-letter-in-another-case.json
+   Observation Unrecognized property 'effectiveDatetime'
+== logical-model-as-a-type.json
+   Observation Unrecognized property 'valueRequest'
+== lowercase-complex-type.json
+   Observation Unrecognized property 'valuequantity'
+== lowercase-primitive-type.json
+   Observation Unrecognized property 'valuestring'
+== miscased-key-in-a-backbone-element.json
+   Observation.component[0] Unrecognized property 'valuestring'
+== miscased-key-in-a-bundle-entry.json
+   Bundle.entry[0].resource Unrecognized property 'valuestring'
+== miscased-key-in-a-contained-resource.json
+   Patient.contained[0] Unrecognized property 'valuestring'
+   Patient.contained[0] The contained resource 'o' is not referenced to from elsewhere in the containing resource nor does it refer to the conta
+== miscased-key-in-a-patient.json
+   Patient Unrecognized property 'deceasedboolean'
+== miscased-key-under-a-content-reference.json
+   Questionnaire.item[0].item[0].initial[0] Unrecognized property 'valuestring'
+   Questionnaire.item[0].item[0].initial[0] Questionnaire.item.initial.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinitio
+== miscased-key-under-a-fixed-value.json
+   Observation Unrecognized property 'valuestring'
+== miscased-key-under-a-pattern.json
+   Observation Unrecognized property 'valuequantity'
+== miscased-key-with-a-bad-value.json
+   Observation Unrecognized property 'effectivedateTime'
+== miscased-value-of-an-extension.json
+   Patient.extension[0] Unrecognized property 'valuedateTime'
+   Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureD
+   Patient The extension http://hl7.org/fhir/StructureDefinition/patient-birthTime v5.4.0 is not allowed to be used at this point (
+   Patient.extension[0] The Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' definition is for a simple extension, so it mu
+   Patient.extension[0] Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/patient-birthTi
+== resource-as-a-type.json
+   Observation Unrecognized property 'valuePatient'
+== type-a-profile-restricts-everywhere.json
+   Observation.value.ofType(dateTime) Not a valid date/time format: 'bad'
+   Observation.value.ofType(dateTime) The Profile 'http://example.org/StructureDefinition/obs-q' definition allows for the type Quantity but found type dateTi
+== type-a-profile-restricts-in-a-backbone-element.json
+   Observation.component[0].value.ofType(dateTime) Not a valid date/time format: 'bad'
+   Observation.component[0].value.ofType(dateTime) The Profile 'http://example.org/StructureDefinition/obs-levels' definition allows for the type Quantity but found type d
+== type-of-a-choice-at-another-level.json
+   Questionnaire.item[0].answerOption[0] Unrecognized property 'valueDateTime'
+   Questionnaire.item[0].answerOption[0] Questionnaire.item.answerOption.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefi
+== underscore-of-a-miscased-key.json
+   Observation Unrecognized property '_valuestring'
+== uppercase-type.json
+   Observation Unrecognized property 'valueSTRING'
+######## 5.0.0
+== a-variant-and-a-miscased-key.json
+   Observation Unrecognized property 'valuestring'
+== abstract-type-BackboneElement.json
+   Observation Unrecognized property 'valueBackboneElement'
+== abstract-type-DataType.json
+   Observation Unrecognized property 'valueDataType'
+== abstract-type-Element.json
+   Observation Unrecognized property 'valueElement'
+== asNeeded-boolean-where-it-is-not-a-choice.json
+   MedicationRequest.dosageInstruction[0] Unrecognized property 'asNeededBoolean'
+== control-codeable-concept.json
+== control-complex.json
+== control-fixed-value.json
+   Observation.value.ofType(string) Value is 'bad' but is fixed to 'ok' in the profile http://example.org/StructureDefinition/obs-fixed#Observation.value[x]
+== control-primitive-with-its-extensions.json
+== element-that-starts-like-a-choice.json
+   ConceptMap.group[0].element[0].target[0].dependsOn[0] Constraint failed: cmd-6: 'One of value[x] or valueSet must exist, but not both.' (defined in http://hl7.org/fhir/Struct
+   ConceptMap.group[0].element[0].target[0].dependsOn[0].valueSet Example URLs are not allowed in this context (http://example.org/vs)
+   ConceptMap.group[0].element[0].target[0].dependsOn[0].attribute The property code 'x' is not known
+== inner-letter-in-another-case.json
+   Observation Unrecognized property 'effectiveDatetime'
+== logical-model-as-a-type.json
+   Observation Unrecognized property 'valueRequest'
+== lowercase-complex-type.json
+   Observation Unrecognized property 'valuequantity'
+== lowercase-primitive-type.json
+   Observation Unrecognized property 'valuestring'
+== miscased-key-in-a-backbone-element.json
+   Observation.component[0] Unrecognized property 'valuestring'
+== miscased-key-in-a-bundle-entry.json
+   Bundle.entry[0].resource Unrecognized property 'valuestring'
+== miscased-key-in-a-contained-resource.json
+   Patient.contained[0] Unrecognized property 'valuestring'
+   Patient.contained[0] The contained resource 'o' is not referenced to from elsewhere in the containing resource nor does it refer to the conta
+== miscased-key-in-a-patient.json
+   Patient Unrecognized property 'deceasedboolean'
+== miscased-key-under-a-content-reference.json
+   Questionnaire.item[0].item[0].initial[0] Unrecognized property 'valuestring'
+   Questionnaire.item[0].item[0].initial[0] Questionnaire.item.initial.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinitio
+== miscased-key-under-a-fixed-value.json
+   Observation Unrecognized property 'valuestring'
+== miscased-key-under-a-pattern.json
+   Observation Unrecognized property 'valuequantity'
+== miscased-key-with-a-bad-value.json
+   Observation Unrecognized property 'effectivedateTime'
+== miscased-value-of-an-extension.json
+   Patient.extension[0] Unrecognized property 'valuedateTime'
+   Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureD
+   Patient The extension http://hl7.org/fhir/StructureDefinition/patient-birthTime v5.2.0 is not allowed to be used at this point (
+   Patient.extension[0] The Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' definition is for a simple extension, so it mu
+   Patient.extension[0] Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/patient-birthTi
+== resource-as-a-type.json
+   Observation Unrecognized property 'valuePatient'
+== type-a-profile-restricts-everywhere.json
+   Observation.value.ofType(dateTime) Not a valid date/time format: 'bad'
+   Observation.value.ofType(dateTime) The Profile 'http://example.org/StructureDefinition/obs-q' definition allows for the type Quantity but found type dateTi
+== type-a-profile-restricts-in-a-backbone-element.json
+   Observation.component[0].value.ofType(dateTime) Not a valid date/time format: 'bad'
+   Observation.component[0].value.ofType(dateTime) The Profile 'http://example.org/StructureDefinition/obs-levels' definition allows for the type Quantity but found type d
+== type-of-a-choice-at-another-level.json
+   Questionnaire.item[0].answerOption[0] Unrecognized property 'valueDateTime'
+   Questionnaire.item[0].type The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0
+   Questionnaire.item[0].type The value provided ('choice') was not found in the value set 'Questionnaire Item Type' (http://hl7.org/fhir/ValueSet/ite
+   Questionnaire.item[0].answerOption[0] Questionnaire.item.answerOption.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefi
+== underscore-of-a-miscased-key.json
+   Observation Unrecognized property '_valuestring'
+== uppercase-type.json
+   Observation Unrecognized property 'valueSTRING'

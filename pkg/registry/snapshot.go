@@ -154,6 +154,7 @@ func (r *Registry) snapshotOf(ctx context.Context, g *generation, sd *StructureD
 	if sd.Snapshot == nil {
 		sd.Snapshot, sd.snapshotNotes, sd.snapshotCyclic = snapshot, notes, frame.cyclic
 		sd.snapshotGenerated = true
+		r.choiceGen.Add(1) // el árbol de sd cambia: las bases calculadas sin él ya no valen
 	}
 	snapshot = sd.Snapshot
 	sd.snapshotMu.Unlock()

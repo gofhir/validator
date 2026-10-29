@@ -1,0 +1,112 @@
+BASE=5c0001c ./scripts/bench-compare.sh
+round 1/10
+round 2/10
+round 3/10
+round 4/10
+round 5/10
+round 6/10
+round 7/10
+round 8/10
+round 9/10
+round 10/10
+# Benchmark comparison
+
+- Date: 2026-10-28 18:29 -03
+- Base: `5c0001ce50d9` · Head: `5c0001ce50d9` (uncommitted changes)
+- `go version`: go version go1.27.2 darwin/arm64
+- Machine: Apple M4 Pro, 8P+4E
+- Interleaved rounds: 10 · serial benchmarks: 1 CPU · parallel: 1,4,8 · benchtime: 1s
+- Command: `BASE=5c0001c COUNT=10 CPUS=1,4,8 BENCHTIME=1s scripts/bench-compare.sh`
+
+```
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+                                             │   base.txt    │               head.txt               │
+                                             │    sec/op     │    sec/op      vs base               │
+ValidatePatientWithData                        200.7µ ±  36%   176.7µ ±  81%       ~ (p=0.684 n=10)
+ValidateObservation                            157.3µ ±  45%   126.2µ ± 104%       ~ (p=0.436 n=10)
+ValidatorCreation                               1.178 ±  22%    1.229 ±  84%       ~ (p=0.739 n=10)
+ValidateRotating                               568.7µ ±  42%   611.2µ ±  55%       ~ (p=0.529 n=10)
+ValidatorLiveHeap                               1.300 ±  19%    1.155 ±  83%       ~ (p=0.481 n=10)
+ValidateProfiled/patient                       584.1µ ±  64%   647.4µ ±  30%       ~ (p=0.796 n=10)
+ValidateProfiled/blood-pressure                478.8µ ±  88%   400.9µ ±  45%       ~ (p=0.529 n=10)
+ValidateProfiled/extension-values              2.731m ±  85%   2.502m ±  57%       ~ (p=0.481 n=10)
+ValidateParallel                               50.22µ ±  53%   49.24µ ±  43%       ~ (p=0.684 n=10)
+ValidateParallel-4                             19.82µ ±  22%   21.13µ ±  54%       ~ (p=0.529 n=10)
+ValidateParallel-8                             17.66µ ±  20%   16.40µ ±  20%       ~ (p=0.631 n=10)
+ValidateProfiled/patient-parallel              599.5µ ±  54%   557.0µ ± 132%       ~ (p=1.000 n=10)
+ValidateProfiled/patient-parallel-4            246.4µ ±  39%   245.4µ ±  45%       ~ (p=0.971 n=10)
+ValidateProfiled/patient-parallel-8            199.6µ ±  24%   198.9µ ±  45%       ~ (p=0.971 n=10)
+ValidateProfiled/blood-pressure-parallel       411.0µ ± 100%   536.7µ ±  24%       ~ (p=0.315 n=10)
+ValidateProfiled/blood-pressure-parallel-4     206.9µ ±  51%   223.9µ ±  27%       ~ (p=0.796 n=10)
+ValidateProfiled/blood-pressure-parallel-8     126.0µ ±  34%   129.3µ ±  40%       ~ (p=0.971 n=10)
+ValidateProfiled/extension-values-parallel     2.711m ±  36%   2.887m ±  62%       ~ (p=0.631 n=10)
+ValidateProfiled/extension-values-parallel-4   1.297m ±  28%   1.104m ±  30%       ~ (p=0.739 n=10)
+ValidateProfiled/extension-values-parallel-8   790.3µ ±  32%   841.3µ ±  21%       ~ (p=0.971 n=10)
+geomean                                        669.2µ          659.6µ         -1.43%
+
+                                             │   base.txt    │                head.txt                │
+                                             │     B/op      │     B/op       vs base                 │
+ValidatePatientWithData                        83.56Ki ±  0%   83.49Ki ±  0%  -0.09% (p=0.019 n=10)
+ValidateObservation                            70.69Ki ±  0%   70.70Ki ±  0%       ~ (p=0.539 n=10)
+ValidatorCreation                              270.6Mi ±  0%   270.6Mi ±  0%       ~ (p=0.956 n=10)
+ValidateRotating                               277.0Ki ± 30%   313.2Ki ± 14%       ~ (p=0.101 n=10)
+ValidatorLiveHeap                              270.5Mi ±  0%   270.7Mi ±  0%  +0.04% (p=0.041 n=10)
+ValidateProfiled/patient                       309.2Ki ±  0%   309.2Ki ±  0%       ~ (p=0.105 n=10)
+ValidateProfiled/blood-pressure                230.0Ki ±  0%   230.0Ki ±  0%       ~ (p=0.582 n=10)
+ValidateProfiled/extension-values              1.349Mi ±  0%   1.349Mi ±  0%       ~ (p=0.923 n=10)
+ValidateParallel                               23.96Ki ±  0%   23.98Ki ±  0%       ~ (p=0.985 n=10)
+ValidateParallel-4                             23.93Ki ±  0%   23.92Ki ±  0%       ~ (p=0.238 n=10)
+ValidateParallel-8                             23.92Ki ±  0%   23.92Ki ±  0%       ~ (p=0.898 n=10)
+ValidateProfiled/patient-parallel              309.2Ki ±  0%   309.2Ki ±  0%       ~ (p=0.387 n=10)
+ValidateProfiled/patient-parallel-4            309.2Ki ±  0%   309.2Ki ±  0%       ~ (p=0.239 n=10)
+ValidateProfiled/patient-parallel-8            309.2Ki ±  0%   309.2Ki ±  0%       ~ (p=0.697 n=10)
+ValidateProfiled/blood-pressure-parallel       230.0Ki ±  0%   230.0Ki ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/blood-pressure-parallel-4     230.1Ki ±  0%   230.1Ki ±  0%       ~ (p=0.812 n=10)
+ValidateProfiled/blood-pressure-parallel-8     230.1Ki ±  0%   230.1Ki ±  0%       ~ (p=0.754 n=10)
+ValidateProfiled/extension-values-parallel     1.349Mi ±  0%   1.349Mi ±  0%       ~ (p=0.933 n=10)
+ValidateProfiled/extension-values-parallel-4   1.349Mi ±  0%   1.349Mi ±  0%       ~ (p=0.183 n=10)
+ValidateProfiled/extension-values-parallel-8   1.349Mi ±  0%   1.349Mi ±  0%       ~ (p=0.811 n=10)
+geomean                                        457.4Ki         460.2Ki        +0.62%
+¹ all samples are equal
+
+                                             │   base.txt   │               head.txt                │
+                                             │  allocs/op   │  allocs/op    vs base                 │
+ValidatePatientWithData                        1.706k ±  0%   1.706k ±  0%       ~ (p=1.000 n=10)
+ValidateObservation                            1.320k ±  0%   1.320k ±  0%       ~ (p=1.000 n=10) ¹
+ValidatorCreation                              1.184M ±  0%   1.184M ±  0%       ~ (p=0.182 n=10)
+ValidateRotating                               4.705k ± 31%   5.295k ± 14%       ~ (p=0.205 n=10)
+ValidatorLiveHeap                              1.184M ±  0%   1.184M ±  0%  +0.00% (p=0.040 n=10)
+ValidateProfiled/patient                       6.010k ±  0%   6.010k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/blood-pressure                4.218k ±  0%   4.218k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/extension-values              25.53k ±  0%   25.53k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateParallel                                383.0 ±  0%    383.0 ±  0%       ~ (p=1.000 n=10) ¹
+ValidateParallel-4                              383.0 ±  0%    383.0 ±  0%       ~ (p=1.000 n=10) ¹
+ValidateParallel-8                              383.0 ±  0%    383.0 ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/patient-parallel              6.010k ±  0%   6.010k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/patient-parallel-4            6.010k ±  0%   6.010k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/patient-parallel-8            6.010k ±  0%   6.010k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/blood-pressure-parallel       4.218k ±  0%   4.218k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/blood-pressure-parallel-4     4.218k ±  0%   4.218k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/blood-pressure-parallel-8     4.218k ±  0%   4.218k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/extension-values-parallel     25.53k ±  0%   25.53k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/extension-values-parallel-4   25.53k ±  0%   25.53k ±  0%       ~ (p=1.000 n=10) ¹
+ValidateProfiled/extension-values-parallel-8   25.53k ±  0%   25.53k ±  0%       ~ (p=1.000 n=10) ¹
+geomean                                        7.216k         7.258k        +0.59%
+¹ all samples are equal
+
+                 │   base.txt    │            head.txt             │
+                 │ first-pass-ms │ first-pass-ms  vs base          │
+ValidateRotating    3.755k ± 21%   3.051k ± 100%  ~ (p=0.436 n=10)
+
+                 │  base.txt   │            head.txt             │
+                 │  resources  │  resources   vs base            │
+ValidateRotating   4.778k ± 0%   4.778k ± 0%  ~ (p=1.000 n=10) ¹
+¹ all samples are equal
+
+                  │   base.txt   │            head.txt            │
+                  │    live-B    │    live-B     vs base          │
+ValidatorLiveHeap   92.96Mi ± 0%   92.98Mi ± 0%  ~ (p=0.392 n=10)
+```

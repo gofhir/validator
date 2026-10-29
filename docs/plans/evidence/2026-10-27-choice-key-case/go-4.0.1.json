@@ -1,0 +1,180 @@
+[
+  {
+    "resource": "probe/s01-lower-primitive.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "3.843ms"
+  },
+  {
+    "resource": "probe/s02-upper-primitive.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "92µs"
+  },
+  {
+    "resource": "probe/s03-lower-complex.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "86µs"
+  },
+  {
+    "resource": "probe/s04-both.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueString, valuestring",
+        "expression": [
+          "Observation"
+        ]
+      }
+    ],
+    "duration": "68µs"
+  },
+  {
+    "resource": "probe/s05-underscore-lower.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "61µs"
+  },
+  {
+    "resource": "probe/s06-lower-bad-format.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value 'bad' does not match expected format for type dateTime",
+        "expression": [
+          "Observation.effectivedateTime"
+        ]
+      }
+    ],
+    "duration": "81µs"
+  },
+  {
+    "resource": "probe/s07-inner-case.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "55µs"
+  },
+  {
+    "resource": "probe/s08-control-ok.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "85µs"
+  },
+  {
+    "resource": "probe/s09-no-suffix.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'value'",
+        "expression": [
+          "Observation.value"
+        ]
+      }
+    ],
+    "duration": "63µs"
+  },
+  {
+    "resource": "probe/s10-patient.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "63µs"
+  },
+  {
+    "resource": "probe/s11-ext-lower.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' is not allowed in context 'Patient, DomainResource, Resource'",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      }
+    ],
+    "duration": "400µs"
+  },
+  {
+    "resource": "probe/s12-fixed-lower.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absent reason must be present.' (defined in http://hl7.org/fhir/StructureDefinition/vitalsigns)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day'",
+        "expression": [
+          "Observation.effectiveDateTime"
+        ]
+      }
+    ],
+    "duration": "722µs"
+  }
+]

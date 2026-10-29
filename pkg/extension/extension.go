@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/gofhir/validator/v2/internal/elementvalues"
@@ -439,14 +438,10 @@ func (v *Validator) validateExtension(ctx context.Context, sd *registry.Structur
 // el valor es un elemento como cualquier otro). El parámetro url nombra la definición de la extensión
 // en los mensajes.
 func (v *Validator) validateExtensionValue(ctx context.Context, sd *registry.StructureDefinition, valueNode *registry.ElementNode, ext map[string]any, url, extPath string, result *issue.Result) {
-	// Los valores de este elemento son los de un tipo que permite su elemento en la definición del tipo
-	// de la extensión (Extension, en la versión cargada). Una clave de otro tipo (valueMeta en R4B) es
-	// una propiedad desconocida, que informa la fase estructural, como HL7 (#178).
-	baseTypes := v.baseTypes(sd, valueNode)
+	// Los valores de este elemento son los de un tipo que declara su elemento base (Extension.value[x]
+	// en la versión cargada; elementvalues.Of). Una clave de otro tipo (valueMeta en R4B) es una
+	// propiedad desconocida, que informa la fase estructural, como HL7 (#178, #180).
 	values := elementvalues.Of(valueNode, ext, v.registry)
-	values = slices.DeleteFunc(values, func(cv elementvalues.Value) bool {
-		return baseTypes != nil && !declares(baseTypes, cv.TypeCode)
-	})
 	// Un valor es uno escrito como dice su elemento: un null o un array no lo son, y HL7 informa que
 	// falta (json.html). Un primitivo presente solo por su "_key" sí lo es (json.html#primitive).
 	written := 0
@@ -501,25 +496,6 @@ func (v *Validator) validateExtensionValue(ctx context.Context, sd *registry.Str
 		// restringe: se valida con la definición del tipo, y HL7 informa lo que tiene adentro (#178).
 		v.validateChildren(ctx, v.registry.TypeChildrenOf(valueNode, cv.TypeCode), inst, at, result)
 	}
-}
-
-// baseTypes devuelve el elemento que corresponde a valueNode en la definición del tipo de sd, cuyos
-// tipos son los que una clave puede nombrar, o nil si no está.
-func (v *Validator) baseTypes(sd *registry.StructureDefinition, valueNode *registry.ElementNode) *registry.ElementDefinition {
-	base := v.registry.GetByType(sd.Type)
-	if base == nil {
-		return nil
-	}
-	root := base.Tree().Root()
-	if root == nil {
-		return nil
-	}
-	for _, child := range root.Children {
-		if child.Name() == valueNode.Name() {
-			return child.Def
-		}
-	}
-	return nil
 }
 
 // declares dice si def permite el tipo code, exacto: el tipo que nombra la clave de un elemento de

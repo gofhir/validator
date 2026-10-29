@@ -1,0 +1,141 @@
+######## 4.0.1
+== s01-lower-primitive.json
+  HL7 error Observation Unrecognized property 'valuestring'
+  GO  error Observation.valuestring Unknown element 'valuestring'
+== s02-upper-primitive.json
+  HL7 error Observation Unrecognized property 'valueSTRING'
+  GO  error Observation.valueSTRING Unknown element 'valueSTRING'
+== s03-lower-complex.json
+  HL7 error Observation Unrecognized property 'valuequantity'
+  GO  error Observation.valuequantity Unknown element 'valuequantity'
+== s04-both.json
+  HL7 error Observation Unrecognized property 'valuestring'
+  GO  error Observation.valuestring Unknown element 'valuestring'
+== s05-underscore-lower.json
+  HL7 error Observation Unrecognized property '_valuestring'
+  GO  error Observation._valuestring Unknown element '_valuestring'
+== s06-lower-bad-format.json
+  HL7 error Observation Unrecognized property 'effectivedateTime'
+  GO  error Observation.effectivedateTime Unknown element 'effectivedateTime'
+== s07-inner-case.json
+  HL7 error Observation Unrecognized property 'effectiveDatetime'
+  GO  error Observation.effectiveDatetime Unknown element 'effectiveDatetime'
+== s08-control-ok.json
+== s09-no-suffix.json
+  HL7 error Observation Unrecognized property 'value'
+  GO  error Observation.value Unknown element 'value'
+== s10-patient.json
+  HL7 error Patient Unrecognized property 'deceasedboolean'
+  GO  error Patient.deceasedboolean Unknown element 'deceasedboolean'
+== s11-ext-lower.json
+  HL7 error Patient.extension[0] Unrecognized property 'valuedateTime'
+  HL7 error Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+  HL7 error Patient The extension http://hl7.org/fhir/StructureDefinition/patient-birthTime v5.4.0 is not allowed to be used at th
+  HL7 error Patient.extension[0] The Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' definition is for a simple extension
+  HL7 error Patient.extension[0] Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/patie
+  GO  error Patient.extension[0].valuedateTime Unknown element 'valuedateTime'
+  GO  error Patient.extension[0].value[x] Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  GO  error Patient Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' is not allowed in context 'Patient, Doma
+  GO  error Patient.extension[0] Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' requires a value
+  GO  error Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+== s12-fixed-lower.json
+  HL7 error Observation Unrecognized property 'valuequantity'
+  HL7 error Observation.effective.ofType(dateTime) Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be pre
+  HL7 error Observation Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absen
+  GO  error Observation.valuequantity Unknown element 'valuequantity'
+  GO  error Observation Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absen
+  GO  error Observation.effectiveDateTime Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be pre
+######## 4.3.0
+== s01-lower-primitive.json
+  HL7 error Observation Unrecognized property 'valuestring'
+  GO  error Observation.valuestring Unknown element 'valuestring'
+== s02-upper-primitive.json
+  HL7 error Observation Unrecognized property 'valueSTRING'
+  GO  error Observation.valueSTRING Unknown element 'valueSTRING'
+== s03-lower-complex.json
+  HL7 error Observation Unrecognized property 'valuequantity'
+  GO  error Observation.valuequantity Unknown element 'valuequantity'
+== s04-both.json
+  HL7 error Observation Unrecognized property 'valuestring'
+  GO  error Observation.valuestring Unknown element 'valuestring'
+== s05-underscore-lower.json
+  HL7 error Observation Unrecognized property '_valuestring'
+  GO  error Observation._valuestring Unknown element '_valuestring'
+== s06-lower-bad-format.json
+  HL7 error Observation Unrecognized property 'effectivedateTime'
+  GO  error Observation.effectivedateTime Unknown element 'effectivedateTime'
+== s07-inner-case.json
+  HL7 error Observation Unrecognized property 'effectiveDatetime'
+  GO  error Observation.effectiveDatetime Unknown element 'effectiveDatetime'
+== s08-control-ok.json
+== s09-no-suffix.json
+  HL7 error Observation Unrecognized property 'value'
+  GO  error Observation.value Unknown element 'value'
+== s10-patient.json
+  HL7 error Patient Unrecognized property 'deceasedboolean'
+  GO  error Patient.deceasedboolean Unknown element 'deceasedboolean'
+== s11-ext-lower.json
+  HL7 error Patient.extension[0] Unrecognized property 'valuedateTime'
+  HL7 error Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+  HL7 error Patient The extension http://hl7.org/fhir/StructureDefinition/patient-birthTime v5.4.0 is not allowed to be used at th
+  HL7 error Patient.extension[0] The Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' definition is for a simple extension
+  HL7 error Patient.extension[0] Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/patie
+  GO  error Patient.extension[0].valuedateTime Unknown element 'valuedateTime'
+  GO  error Patient.extension[0].value[x] Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  GO  error Patient Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' is not allowed in context 'Patient, Doma
+  GO  error Patient.extension[0] Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' requires a value
+  GO  error Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+== s12-fixed-lower.json
+  HL7 error Observation Unrecognized property 'valuequantity'
+  HL7 error Observation.effective.ofType(dateTime) Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be pre
+  HL7 error Observation Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absen
+  GO  error Observation.valuequantity Unknown element 'valuequantity'
+  GO  error Observation Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absen
+  GO  error Observation.effectiveDateTime Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be pre
+######## 5.0.0
+== s01-lower-primitive.json
+  HL7 error Observation Unrecognized property 'valuestring'
+  GO  error Observation.valuestring Unknown element 'valuestring'
+== s02-upper-primitive.json
+  HL7 error Observation Unrecognized property 'valueSTRING'
+  GO  error Observation.valueSTRING Unknown element 'valueSTRING'
+== s03-lower-complex.json
+  HL7 error Observation Unrecognized property 'valuequantity'
+  GO  error Observation.valuequantity Unknown element 'valuequantity'
+== s04-both.json
+  HL7 error Observation Unrecognized property 'valuestring'
+  GO  error Observation.valuestring Unknown element 'valuestring'
+== s05-underscore-lower.json
+  HL7 error Observation Unrecognized property '_valuestring'
+  GO  error Observation._valuestring Unknown element '_valuestring'
+== s06-lower-bad-format.json
+  HL7 error Observation Unrecognized property 'effectivedateTime'
+  GO  error Observation.effectivedateTime Unknown element 'effectivedateTime'
+== s07-inner-case.json
+  HL7 error Observation Unrecognized property 'effectiveDatetime'
+  GO  error Observation.effectiveDatetime Unknown element 'effectiveDatetime'
+== s08-control-ok.json
+== s09-no-suffix.json
+  HL7 error Observation Unrecognized property 'value'
+  GO  error Observation.value Unknown element 'value'
+== s10-patient.json
+  HL7 error Patient Unrecognized property 'deceasedboolean'
+  GO  error Patient.deceasedboolean Unknown element 'deceasedboolean'
+== s11-ext-lower.json
+  HL7 error Patient.extension[0] Unrecognized property 'valuedateTime'
+  HL7 error Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+  HL7 error Patient The extension http://hl7.org/fhir/StructureDefinition/patient-birthTime v5.2.0 is not allowed to be used at th
+  HL7 error Patient.extension[0] The Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' definition is for a simple extension
+  HL7 error Patient.extension[0] Extension.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/patie
+  GO  error Patient.extension[0].valuedateTime Unknown element 'valuedateTime'
+  GO  error Patient.extension[0].value[x] Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+  GO  error Patient Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' is not allowed in context 'Patient, Doma
+  GO  error Patient.extension[0] Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' requires a value
+  GO  error Patient.extension[0] Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+== s12-fixed-lower.json
+  HL7 error Observation Unrecognized property 'valuequantity'
+  HL7 error Observation.effective.ofType(dateTime) Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be pre
+  HL7 error Observation Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absen
+  GO  error Observation.valuequantity Unknown element 'valuequantity'
+  GO  error Observation Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absen
+  GO  error Observation.effectiveDateTime Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be pre

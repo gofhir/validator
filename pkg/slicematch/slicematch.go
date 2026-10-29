@@ -491,19 +491,13 @@ func (m *Matcher) profileConforms(ctx context.Context, req Request, slice *regis
 }
 
 // keyType returns the type a choice element's JSON property names: "valueQuantity" is
-// "value[x]" of type Quantity (formats.html#choice), whether or not the element allows it. It is
-// "" for an element that is not a choice.
+// "value[x]" of type Quantity (formats.html#choice), whether or not the element allows it, if its
+// base declares it (Registry.ChoiceType). It is "" for an element that is not a choice.
 func (m *Matcher) keyType(node *registry.ElementNode, key string) string {
-	base, ok := strings.CutSuffix(node.Name(), "[x]")
-	if !ok {
+	if !strings.HasSuffix(node.Name(), "[x]") {
 		return ""
 	}
-	for _, t := range node.Def.Type {
-		if base+capitalize(t.Code) == key {
-			return t.Code
-		}
-	}
-	return m.reg.ChoiceType(base, key)
+	return m.reg.ChoiceType(node, key)
 }
 
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).

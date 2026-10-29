@@ -71,8 +71,10 @@ func TestCardinalityOnTheTree(t *testing.T) {
 			`{"resourceType":"Patient","deceasedBoolean":false,"contact":[{"gender":"male"}]}`, nil},
 		{"a required choice is present under a typed name",
 			`{"resourceType":"Patient","deceasedDateTime":"2020"}`, nil},
-		{"a required choice with a value of a type it does not allow is present (the wrong type is another phase's)",
-			`{"resourceType":"Patient","deceasedString":"x"}`, nil},
+		// Un tipo que la base de deceased[x] no declara (boolean, dateTime) no es un valor: la propiedad
+		// es desconocida y el elemento falta, como en HL7 6.10.2 (formats.html#choice; #180).
+		{"a required choice with a value of a type its base does not declare is missing",
+			`{"resourceType":"Patient","deceasedString":"x"}`, []string{"CARDINALITY_MIN @ Patient.deceased[x]"}},
 		{"a required choice is missing",
 			`{"resourceType":"Patient"}`, []string{"CARDINALITY_MIN @ Patient.deceased[x]"}},
 		{"a required primitive present only through its extensions",

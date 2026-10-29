@@ -17,8 +17,10 @@ import (
 
 // StructureDefinition.Kind constants.
 const (
-	KindResource = "resource"
-	KindLogical  = "logical"
+	KindResource      = "resource"
+	KindLogical       = "logical"
+	KindPrimitiveType = "primitive-type"
+	KindComplexType   = "complex-type"
 )
 
 // StructureDefinition.Derivation constants.
@@ -201,6 +203,35 @@ func (ed *ElementDefinition) Repeats() bool {
 	return most != "1"
 }
 
+// ChoiceTypeOf devuelve el código del tipo del elemento que nombra el sufijo de una propiedad de
+// elección: el código con la primera letra en mayúscula y nada más cambiado (formats.html#choice; los
+// nombres de propiedad distinguen mayúsculas, json.html), o "" si ningún tipo declarado coincide.
+func (ed *ElementDefinition) ChoiceTypeOf(suffix string) string {
+	if i := ChoiceTypeIndex(ed.Type, suffix); i >= 0 {
+		return ed.Type[i].Code
+	}
+	return ""
+}
+
+// ChoiceTypeIndex devuelve la posición en types del tipo que nombra el sufijo de una propiedad de
+// elección, con la regla de ChoiceTypeOf, o -1.
+func ChoiceTypeIndex(types []Type, suffix string) int {
+	for i := range types {
+		c := types[i].Code
+		if c == "" || len(c) != len(suffix) || c[1:] != suffix[1:] {
+			continue
+		}
+		first := c[0]
+		if first >= 'a' && first <= 'z' {
+			first -= 'a' - 'A'
+		}
+		if first == suffix[0] {
+			return i
+		}
+	}
+	return -1
+}
+
 // SetRaw guarda el JSON crudo de la ElementDefinition, una copia de data: el llamador puede
 // cambiar data después.
 func (ed *ElementDefinition) SetRaw(data json.RawMessage) {
@@ -327,6 +358,20 @@ type Registry struct {
 	publishes atomic.Uint64
 
 	model *FHIRPathModel // see FHIRPathModel
+
+	// choiceBases guarda el elemento base de cada elemento de elección (*ElementNode ->
+	// choiceBaseEntry), que choiceBase lee sin lock. Depende de las definiciones: una entrada vale solo
+	// mientras choiceGen, que cuenta las definiciones indexadas y los snapshots generados, no se movió
+	// desde que se calculó. Así no se usa la que una búsqueda en curso guarda después de una carga.
+	choiceBases sync.Map
+	choiceGen   atomic.Uint64
+}
+
+// choiceBaseEntry es el elemento base de un elemento de elección (nil si no se encuentra) y la
+// generación de las definiciones con que se calculó.
+type choiceBaseEntry struct {
+	node *ElementNode
+	gen  uint64
 }
 
 // New creates a new empty Registry.
@@ -397,6 +442,7 @@ func (r *Registry) refreshDerivedUnlocked() {
 	clear(r.interfaces)
 	r.holderGen.Add(1)
 	r.holderPaths.Clear()
+	r.choiceBases.Clear()
 	r.buildTypeClassificationCaches()
 	r.model = &FHIRPathModel{reg: r}
 }
@@ -457,6 +503,7 @@ func (r *Registry) reindexUnlocked() {
 
 // indexUnlocked indexes a definition loaded. Must be called while the write lock is held.
 func (r *Registry) indexUnlocked(sd *StructureDefinition) {
+	r.choiceGen.Add(1)
 	r.all = append(r.all, sd)
 	if sd.URL != "" {
 		if sd.Version != "" {
@@ -660,22 +707,116 @@ func (r *Registry) GetByType(typeName string) *StructureDefinition {
 	return r.types.Load().byType[typeName]
 }
 
-// ChoiceType returns the type a JSON property names for a choice element: for the element base
-// "value" and the property "valueQuantity", "Quantity" (formats.html#choice: the element name
-// followed by the type code with its first letter capitalized). Any type this registry defines
-// counts, allowed at that element or not: a value of a type the element does not allow is present
-// with the wrong type, not absent. It is "" when the property names no type.
-func (r *Registry) ChoiceType(base, key string) string {
-	suffix, ok := strings.CutPrefix(key, base)
-	if !ok || suffix == "" || suffix[0] < 'A' || suffix[0] > 'Z' {
+// ChoiceType devuelve el tipo que nombra una propiedad JSON del elemento de elección node: para
+// "value[x]" y la propiedad "valueQuantity", "Quantity" (formats.html#choice: el nombre del elemento
+// seguido del código del tipo con la primera letra en mayúscula). Los tipos son los del elemento del
+// que node deriva (ElementDefinition.base), que deciden cuáles son sus propiedades: un tipo que un
+// perfil no permite nombra un valor del tipo equivocado, no uno ausente. Es "" si la propiedad no
+// nombra ninguno o node no es un elemento de elección.
+func (r *Registry) ChoiceType(node *ElementNode, key string) string {
+	def := node.Def
+	base, ok := strings.CutSuffix(def.Path[strings.LastIndex(def.Path, ".")+1:], "[x]")
+	if !ok {
 		return ""
 	}
-	for _, code := range []string{suffix, strings.ToLower(suffix[:1]) + suffix[1:]} {
-		if r.GetByType(code) != nil {
-			return code
-		}
+	suffix, ok := strings.CutPrefix(key, base)
+	if !ok || suffix == "" {
+		return ""
+	}
+	types := def.Type
+	if b := r.choiceBase(node); b != nil {
+		types = b.Def.Type
+	}
+	if i := ChoiceTypeIndex(types, suffix); i >= 0 {
+		return types[i].Code
 	}
 	return ""
+}
+
+// choiceBase devuelve el elemento base de node, o nil si no se encuentra. Se calcula una vez por
+// nodo: ChoiceType se consulta por cada propiedad de elección de cada instancia. Un nodo sin
+// definición (armado a mano) no tiene más base que sus tipos y no se guarda.
+func (r *Registry) choiceBase(node *ElementNode) *ElementNode {
+	if node.sd == nil {
+		return nil
+	}
+	gen := r.choiceGen.Load()
+	if cached, ok := r.choiceBases.Load(node); ok {
+		if e, _ := cached.(choiceBaseEntry); e.gen == gen {
+			return e.node
+		}
+	}
+	b := r.baseElement(node)
+	r.choiceBases.Store(node, choiceBaseEntry{node: b, gen: gen})
+	return b
+}
+
+// baseElement busca el elemento base de node siguiendo la cadena de baseDefinition, en la primera
+// definición que no es un perfil y lo tiene: un perfil (derivation constraint) restringe elementos y no
+// los define, así que se salta. Así un modelo lógico es su propia base aunque se llame como un tipo de
+// FHIR, y un perfil llega a su tipo por URL, no por nombre.
+//
+// ElementDefinition.base.path es una ruta, no una definición (dos modelos lógicos pueden compartir la raíz): la
+// estructura manda y base.path desempata. Primero, la ruta propia en la cadena de la definición de
+// node. Si no está, el elemento lo despliega el snapshot desde un tipo (de Timing en
+// Observation.effective[x]:effectiveTiming.repeat.bounds[x]; de Extension en
+// Extension.extension:s.value[x]) y está en la definición del tipo del ancestro que lo despliega: se
+// sube por los ancestros y, en el primero cuyo único tipo (resuelto por su código, que puede ser una
+// URL) tiene la ruta relativa, o si no base.path, se toma el elemento; base.path hace falta bajo un
+// contentReference del tipo (T.item.item.value[x], base T.item.value[x]). Por último, base.path en la
+// cadena propia: un contentReference del mismo recurso (Questionnaire.item.item.answerOption.value[x],
+// base Questionnaire.item.answerOption.value[x]).
+func (r *Registry) baseElement(node *ElementNode) *ElementNode {
+	if n := r.definedIn(node.sd, node.Def.Path); n != nil {
+		return n
+	}
+	basePath := ""
+	if node.Def.Base != nil {
+		basePath = node.Def.Base.Path
+	}
+	for anc := node.Parent; anc != nil; anc = anc.Parent {
+		if len(anc.Def.Type) != 1 || !strings.HasPrefix(node.Def.Path, anc.Def.Path+".") {
+			continue
+		}
+		t := r.GetByType(anc.Def.Type[0].Code)
+		if t == nil {
+			continue
+		}
+		root := t.Tree().Root()
+		if root == nil {
+			continue
+		}
+		if n := r.definedIn(t, root.Def.Path+node.Def.Path[len(anc.Def.Path):]); n != nil {
+			return n
+		}
+		if basePath != "" {
+			if n := r.definedIn(t, basePath); n != nil {
+				return n
+			}
+		}
+	}
+	if basePath == "" {
+		return nil
+	}
+	return r.definedIn(node.sd, basePath)
+}
+
+// definedIn devuelve el elemento de ruta path en la primera definición de la cadena de baseDefinition
+// desde sd que no es un perfil y lo tiene, o nil.
+func (r *Registry) definedIn(sd *StructureDefinition, path string) *ElementNode {
+	seen := map[*StructureDefinition]bool{}
+	for ; sd != nil && !seen[sd]; sd, _ = r.ResolveCanonical(sd.BaseDefinition) {
+		seen[sd] = true
+		if sd.Derivation != DerivationConstraint {
+			if n := sd.Tree().ByID(path); n != nil {
+				return n
+			}
+		}
+		if sd.BaseDefinition == "" {
+			break
+		}
+	}
+	return nil
 }
 
 // IsSubtype reports whether typeName is ancestor or derives from it, through the baseDefinition
@@ -833,7 +974,7 @@ func (r *Registry) IsPrimitiveType(typeName string) bool {
 	if sd == nil {
 		return false
 	}
-	return sd.Kind == "primitive-type"
+	return sd.Kind == KindPrimitiveType
 }
 
 // IsDataType checks if the given type name is a FHIR complex data type.
@@ -844,7 +985,7 @@ func (r *Registry) IsDataType(typeName string) bool {
 	if sd == nil {
 		return false
 	}
-	return sd.Kind == "complex-type"
+	return sd.Kind == KindComplexType
 }
 
 // IsDomainResource checks if the given type name is a DomainResource.

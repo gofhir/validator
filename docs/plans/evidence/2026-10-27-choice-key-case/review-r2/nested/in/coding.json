@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p", "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "extension": [{"url": "http://example.org/StructureDefinition/nested-nobase", "extension": [{"url": "s", "valueCoding": {"code": "c"}}]}]}

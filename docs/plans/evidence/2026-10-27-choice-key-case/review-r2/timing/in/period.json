@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "o", "meta": {"profile": ["http://example.org/StructureDefinition/timing-bounds"]}, "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "status": "final", "code": {"text": "x"}, "effectiveTiming": {"repeat": {"boundsPeriod": {"start": "2020-01-01"}, "frequency": 1, "period": 1, "periodUnit": "d"}}}

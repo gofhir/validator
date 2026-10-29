@@ -1,0 +1,1 @@
+{"resourceType":"Patient","id":"p","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/patient-birthTime","valuedateTime":"2020-01-01T00:00:00Z"}]}

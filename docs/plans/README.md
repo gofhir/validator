@@ -13,23 +13,32 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #178, contenido de los valores de una extensión (rama `fix/extension-value-content`)
+## Frente activo: #180, clave de elección con otras mayúsculas (rama `fix/choice-key-case`)
 
-[2026-10-27-extension-value-content.md](2026-10-27-extension-value-content.md): paso 1 hecho. HL7 6.10.2
-informa las extensiones dentro de un valor y nosotros no (9 de 15 sondas, iguales en R4 y R5); además el
-formato de un valor primitivo sale dos veces (c15). Evidencia en
-[evidence/2026-10-27-extension-value-content/](evidence/2026-10-27-extension-value-content/). Pasos 2 a 6
-hechos: la ronda adversarial (plan §7) amplió el alcance; el usuario aprobó y separó la clave de
-elección con otras mayúsculas en #180. Tests en `pkg/validator/extension_value_test.go` (valores
-esperados de HL7 en las tres versiones, evidencia `tests-hl7/`), en verde; suite completa en verde.
-Paso 7 hecho (plan §9): `same` con dos clases explicadas, `hl7diff run` PASS en
-los 49 grupos (12 falsos positivos menos), barrido 0 inestables, mutaciones 14/14, costo bajo el
-umbral. Paso 8 hecho (plan §10): la ronda 1 dejó C1 y F1 (medias), corregidos con casos de HL7; la
-ronda 2 converge sin hallazgos medios. Mutaciones 17/17, `make check` verde. Paso 9 hecho: commit y PR, pendiente de merge.
-Backlog nuevo: doble informe valor/cardinalidad en una extensión
-(junto a la deduplicación de #174) y el testdata compartido entre `pkg/extension` y `pkg/validator` (F4).
+[2026-10-27-choice-key-case.md](2026-10-27-choice-key-case.md): paso 1 hecho (las sondas en R4, R4B y R5
+confirman que HL7 marca la clave como desconocida y nosotros no; evidencia en
+[evidence/2026-10-27-choice-key-case/](evidence/2026-10-27-choice-key-case/)). Paso 2 hecho (plan §2-§6).
+Paso 3 hecho (plan §7). Paso 4: aprobado el 27-10-2026 (§8). Paso 5 en curso (plan §9): tests escritos y en rojo;
+el barrido metamórfico encontró que FHIRPath navega propiedades que el modelo no define (`dom-3`, 148 claves),
+anterior a #180: issue para fhirpath aprobado (lo publica el usuario), y en el barrido queda como KNOWN (plan §9).
+Paso 6 hecho (plan §10): tests en verde, barrido con 0 diferencias y 148 KNOWN. Paso 7: las sondas
+mostraron que falta la cardinalidad mínima de q1 (`answerOption.value[x]`); vuelta al paso 2 (plan §11).
+Aprobado el 28-10-2026: en `elementvalues`, solo un tipo del elemento base es un valor (plan §11). Ya
+implementado. Paso 7 (plan §12): sondas iguales a HL7, barrido 0 diferencias, `hl7diff` PASS (solo
+2 falsos positivos `ref-1` menos), mutaciones 10/10 y 16/16, bench sin cambios en asignaciones, `make check` verde. Paso 8: ronda 1 con 3 hallazgos medios aceptados y corregidos (plan §13). Ronda 2 (plan §14): un defecto de diseño, porque `ChoiceType` resuelve la base por el nombre de la ruta
+(un modelo lógico con el nombre de un tipo core toma sus tipos). Rediseño aprobado e implementado (plan §14.1): la base se busca por la cadena baseDefinition.
+`go test ./...` en verde. Validación del rediseño en verde (plan §14.2). La ronda 3 no convergió (plan §15): la caché ya está
+corregida, y queda abierto el respaldo por nombre de `base.path` (Fable 1). El usuario aprobó corregirlo y una 4.ª ronda
+(plan §15.1): la búsqueda por nombre se reemplazó por el recorrido de los tipos de los ancestros. Ronda 4 (plan §16): Fable sin
+hallazgos; Codex dejó 2 medios (`base.path` ambiguo), confirmados y corregidos; validación en verde.
+Ronda 5 (plan §17): tres casos confirmados de la misma familia (resolución de la base: 1 medio de Codex con entrada dudosa, 2 bajos de Fable), ninguno en ejemplos ni hl7diff. Por la condición de corte van a un issue aparte (borrador listo; lo publica el usuario) y #180 pasa al paso 9. `make check` en verde al cierre (28-10-2026). Próximo paso: «commit y pr» del usuario; luego #176 y release v2.2.0.
 HL7: tope de 2 instancias de Java simultáneas (no de corridas).
-Después: #180 (clave de elección con otras mayúsculas), #176 (fhirpath v1.16.6, ucum v4.3.0) y el release v2.2.0.
+Después: #176 (fhirpath v1.16.6, ucum v4.3.0) y el release v2.2.0.
+
+**Cerrado:** #178, contenido de los valores de una extensión
+([2026-10-27-extension-value-content.md](2026-10-27-extension-value-content.md)), mergeado como #181
+(`5c0001c`, 27-10-2026). Su backlog: doble informe valor/cardinalidad (con la deduplicación de #174)
+y el testdata compartido entre `pkg/extension` y `pkg/validator` (F4).
 
 **Cerrado:** #174, orden determinista de los issues ([2026-10-26-issue-order.md](2026-10-26-issue-order.md)),
 mergeado como #179 (`6c0db79`, 27-10-2026). Su backlog: orden del documento o un orden final por

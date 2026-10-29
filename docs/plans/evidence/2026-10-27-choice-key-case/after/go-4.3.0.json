@@ -1,0 +1,256 @@
+[
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s01-lower-primitive.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuestring'",
+        "expression": [
+          "Observation.valuestring"
+        ]
+      }
+    ],
+    "duration": "7.188ms"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s02-upper-primitive.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueSTRING'",
+        "expression": [
+          "Observation.valueSTRING"
+        ]
+      }
+    ],
+    "duration": "125µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s03-lower-complex.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuequantity'",
+        "expression": [
+          "Observation.valuequantity"
+        ]
+      }
+    ],
+    "duration": "86µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s04-both.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuestring'",
+        "expression": [
+          "Observation.valuestring"
+        ]
+      }
+    ],
+    "duration": "82µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s05-underscore-lower.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element '_valuestring'",
+        "expression": [
+          "Observation._valuestring"
+        ]
+      }
+    ],
+    "duration": "74µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s06-lower-bad-format.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'effectivedateTime'",
+        "expression": [
+          "Observation.effectivedateTime"
+        ]
+      }
+    ],
+    "duration": "71µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s07-inner-case.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'effectiveDatetime'",
+        "expression": [
+          "Observation.effectiveDatetime"
+        ]
+      }
+    ],
+    "duration": "63µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s08-control-ok.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "122µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s09-no-suffix.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'value'",
+        "expression": [
+          "Observation.value"
+        ]
+      }
+    ],
+    "duration": "68µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s10-patient.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'deceasedboolean'",
+        "expression": [
+          "Patient.deceasedboolean"
+        ]
+      }
+    ],
+    "duration": "74µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s11-ext-lower.json",
+    "valid": false,
+    "errors": 5,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuedateTime'",
+        "expression": [
+          "Patient.extension[0].valuedateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "extension",
+        "diagnostics": "Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' is not allowed in context 'Patient, DomainResource, Resource'",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthTime' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      }
+    ],
+    "duration": "462µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/probe/s12-fixed-lower.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuequantity'",
+        "expression": [
+          "Observation.valuequantity"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: vs-2: 'If there is no component or hasMember element then either a value[x] or a data absent reason must be present.' (defined in http://hl7.org/fhir/StructureDefinition/vitalsigns)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day' (defined in http://hl7.org/fhir/StructureDefinition/vitalsigns)",
+        "expression": [
+          "Observation.effectiveDateTime"
+        ]
+      }
+    ],
+    "duration": "593µs"
+  }
+]

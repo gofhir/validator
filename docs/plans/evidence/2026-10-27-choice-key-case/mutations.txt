@@ -1,0 +1,43 @@
+## #180
+m1-choice-type-case-insensitive killed
+m2-primitive-no-parent-filter killed
+m3-primitive-no-base-types killed
+m4-choice-type-ignores-base killed
+m4c-choice-base-path-not-in-ancestor-type killed
+m4d-choice-base-path-before-structure killed
+m4b-choice-base-no-ancestor-types killed
+m5-choice-type-any-registry-type killed
+m6-fixedpattern-any-prefix killed
+m6b-fixedpattern-declared-types-only killed
+m7-structural-lowercase-initial killed
+m8-mutual-exclusion-any-key killed
+m9-elementvalues-declared-only killed
+m10-slicematch-declared-only killed
+m11-elementvalues-declared-bypasses-base killed
+m12-choice-base-parent-only killed
+m13-choice-base-in-profile killed
+m14-choice-base-by-type-name killed
+m15-choice-base-cache-kept-on-index killed
+m16-choice-base-stale-entry-used killed
+m17-hand-built-node-cached killed
+## #178
+m1-no-value-content killed
+m2-type-named-lowercase killed
+m3-wrong-type-with-extension-children killed
+m4-no-unresolved-fallback killed
+m5-elementvalues-ignores-underscore-of-other-type killed
+m6-no-underscore-of-value killed
+m7-no-primitive-sibling-in-content killed
+m8-no-declared-sub-extension killed
+m9-no-sub-sub-extension killed
+m10-modifier-extension-everywhere killed
+m11-null-counts-as-value killed
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+AssertionError: ('m12-no-base-types-filter', 'fragment not found once')
+m12-no-base-types-filter NOT-APPLIED
+m13-unwritten-value-walked killed
+m14-value-required-ignores-nested killed
+m15-no-unresolved-fallback-in-contexts killed
+m16-sub-extension-value-allowed killed
+m17-sub-extension-value-optional killed

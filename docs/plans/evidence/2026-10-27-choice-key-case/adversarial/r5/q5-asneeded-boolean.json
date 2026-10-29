@@ -1,0 +1,1 @@
+{"resourceType":"MedicationRequest","id":"m","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"active","intent":"order","medication":{"concept":{"text":"x"}},"subject":{"reference":"Patient/p"},"dosageInstruction":[{"asNeededBoolean":true}]}

@@ -3,6 +3,7 @@ package elementvalues
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/gofhir/validator/v2/pkg/registry"
@@ -17,12 +18,15 @@ func node(id string, types ...string) *registry.ElementNode {
 	return &registry.ElementNode{Def: def}
 }
 
-// types knows the types this test uses, as the Registry does: a choice property is the element
-// name followed by the type with its first letter capitalized; code, date and string are primitive.
+// types knows the types this test uses, as the Registry does: every choice element's base declares
+// Quantity, string and Period, and a choice property is the element name followed by one of them
+// with its first letter capitalized; code, date and string are primitive.
 type types struct{}
 
-func (types) ChoiceType(base, key string) string {
+func (types) ChoiceType(node *registry.ElementNode, key string) string {
+	def := node.Def
 	suffixes := map[string]string{"Quantity": "Quantity", "String": "string", "Period": "Period"}
+	base := strings.TrimSuffix(def.Path[strings.LastIndex(def.Path, ".")+1:], "[x]")
 	if len(key) > len(base) && key[:len(base)] == base {
 		return suffixes[key[len(base):]]
 	}
@@ -79,6 +83,9 @@ func TestOf(t *testing.T) {
 		{"a primitive choice it does not allow, present only through its extensions", node("O.value[x]", "Quantity"), `{"_valueString":{"id":"x"}}`,
 			[]string{`P.valueString string null {"id":"x"}`}},
 		{"a complex choice it does not allow, through a \"_value\", is no property of it", node("O.value[x]", "string"), `{"_valuePeriod":{"id":"x"}}`, nil},
+		// Un tipo que la base no declara no es un valor del elemento (formats.html#choice; #180).
+		{"a choice of a type its base does not declare is no value", node("O.value[x]", "Quantity"), `{"valueCoding":{}}`, nil},
+		{"a choice in another case is no value", node("O.value[x]", "Quantity"), `{"valuequantity":{},"valuePERIOD":{}}`, nil},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			var inst map[string]any

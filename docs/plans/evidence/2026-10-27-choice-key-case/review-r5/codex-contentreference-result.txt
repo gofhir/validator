@@ -1,0 +1,19 @@
+--- FAIL: TestChoiceTypeContentReferenceBeforeAncestorBasePath (1.82s)
+    --- FAIL: TestChoiceTypeContentReferenceBeforeAncestorBasePath/4.0.1 (0.55s)
+        zz_codex_r5_test.go:86: baseElement = 0x3ae5b9c66d20, want logical model element 0x3ae5b9c66960
+        zz_codex_r5_test.go:98: ChoiceType("boundsCoding") = "", want "Coding"
+        zz_codex_r5_test.go:98: ChoiceType("boundsDate") = "", want "date"
+        zz_codex_r5_test.go:98: ChoiceType("boundsPeriod") = "Period", want ""
+    --- FAIL: TestChoiceTypeContentReferenceBeforeAncestorBasePath/4.3.0 (0.61s)
+        zz_codex_r5_test.go:86: baseElement = 0x3ae5c1c539e0, want logical model element 0x3ae5c1c53620
+        zz_codex_r5_test.go:98: ChoiceType("boundsCoding") = "", want "Coding"
+        zz_codex_r5_test.go:98: ChoiceType("boundsDate") = "", want "date"
+        zz_codex_r5_test.go:98: ChoiceType("boundsPeriod") = "Period", want ""
+    --- FAIL: TestChoiceTypeContentReferenceBeforeAncestorBasePath/5.0.0 (0.66s)
+        zz_codex_r5_test.go:86: baseElement = 0x3ae5c3ad0480, want logical model element 0x3ae5c3ad0060
+        zz_codex_r5_test.go:98: ChoiceType("boundsCoding") = "", want "Coding"
+        zz_codex_r5_test.go:98: ChoiceType("boundsDate") = "", want "date"
+        zz_codex_r5_test.go:98: ChoiceType("boundsPeriod") = "Period", want ""
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/registry	2.376s
+FAIL

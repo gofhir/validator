@@ -1,0 +1,204 @@
+[
+  {
+    "resource": "adv2/r4/q1-answeroption-datetime-bad.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value 'bad' does not match expected format for type dateTime",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      }
+    ],
+    "duration": "4.487ms"
+  },
+  {
+    "resource": "adv2/r4/q2-answeroption-datetime-ok.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      }
+    ],
+    "duration": "157µs"
+  },
+  {
+    "resource": "adv2/r4/q3-ext-value-request.json",
+    "valid": false,
+    "errors": 7,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueRequest'",
+        "expression": [
+          "Patient.extension[0].valueRequest"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].valueRequest.status' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].valueRequest.status"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].valueRequest.intent' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].valueRequest.intent"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].valueRequest.subject' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].valueRequest.subject"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Patient.extension[0].valueRequest"
+        ]
+      }
+    ],
+    "duration": "342µs"
+  },
+  {
+    "resource": "adv2/r4/q4-value-patient.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuePatient'",
+        "expression": [
+          "Observation.valuePatient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Observation.valuePatient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation.valuePatient"
+        ]
+      }
+    ],
+    "duration": "160µs"
+  },
+  {
+    "resource": "adv2/r4/q5-asneeded-boolean.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "250µs"
+  },
+  {
+    "resource": "adv2/r4/q6-obs-value-request.json",
+    "valid": false,
+    "errors": 5,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueRequest'",
+        "expression": [
+          "Observation.valueRequest"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Observation.valueRequest.status' is 1, but found 0",
+        "expression": [
+          "Observation.valueRequest.status"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Observation.valueRequest.intent' is 1, but found 0",
+        "expression": [
+          "Observation.valueRequest.intent"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Observation.valueRequest.subject' is 1, but found 0",
+        "expression": [
+          "Observation.valueRequest.subject"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Observation.valueRequest"
+        ]
+      }
+    ],
+    "duration": "91µs"
+  }
+]
