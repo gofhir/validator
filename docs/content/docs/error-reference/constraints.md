@@ -143,4 +143,4 @@ The constraint engine supports FHIR-specific FHIRPath functions defined in [FHIR
 | `conformsTo()` | Checks if a resource conforms to a profile |
 | `htmlChecks()` | Validates XHTML narrative content per FHIR rules |
 
-The `htmlChecks()` function validates that `text.div` content follows the FHIR XHTML rules (R4 §2.4.1): `<div>` root element, allowed HTML element whitelist, prohibited elements/attributes, and non-empty content. This enables the `txt-1` and `txt-2` constraints to be evaluated dynamically from the Narrative StructureDefinition.
+fhirpath implements `htmlChecks()` and asks the validator, which gives each evaluation an HTML checker, whether `text.div` content follows the FHIR XHTML rules (R4 §2.4.1): `<div>` root element, allowed HTML element whitelist, prohibited elements/attributes, and non-empty content. This enables the `txt-1` and `txt-2` constraints to be evaluated dynamically from the Narrative StructureDefinition.

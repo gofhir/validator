@@ -1230,5 +1230,13 @@
     "file": "testdata/m12-slice-scoping/probes/ux_r38_int_zz.json",
     "location": "Location.operationalStatus.code",
     "messageId": "Unknown_Code_in_Version"
+  },
+  {
+    "decision": "B-D22",
+    "reason": "A UCUM annotation is of ASCII characters 33-126 without curly braces (UCUM §2.1), so 'mg{a b}' is not a UCUM code. HL7 6.10.2 under -tx n/a, the baseline, only warns that it cannot validate it, and its Java UCUM accepts a space inside an annotation (gofhir/ucum classifies that as java-accepts-space-in-annotation).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/uq_space.json",
+    "location": "Observation.valueQuantity.code",
+    "messageId": "UCUM_INVALID_CODE"
   }
 ]

@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nv-onclick",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p onclick=\"go()\">x</p></div>"
+  },
+  "active": true
+}

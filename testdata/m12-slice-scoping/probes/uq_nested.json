@@ -1,0 +1,14 @@
+{
+  "resourceType": "Observation",
+  "id": "uq-nested",
+  "status": "final",
+  "code": {
+    "text": "weight"
+  },
+  "valueQuantity": {
+    "value": 1,
+    "unit": "mg{a{b}}",
+    "system": "http://unitsofmeasure.org",
+    "code": "mg{a{b}}"
+  }
+}

@@ -90,7 +90,8 @@ which resolve a `url|version` canonical exactly when possible.
 
 ### ~~GO-GAP-008~~: XHTML Structural Validation — RESOLVED (v1.14.0)
 
-Resolved via `htmlChecks()` FHIRPath function implementation (`pkg/constraint/htmlchecks.go`).
+Resolved via `htmlChecks()`: fhirpath implements the function and asks the validator's HTML checker
+(`pkg/constraint/htmlchecks.go`, given to each evaluation since v2.2.0) for FHIR's rules.
 The `txt-1`/`txt-2` constraints from the Narrative StructureDefinition now evaluate dynamically.
 Validates: `<div>` root, allowed HTML elements, prohibited elements/attributes, non-empty content.
 See: #51 (Gap 4).

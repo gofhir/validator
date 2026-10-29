@@ -143,4 +143,4 @@ El motor de constraints soporta funciones FHIRPath específicas de FHIR definida
 | `conformsTo()` | Verifica si un recurso conforma con un perfil |
 | `htmlChecks()` | Valida contenido XHTML narrativo según las reglas FHIR |
 
-La función `htmlChecks()` valida que el contenido de `text.div` siga las reglas XHTML de FHIR (R4 §2.4.1): elemento raíz `<div>`, whitelist de elementos HTML permitidos, elementos/atributos prohibidos, y contenido no vacío. Esto permite que los constraints `txt-1` y `txt-2` se evalúen dinámicamente desde el StructureDefinition de Narrative.
+fhirpath implementa `htmlChecks()` y le pregunta al validador, que da un verificador de HTML a cada evaluación, si el contenido de `text.div` sigue las reglas XHTML de FHIR (R4 §2.4.1): elemento raíz `<div>`, whitelist de elementos HTML permitidos, elementos/atributos prohibidos, y contenido no vacío. Esto permite que los constraints `txt-1` y `txt-2` se evalúen dinámicamente desde el StructureDefinition de Narrative.
