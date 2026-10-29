@@ -1,0 +1,54 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "timing-bounds",
+ "url": "http://example.org/StructureDefinition/timing-bounds",
+ "name": "TimingBounds",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.effective[x]",
+    "path": "Observation.effective[x]",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "type",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.effective[x]:effectiveTiming",
+    "path": "Observation.effective[x]",
+    "sliceName": "effectiveTiming",
+    "type": [
+     {
+      "code": "Timing"
+     }
+    ]
+   },
+   {
+    "id": "Observation.effective[x]:effectiveTiming.repeat.bounds[x]",
+    "path": "Observation.effective[x].repeat.bounds[x]",
+    "min": 1,
+    "type": [
+     {
+      "code": "Duration"
+     }
+    ]
+   }
+  ]
+ }
+}

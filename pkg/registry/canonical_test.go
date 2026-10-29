@@ -229,20 +229,26 @@ func TestIsSubtype(t *testing.T) {
 	}
 }
 
-func TestChoiceType(t *testing.T) {
-	r := sharedVersion(t, "4.0.1")
-	for _, tt := range []struct{ base, key, want string }{
-		{"value", "valueQuantity", "Quantity"},
-		{"value", "valueBoolean", "boolean"},
-		{"value", "valueDateTime", "dateTime"},
-		{"effective", "effectivePeriod", "Period"},
-		{"value", "value", ""},
-		{"value", "valuestring", ""}, // the type's first letter is capitalized
-		{"value", "valueFoo", ""},    // no such type
-		{"value", "other", ""},
+// formats.html#choice: el "[x]" se reemplaza por el código del tipo con la primera letra en
+// mayúscula; json.html: los nombres de propiedad distinguen mayúsculas.
+func TestChoiceTypeOf(t *testing.T) {
+	ed := &ElementDefinition{Type: []Type{{Code: "boolean"}, {Code: "dateTime"}, {Code: "CodeableConcept"}, {Code: ""}}}
+	for _, tt := range []struct{ suffix, want string }{
+		{"Boolean", "boolean"},
+		{"DateTime", "dateTime"},
+		{"CodeableConcept", "CodeableConcept"},
+		{"boolean", ""},
+		{"Datetime", ""},
+		{"DATETIME", ""},
+		{"codeableConcept", ""},
+		{"String", ""}, // not declared
+		{"", ""},       // a type with no code names nothing
 	} {
-		if got := r.ChoiceType(tt.base, tt.key); got != tt.want {
-			t.Errorf("ChoiceType(%q, %q) = %q, want %q", tt.base, tt.key, got, tt.want)
+		if got := ed.ChoiceTypeOf(tt.suffix); got != tt.want {
+			t.Errorf("ChoiceTypeOf(%q) = %q, want %q", tt.suffix, got, tt.want)
 		}
+	}
+	if got := (&ElementDefinition{}).ChoiceTypeOf("Boolean"); got != "" {
+		t.Errorf("ChoiceTypeOf with no types = %q", got)
 	}
 }

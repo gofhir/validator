@@ -1,0 +1,20 @@
+=== RUN   TestR5ChoiceTypeSliceWithoutType
+    choice_type_r5_test.go:51: 4.0.1 http://example.org/StructureDefinition/slice-notype: slice types=[]
+    choice_type_r5_test.go:53: 4.0.1 http://example.org/StructureDefinition/slice-notype: ChoiceType(valueCoding) = "", want Coding (base <nil>)
+    choice_type_r5_test.go:51: 4.0.1 http://example.org/StructureDefinition/slice-notype-diff: slice types=[{Extension [] [] [] []}]
+    choice_type_r5_test.go:51: 5.0.0 http://example.org/StructureDefinition/slice-notype: slice types=[]
+    choice_type_r5_test.go:53: 5.0.0 http://example.org/StructureDefinition/slice-notype: ChoiceType(valueCoding) = "", want Coding (base <nil>)
+    choice_type_r5_test.go:51: 5.0.0 http://example.org/StructureDefinition/slice-notype-diff: slice types=[{Extension [] [] [] []}]
+--- FAIL: TestR5ChoiceTypeSliceWithoutType (1.19s)
+=== RUN   TestR5ChoiceTypeCrossContentReference
+    choice_type_r5_test.go:79: ChoiceType(valueDate) = "", want date (base <nil>)
+--- FAIL: TestR5ChoiceTypeCrossContentReference (0.00s)
+=== RUN   TestR5ScanCoreChoiceUnderTypedAncestor
+    choice_type_r5_test.go:124: 4.0.1: 0 choice elements under a typed ancestor
+    choice_type_r5_test.go:124: 5.0.0: 0 choice elements under a typed ancestor
+--- PASS: TestR5ScanCoreChoiceUnderTypedAncestor (0.00s)
+=== RUN   TestR5VitalSignsErratum
+--- PASS: TestR5VitalSignsErratum (0.00s)
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/registry	1.685s
+FAIL

@@ -1,0 +1,126 @@
+package registry
+
+import (
+	"context"
+	"strings"
+	"testing"
+
+	"github.com/gofhir/validator/v2/pkg/loader"
+)
+
+func loadSDs(t *testing.T, r *Registry, sds ...string) {
+	t.Helper()
+	resources := make([][]byte, 0, len(sds))
+	for _, sd := range sds {
+		resources = append(resources, []byte(sd))
+	}
+	pkg, err := loader.NewLoader("").LoadFromResources(resources)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := r.LoadFromPackages([]*loader.Package{pkg}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// R5a: el slice de extensión no trae type en el snapshot (lo trae el elemento que corta,
+// Patient.extension). El ancestro recorrido es el slice (Parent), no el elemento cortado (SliceOf).
+func TestR5ChoiceTypeSliceWithoutType(t *testing.T) {
+	const snap = `{"resourceType":"StructureDefinition","id":"slice-notype","url":"http://example.org/StructureDefinition/slice-notype","name":"SliceNoType","status":"active","kind":"resource","abstract":false,"type":"Patient","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient","derivation":"constraint","snapshot":{"element":[
+ {"id":"Patient","path":"Patient","base":{"path":"Patient","min":0,"max":"*"}},
+ {"id":"Patient.extension","path":"Patient.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"},"base":{"path":"DomainResource.extension","min":0,"max":"*"},"type":[{"code":"Extension"}]},
+ {"id":"Patient.extension:e","path":"Patient.extension","sliceName":"e","min":0,"max":"1","base":{"path":"DomainResource.extension","min":0,"max":"*"}},
+ {"id":"Patient.extension:e.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","base":{"path":"Extension.value[x]","min":0,"max":"1"},"type":[{"code":"string"}]}]}}`
+	const diff = `{"resourceType":"StructureDefinition","id":"slice-notype-diff","url":"http://example.org/StructureDefinition/slice-notype-diff","name":"SliceNoTypeDiff","status":"active","kind":"resource","abstract":false,"type":"Patient","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient","derivation":"constraint","differential":{"element":[
+ {"id":"Patient","path":"Patient"},
+ {"id":"Patient.extension","path":"Patient.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"}},
+ {"id":"Patient.extension:e","path":"Patient.extension","sliceName":"e","min":0,"max":"1"},
+ {"id":"Patient.extension:e.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","type":[{"code":"string"}]}]}}`
+	for _, version := range []string{"4.0.1", "5.0.0"} {
+		r := sharedVersion(t, version).Clone()
+		loadSDs(t, r, snap, diff)
+		for _, url := range []string{"http://example.org/StructureDefinition/slice-notype", "http://example.org/StructureDefinition/slice-notype-diff"} {
+			sd := r.GetByURL(url)
+			if err := r.EnsureSnapshot(context.Background(), sd); err != nil {
+				t.Logf("%s %s: EnsureSnapshot: %v", version, url, err)
+			}
+			node := sd.Tree().ByID("Patient.extension:e.value[x]")
+			if node == nil {
+				t.Fatalf("%s %s: node missing", version, url)
+			}
+			t.Logf("%s %s: slice types=%v", version, url, node.Parent.Def.Type)
+			if got := r.ChoiceType(node, "valueCoding"); got != "Coding" {
+				t.Errorf("%s %s: ChoiceType(valueCoding) = %q, want Coding (base %v)", version, url, got, r.choiceBase(node))
+			}
+		}
+	}
+}
+
+// R5b: contentReference a otro StructureDefinition (url#id): base.path está en U, que no está en
+// ninguna cadena ni en el tipo de un ancestro.
+func TestR5ChoiceTypeCrossContentReference(t *testing.T) {
+	const (
+		u = `{"resourceType":"StructureDefinition","id":"u","url":"http://example.org/U","name":"U","status":"active","kind":"logical","abstract":false,"type":"http://example.org/U","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Base","derivation":"specialization","snapshot":{"element":[
+ {"id":"U","path":"U","base":{"path":"U","min":0,"max":"*"}},
+ {"id":"U.grp","path":"U.grp","min":0,"max":"*","base":{"path":"U.grp","min":0,"max":"*"},"type":[{"code":"BackboneElement"}]},
+ {"id":"U.grp.value[x]","path":"U.grp.value[x]","min":0,"max":"1","base":{"path":"U.grp.value[x]","min":0,"max":"1"},"type":[{"code":"Coding"},{"code":"date"}]}]}}`
+		a = `{"resourceType":"StructureDefinition","id":"a2","url":"http://example.org/A2","name":"A2","status":"active","kind":"logical","abstract":false,"type":"http://example.org/A2","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Base","derivation":"specialization","snapshot":{"element":[
+ {"id":"A2","path":"A2","base":{"path":"A2","min":0,"max":"*"}},
+ {"id":"A2.item","path":"A2.item","min":0,"max":"*","base":{"path":"A2.item","min":0,"max":"*"},"contentReference":"http://example.org/U#U.grp"}]}}`
+		p = `{"resourceType":"StructureDefinition","id":"p2","url":"http://example.org/P2","name":"P2","status":"active","kind":"logical","abstract":false,"type":"http://example.org/A2","baseDefinition":"http://example.org/A2","derivation":"constraint","snapshot":{"element":[
+ {"id":"A2","path":"A2","base":{"path":"A2","min":0,"max":"*"}},
+ {"id":"A2.item","path":"A2.item","min":0,"max":"*","base":{"path":"A2.item","min":0,"max":"*"},"contentReference":"http://example.org/U#U.grp"},
+ {"id":"A2.item.value[x]","path":"A2.item.value[x]","min":0,"max":"1","base":{"path":"U.grp.value[x]","min":0,"max":"1"},"type":[{"code":"Coding"}]}]}}`
+	)
+	r := sharedVersion(t, "5.0.0").Clone()
+	loadSDs(t, r, u, a, p)
+	node := r.GetByURL("http://example.org/P2").Tree().ByID("A2.item.value[x]")
+	if got := r.ChoiceType(node, "valueDate"); got != "date" {
+		t.Errorf("ChoiceType(valueDate) = %q, want date (base %v)", got, r.choiceBase(node))
+	}
+}
+
+// R5c: barrido de los paquetes base: elementos de elección bajo un ancestro de un solo tipo que no es
+// BackboneElement/Element (hijos desplegados de un tipo en una especialización), y raíces con type.
+func TestR5ScanCoreChoiceUnderTypedAncestor(t *testing.T) {
+	for _, version := range []string{"4.0.1", "5.0.0"} {
+		r := sharedVersion(t, version)
+		n := 0
+		for _, url := range r.AllURLs() {
+			sd := r.GetByURL(url)
+			if sd.Derivation == DerivationConstraint || sd.Snapshot == nil {
+				continue
+			}
+			tree := sd.Tree()
+			if root := tree.Root(); root != nil && len(root.Def.Type) > 0 {
+				t.Logf("%s: root with type: %s %v", version, sd.URL, root.Def.Type)
+			}
+			for _, el := range sd.Snapshot.Element {
+				if !strings.HasSuffix(el.Path, "[x]") {
+					continue
+				}
+				node := tree.ByID(el.ID)
+				if node == nil {
+					continue
+				}
+				for anc := node.Parent; anc != nil; anc = anc.Parent {
+					if len(anc.Def.Type) != 1 {
+						continue
+					}
+					c := anc.Def.Type[0].Code
+					if c == "BackboneElement" || c == "Element" {
+						continue
+					}
+					n++
+					t.Logf("%s: %s: %s under %s (%s)", version, sd.URL, el.ID, anc.Def.ID, c)
+				}
+				// Paso 1 vs 2: ¿coinciden?
+				b := r.baseElement(node)
+				if b == nil {
+					t.Logf("%s: %s: %s has no base element (base.path %v)", version, sd.URL, el.ID, el.Base)
+				}
+			}
+		}
+		t.Logf("%s: %d choice elements under a typed ancestor", version, n)
+	}
+}

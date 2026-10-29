@@ -1,0 +1,1 @@
+{"resourceType": "Questionnaire", "id": "q", "meta": {"profile": ["http://example.org/StructureDefinition/nested-item"]}, "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "status": "active", "item": [{"linkId": "1", "type": "group", "item": [{"linkId": "1.1", "type": "choice", "answerOption": [{"valueDateTime": "2020-01-01"}]}]}]}

@@ -31,10 +31,11 @@ func (v Value) Path(parent string) string {
 	return p
 }
 
-// Types tells what the values' types are: the type a choice property names (Registry.ChoiceType)
-// and whether a type is primitive (Registry.IsPrimitiveTypeCode). *registry.Registry is one.
+// Types tells what the values' types are: the type a choice property names among those of the
+// element's base (Registry.ChoiceType) and whether a type is primitive (Registry.IsPrimitiveTypeCode).
+// *registry.Registry is one.
 type Types interface {
-	ChoiceType(base, key string) string
+	ChoiceType(node *registry.ElementNode, key string) string
 	IsPrimitiveTypeCode(code string) bool
 }
 
@@ -42,7 +43,7 @@ type Types interface {
 // ("value[x]") under each name its types give it, the element name followed by the type code with
 // its first letter capitalized (formats.html#choice), then under any other property that
 // types.ChoiceType says names a type. A value of a type the element does not allow is present,
-// with the wrong type, not absent. Only a primitive has a "_name" sibling (json.html#primitive): a
+// with the wrong type, not absent; one the element's base does not declare is no value of it. Only a primitive has a "_name" sibling (json.html#primitive): a
 // primitive present only through it (extensions without a value) is present, once per entry of a
 // repeating one; another type's "_name" is no property of it, and is not read.
 func Of(child *registry.ElementNode, inst map[string]any, types Types) []Value {
@@ -55,7 +56,7 @@ func Of(child *registry.ElementNode, inst map[string]any, types Types) []Value {
 		}
 		return valuesOf(inst, name, typeCode, primitive(types, typeCode))
 	}
-	props := choiceProperties(base, child.Def.Type, inst, types)
+	props := choiceProperties(base, child, inst, types)
 	if len(props) == 0 {
 		return nil
 	}
@@ -73,11 +74,13 @@ type property struct {
 	rank      int
 }
 
-// choiceProperties returns the properties of inst a choice element of base and types is read from:
-// those the types name (or their "_key" siblings name), in the types' order, then those
-// Types.ChoiceType says name another type (or, for a primitive one, their "_key" siblings), by key.
+// choiceProperties returns the properties of inst a choice element node of base is read from, those
+// whose type Types.ChoiceType finds among the base element's: the ones node's types name (or their
+// "_key" siblings name), in the types' order, then the others (or, for a primitive one, their "_key"
+// siblings), by key.
 // Only inst's own keys are looked at, not every name the types give.
-func choiceProperties(base string, types []registry.Type, inst map[string]any, t Types) []property {
+func choiceProperties(base string, node *registry.ElementNode, inst map[string]any, t Types) []property {
+	types := node.Def.Type
 	var out []property
 	for k := range inst {
 		key, underscored := strings.CutPrefix(k, "_")
@@ -89,11 +92,18 @@ func choiceProperties(base string, types []registry.Type, inst map[string]any, t
 				continue // the value's key stands for both
 			}
 		}
-		if rank := declared(types, key[len(base):]); rank >= 0 {
+		// La base decide si la clave es un valor: un tipo que solo el perfil declara (CodeableReference
+		// de un package de R5 cargado en R4) no es una propiedad (#180).
+		code := t.ChoiceType(node, key)
+		if code == "" {
+			continue
+		}
+		if rank := registry.ChoiceTypeIndex(types, key[len(base):]); rank >= 0 {
 			out = append(out, property{key: key, code: types[rank].Code, rank: rank})
-		} else if code := t.ChoiceType(base, key); code != "" && (!underscored || primitive(t, code)) {
-			// Un tipo que el elemento no permite también es un valor, con el tipo equivocado; su
-			// hermano "_key" lo es solo si es de un primitivo (json.html#primitive; #178).
+		} else if !underscored || primitive(t, code) {
+			// Un tipo que el perfil no permite y la base sí también es un valor, con el tipo
+			// equivocado; su hermano "_key" lo es solo si es de un primitivo (json.html#primitive;
+			// #178, #180).
 			out = append(out, property{key: key, code: code, rank: len(types)})
 		}
 	}
@@ -104,25 +114,6 @@ func choiceProperties(base string, types []registry.Type, inst map[string]any, t
 		return out[i].key < out[j].key
 	})
 	return out
-}
-
-// declared returns the position among types of the one a choice property's suffix names, the type
-// code with its first letter capitalized (formats.html#choice), or -1.
-func declared(types []registry.Type, suffix string) int {
-	for i, t := range types {
-		c := t.Code
-		if c == "" || len(c) != len(suffix) || c[1:] != suffix[1:] {
-			continue
-		}
-		first := c[0]
-		if first >= 'a' && first <= 'z' {
-			first -= 'a' - 'A'
-		}
-		if first == suffix[0] {
-			return i
-		}
-	}
-	return -1
 }
 
 // primitive reports whether typeCode is a primitive type's, which a "_key" sibling may extend.

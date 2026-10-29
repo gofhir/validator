@@ -269,42 +269,6 @@ func TestValidateNestedElements(t *testing.T) {
 	}
 }
 
-func TestFindMatchingChoiceType(t *testing.T) {
-	// Create a mock ElementDefinition with types
-	elemDef := &registry.ElementDefinition{
-		Type: []registry.Type{
-			{Code: "boolean"},
-			{Code: "dateTime"},
-			{Code: "CodeableConcept"},
-			{Code: "Quantity"},
-		},
-	}
-
-	tests := []struct {
-		suffix   string
-		expected string
-	}{
-		{"Boolean", "boolean"},   // Case insensitive match
-		{"boolean", "boolean"},   // Exact match
-		{"DateTime", "dateTime"}, // Case insensitive
-		{"dateTime", "dateTime"}, // Exact
-		{"CodeableConcept", "CodeableConcept"},
-		{"codeableconcept", "CodeableConcept"}, // Case insensitive
-		{"Quantity", "Quantity"},
-		{"String", ""},  // Not in types
-		{"Invalid", ""}, // Not in types
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.suffix, func(t *testing.T) {
-			result := findMatchingChoiceType(elemDef, tt.suffix)
-			if result != tt.expected {
-				t.Errorf("findMatchingChoiceType(%q) = %q, want %q", tt.suffix, result, tt.expected)
-			}
-		})
-	}
-}
-
 func TestValidateObservationChoiceTypes(t *testing.T) {
 	reg := setupTestRegistry(t)
 	v := New(reg)

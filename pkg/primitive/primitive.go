@@ -63,8 +63,10 @@ type validationContext struct {
 
 // elementIndex holds pre-processed element lookups for a StructureDefinition.
 type elementIndex struct {
-	byPath      map[string]*registry.ElementDefinition
-	choiceTypes map[string]*registry.ElementDefinition
+	byPath map[string]*registry.ElementDefinition
+	// choiceTypes son los elementos de elección, por su ruta sin "[x]", como nodos del árbol del
+	// snapshot: Registry.ChoiceType los toma para llegar a su elemento base.
+	choiceTypes map[string]*registry.ElementNode
 }
 
 // Validate validates primitive types in a FHIR resource against its StructureDefinition.
@@ -136,20 +138,26 @@ func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any
 func buildElementIndex(sd *registry.StructureDefinition) *elementIndex {
 	idx := &elementIndex{
 		byPath:      make(map[string]*registry.ElementDefinition),
-		choiceTypes: make(map[string]*registry.ElementDefinition),
+		choiceTypes: make(map[string]*registry.ElementNode),
 	}
 
 	if sd.Snapshot == nil {
 		return idx
 	}
 
+	tree := sd.Tree()
 	for i := range sd.Snapshot.Element {
 		elem := &sd.Snapshot.Element[i]
 		idx.byPath[elem.Path] = elem
 
 		if strings.HasSuffix(elem.Path, "[x]") {
 			basePath := strings.TrimSuffix(elem.Path, "[x]")
-			idx.choiceTypes[basePath] = elem
+			// Un elemento sin id no está en el árbol: sin su definición, solo sus tipos propios.
+			node := tree.ByID(elem.ID)
+			if node == nil {
+				node = &registry.ElementNode{Def: elem}
+			}
+			idx.choiceTypes[basePath] = node
 		}
 	}
 
@@ -230,34 +238,25 @@ func (v *Validator) resolveElementDefinition(
 		}
 	}
 
-	// Try resolving as choice type
-	for choiceBasePath, choiceElemDef := range idx.choiceTypes {
+	// Un elemento de elección del mismo padre, como lo resuelve la fase estructural (#59), cuyo tipo en
+	// la definición base nombra la propiedad con la inicial en mayúscula (formats.html#choice;
+	// json.html: los nombres distinguen mayúsculas). Un tipo que el perfil no permite sigue nombrando la
+	// propiedad: su valor se revisa como ese tipo, como hace HL7 (#180).
+	parentPath := elementPath[:strings.LastIndex(elementPath, ".")+1]
+	for choiceBasePath, choiceNode := range idx.choiceTypes {
 		choiceBaseName := choiceBasePath[strings.LastIndex(choiceBasePath, ".")+1:]
-
-		if strings.HasPrefix(elementName, choiceBaseName) && len(elementName) > len(choiceBaseName) {
-			typeSuffix := elementName[len(choiceBaseName):]
-
-			matchedType := findMatchingChoiceType(choiceElemDef, typeSuffix)
-			if matchedType != "" {
-				return &resolvedElement{
-					elemDef:      choiceElemDef,
-					resolvedType: matchedType,
-				}
+		if choiceBasePath != parentPath+choiceBaseName {
+			continue
+		}
+		if matchedType := v.registry.ChoiceType(choiceNode, elementName); matchedType != "" {
+			return &resolvedElement{
+				elemDef:      choiceNode.Def,
+				resolvedType: matchedType,
 			}
 		}
 	}
 
 	return nil
-}
-
-// findMatchingChoiceType finds the actual type code that matches the suffix.
-func findMatchingChoiceType(elemDef *registry.ElementDefinition, typeSuffix string) string {
-	for _, t := range elemDef.Type {
-		if strings.EqualFold(t.Code, typeSuffix) {
-			return t.Code
-		}
-	}
-	return ""
 }
 
 // extractFHIRType extracts the actual FHIR type from a Type.

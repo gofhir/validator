@@ -1,0 +1,104 @@
+package registry
+
+import (
+	"context"
+	"testing"
+
+	"github.com/gofhir/validator/v2/pkg/loader"
+)
+
+func TestChoiceTypeContentReferenceBeforeAncestorBasePath(t *testing.T) {
+	const model = `{
+ "resourceType":"StructureDefinition",
+ "id":"logical-timing",
+ "url":"http://example.org/LogicalTiming",
+ "name":"LogicalTiming","status":"active",
+ "kind":"logical","abstract":false,
+ "type":"http://example.org/LogicalTiming",
+ "baseDefinition":"http://hl7.org/fhir/StructureDefinition/Base",
+ "derivation":"specialization",
+ "snapshot":{"element":[
+  {"id":"Timing","path":"Timing",
+   "base":{"path":"Timing","min":0,"max":"*"}},
+  {"id":"Timing.repeat","path":"Timing.repeat","min":0,"max":"1",
+   "base":{"path":"Timing.repeat","min":0,"max":"1"},
+   "type":[{"code":"Timing"}]},
+  {"id":"Timing.repeat.bounds[x]","path":"Timing.repeat.bounds[x]",
+   "min":0,"max":"1",
+   "base":{"path":"Timing.repeat.bounds[x]","min":0,"max":"1"},
+   "type":[{"code":"Coding"},{"code":"date"}]},
+  {"id":"Timing.repeat.item","path":"Timing.repeat.item",
+   "min":0,"max":"*",
+   "base":{"path":"Timing.repeat.item","min":0,"max":"*"},
+   "contentReference":"#Timing.repeat"}
+ ]}}`
+	const profile = `{
+ "resourceType":"StructureDefinition",
+ "id":"logical-timing-profile",
+ "url":"http://example.org/LogicalTimingProfile",
+ "name":"LogicalTimingProfile","status":"active",
+ "kind":"logical","abstract":false,
+ "type":"http://example.org/LogicalTiming",
+ "baseDefinition":"http://example.org/LogicalTiming",
+ "derivation":"constraint",
+ "differential":{"element":[
+  {"id":"Timing","path":"Timing"},
+  {"id":"Timing.repeat.item.bounds[x]",
+   "path":"Timing.repeat.item.bounds[x]",
+   "type":[{"code":"Coding"}]}
+ ]}}`
+
+	for _, version := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		t.Run(version, func(t *testing.T) {
+			r := sharedVersion(t, version).Clone()
+			pkg, err := loader.NewLoader("").LoadFromResources(
+				[][]byte{[]byte(model), []byte(profile)},
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := r.LoadFromPackages([]*loader.Package{pkg}); err != nil {
+				t.Fatal(err)
+			}
+
+			sd := r.GetByURL("http://example.org/LogicalTimingProfile")
+			if sd == nil {
+				t.Fatal("profile not loaded")
+			}
+			if err := r.EnsureSnapshot(context.Background(), sd); err != nil {
+				t.Fatal(err)
+			}
+			node := sd.Tree().ByID("Timing.repeat.item.bounds[x]")
+			if node == nil {
+				t.Fatal("contentReference child not expanded")
+			}
+			if node.Def.Base == nil ||
+				node.Def.Base.Path != "Timing.repeat.bounds[x]" {
+				t.Fatalf("unexpected base: %+v", node.Def.Base)
+			}
+
+			wantBase := r.GetByURL("http://example.org/LogicalTiming").
+				Tree().ByID("Timing.repeat.bounds[x]")
+			if wantBase == nil {
+				t.Fatal("source element missing")
+			}
+			if got := r.baseElement(node); got != wantBase {
+				t.Errorf("baseElement = %p, want logical model element %p",
+					got, wantBase)
+			}
+
+			for _, tt := range []struct {
+				key, want string
+			}{
+				{"boundsCoding", "Coding"},
+				{"boundsDate", "date"},
+				{"boundsPeriod", ""},
+			} {
+				if got := r.ChoiceType(node, tt.key); got != tt.want {
+					t.Errorf("ChoiceType(%q) = %q, want %q",
+						tt.key, got, tt.want)
+				}
+			}
+		})
+	}
+}

@@ -1,0 +1,88 @@
+[
+  {
+    "resource": "probe-fp/f01-control.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value is \"http://wrong\", but the profile requires \"http://unitsofmeasure.org\"",
+        "expression": [
+          "Observation.valueQuantity.system"
+        ]
+      }
+    ],
+    "duration": "5ms"
+  },
+  {
+    "resource": "probe-fp/f02-lower.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "158µs"
+  },
+  {
+    "resource": "probe-fp/f03-ok.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "114µs"
+  },
+  {
+    "resource": "probe-fp/f04-fixed-lower.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "530µs"
+  },
+  {
+    "resource": "probe-fp/f05-fixed-control.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value is \"bad\", but the profile requires \"ok\"",
+        "expression": [
+          "Observation.valueString"
+        ]
+      }
+    ],
+    "duration": "121µs"
+  },
+  {
+    "resource": "probe-fp/f06-fixed-other-type.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueBoolean'",
+        "expression": [
+          "Observation.valueBoolean"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value is true, but the profile requires \"ok\"",
+        "expression": [
+          "Observation.valueBoolean"
+        ]
+      }
+    ],
+    "duration": "104µs"
+  }
+]

@@ -1,0 +1,130 @@
+[
+  {
+    "resource": "adv2/r5/q1-answeroption-datetime-bad.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value 'bad' does not match expected format for type dateTime",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: que-5: 'Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet' (defined in http://hl7.org/fhir/StructureDefinition/Questionnaire)",
+        "expression": [
+          "Questionnaire.item[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "diagnostics": "The value provided ('choice') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0' (required)",
+        "expression": [
+          "Questionnaire.item[0].type"
+        ]
+      }
+    ],
+    "duration": "4.769ms"
+  },
+  {
+    "resource": "adv2/r5/q2-answeroption-datetime-ok.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: que-5: 'Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet' (defined in http://hl7.org/fhir/StructureDefinition/Questionnaire)",
+        "expression": [
+          "Questionnaire.item[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "diagnostics": "The value provided ('choice') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0' (required)",
+        "expression": [
+          "Questionnaire.item[0].type"
+        ]
+      }
+    ],
+    "duration": "163µs"
+  },
+  {
+    "resource": "adv2/r5/q4-value-patient.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuePatient'",
+        "expression": [
+          "Observation.valuePatient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Observation.valuePatient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation.valuePatient"
+        ]
+      }
+    ],
+    "duration": "400µs"
+  },
+  {
+    "resource": "adv2/r5/q5-asneeded-boolean.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'asNeededBoolean'",
+        "expression": [
+          "MedicationRequest.dosageInstruction[0].asNeededBoolean"
+        ]
+      }
+    ],
+    "duration": "295µs"
+  }
+]

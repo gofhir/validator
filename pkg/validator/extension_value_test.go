@@ -264,21 +264,25 @@ func extValueCases() []extValueCase {
 			want: []at{{id: issue.DiagExtensionInvalidContext, expr: "Patient.extension[0].valueIdentifier"}},
 		},
 		{
-			// p09: "valueuri" no es un valor (json.html#choice); la extensión exige uno.
-			name:   "misspelled value key",
-			data:   extPatient(`"extension":[{"url":"` + extBase + `str-ext","valueuri":"x"}]`),
-			want:   []at{{id: issue.DiagExtensionValueRequired, expr: "Patient.extension[0]"}},
+			// p09: "valueuri" no es un valor (json.html#choice) sino un elemento desconocido; la extensión
+			// exige un valor.
+			name: "misspelled value key",
+			data: extPatient(`"extension":[{"url":"` + extBase + `str-ext","valueuri":"x"}]`),
+			want: []at{
+				{id: issue.DiagExtensionValueRequired, expr: "Patient.extension[0]"},
+				{id: issue.DiagStructureUnknownElement, expr: "Patient.extension[0].valueuri"},
+			},
 			absent: []at{{id: issue.DiagExtensionInvalidValueType, expr: "Patient.extension[0].valueuri"}},
 		},
 		{
-			// Con un valor opcional, "valueuri" deja la extensión sin valor ni subextensiones, y falla
-			// ext-1, como en HL7. Pérdida conocida (#180): la fase estructural compara la clave sin
-			// distinguir mayúsculas y no informa el elemento desconocido, que HL7 sí informa. Al cerrar
-			// #180, este caso pasa a exigirlo.
-			name:   "misspelled value key, optional value (#180)",
-			data:   extPatient(`"extension":[{"url":"` + extBase + `opt-str-ext","valueuri":"x"}]`),
-			want:   []at{{id: issue.DiagConstraintFailed, expr: "Patient.extension[0]", text: "ext-1"}},
-			absent: []at{{id: issue.DiagStructureUnknownElement, expr: "Patient.extension[0].valueuri"}},
+			// Con un valor opcional, "valueuri" deja la extensión sin valor ni subextensiones: falla ext-1
+			// y la clave es un elemento desconocido, como en HL7 (#180).
+			name: "misspelled value key, optional value",
+			data: extPatient(`"extension":[{"url":"` + extBase + `opt-str-ext","valueuri":"x"}]`),
+			want: []at{
+				{id: issue.DiagConstraintFailed, expr: "Patient.extension[0]", text: "ext-1"},
+				{id: issue.DiagStructureUnknownElement, expr: "Patient.extension[0].valueuri"},
+			},
 		},
 		{
 			// "valueSet" no es un valor: Set no es un tipo. Es un elemento desconocido.
@@ -366,11 +370,18 @@ func extValueCases() []extValueCase {
 func TestExtensionValueContent(t *testing.T) {
 	cases := extValueCases()
 	if *extValueDump != "" {
-		dumpExtValueCases(t, cases)
+		dumpValueCases(t, *extValueDump, cases)
 		return
 	}
+	runValueCases(t, extValueDefs(t), cases)
+}
+
+// runValueCases valida cada caso en cada versión con las definiciones defs, y exige sus issues
+// esperados y ausentes, y que ninguno se repita.
+func runValueCases(t *testing.T, defs []string, cases []extValueCase) {
+	t.Helper()
 	for _, version := range orderVersions {
-		v := orderValidator(t, version, extValueDefs(t)...)
+		v := orderValidator(t, version, defs...)
 		for _, tc := range cases {
 			if len(tc.versions) > 0 && !slices.Contains(tc.versions, version) {
 				continue
@@ -403,10 +414,11 @@ func TestExtensionValueContent(t *testing.T) {
 	}
 }
 
-// dumpExtValueCases escribe cada caso en un archivo, para validarlo con HL7.
-func dumpExtValueCases(t *testing.T, cases []extValueCase) {
+// dumpValueCases escribe cada caso en root/<versión>/<nombre>.json, para validarlo con HL7.
+func dumpValueCases(t *testing.T, root string, cases []extValueCase) {
+	t.Helper()
 	for _, version := range orderVersions {
-		dir := filepath.Join(*extValueDump, version)
+		dir := filepath.Join(root, version)
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			t.Fatal(err)
 		}

@@ -168,8 +168,7 @@ func matchChoiceType(key, sdPath string, idx *elementIndex) string {
 			continue
 		}
 		if strings.HasPrefix(key, choiceBaseName) && len(key) > len(choiceBaseName) {
-			typeSuffix := key[len(choiceBaseName):]
-			if findMatchingChoiceType(choiceElemDef, typeSuffix) != "" {
+			if choiceElemDef.ChoiceTypeOf(key[len(choiceBaseName):]) != "" {
 				return choiceBasePath
 			}
 		}
@@ -366,8 +365,9 @@ func (v *Validator) resolveElementDefinition(
 			// Extract the type suffix (e.g., "deceasedBoolean" -> "Boolean")
 			typeSuffix := elementName[len(choiceBaseName):]
 
-			// Find the matching type from the ElementDefinition
-			matchedType := findMatchingChoiceType(choiceElemDef, typeSuffix)
+			// El tipo declarado que nombra, con la inicial en mayúscula y nada más cambiado
+			// (formats.html#choice; json.html: los nombres distinguen mayúsculas)
+			matchedType := choiceElemDef.ChoiceTypeOf(typeSuffix)
 			if matchedType != "" {
 				return &resolvedElement{
 					elemDef:      choiceElemDef,
@@ -378,19 +378,6 @@ func (v *Validator) resolveElementDefinition(
 	}
 
 	return nil
-}
-
-// findMatchingChoiceType finds the actual type code from the ElementDefinition
-// that matches the given suffix (case-insensitive).
-// Returns the actual type code from the SD (preserving original case).
-func findMatchingChoiceType(elemDef *registry.ElementDefinition, typeSuffix string) string {
-	for _, t := range elemDef.Type {
-		// Compare case-insensitively
-		if strings.EqualFold(t.Code, typeSuffix) {
-			return t.Code
-		}
-	}
-	return ""
 }
 
 // validateChildren validates the children of an element based on its type.

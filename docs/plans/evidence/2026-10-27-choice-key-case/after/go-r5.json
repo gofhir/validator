@@ -1,0 +1,122 @@
+[
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r5/q1-answeroption-datetime-bad.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Questionnaire.item[0].answerOption[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: que-5: 'Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet' (defined in http://hl7.org/fhir/StructureDefinition/Questionnaire)",
+        "expression": [
+          "Questionnaire.item[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "diagnostics": "The value provided ('choice') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0' (required)",
+        "expression": [
+          "Questionnaire.item[0].type"
+        ]
+      }
+    ],
+    "duration": "6.409ms"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r5/q2-answeroption-datetime-ok.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Questionnaire.item[0].answerOption[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: que-5: 'Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet' (defined in http://hl7.org/fhir/StructureDefinition/Questionnaire)",
+        "expression": [
+          "Questionnaire.item[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "diagnostics": "The value provided ('choice') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0' (required)",
+        "expression": [
+          "Questionnaire.item[0].type"
+        ]
+      }
+    ],
+    "duration": "275µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r5/q4-value-patient.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuePatient'",
+        "expression": [
+          "Observation.valuePatient"
+        ]
+      }
+    ],
+    "duration": "535µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r5/q5-asneeded-boolean.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'asNeededBoolean'",
+        "expression": [
+          "MedicationRequest.dosageInstruction[0].asNeededBoolean"
+        ]
+      }
+    ],
+    "duration": "372µs"
+  }
+]

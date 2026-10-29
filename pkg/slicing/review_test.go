@@ -175,7 +175,7 @@ func TestSliceChildrenAgainstTheBase(t *testing.T) {
 		`{"id":"Patient.extension","path":"Patient.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"},"type":[{"code":"Extension"}]}`,
 		`{"id":"Patient.extension:q","path":"Patient.extension","sliceName":"q","min":0,"max":"1","type":[{"code":"Extension"}]}`,
 		`{"id":"Patient.extension:q.url","path":"Patient.extension.url","min":1,"max":"1","fixedUri":"urn:q","type":[{"code":"uri"}]}`,
-		`{"id":"Patient.extension:q.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","type":[{"code":"Quantity"}]}`,
+		`{"id":"Patient.extension:q.value[x]","path":"Patient.extension.value[x]","min":1,"max":"1","base":{"path":"Extension.value[x]","min":0,"max":"1"},"type":[{"code":"Quantity"}]}`,
 	))
 	check(t, v, reg, url, []struct {
 		name, resource string

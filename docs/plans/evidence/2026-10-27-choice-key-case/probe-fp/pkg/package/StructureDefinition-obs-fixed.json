@@ -1,0 +1,2 @@
+{"resourceType":"StructureDefinition","id":"obs-fixed","url":"http://example.org/StructureDefinition/obs-fixed","name":"ObsFixed","status":"active","kind":"resource","abstract":false,"type":"Observation","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Observation","derivation":"constraint","fhirVersion":"4.0.1",
+ "differential":{"element":[{"id":"Observation","path":"Observation"},{"id":"Observation.value[x]","path":"Observation.value[x]","type":[{"code":"string"}],"fixedString":"ok"}]}}

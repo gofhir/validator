@@ -1,0 +1,376 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "collection",
+  "entry" : [{
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>Questionnaire.item[0].answerOption[0]</td><td>Structural Issue</td><td>Unrecognized property 'valueDateTime'</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Questionnaire.item[0].type</td><td>Not Found</td><td>The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0.0'</td><td/><td>TerminologyEngine</td></tr><tr><td>Error</td><td>Questionnaire.item[0].type</td><td>Invalid Code</td><td>The value provided ('choice') was not found in the value set 'Questionnaire Item Type' (http://hl7.org/fhir/ValueSet/item-type|5.0.0), and a code is required from this value set  (error message = The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0.0'; The provided code '#choice' was not found in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0')</td><td/><td>TerminologyEngine</td></tr><tr><td>Error</td><td>Questionnaire.item[0].answerOption[0]</td><td>Structural Issue</td><td>Questionnaire.item.answerOption.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "adv2/r5/q2-answeroption-datetime-ok.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 227
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unrecognized property 'valueDateTime'"
+        },
+        "expression" : ["Questionnaire.item[0].answerOption[0]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 187
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "UNABLE_TO_INFER_CODESYSTEM"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0"
+        }],
+        "severity" : "error",
+        "code" : "not-found",
+        "details" : {
+          "text" : "The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0.0'"
+        },
+        "expression" : ["Questionnaire.item[0].type"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 187
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Terminology_TX_NoValid_16"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0"
+        }],
+        "severity" : "error",
+        "code" : "code-invalid",
+        "details" : {
+          "text" : "The value provided ('choice') was not found in the value set 'Questionnaire Item Type' (http://hl7.org/fhir/ValueSet/item-type|5.0.0), and a code is required from this value set  (error message = The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0.0'; The provided code '#choice' was not found in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0')"
+        },
+        "expression" : ["Questionnaire.item[0].type"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 228
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_Minimum"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Questionnaire.item.answerOption.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0)"
+        },
+        "expression" : ["Questionnaire.item[0].answerOption[0]"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>Observation</td><td>Structural Issue</td><td>Unrecognized property 'valuePatient'</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a subject</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "adv2/r5/q4-value-patient.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 192
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unrecognized property 'valuePatient'"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 193
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_subject"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a subject"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 193
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 193
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+        },
+        "expression" : ["Observation"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>Questionnaire.item[0].answerOption[0]</td><td>Structural Issue</td><td>Unrecognized property 'valueDateTime'</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Questionnaire.item[0].type</td><td>Not Found</td><td>The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0.0'</td><td/><td>TerminologyEngine</td></tr><tr><td>Error</td><td>Questionnaire.item[0].type</td><td>Invalid Code</td><td>The value provided ('choice') was not found in the value set 'Questionnaire Item Type' (http://hl7.org/fhir/ValueSet/item-type|5.0.0), and a code is required from this value set  (error message = The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0.0'; The provided code '#choice' was not found in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0')</td><td/><td>TerminologyEngine</td></tr><tr><td>Error</td><td>Questionnaire.item[0].answerOption[0]</td><td>Structural Issue</td><td>Questionnaire.item.answerOption.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0)</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "adv2/r5/q1-answeroption-datetime-bad.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 226
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unrecognized property 'valueDateTime'"
+        },
+        "expression" : ["Questionnaire.item[0].answerOption[0]"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 187
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "UNABLE_TO_INFER_CODESYSTEM"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0"
+        }],
+        "severity" : "error",
+        "code" : "not-found",
+        "details" : {
+          "text" : "The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0.0'"
+        },
+        "expression" : ["Questionnaire.item[0].type"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 187
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Terminology_TX_NoValid_16"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0"
+        }],
+        "severity" : "error",
+        "code" : "code-invalid",
+        "details" : {
+          "text" : "The value provided ('choice') was not found in the value set 'Questionnaire Item Type' (http://hl7.org/fhir/ValueSet/item-type|5.0.0), and a code is required from this value set  (error message = The System URI could not be determined for the code 'choice' in the ValueSet 'http://hl7.org/fhir/ValueSet/item-type|5.0.0'; The provided code '#choice' was not found in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0')"
+        },
+        "expression" : ["Questionnaire.item[0].type"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 227
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_Minimum"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Questionnaire.item.answerOption.value[x]: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Questionnaire|5.0.0)"
+        },
+        "expression" : ["Questionnaire.item[0].answerOption[0]"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Error</td><td>MedicationRequest.dosageInstruction[0]</td><td>Structural Issue</td><td>Unrecognized property 'asNeededBoolean'</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "adv2/r5/q5-asneeded-boolean.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 289
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unrecognized property 'asNeededBoolean'"
+        },
+        "expression" : ["MedicationRequest.dosageInstruction[0]"]
+      }]
+    }
+  }]
+}

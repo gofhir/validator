@@ -1,0 +1,1 @@
+{"name":"example.choiceparent2","version":"0.1.0","fhirVersions":["4.0.1"],"type":"fhir.ig","dependencies":{"hl7.fhir.r4.core":"4.0.1"}}

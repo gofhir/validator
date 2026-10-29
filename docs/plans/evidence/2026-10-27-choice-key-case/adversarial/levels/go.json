@@ -1,0 +1,46 @@
+[
+  {
+    "resource": "a1/in/a1-component-datetime-bad.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Observation.component[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value 'bad' does not match expected format for type dateTime",
+        "expression": [
+          "Observation.component[0].valueDateTime"
+        ]
+      }
+    ],
+    "duration": "4.607ms"
+  },
+  {
+    "resource": "a1/in/a1-component-datetime-ok.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Observation.component[0].valueDateTime"
+        ]
+      }
+    ],
+    "duration": "175µs"
+  }
+]

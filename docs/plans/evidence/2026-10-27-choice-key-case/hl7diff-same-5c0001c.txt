@@ -1,0 +1,164 @@
+# hl7diff same: baseline 5c0001c vs working tree
+
+decisions: identical (15 files, 26 lines)
+
+multimatch: identical (3 files, 9 lines)
+
+core-probes: identical (7 files, 12 lines)
+
+type-profile-probes: identical (47 files, 92 lines)
+
+nested-resource-probes: identical (4 files, 6 lines)
+
+review-probes: identical (5 files, 9 lines)
+
+extension-probes: identical (14 files, 27 lines)
+
+primitive-extension-probes: identical (5 files, 5 lines)
+
+context-probes: identical (33 files, 131 lines)
+
+context-eval-probes: identical (31 files, 55 lines)
+
+context-scope-probes: identical (198 files, 369 lines)
+
+interface-probes: identical (9 files, 35 lines)
+
+interface-probes-r5: identical (16 files, 20 lines)
+
+interface-probes-r4b: identical (9 files, 36 lines)
+
+constraint-probes: identical (81 files, 162 lines)
+
+invariant-probes: identical (61 files, 107 lines)
+
+fixedpattern-probes: identical (50 files, 86 lines)
+
+target-probes: identical (71 files, 104 lines)
+
+nested-slicing-probes: identical (18 files, 23 lines)
+
+json-shape-probes: identical (34 files, 103 lines)
+
+binding-probes: identical (5 files, 10 lines)
+
+binding-walk-probes: identical (14 files, 31 lines)
+
+extension-walk-probes: identical (20 files, 42 lines)
+
+binding-profile-probes: identical (10 files, 19 lines)
+
+valueset-membership-probes: identical (43 files, 52 lines)
+
+holder-profile-probes: identical (50 files, 93 lines)
+
+## reference-walk-probes: 23 lines differ (56 files, 139 baseline lines)
+
+- sorted line 118
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u1_r4_obs_valueReference.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Observation.valueReference"],"diagnostics":"Constraint failed: ref-1: 'SHALL have a contained resource if a local reference is provided'","location":{"Line":1,"Column":93}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u1_r4_obs_valueReference.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Observation.valueReference"],"diagnostics":"Unknown element 'valueReference'","location":{"Line":1,"Column":93}}
+- sorted line 119
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u1_r4_obs_valueReference.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Observation.valueReference"],"diagnostics":"Unknown element 'valueReference'","location":{"Line":1,"Column":93}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u1_r4_obs_valueReference.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Observation"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 120
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u1_r4_obs_valueReference.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Observation"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u2_r4_pat_badchoice.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Patient.deceasedReference"],"diagnostics":"Unknown element 'deceasedReference'","location":{"Line":1,"Column":55}}
+- sorted line 121
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u2_r4_pat_badchoice.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.multipleBirthReference"],"diagnostics":"Constraint failed: ref-1: 'SHALL have a contained resource if a local reference is provided'","location":{"Line":1,"Column":110}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u2_r4_pat_badchoice.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Patient.multipleBirthReference"],"diagnostics":"Unknown element 'multipleBirthReference'","location":{"Line":1,"Column":110}}
+- sorted line 122
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u2_r4_pat_badchoice.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Patient.deceasedReference"],"diagnostics":"Unknown element 'deceasedReference'","location":{"Line":1,"Column":55}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u2_r4_pat_badchoice.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 123
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u2_r4_pat_badchoice.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Patient.multipleBirthReference"],"diagnostics":"Unknown element 'multipleBirthReference'","location":{"Line":1,"Column":110}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_s1_slice_target_type.json","severity":"error","code":"value","messageId":"REFERENCE_INVALID_TARGET","expression":["Patient.generalPractitioner[0]"],"diagnostics":"Invalid reference target type 'Organization'. Allowed: Practitioner","location":{"Line":1,"Column":327}}
+- sorted line 124
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_rv_u2_r4_pat_badchoice.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_s1_slice_target_type.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":214}}
+- sorted line 125
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_s1_slice_target_type.json","severity":"error","code":"value","messageId":"REFERENCE_INVALID_TARGET","expression":["Patient.generalPractitioner[0]"],"diagnostics":"Invalid reference target type 'Organization'. Allowed: Practitioner","location":{"Line":1,"Column":327}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_s2_slice_target_type_unresolved.json","severity":"error","code":"value","messageId":"REFERENCE_INVALID_TARGET","expression":["Patient.generalPractitioner[0]"],"diagnostics":"Invalid reference target type 'Organization'. Allowed: Practitioner","location":{"Line":1,"Column":224}}
+- sorted line 126
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_s1_slice_target_type.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":214}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_s3_slice_target_profile.json","severity":"error","code":"structure","messageId":"REFERENCE_TARGET_PROFILE","expression":["Patient.generalPractitioner[0]"],"diagnostics":"Unable to find a profile match for #pr among choices: http://example.org/StructureDefinition/pract-gender","location":{"Line":1,"Column":326}}
+- sorted line 127
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_s2_slice_target_type_unresolved.json","severity":"error","code":"value","messageId":"REFERENCE_INVALID_TARGET","expression":["Patient.generalPractitioner[0]"],"diagnostics":"Invalid reference target type 'Organization'. Allowed: Practitioner","location":{"Line":1,"Column":224}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_s3_slice_target_profile.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":214}}
+- sorted line 128
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_s3_slice_target_profile.json","severity":"error","code":"structure","messageId":"REFERENCE_TARGET_PROFILE","expression":["Patient.generalPractitioner[0]"],"diagnostics":"Unable to find a profile match for #pr among choices: http://example.org/StructureDefinition/pract-gender","location":{"Line":1,"Column":326}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_t1_identifier_profile_assigner.json","severity":"error","code":"structure","messageId":"REFERENCE_TARGET_PROFILE","expression":["Patient.identifier[0].assigner"],"diagnostics":"Unable to find a profile match for #org among choices: http://example.org/StructureDefinition/org-named","location":{"Line":1,"Column":355}}
+- sorted line 129
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_s3_slice_target_profile.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":214}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_t1_identifier_profile_assigner.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":211}}
+- sorted line 130
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_t1_identifier_profile_assigner.json","severity":"error","code":"structure","messageId":"REFERENCE_TARGET_PROFILE","expression":["Patient.identifier[0].assigner"],"diagnostics":"Unable to find a profile match for #org among choices: http://example.org/StructureDefinition/org-named","location":{"Line":1,"Column":355}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_t2_annotation_profile_author.json","severity":"error","code":"value","messageId":"REFERENCE_INVALID_TARGET","expression":["Observation.note[0].authorReference"],"diagnostics":"Invalid reference target type 'Patient'. Allowed: Practitioner","location":{"Line":1,"Column":356}}
+- sorted line 131
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_t1_identifier_profile_assigner.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":211}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_t2_annotation_profile_author.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Observation.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":251}}
+- sorted line 132
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_t2_annotation_profile_author.json","severity":"error","code":"value","messageId":"REFERENCE_INVALID_TARGET","expression":["Observation.note[0].authorReference"],"diagnostics":"Invalid reference target type 'Patient'. Allowed: Practitioner","location":{"Line":1,"Column":356}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_w1_logical_type_not_allowed.json"}
+- sorted line 133
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_t2_annotation_profile_author.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Observation.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":251}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_w2_literal_type_mismatch.json","severity":"error","code":"value","messageId":"REFERENCE_INVALID_TARGET","expression":["Observation.subject"],"diagnostics":"Invalid reference target type 'Practitioner'. Allowed: Patient, Group, Device, Location","location":{"Line":1,"Column":176}}
+- sorted line 134
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_w1_logical_type_not_allowed.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_w2_literal_type_mismatch.json","severity":"error","code":"value","messageId":"REFERENCE_TYPE_MISMATCH","expression":["Observation.subject"],"diagnostics":"Reference type element 'Practitioner' does not match reference target 'Patient'","location":{"Line":1,"Column":176}}
+- sorted line 135
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_w2_literal_type_mismatch.json","severity":"error","code":"value","messageId":"REFERENCE_INVALID_TARGET","expression":["Observation.subject"],"diagnostics":"Invalid reference target type 'Practitioner'. Allowed: Patient, Group, Device, Location","location":{"Line":1,"Column":176}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_w3_ext_forbids_reference.json","severity":"error","code":"invalid","messageId":"REFERENCE_CONTAINED_NOT_FOUND","expression":["Patient.extension[0].valueReference.reference"],"diagnostics":"Contained resource 'nope' not found. Reference is not defined within the resource","location":{"Line":1,"Column":236}}
+- sorted line 136
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_w2_literal_type_mismatch.json","severity":"error","code":"value","messageId":"REFERENCE_TYPE_MISMATCH","expression":["Observation.subject"],"diagnostics":"Reference type element 'Practitioner' does not match reference target 'Patient'","location":{"Line":1,"Column":176}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_w3_ext_forbids_reference.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.extension[0].valueReference"],"diagnostics":"Constraint failed: ref-1: 'SHALL have a contained resource if a local reference is provided'","location":{"Line":1,"Column":223}}
+- sorted line 137
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_w3_ext_forbids_reference.json","severity":"error","code":"invalid","messageId":"REFERENCE_CONTAINED_NOT_FOUND","expression":["Patient.extension[0].valueReference.reference"],"diagnostics":"Contained resource 'nope' not found. Reference is not defined within the resource","location":{"Line":1,"Column":236}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_w3_ext_forbids_reference.json","severity":"error","code":"value","messageId":"EXTENSION_INVALID_VALUE_TYPE","expression":["Patient.extension[0].valueReference"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'Reference'. Allowed: Address","location":{"Line":1,"Column":223}}
+
+package-example-cpg-probes: identical (4 files, 10 lines)
+
+package-example-cql-probes: identical (2 files, 3 lines)
+
+unknown-codesystem-probes: identical (521 files, 1035 lines)
+
+fullurl-probes: identical (48 files, 135 lines)
+
+fullurl-probes-r4b: identical (1 files, 3 lines)
+
+fullurl-probes-r5: identical (4 files, 8 lines)
+
+held-resource-probes: identical (39 files, 146 lines)
+
+resolve-probes: identical (19 files, 31 lines)
+
+resource-element-probes: identical (6 files, 17 lines)
+
+canonical-probes: identical (17 files, 19 lines)
+
+r5-probes: identical (8 files, 12 lines)
+
+r4b-probes: identical (1 files, 1 lines)
+
+deqm-probes: identical (15 files, 65 lines)
+
+deqm-examples: identical (108 files, 451 lines)
+
+uscore-probes: identical (7 files, 18 lines)
+
+uscore-examples: identical (183 files, 409 lines)
+
+ips: identical (44 files, 88 lines)
+
+mcode-examples: identical (179 files, 471 lines)
+
+aucore-examples: identical (65 files, 108 lines)
+
+chcore-examples: identical (48 files, 76 lines)
+
+clcore-examples: identical (20 files, 24 lines)
+
+r4-core-examples: identical (5301 files, 55193 lines)
+
+**DIFFERENT**
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/same-report.md
+exit status 1

@@ -1,0 +1,140 @@
+[
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r4/q1-answeroption-datetime-bad.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Questionnaire.item[0].answerOption[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].value[x]"
+        ]
+      }
+    ],
+    "duration": "4.54ms"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r4/q2-answeroption-datetime-ok.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueDateTime'",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].valueDateTime"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Questionnaire.item[0].answerOption[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Questionnaire.item[0].answerOption[0].value[x]"
+        ]
+      }
+    ],
+    "duration": "262µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r4/q3-ext-value-request.json",
+    "valid": false,
+    "errors": 4,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueRequest'",
+        "expression": [
+          "Patient.extension[0].valueRequest"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0",
+        "expression": [
+          "Patient.extension[0].value[x]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Extension 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' requires a value",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      }
+    ],
+    "duration": "412µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r4/q4-value-patient.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valuePatient'",
+        "expression": [
+          "Observation.valuePatient"
+        ]
+      }
+    ],
+    "duration": "483µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r4/q5-asneeded-boolean.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "420µs"
+  },
+  {
+    "resource": "/Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-10-27-choice-key-case/adversarial/r4/q6-obs-value-request.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueRequest'",
+        "expression": [
+          "Observation.valueRequest"
+        ]
+      }
+    ],
+    "duration": "94µs"
+  }
+]

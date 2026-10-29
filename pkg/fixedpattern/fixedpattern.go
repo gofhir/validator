@@ -73,7 +73,7 @@ func (v *Validator) ValidateData(resource map[string]any, sd *registry.Structure
 	}
 
 	// Validate all elements recursively
-	v.validateElement(resource, resourceType, resourceType, elemIndex, result)
+	v.validateElement(resource, resourceType, resourceType, elemIndex, sd.Tree(), result)
 
 	// Validate contained resources
 	v.validateContained(resource, resourceType, result)
@@ -118,7 +118,7 @@ func (v *Validator) validateContained(resource map[string]any, baseFhirPath stri
 		}
 
 		// Validate contained resource
-		v.validateElement(resourceMap, resourceType, containedFhirPath, elemIndex, result)
+		v.validateElement(resourceMap, resourceType, containedFhirPath, elemIndex, containedSD.Tree(), result)
 	}
 }
 
@@ -128,6 +128,7 @@ func (v *Validator) validateElement(
 	sdPath string,
 	fhirPath string,
 	elemIndex map[string]*registry.ElementDefinition,
+	tree *registry.ElementTree,
 	result *issue.Result,
 ) {
 	// Las claves en orden de nombre: los issues salen siempre en el mismo orden (#174)
@@ -144,7 +145,7 @@ func (v *Validator) validateElement(
 		elementFHIRPath := fhirPath + "." + key
 
 		// Check for choice types (value[x])
-		ed := v.resolveElementDef(elementSDPath, key, elemIndex)
+		ed := v.resolveElementDef(elementSDPath, key, elemIndex, tree)
 		if ed == nil {
 			continue // Element not found, structural validator handles this
 		}
@@ -155,12 +156,12 @@ func (v *Validator) validateElement(
 		// Recurse into children
 		switch val := value.(type) {
 		case map[string]any:
-			v.validateElement(val, elementSDPath, elementFHIRPath, elemIndex, result)
+			v.validateElement(val, elementSDPath, elementFHIRPath, elemIndex, tree, result)
 		case []any:
 			for i, item := range val {
 				itemPath := fmt.Sprintf("%s[%d]", elementFHIRPath, i)
 				if itemMap, ok := item.(map[string]any); ok {
-					v.validateElement(itemMap, elementSDPath, itemPath, elemIndex, result)
+					v.validateElement(itemMap, elementSDPath, itemPath, elemIndex, tree, result)
 				} else {
 					// For primitive arrays, validate each item against fixed/pattern
 					v.validateFixedPatternValue(ed, item, itemPath, result)
@@ -170,22 +171,31 @@ func (v *Validator) validateElement(
 	}
 }
 
-// resolveElementDef finds the ElementDefinition for a path, handling choice types.
-func (v *Validator) resolveElementDef(path, key string, elemIndex map[string]*registry.ElementDefinition) *registry.ElementDefinition {
+// resolveElementDef finds the ElementDefinition for a path, handling choice types. The snapshot's
+// element tree gives ChoiceType the node of a choice element.
+func (v *Validator) resolveElementDef(path, key string, elemIndex map[string]*registry.ElementDefinition, tree *registry.ElementTree) *registry.ElementDefinition {
 	// Try exact match first
 	if ed := elemIndex[path]; ed != nil {
 		return ed
 	}
 
-	// Try choice type pattern (e.g., "value[x]" for "valueString")
+	// Un elemento de elección del mismo padre cuyo tipo, con la inicial en mayúscula, nombra la clave
+	// ("value[x]" para "valueString"; formats.html#choice, y json.html: los nombres distinguen
+	// mayúsculas). Los tipos son los de su elemento base: uno que el perfil no permite nombra un valor
+	// del tipo equivocado, que se compara igual con el fijo (#180).
 	basePath := path[:len(path)-len(key)-1] // Remove ".key" suffix
-	for candidatePath, ed := range elemIndex {
-		if strings.HasPrefix(candidatePath, basePath+".") && strings.HasSuffix(candidatePath, "[x]") {
-			// Extract the base name from the choice type (e.g., "value" from "Patient.value[x]")
-			choiceBase := candidatePath[len(basePath)+1 : len(candidatePath)-3]
-			if strings.HasPrefix(strings.ToLower(key), strings.ToLower(choiceBase)) {
-				return ed
-			}
+	for i := 1; i < len(key); i++ {
+		ed := elemIndex[basePath+"."+key[:i]+"[x]"]
+		if ed == nil {
+			continue
+		}
+		// Un elemento sin id no está en el árbol: sin su definición, solo sus tipos propios.
+		node := tree.ByID(ed.ID)
+		if node == nil {
+			node = &registry.ElementNode{Def: ed}
+		}
+		if v.registry.ChoiceType(node, key) != "" {
+			return ed
 		}
 	}
 

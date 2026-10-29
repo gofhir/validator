@@ -14,6 +14,9 @@ import (
 // ElementDefinition.path is never used to place a node, because slices share their base's path.
 type ElementNode struct {
 	Def *ElementDefinition
+	// sd es la StructureDefinition de cuyo snapshot sale el elemento: desde ella se sigue la cadena de
+	// baseDefinition hasta el elemento base (ChoiceType).
+	sd *StructureDefinition
 
 	// Parent is the element that contains this one: for A.b:s.c it is A.b:s, and for the slice
 	// A.b:s (or the reslice A.b:s/r) it is A, the parent of the sliced element.
@@ -128,7 +131,7 @@ func buildTree(sd *StructureDefinition, snap *Snapshot) *ElementTree {
 			t.issue(TreeIssueDuplicateID, def.ID, "duplicate element id; the first occurrence is used")
 			continue
 		}
-		n := &ElementNode{Def: def}
+		n := &ElementNode{Def: def, sd: sd}
 		t.byID[def.ID] = n
 		nodes = append(nodes, n)
 	}
