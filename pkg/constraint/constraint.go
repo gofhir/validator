@@ -109,6 +109,8 @@ type Validator struct {
 	// holderProfiles chooses the profiles a held resource is checked against among those its
 	// holder element's type.profile names.
 	holderProfiles HolderProfiles
+	// html checks a narrative's XHTML for htmlChecks().
+	html eval.HTMLChecker
 }
 
 // HolderProfiles chooses, among the profiles a holder element's type.profile names for a resource
@@ -184,6 +186,7 @@ func New(reg *registry.Registry, termReg *terminology.Registry, opts ...Option) 
 		registry:     reg,
 		termRegistry: termReg,
 		exprCache:    make(map[string]compiledExpr),
+		html:         narrativeHTML{},
 	}
 	for _, o := range opts {
 		o(v)
@@ -416,6 +419,9 @@ func (v *Validator) evaluateOn(expr *fhirpath.Expression, focus fhirpath.Collect
 	if opts.termService != nil {
 		evalCtx.SetTerminologyService(opts.termService)
 	}
+
+	// Las reglas de HTML de htmlChecks().
+	evalCtx.SetHTMLChecker(v.html)
 
 	return expr.EvaluateWithContext(evalCtx)
 }

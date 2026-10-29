@@ -1,63 +1,20 @@
 package constraint
 
 import (
+	"context"
 	"strings"
 
-	"github.com/gofhir/fhirpath/eval"
-	"github.com/gofhir/fhirpath/funcs"
-	"github.com/gofhir/fhirpath/types"
 	"golang.org/x/net/html"
 )
 
-func init() {
-	// Register htmlChecks() as a FHIR additional function (§2.9.1.5).
-	// When invoked on an xhtml element, returns true if the FHIR XHTML rules
-	// are met (R4 §2.4.1), false otherwise. Returns null on non-xhtml elements.
-	funcs.Register(eval.FuncDef{
-		Name:    "htmlChecks",
-		MinArgs: 0,
-		MaxArgs: 0,
-		Fn:      fnHTMLChecks,
-	})
-}
+// narrativeHTML es el verificador de HTML que el validador da a fhirpath para htmlChecks(): las reglas
+// de la narrativa son de FHIR, no del lenguaje (R4 narrative.html#xhtml), y la librería se las pide a
+// quien evalúa.
+type narrativeHTML struct{}
 
-// fnHTMLChecks implements the FHIR htmlChecks() function.
-// Validates XHTML narrative content per FHIR R4 §2.4.1:
-//   - Must have a <div> root element
-//   - Must contain some non-whitespace content
-//   - Must only use allowed HTML elements
-//   - Must not contain prohibited elements (script, style, head, body, etc.)
-//   - Must not contain event handler attributes (onClick, onLoad, etc.)
-func fnHTMLChecks(_ *eval.Context, input types.Collection, _ []any) (types.Collection, error) {
-	if input.Empty() {
-		return types.Collection{}, nil
-	}
-
-	// Extract string value from input.
-	var xhtmlStr string
-	for _, item := range input {
-		switch v := item.(type) {
-		case types.String:
-			xhtmlStr = v.Value()
-		case *types.ObjectValue:
-			if val, ok := v.Get("value"); ok {
-				if s, ok := val.(types.String); ok {
-					xhtmlStr = s.Value()
-				}
-			}
-		}
-		if xhtmlStr != "" {
-			break
-		}
-	}
-
-	if xhtmlStr == "" {
-		// Not an xhtml element or empty — return null (empty collection).
-		return types.Collection{}, nil
-	}
-
-	valid := validateXHTML(xhtmlStr)
-	return types.Collection{types.NewBoolean(valid)}, nil
+// HTMLChecks dice si s cumple las reglas de FHIR para el XHTML de una narrativa.
+func (narrativeHTML) HTMLChecks(_ context.Context, s string) (bool, error) {
+	return validateXHTML(s), nil
 }
 
 // validateXHTML checks the FHIR XHTML rules on a narrative div string.

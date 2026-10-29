@@ -1,0 +1,32 @@
+File: b-deps.test
+Type: alloc_objects
+Time: 2026-10-28 23:59:29 -03
+Showing nodes accounting for 96084, 2.20% of 4362101 total
+Dropped 281 nodes (cum <= 21810)
+Showing top 25 nodes out of 71
+      flat  flat%   sum%        cum   cum%
+     70041  1.61%  1.61%      70041  1.61%  github.com/gofhir/fhirpath/types.(*ObjectValue).childCandidates
+     54027  1.24%  2.84%      54027  1.24%  github.com/gofhir/fhirpath/eval.startClock (inline)
+    -46023  1.06%  1.79%      24018  0.55%  github.com/gofhir/fhirpath/types.(*ObjectValue).childElement
+     26011   0.6%  2.39%      26011   0.6%  math/big.NewInt (inline)
+     -9973  0.23%  2.16%      -9973  0.23%  github.com/gofhir/fhirpath/types.decodeJSONString
+      3993 0.092%  2.25%      94056  2.16%  github.com/gofhir/validator/v2/pkg/constraint.(*Validator).walkChildren
+      3975 0.091%  2.34%      24014  0.55%  github.com/gofhir/fhirpath/types.(*ObjectValue).unpairedChildren.func1
+      2006 0.046%  2.39%       2006 0.046%  internal/bytealg.MakeNoZero
+     -2001 0.046%  2.34%      -2001 0.046%  github.com/gofhir/fhirpath/eval.(*Evaluator).buildElementPath
+      2001 0.046%  2.39%       2001 0.046%  github.com/gofhir/fhirpath/eval.(*Evaluator).evaluateSelect
+     -2001 0.046%  2.34%     -10004  0.23%  github.com/gofhir/fhirpath/eval.(*Evaluator).navigateMember
+     -2001 0.046%  2.29%     -12005  0.28%  github.com/gofhir/fhirpath/eval.compileNavigation.func1
+     -2001 0.046%  2.25%      -6003  0.14%  github.com/gofhir/fhirpath/types.pairValueWithElement
+     -2001 0.046%  2.20%      -2001 0.046%  github.com/gofhir/validator/v2/pkg/constraint.jsonKey
+        28 0.00064%  2.20%      12597  0.29%  github.com/gofhir/fhirpath.parse
+         3 6.9e-05%  2.20%      94129  2.16%  github.com/gofhir/validator/v2/pkg/validator.(*Validator).Validate
+         0     0%  2.20%      -1994 0.046%  github.com/buger/jsonparser.ArrayEach
+         0     0%  2.20%      24009  0.55%  github.com/buger/jsonparser.ObjectEach
+         0     0%  2.20%      94047  2.16%  github.com/gofhir/fhirpath.(*Expression).EvaluateWithContext
+         0     0%  2.20%      94047  2.16%  github.com/gofhir/fhirpath/eval.(*Evaluator).EvaluateNode
+         0     0%  2.20%     -12006  0.28%  github.com/gofhir/fhirpath/eval.(*Evaluator).inScope
+         0     0%  2.20%      -2001 0.046%  github.com/gofhir/fhirpath/eval.(*Evaluator).resolveElement
+         0     0%  2.20%      14008  0.32%  github.com/gofhir/fhirpath/eval.(*compiledCall).eval
+         0     0%  2.20%      14008  0.32%  github.com/gofhir/fhirpath/eval.(*compiledCall).evalOrdinary
+         0     0%  2.20%      26011   0.6%  github.com/gofhir/fhirpath/eval.Compare

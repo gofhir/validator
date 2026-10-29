@@ -13,27 +13,18 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #180, clave de elección con otras mayúsculas (rama `fix/choice-key-case`)
+## Frente activo: #176, fhirpath v1.16.6 y ucum v4.3.4 (rama `chore/update-fhirpath-ucum`)
 
-[2026-10-27-choice-key-case.md](2026-10-27-choice-key-case.md): paso 1 hecho (las sondas en R4, R4B y R5
-confirman que HL7 marca la clave como desconocida y nosotros no; evidencia en
-[evidence/2026-10-27-choice-key-case/](evidence/2026-10-27-choice-key-case/)). Paso 2 hecho (plan §2-§6).
-Paso 3 hecho (plan §7). Paso 4: aprobado el 27-10-2026 (§8). Paso 5 en curso (plan §9): tests escritos y en rojo;
-el barrido metamórfico encontró que FHIRPath navega propiedades que el modelo no define (`dom-3`, 148 claves),
-anterior a #180: issue para fhirpath aprobado (lo publica el usuario), y en el barrido queda como KNOWN (plan §9).
-Paso 6 hecho (plan §10): tests en verde, barrido con 0 diferencias y 148 KNOWN. Paso 7: las sondas
-mostraron que falta la cardinalidad mínima de q1 (`answerOption.value[x]`); vuelta al paso 2 (plan §11).
-Aprobado el 28-10-2026: en `elementvalues`, solo un tipo del elemento base es un valor (plan §11). Ya
-implementado. Paso 7 (plan §12): sondas iguales a HL7, barrido 0 diferencias, `hl7diff` PASS (solo
-2 falsos positivos `ref-1` menos), mutaciones 10/10 y 16/16, bench sin cambios en asignaciones, `make check` verde. Paso 8: ronda 1 con 3 hallazgos medios aceptados y corregidos (plan §13). Ronda 2 (plan §14): un defecto de diseño, porque `ChoiceType` resuelve la base por el nombre de la ruta
-(un modelo lógico con el nombre de un tipo core toma sus tipos). Rediseño aprobado e implementado (plan §14.1): la base se busca por la cadena baseDefinition.
-`go test ./...` en verde. Validación del rediseño en verde (plan §14.2). La ronda 3 no convergió (plan §15): la caché ya está
-corregida, y queda abierto el respaldo por nombre de `base.path` (Fable 1). El usuario aprobó corregirlo y una 4.ª ronda
-(plan §15.1): la búsqueda por nombre se reemplazó por el recorrido de los tipos de los ancestros. Ronda 4 (plan §16): Fable sin
-hallazgos; Codex dejó 2 medios (`base.path` ambiguo), confirmados y corregidos; validación en verde.
-Ronda 5 (plan §17): tres casos confirmados de la misma familia (resolución de la base: 1 medio de Codex con entrada dudosa, 2 bajos de Fable), ninguno en ejemplos ni hl7diff. Por la condición de corte van a un issue aparte (borrador listo; lo publica el usuario) y #180 pasa al paso 9. `make check` en verde al cierre (28-10-2026). Próximo paso: «commit y pr» del usuario; luego #176 y release v2.2.0.
+[2026-10-28-update-fhirpath-ucum.md](2026-10-28-update-fhirpath-ucum.md): paso 1 hecho (con solo las
+dependencias nuevas, `hl7diff same` contra `548ad1f` da idéntico; el validador pisa el `htmlChecks()` de
+fhirpath con una función global). Paso 2 hecho (plan §2-§6). Paso 3 hecho (plan §7: 12 hallazgos, todos aceptados; HL7 no es oráculo de UCUM ni del `div` vacío). Paso 4: aprobado el 28-10-2026. Pasos 5 y 6 hechos (plan §8): sondas de HL7 en las tres versiones, tests en verde, `htmlChecks()` por el verificador de la librería; dos defectos de otros (fhirpath responde sobre un string; txt-1/txt-2 con la misma expresión) registrados. Paso 7 hecho (plan §9): todo en verde, mutaciones 6/6; +2-3 % de asignaciones, todo de fhirpath (issue redactado). Issue gofhir/fhirpath#248 publicado. Paso 8: ronda 1 (plan §10) con 3 medios de Codex, corregidos; mutaciones 6/6 de nuevo. Ronda 2 (plan §11): converge. Paso 9 hecho (plan §12), `make check` verde. Próximo: «commit y pr» del usuario; luego release v2.2.0.
+Después: release v2.2.0.
+
+**Cerrado:** #180, clave de elección con otras mayúsculas
+([2026-10-27-choice-key-case.md](2026-10-27-choice-key-case.md)), mergeado como #182 (`548ad1f`,
+28-10-2026), tras 5 rondas de review. Los tres casos de resolución de la base de la ronda 5 están en
+gofhir/validator#183. Backlog: issue de fhirpath de `children()` (lo publica el usuario).
 HL7: tope de 2 instancias de Java simultáneas (no de corridas).
-Después: #176 (fhirpath v1.16.6, ucum v4.3.0) y el release v2.2.0.
 
 **Cerrado:** #178, contenido de los valores de una extensión
 ([2026-10-27-extension-value-content.md](2026-10-27-extension-value-content.md)), mergeado como #181

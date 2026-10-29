@@ -1,0 +1,20 @@
+{
+  "resourceType": "Patient",
+  "id": "nv-contained",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p></div>"
+  },
+  "contained": [
+    {
+      "resourceType": "Organization",
+      "id": "org",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>x</p><script>alert(1)</script></div>"
+      },
+      "name": "Org"
+    }
+  ],
+  "active": true
+}

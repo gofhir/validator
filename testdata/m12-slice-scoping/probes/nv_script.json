@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nv-script",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>x</p><script>alert(1)</script></div>"
+  },
+  "active": true
+}

@@ -1,6 +1,7 @@
 package constraint_test
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"sort"
@@ -264,6 +265,11 @@ func contextFor(e constraintEntry, shape string) (string, bool) {
 	return string(out), true
 }
 
+// El verificador de HTML de la auditoría (auditHTML): toda narrativa pasa.
+type auditHTML struct{}
+
+func (auditHTML) HTMLChecks(context.Context, string) (bool, error) { return true, nil }
+
 // TestAuditEngineExpressionGaps compiles and evaluates every published constraint expression
 // against instances built from the SDs, and groups whatever the engine cannot handle.
 func TestAuditEngineExpressionGaps(t *testing.T) {
@@ -331,6 +337,8 @@ func TestAuditEngineExpressionGaps(t *testing.T) {
 				shape = ctxShape
 			}
 			ctx := eval.NewContext([]byte(shape))
+			// htmlChecks() pide las reglas a quien evalúa; aquí se audita el motor, no esas reglas.
+			ctx.SetHTMLChecker(auditHTML{})
 			if _, eerr := expr.EvaluateWithContext(ctx); eerr != nil {
 				k := e.key + "|" + eerr.Error()
 				if seen[k] {

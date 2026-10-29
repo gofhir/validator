@@ -1,0 +1,14 @@
+{
+  "resourceType": "Observation",
+  "id": "uq-plain",
+  "status": "final",
+  "code": {
+    "text": "weight"
+  },
+  "valueQuantity": {
+    "value": 1,
+    "unit": "mg{ab}",
+    "system": "http://unitsofmeasure.org",
+    "code": "mg{ab}"
+  }
+}

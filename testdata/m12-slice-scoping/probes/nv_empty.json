@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nv-empty",
+  "text": {
+    "status": "generated",
+    "div": ""
+  },
+  "active": true
+}
