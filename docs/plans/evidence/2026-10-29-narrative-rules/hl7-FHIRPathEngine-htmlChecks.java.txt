@@ -1,0 +1,141 @@
+  private List<Base> funcHtmlChecks1(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {
+    if (focus.size() != 1) {
+      return new ArrayList<Base>();
+    }
+    Base n = focus.get(0);
+    XhtmlNode x;
+    if (n.getXhtml() != null)
+      x = n.getXhtml();
+    else if (n instanceof StringType || (n.isPrimitive() && "string".equals(n.fhirType()))) {
+      try {
+        x = new XhtmlParser().parseFragment("<div xmlns=\"http://www.w3.org/1999/xhtml\">"+n.primitiveValue()+"</div>");
+      } catch (Exception e) {
+        return makeBoolean(false);  
+      }
+    } else
+      return new ArrayList<Base>();
+    if (x == null) {
+      return makeBoolean(false);                
+    }
+    boolean ok = checkHtmlNames(x, true);
+    if (ok && VersionUtilities.isR6Plus(this.worker.getVersion())) {
+      ok = checkForContent(x);
+    }
+    return makeBoolean(ok);    
+  }
+
+  private List<Base> funcHtmlChecks2(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {
+    // todo: actually check the HTML
+    if (focus.size() != 1) {
+      return makeBoolean(false);          
+    }
+    XhtmlNode x = focus.get(0).getXhtml();
+    if (x == null) {
+      return makeBoolean(false);                
+    }
+    return makeBoolean(checkForContent(x));    
+  }
+
+  private boolean checkForContent(XhtmlNode x) {
+    if ((x.getNodeType() == NodeType.Text && !Utilities.noString(x.getContent().trim())) || (x.getNodeType() == NodeType.Element && "img".equals(x.getName()))) {
+      return true;
+    }
+    for (XhtmlNode c : x.getChildNodes()) {
+      if (checkForContent(c)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private List<Base> funcComparable(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {
+    // Undocumented what this should do if the input collection is empty
+    // if (focus.size() == 0) {
+    //   return new ArrayList<Base>();
+    // }
+    if (focus.size() != 1 || !(focus.get(0).fhirType().equals("Quantity"))) {
+      return makeBoolean(false);          
+    }
+    List<Base> nl = execute(context, baseToList(context.thisItem), exp.getParameters().get(0), true);
+    if (nl.size() != 1 || !(nl.get(0).fhirType().equals("Quantity"))) {
+      return makeBoolean(false);          
+    }
+    String s1 = getNamedValue(focus.get(0), "system");
+    String u1 = getNamedValue(focus.get(0), "code");
+    String s2 = getNamedValue(nl.get(0), "system");
+    String u2 = getNamedValue(nl.get(0), "code");
+    
+    if (s1 == null || s2 == null || !s1.equals(s2)) {
+      return makeBoolean(false);                
+    }
+    if (u1 == null || u2 == null) {
+      return makeBoolean(false);                
+    }
+    if (u1.equals(u2)) {
+      return makeBoolean(true);
+    }
+    if (s1.equals("http://unitsofmeasure.org") && worker.getUcumService() != null) {
+      try {
+        return makeBoolean(worker.getUcumService().isComparable(u1, u2));
+      } catch (UcumException e) {
+        return makeBoolean(false);  
+      }  
+    } else {
+      return makeBoolean(false);  
+    }
+  }
+
+
+  private String getNamedValue(Base base, String name) {
+    Property p = base.getChildByName(name);
+    if (p != null && p.hasValues() && p.getValues().size() == 1) {
+      return p.getValues().get(0).primitiveValue();
+    }
+    return null;
+  }
+
+  private boolean checkHtmlNames(XhtmlNode node, boolean block) {
+    if (node.getNodeType() == NodeType.Comment) {
+      if (node.getContent().startsWith("DOCTYPE"))
+        return false;
+    }
+    if (node.getNodeType() == NodeType.Element) {
+      if (block) {
+        if (!Utilities.existsInList(node.getName(),
+            "p", "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "a", "span", "b", "em", "i", "strong",
+            "small", "big", "tt", "small", "dfn", "q", "var", "abbr", "acronym", "cite", "blockquote", "hr", "address", "bdo", "kbd", "q", "sub", "sup",
+            "ul", "ol", "li", "dl", "dt", "dd", "pre", "table", "caption", "colgroup", "col", "thead", "tr", "tfoot", "tbody", "th", "td",
+            "code", "samp", "img", "map", "area")) {
+          return false;
+        }        
+      } else {
+        if (!Utilities.existsInList(node.getName(),
+            "a", "span", "b", "em", "i", "strong", "small", "big", "small", "q", "var", "abbr", "acronym", "cite", "kbd", "q", "sub", "sup", "code", "samp", "img", "map", "area")) {
+          return false;
+        }
+      }
+      for (String an : node.getAttributes().keySet()) {
+        boolean ok = an.startsWith("xmlns") || Utilities.existsInList(an,
+            "title", "style", "class", "id", "lang", "xml:lang", "xml:space", "dir", "accesskey", "tabindex",
+            // tables
+            "span", "width", "align", "valign", "char", "charoff", "abbr", "axis", "headers", "scope", "rowspan", "colspan") ||
+
+            Utilities.existsInList(node.getName() + "." + an, "a.href", "a.name", "img.src", "img.border", "div.xmlns", "blockquote.cite", "q.cite",
+                "a.charset", "a.type", "a.name", "a.href", "a.hreflang", "a.rel", "a.rev", "a.shape", "a.coords", "img.src",
+                "img.alt", "img.longdesc", "img.height", "img.width", "img.usemap", "img.ismap", "map.name", "area.shape",
+                "area.coords", "area.href", "area.nohref", "area.alt", "table.summary", "table.width", "table.border",
+                "table.frame", "table.rules", "table.cellspacing", "table.cellpadding", "pre.space", "td.nowrap"
+                );
+        if (!ok) {
+          return false;
+        }
+      }
+      for (XhtmlNode c : node.getChildNodes()) {
+        if (!checkHtmlNames(c, block && !"p".equals(c))) { // FIXME SpotBugs issue: EC_UNRELATED_TYPES "p".equals(c) is always false (String vs XhtmlNode); compare "p".equals(c.getName())
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+

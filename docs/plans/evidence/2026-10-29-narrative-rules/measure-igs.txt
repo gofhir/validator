@@ -1,0 +1,105 @@
+== package divs 81
+  (ours,xpath,java) ok -> {(True, False, True): 12, (True, True, True): 69}
+  not in ours : []
+  not in xpath : [('div@xml:lang', 12)]
+  not in java : []
+== package divs 65
+  (ours,xpath,java) ok -> {(True, True, True): 65}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== package divs 181
+  (ours,xpath,java) ok -> {(True, True, True): 181}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== package divs 231
+  (ours,xpath,java) ok -> {(True, True, True): 229, (True, False, True): 2}
+  not in ours : []
+  not in xpath : [('div@xml:lang', 2)]
+  not in java : []
+== package divs 208
+  (ours,xpath,java) ok -> {(True, True, True): 208}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== package divs 242
+  (ours,xpath,java) ok -> {(True, True, True): 242}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== package divs 447
+  (ours,xpath,java) ok -> {(True, True, True): 435, 'unparseable': 12}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== package divs 20
+  (ours,xpath,java) ok -> {(True, True, True): 20}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== package divs 55
+  (ours,xpath,java) ok -> {(True, False, True): 5, (True, True, True): 50}
+  not in ours : []
+  not in xpath : [('div@xml:lang', 5)]
+  not in java : []
+== package divs 177
+  (ours,xpath,java) ok -> {(True, True, True): 165, (True, False, True): 12}
+  not in ours : []
+  not in xpath : [('div@xml:lang', 12)]
+  not in java : []
+== ch.fhir.ig.ch-core#6.0.0 divs 74
+  (ours,xpath,java) ok -> {(True, True, True): 74}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.au.core#2.0.0 divs 33
+  (ours,xpath,java) ok -> {(True, True, True): 33}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.us.core#6.1.0 divs 210
+  (ours,xpath,java) ok -> {(True, True, True): 210}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.us.core#9.0.0 divs 212
+  (ours,xpath,java) ok -> {(True, True, True): 212}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.us.davinci-deqm#5.0.0 divs 52
+  (ours,xpath,java) ok -> {(True, True, True): 52}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.us.mcode#4.0.0 divs 171
+  (ours,xpath,java) ok -> {(True, True, True): 171}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.uv.cpg#1.0.0 divs 165
+  (ours,xpath,java) ok -> {(True, True, True): 165}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.uv.cql#1.0.0 divs 15
+  (ours,xpath,java) ok -> {(True, True, True): 15}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.uv.crmi#1.0.0 divs 79
+  (ours,xpath,java) ok -> {(True, True, True): 79}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.uv.extensions#5.4.0 divs 885
+  (ours,xpath,java) ok -> {(True, True, True): 884, (True, False, True): 1}
+  not in ours : []
+  not in xpath : [('div@xml:lang', 1)]
+  not in java : []
+== hl7.fhir.uv.ips#2.0.1 divs 74
+  (ours,xpath,java) ok -> {(True, True, True): 73, (True, False, True): 1}
+  not in ours : []
+  not in xpath : [('div@xml:lang', 1)]
+  not in java : []

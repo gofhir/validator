@@ -1,0 +1,15 @@
+== hl7.fhir.r4.examples#4.0.1 divs 6563
+  (ours,xpath,java) ok -> {(True, True, True): 6563}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.r4b.examples#4.3.0 divs 4530
+  (ours,xpath,java) ok -> {(True, True, True): 4530}
+  not in ours : []
+  not in xpath : []
+  not in java : []
+== hl7.fhir.r5.examples#5.0.0 divs 4676
+  (ours,xpath,java) ok -> {(True, True, True): 4676}
+  not in ours : []
+  not in xpath : []
+  not in java : []

@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-center",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><center>text</center></div>"
+  },
+  "active": true
+}

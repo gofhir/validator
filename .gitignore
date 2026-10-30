@@ -72,3 +72,6 @@ docs/.hugo_build.lock
 
 # Packages de los benchmarks (make bench-deps)
 /.cache/
+
+# Salida por defecto de make narrative-corpus
+/narrative-corpus.txt

@@ -13,12 +13,21 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #176, fhirpath v1.16.6 y ucum v4.3.4 (rama `chore/update-fhirpath-ucum`)
+## Frente activo: reglas de la narrativa (rama `fix/narrative-rules`, desde `836a626`)
 
-[2026-10-28-update-fhirpath-ucum.md](2026-10-28-update-fhirpath-ucum.md): paso 1 hecho (con solo las
-dependencias nuevas, `hl7diff same` contra `548ad1f` da idéntico; el validador pisa el `htmlChecks()` de
-fhirpath con una función global). Paso 2 hecho (plan §2-§6). Paso 3 hecho (plan §7: 12 hallazgos, todos aceptados; HL7 no es oráculo de UCUM ni del `div` vacío). Paso 4: aprobado el 28-10-2026. Pasos 5 y 6 hechos (plan §8): sondas de HL7 en las tres versiones, tests en verde, `htmlChecks()` por el verificador de la librería; dos defectos de otros (fhirpath responde sobre un string; txt-1/txt-2 con la misma expresión) registrados. Paso 7 hecho (plan §9): todo en verde, mutaciones 6/6; +2-3 % de asignaciones, todo de fhirpath (issue redactado). Issue gofhir/fhirpath#248 publicado. Paso 8: ronda 1 (plan §10) con 3 medios de Codex, corregidos; mutaciones 6/6 de nuevo. Ronda 2 (plan §11): converge. Paso 9 hecho (plan §12), `make check` verde. Próximo: «commit y pr» del usuario; luego release v2.2.0.
-Después: release v2.2.0.
+[2026-10-29-narrative-rules.md](2026-10-29-narrative-rules.md): pasos 1-4 hechos (plan aprobado el
+29-10-2026: XHTML estricto con `encoding/xml`, ADR-002 con la regla de HTML 4.0). Pasos 5-7 hechos (§5-§7):
+tests nuevos, `htmlchecks.go` reescrito, ADR-002, `make narrative-corpus`; sondas `nx_*` (36) contra HL7,
+divergencias B-D39 y B-D40 declaradas; `hl7diff same` idéntico fuera de las sondas, `hl7diff run` PASS en
+los grupos de narrativa; `make check` verde; costo medido y aceptado. Paso 8 (§8): converge en la ronda 3
+(ronda 2: lectura con `RawToken` por el hallazgo X6); mutaciones 26/26; `hl7diff run` 51/51 PASS y
+`hl7diff same` idéntico fuera de las sondas de narrativa. Próximo: paso 9, cierre (commit y PR cuando el
+usuario lo pida). Borradores
+que publica el usuario: issue de Go de sustitutos (`go-issue-surrogate-draft.md`) y observación a HL7
+(`hl7-observation-txt-draft.md`).
+
+**Cerrado:** #176, fhirpath v1.16.6 y ucum v4.3.4 ([2026-10-28-update-fhirpath-ucum.md](2026-10-28-update-fhirpath-ucum.md)),
+mergeado como #184 (`0a0f891`); release v2.2.0 (`836a626`).
 
 **Cerrado:** #180, clave de elección con otras mayúsculas
 ([2026-10-27-choice-key-case.md](2026-10-27-choice-key-case.md)), mergeado como #182 (`548ad1f`,

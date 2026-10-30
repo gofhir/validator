@@ -1,0 +1,19 @@
+File: constraint.test
+Type: alloc_objects
+Time: 2026-10-29 16:15:57 -03
+Showing nodes accounting for 15469409, 99.04% of 15619862 total
+Dropped 233 nodes (cum <= 78099)
+Showing top 12 nodes out of 33
+      flat  flat%   sum%        cum   cum%
+   6567366 42.04% 42.04%    6567366 42.04%  reflect.unsafe_New
+   3613111 23.13% 65.18%    3993905 25.57%  encoding/xml.(*Decoder).rawToken
+   1707165 10.93% 76.11%    5739490 36.74%  encoding/xml.(*Decoder).Token
+   1049612  6.72% 82.83%    1049612  6.72%  encoding/json/v2.makeString
+    948606  6.07% 88.90%     948606  6.07%  reflect.mapassign_faststr0
+    734688  4.70% 93.60%     734688  4.70%  reflect.makemap
+    376513  2.41% 96.01%     376513  2.41%  reflect.growslice
+    365635  2.34% 98.35%     372198  2.38%  encoding/xml.(*Decoder).name
+    101366  0.65% 99.00%    5860546 37.52%  github.com/gofhir/validator/v2/pkg/constraint.validateXHTML
+      5324 0.034% 99.04%   15619604   100%  github.com/gofhir/validator/v2/pkg/constraint.BenchmarkZZNarratives
+        13 8.3e-05% 99.04%   15619664   100%  testing.(*B).runN
+        10 6.4e-05% 99.04%    1072714  6.87%  encoding/json/v2.makeStringArshaler.func2

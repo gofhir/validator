@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-cdata-script",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><![CDATA[<script>alert(1)</script>]]></p></div>"
+  },
+  "active": true
+}

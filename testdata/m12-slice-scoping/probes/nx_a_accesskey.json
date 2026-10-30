@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-a-accesskey",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><a href=\"http://example.org\" accesskey=\"k\" tabindex=\"1\" hreflang=\"en\">text</a></p></div>"
+  },
+  "active": true
+}

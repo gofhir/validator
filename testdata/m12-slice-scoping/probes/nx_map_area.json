@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-map-area",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\" alt=\"a\" usemap=\"#m\"/><map name=\"m\"><area shape=\"rect\" coords=\"0,0,1,1\" href=\"http://example.org\" alt=\"x\"/></map></div>"
+  },
+  "active": true
+}

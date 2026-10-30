@@ -1,0 +1,14 @@
+validateXHTML (pkg/constraint/htmlchecks.go, main 836a626), test temporal en pkg/constraint, 29-10-2026.
+true = la narrativa pasa htmlChecks().
+
+true   <div xmlns="http://www.w3.org/1999/xhtml"><body onload="x()">text</body></div>
+false  <div xmlns="http://www.w3.org/1999/xhtml"><head><title>t</title></head><p>text</p></div>
+true   <div xmlns="http://www.w3.org/1999/xhtml"><P>text</P></div>
+true   <div xmlns="http://example.org/wrong"><p>text</p></div>
+true   <div><p>text</p></div>
+true   <div xmlns="http://www.w3.org/1999/xhtml"><p>a &nbsp; b</p></div>
+true   <div xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><p>text</p></div>
+true   <div xmlns="http://www.w3.org/1999/xhtml"><p>text<br/></p></div>
+false  <div xmlns="http://www.w3.org/1999/xhtml"><table frame="box"><tr><td>x</td></tr></table></div>
+false  <div xmlns="http://www.w3.org/1999/xhtml"><p>text</p></div><p>after</p>
+true   <div xmlns="http://www.w3.org/1999/xhtml"><p>unclosed</div>

@@ -1,0 +1,27 @@
+package constraint
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func BenchmarkZZNarratives(b *testing.B) {
+	files, _ := filepath.Glob(os.Getenv("HOME") + "/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/*.json")
+	var divs []string
+	for _, f := range files {
+		data, _ := os.ReadFile(f)
+		var doc any
+		if json.Unmarshal(data, &doc) == nil {
+			divs = append(divs, narrativeDivs(doc)...)
+		}
+	}
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		for _, d := range divs {
+			validateXHTML(d)
+		}
+	}
+}

@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-pre-xml-space",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre xml:space=\"preserve\">text</pre></div>"
+  },
+  "active": true
+}

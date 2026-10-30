@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-td-char-axis",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><tr><td char=\".\" charoff=\"1\" axis=\"a\" nowrap=\"nowrap\">x</td></tr></table></div>"
+  },
+  "active": true
+}

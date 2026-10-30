@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-doctype",
+  "text": {
+    "status": "generated",
+    "div": "<!DOCTYPE html><div xmlns=\"http://www.w3.org/1999/xhtml\"><p>text</p></div>"
+  },
+  "active": true
+}

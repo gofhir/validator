@@ -233,17 +233,17 @@
     },
     {
       "name": "narrative-ucum-probes",
-      "files": ["testdata/m12-slice-scoping/probes/nv_*.json", "testdata/m12-slice-scoping/probes/uq_*.json"]
+      "files": ["testdata/m12-slice-scoping/probes/nv_*.json", "testdata/m12-slice-scoping/probes/nx_*.json", "testdata/m12-slice-scoping/probes/uq_*.json"]
     },
     {
       "name": "narrative-ucum-probes-r4b",
       "version": "4.3.0",
-      "files": ["testdata/m12-slice-scoping/probes/nv_*.json", "testdata/m12-slice-scoping/probes/uq_*.json"]
+      "files": ["testdata/m12-slice-scoping/probes/nv_*.json", "testdata/m12-slice-scoping/probes/nx_*.json", "testdata/m12-slice-scoping/probes/uq_*.json"]
     },
     {
       "name": "narrative-ucum-probes-r5",
       "version": "5.0.0",
-      "files": ["testdata/m12-slice-scoping/probes/nv_*.json", "testdata/m12-slice-scoping/probes/uq_*.json"]
+      "files": ["testdata/m12-slice-scoping/probes/nv_*.json", "testdata/m12-slice-scoping/probes/nx_*.json", "testdata/m12-slice-scoping/probes/uq_*.json"]
     },
     {
       "name": "deqm-probes",
