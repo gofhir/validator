@@ -1,0 +1,31 @@
+package main
+
+import (
+	"encoding/xml"
+	"fmt"
+	"strings"
+)
+
+func main() {
+	for _, in := range []string{`<a>&#xD800;</a>`, `<a b="&#xDFFF;"/>`, `<a>&#x0;</a>`, `<a>&#x110000;</a>`} {
+		d := xml.NewDecoder(strings.NewReader(in))
+		var err error
+		var text []string
+		for {
+			var tok xml.Token
+			tok, err = d.Token()
+			if err != nil {
+				break
+			}
+			switch t := tok.(type) {
+			case xml.CharData:
+				text = append(text, fmt.Sprintf("%q", string(t)))
+			case xml.StartElement:
+				for _, a := range t.Attr {
+					text = append(text, fmt.Sprintf("%s=%q", a.Name.Local, a.Value))
+				}
+			}
+		}
+		fmt.Printf("%-22s %v  err=%v\n", in, text, err)
+	}
+}

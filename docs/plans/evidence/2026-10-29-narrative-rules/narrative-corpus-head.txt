@@ -1,0 +1,65 @@
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1	divs 6563	failing 4	not JSON 0
+	package/ActivityDefinition-blood-tubes-supply.json
+	package/ActivityDefinition-heart-valve-replacement.json
+	package/EventDefinition-example.json
+	package/Questionnaire-zika-virus-exposure-assessment.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4b.examples#4.3.0	divs 4530	failing 0	not JSON 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.r5.examples#5.0.0	divs 4676	failing 0	not JSON 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.us.core#6.1.0	divs 391	failing 0	not JSON 2
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.core#6.1.0/package/openapi/us-core-client.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.core#6.1.0/package/openapi/us-core-server.openapi.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.us.core#9.0.0	divs 443	failing 0	not JSON 2
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.core#9.0.0/package/openapi/us-core-client.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.core#9.0.0/package/openapi/us-core-server.openapi.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.ips#2.0.1	divs 251	failing 0	not JSON 1
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.ips#2.0.1/package/openapi/ips-server.openapi.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0	divs 413	failing 0	not JSON 10
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-receiver-cancer-conditions-then-patients.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-receiver-patient-bundle.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-receiver-patients-and-cancer-conditions.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-receiver-patients-in-group.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-receiver-patients-with-cancer-condition.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-sender-cancer-conditions-then-patients.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-sender-patient-bundle.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-sender-patients-and-cancer-conditions.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-sender-patients-in-group.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0/package/openapi/mcode-sender-patients-with-cancer-condition.openapi.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.au.core#2.0.0	divs 98	failing 0	not JSON 2
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.au.core#2.0.0/package/openapi/au-core-requester.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.au.core#2.0.0/package/openapi/au-core-responder.openapi.json
+/Users/robertoaraneda/.fhir/packages/ch.fhir.ig.ch-core#6.0.0	divs 155	failing 0	not JSON 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0	divs 260	failing 0	not JSON 8
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0/package/openapi/consumer-client.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0/package/openapi/consumer-server.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0/package/openapi/gic-client.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0/package/openapi/gic-server.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0/package/openapi/producer-client.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0/package/openapi/producer-server.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0/package/openapi/receiver-server.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0/package/openapi/reporter-client.openapi.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.cpg#1.0.0	divs 612	failing 12	not JSON 1
+	package/example/ActivityDefinition-opioidcds-riskassessment-request.json
+	package/example/Library-ANCCommon.json
+	package/example/Library-ANCRecommendationA2.json
+	package/example/PlanDefinition-anc-contact-schedule.json
+	package/example/PlanDefinition-anc-contact.json
+	package/example/PlanDefinition-anc-recommendation-a2.json
+	package/example/PlanDefinition-cc-cpg-plan-ckd.json
+	package/example/PlanDefinition-ckd-risk-screening.json
+	package/example/PlanDefinition-cpg-common-registration.json
+	package/example/PlanDefinition-opioidcds-r4-recommendation-05.json
+	package/example/PlanDefinition-va-ckd-protocol.json
+	package/example/PlanDefinition-va-ckd-recommendations.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.cpg#1.0.0/package/openapi/cpg-common-patient-registry.openapi.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.cql#1.0.0	divs 35	failing 0	not JSON 2
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.cql#1.0.0/package/openapi/cql-evaluation-service-example.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.cql#1.0.0/package/openapi/cql-evaluation-service.openapi.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.crmi#1.0.0	divs 134	failing 0	not JSON 6
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.crmi#1.0.0/package/openapi/crmi-artifact-terminology-service.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.crmi#1.0.0/package/openapi/crmi-authoring-artifact-repository.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.crmi#1.0.0/package/openapi/crmi-publishable-artifact-repository.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.crmi#1.0.0/package/openapi/crmi-shareable-artifact-repository.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.crmi#1.0.0/package/openapi/publishable-example.openapi.json
+	not JSON: /Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.crmi#1.0.0/package/openapi/shareable-example.openapi.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.extensions#5.4.0	divs 885	failing 0	not JSON 0
+total	divs 19446	failing 16

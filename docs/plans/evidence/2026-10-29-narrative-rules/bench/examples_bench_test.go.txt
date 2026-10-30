@@ -1,0 +1,27 @@
+package validator
+
+import (
+	"context"
+	"os"
+	"testing"
+)
+
+func BenchmarkZZExamples(b *testing.B) {
+	v, err := New()
+	if err != nil {
+		b.Fatal(err)
+	}
+	dir := os.Getenv("HOME") + "/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/"
+	for _, name := range []string{"Patient-example.json", "Observation-example.json", "Composition-example.json"} {
+		data, err := os.ReadFile(dir + name)
+		if err != nil {
+			b.Fatal(err)
+		}
+		b.Run(name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_, _ = v.Validate(context.Background(), data)
+			}
+		})
+	}
+}

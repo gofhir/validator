@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-inner-wrong-ns",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p xmlns=\"http://example.org/wrong\">text</p></div>"
+  },
+  "active": true
+}

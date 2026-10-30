@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-img-only",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\" alt=\"a\"/></div>"
+  },
+  "active": true
+}

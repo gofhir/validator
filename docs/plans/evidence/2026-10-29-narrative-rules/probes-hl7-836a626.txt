@@ -1,0 +1,40 @@
+a_accesskey      HL7: -                                                            ours: -
+a_target         HL7: XHTML_XHTML_Attribute_Illegal txt-1                          ours: txt-1 txt-2
+bdo              HL7: -                                                            ours: -
+body_nested      HL7: XHTML_XHTML_Attribute_Illegal XHTML_XHTML_Element_Illegal txt-1 ours: txt-1 txt-2
+br_lang          HL7: -                                                            ours: txt-1 txt-2
+cdata_script     HL7: txt-2                                                        ours: -
+center           HL7: XHTML_XHTML_Element_Illegal txt-1                            ours: txt-1 txt-2
+comment          HL7: -                                                            ours: -
+comment_after    HL7: -                                                            ours: txt-1 txt-2
+comment_before   HL7: -                                                            ours: txt-1 txt-2
+crossed          HL7: Error parsing XHTML: Malformed XHTML: Found "</b>" expecting txt-1 txt-2 ours: txt-1 txt-2
+doctype          HL7: -                                                            ours: txt-1 txt-2
+font             HL7: XHTML_XHTML_Element_Illegal txt-1                            ours: txt-1 txt-2
+head_nested      HL7: XHTML_XHTML_Element_Illegal txt-1                            ours: txt-1 txt-2
+img_only         HL7: -                                                            ours: -
+inner_wrong_ns   HL7: XHTML_XHTML_NS_InValid                                       ours: txt-1 txt-2
+ins              HL7: XHTML_XHTML_Element_Illegal txt-1                            ours: txt-1 txt-2
+map_area         HL7: -                                                            ours: -
+nbsp             HL7: Invalid entity in the XHTML ('&nbsp;')                       ours: txt-1 txt-2
+nbsp_only        HL7: -                                                            ours: -
+no_ns            HL7: XHTML_XHTML_NS_InValid                                       ours: txt-1 txt-2
+numeric_ref      HL7: -                                                            ours: -
+onclick_mixed    HL7: XHTML_XHTML_Attribute_Illegal txt-1                          ours: txt-1 txt-2
+p_align          HL7: -                                                            ours: -
+p_lang_attr      HL7: -                                                            ours: -
+pi               HL7: -                                                            ours: txt-1 txt-2
+pre_xml_space    HL7: -                                                            ours: -
+prefixed_attr    HL7: XHTML_XHTML_Attribute_Illegal txt-1                          ours: txt-1 txt-2
+prefixed_class   HL7: XHTML_XHTML_Attribute_Illegal txt-1                          ours: txt-1 txt-2
+table_frame      HL7: -                                                            ours: -
+td_bgcolor       HL7: XHTML_XHTML_Attribute_Illegal txt-1                          ours: -
+td_char_axis     HL7: -                                                            ours: -
+trailing         HL7: -                                                            ours: txt-1 txt-2
+trailing_text    HL7: -                                                            ours: txt-1 txt-2
+two_divs         HL7: -                                                            ours: txt-1 txt-2
+unclosed         HL7: Error parsing XHTML: Malformed XHTML: Found "</div>" expecti txt-1 txt-2 ours: txt-1 txt-2
+upper_p          HL7: XHTML_XHTML_Element_Illegal txt-1                            ours: txt-1 txt-2
+upper_xml_lang   HL7: XHTML_XHTML_Attribute_Illegal txt-1                          ours: txt-1 txt-2
+wrong_ns         HL7: XHTML_XHTML_NS_InValid                                       ours: txt-1 txt-2
+xmlns_decl       HL7: -                                                            ours: -

@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-trailing",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>text</p></div><p>after</p>"
+  },
+  "active": true
+}

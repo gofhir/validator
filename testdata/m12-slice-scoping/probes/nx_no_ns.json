@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-no-ns",
+  "text": {
+    "status": "generated",
+    "div": "<div><p>text</p></div>"
+  },
+  "active": true
+}

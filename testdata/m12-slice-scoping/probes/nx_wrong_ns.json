@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-wrong-ns",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://example.org/wrong\"><p>text</p></div>"
+  },
+  "active": true
+}

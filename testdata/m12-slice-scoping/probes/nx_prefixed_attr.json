@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-prefixed-attr",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:x=\"http://example.org/x\"><p x:foo=\"1\">text</p></div>"
+  },
+  "active": true
+}

@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-comment",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><!-- note --><p>text</p></div>"
+  },
+  "active": true
+}

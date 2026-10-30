@@ -1238,5 +1238,165 @@
     "file": "testdata/m12-slice-scoping/probes/uq_space.json",
     "location": "Observation.valueQuantity.code",
     "messageId": "UCUM_INVALID_CODE"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "HTML 4.0 §8.1 applies lang to all elements but BR and HR, and narrative.html allows only the attributes HTML 4.0 describes (ADR-002); HL7 6.10.2 accepts lang on any element.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_br_lang.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "narrative.html: in JSON 'the characters between the first > and the last < delimiters is the content of the <div> element' and \"<?xml ...><div>text</div>\" is not legal, so nothing but whitespace may precede the div; HL7 6.10.2 accepts a DOCTYPE before it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_doctype.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "narrative.html: \"<?xml ...><div>text</div>\" is not legal (the characters between the first > and the last < are the content of the div); HL7 6.10.2 accepts it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_pi.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "narrative.html: in JSON the characters between the first > and the last < delimiters are the content of the <div> element, so nothing but whitespace may follow it; HL7 6.10.2 accepts an element after it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_trailing.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "narrative.html: in JSON the characters between the first > and the last < delimiters are the content of the <div> element, so nothing but whitespace may follow it; HL7 6.10.2 accepts text after it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_trailing_text.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "narrative.html: in JSON the characters between the first > and the last < delimiters are the content of the <div> element, so a second div after it is not part of the narrative; HL7 6.10.2 accepts it.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_two_divs.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "The narrative is XHTML (narrative.html), so its div is in the XHTML namespace; HL7 6.10.2 rejects it too, as XHTML_XHTML_NS_InValid, not as txt-1/txt-2, and htmlChecks() is the only check the spec defines (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_no_ns.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "The narrative is XHTML (narrative.html), so its div is in the XHTML namespace; HL7 6.10.2 rejects it too, as XHTML_XHTML_NS_InValid, not as txt-1/txt-2, and htmlChecks() is the only check the spec defines (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_wrong_ns.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "The narrative is XHTML (narrative.html), so every element is in the XHTML namespace; HL7 6.10.2 rejects it too, as XHTML_XHTML_NS_InValid, not as txt-1/txt-2, and htmlChecks() is the only check the spec defines (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_inner_wrong_ns.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "narrative.html: 'there is no support for HTML entities like &nbsp; or &copy;'; HL7 6.10.2 rejects it too, as 'Invalid entity in the XHTML', not as txt-1/txt-2, and htmlChecks() is the only check the spec defines (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_nbsp.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D40",
+    "reason": "txt-1 and txt-2 share the expression htmlChecks() in R4, R4B and R5, so a narrative that breaks one rule fails both; HL7 6.10.2 rewrites txt-2 by its key to a function the spec does not define (FHIRPathExpressionFixer, htmlChecks2()). Observation to HL7 drafted (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_a_target.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D40",
+    "reason": "txt-1 and txt-2 share the expression htmlChecks() in R4, R4B and R5, so a narrative that breaks one rule fails both; HL7 6.10.2 rewrites txt-2 by its key to a function the spec does not define (FHIRPathExpressionFixer, htmlChecks2()). Observation to HL7 drafted (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_body_nested.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D40",
+    "reason": "txt-1 and txt-2 share the expression htmlChecks() in R4, R4B and R5, so a narrative that breaks one rule fails both; HL7 6.10.2 rewrites txt-2 by its key to a function the spec does not define (FHIRPathExpressionFixer, htmlChecks2()). Observation to HL7 drafted (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_center.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D40",
+    "reason": "txt-1 and txt-2 share the expression htmlChecks() in R4, R4B and R5, so a narrative that breaks one rule fails both; HL7 6.10.2 rewrites txt-2 by its key to a function the spec does not define (FHIRPathExpressionFixer, htmlChecks2()). Observation to HL7 drafted (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_upper_p.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D40",
+    "reason": "txt-1 and txt-2 share the expression htmlChecks() in R4, R4B and R5, so a narrative that breaks one rule fails both; HL7 6.10.2 rewrites txt-2 by its key to a function the spec does not define (FHIRPathExpressionFixer, htmlChecks2()). Observation to HL7 drafted (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_upper_xml_lang.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D40",
+    "reason": "txt-1 and txt-2 share the expression htmlChecks() in R4, R4B and R5, so a narrative that breaks one rule fails both; HL7 6.10.2 rewrites txt-2 by its key to a function the spec does not define (FHIRPathExpressionFixer, htmlChecks2()). Observation to HL7 drafted (ADR-002).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_prefixed_class.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "HTML 4.0 §15.1.1 describes bgcolor on TD (deprecated), and narrative.html forbids deprecated elements, not attributes; the R4 txt-1 xpath accepts bgcolor too. HL7 6.10.2 rejects it.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/nx_td_bgcolor.json",
+    "location": "Patient.text.div",
+    "messageId": "http://hl7.org/fhir/StructureDefinition/Narrative#txt-1"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "In XML, CDATA is text, not markup: <![CDATA[<script>…]]> is text content and no script element, so the narrative has non-whitespace content. HL7 6.10.2 reports txt-2.",
+    "side": "hl7",
+    "file": "testdata/m12-slice-scoping/probes/nx_cdata_script.json",
+    "location": "Patient.text.div",
+    "messageId": "http://hl7.org/fhir/StructureDefinition/Narrative#txt-2"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "narrative.html: in JSON the characters between the first > and the last < delimiters are the content of the <div> element, so nothing but whitespace may precede it, a comment included; HL7 6.10.2 accepts the comment.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_comment_before.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "B-D39",
+    "reason": "narrative.html: in JSON the characters between the first > and the last < delimiters are the content of the <div> element, so nothing but whitespace may follow it, a comment included; HL7 6.10.2 accepts the comment.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/nx_comment_after.json",
+    "location": "Patient.text.div",
+    "messageId": "CONSTRAINT_FAILED"
   }
 ]

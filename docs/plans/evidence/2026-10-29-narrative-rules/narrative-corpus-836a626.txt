@@ -1,0 +1,19 @@
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1	divs 6563	failing 4
+	package/ActivityDefinition-blood-tubes-supply.json
+	package/ActivityDefinition-heart-valve-replacement.json
+	package/EventDefinition-example.json
+	package/Questionnaire-zika-virus-exposure-assessment.json
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4b.examples#4.3.0	divs 4530	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.r5.examples#5.0.0	divs 4676	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.us.core#6.1.0	divs 391	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.us.core#9.0.0	divs 443	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.ips#2.0.1	divs 251	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.us.mcode#4.0.0	divs 413	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.au.core#2.0.0	divs 98	failing 0
+/Users/robertoaraneda/.fhir/packages/ch.fhir.ig.ch-core#6.0.0	divs 155	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.us.davinci-deqm#5.0.0	divs 260	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.cpg#1.0.0	divs 612	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.cql#1.0.0	divs 35	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.crmi#1.0.0	divs 134	failing 0
+/Users/robertoaraneda/.fhir/packages/hl7.fhir.uv.extensions#5.4.0	divs 885	failing 0
+total	divs 19446	failing 4

@@ -1,0 +1,40 @@
+package org.hl7.fhir.validation.instance.utils;
+
+import org.hl7.fhir.utilities.VersionUtilities;
+
+public class FHIRPathExpressionFixer {
+
+
+  @SuppressWarnings("checkstyle:stringImplicitPatternUsage")
+  //False positive: .matches() occurs in FHIRPath expression string literals, not Java calls
+  public static String fixExpr(String expr, String key, String version) {
+    // this is a hack work around for past publication of wrong FHIRPath expressions
+
+    boolean r5 = VersionUtilities.isR5Ver(version);
+    boolean r4 = VersionUtilities.isR4Ver(version) || VersionUtilities.isR4BVer(version);
+
+    // see https://chat.fhir.org/#narrow/stream/196008-ig-publishing-requirements/topic/Operation.20Definition.20Parameters.20table
+    if (r5 && "opd-3".equals(key)) {
+      return "targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/all-resource-types'))";
+    }    
+    if (r4 && "opd-3".equals(key)) {
+      return "targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))";
+    }
+    
+    if ("probability is decimal implies (probability as decimal) <= 100".equals(expr)) {
+      return "(probability.exists() and (probability is decimal)) implies ((probability as decimal) <= 100)";
+    }
+    if ("enableWhen.count() > 2 implies enableBehavior.exists()".equals(expr)) {
+      return "enableWhen.count() >= 2 implies enableBehavior.exists()";
+    }
+    if ("txt-2".equals(key)) {
+      return "htmlChecks2()";
+    }
+    if ("que-7".equals(key)) {
+      return "operator = 'exists' implies (answer is boolean)"; // wrong prior to R5
+    }
+    if ("dom-6".equals(key)) {
+      return "(%rootResource != $this) or text.`div`.exists()";
+    }
+    if ("generated='generated' implies source.empty()".equals(expr)) {
+      return "generation='generated' implies source.empty()";

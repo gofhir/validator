@@ -1,0 +1,189 @@
+# attribute	section	elements	deprecated	dtd
+abbr	11.2.6	td,th		
+accept-charset	17.3	form		
+accept	17.3	input		
+accesskey	17.11.2	a,area,button,input,label,legend,textarea		
+action	17.3	form		
+align	11.2.2	caption	D	L
+align	13.7.4	applet,iframe,img,input,object	D	L
+align	17.10	legend	D	L
+align	11.2.1	table	D	L
+align	15.3	hr	D	L
+align	15.1.2	div,h1,h2,h3,h4,h5,h6,p	D	L
+align	11.3.2	col,colgroup,tbody,td,tfoot,th,thead,tr		
+alink	7.5.1	body	D	L
+alt	13.8	applet	D	L
+alt	13.8	area,img		
+alt	13.8	input		
+archive	13.3	object		
+archive	13.4	applet	D	L
+axis	11.2.6	td,th		
+background	7.5.1	body	D	L
+bgcolor	15.1.1	table	D	L
+bgcolor	15.1.1	tr	D	L
+bgcolor	15.1.1	td,th	D	L
+bgcolor	15.1.1	body	D	L
+border	13.7.3	img,object	D	L
+border	11.3.1	table		
+cellpadding	11.3.3	table		
+cellspacing	11.3.3	table		
+char	11.3.2	col,colgroup,tbody,td,tfoot,th,thead,tr		
+charoff	11.3.2	col,colgroup,tbody,td,tfoot,th,thead,tr		
+charset	12.2	a,link,script		
+checked	17.4	input		
+cite	9.2.2	blockquote,q		
+cite	9.4	del,ins		
+class	7.5.2	all elements but base,basefont,head,html,meta,param,script,style,title		
+classid	13.3	object		
+clear	15.1.3.2	br	D	L
+code	13.4	applet	D	L
+codebase	13.3	object		
+codebase	13.4	applet	D	L
+codetype	13.3	object		
+color	15.2.2	basefont,font	D	L
+cols	16.2.1	frameset		F
+cols	17.7	textarea		
+colspan	11.2.6	td,th		
+compact	10.2	dir,menu	D	L
+compact	10.2	dl,ol,ul	D	L
+content	7.4.4.2	meta		
+coords	13.6.1	area		
+coords	13.6.1	a		
+data	13.3	object		
+datetime	9.4	del,ins		
+declare	13.3	object		
+defer	18.2.1	script		
+dir	8.2	all elements but applet,base,basefont,bdo,br,frame,frameset,hr,iframe,param,script		
+dir	8.2.4	bdo		
+disabled	17.12.1	button,input,optgroup,option,select,textarea		
+enctype	17.3	form		
+face	15.2.2	basefont,font	D	L
+for	17.9.1	label		
+frame	11.3.1	table		
+frameborder	16.2.2	frame,iframe		F
+headers	11.2.6	td,th		
+height	16.5	iframe		L
+height	13.7.1	img,object		
+height	13.4	applet	D	L
+height	11.2.6	td,th	D	L
+href	12.2	a,area,link		
+href	12.4	base		
+hreflang	12.2	a,link		
+hspace	13.7.2	applet,img,object	D	L
+http-equiv	7.4.4.2	meta		
+id	7.5.2	all elements but base,head,html,meta,script,style,title		
+ismap	13.6.2	img		
+label	17.6.1	option		
+label	17.6.1	optgroup		
+lang	8.1	all elements but applet,base,basefont,br,frame,frameset,hr,iframe,param,script		
+language	18.2.1	script	D	L
+link	7.5.1	body	D	L
+longdesc	13.2	img		
+longdesc	16.2.2	frame,iframe		F
+marginheight	16.2.2	frame,iframe		F
+marginwidth	16.2.2	frame,iframe		F
+maxlength	17.4	input		
+media	14.2.3	style		
+media	14.2.3	link		
+method	17.3	form		
+multiple	17.6	select		
+name	17.5	button,textarea		
+name	13.4	applet	D	L
+name	17.6	select		
+name	16.2.2	frame,iframe		F
+name	12.2	a		
+name	17.4	input,object		
+name	13.6.1	map		
+name	13.3.2	param		
+name	7.4.4.2	meta		
+nohref	13.6.1	area		
+noresize	16.2.2	frame		F
+noshade	15.3	hr	D	L
+nowrap	11.2.6	td,th	D	L
+object	13.4	applet	D	L
+onblur	18.2.3	a,area,button,input,label,select,textarea		
+onchange	18.2.3	input,select,textarea		
+onclick	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+ondblclick	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onfocus	18.2.3	a,area,button,input,label,select,textarea		
+onkeydown	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onkeypress	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onkeyup	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onload	18.2.3	frameset		F
+onload	18.2.3	body		
+onmousedown	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onmousemove	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onmouseout	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onmouseover	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onmouseup	18.2.3	all elements but applet,base,basefont,bdo,br,font,frame,frameset,head,html,iframe,isindex,meta,param,script,style,title		
+onreset	18.2.3	form		
+onselect	18.2.3	input,textarea		
+onsubmit	18.2.3	form		
+onunload	18.2.3	frameset		F
+onunload	18.2.3	body		
+profile	7.4.1	head		
+prompt	17.8	isindex	D	L
+readonly	17.12.2	textarea		
+readonly	17.12.2	input		
+rel	12.2	a,link		
+rev	12.2	a,link		
+rows	16.2.1	frameset		F
+rows	17.7	textarea		
+rowspan	11.2.6	td,th		
+rules	11.3.1	table		
+scheme	7.4.4.2	meta		
+scope	11.2.6	td,th		
+scrolling	16.2.2	frame,iframe		F
+selected	17.6.1	option		
+shape	13.6.1	area		
+shape	13.6.1	a		
+size	15.3	hr	D	L
+size	15.2.2	font	D	L
+size	17.4	input		
+size	15.2.2	basefont	D	L
+size	17.6	select		
+span	11.2.4.2	col		
+span	11.2.4.1	colgroup		
+src	18.2.1	script		
+src	17.4	input		
+src	16.2.2	frame,iframe		F
+src	13.2	img		
+standby	13.3	object		
+start	10.2	ol	D	L
+style	14.2.2	all elements but base,basefont,head,html,meta,param,script,style,title		
+summary	11.2.1	table		
+tabindex	17.11.1	a,area,button,input,object,select,textarea		
+target	16.3	a,area,base,form,link		L
+text	7.5.1	body	D	L
+title	7.4.3	style		
+title	7.4.3	all elements but base,basefont,head,html,meta,param,script,style,title		
+type	12.2	a,link		
+type	13.3	object		
+type	13.3.2	param		
+type	18.2.1	script		
+type	14.2.3	style		
+type	17.4	input		
+type	10.2	li	D	L
+type	10.2	ol	D	L
+type	10.2	ul	D	L
+type	17.5	button		
+usemap	13.6.1	img,input,object		
+valign	11.3.2	col,colgroup,tbody,td,tfoot,th,thead,tr		
+value	17.6.1	option		
+value	13.3.2	param		
+value	17.4	input		
+value	17.5	button		
+value	10.2	li	D	L
+valuetype	13.3.2	param		
+version	7.3	html	D	L
+vlink	7.5.1	body	D	L
+vspace	13.7.2	applet,img,object	D	L
+width	15.3	hr	D	L
+width	16.5	iframe		L
+width	13.7.1	img,object		
+width	11.2.1	table		
+width	13.4	applet	D	L
+width	11.2.4.2	col		
+width	11.2.4.1	colgroup		
+width	11.2.6	td,th	D	L
+width	9.3.4	pre	D	L

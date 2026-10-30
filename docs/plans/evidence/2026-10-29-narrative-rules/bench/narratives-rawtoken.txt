@@ -1,0 +1,3 @@
+BenchmarkZZNarratives-12    	       1	1441009917 ns/op	197951016 B/op	 5445782 allocs/op
+BenchmarkZZNarratives-12    	       2	 688432458 ns/op	197950752 B/op	 5445779 allocs/op
+BenchmarkZZNarratives-12    	       2	1183748021 ns/op	197950968 B/op	 5445781 allocs/op

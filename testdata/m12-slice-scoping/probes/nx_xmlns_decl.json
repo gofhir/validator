@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-xmlns-decl",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:x=\"urn:example\"><p>text</p></div>"
+  },
+  "active": true
+}

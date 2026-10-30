@@ -1,0 +1,20 @@
+BenchmarkZZExamples/Patient-example.json-12         	    2283	    573971 ns/op	  422363 B/op	    7803 allocs/op
+BenchmarkZZExamples/Patient-example.json-12         	    2394	    640964 ns/op	  422385 B/op	    7803 allocs/op
+BenchmarkZZExamples/Patient-example.json-12         	    1880	    599852 ns/op	  422307 B/op	    7803 allocs/op
+BenchmarkZZExamples/Observation-example.json-12     	    4911	    260783 ns/op	  200993 B/op	    3326 allocs/op
+BenchmarkZZExamples/Observation-example.json-12     	    4676	    263540 ns/op	  200996 B/op	    3326 allocs/op
+BenchmarkZZExamples/Observation-example.json-12     	    4113	    254932 ns/op	  200968 B/op	    3326 allocs/op
+BenchmarkZZExamples/Composition-example.json-12     	    1825	    586486 ns/op	  486484 B/op	    8323 allocs/op
+BenchmarkZZExamples/Composition-example.json-12     	    1882	    647821 ns/op	  486446 B/op	    8323 allocs/op
+BenchmarkZZExamples/Composition-example.json-12     	    2043	    634489 ns/op	  486433 B/op	    8323 allocs/op
+
+BenchmarkZZExamples/Patient-example.json-12         	    2278	    614609 ns/op	  411124 B/op	    7895 allocs/op
+BenchmarkZZExamples/Patient-example.json-12         	    2283	    601621 ns/op	  411011 B/op	    7895 allocs/op
+BenchmarkZZExamples/Patient-example.json-12         	    2131	    656006 ns/op	  411114 B/op	    7895 allocs/op
+BenchmarkZZExamples/Observation-example.json-12     	    4741	    270962 ns/op	  194027 B/op	    3444 allocs/op
+BenchmarkZZExamples/Observation-example.json-12     	    5182	    338945 ns/op	  194051 B/op	    3444 allocs/op
+BenchmarkZZExamples/Observation-example.json-12     	    5226	    276650 ns/op	  194024 B/op	    3444 allocs/op
+BenchmarkZZExamples/Composition-example.json-12     	    1549	    762826 ns/op	  454904 B/op	    8491 allocs/op
+BenchmarkZZExamples/Composition-example.json-12     	    2132	    711075 ns/op	  454948 B/op	    8491 allocs/op
+BenchmarkZZExamples/Composition-example.json-12     	    1765	    647724 ns/op	  454937 B/op	    8491 allocs/op
+

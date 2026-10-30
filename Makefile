@@ -1,4 +1,4 @@
-.PHONY: download-specs test lint build check compare-baseline bench-deps bench bench-compare
+.PHONY: download-specs test lint build check compare-baseline narrative-corpus bench-deps bench bench-compare
 
 # Línea base de las comparaciones (compare-baseline, bench-compare): un ref de git.
 BASE ?=
@@ -36,6 +36,19 @@ check:
 compare-baseline:
 	@test -n "$(BASE)" || { echo "usage: make compare-baseline BASE=<git ref>"; exit 2; }
 	go run ./internal/tools/hl7diff same -baseline $(BASE) -heavy
+
+# narrative-corpus mide htmlChecks() sobre cada narrativa de los packages del caché FHIR (ADR-002):
+# los ejemplos oficiales de R4, R4B y R5 y los IG del manifiesto de hl7diff. Escribe NARRATIVE_OUT.
+FHIR_PACKAGES ?= $(HOME)/.fhir/packages
+NARRATIVE_PACKAGES ?= $(addprefix $(FHIR_PACKAGES)/,hl7.fhir.r4.examples\#4.0.1 hl7.fhir.r4b.examples\#4.3.0 \
+	hl7.fhir.r5.examples\#5.0.0 hl7.fhir.us.core\#6.1.0 hl7.fhir.us.core\#9.0.0 hl7.fhir.uv.ips\#2.0.1 \
+	hl7.fhir.us.mcode\#4.0.0 hl7.fhir.au.core\#2.0.0 ch.fhir.ig.ch-core\#6.0.0 hl7.fhir.us.davinci-deqm\#5.0.0 \
+	hl7.fhir.uv.cpg\#1.0.0 hl7.fhir.uv.cql\#1.0.0 hl7.fhir.uv.crmi\#1.0.0 hl7.fhir.uv.extensions\#5.4.0)
+NARRATIVE_OUT ?= narrative-corpus.txt
+narrative-corpus:
+	NARRATIVE_PACKAGES="$(NARRATIVE_PACKAGES)" NARRATIVE_OUT="$(abspath $(NARRATIVE_OUT))" \
+		go test -run '^TestNarrativeCorpus$$' -count=1 ./pkg/constraint
+	@tail -1 $(NARRATIVE_OUT)
 
 # bench-deps descarga los packages de los benchmarks con guías, verificados con SHA-256.
 bench-deps:

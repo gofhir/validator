@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "nx-upper-p",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><P>text</P></div>"
+  },
+  "active": true
+}

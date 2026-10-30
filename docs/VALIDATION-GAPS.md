@@ -93,7 +93,9 @@ which resolve a `url|version` canonical exactly when possible.
 Resolved via `htmlChecks()`: fhirpath implements the function and asks the validator's HTML checker
 (`pkg/constraint/htmlchecks.go`, given to each evaluation since v2.2.0) for FHIR's rules.
 The `txt-1`/`txt-2` constraints from the Narrative StructureDefinition now evaluate dynamically.
-Validates: `<div>` root, allowed HTML elements, prohibited elements/attributes, non-empty content.
+Validates the narrative as XML (well-formed, a single XHTML `<div>` root, no HTML entities), its
+elements and attributes against HTML 4.0 as narrative.html describes them (ADR-002), and non-empty
+content.
 See: #51 (Gap 4).
 
 ---

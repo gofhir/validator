@@ -1,0 +1,290 @@
+# hl7diff same: baseline 836a626 vs working tree
+
+decisions: identical (15 files, 26 lines)
+
+multimatch: identical (3 files, 9 lines)
+
+core-probes: identical (7 files, 12 lines)
+
+type-profile-probes: identical (47 files, 92 lines)
+
+nested-resource-probes: identical (4 files, 6 lines)
+
+review-probes: identical (5 files, 9 lines)
+
+extension-probes: identical (14 files, 27 lines)
+
+primitive-extension-probes: identical (5 files, 5 lines)
+
+context-probes: identical (33 files, 131 lines)
+
+context-eval-probes: identical (31 files, 55 lines)
+
+context-scope-probes: identical (198 files, 369 lines)
+
+interface-probes: identical (9 files, 35 lines)
+
+interface-probes-r5: identical (16 files, 20 lines)
+
+interface-probes-r4b: identical (9 files, 36 lines)
+
+constraint-probes: identical (81 files, 162 lines)
+
+invariant-probes: identical (61 files, 107 lines)
+
+fixedpattern-probes: identical (50 files, 86 lines)
+
+target-probes: identical (71 files, 104 lines)
+
+nested-slicing-probes: identical (18 files, 23 lines)
+
+json-shape-probes: identical (34 files, 103 lines)
+
+binding-probes: identical (5 files, 10 lines)
+
+binding-walk-probes: identical (14 files, 31 lines)
+
+extension-walk-probes: identical (20 files, 42 lines)
+
+binding-profile-probes: identical (10 files, 19 lines)
+
+valueset-membership-probes: identical (43 files, 52 lines)
+
+holder-profile-probes: identical (50 files, 93 lines)
+
+reference-walk-probes: identical (56 files, 137 lines)
+
+package-example-cpg-probes: identical (4 files, 10 lines)
+
+package-example-cql-probes: identical (2 files, 3 lines)
+
+unknown-codesystem-probes: identical (521 files, 1035 lines)
+
+fullurl-probes: identical (48 files, 135 lines)
+
+fullurl-probes-r4b: identical (1 files, 3 lines)
+
+fullurl-probes-r5: identical (4 files, 8 lines)
+
+held-resource-probes: identical (39 files, 146 lines)
+
+resolve-probes: identical (19 files, 31 lines)
+
+resource-element-probes: identical (6 files, 17 lines)
+
+canonical-probes: identical (17 files, 19 lines)
+
+r5-probes: identical (8 files, 12 lines)
+
+r4b-probes: identical (1 files, 1 lines)
+
+## narrative-ucum-probes: 70 lines differ (49 files, 75 baseline lines)
+
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json"}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json"}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_cdata_script.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+- sorted line 22
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_center.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_cdata_script.json"}
+- sorted line 23
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_center.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+- sorted line 24
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_center.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+- sorted line 25
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment.json"}
+- sorted line 26
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+- sorted line 27
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+- sorted line 28
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_font.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+- sorted line 29
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_font.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+- sorted line 30
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_head_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+- sorted line 31
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_head_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+- sorted line 32
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_img_only.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes'","location":{"Line":6,"Column":10}}
+- sorted line 33
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_inner_wrong_ns.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content'","location":{"Line":6,"Column":10}}
+
+## narrative-ucum-probes-r4b: 70 lines differ (49 files, 75 baseline lines)
+
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json"}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json"}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_cdata_script.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 22
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_center.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_cdata_script.json"}
+- sorted line 23
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_center.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 24
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_center.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 25
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment.json"}
+- sorted line 26
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 27
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 28
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_font.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 29
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_font.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 30
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_head_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 31
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_head_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 32
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_img_only.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 33
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_inner_wrong_ns.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+
+## narrative-ucum-probes-r5: 70 lines differ (49 files, 75 baseline lines)
+
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json"}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_accesskey.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_a_target.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json"}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_bdo.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_body_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_cdata_script.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_br_lang.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 22
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_center.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_cdata_script.json"}
+- sorted line 23
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_center.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 24
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_center.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 25
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment.json"}
+- sorted line 26
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 27
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_after.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 28
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_font.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 29
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_font.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_comment_before.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 30
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_head_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 31
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_head_nested.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_crossed.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 32
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_img_only.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-1: 'The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003ca\u003e elements (either name or href), images and internally contained style attributes' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+- sorted line 33
+  base: {"file":"testdata/m12-slice-scoping/probes/nx_inner_wrong_ns.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/nx_doctype.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.text.div"],"diagnostics":"Constraint failed: txt-2: 'The narrative SHALL have some non-whitespace content' (defined in http://hl7.org/fhir/StructureDefinition/Narrative)","location":{"Line":6,"Column":10}}
+
+deqm-probes: identical (15 files, 65 lines)
+
+deqm-examples: identical (108 files, 451 lines)
+
+uscore-probes: identical (7 files, 18 lines)
+
+uscore-examples: identical (183 files, 409 lines)
+
+ips: identical (44 files, 88 lines)
+
+mcode-examples: identical (179 files, 471 lines)
+
+aucore-examples: identical (65 files, 108 lines)
+
+chcore-examples: identical (48 files, 76 lines)
+
+clcore-examples: identical (20 files, 24 lines)
+
+**DIFFERENT**
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/same-report.md
+exit status 1

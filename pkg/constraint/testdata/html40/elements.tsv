@@ -1,0 +1,92 @@
+# element	section	deprecated	dtd
+a	12.2		
+abbr	9.2.1		
+acronym	9.2.1		
+address	7.5.6		
+applet	13.4	D	L
+area	13.6.1		
+b	15.2.1		
+base	12.4		
+basefont	15.2.2	D	L
+bdo	8.2.4		
+big	15.2.1		
+blockquote	9.2.2		
+body	7.5.1		
+br	9.3.2		
+button	17.5		
+caption	11.2.2		
+center	15.1.2	D	L
+cite	9.2.1		
+code	9.2.1		
+col	11.2.4.1		
+colgroup	11.2.4		
+dd	10.3		
+del	9.4		
+dfn	9.2.1		
+dir	10.4	D	L
+div	7.5.4		
+dl	10.3		
+dt	10.3		
+em	9.2.1		
+fieldset	17.10		
+font	15.2.2	D	L
+form	17.3		
+frame	16.2.2		F
+frameset	16.2.1		F
+h1	7.5.5		
+h2	7.5.5		
+h3	7.5.5		
+h4	7.5.5		
+h5	7.5.5		
+h6	7.5.5		
+head	7.4.1		
+hr	15.3		
+html	7.3		
+i	15.2.1		
+iframe	16.5		L
+img	13.2		
+input	17.4		
+ins	9.4		
+isindex	17.8	D	L
+kbd	9.2.1		
+label	17.9.1		
+legend	17.10		
+li	10.2		
+link	12.3		
+map	13.6.1		
+menu	10.4	D	L
+meta	7.4.4.1		
+noframes	16.4.1		F
+noscript	18.3.1		
+object	13.3		
+ol	10.2		
+optgroup	17.6		
+option	17.6		
+p	9.3.1		
+param	13.3.2		
+pre	9.3.4		
+q	9.2.2		
+s	15.2.1	D	L
+samp	9.2.1		
+script	18.2.1		
+select	17.6		
+small	15.2.1		
+span	7.5.4		
+strike	15.2.1	D	L
+strong	9.2.1		
+style	14.2.3		
+sub	9.2.3		
+sup	9.2.3		
+table	11.2.1		
+tbody	11.2.3		
+td	11.2.6		
+textarea	17.7		
+tfoot	11.2.3		
+th	11.2.6		
+thead	11.2.3		
+title	7.4.2		
+tr	11.2.5		
+tt	15.2.1		
+u	15.2.1	D	L
+ul	10.2		
+var	9.2.1		
