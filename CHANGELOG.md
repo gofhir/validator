@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/gofhir/validator/compare/v2.2.0...v2.2.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* **narrative:** read the narrative as strict XHTML and derive its HTML rules from HTML 4.0 ([#185](https://github.com/gofhir/validator/issues/185)) ([970e2c1](https://github.com/gofhir/validator/commit/970e2c1b1e1a9657b55de9bbab56c7889b643650))
+
 ## [2.2.0](https://github.com/gofhir/validator/compare/v2.1.0...v2.2.0) (2026-10-29)
 
 
