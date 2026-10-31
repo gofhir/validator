@@ -13,18 +13,16 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: reglas de la narrativa (rama `fix/narrative-rules`, desde `836a626`)
+## Frente activo: #183, elemento base de ChoiceType (rama `fix/choice-base-element`, desde `970e2c1`)
 
-[2026-10-29-narrative-rules.md](2026-10-29-narrative-rules.md): pasos 1-4 hechos (plan aprobado el
-29-10-2026: XHTML estricto con `encoding/xml`, ADR-002 con la regla de HTML 4.0). Pasos 5-7 hechos (§5-§7):
-tests nuevos, `htmlchecks.go` reescrito, ADR-002, `make narrative-corpus`; sondas `nx_*` (36) contra HL7,
-divergencias B-D39 y B-D40 declaradas; `hl7diff same` idéntico fuera de las sondas, `hl7diff run` PASS en
-los grupos de narrativa; `make check` verde; costo medido y aceptado. Paso 8 (§8): converge en la ronda 3
-(ronda 2: lectura con `RawToken` por el hallazgo X6); mutaciones 26/26; `hl7diff run` 51/51 PASS y
-`hl7diff same` idéntico fuera de las sondas de narrativa. Próximo: paso 9, cierre (commit y PR cuando el
-usuario lo pida). Borradores
-que publica el usuario: issue de Go de sustitutos (`go-issue-surrogate-draft.md`) y observación a HL7
-(`hl7-observation-txt-draft.md`).
+[2026-10-30-choice-base-element.md](2026-10-30-choice-base-element.md): pasos 1 a 9 hechos (30-10-2026).
+`baseElement` es recursivo con `childOf`. El review convergió en la ronda 2 (solo Codex). `make check`
+está en verde y `hl7diff same` da IDENTICAL. El backlog está en §9. Sin commit: falta el «commit y pr»
+del usuario.
+
+**Cerrado:** reglas de la narrativa ([2026-10-29-narrative-rules.md](2026-10-29-narrative-rules.md)), mergeado
+como #185 (`970e2c1`, 30-10-2026). Borradores que publica el usuario: issue de Go de sustitutos
+(`go-issue-surrogate-draft.md`) y observación a HL7 (`hl7-observation-txt-draft.md`).
 
 **Cerrado:** #176, fhirpath v1.16.6 y ucum v4.3.4 ([2026-10-28-update-fhirpath-ucum.md](2026-10-28-update-fhirpath-ucum.md)),
 mergeado como #184 (`0a0f891`); release v2.2.0 (`836a626`).

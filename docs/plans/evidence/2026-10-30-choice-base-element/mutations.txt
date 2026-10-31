@@ -1,0 +1,9 @@
+m1-ignore-reference: KILLED
+m2-parent-from-snapshot: KILLED
+m3-no-target-type: KILLED
+m4-no-cycle-guard: KILLED
+m6-base-types-first: KILLED
+m7-target-by-path: KILLED
+m8-rel-from-id: SURVIVED
+m9-no-base-path: KILLED
+m10-id-in-profiles: KILLED

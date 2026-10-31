@@ -1,0 +1,164 @@
+package registry
+
+// Sonda del paso 7 de docs/plans/2026-10-30-choice-base-element.md: compara la base de cada elemento de
+// elección según baseElement de 970e2c1 (oldBaseElement, copiado tal cual) y la de ahora, en el núcleo
+// R4, R4B y R5 y en las IG instaladas en ~/.fhir/packages. Se copia a pkg/registry y se corre con
+// go test ./pkg/registry -run TestZZCompareBases -v.
+
+import (
+	"context"
+	"os"
+	"slices"
+	"strings"
+	"testing"
+
+	"github.com/gofhir/validator/v2/pkg/loader"
+)
+
+func (r *Registry) oldBaseElement(node *ElementNode) *ElementNode {
+	if n := r.definedIn(node.sd, node.Def.Path); n != nil {
+		return n
+	}
+	basePath := ""
+	if node.Def.Base != nil {
+		basePath = node.Def.Base.Path
+	}
+	for anc := node.Parent; anc != nil; anc = anc.Parent {
+		if len(anc.Def.Type) != 1 || !strings.HasPrefix(node.Def.Path, anc.Def.Path+".") {
+			continue
+		}
+		t := r.GetByType(anc.Def.Type[0].Code)
+		if t == nil {
+			continue
+		}
+		root := t.Tree().Root()
+		if root == nil {
+			continue
+		}
+		if n := r.definedIn(t, root.Def.Path+node.Def.Path[len(anc.Def.Path):]); n != nil {
+			return n
+		}
+		if basePath != "" {
+			if n := r.definedIn(t, basePath); n != nil {
+				return n
+			}
+		}
+	}
+	if basePath == "" {
+		return nil
+	}
+	return r.definedIn(node.sd, basePath)
+}
+
+func zzName(n *ElementNode) string {
+	if n == nil {
+		return "nil"
+	}
+	return n.sd.URL + "#" + n.Def.ID
+}
+
+func zzTypes(n *ElementNode, own *ElementNode) string {
+	if n == nil {
+		n = own
+	}
+	codes := make([]string, 0, len(n.Def.Type))
+	for _, t := range n.Def.Type {
+		codes = append(codes, t.Code)
+	}
+	slices.Sort(codes)
+	return strings.Join(codes, "|")
+}
+
+func zzCompare(t *testing.T, label string, r *Registry) {
+	n, nodeDiff, typeDiff, nilOld, nilNew := 0, 0, 0, 0, 0
+	urls := r.AllURLs()
+	slices.Sort(urls)
+	for _, url := range urls {
+		sd := r.GetByURL(url)
+		if sd == nil || sd.Snapshot == nil {
+			continue
+		}
+		tree := sd.Tree()
+		for _, el := range sd.Snapshot.Element {
+			if !strings.HasSuffix(el.Path, "[x]") {
+				continue
+			}
+			node := tree.ByID(el.ID)
+			if node == nil {
+				continue
+			}
+			n++
+			if r.baseElement(node) == nil {
+				t.Logf("%s NIL %s %s base=%v", label, sd.URL, el.ID, el.Base)
+			}
+			old, nw := r.oldBaseElement(node), r.baseElement(node)
+			if old == nil {
+				nilOld++
+			}
+			if nw == nil {
+				nilNew++
+			}
+			if old == nw {
+				continue
+			}
+			nodeDiff++
+			ot, nt := zzTypes(old, node), zzTypes(nw, node)
+			kind := "SAME-TYPES"
+			if ot != nt {
+				kind = "TYPES"
+				typeDiff++
+			}
+			t.Logf("%s %s %s %s: old=%s [%s] new=%s [%s]", label, kind, sd.URL, el.ID, zzName(old), ot, zzName(nw), nt)
+		}
+	}
+	t.Logf("%s SUMMARY: %d choice elements, %d different base, %d different types, nil old %d, nil new %d", label, n, nodeDiff, typeDiff, nilOld, nilNew)
+}
+
+func zzLoadIGs(t *testing.T, r *Registry, igs [][2]string) {
+	home, _ := os.UserHomeDir()
+	l := loader.NewLoader(home + "/.fhir/packages")
+	for _, ig := range igs {
+		before := len(r.AllURLs())
+		p, err := l.LoadPackage(ig[0], ig[1])
+		if err != nil {
+			t.Logf("skip %v: %v", ig, err)
+			continue
+		}
+		if err := r.LoadFromPackages([]*loader.Package{p}); err != nil {
+			t.Logf("skip %v: %v", ig, err)
+		}
+		t.Logf("package %s#%s: %d resources, +%d definitions", ig[0], ig[1], len(p.Resources), len(r.AllURLs())-before)
+	}
+	total, failed := 0, 0
+	for _, url := range r.AllURLs() {
+		total++
+		if sd := r.GetByURL(url); sd != nil && sd.Snapshot == nil {
+			if err := r.EnsureSnapshot(context.Background(), sd); err != nil {
+				failed++
+				t.Logf("snapshot %s: %v", url, err)
+			}
+		}
+	}
+	t.Logf("loaded %d definitions, %d snapshots failed", total, failed)
+}
+
+func TestZZCompareBases(t *testing.T) {
+	for _, v := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		zzCompare(t, v, sharedVersion(t, v))
+	}
+	r4 := sharedVersion(t, "4.0.1").Clone()
+	zzLoadIGs(t, r4, [][2]string{
+		{"hl7.fhir.us.core", "6.1.0"}, {"hl7.fhir.us.core", "9.0.0"}, {"hl7.fhir.uv.sdc", "3.0.0"}, {"hl7.fhir.uv.cpg", "1.0.0"},
+		{"hl7.fhir.uv.tools.r4", "1.3.0"}, {"ch.fhir.ig.ch-core", "6.0.0"}, {"hl7.fhir.us.mcode", "4.0.0"},
+		{"hl7.fhir.us.qicore", "6.0.0"}, {"hl7.fhir.uv.ips", "2.0.1"}, {"hl7.fhir.uv.extensions.r4", "5.4.0"},
+		{"hl7.fhir.us.davinci-deqm", "5.0.0"}, {"hl7.fhir.uv.crmi", "1.0.0"}, {"hl7.fhir.uv.genomics-reporting", "2.0.0"},
+		{"hl7.fhir.cl.clcore", "1.9.4"}, {"hl7.fhir.au.core", "2.0.0"}, {"hl7.fhir.au.base", "6.0.0"},
+		{"hl7.fhir.uv.ipa", "1.1.0"}, {"hl7.fhir.uv.smart-app-launch", "2.2.0"}, {"hl7.fhir.uv.bulkdata", "2.0.0"},
+		{"hl7.fhir.us.cqfmeasures", "5.0.0"}, {"hl7.fhir.uv.cql", "1.0.0"}, {"fhir.cqf.common", "4.0.1"},
+		{"hl7.fhir.uv.sdc", "4.0.0"}, {"hl7.fhir.uv.cpg", "2.0.0"},
+	})
+	zzCompare(t, "R4+IGs", r4)
+	r5 := sharedVersion(t, "5.0.0").Clone()
+	zzLoadIGs(t, r5, [][2]string{{"hl7.fhir.uv.extensions.r5", "5.2.0"}})
+	zzCompare(t, "R5+IGs", r5)
+}
