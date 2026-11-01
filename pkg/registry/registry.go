@@ -754,51 +754,81 @@ func (r *Registry) choiceBase(node *ElementNode) *ElementNode {
 // baseElement busca el elemento base de node siguiendo la cadena de baseDefinition, en la primera
 // definición que no es un perfil y lo tiene: un perfil (derivation constraint) restringe elementos y no
 // los define, así que se salta. Así un modelo lógico es su propia base aunque se llame como un tipo de
-// FHIR, y un perfil llega a su tipo por URL, no por nombre.
+// FHIR, y un perfil llega a su tipo por URL, no por nombre. Un slice tiene la base del elemento que
+// corta, que está en la cadena con su ruta.
 //
-// ElementDefinition.base.path es una ruta, no una definición (dos modelos lógicos pueden compartir la raíz): la
-// estructura manda y base.path desempata. Primero, la ruta propia en la cadena de la definición de
-// node. Si no está, el elemento lo despliega el snapshot desde un tipo (de Timing en
-// Observation.effective[x]:effectiveTiming.repeat.bounds[x]; de Extension en
-// Extension.extension:s.value[x]) y está en la definición del tipo del ancestro que lo despliega: se
-// sube por los ancestros y, en el primero cuyo único tipo (resuelto por su código, que puede ser una
-// URL) tiene la ruta relativa, o si no base.path, se toma el elemento; base.path hace falta bajo un
-// contentReference del tipo (T.item.item.value[x], base T.item.value[x]). Por último, base.path en la
-// cadena propia: un contentReference del mismo recurso (Questionnaire.item.item.answerOption.value[x],
-// base Questionnaire.item.answerOption.value[x]).
+// ElementDefinition.base.path es una ruta, no una definición (dos modelos lógicos pueden compartir la
+// raíz): la estructura manda y base.path desempata. Si la ruta propia no está en la cadena, el elemento
+// lo despliega el snapshot, y su base es el hijo de la base de su padre (childOf): la del padre sale de
+// lo que la define, no del snapshot del perfil, porque el generador reemplaza una contentReference por
+// el tipo de su destino cuando el diferencial nombra hijos. Por último, base.path en la cadena propia.
 func (r *Registry) baseElement(node *ElementNode) *ElementNode {
 	if n := r.definedIn(node.sd, node.Def.Path); n != nil {
 		return n
 	}
-	basePath := ""
-	if node.Def.Base != nil {
-		basePath = node.Def.Base.Path
-	}
-	for anc := node.Parent; anc != nil; anc = anc.Parent {
-		if len(anc.Def.Type) != 1 || !strings.HasPrefix(node.Def.Path, anc.Def.Path+".") {
-			continue
+	if p := node.Parent; p != nil && strings.HasPrefix(node.Def.Path, p.Def.Path+".") {
+		e := r.choiceBase(p)
+		if e == nil {
+			e = p
 		}
-		t := r.GetByType(anc.Def.Type[0].Code)
-		if t == nil {
-			continue
-		}
-		root := t.Tree().Root()
-		if root == nil {
-			continue
-		}
-		if n := r.definedIn(t, root.Def.Path+node.Def.Path[len(anc.Def.Path):]); n != nil {
+		if n := r.childOf(e, p, node.Def.Path[len(p.Def.Path):], map[*ElementNode]bool{}); n != nil {
 			return n
 		}
-		if basePath != "" {
-			if n := r.definedIn(t, basePath); n != nil {
-				return n
-			}
-		}
 	}
-	if basePath == "" {
+	if node.Def.Base == nil || node.Def.Base.Path == "" {
 		return nil
 	}
-	return r.definedIn(node.sd, basePath)
+	return r.definedIn(node.sd, node.Def.Base.Path)
+}
+
+// childOf devuelve el hijo rel (".value[x]") del elemento e, la base de p, según lo que define e: el
+// hijo que su definición declara, buscado primero por id (el destino de una referencia puede ser un
+// slice, #Provenance.agent:Author, cuya ruta es la del elemento cortado); si no, el de su
+// contentReference, que «bring[s] across all the rules» del elemento que nombra
+// (ElementDefinition.contentReference); y si no, el de su tipo. El mapa seen corta las referencias en ciclo.
+func (r *Registry) childOf(e, p *ElementNode, rel string, seen map[*ElementNode]bool) *ElementNode {
+	if seen[e] {
+		return nil
+	}
+	seen[e] = true
+	if e.sd.Derivation != DerivationConstraint {
+		if n := e.sd.Tree().ByID(e.Def.ID + rel); n != nil {
+			return n
+		}
+	}
+	if n := r.definedIn(e.sd, e.Def.Path+rel); n != nil {
+		return n
+	}
+	if target, _ := r.ContentReference(e.sd, e); target != nil {
+		if n := r.childOf(target, p, rel, seen); n != nil {
+			return n
+		}
+	}
+	t := r.unrolledType(e, p)
+	if t == nil {
+		return nil
+	}
+	root := t.Tree().Root()
+	if root == nil {
+		return nil
+	}
+	return r.childOf(root, p, rel, seen)
+}
+
+// unrolledType devuelve la definición del tipo cuyos hijos despliega p, de base e: el único tipo de p
+// (un perfil acota los de su base: effective[x] restringido a Timing) o, si p no declara tipos, el de e.
+// El código puede ser una URL (un modelo lógico). Es nil si no hay exactamente un tipo o no está cargado.
+// Los hijos de un slice sin tipos de un elemento con varios no tienen un tipo del que derivar: la
+// especificación no ata el nombre de un slice a un tipo (profiling.html), así que no se adivina.
+func (r *Registry) unrolledType(e, p *ElementNode) *StructureDefinition {
+	types := p.Def.Type
+	if len(types) == 0 {
+		types = e.Def.Type
+	}
+	if len(types) != 1 {
+		return nil
+	}
+	return r.GetByType(types[0].Code)
 }
 
 // definedIn devuelve el elemento de ruta path en la primera definición de la cadena de baseDefinition

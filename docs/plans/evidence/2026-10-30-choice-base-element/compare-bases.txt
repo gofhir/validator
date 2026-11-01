@@ -1,0 +1,44 @@
+=== RUN   TestZZCompareBases
+4.0.1 SUMMARY: 1252 choice elements, 0 different base, 0 different types, nil old 0, nil new 0
+4.3.0 SUMMARY: 1243 choice elements, 0 different base, 0 different types, nil old 0, nil new 0
+5.0.0 SUMMARY: 1406 choice elements, 0 different base, 0 different types, nil old 0, nil new 0
+package hl7.fhir.us.core#6.1.0: 420 resources, +59 definitions
+package hl7.fhir.us.core#9.0.0: 422 resources, +12 definitions
+package hl7.fhir.uv.sdc#3.0.0: 211 resources, +70 definitions
+package hl7.fhir.uv.cpg#1.0.0: 355 resources, +157 definitions
+package hl7.fhir.uv.tools.r4#1.3.0: 255 resources, +87 definitions
+package ch.fhir.ig.ch-core#6.0.0: 148 resources, +73 definitions
+package hl7.fhir.us.mcode#4.0.0: 342 resources, +53 definitions
+package hl7.fhir.us.qicore#6.0.0: 182 resources, +65 definitions
+package hl7.fhir.uv.ips#2.0.1: 145 resources, +32 definitions
+package hl7.fhir.uv.extensions.r4#5.4.0: 1824 resources, +95 definitions
+package hl7.fhir.us.davinci-deqm#5.0.0: 104 resources, +26 definitions
+package hl7.fhir.uv.crmi#1.0.0: 171 resources, +59 definitions
+package hl7.fhir.uv.genomics-reporting#2.0.0: 98 resources, +26 definitions
+package hl7.fhir.cl.clcore#1.9.4: 148 resources, +29 definitions
+package hl7.fhir.au.core#2.0.0: 64 resources, +26 definitions
+package hl7.fhir.au.base#6.0.0: 304 resources, +105 definitions
+package hl7.fhir.uv.ipa#1.1.0: 34 resources, +12 definitions
+package hl7.fhir.uv.smart-app-launch#2.2.0: 24 resources, +6 definitions
+package hl7.fhir.uv.bulkdata#2.0.0: 14 resources, +0 definitions
+package hl7.fhir.us.cqfmeasures#5.0.0: 176 resources, +35 definitions
+package hl7.fhir.uv.cql#1.0.0: 38 resources, +13 definitions
+package fhir.cqf.common#4.0.1: 16 resources, +0 definitions
+package hl7.fhir.uv.sdc#4.0.0: 294 resources, +24 definitions
+package hl7.fhir.uv.cpg#2.0.0: 289 resources, +11 definitions
+loaded 1985 definitions, 0 snapshots failed
+R4+IGs NIL http://fhir.ch/ig/ch-core/StructureDefinition/ch-core-patient-ech-11-placeofbirth Extension.value[x] base=&{Extension.value[x] 0 1}
+R4+IGs NIL http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-codesystem CodeSystem.concept.property.value[x] base=&{CodeSystem.concept.property.value[x] 1 1}
+R4+IGs NIL http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-task Task.input.value[x] base=&{Task.input.value[x] 1 1}
+R4+IGs NIL http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-task Task.input:questionnaire.value[x] base=&{Task.input.value[x] 1 1}
+R4+IGs NIL http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-task Task.input:responseEndpoint.value[x] base=&{Task.input.value[x] 1 1}
+R4+IGs NIL http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-task Task.output.value[x] base=&{Task.output.value[x] 1 1}
+R4+IGs NIL http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-task Task.output:response.value[x] base=&{Task.output.value[x] 1 1}
+R4+IGs NIL http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-valueset ValueSet.expansion.parameter.value[x] base=&{ValueSet.expansion.parameter.value[x] 0 1}
+R4+IGs SUMMARY: 3486 choice elements, 0 different base, 0 different types, nil old 8, nil new 8
+package hl7.fhir.uv.extensions.r5#5.2.0: 1518 resources, +0 definitions
+loaded 948 definitions, 0 snapshots failed
+R5+IGs SUMMARY: 1406 choice elements, 0 different base, 0 different types, nil old 0, nil new 0
+--- PASS: TestZZCompareBases (3.93s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	4.581s

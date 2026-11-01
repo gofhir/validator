@@ -1,0 +1,246 @@
+package registry
+
+import (
+	"context"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/gofhir/validator/v2/pkg/loader"
+)
+
+// advNewBaseElement is the plan's §2 algorithm, written from the plan text only.
+func (r *Registry) advNewBaseElement(node *ElementNode) *ElementNode {
+	if n := r.definedIn(node.sd, node.Def.Path); n != nil {
+		return n
+	}
+	basePath := ""
+	if node.Def.Base != nil {
+		basePath = node.Def.Base.Path
+	}
+	for anc := node.Parent; anc != nil; anc = anc.Parent {
+		if !strings.HasPrefix(node.Def.Path, anc.Def.Path+".") {
+			continue
+		}
+		rel := node.Def.Path[len(anc.Def.Path):]
+		if anc.Def.ContentReference != nil {
+			dest, _ := r.ContentReference(node.sd, anc)
+			if dest == nil {
+				continue
+			}
+			if n := r.definedIn(dest.sd, dest.Def.Path+rel); n != nil {
+				return n
+			}
+			continue
+		}
+		types := anc.Def.Type
+		for s := anc.SliceOf; len(types) == 0 && s != nil; s = s.SliceOf {
+			types = s.Def.Type
+		}
+		if len(types) != 1 {
+			continue
+		}
+		t := r.GetByType(types[0].Code)
+		if t == nil {
+			continue
+		}
+		root := t.Tree().Root()
+		if root == nil {
+			continue
+		}
+		if n := r.definedIn(t, root.Def.Path+rel); n != nil {
+			return n
+		}
+		if basePath != "" {
+			if n := r.definedIn(t, basePath); n != nil {
+				return n
+			}
+		}
+	}
+	if basePath == "" {
+		return nil
+	}
+	return r.definedIn(node.sd, basePath)
+}
+
+func advCompare(t *testing.T, label string, r *Registry) {
+	t.Helper()
+	n, diff, nilBoth := 0, 0, 0
+	for _, url := range r.AllURLs() {
+		sd := r.GetByURL(url)
+		if sd == nil || sd.Snapshot == nil {
+			continue
+		}
+		tree := sd.Tree()
+		for _, el := range sd.Snapshot.Element {
+			if !strings.HasSuffix(el.Path, "[x]") {
+				continue
+			}
+			node := tree.ByID(el.ID)
+			if node == nil {
+				continue
+			}
+			n++
+			old := r.baseElement(node)
+			nw := r.advNewBaseElement(node)
+			if old == nil && nw == nil {
+				nilBoth++
+			}
+			if old != nw {
+				diff++
+				oldS, nwS := "nil", "nil"
+				if old != nil {
+					oldS = old.sd.URL + "#" + old.Def.ID
+				}
+				if nw != nil {
+					nwS = nw.sd.URL + "#" + nw.Def.ID
+				}
+				t.Logf("%s DIFF %s %s: old=%s new=%s", label, sd.URL, el.ID, oldS, nwS)
+			}
+		}
+	}
+	t.Logf("%s: %d choice elements, %d differences, %d nil in both", label, n, diff, nilBoth)
+}
+
+func TestAdvCompareOldNew(t *testing.T) {
+	for _, v := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		advCompare(t, v, sharedVersion(t, v))
+	}
+	home, _ := os.UserHomeDir()
+	l := loader.NewLoader(home + "/.fhir/packages")
+	igs := [][2]string{
+		{"hl7.fhir.us.core", "6.1.0"}, {"hl7.fhir.uv.sdc", "3.0.0"}, {"hl7.fhir.uv.cpg", "1.0.0"},
+		{"hl7.fhir.uv.tools.r4", "1.3.0"}, {"ch.fhir.ig.ch-core", "6.0.0"}, {"hl7.fhir.us.mcode", "4.0.0"},
+		{"hl7.fhir.us.qicore", "6.0.0"}, {"hl7.fhir.uv.ips", "2.0.1"}, {"hl7.fhir.uv.extensions.r4", "5.4.0"},
+		{"hl7.fhir.us.davinci-deqm", "5.0.0"}, {"hl7.fhir.uv.crmi", "1.0.0"}, {"hl7.fhir.uv.genomics-reporting", "2.0.0"},
+		{"hl7.fhir.cl.clcore", "1.9.4"}, {"hl7.fhir.au.core", "2.0.0"}, {"hl7.fhir.au.base", "6.0.0"},
+	}
+	r := sharedVersion(t, "4.0.1").Clone()
+	for _, ig := range igs {
+		p, err := l.LoadPackage(ig[0], ig[1])
+		if err != nil {
+			t.Logf("skip %v: %v", ig, err)
+			continue
+		}
+		if err := r.LoadFromPackages([]*loader.Package{p}); err != nil {
+			t.Logf("skip %v: %v", ig, err)
+		}
+	}
+	for _, url := range r.AllURLs() {
+		sd := r.GetByURL(url)
+		if sd != nil && sd.Snapshot == nil {
+			_ = r.EnsureSnapshot(context.Background(), sd)
+		}
+	}
+	advCompare(t, "R4+IGs", r)
+}
+
+// Case-1 variant with the plan's algorithm, and a profile snapshot WITHOUT base (base is 0..1).
+func TestAdvPlanCases(t *testing.T) {
+	const model = `{"resourceType":"StructureDefinition","id":"lt","url":"http://example.org/LT","name":"LT","status":"active","kind":"logical","abstract":false,"type":"http://example.org/LT","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Base","derivation":"specialization","snapshot":{"element":[
+  {"id":"Timing","path":"Timing","base":{"path":"Timing","min":0,"max":"*"}},
+  {"id":"Timing.repeat","path":"Timing.repeat","min":0,"max":"1","base":{"path":"Timing.repeat","min":0,"max":"1"},"type":[{"code":"Timing"}]},
+  {"id":"Timing.repeat.bounds[x]","path":"Timing.repeat.bounds[x]","min":0,"max":"1","base":{"path":"Timing.repeat.bounds[x]","min":0,"max":"1"},"type":[{"code":"Coding"},{"code":"date"}]},
+  {"id":"Timing.repeat.item","path":"Timing.repeat.item","min":0,"max":"*","base":{"path":"Timing.repeat.item","min":0,"max":"*"},"contentReference":"#Timing.repeat"}]}}`
+	const profile = `{"resourceType":"StructureDefinition","id":"ltp","url":"http://example.org/LTP","name":"LTP","status":"active","kind":"logical","abstract":false,"type":"http://example.org/LT","baseDefinition":"http://example.org/LT","derivation":"constraint","differential":{"element":[
+  {"id":"Timing","path":"Timing"},
+  {"id":"Timing.repeat.item.bounds[x]","path":"Timing.repeat.item.bounds[x]","type":[{"code":"Coding"}]}]}}`
+	// Questionnaire profile with its own snapshot, no base on the expanded element, contentReference by URL.
+	const qNoBase = `{"resourceType":"StructureDefinition","id":"qnb","url":"http://example.org/QNB","name":"QNB","status":"active","kind":"resource","abstract":false,"type":"Questionnaire","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Questionnaire","derivation":"constraint","snapshot":{"element":[
+  {"id":"Questionnaire","path":"Questionnaire"},
+  {"id":"Questionnaire.item","path":"Questionnaire.item","min":0,"max":"*","type":[{"code":"BackboneElement"}]},
+  {"id":"Questionnaire.item.item","path":"Questionnaire.item.item","min":0,"max":"*","contentReference":"http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item"},
+  {"id":"Questionnaire.item.item.answerOption","path":"Questionnaire.item.item.answerOption","min":0,"max":"*","type":[{"code":"BackboneElement"}]},
+  {"id":"Questionnaire.item.item.answerOption.value[x]","path":"Questionnaire.item.item.answerOption.value[x]","min":1,"max":"1","type":[{"code":"Coding"}]}]}}`
+	// Choice slice (value[x]:valueTiming) without type, child choice under it.
+	const obsSlice = `{"resourceType":"StructureDefinition","id":"obs-vt","url":"http://example.org/OVT","name":"OVT","status":"active","kind":"resource","abstract":false,"type":"Observation","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Observation","derivation":"constraint","snapshot":{"element":[
+  {"id":"Observation","path":"Observation","base":{"path":"Observation","min":0,"max":"*"}},
+  {"id":"Observation.value[x]","path":"Observation.value[x]","min":0,"max":"1","base":{"path":"Observation.value[x]","min":0,"max":"1"},"slicing":{"discriminator":[{"type":"type","path":"$this"}],"rules":"open"},"type":[{"code":"Quantity"},{"code":"Timing"},{"code":"string"}]},
+  {"id":"Observation.value[x]:valueTiming","path":"Observation.value[x]","sliceName":"valueTiming","min":0,"max":"1","base":{"path":"Observation.value[x]","min":0,"max":"1"}},
+  {"id":"Observation.value[x]:valueTiming.repeat","path":"Observation.value[x].repeat","min":0,"max":"1","base":{"path":"Timing.repeat","min":0,"max":"1"},"type":[{"code":"Element"}]},
+  {"id":"Observation.value[x]:valueTiming.repeat.bounds[x]","path":"Observation.value[x].repeat.bounds[x]","min":0,"max":"1","base":{"path":"Timing.repeat.bounds[x]","min":0,"max":"1"},"type":[{"code":"Period"}]}]}}`
+	for _, v := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		r := sharedVersion(t, v).Clone()
+		loadSDs(t, r, model, profile, qNoBase, obsSlice)
+		sd := r.GetByURL("http://example.org/LTP")
+		_ = r.EnsureSnapshot(context.Background(), sd)
+		node := sd.Tree().ByID("Timing.repeat.item.bounds[x]")
+		if node == nil {
+			t.Fatalf("%s: no node", v)
+		}
+		want := r.GetByURL("http://example.org/LT").Tree().ByID("Timing.repeat.bounds[x]")
+		if got := r.advNewBaseElement(node); got != want {
+			t.Errorf("%s case1 new: got %s#%s (%p) want %s#%s (%p); byURL==resolve: %v", v, got.sd.URL, got.Def.ID, got.sd, want.sd.URL, want.Def.ID, want.sd, func() bool { x, _ := r.ResolveCanonical("http://example.org/LT"); return x == want.sd }())
+			t.Logf("old: %v; ChoiceType new types: %v", r.baseElement(node) == want, got.Def.Type)
+		}
+		node = r.GetByURL("http://example.org/QNB").Tree().ByID("Questionnaire.item.item.answerOption.value[x]")
+		old, nw := r.baseElement(node), r.advNewBaseElement(node)
+		t.Logf("%s QNB (no base): old=%v new=%v", v, old != nil, nw != nil)
+		node = r.GetByURL("http://example.org/OVT").Tree().ByID("Observation.value[x]:valueTiming.repeat.bounds[x]")
+		old, nw = r.baseElement(node), r.advNewBaseElement(node)
+		t.Logf("%s OVT (typeless choice slice ancestor): old=%v new=%v", v, old != nil, nw != nil)
+	}
+}
+
+func loadSDs(t *testing.T, r *Registry, sds ...string) {
+	t.Helper()
+	resources := make([][]byte, 0, len(sds))
+	for _, sd := range sds {
+		resources = append(resources, []byte(sd))
+	}
+	pkg, err := loader.NewLoader("").LoadFromResources(resources)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := r.LoadFromPackages([]*loader.Package{pkg}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestAdvDumpLTP(t *testing.T) {
+	const model = `{"resourceType":"StructureDefinition","id":"lt","url":"http://example.org/LT","name":"LT","status":"active","kind":"logical","abstract":false,"type":"http://example.org/LT","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Base","derivation":"specialization","snapshot":{"element":[
+  {"id":"Timing","path":"Timing","base":{"path":"Timing","min":0,"max":"*"}},
+  {"id":"Timing.repeat","path":"Timing.repeat","min":0,"max":"1","base":{"path":"Timing.repeat","min":0,"max":"1"},"type":[{"code":"Timing"}]},
+  {"id":"Timing.repeat.bounds[x]","path":"Timing.repeat.bounds[x]","min":0,"max":"1","base":{"path":"Timing.repeat.bounds[x]","min":0,"max":"1"},"type":[{"code":"Coding"},{"code":"date"}]},
+  {"id":"Timing.repeat.item","path":"Timing.repeat.item","min":0,"max":"*","base":{"path":"Timing.repeat.item","min":0,"max":"*"},"contentReference":"#Timing.repeat"}]}}`
+	const profile = `{"resourceType":"StructureDefinition","id":"ltp","url":"http://example.org/LTP","name":"LTP","status":"active","kind":"logical","abstract":false,"type":"http://example.org/LT","baseDefinition":"http://example.org/LT","derivation":"constraint","differential":{"element":[
+  {"id":"Timing","path":"Timing"},
+  {"id":"Timing.repeat.item.bounds[x]","path":"Timing.repeat.item.bounds[x]","type":[{"code":"Coding"}]}]}}`
+	r := sharedVersion(t, "4.0.1").Clone()
+	loadSDs(t, r, model, profile)
+	sd := r.GetByURL("http://example.org/LTP")
+	if err := r.EnsureSnapshot(context.Background(), sd); err != nil {
+		t.Log(err)
+	}
+	for _, el := range sd.Snapshot.Element {
+		cr := ""
+		if el.ContentReference != nil {
+			cr = *el.ContentReference
+		}
+		t.Logf("%s path=%s type=%v cr=%q base=%v", el.ID, el.Path, el.Type, cr, el.Base)
+	}
+	node := sd.Tree().ByID("Timing.repeat.item.bounds[x]")
+	for a := node.Parent; a != nil; a = a.Parent {
+		t.Logf("anc %s sd=%s cr=%v types=%v", a.Def.ID, a.sd.URL, a.Def.ContentReference != nil, a.Def.Type)
+	}
+}
+
+func TestAdvKeptCR(t *testing.T) {
+	const model = `{"resourceType":"StructureDefinition","id":"lt","url":"http://example.org/LT","name":"LT","status":"active","kind":"logical","abstract":false,"type":"http://example.org/LT","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Base","derivation":"specialization","snapshot":{"element":[
+  {"id":"Timing","path":"Timing","base":{"path":"Timing","min":0,"max":"*"}},
+  {"id":"Timing.repeat","path":"Timing.repeat","min":0,"max":"1","base":{"path":"Timing.repeat","min":0,"max":"1"},"type":[{"code":"Timing"}]},
+  {"id":"Timing.repeat.bounds[x]","path":"Timing.repeat.bounds[x]","min":0,"max":"1","base":{"path":"Timing.repeat.bounds[x]","min":0,"max":"1"},"type":[{"code":"Coding"},{"code":"date"}]},
+  {"id":"Timing.repeat.item","path":"Timing.repeat.item","min":0,"max":"*","base":{"path":"Timing.repeat.item","min":0,"max":"*"},"contentReference":"#Timing.repeat"}]}}`
+	const profile = `{"resourceType":"StructureDefinition","id":"ltp2","url":"http://example.org/LTP2","name":"LTP2","status":"active","kind":"logical","abstract":false,"type":"http://example.org/LT","baseDefinition":"http://example.org/LT","derivation":"constraint","snapshot":{"element":[
+  {"id":"Timing","path":"Timing","base":{"path":"Timing","min":0,"max":"*"}},
+  {"id":"Timing.repeat","path":"Timing.repeat","min":0,"max":"1","base":{"path":"Timing.repeat","min":0,"max":"1"},"type":[{"code":"Timing"}]},
+  {"id":"Timing.repeat.bounds[x]","path":"Timing.repeat.bounds[x]","min":0,"max":"1","base":{"path":"Timing.repeat.bounds[x]","min":0,"max":"1"},"type":[{"code":"Coding"},{"code":"date"}]},
+  {"id":"Timing.repeat.item","path":"Timing.repeat.item","min":0,"max":"*","base":{"path":"Timing.repeat.item","min":0,"max":"*"},"contentReference":"#Timing.repeat"},
+  {"id":"Timing.repeat.item.bounds[x]","path":"Timing.repeat.item.bounds[x]","min":0,"max":"1","base":{"path":"Timing.repeat.bounds[x]","min":0,"max":"1"},"type":[{"code":"Coding"}]}]}}`
+	r := sharedVersion(t, "4.0.1").Clone()
+	loadSDs(t, r, model, profile)
+	node := r.GetByURL("http://example.org/LTP2").Tree().ByID("Timing.repeat.item.bounds[x]")
+	want := r.GetByURL("http://example.org/LT").Tree().ByID("Timing.repeat.bounds[x]")
+	got := r.advNewBaseElement(node)
+	t.Logf("kept-cr snapshot: new==want %v (got %s#%s)", got == want, got.sd.URL, got.Def.ID)
+}

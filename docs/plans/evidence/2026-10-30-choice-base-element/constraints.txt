@@ -1,0 +1,76 @@
+== r4.core#4.0.1
+StructureDefinition sdf-15a | If the first element in a differential has no "." in the path and it's not a logical model, it has no type
+StructureDefinition sdf-5 | If the structure defines an extension then the structure must have context information
+StructureDefinition sdf-9 | In any snapshot or differential, no label, code or requirements on an element without a "." in the path (e.g. the first element)
+StructureDefinition sdf-11 | If there's a type, its content must match the path name in the first element of a snapshot
+StructureDefinition sdf-15 | The first element in a snapshot has no type unless model is a logical model.
+StructureDefinition sdf-18 | Context Invariants can only be used for extensions
+StructureDefinition sdf-19 | FHIR Specification models only use FHIR defined types
+StructureDefinition sdf-23 | No slice name on root
+StructureDefinition.snapshot sdf-8 | All snapshot elements must start with the StructureDefinition's specified type for non-logical models, or with the same type name for logical models
+StructureDefinition.differential sdf-20 | No slicing on the root element
+StructureDefinition.differential sdf-8a | In any differential, all the elements must start with the StructureDefinition's specified type for non-logical models, or with the same type name for logical models
+ElementDefinition eld-5 | if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding
+ElementDefinition eld-6 | Fixed value may only be specified if there is one type
+ElementDefinition eld-7 | Pattern may only be specified if there is one type
+ElementDefinition eld-11 | Binding can only be present for coded elements, string, and uri
+ElementDefinition eld-13 | Types must be unique by code
+ElementDefinition eld-16 | sliceName must be composed of proper tokens separated by "/"
+ElementDefinition eld-22 | sliceIsConstraining can only appear if slicename is present
+ElementDefinition.contentReference DEF | Identifies an element defined elsewhere in the definition whose content rules should be applied to the current element. ContentReferences bring across all the rules that are in the ElementDefinition for the element, including definitions, cardinality constraints, bindings, invariants etc. | COMMENT | ContentReferences can only be defined in specializations, not constrained types, and they cannot be changed and always reference the non-constrained definition.
+ElementDefinition.type eld-4 | Aggregation may only be specified if one of the allowed types for the element is a reference
+ElementDefinition.type eld-17 | targetProfile is only allowed if the type is Reference or canonical
+ElementDefinition.type DEF | The data type or resource that the value of this element is permitted to be. | COMMENT | The Type of the element can be left blank in a differential constraint, in which case the type is inherited from the resource. Abstract types are not permitted to appear as a type when multiple types are listed.  (I.e. Abstract types cannot be part of a choice).
+== r4b.core#4.3.0
+StructureDefinition sdf-15a | If the first element in a differential has no "." in the path and it's not a logical model, it has no type
+StructureDefinition sdf-5 | If the structure defines an extension then the structure must have context information
+StructureDefinition sdf-9 | In any snapshot or differential, no label, code or requirements on an element without a "." in the path (e.g. the first element)
+StructureDefinition sdf-11 | If there's a type, its content must match the path name in the first element of a snapshot
+StructureDefinition sdf-15 | The first element in a snapshot has no type unless model is a logical model.
+StructureDefinition sdf-18 | Context Invariants can only be used for extensions
+StructureDefinition sdf-19 | FHIR Specification models only use FHIR defined types
+StructureDefinition sdf-23 | No slice name on root
+StructureDefinition.snapshot sdf-8 | All snapshot elements must start with the StructureDefinition's specified type for non-logical models, or with the same type name for logical models
+StructureDefinition.snapshot sdf-24 | For CodeableReference elements, target profiles must be listed on the CodeableReference, not the CodeableReference.reference
+StructureDefinition.snapshot sdf-25 | For CodeableReference elements, bindings must be listed on the CodeableReference, not the CodeableReference.concept
+StructureDefinition.differential sdf-20 | No slicing on the root element
+StructureDefinition.differential sdf-8a | In any differential, all the elements must start with the StructureDefinition's specified type for non-logical models, or with the same type name for logical models
+ElementDefinition eld-5 | if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding
+ElementDefinition eld-6 | Fixed value may only be specified if there is one type
+ElementDefinition eld-7 | Pattern may only be specified if there is one type
+ElementDefinition eld-11 | Binding can only be present for coded elements, string, and uri
+ElementDefinition eld-13 | Types must be unique by code
+ElementDefinition eld-16 | sliceName must be composed of proper tokens separated by"/"
+ElementDefinition eld-22 | sliceIsConstraining can only appear if slicename is present
+ElementDefinition.contentReference DEF | Identifies an element defined elsewhere in the definition whose content rules should be applied to the current element. ContentReferences bring across all the rules that are in the ElementDefinition for the element, including definitions, cardinality constraints, bindings, invariants etc. | COMMENT | ContentReferences can only be defined in specializations, not constrained types, and they cannot be changed and always reference the non-constrained definition.
+ElementDefinition.type eld-4 | Aggregation may only be specified if one of the allowed types for the element is a reference
+ElementDefinition.type eld-17 | targetProfile is only allowed if the type is Reference or canonical
+ElementDefinition.type DEF | The data type or resource that the value of this element is permitted to be. | COMMENT | The Type of the element can be left blank in a differential constraint, in which case the type is inherited from the resource. Abstract types are not permitted to appear as a type when multiple types are listed.  (I.e. Abstract types cannot be part of a choice).
+== r5.core#5.0.0
+StructureDefinition sdf-5 | If the structure defines an extension then the structure must have context information
+StructureDefinition sdf-11 | If there's a type, its content must match the path name in the first element of a snapshot
+StructureDefinition sdf-15 | The first element in a snapshot has no type unless model is a logical model.
+StructureDefinition sdf-15a | If the first element in a differential has no "." in the path and it's not a logical model, it has no type
+StructureDefinition sdf-9 | In any snapshot or differential, no label, code or requirements on an element without a "." in the path (e.g. the first element)
+StructureDefinition sdf-18 | Context Invariants can only be used for extensions
+StructureDefinition sdf-19 | FHIR Specification models only use FHIR defined types
+StructureDefinition sdf-23 | No slice name on root
+StructureDefinition sdf-29 | Elements in Resources must have a min cardinality or 0 or 1 and a max cardinality of 1 or *
+StructureDefinition.snapshot sdf-8 | All snapshot elements must start with the StructureDefinition's specified type for non-logical models, or with the same type name for logical models
+StructureDefinition.snapshot sdf-24 | For CodeableReference elements, target profiles must be listed on the CodeableReference, not the CodeableReference.reference
+StructureDefinition.snapshot sdf-25 | For CodeableReference elements, bindings must be listed on the CodeableReference, not the CodeableReference.concept
+StructureDefinition.snapshot.element sdf-28 | If there are no discriminators, there must be a definition
+StructureDefinition.differential sdf-20 | No slicing on the root element
+StructureDefinition.differential sdf-8a | In any differential, all the elements must start with the StructureDefinition's specified type for non-logical models, or with the same type name for logical models
+ElementDefinition eld-5 | if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding
+ElementDefinition eld-6 | Fixed value may only be specified if there is one type
+ElementDefinition eld-7 | Pattern may only be specified if there is one type
+ElementDefinition eld-11 | Binding can only be present for coded elements, string, and uri if using FHIR-defined types
+ElementDefinition eld-13 | Types must be unique by code
+ElementDefinition eld-16 | sliceName must be composed of proper tokens separated by "/"
+ElementDefinition eld-22 | sliceIsConstraining can only appear if slicename is present
+ElementDefinition eld-25 | Order has no meaning (and cannot be asserted to have meaning), so enforcing rules on order is improper
+ElementDefinition.contentReference DEF | Identifies an element defined elsewhere in the definition whose content rules should be applied to the current element. ContentReferences bring across all the rules that are in the ElementDefinition for the element, including definitions, cardinality constraints, bindings, invariants etc. | COMMENT | ContentReferences can only be defined in specializations, not constrained types, and they cannot be changed and always reference the non-constrained definition.
+ElementDefinition.type eld-4 | Aggregation may only be specified if one of the allowed types for the element is a reference
+ElementDefinition.type eld-17 | targetProfile is only allowed if the type is Reference or canonical
+ElementDefinition.type DEF | The data type or resource that the value of this element is permitted to be. | COMMENT | The Type of the element can be left blank in a differential constraint, in which case the type is inherited from the resource. Abstract types are not permitted to appear as a type when multiple types are listed.  (I.e. Abstract types cannot be part of a choice).

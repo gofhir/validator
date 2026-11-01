@@ -1,0 +1,19 @@
+ok  	github.com/gofhir/validator/v2/pkg/validator	69.872s
+       71.96 real        74.44 user         3.63 sys
+          1065091072  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              176132  page reclaims
+               15688  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                7480  signals received
+               31401  voluntary context switches
+              261855  involuntary context switches
+          4174004112  instructions retired
+          3175302206  cycles elapsed
+            26804848  peak memory footprint
