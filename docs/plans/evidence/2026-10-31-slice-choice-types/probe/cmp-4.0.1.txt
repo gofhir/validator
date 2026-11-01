@@ -1,0 +1,101 @@
+## t1
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t1' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t1' allows the type(s) code but found type string
+## t10
+  HL7 | error | Patient.extension[0].extension[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/ext-t10' definition allows for the type Coding but found type string
+  HL7 | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Patient.extension[0].extension[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/ext-t10' allows the type(s) Coding but found type string
+## t10b
+  HL7 | error | Patient.extension[0] | The Extension 'http://example.org/fhir/StructureDefinition/ext-t10b' definition allows for the types [Coding] but found type string
+  HL7 | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Patient.extension[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/ext-t10b' allows the type(s) Coding but found type string
+## t11
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t2' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string
+  GO  | error | Parameters.parameter[0].valueString | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)
+## t12
+  HL7 | error | Parameters.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Parameters.parameter[0].valueString | Unknown element 'valueString'
+  GO  | error | Parameters.parameter[0].value[x] | Maximum cardinality of 'Parameters.parameter[0].value[x]' is 1, but found 2
+## t12b
+  HL7 | error | Bundle.entry[0].resource/*Parameters/t12be*/.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t2' definition allows for the type code but found type string
+  GO  | error | Bundle.entry[0].resource.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string
+## t12c
+  HL7 | error | List.contained[0]/*Parameters/c1*/.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t2' definition allows for the type code but found type string
+  HL7 | warning | List | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | warning | List | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | List.contained[0].parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string
+## t13
+  HL7 | error | Parameters.parameter[0] | The type of element valueInteger is not known - it could not be determined from the information available. Valid types at this point are code, string
+  HL7 | error | Parameters.parameter[0] | The type of element valueInteger is not known - it could not be determined from the information available. Valid types at this point are code, boolean
+  GO  | error | Parameters.parameter[0].valueInteger | The profile 'http://example.org/fhir/StructureDefinition/p-ha' allows the type(s) code, string but found type integer
+  GO  | error | Parameters.parameter[0].valueInteger | The profile 'http://example.org/fhir/StructureDefinition/p-hb' allows the type(s) code, boolean but found type integer
+## t14
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t6' definition allows for the type code but found type string
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | Value is 'zzz' but is fixed to 'abc' in the profile http://example.org/fhir/StructureDefinition/p-t6#Parameters.parameter:op.value[x]
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t6' allows the type(s) code but found type string
+  GO  | error | Parameters.parameter[0].valueString | Value is "zzz", but the profile requires "abc"
+## t15
+  HL7 | error | Parameters.parameter[0].value[x] | Error parsing JSON: the primitive value must be a string
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t2' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | Error parsing JSON: the primitive value must be a string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string
+## t16
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t16' definition allows for the type code but found type string
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The System URI could not be determined for the code 'foo' in the ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The value provided ('foo') was not found in the value set 'AdministrativeGender' (http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1), and a code is requi
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t16' allows the type(s) code but found type string
+## t17
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t17' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t17' allows the type(s) code but found type string
+## t18
+## t18ok
+## t2
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t2' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string
+## t2ok
+## t2other
+## t3
+  HL7 | error | Parameters.parameter[0].part[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t3' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].part[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t3' allows the type(s) code but found type string
+## t4
+  HL7 | error | Parameters.parameter[0].part[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t4' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].part[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t4' allows the type(s) code but found type string
+## t5
+  HL7 | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a subject
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a performer
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have an effective[x] ()
+  HL7 | error | Observation.value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/o-t5' definition allows for the type Quantity but found type string
+  GO  | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Observation.valueString | The profile 'http://example.org/fhir/StructureDefinition/o-t5' allows the type(s) Quantity but found type string
+## t6a
+  HL7 | error | Parameters.parameter[0].value.ofType(code) | Value is 'zzz' but is fixed to 'abc' in the profile http://example.org/fhir/StructureDefinition/p-t6#Parameters.parameter:op.value[x]
+  GO  | error | Parameters.parameter[0].valueCode | Value is "zzz", but the profile requires "abc"
+## t6b
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t6' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t6' allows the type(s) code but found type string
+## t7
+  HL7 | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a subject
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a performer
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have an effective[x] ()
+  HL7 | error | Observation.component[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/o-t7' definition allows for the type Quantity but found type string
+  GO  | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Observation.component[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/o-t7' allows the type(s) Quantity but found type string
+## t7ok
+  HL7 | warning | Observation.component[0].value.ofType(Quantity) | Unable to validate code 'mm[Hg]' in system 'http://unitsofmeasure.org' because the validator is running without terminology services
+  HL7 | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a subject
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a performer
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have an effective[x] ()
+  GO  | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+## t8
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t8' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t8' allows the type(s) code but found type string
+## t9
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-t9' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-t9' allows the type(s) code but found type string

@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "t5",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-t5"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "a"
+}

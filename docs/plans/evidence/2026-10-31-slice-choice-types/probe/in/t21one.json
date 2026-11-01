@@ -1,0 +1,24 @@
+{
+ "resourceType": "Parameters",
+ "id": "t21one",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-t21"
+  ]
+ },
+ "parameter": [
+  {
+   "name": "x",
+   "valueTiming": {
+    "repeat": {
+     "boundsDuration": {
+      "value": 1,
+      "unit": "d",
+      "system": "http://unitsofmeasure.org",
+      "code": "d"
+     }
+    }
+   }
+  }
+ ]
+}

@@ -26,7 +26,7 @@ func TestSubExtensions(t *testing.T) {
 		{"a declared part", `{"url":"code","valueCodeableConcept":{"coding":[{"system":"urn:iso:std:iso:3166","code":"CL"}]}}`, issue.DiagCodeSystemNotFound},
 		{"a relative url the definition does not declare", `{"url":"nope","valueString":"x"}`, issue.DiagExtensionSubExtensionInvalid},
 		{"an absolute url defined separately", `{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"unknown"}`, ""},
-		{"an absolute url, validated against its own definition", `{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueString":"x"}`, issue.DiagExtensionInvalidValueType},
+		{"an absolute url, validated against its own definition", `{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueString":"x"}`, issue.DiagStructureTypeNotAllowed},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			res, err := v.Validate(context.Background(), nationality(tt.part))

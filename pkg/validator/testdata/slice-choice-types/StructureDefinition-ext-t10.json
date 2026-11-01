@@ -1,0 +1,68 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-t10",
+ "url": "http://example.org/fhir/StructureDefinition/ext-t10",
+ "name": "Extt10",
+ "status": "active",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Extension.extension:s",
+    "path": "Extension.extension",
+    "sliceName": "s"
+   },
+   {
+    "id": "Extension.extension:s.url",
+    "path": "Extension.extension.url",
+    "fixedUri": "s"
+   },
+   {
+    "id": "Extension.extension:s.value[x]",
+    "path": "Extension.extension.value[x]",
+    "type": [
+     {
+      "code": "Coding"
+     }
+    ]
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-t10"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "max": "0"
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ]
+}

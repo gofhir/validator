@@ -1,0 +1,61 @@
+package validator
+
+import (
+	"context"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"testing"
+)
+
+func TestReviewR3InlineExtension(t *testing.T) {
+	const outer = `{"resourceType":"StructureDefinition","url":"http://example.org/outer","name":"Outer","status":"active","kind":"complex-type","abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint","context":[{"type":"element","expression":"Element"},{"type":"element","expression":"Patient"}],"differential":{"element":[{"id":"Extension","path":"Extension"},{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/outer"},{"id":"Extension.value[x]","path":"Extension.value[x]","type":[{"code":"HumanName"}]},{"id":"Extension.value[x].extension","path":"Extension.value[x].extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"}},{"id":"Extension.value[x].extension:x","path":"Extension.value[x].extension","sliceName":"x","type":[{"code":"Extension"}]},{"id":"Extension.value[x].extension:x.url","path":"Extension.value[x].extension.url","fixedUri":"http://example.org/inner"},{"id":"Extension.value[x].extension:x.value[x]","path":"Extension.value[x].extension.value[x]","type":[{"code":"boolean"}]}]}}`
+	const inner = `{"resourceType":"StructureDefinition","url":"http://example.org/inner","name":"Inner","status":"active","kind":"complex-type","abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint","context":[{"type":"element","expression":"Element"},{"type":"element","expression":"Patient"}],"differential":{"element":[{"id":"Extension","path":"Extension"},{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/inner"},{"id":"Extension.value[x]","path":"Extension.value[x]","type":[{"code":"string"}]}]}}`
+	const data = `{"resourceType":"Patient","extension":[{"url":"http://example.org/outer","valueHumanName":{"family":"f","extension":[{"url":"http://example.org/inner","valueString":"bad"}]}}]}`
+	for _, version := range orderVersions {
+		t.Run(version, func(t *testing.T) {
+			v := orderValidator(t, version, outer, inner)
+			res, err := v.Validate(context.Background(), []byte(data))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if n := countAt(res, at{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueHumanName.extension[0].valueString", text: "http://example.org/outer"}); n != 1 {
+				t.Fatalf("got %d, want 1 inline restriction error; issues: %+v", n, res.Issues)
+			}
+		})
+	}
+}
+
+func TestReviewR3ValueSlice(t *testing.T) {
+	const def = `{"resourceType":"StructureDefinition","url":"http://example.org/sliced","name":"Sliced","status":"active","kind":"complex-type","abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint","context":[{"type":"element","expression":"Element"},{"type":"element","expression":"Patient"}],"differential":{"element":[{"id":"Extension","path":"Extension"},{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/sliced"},{"id":"Extension.value[x]","path":"Extension.value[x]","type":[{"code":"Quantity"},{"code":"Coding"}],"slicing":{"discriminator":[{"type":"exists","path":"system"}],"rules":"open"}},{"id":"Extension.value[x]:q","path":"Extension.value[x]","sliceName":"q","type":[{"code":"Quantity"}]},{"id":"Extension.value[x]:q.system","path":"Extension.value[x].system","min":1}]}}`
+	const data = `{"resourceType":"Patient","extension":[{"url":"http://example.org/sliced","valueCoding":{"system":"http://example.org/cs","code":"a"}}]}`
+	for _, version := range orderVersions {
+		t.Run(version, func(t *testing.T) {
+			v := orderValidator(t, version, def)
+			res, err := v.Validate(context.Background(), []byte(data))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if n := countAt(res, at{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueCoding"}); n != 1 {
+				t.Fatalf("got %d, want 1 slice type error; issues: %+v", n, res.Issues)
+			}
+		})
+	}
+}
+
+func TestReviewR3OwnValueDuplicate(t *testing.T) {
+	const child = `{"resourceType":"StructureDefinition","url":"http://example.org/child","name":"Child","status":"active","kind":"complex-type","abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint","context":[{"type":"element","expression":"Element"},{"type":"element","expression":"Patient"}],"differential":{"element":[{"id":"Extension","path":"Extension"},{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/child"},{"id":"Extension.value[x]","path":"Extension.value[x]","type":[{"code":"HumanName"}]}]}}`
+	const parent = `{"resourceType":"StructureDefinition","url":"http://example.org/parent","name":"Parent","status":"active","kind":"complex-type","abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint","context":[{"type":"element","expression":"Element"},{"type":"element","expression":"Patient"}],"differential":{"element":[{"id":"Extension","path":"Extension"},{"id":"Extension.extension","path":"Extension.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"}},{"id":"Extension.extension:part","path":"Extension.extension","sliceName":"part"},{"id":"Extension.extension:part.url","path":"Extension.extension.url","fixedUri":"http://example.org/child"},{"id":"Extension.extension:part.value[x]","path":"Extension.extension.value[x]","type":[{"code":"HumanName"}]},{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/parent"},{"id":"Extension.value[x]","path":"Extension.value[x]","max":"0"}]}}`
+	const data = `{"resourceType":"Patient","extension":[{"url":"http://example.org/parent","extension":[{"url":"http://example.org/child","valueHumanName":{"family":"f","extension":[` + badFlag + `]}}]}]}`
+	for _, version := range orderVersions {
+		t.Run(version, func(t *testing.T) {
+			defs := append(extValueDefs(t), parent, child)
+			v := orderValidator(t, version, defs...)
+			res, err := v.Validate(context.Background(), []byte(data))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if n := countAt(res, at{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].extension[0].valueHumanName.extension[0].valueString", text: "flag-ext"}); n != 1 {
+				t.Fatalf("got %d, want 1 own-definition error; issues: %+v", n, res.Issues)
+			}
+		})
+	}
+}

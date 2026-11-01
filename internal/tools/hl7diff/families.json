@@ -202,10 +202,13 @@
       "name": "extension-value-type",
       "rule": "parent",
       "gofhir": [
-        "EXTENSION_INVALID_VALUE_TYPE"
+        "STRUCTURE_TYPE_NOT_ALLOWED",
+        "EXTENSION_VALUE_NOT_ALLOWED"
       ],
       "hl7": [
-        "Extension_EXT_Type"
+        "Extension_EXT_Type",
+        "Extension_PROF_Type",
+        "Validation_VAL_Profile_NoType"
       ]
     },
     {
@@ -525,7 +528,6 @@
     "CONTAINED_DUPLICATE_ID": "no HL7 counterpart verified yet",
     "EXTENSION_NESTED_UNKNOWN": "deprecated: no longer reported (EXTENSION_SUBEXTENSION_INVALID)",
     "EXTENSION_NO_URL": "no HL7 counterpart verified yet",
-    "EXTENSION_VALUE_NOT_ALLOWED": "no HL7 counterpart verified yet",
     "MODE_DELETE_REQUIRES_ID": "API mode check, not an instance finding",
     "MODE_UPDATE_REQUIRES_ID": "API mode check, not an instance finding",
     "PROFILE_DIFFERENTIAL_IGNORED": "a warning: HL7 leaves such elements out silently",

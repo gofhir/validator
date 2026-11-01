@@ -76,6 +76,12 @@ func FindAll(jsonData []byte, paths []string) map[string]*Location {
 		_ = s.walk()
 	}
 
+	// Lo hallado solo bajo la propiedad "_x" vale cuando no hay propiedad literal "x".
+	for k, o := range s.shadow {
+		if _, ok := s.offsets[k]; !ok {
+			s.offsets[k] = o
+		}
+	}
 	located := make(map[string]*Location, len(s.offsets))
 	for _, loc := range lineCols(jsonData, s.offsets) {
 		located[loc.key] = &Location{Line: loc.line, Column: loc.col}
@@ -110,7 +116,10 @@ type scanner struct {
 	wanted   map[string]bool // keys of the paths to locate
 	prefixes map[string]bool // keys of the values a path to locate goes through
 	offsets  map[string]int  // key -> offset of each path located
-	path     []byte          // key of the value being read
+	shadow   map[string]int  // key -> offset of each path located under a "_"-prefixed property
+	path     []byte          // key of the value being read, as written
+	lpath    []byte          // key of the value being read, without the "_" of a primitive's property
+	inShadow bool            // the value being read lies under a "_"-prefixed property
 }
 
 // walk reads one value at s.path, recording and entering what lies under it.
@@ -131,13 +140,20 @@ func (s *scanner) walk() error {
 				return err
 			}
 			name, _ := tok.(string)
-			if err := s.member(name, int(s.dec.InputOffset())); err != nil {
+			// json.html#primitive: el id y las Extension de un primitivo viven en la propiedad
+			// del mismo nombre con prefijo "_"; su ruta FHIRPath continúa por ese nombre sin él.
+			under := len(name) > 1 && name[0] == '_'
+			logical := name
+			if under {
+				logical = name[1:]
+			}
+			if err := s.member(name, logical, int(s.dec.InputOffset()), under); err != nil {
 				return err
 			}
 		}
 	case '[':
 		for i := 0; s.dec.More(); i++ {
-			if err := s.member(strconv.Itoa(i), s.itemStart(int(s.dec.InputOffset()))); err != nil {
+			if err := s.member(strconv.Itoa(i), strconv.Itoa(i), s.itemStart(int(s.dec.InputOffset())), false); err != nil {
 				return err
 			}
 		}
@@ -160,18 +176,34 @@ func (s *scanner) itemStart(offset int) int {
 	return offset
 }
 
-// member reads the value of one property or array item, segment, located at offset.
-func (s *scanner) member(segment string, offset int) error {
-	n := len(s.path)
+// member reads the value of one property or array item, located at offset. Raw is its name as
+// written and logical the name it has in a FHIRPath (without the "_" of a primitive's property).
+//
+// Un valor bajo la propiedad "_x" se ubica por su ruta literal ("_x...", exactamente como está
+// escrita) y, de respaldo, por la lógica ("x..."), que solo vale si no hay propiedad literal "x".
+func (s *scanner) member(raw, logical string, offset int, under bool) error {
+	n, ln := len(s.path), len(s.lpath)
 	if n > 0 {
 		s.path = append(s.path, segmentSeparator...)
+		s.lpath = append(s.lpath, segmentSeparator...)
 	}
-	s.path = append(s.path, segment...)
-	defer func() { s.path = s.path[:n] }()
+	s.path = append(s.path, raw...)
+	s.lpath = append(s.lpath, logical...)
+	was := s.inShadow
+	s.inShadow = was || under
+	defer func() { s.path, s.lpath, s.inShadow = s.path[:n], s.lpath[:ln], was }()
 	if s.wanted[string(s.path)] {
 		s.offsets[string(s.path)] = offset
 	}
-	if s.prefixes[string(s.path)] {
+	if s.inShadow && s.wanted[string(s.lpath)] {
+		if _, ok := s.shadow[string(s.lpath)]; !ok {
+			if s.shadow == nil {
+				s.shadow = map[string]int{} // se crea solo si hay una propiedad "_x" que ubicar
+			}
+			s.shadow[string(s.lpath)] = offset
+		}
+	}
+	if s.prefixes[string(s.path)] || (s.inShadow && s.prefixes[string(s.lpath)]) {
 		return s.walk()
 	}
 	return skipValue(s.dec)

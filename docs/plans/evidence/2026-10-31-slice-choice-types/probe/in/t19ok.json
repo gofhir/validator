@@ -1,0 +1,19 @@
+{
+ "resourceType": "Parameters",
+ "id": "t19ok",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-t19"
+  ]
+ },
+ "parameter": [
+  {
+   "name": "x",
+   "valueQuantity": {
+    "value": 1,
+    "system": "http://unitsofmeasure.org",
+    "code": "mg"
+   }
+  }
+ ]
+}

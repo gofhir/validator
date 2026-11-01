@@ -1,0 +1,20 @@
+control: exit=0 (45s)
+m1 sin tipo en las capas del slice (solo el elemento cortado): muere, 1 tests (26s): TestSliceChoiceTypes
+m2 sin tipo en ninguna capa del slice: muere, 4 tests (38s): TestFixedValueOfAProfileThatChangesItsType, TestExtensionValueDescendantRestriction, TestSliceChoiceTypes, TestProfileDiscriminatorOnValuesThatAreNotResources
+m4 sin deduplicar (informa en cada capa): muere, 1 tests (31s): TestSliceChoiceTypes
+m5 payload: solo el primer tipo admitido: muere, 1 tests (33s): TestSliceChoiceTypes
+m6 payload: perfil vacío: muere, 1 tests (25s): TestSliceChoiceTypes
+m7 payload: tipo encontrado cambiado por el admitido: muere, 1 tests (29s): TestSliceChoiceTypes
+m8 untyped siempre falso (t12): muere, 1 tests (27s): TestSliceChoiceTypes
+m9 untyped sin la condición de recurso: muere, 1 tests (27s): TestSliceChoiceTypes
+m10 wrongType siempre falso (hijos del tipo propio): muere, 1 tests (25s): TestSliceChoiceTypes
+m11 checkValueless sin tipo: muere, 2 tests (27s): TestValuelessPrimitiveOfChoiceSliceTypeNotAllowed, TestSliceChoiceTypes
+m12 estructural: sin reconocer por la base: muere, 2 tests (21s): TestFixedValueOfAProfileThatChangesItsType, TestSliceChoiceTypes
+m13 estructural: toda variante de la base es el valor (sin baseOnly): muere, 1 tests (25s): TestSliceChoiceTypes
+m14 constraint: también compara con la definición propia del valor (doble informe): muere, 6 tests (25s): TestChoiceKeyCase, TestExtensionValidation, TestExtensionValueContent, TestExtensionWithSeveralValues
+m15 constraint: la definición propia nunca se marca: muere, 6 tests (29s): TestChoiceKeyCase, TestExtensionValidation, TestExtensionValueContent, TestExtensionWithSeveralValues
+m16 extensión: sin el error de tipo: muere, 8 tests (28s): TestStandaloneExtensionValueType, TestChoiceKeyCase, TestExtensionValidation, TestExtensionValueContent
+m17 extensión: ruta con guion bajo en un primitivo: muere, 1 tests (42s): TestExtensionValueContent
+m18 checkType: el tipo nunca se declara (rechaza todo): muere, 16 tests (43s): TestChoiceKeyCase, TestFixedValueOfAProfileThatChangesItsType, TestEmptyInvariantFails, TestExtensionValidation
+m19 constraint: omite toda la definición propia (own amplio de la ronda 1): muere, 1 tests (42s): TestExtensionValueDescendantRestriction
+sobreviven: 0

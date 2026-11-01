@@ -81,6 +81,10 @@ type constraintEvalOpts struct {
 
 	// contentJudged is ValidateOptions.ContentJudged.
 	contentJudged func(map[string]any) bool
+
+	// own es la definición propia del valor cuyos hijos se recorren (DefinitionSource.DefinitionOf),
+	// nil si no hay ninguna: su tipo lo juzga pkg/extension, no esta fase.
+	own *registry.StructureDefinition
 }
 
 // Validator validates constraints defined in ElementDefinitions.
@@ -239,7 +243,7 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	}
 	evalOpts.resolver = resolverWithin(evalOpts.resolver, evalOpts.scope.RootResource, nil)
 
-	v.walk(sd, root, "", resource, resourceData, nil, sd.RootName(resource), evalOpts, result)
+	v.walk(sd, root, "", false, resource, resourceData, nil, sd.RootName(resource), evalOpts, result)
 }
 
 // buildEvalOpts constructs constraintEvalOpts from the validator state and per-call options.

@@ -1,0 +1,31 @@
+{
+ "resourceType": "Observation",
+ "id": "t7ok",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-t7"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "component": [
+  {
+   "code": {
+    "coding": [
+     {
+      "system": "http://loinc.org",
+      "code": "8480-6"
+     }
+    ]
+   },
+   "valueQuantity": {
+    "value": 1,
+    "unit": "mm[Hg]",
+    "system": "http://unitsofmeasure.org",
+    "code": "mm[Hg]"
+   }
+  }
+ ]
+}

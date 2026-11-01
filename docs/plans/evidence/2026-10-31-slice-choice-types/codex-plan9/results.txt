@@ -1,0 +1,27 @@
+=== RUN   TestDesignReviewNameAndAlternatives
+    zz_design_review_probe_test.go:13: names differ: "valueQuantity" vs "value[x]"
+    zz_design_review_probe_test.go:17: multiple profiles silently produce no type profile
+--- PASS: TestDesignReviewNameAndAlternatives (0.00s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	(cached)
+=== RUN   TestDesignReviewSeverityDedup
+    zz_design_review_probe_test.go:15: warning suppresses same-key/expression error in another tree
+--- PASS: TestDesignReviewSeverityDedup (0.00s)
+=== RUN   TestDesignReviewTypeScope
+    zz_design_review_probe_test.go:26: same SD/location reports twice across walks despite shared report scope
+--- PASS: TestDesignReviewTypeScope (0.00s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/constraint	(cached)
+=== RUN   TestDesignReviewOwnValueChecksRequired
+=== RUN   TestDesignReviewOwnValueChecksRequired/4.0.1
+    zz_design_review_probe_test.go:17: validateOwnValue reports missing required value, not only type errors
+=== RUN   TestDesignReviewOwnValueChecksRequired/4.3.0
+    zz_design_review_probe_test.go:17: validateOwnValue reports missing required value, not only type errors
+=== RUN   TestDesignReviewOwnValueChecksRequired/5.0.0
+    zz_design_review_probe_test.go:17: validateOwnValue reports missing required value, not only type errors
+--- PASS: TestDesignReviewOwnValueChecksRequired (5.60s)
+    --- PASS: TestDesignReviewOwnValueChecksRequired/4.0.1 (2.25s)
+    --- PASS: TestDesignReviewOwnValueChecksRequired/4.3.0 (1.78s)
+    --- PASS: TestDesignReviewOwnValueChecksRequired/5.0.0 (1.57s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/extension	7.139s

@@ -1,0 +1,216 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidatePatientWithData 	    9874	    113157 ns/op	   88277 B/op	    1753 allocs/op
+BenchmarkValidateObservation     	   13282	     90754 ns/op	   74625 B/op	    1357 allocs/op
+BenchmarkValidatorCreation       	       2	 790046792 ns/op	283722592 B/op	 1183827 allocs/op
+BenchmarkValidateRotating        	   10000	    416582 ns/op	      2310 first-pass-ms	      4778 resources	  318553 B/op	    5533 allocs/op
+BenchmarkValidatorLiveHeap       	       2	 738465521 ns/op	        97.52 live-MB	283715096 B/op	 1183849 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient         	    3187	    391920 ns/op	  323275 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure  	    4370	    291305 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values         	     710	   1785782 ns/op	 1432435 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateParallel     	   36787	     30823 ns/op	   25194 B/op	     393 allocs/op
+BenchmarkValidateParallel-8   	  162896	      8013 ns/op	   25157 B/op	     393 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient-parallel           	    2637	    417844 ns/op	  323274 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/patient-parallel-8         	   10000	    117686 ns/op	  323290 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel    	    3829	    303615 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel-8  	   16075	     74031 ns/op	  241678 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel           	     818	   1667018 ns/op	 1432431 B/op	   26118 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel-8         	    2461	    433281 ns/op	 1432518 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidatePatientWithData 	   10000	    111229 ns/op	   88275 B/op	    1753 allocs/op
+BenchmarkValidateObservation     	   13485	     87754 ns/op	   74623 B/op	    1357 allocs/op
+BenchmarkValidatorCreation       	       2	 736714875 ns/op	283722592 B/op	 1183827 allocs/op
+BenchmarkValidateRotating        	   10000	    430736 ns/op	      1996 first-pass-ms	      4778 resources	  318553 B/op	    5533 allocs/op
+BenchmarkValidatorLiveHeap       	       2	 734384584 ns/op	        97.52 live-MB	283736984 B/op	 1183849 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient         	    3265	    380608 ns/op	  323274 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure  	    4402	    286506 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values         	     771	   1677650 ns/op	 1432434 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateParallel     	   40887	     30154 ns/op	   25188 B/op	     393 allocs/op
+BenchmarkValidateParallel-8   	  171152	      7293 ns/op	   25157 B/op	     393 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient-parallel           	    3374	    424674 ns/op	  323274 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/patient-parallel-8         	   14092	     84247 ns/op	  323288 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel    	    4128	    298708 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel-8  	   14834	     71935 ns/op	  241686 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel           	     764	   1761849 ns/op	 1432431 B/op	   26118 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel-8         	    3680	    386584 ns/op	 1432506 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidatePatientWithData 	    9513	    107137 ns/op	   88286 B/op	    1754 allocs/op
+BenchmarkValidateObservation     	   13302	     89950 ns/op	   74625 B/op	    1357 allocs/op
+BenchmarkValidatorCreation       	       2	 717473604 ns/op	283799072 B/op	 1183831 allocs/op
+BenchmarkValidateRotating        	    6596	    379074 ns/op	      2083 first-pass-ms	      4778 resources	  273678 B/op	    4767 allocs/op
+BenchmarkValidatorLiveHeap       	       2	 728502208 ns/op	        97.47 live-MB	283605912 B/op	 1183841 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient         	    3201	    433686 ns/op	  323275 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure  	    4215	    297950 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values         	     750	   1824336 ns/op	 1432434 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateParallel     	   38662	     31514 ns/op	   25191 B/op	     393 allocs/op
+BenchmarkValidateParallel-8   	  133694	      7601 ns/op	   25160 B/op	     393 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient-parallel           	    3100	    394636 ns/op	  323275 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/patient-parallel-8         	   14887	     79125 ns/op	  323300 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel    	    4303	    288452 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel-8  	   20212	     55989 ns/op	  241698 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel           	     794	   1715231 ns/op	 1432430 B/op	   26118 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel-8         	    3586	    367705 ns/op	 1432546 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidatePatientWithData 	   10000	    107781 ns/op	   88274 B/op	    1753 allocs/op
+BenchmarkValidateObservation     	   13069	     94260 ns/op	   74628 B/op	    1357 allocs/op
+BenchmarkValidatorCreation       	       2	 729969750 ns/op	283646112 B/op	 1183823 allocs/op
+BenchmarkValidateRotating        	   10000	    418257 ns/op	      2106 first-pass-ms	      4778 resources	  318553 B/op	    5533 allocs/op
+BenchmarkValidatorLiveHeap       	       2	 733225188 ns/op	        97.52 live-MB	283764280 B/op	 1183851 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient         	    3249	    392649 ns/op	  323275 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure  	    4531	    292022 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values         	     790	   1689811 ns/op	 1432433 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateParallel     	   39468	     30214 ns/op	   25190 B/op	     393 allocs/op
+BenchmarkValidateParallel-8   	  184052	      6154 ns/op	   25156 B/op	     393 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient-parallel           	    3265	    392832 ns/op	  323275 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/patient-parallel-8         	   14193	     74785 ns/op	  323290 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel    	    4345	    288917 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel-8  	   22023	     56374 ns/op	  241678 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel           	     811	   1713212 ns/op	 1432430 B/op	   26118 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel-8         	    4005	    403375 ns/op	 1432517 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidatePatientWithData 	   10770	    107539 ns/op	   88258 B/op	    1753 allocs/op
+BenchmarkValidateObservation     	   12690	    114568 ns/op	   74634 B/op	    1357 allocs/op
+BenchmarkValidatorCreation       	       2	 730259083 ns/op	283717184 B/op	 1183825 allocs/op
+BenchmarkValidateRotating        	   10000	    428428 ns/op	      2263 first-pass-ms	      4778 resources	  318553 B/op	    5533 allocs/op
+BenchmarkValidatorLiveHeap       	       2	 728159875 ns/op	        97.50 live-MB	283786168 B/op	 1183851 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient         	    3388	    383768 ns/op	  323275 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure  	    4348	    285713 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values         	     829	   1649647 ns/op	 1432432 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateParallel     	   38317	     30211 ns/op	   25192 B/op	     393 allocs/op
+BenchmarkValidateParallel-8   	  187138	      5799 ns/op	   25155 B/op	     393 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient-parallel           	    3130	    379494 ns/op	  323274 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/patient-parallel-8         	   17091	     72153 ns/op	  323289 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel    	    4334	    297035 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel-8  	   20396	     54530 ns/op	  241678 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel           	     807	   1697687 ns/op	 1432431 B/op	   26118 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel-8         	    4306	    306675 ns/op	 1432508 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidatePatientWithData 	   10794	    109165 ns/op	   88258 B/op	    1753 allocs/op
+BenchmarkValidateObservation     	   13392	     90409 ns/op	   74624 B/op	    1357 allocs/op
+BenchmarkValidatorCreation       	       2	 748892500 ns/op	283744480 B/op	 1183827 allocs/op
+BenchmarkValidateRotating        	   10000	    406724 ns/op	      2062 first-pass-ms	      4778 resources	  318553 B/op	    5533 allocs/op
+BenchmarkValidatorLiveHeap       	       2	 721437730 ns/op	        97.55 live-MB	283840760 B/op	 1183855 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient         	    3163	    386121 ns/op	  323275 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure  	    4165	    292574 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values         	     816	   1655929 ns/op	 1432434 B/op	   26118 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateParallel     	   37983	     31621 ns/op	   25192 B/op	     393 allocs/op
+BenchmarkValidateParallel-8   	  193576	      6689 ns/op	   25154 B/op	     393 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/gofhir/validator/v2/pkg/validator
+cpu: Apple M4 Pro
+BenchmarkValidateProfiled/patient-parallel           	    3067	    394857 ns/op	  323274 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/patient-parallel-8         	   12766	     92298 ns/op	  323290 B/op	    6142 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel    	    4209	    297911 ns/op	  241665 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/blood-pressure-parallel-8  	   14838	    113033 ns/op	  241678 B/op	    4334 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel           	     604	   1975886 ns/op	 1432433 B/op	   26118 allocs/op
+BenchmarkValidateProfiled/extension-values-parallel-8         	    3088	    517250 ns/op	 1432522 B/op	   26118 allocs/op
+PASS

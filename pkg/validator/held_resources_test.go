@@ -235,7 +235,7 @@ func TestHeldResourceExtensions(t *testing.T) {
 		{"z8_element_extensions", []string{
 			"EXTENSION_UNKNOWN @ Bundle.entry[0].extension[0]",
 			"EXTENSION_UNKNOWN @ Bundle.entry[0].resource.extension[0]",
-			"EXTENSION_UNKNOWN @ Bundle.entry[0].resource.name[0]._given[0].extension[0]",
+			"EXTENSION_UNKNOWN @ Bundle.entry[0].resource.name[0].given[0].extension[0]",
 		}},
 	} {
 		t.Run(tt.probe, func(t *testing.T) {

@@ -2,6 +2,7 @@ package location
 
 import (
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -345,5 +346,73 @@ func TestFindItemAfterAComma(t *testing.T) {
 		if loc == nil || loc.Line != tt.line || loc.Column != tt.col {
 			t.Errorf("Find(%q) = %+v, want line %d col %d", tt.path, loc, tt.line, tt.col)
 		}
+	}
+}
+
+// json.html#primitive: el id y las Extension de un primitivo viven en la propiedad con el mismo
+// nombre y prefijo "_" (los ítems de un arreglo, alineados por índice, con null donde no hay), y
+// la ruta FHIRPath de lo que contienen no lleva el "_". Una ruta al primitivo mismo sigue
+// ubicando la propiedad del valor.
+func TestFindUnderPrimitiveSibling(t *testing.T) {
+	// at es el offset (0-indexado) que se espera: justo después de la clave, o al inicio del ítem.
+	after := func(src, key string) int { return strings.Index(src, key) + len(key) }
+	at := strings.Index
+	tests := []struct {
+		name, src, path string
+		offset          int // -1: no se ubica
+	}{
+		{"object primitive", `{"resourceType":"Patient","birthDate":"2000","_birthDate":{"extension":[{"url":"u","valueString":"x"}]}}`,
+			"Patient.birthDate.extension[0].valueString", -2},
+		{"the primitive itself keeps the value", `{"resourceType":"Patient","birthDate":"2000","_birthDate":{"id":"a"}}`,
+			"Patient.birthDate", -3},
+		{"array primitive", `{"resourceType":"Patient","name":[{"given":["A","B"],"_given":[null,{"extension":[{"url":"u"}]}]}]}`,
+			"Patient.name[0].given[1].extension[0]", -4},
+		{"nested", `{"resourceType":"Patient","name":[{"family":"F","_family":{"extension":[{"url":"u","valueString":"x"}]}}]}`,
+			"Patient.name[0].family.extension[0].valueString", -5},
+		{"only the underscore property", `{"resourceType":"Patient","_birthDate":{"extension":[{"url":"u"}]}}`,
+			"Patient.birthDate.extension[0]", -6},
+		{"the literal key wins", `{"resourceType":"Patient","_a":{"b":1},"a":{"b":2}}`,
+			"Patient.a.b", -7},
+		{"in neither", `{"resourceType":"Patient","birthDate":"2000","_birthDate":{"id":"a"}}`,
+			"Patient.birthDate.extension[0]", -1},
+		{"literal _id", `{"resourceType":"Patient","_id":{"extension":[{"url":"u"}]}}`,
+			"Patient._id", -8},
+		{"literal _code", `{"resourceType":"Observation","code":{"text":"t"},"_code":{"id":"a"}}`,
+			"Observation._code", -9},
+		{"literal _birthDate path", `{"resourceType":"Patient","birthDate":"2000","_birthDate":{"extension":[{"url":"u","valueString":"x"}]}}`,
+			"Patient._birthDate.extension[0].valueString", -10},
+		{"literal _given item", `{"resourceType":"Patient","name":[{"given":["A","B"],"_given":[null,{"id":"i"}]}]}`,
+			"Patient.name[0]._given[1]", -11},
+		{"null item has no children", `{"resourceType":"Patient","name":[{"given":["A","B"],"_given":[null,{"id":"i"}]}]}`,
+			"Patient.name[0].given[0].id", -1},
+	}
+	want := map[string]func(src string) int{
+		"object primitive":                     func(s string) int { return after(s, `"valueString"`) },
+		"the primitive itself keeps the value": func(s string) int { return after(s, `"birthDate"`) },
+		"array primitive":                      func(s string) int { return at(s, `{"extension":[{"url":"u"}]}`) + len(`{"extension":[`) },
+		"nested":                               func(s string) int { return after(s, `"valueString"`) },
+		"only the underscore property":         func(s string) int { return at(s, `{"url":"u"}`) },
+		"the literal key wins":                 func(s string) int { return after(s, `"b"`+`:2`) - len(`:2`) },
+		"literal _id":                          func(s string) int { return after(s, `"_id"`) },
+		"literal _code":                        func(s string) int { return after(s, `"_code"`) },
+		"literal _birthDate path":              func(s string) int { return after(s, `"valueString"`) },
+		"literal _given item":                  func(s string) int { return at(s, `{"id":"i"}`) },
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			loc := Find([]byte(tt.src), tt.path)
+			if tt.offset == -1 {
+				if loc != nil {
+					t.Fatalf("Find(%q) = %+v, want nil", tt.path, loc)
+				}
+				return
+			}
+			if loc == nil {
+				t.Fatalf("Find(%q) = nil", tt.path)
+			}
+			if loc.Line != 1 || loc.Column != want[tt.name](tt.src)+1 {
+				t.Errorf("Find(%q) = %+v, want column %d", tt.path, loc, want[tt.name](tt.src)+1)
+			}
+		})
 	}
 }

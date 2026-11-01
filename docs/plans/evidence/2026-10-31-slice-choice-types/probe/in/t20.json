@@ -1,0 +1,25 @@
+{
+ "resourceType": "Parameters",
+ "id": "t20",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-t20"
+  ]
+ },
+ "parameter": [
+  {
+   "name": "x",
+   "valueCodeableConcept": {
+    "coding": [
+     {
+      "extension": [
+       {
+        "url": "http://example.org/fhir/StructureDefinition/x"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

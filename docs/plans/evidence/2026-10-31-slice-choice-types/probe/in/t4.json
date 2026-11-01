@@ -1,0 +1,20 @@
+{
+ "resourceType": "Parameters",
+ "id": "t4",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-t4"
+  ]
+ },
+ "parameter": [
+  {
+   "name": "x",
+   "part": [
+    {
+     "name": "t",
+     "valueString": "a"
+    }
+   ]
+  }
+ ]
+}

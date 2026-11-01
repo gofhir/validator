@@ -1,0 +1,48 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-t19",
+ "url": "http://example.org/fhir/StructureDefinition/p-t19",
+ "name": "Pt19",
+ "status": "active",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Parameters",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Parameters",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Parameters",
+    "path": "Parameters"
+   },
+   {
+    "id": "Parameters.parameter.value[x]",
+    "path": "Parameters.parameter.value[x]",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "exists",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Parameters.parameter.value[x]:q",
+    "path": "Parameters.parameter.value[x]",
+    "sliceName": "q",
+    "type": [
+     {
+      "code": "Quantity"
+     }
+    ]
+   },
+   {
+    "id": "Parameters.parameter.value[x]:q.system",
+    "path": "Parameters.parameter.value[x].system",
+    "min": 1
+   }
+  ]
+ }
+}

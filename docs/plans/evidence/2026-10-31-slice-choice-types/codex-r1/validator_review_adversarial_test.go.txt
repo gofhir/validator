@@ -1,0 +1,12 @@
+package validator
+
+import (
+ "testing"
+ "github.com/gofhir/validator/v2/pkg/issue"
+)
+
+func TestReviewInlineExtensionChildren(t *testing.T) {
+ defs:=extValueDefs(t)
+ defs=append(defs,`{"resourceType":"StructureDefinition","url":"http://example.org/StructureDefinition/p-inline","name":"Inline","status":"active","kind":"resource","abstract":false,"type":"Patient","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient","derivation":"constraint","differential":{"element":[{"id":"Patient","path":"Patient"},{"id":"Patient.extension.id","path":"Patient.extension.id","max":"0"}]}}`)
+ runValueCases(t,defs,[]extValueCase{{name:"inline extension children",data:`{"resourceType":"Patient","meta":{"profile":["http://example.org/StructureDefinition/p-inline"]},"extension":[{"url":"http://example.org/StructureDefinition/bool-ext","valueString":"bad"}]}`,want:[]at{{id:issue.DiagStructureTypeNotAllowed,expr:"Patient.extension[0].valueString"}}}})
+}

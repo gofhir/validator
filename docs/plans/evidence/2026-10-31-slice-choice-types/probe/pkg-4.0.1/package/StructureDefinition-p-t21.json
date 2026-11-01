@@ -1,0 +1,32 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-t21",
+ "url": "http://example.org/fhir/StructureDefinition/p-t21",
+ "name": "Pt21",
+ "status": "active",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Parameters",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Parameters",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Parameters",
+    "path": "Parameters"
+   },
+   {
+    "id": "Parameters.parameter.value[x]",
+    "path": "Parameters.parameter.value[x]",
+    "type": [
+     {
+      "code": "Timing",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/t-t21"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

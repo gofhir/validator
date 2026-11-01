@@ -164,7 +164,7 @@ func choiceKeyCases() []extValueCase {
 			// Extension es la base: valueUri es un valor del tipo equivocado, como en #178 con base.
 			name: "type a profile restricts in a snapshot with no base",
 			data: `{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/StructureDefinition/nobase-ext","valueUri":"http://x"}]}`,
-			want: []at{{id: issue.DiagExtensionInvalidValueType, expr: "Patient.extension[0].valueUri"}},
+			want: []at{{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueUri"}},
 			absent: []at{
 				{id: issue.DiagExtensionValueRequired, expr: "Patient.extension[0]"},
 				noValue("Patient.extension[0]"),
@@ -176,7 +176,7 @@ func choiceKeyCases() []extValueCase {
 			// (evidence/2026-10-27-choice-key-case/review-r2/nested).
 			name: "type a sub-extension restricts in a snapshot with no base",
 			data: `{"resourceType":"Patient","id":"p","extension":[{"url":"http://example.org/StructureDefinition/nested-nobase","extension":[{"url":"s","valueCoding":{"code":"c"}}]}]}`,
-			want: []at{{id: issue.DiagExtensionInvalidValueType, expr: "Patient.extension[0].extension[0].valueCoding"}},
+			want: []at{{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].extension[0].valueCoding"}},
 			absent: []at{
 				{id: issue.DiagExtensionValueRequired, expr: "Patient.extension[0].extension[0]"},
 				noValue("Patient.extension[0].extension[0]"),

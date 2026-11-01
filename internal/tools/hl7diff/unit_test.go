@@ -258,7 +258,7 @@ func TestAssignIsMaximum(t *testing.T) {
 	// error (E.a) can pair with the HL7 error at its parent (E) or at itself (E.a); the second (E.b)
 	// only with the one at the parent. Every error pairs only if the first gives way.
 	g := func(loc string) GoIssue {
-		return GoIssue{File: "f", Severity: "error", MessageID: "EXTENSION_INVALID_VALUE_TYPE", Expression: []string{loc}}
+		return GoIssue{File: "f", Severity: "error", MessageID: "STRUCTURE_TYPE_NOT_ALLOWED", Expression: []string{loc}}
 	}
 	h := func(loc string) HL7Issue {
 		return HL7Issue{File: "f", Severity: "error", Key: "Extension_EXT_Type", HasID: true, Location: loc, Text: "The Extension 'u' definition allows for the types [Identifier] but found type string"}
@@ -475,16 +475,16 @@ func TestFourthReviewScenarios(t *testing.T) {
 
 	t.Run("2: a location made precise among sibling items passes", func(t *testing.T) {
 		x := hl7(extType("E.extension[0]"), extType("E.extension[1]"))
-		base := run(g("EXTENSION_INVALID_VALUE_TYPE", "E", "type"))
-		head := run(g("EXTENSION_INVALID_VALUE_TYPE", "E.extension[1]", "type"))
+		base := run(g("STRUCTURE_TYPE_NOT_ALLOWED", "E", "type"))
+		head := run(g("STRUCTURE_TYPE_NOT_ALLOWED", "E.extension[1]", "type"))
 		if !ok(base, head, x) {
 			t.Error("must pass")
 		}
 	})
 	t.Run("4: an unnamed finding moved to the wrong item fails", func(t *testing.T) {
 		x := hl7(extType("P"))
-		base := run(g("EXTENSION_INVALID_VALUE_TYPE", "P.extension[1]", "type"))
-		head := run(g("EXTENSION_INVALID_VALUE_TYPE", "P.extension[0]", "type"))
+		base := run(g("STRUCTURE_TYPE_NOT_ALLOWED", "P.extension[1]", "type"))
+		head := run(g("STRUCTURE_TYPE_NOT_ALLOWED", "P.extension[0]", "type"))
 		if ok(base, head, x) {
 			// Neither item pairs with the owner, so the move shows as a new false positive.
 			t.Error("must fail")

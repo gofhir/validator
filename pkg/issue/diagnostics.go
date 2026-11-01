@@ -11,7 +11,10 @@ type DiagnosticID string
 
 // Diagnostic IDs for structural validation (M1).
 const (
-	DiagStructureUnknownElement        DiagnosticID = "STRUCTURE_UNKNOWN_ELEMENT"
+	DiagStructureUnknownElement DiagnosticID = "STRUCTURE_UNKNOWN_ELEMENT"
+	// DiagStructureTypeNotAllowed: a value of a choice element is of a type that a definition
+	// governing it does not allow (ElementDefinition.type).
+	DiagStructureTypeNotAllowed        DiagnosticID = "STRUCTURE_TYPE_NOT_ALLOWED"
 	DiagStructureInvalidJSON           DiagnosticID = "STRUCTURE_INVALID_JSON"
 	DiagStructureNoResourceType        DiagnosticID = "STRUCTURE_NO_RESOURCE_TYPE"
 	DiagStructureUnknownResource       DiagnosticID = "STRUCTURE_UNKNOWN_RESOURCE"
@@ -97,7 +100,6 @@ const (
 	DiagExtensionContextInvariant DiagnosticID = "EXTENSION_CONTEXT_INVARIANT"
 	DiagExtensionValueRequired    DiagnosticID = "EXTENSION_VALUE_REQUIRED"
 	DiagExtensionValueNotAllowed  DiagnosticID = "EXTENSION_VALUE_NOT_ALLOWED"
-	DiagExtensionInvalidValueType DiagnosticID = "EXTENSION_INVALID_VALUE_TYPE"
 	// DiagExtensionSubExtensionInvalid: a complex extension holds an extension whose relative url
 	// names no part its definition declares.
 	DiagExtensionSubExtensionInvalid DiagnosticID = "EXTENSION_SUBEXTENSION_INVALID"
@@ -242,6 +244,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "Unknown element '{element}'",
+	},
+	DiagStructureTypeNotAllowed: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "The profile '{profile}' allows the type(s) {types} but found type {type}",
 	},
 	DiagStructureInvalidJSON: {
 		Severity: SeverityError,
@@ -518,11 +525,6 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "Extension '{url}' does not allow a value (complex extension)",
-	},
-	DiagExtensionInvalidValueType: {
-		Severity: SeverityError,
-		Code:     CodeValue,
-		Template: "Extension '{url}' has invalid value type '{provided}'. Allowed: {allowed}",
 	},
 	DiagExtensionSubExtensionInvalid: {
 		Severity: SeverityError,

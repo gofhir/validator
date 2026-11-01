@@ -1,0 +1,515 @@
+[
+  {
+    "resource": "in/t1.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t1' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "3.776ms"
+  },
+  {
+    "resource": "in/t10.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/ext-t10' allows the type(s) Coding but found type string",
+        "expression": [
+          "Patient.extension[0].extension[0].valueString"
+        ]
+      }
+    ],
+    "duration": "1.086ms"
+  },
+  {
+    "resource": "in/t10b.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/ext-t10b' allows the type(s) Coding but found type string",
+        "expression": [
+          "Patient.extension[0].valueString"
+        ]
+      }
+    ],
+    "duration": "218µs"
+  },
+  {
+    "resource": "in/t11.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "388µs"
+  },
+  {
+    "resource": "in/t12.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unknown element 'valueString'",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Maximum cardinality of 'Parameters.parameter[0].value[x]' is 1, but found 2",
+        "expression": [
+          "Parameters.parameter[0].value[x]"
+        ]
+      }
+    ],
+    "duration": "76µs"
+  },
+  {
+    "resource": "in/t12b.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "488µs"
+  },
+  {
+    "resource": "in/t12c.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "List"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string",
+        "expression": [
+          "List.contained[0].parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "365µs"
+  },
+  {
+    "resource": "in/t13.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 1,
+    "issues": [
+      {
+        "severity": "information",
+        "code": "informational",
+        "diagnostics": "Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb]"
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-ha' allows the type(s) code, string but found type integer",
+        "expression": [
+          "Parameters.parameter[0].valueInteger"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-hb' allows the type(s) code, boolean but found type integer",
+        "expression": [
+          "Parameters.parameter[0].valueInteger"
+        ]
+      }
+    ],
+    "duration": "317µs"
+  },
+  {
+    "resource": "in/t14.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t6' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value is \"zzz\", but the profile requires \"abc\"",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "314µs"
+  },
+  {
+    "resource": "in/t15.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Error parsing JSON: the primitive value must be a string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "111µs"
+  },
+  {
+    "resource": "in/t16.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t16' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "378µs"
+  },
+  {
+    "resource": "in/t17.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t17' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "327µs"
+  },
+  {
+    "resource": "in/t18.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "291µs"
+  },
+  {
+    "resource": "in/t18ok.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "58µs"
+  },
+  {
+    "resource": "in/t2.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t2' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "70µs"
+  },
+  {
+    "resource": "in/t2ok.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "49µs"
+  },
+  {
+    "resource": "in/t2other.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "49µs"
+  },
+  {
+    "resource": "in/t3.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t3' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].part[0].valueString"
+        ]
+      }
+    ],
+    "duration": "295µs"
+  },
+  {
+    "resource": "in/t4.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t4' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].part[0].valueString"
+        ]
+      }
+    ],
+    "duration": "502µs"
+  },
+  {
+    "resource": "in/t5.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/o-t5' allows the type(s) Quantity but found type string",
+        "expression": [
+          "Observation.valueString"
+        ]
+      }
+    ],
+    "duration": "558µs"
+  },
+  {
+    "resource": "in/t6a.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "value",
+        "diagnostics": "Value is \"zzz\", but the profile requires \"abc\"",
+        "expression": [
+          "Parameters.parameter[0].valueCode"
+        ]
+      }
+    ],
+    "duration": "75µs"
+  },
+  {
+    "resource": "in/t6b.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t6' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "53µs"
+  },
+  {
+    "resource": "in/t7.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/o-t7' allows the type(s) Quantity but found type string",
+        "expression": [
+          "Observation.component[0].valueString"
+        ]
+      }
+    ],
+    "duration": "752µs"
+  },
+  {
+    "resource": "in/t7ok.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      }
+    ],
+    "duration": "191µs"
+  },
+  {
+    "resource": "in/t8.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t8' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "348µs"
+  },
+  {
+    "resource": "in/t9.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-t9' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "299µs"
+  }
+]

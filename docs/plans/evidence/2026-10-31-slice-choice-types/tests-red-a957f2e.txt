@@ -1,0 +1,214 @@
+--- FAIL: TestSliceChoiceTypes (2.95s)
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t1_restricted_choice (0.01s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t2_slice_with_code_only (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t3_restricted_choice_under_a_content_reference (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].part[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].part[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].part[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].part[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t4_slice_of_part (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].part[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t5_root_choice_restricted (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Observation.valueString "allows the type(s) Quantity but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Observation.valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Observation.valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Observation.valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t6b_fixed_value,_other_type (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t7_component_choice_restricted (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Observation.component[0].valueString "allows the type(s) Quantity but found type string"
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t8_slice_and_sliced_element_restricted (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t9_slice_narrower_than_the_sliced_element (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t10_nested_extension_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Patient.extension[0].extension[0].valueString "allows the type(s) Coding but found type string"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:399: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueString
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t10b_extension_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Patient.extension[0].valueString "allows the type(s) Coding but found type string"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10b' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:399: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueString
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10b' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t11_only_the_primitive_extension (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | CONSTRAINT_FAILED | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element) | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t13_two_profiles (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "allows the type(s) code, string but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "allows the type(s) code, boolean but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueInteger
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t14_fixed_value_and_type (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | FIXED_VALUE_MISMATCH | Value is "zzz", but the profile requires "abc" | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t15_a_number_as_string (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | TYPE_WRONG_JSON_TYPE | Error parsing JSON: the primitive value must be a string | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t16_binding_on_the_slice (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t17_required_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t1_restricted_choice (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t2_slice_with_code_only (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t3_restricted_choice_under_a_content_reference (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].part[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].part[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].part[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].part[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t4_slice_of_part (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].part[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t5_root_choice_restricted (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Observation.valueString "allows the type(s) Quantity but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Observation.valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Observation.valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Observation.valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t6b_fixed_value,_other_type (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t7_component_choice_restricted (0.01s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Observation.component[0].valueString "allows the type(s) Quantity but found type string"
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t8_slice_and_sliced_element_restricted (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t9_slice_narrower_than_the_sliced_element (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t10_nested_extension_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Patient.extension[0].extension[0].valueString "allows the type(s) Coding but found type string"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:399: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueString
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t10b_extension_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Patient.extension[0].valueString "allows the type(s) Coding but found type string"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10b' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:399: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueString
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10b' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t11_only_the_primitive_extension (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | CONSTRAINT_FAILED | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element) | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t13_two_profiles (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "allows the type(s) code, string but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "allows the type(s) code, boolean but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueInteger
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t14_fixed_value_and_type (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | FIXED_VALUE_MISMATCH | Value is "zzz", but the profile requires "abc" | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t15_a_number_as_string (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | TYPE_WRONG_JSON_TYPE | Error parsing JSON: the primitive value must be a string | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t16_binding_on_the_slice (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t17_required_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t1_restricted_choice (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t2_slice_with_code_only (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t3_restricted_choice_under_a_content_reference (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].part[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].part[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].part[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].part[0].valueString
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t4_slice_of_part (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].part[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t5_root_choice_restricted (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Observation.valueString "allows the type(s) Quantity but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Observation.valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Observation.valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Observation.valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t6b_fixed_value,_other_type (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t7_component_choice_restricted (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Observation.component[0].valueString "allows the type(s) Quantity but found type string"
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Observation
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t8_slice_and_sliced_element_restricted (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueString
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueString' | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t9_slice_narrower_than_the_sliced_element (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t10_nested_extension_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Patient.extension[0].extension[0].valueString "allows the type(s) Coding but found type string"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:399: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].extension[0].valueString
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t10b_extension_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Patient.extension[0].valueString "allows the type(s) Coding but found type string"
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10b' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+        extension_value_test.go:399: unexpected EXTENSION_INVALID_VALUE_TYPE at Patient.extension[0].valueString
+            error | EXTENSION_INVALID_VALUE_TYPE | Extension 'http://example.org/fhir/StructureDefinition/ext-t10b' has invalid value type 'string'. Allowed: Coding | Patient.extension[0].valueString
+            warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | Patient
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t11_only_the_primitive_extension (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | CONSTRAINT_FAILED | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element) | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t13_two_profiles (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "allows the type(s) code, string but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "allows the type(s) code, boolean but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+        extension_value_test.go:399: unexpected STRUCTURE_UNKNOWN_ELEMENT at Parameters.parameter[0].valueInteger
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_UNKNOWN_ELEMENT | Unknown element 'valueInteger' | Parameters.parameter[0].valueInteger
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t14_fixed_value_and_type (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | FIXED_VALUE_MISMATCH | Value is "zzz", but the profile requires "abc" | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t15_a_number_as_string (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+            error | TYPE_WRONG_JSON_TYPE | Error parsing JSON: the primitive value must be a string | Parameters.parameter[0].valueString
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t16_binding_on_the_slice (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t17_required_value (0.00s)
+        extension_value_test.go:394: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueString "allows the type(s) code but found type string"
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	3.579s
+FAIL

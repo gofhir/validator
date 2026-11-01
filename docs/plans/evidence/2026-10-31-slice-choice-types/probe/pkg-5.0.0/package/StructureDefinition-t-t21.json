@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "t-t21",
+ "url": "http://example.org/fhir/StructureDefinition/t-t21",
+ "name": "Tt21",
+ "status": "active",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Timing",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Timing",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Timing",
+    "path": "Timing"
+   },
+   {
+    "id": "Timing.repeat.bounds[x]",
+    "path": "Timing.repeat.bounds[x]",
+    "type": [
+     {
+      "code": "Period"
+     }
+    ]
+   }
+  ]
+ }
+}
