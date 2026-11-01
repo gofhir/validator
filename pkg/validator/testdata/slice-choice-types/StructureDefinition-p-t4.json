@@ -1,0 +1,52 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-t4",
+ "url": "http://example.org/fhir/StructureDefinition/p-t4",
+ "name": "Pt4",
+ "status": "active",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Parameters",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Parameters",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Parameters",
+    "path": "Parameters"
+   },
+   {
+    "id": "Parameters.parameter.part",
+    "path": "Parameters.parameter.part",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "name"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Parameters.parameter.part:t",
+    "path": "Parameters.parameter.part",
+    "sliceName": "t"
+   },
+   {
+    "id": "Parameters.parameter.part:t.name",
+    "path": "Parameters.parameter.part.name",
+    "fixedString": "t"
+   },
+   {
+    "id": "Parameters.parameter.part:t.value[x]",
+    "path": "Parameters.parameter.part.value[x]",
+    "type": [
+     {
+      "code": "code"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,30 @@
+{
+ "resourceType": "List",
+ "id": "t12c",
+ "status": "current",
+ "mode": "working",
+ "contained": [
+  {
+   "resourceType": "Parameters",
+   "id": "c1",
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/p-t2"
+    ]
+   },
+   "parameter": [
+    {
+     "name": "op",
+     "valueString": "a"
+    }
+   ]
+  }
+ ],
+ "entry": [
+  {
+   "item": {
+    "reference": "#c1"
+   }
+  }
+ ]
+}

@@ -1,0 +1,377 @@
+# hl7diff same: baseline a957f2e vs working tree
+
+decisions: identical (15 files, 26 lines)
+
+multimatch: identical (3 files, 9 lines)
+
+core-probes: identical (7 files, 12 lines)
+
+type-profile-probes: identical (47 files, 92 lines)
+
+nested-resource-probes: identical (4 files, 6 lines)
+
+## review-probes: 3 lines differ (5 files, 9 baseline lines)
+
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/rv3_prim_ext_with_value.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient._birthDate.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":15,"Column":4}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rv3_prim_ext_with_value.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":15,"Column":4}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/rv4_prim_ext_no_value.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate"],"diagnostics":"Constraint failed: rp-2: 'birthDate has a value'"}
+  head: {"file":"testdata/m12-slice-scoping/probes/rv4_prim_ext_no_value.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate"],"diagnostics":"Constraint failed: rp-2: 'birthDate has a value'","location":{"Line":12,"Column":14}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/rv4_prim_ext_no_value.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient._birthDate.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":14,"Column":4}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rv4_prim_ext_no_value.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":14,"Column":4}}
+
+## extension-probes: 6 lines differ (14 files, 27 baseline lines)
+
+- sorted line 2
+  base: {"file":"testdata/m12-slice-scoping/probes/xd10_req_primitive.json","severity":"error","code":"invalid","messageId":"EXTENSION_SUBEXTENSION_INVALID","expression":["Patient._birthDate.extension[0].extension[0]"],"diagnostics":"Sub-extension url 'b' is not defined by the extension 'https://example.org/fhir/StructureDefinition/ext-req'","location":{"Line":14,"Column":6}}
+  head: {"file":"testdata/m12-slice-scoping/probes/xd10_req_primitive.json","severity":"error","code":"invalid","messageId":"EXTENSION_SUBEXTENSION_INVALID","expression":["Patient.birthDate.extension[0].extension[0]"],"diagnostics":"Sub-extension url 'b' is not defined by the extension 'https://example.org/fhir/StructureDefinition/ext-req'","location":{"Line":14,"Column":6}}
+- sorted line 3
+  base: {"file":"testdata/m12-slice-scoping/probes/xd10_req_primitive.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)"}
+  head: {"file":"testdata/m12-slice-scoping/probes/xd10_req_primitive.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)","location":{"Line":10,"Column":4}}
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/xd10_req_primitive.json","severity":"error","code":"required","messageId":"SLICING_CARDINALITY_MIN","expression":["Patient.birthDate.extension[0].extension:a"],"diagnostics":"Minimum cardinality of 'Patient.birthDate.extension[0].extension:a' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/xd10_req_primitive.json","severity":"error","code":"required","messageId":"SLICING_CARDINALITY_MIN","expression":["Patient.birthDate.extension[0].extension:a"],"diagnostics":"Minimum cardinality of 'Patient.birthDate.extension[0].extension:a' is 1, but found 0","location":{"Line":13,"Column":16}}
+- sorted line 5
+  base: {"file":"testdata/m12-slice-scoping/probes/xd10_req_primitive.json","severity":"error","code":"structure","messageId":"EXTENSION_VALUE_NOT_ALLOWED","expression":["Patient._birthDate.extension[0]"],"diagnostics":"Extension 'https://example.org/fhir/StructureDefinition/ext-req' does not allow a value (complex extension)","location":{"Line":10,"Column":4}}
+  head: {"file":"testdata/m12-slice-scoping/probes/xd10_req_primitive.json","severity":"error","code":"structure","messageId":"EXTENSION_VALUE_NOT_ALLOWED","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Extension 'https://example.org/fhir/StructureDefinition/ext-req' does not allow a value (complex extension)","location":{"Line":10,"Column":4}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/xd14_sub_absolute_bad.json","severity":"error","code":"value","messageId":"EXTENSION_INVALID_VALUE_TYPE","expression":["Patient.extension[0].extension[1].valueString"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/data-absent-reason' has invalid value type 'string'. Allowed: code","location":{"Line":17,"Column":19}}
+  head: {"file":"testdata/m12-slice-scoping/probes/xd14_sub_absolute_bad.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Patient.extension[0].extension[1].valueString"],"diagnostics":"The profile 'http://hl7.org/fhir/StructureDefinition/data-absent-reason' allows the type(s) code but found type string","location":{"Line":17,"Column":19}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/xd5_xp_primitive.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Constraint failed: xp-1: 'The value starts with x' (defined in https://example.org/fhir/StructureDefinition/ext-xp)"}
+  head: {"file":"testdata/m12-slice-scoping/probes/xd5_xp_primitive.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Constraint failed: xp-1: 'The value starts with x' (defined in https://example.org/fhir/StructureDefinition/ext-xp)","location":{"Line":10,"Column":4}}
+
+primitive-extension-probes: identical (5 files, 5 lines)
+
+context-probes: identical (33 files, 131 lines)
+
+## context-eval-probes: 1 lines differ (31 files, 55 baseline lines)
+
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/ue_t06c_invprim_novalue.json","severity":"error","code":"extension","messageId":"EXTENSION_CONTEXT_INVARIANT","expression":["Patient.name[0].given[0]"],"diagnostics":"Extension 'https://example.org/fhir/StructureDefinition/p-invprim' is not allowed here: its context invariant 'startsWith('a')' does not hold"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ue_t06c_invprim_novalue.json","severity":"error","code":"extension","messageId":"EXTENSION_CONTEXT_INVARIANT","expression":["Patient.name[0].given[0]"],"diagnostics":"Extension 'https://example.org/fhir/StructureDefinition/p-invprim' is not allowed here: its context invariant 'startsWith('a')' does not hold","location":{"Line":6,"Column":5}}
+
+## context-scope-probes: 2 lines differ (198 files, 369 baseline lines)
+
+- sorted line 219
+  base: {"file":"testdata/m12-slice-scoping/probes/us_r5_x3.json","severity":"error","code":"extension","messageId":"EXTENSION_CONTEXT_INVARIANT","expression":["Patient.birthDate"],"diagnostics":"Extension 'https://example.org/fhir/StructureDefinition/v-x3' is not allowed here: its context invariant '$this is string' does not hold"}
+  head: {"file":"testdata/m12-slice-scoping/probes/us_r5_x3.json","severity":"error","code":"extension","messageId":"EXTENSION_CONTEXT_INVARIANT","expression":["Patient.birthDate"],"diagnostics":"Extension 'https://example.org/fhir/StructureDefinition/v-x3' is not allowed here: its context invariant '$this is string' does not hold","location":{"Line":3,"Column":14}}
+- sorted line 220
+  base: {"file":"testdata/m12-slice-scoping/probes/us_r5_x3.json","severity":"error","code":"extension","messageId":"EXTENSION_CONTEXT_INVARIANT","expression":["Patient.deceasedBoolean"],"diagnostics":"Extension 'https://example.org/fhir/StructureDefinition/v-x4' is not allowed here: its context invariant '$this is string' does not hold"}
+  head: {"file":"testdata/m12-slice-scoping/probes/us_r5_x3.json","severity":"error","code":"extension","messageId":"EXTENSION_CONTEXT_INVARIANT","expression":["Patient.deceasedBoolean"],"diagnostics":"Extension 'https://example.org/fhir/StructureDefinition/v-x4' is not allowed here: its context invariant '$this is string' does not hold","location":{"Line":11,"Column":20}}
+
+interface-probes: identical (9 files, 35 lines)
+
+interface-probes-r5: identical (16 files, 20 lines)
+
+interface-probes-r4b: identical (9 files, 36 lines)
+
+## constraint-probes: 5 lines differ (81 files, 162 baseline lines)
+
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/ci_d04_ext_on_primitive.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient._birthDate.extension[0]"],"diagnostics":"Unknown extension 'https://example.org/fhir/StructureDefinition/d-ext'","location":{"Line":1,"Column":96}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ci_d04_ext_on_primitive.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Unknown extension 'https://example.org/fhir/StructureDefinition/d-ext'","location":{"Line":1,"Column":96}}
+- sorted line 72
+  base: {"file":"testdata/m12-slice-scoping/probes/ci_p06_prim_arr.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MolecularSequence.quality[0].roc._precision[1].extension[0]"],"diagnostics":"Unknown extension 'https://example.org/fhir/StructureDefinition/w-prec'","location":{"Line":1,"Column":173}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ci_p06_prim_arr.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MolecularSequence.quality[0].roc.precision[1].extension[0]"],"diagnostics":"Unknown extension 'https://example.org/fhir/StructureDefinition/w-prec'","location":{"Line":1,"Column":173}}
+- sorted line 75
+  base: {"file":"testdata/m12-slice-scoping/probes/ci_p07_prim_arr_null.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MolecularSequence.quality[0].roc._precision[1].extension[0]"],"diagnostics":"Unknown extension 'https://example.org/fhir/StructureDefinition/w-prec'","location":{"Line":1,"Column":180}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ci_p07_prim_arr_null.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MolecularSequence.quality[0].roc.precision[1].extension[0]"],"diagnostics":"Unknown extension 'https://example.org/fhir/StructureDefinition/w-prec'","location":{"Line":1,"Column":180}}
+- sorted line 77
+  base: {"file":"testdata/m12-slice-scoping/probes/ci_p08_prim_arr_15.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MolecularSequence.quality[0].roc._precision[1].extension[0]"],"diagnostics":"Unknown extension 'https://example.org/fhir/StructureDefinition/w-prec'","location":{"Line":1,"Column":172}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ci_p08_prim_arr_15.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MolecularSequence.quality[0].roc.precision[1].extension[0]"],"diagnostics":"Unknown extension 'https://example.org/fhir/StructureDefinition/w-prec'","location":{"Line":1,"Column":172}}
+- sorted line 142
+  base: {"file":"testdata/m12-slice-scoping/probes/ci_v18_primitive_id_only.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.name[0].family"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ci_v18_primitive_id_only.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.name[0].family"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":54}}
+
+## invariant-probes: 1 lines differ (61 files, 107 baseline lines)
+
+- sorted line 107
+  base: {"file":"testdata/m12-slice-scoping/probes/ci_v18_primitive_id_only.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.name[0].family"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ci_v18_primitive_id_only.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.name[0].family"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":54}}
+
+## fixedpattern-probes: 13 lines differ (50 files, 86 baseline lines)
+
+- sorted line 29
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r01_status_ext.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Observation._status.extension[0]"],"diagnostics":"Unknown extension 'http://e'","location":{"Line":1,"Column":397}}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r01_status_ext.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Observation.status.extension[0]"],"diagnostics":"Unknown extension 'http://e'","location":{"Line":1,"Column":397}}
+- sorted line 31
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Observation.status"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/observation-status|4.0.1'"}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Observation.status"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/observation-status|4.0.1'","location":{"Line":1,"Column":361}}
+- sorted line 32
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json","severity":"error","code":"required","messageId":"FIXED_VALUE_MISSING","expression":["Observation.status"],"diagnostics":"Missing element 'value', which the profile requires to be \"final\""}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json","severity":"error","code":"required","messageId":"FIXED_VALUE_MISSING","expression":["Observation.status"],"diagnostics":"Missing element 'value', which the profile requires to be \"final\"","location":{"Line":1,"Column":361}}
+- sorted line 33
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json","severity":"error","code":"value","messageId":"FIXED_VALUE_EXTRA","expression":["Observation.status"],"diagnostics":"Element 'extension' is present, but the fixed value the profile requires has none"}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json","severity":"error","code":"value","messageId":"FIXED_VALUE_EXTRA","expression":["Observation.status"],"diagnostics":"Element 'extension' is present, but the fixed value the profile requires has none","location":{"Line":1,"Column":361}}
+- sorted line 34
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Observation._status.extension[0]"],"diagnostics":"Unknown extension 'http://e'","location":{"Line":1,"Column":378}}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r02_status_only_ext.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Observation.status.extension[0]"],"diagnostics":"Unknown extension 'http://e'","location":{"Line":1,"Column":378}}
+- sorted line 51
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r10_gender_ext_only.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Patient.gender"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'"}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r10_gender_ext_only.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Patient.gender"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'","location":{"Line":1,"Column":225}}
+- sorted line 52
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r10_gender_ext_only.json","severity":"error","code":"required","messageId":"FIXED_VALUE_MISSING","expression":["Patient.gender"],"diagnostics":"Missing element 'value', which the profile requires to be \"male\""}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r10_gender_ext_only.json","severity":"error","code":"required","messageId":"FIXED_VALUE_MISSING","expression":["Patient.gender"],"diagnostics":"Missing element 'value', which the profile requires to be \"male\"","location":{"Line":1,"Column":225}}
+- sorted line 53
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r10_gender_ext_only.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient._gender.extension[0]"],"diagnostics":"Unknown extension 'http://e'","location":{"Line":1,"Column":242}}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r10_gender_ext_only.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.gender.extension[0]"],"diagnostics":"Unknown extension 'http://e'","location":{"Line":1,"Column":242}}
+- sorted line 75
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r20_code_coding_ext_primitive.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Observation.code.coding[0]._code.extension[0]"],"diagnostics":"Unknown extension 'http://e'","location":{"Line":1,"Column":353}}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r20_code_coding_ext_primitive.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Observation.code.coding[0].code.extension[0]"],"diagnostics":"Unknown extension 'http://e'","location":{"Line":1,"Column":353}}
+- sorted line 81
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r26_ext_type_slice_no_value.json","severity":"error","code":"required","messageId":"FIXED_VALUE_MISSING","expression":["Patient.extension[0].valueCode"],"diagnostics":"Missing element 'value', which the profile requires to be \"x\""}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r26_ext_type_slice_no_value.json","severity":"error","code":"required","messageId":"FIXED_VALUE_MISSING","expression":["Patient.extension[0].valueCode"],"diagnostics":"Missing element 'value', which the profile requires to be \"x\"","location":{"Line":1,"Column":232}}
+- sorted line 82
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r26_ext_type_slice_no_value.json","severity":"error","code":"value","messageId":"FIXED_VALUE_EXTRA","expression":["Patient.extension[0].valueCode"],"diagnostics":"Element 'extension' is present, but the fixed value the profile requires has none"}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r26_ext_type_slice_no_value.json","severity":"error","code":"value","messageId":"FIXED_VALUE_EXTRA","expression":["Patient.extension[0].valueCode"],"diagnostics":"Element 'extension' is present, but the fixed value the profile requires has none","location":{"Line":1,"Column":232}}
+- sorted line 84
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r28_contained_no_value.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Observation.contained[0].gender"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'"}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r28_contained_no_value.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Observation.contained[0].gender"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'","location":{"Line":1,"Column":282}}
+- sorted line 85
+  base: {"file":"testdata/m12-slice-scoping/probes/fp_r28_contained_no_value.json","severity":"error","code":"required","messageId":"FIXED_VALUE_MISSING","expression":["Observation.contained[0].gender"],"diagnostics":"Missing element 'value', which the profile requires to be \"male\""}
+  head: {"file":"testdata/m12-slice-scoping/probes/fp_r28_contained_no_value.json","severity":"error","code":"required","messageId":"FIXED_VALUE_MISSING","expression":["Observation.contained[0].gender"],"diagnostics":"Missing element 'value', which the profile requires to be \"male\"","location":{"Line":1,"Column":282}}
+
+target-probes: identical (71 files, 104 lines)
+
+nested-slicing-probes: identical (18 files, 23 lines)
+
+## json-shape-probes: 4 lines differ (34 files, 103 baseline lines)
+
+- sorted line 28
+  base: {"file":"testdata/m12-slice-scoping/probes/js_b1_sibling_shapes.json","severity":"error","code":"structure","messageId":"STRUCTURE_OBJECT_EXPECTED","expression":["Patient.gender"],"diagnostics":"'_gender' must be a JSON object, not a primitive value"}
+  head: {"file":"testdata/m12-slice-scoping/probes/js_b1_sibling_shapes.json","severity":"error","code":"structure","messageId":"STRUCTURE_OBJECT_EXPECTED","expression":["Patient.gender"],"diagnostics":"'_gender' must be a JSON object, not a primitive value","location":{"Line":1,"Column":216}}
+- sorted line 81
+  base: {"file":"testdata/m12-slice-scoping/probes/js_d4_primitive_items_renumbered.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.name[0]._given[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":1,"Column":172}}
+  head: {"file":"testdata/m12-slice-scoping/probes/js_d4_primitive_items_renumbered.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.name[0].given[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":1,"Column":172}}
+- sorted line 82
+  base: {"file":"testdata/m12-slice-scoping/probes/js_d5_sibling_extension_value.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)"}
+  head: {"file":"testdata/m12-slice-scoping/probes/js_d5_sibling_extension_value.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)","location":{"Line":1,"Column":144}}
+- sorted line 84
+  base: {"file":"testdata/m12-slice-scoping/probes/js_d5_sibling_extension_value.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient._birthDate.extension[0]"],"diagnostics":"Unknown extension 'http://x'","location":{"Line":1,"Column":144}}
+  head: {"file":"testdata/m12-slice-scoping/probes/js_d5_sibling_extension_value.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.birthDate.extension[0]"],"diagnostics":"Unknown extension 'http://x'","location":{"Line":1,"Column":144}}
+
+binding-probes: identical (5 files, 10 lines)
+
+## binding-walk-probes: 1 lines differ (14 files, 31 baseline lines)
+
+- sorted line 23
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_no_value.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Patient.gender"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'"}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_no_value.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Patient.gender"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'","location":{"Line":1,"Column":45}}
+
+## extension-walk-probes: 3 lines differ (20 files, 42 baseline lines)
+
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/wx_r02_given_array.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.name[0].given[1].extension[0].valueCode"],"diagnostics":"The value provided ('zz') is not in the value set 'http://example.org/rev/vs/ab' (required)"}
+  head: {"file":"testdata/m12-slice-scoping/probes/wx_r02_given_array.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.name[0].given[1].extension[0].valueCode"],"diagnostics":"The value provided ('zz') is not in the value set 'http://example.org/rev/vs/ab' (required)","location":{"Line":1,"Column":177}}
+- sorted line 22
+  base: {"file":"testdata/m12-slice-scoping/probes/wx_r11_ext_on_ext_value.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.extension[0].valueCode.extension[0].valueCode"],"diagnostics":"The value provided ('zz') is not in the value set 'http://example.org/rev/vs/ab' (required)"}
+  head: {"file":"testdata/m12-slice-scoping/probes/wx_r11_ext_on_ext_value.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.extension[0].valueCode.extension[0].valueCode"],"diagnostics":"The value provided ('zz') is not in the value set 'http://example.org/rev/vs/ab' (required)","location":{"Line":1,"Column":225}}
+- sorted line 31
+  base: {"file":"testdata/m12-slice-scoping/probes/wx_r15_prim_single.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.birthDate.extension[0].valueCode"],"diagnostics":"The value provided ('zz') is not in the value set 'http://example.org/rev/vs/ab' (required)"}
+  head: {"file":"testdata/m12-slice-scoping/probes/wx_r15_prim_single.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.birthDate.extension[0].valueCode"],"diagnostics":"The value provided ('zz') is not in the value set 'http://example.org/rev/vs/ab' (required)","location":{"Line":1,"Column":160}}
+
+binding-profile-probes: identical (10 files, 19 lines)
+
+valueset-membership-probes: identical (43 files, 52 lines)
+
+holder-profile-probes: identical (50 files, 93 lines)
+
+## reference-walk-probes: 3 lines differ (56 files, 137 baseline lines)
+
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_a08_primitive_birthDate_nope.json","severity":"error","code":"invalid","messageId":"REFERENCE_CONTAINED_NOT_FOUND","expression":["Patient.birthDate.extension[0].valueReference.reference"],"diagnostics":"Contained resource 'nope' not found. Reference is not defined within the resource"}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_a08_primitive_birthDate_nope.json","severity":"error","code":"invalid","messageId":"REFERENCE_CONTAINED_NOT_FOUND","expression":["Patient.birthDate.extension[0].valueReference.reference"],"diagnostics":"Contained resource 'nope' not found. Reference is not defined within the resource","location":{"Line":1,"Column":268}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_a08_primitive_birthDate_nope.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate.extension[0].valueReference"],"diagnostics":"Constraint failed: ref-1: 'SHALL have a contained resource if a local reference is provided'"}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_a08_primitive_birthDate_nope.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.birthDate.extension[0].valueReference"],"diagnostics":"Constraint failed: ref-1: 'SHALL have a contained resource if a local reference is provided'","location":{"Line":1,"Column":255}}
+- sorted line 137
+  base: {"file":"testdata/m12-slice-scoping/probes/rw_w3_ext_forbids_reference.json","severity":"error","code":"value","messageId":"EXTENSION_INVALID_VALUE_TYPE","expression":["Patient.extension[0].valueReference"],"diagnostics":"Extension 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' has invalid value type 'Reference'. Allowed: Address","location":{"Line":1,"Column":223}}
+  head: {"file":"testdata/m12-slice-scoping/probes/rw_w3_ext_forbids_reference.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Patient.extension[0].valueReference"],"diagnostics":"The profile 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' allows the type(s) Address but found type Reference","location":{"Line":1,"Column":223}}
+
+package-example-cpg-probes: identical (4 files, 10 lines)
+
+package-example-cql-probes: identical (2 files, 3 lines)
+
+unknown-codesystem-probes: identical (521 files, 1035 lines)
+
+fullurl-probes: identical (48 files, 135 lines)
+
+fullurl-probes-r4b: identical (1 files, 3 lines)
+
+fullurl-probes-r5: identical (4 files, 8 lines)
+
+## held-resource-probes: 2 lines differ (39 files, 146 baseline lines)
+
+- sorted line 144
+  base: {"file":"testdata/m12-slice-scoping/probes/hr_z8_element_extensions.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Bundle.entry[0].resource.name[0]._given[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/e-given'","location":{"Line":1,"Column":352}}
+  head: {"file":"testdata/m12-slice-scoping/probes/hr_z8_element_extensions.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Bundle.entry[0].resource.name[0].given[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/e-given'","location":{"Line":1,"Column":352}}
+- sorted line 145
+  base: {"file":"testdata/m12-slice-scoping/probes/hr_z9_complex_key_sibling.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Observation.code"],"diagnostics":"Minimum cardinality of 'Observation.code' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/hr_z9_complex_key_sibling.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Observation.code"],"diagnostics":"Minimum cardinality of 'Observation.code' is 1, but found 0","location":{"Line":1,"Column":145}}
+
+resolve-probes: identical (19 files, 31 lines)
+
+resource-element-probes: identical (6 files, 17 lines)
+
+canonical-probes: identical (17 files, 19 lines)
+
+r5-probes: identical (8 files, 12 lines)
+
+r4b-probes: identical (1 files, 1 lines)
+
+narrative-ucum-probes: identical (49 files, 82 lines)
+
+narrative-ucum-probes-r4b: identical (49 files, 82 lines)
+
+narrative-ucum-probes-r5: identical (49 files, 82 lines)
+
+## deqm-probes: 24 lines differ (15 files, 65 baseline lines)
+
+- sorted line 37
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_base.json","severity":"error","code":"value","messageId":"EXTENSION_INVALID_VALUE_TYPE","expression":["MeasureReport.extension[0].valueString"],"diagnostics":"Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-certificationIdentifier' has invalid value type 'string'. Allowed: Identifier","location":{"Line":1,"Column":311}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_base.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["MeasureReport.extension[0].valueString"],"diagnostics":"The profile 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-certificationIdentifier' allows the type(s) Identifier but found type string","location":{"Line":1,"Column":311}}
+- sorted line 45
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_prof.json","severity":"error","code":"value","messageId":"EXTENSION_INVALID_VALUE_TYPE","expression":["MeasureReport.extension[0].valueString"],"diagnostics":"Extension 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-certificationIdentifier' has invalid value type 'string'. Allowed: Identifier","location":{"Line":1,"Column":311}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_prof.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["MeasureReport.extension[0].valueString"],"diagnostics":"The profile 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-certificationIdentifier' allows the type(s) Identifier but found type string","location":{"Line":1,"Column":311}}
+- sorted line 46
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_prof.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_prof.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["MeasureReport.extension[0].valueString"],"diagnostics":"The profile 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm' allows the type(s) Identifier but found type string","location":{"Line":1,"Column":311}}
+- sorted line 47
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_base.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P4_cehrt_string_prof.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 48
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is \u003e=1'","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_base.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 49
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.date"],"diagnostics":"Minimum cardinality of 'MeasureReport.date' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is \u003e=1'","location":{"Line":1,"Column":2}}
+- sorted line 50
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.reporter"],"diagnostics":"Minimum cardinality of 'MeasureReport.reporter' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.date"],"diagnostics":"Minimum cardinality of 'MeasureReport.date' is 1, but found 0"}
+- sorted line 51
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.subject"],"diagnostics":"Minimum cardinality of 'MeasureReport.subject' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.reporter"],"diagnostics":"Minimum cardinality of 'MeasureReport.reporter' is 1, but found 0"}
+- sorted line 52
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.subject"],"diagnostics":"Minimum cardinality of 'MeasureReport.subject' is 1, but found 0"}
+- sorted line 53
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_base.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MeasureReport.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/ext'","location":{"Line":1,"Column":197}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P5_cehrt_ok_prof.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 54
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_base.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_base.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MeasureReport.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/ext'","location":{"Line":1,"Column":197}}
+- sorted line 55
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is \u003e=1'","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_base.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 56
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.date"],"diagnostics":"Minimum cardinality of 'MeasureReport.date' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is \u003e=1'","location":{"Line":1,"Column":2}}
+- sorted line 57
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.reporter"],"diagnostics":"Minimum cardinality of 'MeasureReport.reporter' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.date"],"diagnostics":"Minimum cardinality of 'MeasureReport.date' is 1, but found 0"}
+- sorted line 58
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.subject"],"diagnostics":"Minimum cardinality of 'MeasureReport.subject' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.reporter"],"diagnostics":"Minimum cardinality of 'MeasureReport.reporter' is 1, but found 0"}
+- sorted line 59
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MeasureReport.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/ext'","location":{"Line":1,"Column":197}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.subject"],"diagnostics":"Minimum cardinality of 'MeasureReport.subject' is 1, but found 0"}
+- sorted line 60
+  base: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["MeasureReport.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/ext'","location":{"Line":1,"Column":197}}
+- sorted line 61
+  base: {"file":"testdata/m12-slice-scoping/probes/r2_V1_two_messages.json","severity":"error","code":"business-rule","messageId":"SLICING_CARDINALITY_MAX","expression":["MeasureReport.extension:message"],"diagnostics":"Maximum cardinality of 'MeasureReport.extension:message' is 1, but found 2","location":{"Line":1,"Column":305}}
+  head: {"file":"testdata/m12-slice-scoping/probes/probe_P6_unknown_ext_str_prof.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 62
+  base: {"file":"testdata/m12-slice-scoping/probes/r2_V1_two_messages.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is \u003e=1'","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/r2_V1_two_messages.json","severity":"error","code":"business-rule","messageId":"SLICING_CARDINALITY_MAX","expression":["MeasureReport.extension:message"],"diagnostics":"Maximum cardinality of 'MeasureReport.extension:message' is 1, but found 2","location":{"Line":1,"Column":305}}
+- sorted line 63
+  base: {"file":"testdata/m12-slice-scoping/probes/r2_V1_two_messages.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["MeasureReport.date"],"diagnostics":"Minimum cardinality of 'MeasureReport.date' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/r2_V1_two_messages.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["MeasureReport"],"diagnostics":"Constraint failed: deqm-5: 'If the scoring, at either the root level or the group level, is other than composite then the group.population cardinality is \u003e=1'","location":{"Line":1,"Column":2}}
+
+deqm-examples: identical (108 files, 451 lines)
+
+uscore-probes: identical (7 files, 18 lines)
+
+uscore-examples: identical (183 files, 409 lines)
+
+ips: identical (44 files, 88 lines)
+
+mcode-examples: identical (179 files, 471 lines)
+
+aucore-examples: identical (65 files, 108 lines)
+
+## chcore-examples: 3 lines differ (48 files, 76 baseline lines)
+
+- sorted line 55
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/ch.fhir.ig.ch-core#6.0.0/package/example/Patient-ElisabethBroennimannByBFH.json","severity":"information","code":"informational","messageId":"BINDING_CANNOT_VALIDATE","expression":["Patient.address[0].country.extension[0].valueCoding"],"diagnostics":"Code 'CH' in system 'urn:iso:std:iso:3166' cannot be validated - external terminology system requires a terminology server"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/ch.fhir.ig.ch-core#6.0.0/package/example/Patient-ElisabethBroennimannByBFH.json","severity":"information","code":"informational","messageId":"BINDING_CANNOT_VALIDATE","expression":["Patient.address[0].country.extension[0].valueCoding"],"diagnostics":"Code 'CH' in system 'urn:iso:std:iso:3166' cannot be validated - external terminology system requires a terminology server","location":{"Line":1,"Column":2651}}
+- sorted line 61
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/ch.fhir.ig.ch-core#6.0.0/package/example/Patient-PersonEch011.json","severity":"information","code":"informational","messageId":"BINDING_CANNOT_VALIDATE","expression":["Patient.contact[0].address.country.extension[0].valueCoding"],"diagnostics":"Code 'CH' in system 'urn:iso:std:iso:3166' cannot be validated - external terminology system requires a terminology server"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/ch.fhir.ig.ch-core#6.0.0/package/example/Patient-PersonEch011.json","severity":"information","code":"informational","messageId":"BINDING_CANNOT_VALIDATE","expression":["Patient.contact[0].address.country.extension[0].valueCoding"],"diagnostics":"Code 'CH' in system 'urn:iso:std:iso:3166' cannot be validated - external terminology system requires a terminology server","location":{"Line":1,"Column":4411}}
+- sorted line 63
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/ch.fhir.ig.ch-core#6.0.0/package/example/Patient-UpiEprTestKrcmarevic.json","severity":"information","code":"informational","messageId":"BINDING_CANNOT_VALIDATE","expression":["Patient.extension[1].valueAddress.country.extension[0].valueCoding"],"diagnostics":"Code 'CH' in system 'urn:iso:std:iso:3166' cannot be validated - external terminology system requires a terminology server"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/ch.fhir.ig.ch-core#6.0.0/package/example/Patient-UpiEprTestKrcmarevic.json","severity":"information","code":"informational","messageId":"BINDING_CANNOT_VALIDATE","expression":["Patient.extension[1].valueAddress.country.extension[0].valueCoding"],"diagnostics":"Code 'CH' in system 'urn:iso:std:iso:3166' cannot be validated - external terminology system requires a terminology server","location":{"Line":1,"Column":1797}}
+
+## clcore-examples: 6 lines differ (20 files, 24 baseline lines)
+
+- sorted line 9
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Location-LocalizacionEjemploCL1.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Location.address.country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Location-LocalizacionEjemploCL1.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Location.address.country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'","location":{"Line":1,"Column":2933}}
+- sorted line 14
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Organization-EjemploLaboratorio1.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Organization.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Organization-EjemploLaboratorio1.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Organization.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'","location":{"Line":1,"Column":2040}}
+- sorted line 15
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Organization-OrganizacionClEjemplo1.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Organization.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Organization-OrganizacionClEjemplo1.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Organization.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'","location":{"Line":1,"Column":2150}}
+- sorted line 17
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Patient-PacienteCL.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Patient.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Patient-PacienteCL.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Patient.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'","location":{"Line":1,"Column":4859}}
+- sorted line 21
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Practitioner-EjemploPrestadorCL.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Practitioner.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Practitioner-EjemploPrestadorCL.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Practitioner.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'","location":{"Line":1,"Column":2899}}
+- sorted line 22
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Practitioner-EjemploPrestadorCL2.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Practitioner.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.cl.clcore#1.9.4/package/example/Practitioner-EjemploPrestadorCL2.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Practitioner.address[0].country.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: urn:iso:std:iso:3166 for '152'","location":{"Line":1,"Column":3287}}
+
+## r4-core-examples: 11 lines differ (5301 files, 55193 baseline lines)
+
+- sorted line 73
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-10bb101f-a121-4264-a920-67be9cb82c74.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Bundle.entry[2].resource._gender.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/Profile/administrative-status'","location":{"Line":133,"Column":13}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-10bb101f-a121-4264-a920-67be9cb82c74.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Bundle.entry[2].resource.gender.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/Profile/administrative-status'","location":{"Line":133,"Column":13}}
+- sorted line 78
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-3a0707d3-549e-4467-b8b8-5a2ab3800efe.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Bundle.entry[3].resource._gender.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/Profile/administrative-status'","location":{"Line":165,"Column":13}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-3a0707d3-549e-4467-b8b8-5a2ab3800efe.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Bundle.entry[3].resource.gender.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/Profile/administrative-status'","location":{"Line":165,"Column":13}}
+- sorted line 571
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-b248b1b2-1686-4b94-9936-37d7a5f94b51.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Bundle.entry[8].resource._gender.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/Profile/administrative-status'","location":{"Line":512,"Column":13}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-b248b1b2-1686-4b94-9936-37d7a5f94b51.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Bundle.entry[8].resource.gender.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/Profile/administrative-status'","location":{"Line":512,"Column":13}}
+- sorted line 584
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-b248b1b2-1686-4b94-9936-37d7a5f94b51.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Bundle.entry[8].resource.gender.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: http://example.org/fhir/v2/administrative-status for 'FTM'"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-b248b1b2-1686-4b94-9936-37d7a5f94b51.json","severity":"warning","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Bundle.entry[8].resource.gender.extension[0].valueCodeableConcept.coding[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: http://example.org/fhir/v2/administrative-status for 'FTM'","location":{"Line":517,"Column":29}}
+- sorted line 47217
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"information","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Patient.gender.extension[0].valueCoding.system"],"diagnostics":"CodeSystem is unknown and can't be validated: http://nema.org/examples/gender for 'M'"}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"information","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Patient.gender.extension[0].valueCoding.system"],"diagnostics":"CodeSystem is unknown and can't be validated: http://nema.org/examples/gender for 'M'","location":{"Line":49,"Column":19}}
+- sorted line 47218
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient._gender.extension[0]"],"diagnostics":"Unknown extension 'http://nema.org/examples/extensions#gender'","location":{"Line":46,"Column":7}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.extension[0]"],"diagnostics":"Unknown extension 'http://nema.org/fhir/extensions#0010:1010'","location":{"Line":9,"Column":5}}
+- sorted line 47219
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.extension[0]"],"diagnostics":"Unknown extension 'http://nema.org/fhir/extensions#0010:1010'","location":{"Line":9,"Column":5}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.extension[1]"],"diagnostics":"Unknown extension 'http://nema.org/fhir/extensions#0010:1020'","location":{"Line":16,"Column":5}}
+- sorted line 47220
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.extension[1]"],"diagnostics":"Unknown extension 'http://nema.org/fhir/extensions#0010:1020'","location":{"Line":16,"Column":5}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.extension[2]"],"diagnostics":"Unknown extension 'http://nema.org/fhir/extensions#0010:1030'","location":{"Line":23,"Column":5}}
+- sorted line 47221
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.extension[2]"],"diagnostics":"Unknown extension 'http://nema.org/fhir/extensions#0010:1030'","location":{"Line":23,"Column":5}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-dicom.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.gender.extension[0]"],"diagnostics":"Unknown extension 'http://nema.org/examples/extensions#gender'","location":{"Line":46,"Column":7}}
+- sorted line 47237
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-pat2.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient._gender.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/Profile/administrative-status'","location":{"Line":37,"Column":7}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Patient-pat2.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Patient.gender.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/Profile/administrative-status'","location":{"Line":37,"Column":7}}
+- sorted line 47256
+  base: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/PlanDefinition-KDN5.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["PlanDefinition.relatedArtifact[1]._type.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/fhir/regimenReferenceType'","location":{"Line":230,"Column":11}}
+  head: {"file":"/Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/PlanDefinition-KDN5.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["PlanDefinition.relatedArtifact[1].type.extension[0]"],"diagnostics":"Unknown extension 'http://example.org/fhir/regimenReferenceType'","location":{"Line":230,"Column":11}}
+
+**DIFFERENT**
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/same-report.md
+exit status 1

@@ -1,0 +1,18 @@
+{
+ "resourceType": "Parameters",
+ "id": "t19",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-t19"
+  ]
+ },
+ "parameter": [
+  {
+   "name": "x",
+   "valueCoding": {
+    "system": "http://example.org/cs",
+    "code": "a"
+   }
+  }
+ ]
+}

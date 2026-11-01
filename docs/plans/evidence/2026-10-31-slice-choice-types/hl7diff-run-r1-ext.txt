@@ -1,0 +1,13 @@
+# hl7diff: baseline a957f2e vs working tree
+
+HL7 validator: validator_cli.jar sha256:a3addadfa18dfa23, java version "24" 2025-03-18
+
+extension-probes: packages: the HL7 validator loaded hl7.fhir.r4.core#4.0.1,hl7.fhir.xver-extensions#0.1.0,hl7.terminology.r4#6.2.0,hl7.fhir.uv.extensions.r4#5.2.0,hl7.terminology#7.5.0,hl7.terminology.r5#7.5.0,hl7.fhir.uv.extensions#5.4.0,acme.extdefs#0.1.0; gofhir ran with the base packages hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.4.0,hl7.terminology.r4#7.5.0, the baseline with the same
+
+## extension-probes: PASS
+
+files: 14, findings: 0, unexplained errors removed: 2, declared divergences: 0
+
+
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/report.md
+go run ./internal/tools/hl7diff run -jar ~/tools/validator_cli.jar -baseline   1.35s user 1.07s system 9% cpu 25.343 total

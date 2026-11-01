@@ -1,0 +1,25 @@
+{
+ "resourceType": "Bundle",
+ "id": "t12b",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:3f1c1b4e-2a5f-4c55-9d8e-0d7a8a6f1b11",
+   "resource": {
+    "resourceType": "Parameters",
+    "id": "t12be",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/p-t2"
+     ]
+    },
+    "parameter": [
+     {
+      "name": "op",
+      "valueString": "a"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,164 @@
+package validator
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+// TestReview187 conserva los issues completos para comparar ambos árboles y prueba controles
+// válidos en cada versión, incluso cuando el recurso está dentro de otro recurso.
+func TestReview187(t *testing.T) {
+	defs := append(extValueDefs(t), sliceChoiceDefs(t)...)
+	defs = append(defs, choiceKeyDefs(t)...)
+	const prefix = "http://example.org/review187/"
+	profile := func(name, typ, elements string) string {
+		return `{"resourceType":"StructureDefinition","url":"` + prefix + name + `","name":"Review","status":"active","kind":"resource","abstract":false,"type":"` + typ + `","baseDefinition":"http://hl7.org/fhir/StructureDefinition/` + typ + `","derivation":"constraint","differential":{"element":[{"id":"` + typ + `","path":"` + typ + `"},` + elements + `]}}`
+	}
+	defs = append(defs,
+		profile("inline", "Patient", `{"id":"Patient.extension.id","path":"Patient.extension.id","max":"0"}`),
+		profile("slice", "Patient", `{"id":"Patient.extension","path":"Patient.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"}},{"id":"Patient.extension:flag","path":"Patient.extension","sliceName":"flag","type":[{"code":"Extension","profile":["`+extBase+`flag-ext"]}]}`),
+		profile("unrolled", "Patient", `{"id":"Patient.extension","path":"Patient.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"}},{"id":"Patient.extension:flag","path":"Patient.extension","sliceName":"flag","type":[{"code":"Extension","profile":["`+extBase+`flag-ext"]}]},{"id":"Patient.extension:flag.value[x]","path":"Patient.extension.value[x]","type":[{"code":"boolean"}]}`),
+	)
+	const deepURL = prefix + "timing"
+	defs = append(defs, `{"resourceType":"StructureDefinition","url":"`+deepURL+`","name":"ReviewTiming","status":"active","kind":"complex-type","abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint","context":[{"type":"element","expression":"Patient"}],"differential":{"element":[{"id":"Extension","path":"Extension"},{"id":"Extension.extension","path":"Extension.extension","max":"0"},{"id":"Extension.url","path":"Extension.url","fixedUri":"`+deepURL+`"},{"id":"Extension.value[x]","path":"Extension.value[x]","type":[{"code":"Timing"}]},{"id":"Extension.value[x].repeat.bounds[x]","path":"Extension.value[x].repeat.bounds[x]","type":[{"code":"Period"}]}]}}`)
+	type probe struct {
+		name, data string
+		clean      bool
+	}
+	var probes []probe
+	for _, c := range extValueCases() {
+		probes = append(probes, probe{"existing-extension/" + c.name, c.data, c.noErrors})
+	}
+	for _, c := range sliceChoiceCases() {
+		probes = append(probes, probe{"existing-choice/" + c.name, c.data, c.noErrors})
+	}
+	for _, c := range choiceKeyCases() {
+		probes = append(probes, probe{"existing-key/" + c.name, c.data, c.noErrors})
+	}
+	meta := func(p string) string {
+		return `"meta":{"profile":["http://example.org/fhir/StructureDefinition/` + p + `"]},`
+	}
+	valid := []probe{
+		{"resource", `{"resourceType":"Parameters",` + meta("p-t1") + `"parameter":[{"name":"x","valueCode":"a"}]}`, true},
+		{"slice", `{"resourceType":"Parameters",` + meta("p-t2") + `"parameter":[{"name":"op","valueCode":"a"},{"name":"other","valueString":"b"}]}`, true},
+		{"contentReference", `{"resourceType":"Parameters",` + meta("p-t3") + `"parameter":[{"name":"x","part":[{"name":"y","valueCode":"a"}]}]}`, true},
+		{"part-slice", `{"resourceType":"Parameters",` + meta("p-t4") + `"parameter":[{"name":"x","part":[{"name":"t","valueCode":"a"}]}]}`, true},
+		{"primitive-with-value", `{"resourceType":"Parameters",` + meta("p-t2") + `"parameter":[{"name":"op","valueCode":"a","_valueCode":{"id":"v"}}]}`, true},
+		{"primitive-only", `{"resourceType":"Parameters",` + meta("p-t2") + `"parameter":[{"name":"op","_valueCode":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"unknown"}]}}]}`, true},
+		{"datatype-profile", `{"resourceType":"Parameters",` + meta("p-t21") + `"parameter":[{"name":"x","valueTiming":{"repeat":{"boundsPeriod":{"start":"2020-01-01"}}}}]}`, true},
+	}
+	wraps := []struct {
+		name string
+		wrap func(string) string
+	}{
+		{"root", func(s string) string { return s }},
+		{"bundle", func(s string) string {
+			return `{"resourceType":"Bundle","type":"collection","entry":[{"resource":` + s + `}]}`
+		}},
+		{"contained", func(s string) string { return `{"resourceType":"Patient","contained":[` + s + `]}` }},
+		{"held", func(s string) string {
+			return `{"resourceType":"Parameters","parameter":[{"name":"r","resource":` + s + `}]}`
+		}},
+		{"part-held", func(s string) string {
+			return `{"resourceType":"Parameters","parameter":[{"name":"r","part":[{"name":"p","resource":` + s + `}]}]}`
+		}},
+		{"response-outcome", func(s string) string {
+			return `{"resourceType":"Bundle","type":"batch-response","entry":[{"response":{"status":"200","outcome":` + s + `}}]}`
+		}},
+	}
+	for _, c := range valid {
+		for _, w := range wraps {
+			probes = append(probes, probe{"valid/" + w.name + "/" + c.name, w.wrap(c.data), true})
+		}
+	}
+	for _, p := range []string{"", "inline", "slice", "unrolled", `inline","` + prefix + `slice`} {
+		for _, value := range []string{`"valueBoolean":true`, `"_valueBoolean":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/data-absent-reason","valueCode":"unknown"}]}`, `"valueString":"bad"`} {
+			m := ""
+			if p != "" {
+				m = `"meta":{"profile":["` + prefix + p + `"]},`
+			}
+			s := `{"resourceType":"Patient",` + m + `"extension":[{"url":"` + extBase + `flag-ext",` + value + `}]}`
+			for _, w := range wraps {
+				probes = append(probes, probe{"extension-profile/" + p + "/" + value + "/" + w.name, w.wrap(s), !strings.Contains(value, "bad")})
+			}
+		}
+	}
+	for _, bounds := range []string{`"boundsPeriod":{"start":"2020-01-01"}`, `"boundsDuration":{"value":1,"unit":"d","system":"http://unitsofmeasure.org","code":"d"}`} {
+		for _, w := range wraps {
+			data := `{"resourceType":"Patient","extension":[{"url":"` + deepURL + `","valueTiming":{"repeat":{` + bounds + `}}}]}`
+			probes = append(probes, probe{"deep/" + w.name + "/" + bounds, w.wrap(data), strings.Contains(bounds, "boundsPeriod")})
+		}
+	}
+	for _, version := range orderVersions {
+		v := orderValidator(t, version, defs...)
+		for i, c := range probes {
+			t.Run(version+"/"+c.name, func(t *testing.T) {
+				r, err := v.Validate(context.Background(), []byte(c.data))
+				if err != nil {
+					t.Fatal(err)
+				}
+				seen := map[string]bool{}
+				flagErrors := 0
+				for _, is := range r.Issues {
+					b, _ := json.Marshal(is)
+					if seen[string(b)] {
+						t.Errorf("duplicate: %s; input %s", b, c.data)
+					}
+					seen[string(b)] = true
+					if c.clean && is.MessageID == "STRUCTURE_TYPE_NOT_ALLOWED" {
+						t.Errorf("false positive: %s; input %s", b, c.data)
+					}
+					if (is.MessageID == "STRUCTURE_TYPE_NOT_ALLOWED" || is.MessageID == "EXTENSION_INVALID_VALUE_TYPE") && strings.Contains(is.Diagnostics, "'"+extBase+"flag-ext'") {
+						flagErrors++
+					}
+				}
+				if strings.HasPrefix(c.name, "extension-profile/") && strings.Contains(c.data, `"valueString":"bad"`) && flagErrors != 1 {
+					t.Errorf("extension definition reported %d times, want 1: %+v", flagErrors, r.Issues)
+				}
+				if dir := os.Getenv("REVIEW187_DUMP"); dir != "" {
+					b, _ := json.MarshalIndent(map[string]any{"name": c.name, "input": json.RawMessage(c.data), "issues": r.Issues}, "", "  ")
+					if err := os.MkdirAll(filepath.Join(dir, version), 0755); err != nil {
+						t.Fatal(err)
+					}
+					if err := os.WriteFile(filepath.Join(dir, version, fmt.Sprintf("%03d.json", i)), b, 0644); err != nil {
+						t.Fatal(err)
+					}
+				}
+			})
+		}
+	}
+}
+
+// El cambio de expresión FHIRPath no debe perder las coordenadas del JSON original.
+func TestReview187PrimitiveIssueLocation(t *testing.T) {
+	const data = `{"resourceType":"Patient","birthDate":"2000-01-01","_birthDate":{"extension":[{"url":"http://example.org/StructureDefinition/flag-ext","valueString":"bad"}]}}`
+	for _, version := range orderVersions {
+		t.Run(version, func(t *testing.T) {
+			v := orderValidator(t, version, extValueDefs(t)...)
+			r, err := v.Validate(context.Background(), []byte(data))
+			if err != nil {
+				t.Fatal(err)
+			}
+			found := 0
+			for _, is := range r.Issues {
+				if is.MessageID != "STRUCTURE_TYPE_NOT_ALLOWED" && is.MessageID != "EXTENSION_INVALID_VALUE_TYPE" {
+					continue
+				}
+				found++
+				if is.Location == nil {
+					t.Errorf("lost source coordinates: %+v", is)
+				} else {
+					t.Logf("source coordinates: %+v", is.Location)
+				}
+			}
+			if found != 1 {
+				t.Fatalf("got %d type errors, want 1: %+v", found, r.Issues)
+			}
+		})
+	}
+}

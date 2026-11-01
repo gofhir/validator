@@ -311,7 +311,7 @@ func TestExtensionWithSeveralValues(t *testing.T) {
 	tests := []struct {
 		name string
 		data string
-		// invalid son las expresiones con EXTENSION_INVALID_VALUE_TYPE, en orden.
+		// invalid son las expresiones con STRUCTURE_TYPE_NOT_ALLOWED, en orden.
 		invalid []string
 		// present son expresiones que algún error tiene que nombrar.
 		present []string
@@ -350,8 +350,8 @@ func TestExtensionWithSeveralValues(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(version+"/"+tt.name, func(t *testing.T) {
 				res := stableIssues(t, v, tt.data)
-				if got := expressionsOf(res, issue.DiagExtensionInvalidValueType); !slices.Equal(got, tt.invalid) {
-					t.Errorf("EXTENSION_INVALID_VALUE_TYPE at %v, want %v\n%s", got, tt.invalid, strings.Join(issueLines(res, false), "\n"))
+				if got := expressionsOf(res, issue.DiagStructureTypeNotAllowed); !slices.Equal(got, tt.invalid) {
+					t.Errorf("STRUCTURE_TYPE_NOT_ALLOWED at %v, want %v\n%s", got, tt.invalid, strings.Join(issueLines(res, false), "\n"))
 				}
 				for _, p := range tt.present {
 					found := false

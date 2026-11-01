@@ -133,12 +133,12 @@ func TestJSONShape(t *testing.T) {
 			"STRUCTURE_ARRAY_EXPECTED @ Observation.effectiveTiming.event",
 		}},
 		{"d4_primitive_items_renumbered", []string{
-			"EXTENSION_UNKNOWN @ Patient.name[0]._given[0].extension[0]",
+			"EXTENSION_UNKNOWN @ Patient.name[0].given[0].extension[0]",
 			"STRUCTURE_VALUE_EXPECTED @ Patient.name[0].given",
 		}},
 		// A primitive's "_key" sibling is an Element: its extensions are shaped and checked.
 		{"d5_sibling_extension_value", []string{
-			"EXTENSION_UNKNOWN @ Patient._birthDate.extension[0]",
+			"EXTENSION_UNKNOWN @ Patient.birthDate.extension[0]",
 			"STRUCTURE_VALUE_EXPECTED @ Patient._birthDate.extension[0].valueString",
 		}},
 		// An element written as an empty object is reported as HL7's parser reports it, not again by

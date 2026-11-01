@@ -212,7 +212,7 @@ func (v *Validator) validateChildren(ctx context.Context, children registry.Inst
 				// of its type; a single value written where an array goes is not checked, as HL7 does
 				// not.
 				if cv.Ext != nil && elementvalues.ShapeOf(child, cv) == elementvalues.RightShape {
-					sibling := path + "._" + cv.Key
+					sibling := path + "." + cv.Key
 					if cv.Array {
 						sibling = fmt.Sprintf("%s[%d]", sibling, cv.Index)
 					}
@@ -471,19 +471,20 @@ func (v *Validator) validateExtensionValue(ctx context.Context, sd *registry.Str
 		if !allowed {
 			// El tipo es el código que nombra la clave (json.html#choice), como lo informa HL7.
 			result.AddErrorWithID(
-				issue.DiagExtensionInvalidValueType,
+				issue.DiagStructureTypeNotAllowed,
 				map[string]any{
-					keyURL:     url,
-					"provided": cv.TypeCode,
-					"allowed":  v.allowedTypesString(valueNode.Def.Type),
+					"profile": url,
+					"types":   typeCodes(valueNode.Def.Type),
+					"type":    cv.TypeCode,
 				},
 				extPath+"."+cv.Key,
 			)
 		}
-		// Lo que tiene adentro: un complejo, en su objeto; un primitivo, en su "_key".
-		inst, at := cv.Ext, extPath+"._"+cv.Key
+		// Lo que tiene adentro: un complejo, en su objeto; un primitivo, en su "_key", que HL7 informa
+		// en la ruta del elemento (sin el guion bajo).
+		inst, at := cv.Ext, extPath+"."+cv.Key
 		if m, ok := cv.Value.(map[string]any); ok {
-			inst, at = m, extPath+"."+cv.Key
+			inst = m
 		}
 		if inst == nil {
 			continue
@@ -498,6 +499,15 @@ func (v *Validator) validateExtensionValue(ctx context.Context, sd *registry.Str
 	}
 }
 
+// typeCodes lista los códigos de types, separados por coma.
+func typeCodes(types []registry.Type) string {
+	codes := make([]string, len(types))
+	for i, t := range types {
+		codes[i] = t.Code
+	}
+	return strings.Join(codes, ", ")
+}
+
 // declares dice si def permite el tipo code, exacto: el tipo que nombra la clave de un elemento de
 // elección es su código (json.html#choice).
 func declares(def *registry.ElementDefinition, code string) bool {
@@ -507,15 +517,6 @@ func declares(def *registry.ElementDefinition, code string) bool {
 		}
 	}
 	return false
-}
-
-// allowedTypesString returns a comma-separated list of allowed types.
-func (v *Validator) allowedTypesString(types []registry.Type) string {
-	names := make([]string, len(types))
-	for i, t := range types {
-		names[i] = t.Code
-	}
-	return strings.Join(names, ", ")
 }
 
 // validateNestedExtensions valida cada extensión dentro de una extensión compleja; nested es su

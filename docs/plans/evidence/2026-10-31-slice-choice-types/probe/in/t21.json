@@ -1,0 +1,27 @@
+{
+ "resourceType": "Parameters",
+ "id": "t21",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-t21"
+  ]
+ },
+ "parameter": [
+  {
+   "name": "x",
+   "valueTiming": {
+    "repeat": {
+     "boundsPeriod": {
+      "start": "2020-01-01"
+     },
+     "boundsDuration": {
+      "value": 1,
+      "unit": "d",
+      "system": "http://unitsofmeasure.org",
+      "code": "d"
+     }
+    }
+   }
+  }
+ ]
+}

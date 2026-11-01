@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"context"
 	"flag"
 	"os"
 	"path/filepath"
@@ -76,7 +77,7 @@ type extValueCase struct {
 }
 
 func extValueCases() []extValueCase {
-	inner := func(path string) at { return at{id: issue.DiagExtensionInvalidValueType, expr: path} }
+	inner := func(path string) at { return at{id: issue.DiagStructureTypeNotAllowed, expr: path} }
 	return []extValueCase{
 		{
 			// c02: una extensión con un tipo no permitido, dentro del valor complejo de otra.
@@ -112,7 +113,7 @@ func extValueCases() []extValueCase {
 			// p10: en la extensión de un primitivo del valor de una subextensión declarada.
 			name: "on a primitive in the value of a declared sub-extension",
 			data: extPatient(`"extension":[{"url":"` + extBase + `nested-ext","extension":[{"url":"part","valueHumanName":{"family":"f","_family":{"extension":[` + badFlag + `]}}}]}]`),
-			want: []at{inner("Patient.extension[0].extension[0].valueHumanName._family.extension[0].valueString")},
+			want: []at{inner("Patient.extension[0].extension[0].valueHumanName.family.extension[0].valueString")},
 		},
 		{
 			// Una subextensión de una subextensión declarada (como codesystem-history en R4).
@@ -159,7 +160,7 @@ func extValueCases() []extValueCase {
 			name: "a value of a type not allowed, with an extension inside",
 			data: extPatient(`"extension":[{"url":"` + extBase + `id-ext","valueHumanName":{"family":"f","extension":[` + badFlag + `]}}]`),
 			want: []at{
-				{id: issue.DiagExtensionInvalidValueType, expr: "Patient.extension[0].valueHumanName", text: "'HumanName'"},
+				{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueHumanName", text: "found type HumanName"},
 				inner("Patient.extension[0].valueHumanName.extension[0].valueString"),
 			},
 		},
@@ -171,15 +172,15 @@ func extValueCases() []extValueCase {
 			name: "a value of a type not allowed, where the definition constrains the value's children",
 			data: extPatient(`"extension":[{"url":"` + extBase + `id-sys-ext","valueHumanName":{"family":"f","_family":{"extension":[` + badFlag + `]}}}]`),
 			want: []at{
-				{id: issue.DiagExtensionInvalidValueType, expr: "Patient.extension[0].valueHumanName", text: "'HumanName'"},
-				inner("Patient.extension[0].valueHumanName._family.extension[0].valueString"),
+				{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueHumanName", text: "found type HumanName"},
+				inner("Patient.extension[0].valueHumanName.family.extension[0].valueString"),
 			},
 		},
 		{
 			// c09: en el hermano "_system" de un primitivo del valor (json.html#primitive).
 			name: "on a primitive inside a complex value",
 			data: extPatient(idExt(`{"system":"urn:x","_system":{"extension":[` + badFlag + `]}}`)),
-			want: []at{inner("Patient.extension[0].valueIdentifier._system.extension[0].valueString")},
+			want: []at{inner("Patient.extension[0].valueIdentifier.system.extension[0].valueString")},
 		},
 		{
 			// c10: sobre el valor mismo.
@@ -197,7 +198,7 @@ func extValueCases() []extValueCase {
 			// c12: en "_valueString", el hermano del valor primitivo de una extensión.
 			name: "on a primitive value",
 			data: extPatient(`"extension":[{"url":"` + extBase + `str-ext","valueString":"a","_valueString":{"extension":[` + badFlag + `]}}]`),
-			want: []at{inner("Patient.extension[0]._valueString.extension[0].valueString")},
+			want: []at{inner("Patient.extension[0].valueString.extension[0].valueString")},
 		},
 		{
 			// c13: dentro de un elemento de elección del valor (Timing.repeat.bounds[x]).
@@ -246,8 +247,8 @@ func extValueCases() []extValueCase {
 			name: "underscore sibling of a type not allowed",
 			data: extPatient(`"extension":[{"url":"` + extBase + `bool-ext","_valueString":{"extension":[` + badFlag + `]}}]`),
 			want: []at{
-				{id: issue.DiagExtensionInvalidValueType, expr: "Patient.extension[0].valueString", text: "'string'"},
-				inner("Patient.extension[0]._valueString.extension[0].valueString"),
+				{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueString", text: "found type string"},
+				inner("Patient.extension[0].valueString.extension[0].valueString"),
 			},
 		},
 		{
@@ -272,7 +273,7 @@ func extValueCases() []extValueCase {
 				{id: issue.DiagExtensionValueRequired, expr: "Patient.extension[0]"},
 				{id: issue.DiagStructureUnknownElement, expr: "Patient.extension[0].valueuri"},
 			},
-			absent: []at{{id: issue.DiagExtensionInvalidValueType, expr: "Patient.extension[0].valueuri"}},
+			absent: []at{{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueuri"}},
 		},
 		{
 			// Con un valor opcional, "valueuri" deja la extensión sin valor ni subextensiones: falla ext-1
@@ -289,7 +290,7 @@ func extValueCases() []extValueCase {
 			name:   "valueSet key",
 			data:   extPatient(`"extension":[{"url":"` + extBase + `str-ext","valueString":"a","valueSet":"x"}]`),
 			want:   []at{{id: issue.DiagStructureUnknownElement, expr: "Patient.extension[0].valueSet"}},
-			absent: []at{{id: issue.DiagExtensionInvalidValueType, expr: "Patient.extension[0].valueSet"}},
+			absent: []at{{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueSet"}},
 		},
 		{
 			// p02: una extensión simple sin valor.
@@ -336,7 +337,7 @@ func extValueCases() []extValueCase {
 			name:     "integer64 value",
 			versions: []string{"5.0.0"},
 			data:     extPatient(`"extension":[{"url":"` + extBase + `any-ext","valueInteger64":"5","_valueInteger64":{"extension":[` + badFlag + `]}}]`),
-			want:     []at{inner("Patient.extension[0]._valueInteger64.extension[0].valueString")},
+			want:     []at{inner("Patient.extension[0].valueInteger64.extension[0].valueString")},
 		},
 		{
 			name:     "integer64 value, before R5",
@@ -374,6 +375,22 @@ func TestExtensionValueContent(t *testing.T) {
 		return
 	}
 	runValueCases(t, extValueDefs(t), cases)
+}
+
+// TestExtensionTypeUnderInlineChildren: la url de una extensión nombra la definición a la que se ajusta
+// y esa definición la gobierna dondequiera que se use (extensibility.html). Un perfil que despliega los
+// hijos de Patient.extension no la reemplaza: un valor de un tipo que la extensión no permite se
+// informa una sola vez, con la extensión como perfil, no con el del recurso.
+func TestExtensionTypeUnderInlineChildren(t *testing.T) {
+	const profile = extBase + "p-inline"
+	defs := append(extValueDefs(t), `{"resourceType":"StructureDefinition","url":"`+profile+`","name":"Inline","status":"active","kind":"resource","abstract":false,"type":"Patient","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient","derivation":"constraint","differential":{"element":[{"id":"Patient","path":"Patient"},{"id":"Patient.extension.id","path":"Patient.extension.id","max":"0"}]}}`)
+	runValueCases(t, defs, []extValueCase{{
+		name: "inline extension children",
+		data: `{"resourceType":"Patient","meta":{"profile":["` + profile + `"]},"extension":[{"url":"` + extBase + `bool-ext","valueString":"bad"}]}`,
+		want: []at{{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueString", text: "'" + extBase + "bool-ext'"}},
+		// Ni el perfil del recurso como dueño del tipo, ni dos veces (runValueCases exige que ninguno se repita).
+		absent: []at{{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueString", text: "'" + profile + "'"}},
+	}})
 }
 
 // runValueCases valida cada caso en cada versión con las definiciones defs, y exige sus issues
@@ -453,4 +470,37 @@ func TestExtensionHasOneChoiceElement(t *testing.T) {
 			t.Errorf("%s: choice elements of Extension = %v, want one", version, choices)
 		}
 	}
+}
+
+// extensibility.html: la url identifica la definición a la que la extensión se ajusta, y el perfilado
+// (profiling) restringe también los descendientes de su valor: boundsDuration dentro de un Timing cuya
+// definición restringe bounds[x] a Period se rechaza, una vez, aunque el tipo del valor sea el que la
+// definición declara.
+func TestExtensionValueDescendantRestriction(t *testing.T) {
+	const def = `{"resourceType":"StructureDefinition","url":"http://example.org/timing-ext","name":"TimingExt","status":"active","kind":"complex-type","abstract":false,"type":"Extension","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Extension","derivation":"constraint","context":[{"type":"element","expression":"Patient"}],"differential":{"element":[{"id":"Extension","path":"Extension"},{"id":"Extension.extension","path":"Extension.extension","max":"0"},{"id":"Extension.url","path":"Extension.url","fixedUri":"http://example.org/timing-ext"},{"id":"Extension.value[x]","path":"Extension.value[x]","type":[{"code":"Timing"}]},{"id":"Extension.value[x].repeat.bounds[x]","path":"Extension.value[x].repeat.bounds[x]","type":[{"code":"Period"}]}]}}`
+	const data = `{"resourceType":"Patient","extension":[{"url":"http://example.org/timing-ext","valueTiming":{"repeat":{"boundsDuration":{"value":1,"unit":"d","system":"http://unitsofmeasure.org","code":"d"}}}}]}`
+	for _, version := range orderVersions {
+		t.Run(version, func(t *testing.T) {
+			v := orderValidator(t, version, def)
+			res, err := v.Validate(context.Background(), []byte(data))
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := at{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].valueTiming.repeat.boundsDuration"}
+			if n := countAt(res, want); n != 1 {
+				t.Fatalf("%d nested choice type errors, want 1; issues: %+v", n, res.Issues)
+			}
+		})
+	}
+}
+
+// countAt cuenta los issues de res que coinciden con a.
+func countAt(res *issue.Result, a at) int {
+	n := 0
+	for _, is := range res.Issues {
+		if is.MessageID == string(a.id) && slices.Contains(is.Expression, a.expr) && strings.Contains(is.Diagnostics, a.text) {
+			n++
+		}
+	}
+	return n
 }

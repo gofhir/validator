@@ -1,0 +1,14 @@
+package validator
+
+import (
+ "testing"
+ "github.com/gofhir/validator/v2/pkg/issue"
+)
+
+func TestReviewNestedVariants(t *testing.T) {
+ inner := `{"resourceType":"Parameters","meta":{"profile":["http://example.org/fhir/StructureDefinition/p-t1"]},"parameter":[{"name":"x","valueCode":"a","valueString":"a"}]}`
+ runValueCases(t, sliceChoiceDefs(t), []extValueCase{
+  {name:"bundle", data:`{"resourceType":"Bundle","type":"collection","entry":[{"resource":`+inner+`}]}`,want:[]at{{id:issue.DiagStructureTypeNotAllowed,expr:"Bundle.entry[0].resource.parameter[0].valueString"}}},
+  {name:"contained", data:`{"resourceType":"Patient","contained":[`+inner+`]}`,want:[]at{{id:issue.DiagStructureTypeNotAllowed,expr:"Patient.contained[0].parameter[0].valueString"}}},
+ })
+}

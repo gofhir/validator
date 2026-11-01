@@ -1,0 +1,15 @@
+{
+ "resourceType": "Parameters",
+ "id": "t18ok",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-t18"
+  ]
+ },
+ "parameter": [
+  {
+   "name": "x",
+   "valueCode": "a"
+  }
+ ]
+}

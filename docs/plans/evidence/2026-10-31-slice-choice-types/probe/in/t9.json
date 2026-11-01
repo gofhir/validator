@@ -1,0 +1,15 @@
+{
+ "resourceType": "Parameters",
+ "id": "t9",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-t9"
+  ]
+ },
+ "parameter": [
+  {
+   "name": "op",
+   "valueString": "a"
+  }
+ ]
+}

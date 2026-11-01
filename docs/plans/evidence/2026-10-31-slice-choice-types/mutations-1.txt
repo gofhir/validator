@@ -1,0 +1,17 @@
+control: exit=0 (20s)
+m1 sin tipo en las capas del slice (solo el elemento cortado): SOBREVIVE (23s)
+m2 sin tipo en ninguna capa del slice: muere, 8 tests (22s): TestChoiceKeyCase, TestFixedValueOfAProfileThatChangesItsType, TestExtensionValidation, TestExtensionValueContent
+m3 sin tipo en el destino de contentReference: SOBREVIVE (21s)
+m4 sin deduplicar (informa en cada capa): muere, 1 tests (19s): TestSliceChoiceTypes
+m5 payload: solo el primer tipo admitido: muere, 1 tests (19s): TestSliceChoiceTypes
+m6 payload: perfil vacío: SOBREVIVE (27s)
+m7 payload: tipo encontrado cambiado por el admitido: muere, 2 tests (25s): TestExtensionValueContent, TestSliceChoiceTypes
+m8 untyped siempre falso (t12): muere, 1 tests (24s): TestSliceChoiceTypes
+m9 untyped sin la condición de recurso: muere, 1 tests (21s): TestExtensionWithSeveralValues
+m10 wrongType siempre falso (hijos del tipo propio): muere, 1 tests (25s): TestExtensionValueContent
+m11 checkValueless sin tipo: muere, 2 tests (45s): TestExtensionValueContent, TestSliceChoiceTypes
+m12 estructural: sin reconocer por la base: muere, 2 tests (41s): TestFixedValueOfAProfileThatChangesItsType, TestSliceChoiceTypes
+m13 estructural: toda variante de la base es el valor (sin baseOnly): muere, 1 tests (48s): TestSliceChoiceTypes
+m14 extensión: la opción no se aplica (doble informe): muere, 6 tests (61s): TestChoiceKeyCase, TestExtensionValidation, TestExtensionValueContent, TestExtensionWithSeveralValues
+m15 extensión: sola, sin el error de tipo: SOBREVIVE (25s)
+sobreviven: 4

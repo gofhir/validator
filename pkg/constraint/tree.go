@@ -37,6 +37,9 @@ import (
 // kindPrimitive is the StructureDefinition.kind of primitive types.
 const kindPrimitive = "primitive-type"
 
+// kindResource es el StructureDefinition.kind de los recursos.
+const kindResource = "resource"
+
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
 const resourceTypeKey = "resourceType"
 
@@ -49,11 +52,13 @@ const maxContentReferenceHops = 8
 
 // The walk checks one value of node, held at fhirPath, and recurses into its children. The node is
 // the most specific definition of the value: the slice it belongs to, or the element. The value's
-// type is typeCode (a choice element's type, or its only type).
-func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
-	seen := map[string]bool{}
+// type is typeCode (a choice element's type, or its only type). Con untyped, la propiedad no es el
+// valor del elemento para el perfil (ver unrecognizedChoice): no se compara su tipo.
+func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, untyped bool, value any, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	seen := typeCheckSeen(untyped, fhirPath)
 	base := node
 	for n := node; n != nil; n = n.SliceOf {
+		v.checkType(sd, n, typeCode, fhirPath, seen, opts, result)
 		v.layer(n, choiceElementPath(n.Def.Path, typeCode), value, &raw, element, fhirPath, seen, opts, result)
 		base = n
 	}
@@ -85,11 +90,25 @@ func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.Elemen
 		if len(children) == 0 {
 			childSD, children = layerSD, layer.Children
 		}
-		if len(children) == 0 && typeRoot != nil {
+		if (len(children) == 0 || v.wrongType(node, typeCode)) && typeRoot != nil {
+			// Los hijos de un valor de un tipo que su elemento no permite son los de su propio
+			// tipo, no los que el elemento restringe, que son de los tipos que permite.
 			childSD, children = typeSD, typeRoot.Children
 		}
+		// Los hijos que son los de la definición propia del valor (self) no se comparan por tipo: esa
+		// definición la juzga la fase que la conoce (extensibility.html), no el perfil.
+		prevOwn := opts.own
+		if self != nil && childSD == self {
+			opts.own = self
+		}
 		v.walkChildren(childSD, children, obj, raw, fhirPath, opts, result)
+		opts.own = prevOwn
 	}
+}
+
+// wrongType dice si un valor de typeCode es de un tipo que el elemento de elección node no permite.
+func (v *Validator) wrongType(node *registry.ElementNode, typeCode string) bool {
+	return typeCode != "" && len(node.Def.Type) > 0 && strings.HasSuffix(node.Def.Path, "[x]") && !declaresType(node, typeCode)
 }
 
 // governedChildren are the children that govern a value of node in its own snapshot: node's, or,
@@ -135,7 +154,8 @@ func (v *Validator) walkPrimitiveExtensions(node *registry.ElementNode, typeCode
 func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*registry.ElementNode, inst map[string]any, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
 	fields := rawFields(raw)
 	for _, child := range children {
-		for _, cv := range elementvalues.Of(child, inst, v.registry) {
+		values := elementvalues.Of(child, inst, v.registry)
+		for _, cv := range values {
 			if !elementvalues.Written(child, cv, v.registry) {
 				// Not written as the element says: the structural phase reports it, and the HL7
 				// validator drops it before evaluating anything.
@@ -144,6 +164,7 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 			path := elementvalues.ItemPath(child, cv, fhirPath)
 			valueRaw, extRaw := fields.of(cv.Key, cv), fields.of("_"+cv.Key, cv)
 			node := v.governing(sd, child, cv, opts)
+			untyped := sd.Kind == kindResource && unrecognizedChoice(child, values, cv)
 			if m, ok := cv.Value.(map[string]any); ok && v.registry.HoldsResource(child.Def) {
 				// A resource held in the element, validated as a resource of its own, against the
 				// profiles of the slice it matched, or of the element.
@@ -153,11 +174,11 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 				continue
 			}
 			if cv.Value != nil {
-				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, extRaw, path, opts, result)
+				v.walk(sd, node, cv.TypeCode, untyped, cv.Value, valueRaw, extRaw, path, opts, result)
 			} else if extRaw != nil && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
 				// A primitive with no value, its id and extensions in its "_key" sibling
 				// (json.html#primitive): Written leaves a null only as an array's item.
-				v.checkValueless(sd, node, cv.TypeCode, extRaw, path, opts, result)
+				v.checkValueless(sd, node, cv.TypeCode, untyped, extRaw, path, opts, result)
 			}
 			if cv.Ext != nil {
 				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, extRaw, path, opts, result)
@@ -243,6 +264,7 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 		opts.scope = ScopeInBundle(opts.scope, res)
 	}
 	opts.resolver = resolverWithin(opts.resolver, opts.scope.RootResource, nil)
+	opts.own = nil // un recurso contenido tiene sus propias definiciones
 
 	definitions := v.nestedDefinitions(opts.ctx, res, fhirPath, result)
 	for _, sd := range v.holderDefinitions(holder, res, fhirPath, &opts, result) {
@@ -252,7 +274,7 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 	}
 	for _, sd := range definitions {
 		if root := sd.Tree().Root(); root != nil {
-			v.walk(sd, root, "", res, raw, nil, fhirPath, &opts, result)
+			v.walk(sd, root, "", false, res, raw, nil, fhirPath, &opts, result)
 		}
 	}
 }
@@ -464,6 +486,83 @@ func (v *Validator) layer(def *registry.ElementNode, defPath string, value any, 
 	v.checkValue(def, *raw, element, fhirPath, opts, result)
 }
 
+// typeCheckSeen es el registro de lo que una caminata revisó de un valor (las restricciones evaluadas,
+// el tipo comparado): vacío, o con la comparación de tipo ya hecha cuando no corresponde (untyped).
+func typeCheckSeen(untyped bool, fhirPath string) map[string]bool {
+	seen := map[string]bool{}
+	if untyped {
+		seen[typeNotAllowedKey(fhirPath)] = true
+	}
+	return seen
+}
+
+func typeNotAllowedKey(fhirPath string) string {
+	return fhirPath + "\x00" + string(issue.DiagStructureTypeNotAllowed)
+}
+
+// unrecognizedChoice dice si cv, un valor del elemento de elección child, es una propiedad que el
+// perfil no toma para él: su tipo no es uno que child declare, y otro de values sí lo es. La fase
+// estructural la informa como elemento desconocido, y el validador HL7 como propiedad no
+// reconocida, sin tipo que comparar. La fase estructural lee los elementos de la definición de un
+// recurso, no los de los tipos de datos que contiene (lee los propios), así que la caminata lo
+// pregunta solo en la definición de un recurso. Un valor solo, de un tipo que únicamente declara la
+// base, es el valor del elemento, de tipo equivocado.
+func unrecognizedChoice(child *registry.ElementNode, values []elementvalues.Value, cv elementvalues.Value) bool {
+	if !strings.HasSuffix(child.Def.Path, "[x]") || declaresType(child, cv.TypeCode) {
+		return false
+	}
+	return slices.ContainsFunc(values, func(o elementvalues.Value) bool { return declaresType(child, o.TypeCode) })
+}
+
+// declaresType dice si la definición de node declara el tipo code.
+func declaresType(node *registry.ElementNode, code string) bool {
+	return slices.ContainsFunc(node.Def.Type, func(t registry.Type) bool { return t.Code == code })
+}
+
+// checkType revisa que def, una de las definiciones de sd que gobiernan un valor de typeCode en
+// fhirPath, permita su tipo. El valor de un elemento de elección es del tipo que nombra su propiedad
+// (json.html#choice), y ElementDefinition.type son los tipos que su elemento permite: una definición
+// que declara tipos y no ese rechaza el valor. Cada valor se informa una vez por caminata (seen), por
+// la primera definición que lo rechaza: la más específica, el slice antes del elemento que parte. No
+// revisa las definiciones propias de un valor (opts.own), que juzga pkg/extension.
+func (v *Validator) checkType(sd *registry.StructureDefinition, def *registry.ElementNode, typeCode, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
+	if typeCode == "" || len(def.Def.Type) == 0 || !strings.HasSuffix(def.Def.Path, "[x]") || judgedByExtension(sd, def, opts.own) {
+		return
+	}
+	if declaresType(def, typeCode) {
+		return
+	}
+	codes := make([]string, len(def.Def.Type))
+	for i, t := range def.Def.Type {
+		codes[i] = t.Code
+	}
+	key := typeNotAllowedKey(fhirPath)
+	if seen[key] {
+		return
+	}
+	seen[key] = true
+	result.AddErrorWithID(issue.DiagStructureTypeNotAllowed, map[string]any{
+		"profile": sd.URL,
+		"types":   strings.Join(codes, ", "),
+		"type":    typeCode,
+	}, fhirPath)
+}
+
+// judgedByExtension dice si def, un elemento de sd, es el valor de la extensión que own define o el
+// de una de sus subextensiones (o una slice de él): el elemento de elección de la raíz de own o de un
+// elemento de su tipo, que son los que compara pkg/extension. Las restricciones de los descendientes
+// del valor (profiling) las revisa esta fase.
+func judgedByExtension(sd *registry.StructureDefinition, def *registry.ElementNode, own *registry.StructureDefinition) bool {
+	if own == nil || sd != own {
+		return false
+	}
+	for def.SliceOf != nil {
+		def = def.SliceOf
+	}
+	p := def.Parent
+	return p == nil || p.Parent == nil || (len(p.Def.Type) > 0 && p.Def.Type[0].Code == own.Type)
+}
+
 // checkValue checks a value at fhirPath, raw with its "_x" sibling element, against def's fixed
 // and pattern values. An issue is reported once per location.
 func (v *Validator) checkValue(def *registry.ElementNode, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
@@ -482,17 +581,18 @@ func (v *Validator) checkValue(def *registry.ElementNode, raw, element json.RawM
 // them: node, the slices it reslices, and the elements a contentReference points to. Their
 // invariants are evaluated on it, a primitive of its type with no value (ele-1 among them), and
 // their fixed and pattern values checked. A primitive type's definition has neither.
-func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, untyped bool, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
 	if objectSpans(element) == nil {
 		return // not an object: a JSON error the primitive phase reports
 	}
-	seen := map[string]bool{}
+	seen := typeCheckSeen(untyped, fhirPath)
 	check := func(n *registry.ElementNode) {
 		v.evaluateValueless(n, choiceElementPath(n.Def.Path, typeCode), typeCode, element, fhirPath, seen, opts, result)
 		v.checkValue(n, nil, element, fhirPath, opts, result)
 	}
 	base := node
 	for n := node; n != nil; n = n.SliceOf {
+		v.checkType(sd, n, typeCode, fhirPath, seen, opts, result)
 		check(n)
 		base = n
 	}

@@ -57,9 +57,9 @@ func TestFixedValueOfAProfileThatChangesItsType(t *testing.T) {
 		{"only-ext-same-plain", []string{"FIXED_VALUE_MISSING"}, true},
 		{"only-ext-other-plain", []string{"FIXED_VALUE_MISSING"}, true},
 		// HL7: «allows for the type string but found type integer» (y al revés). gofhir lo informa
-		// como STRUCTURE_UNKNOWN_ELEMENT: los dos rechazan el tipo que el perfil no permite.
-		{"to-integer-integer-5", []string{"STRUCTURE_UNKNOWN_ELEMENT"}, false},
-		{"to-string-string-a", []string{"STRUCTURE_UNKNOWN_ELEMENT"}, false},
+		// como STRUCTURE_TYPE_NOT_ALLOWED: la base declara el tipo, el perfil no lo permite.
+		{"to-integer-integer-5", []string{"STRUCTURE_TYPE_NOT_ALLOWED"}, false},
+		{"to-string-string-a", []string{"STRUCTURE_TYPE_NOT_ALLOWED"}, false},
 	} {
 		t.Run(tt.instance, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join(dir, "instances", tt.instance+".json"))

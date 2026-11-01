@@ -1,0 +1,30 @@
+package constraint
+
+import (
+ "encoding/json"
+ "testing"
+ "github.com/gofhir/validator/v2/pkg/registry"
+ "github.com/gofhir/validator/v2/internal/testfhir"
+ "github.com/gofhir/validator/v2/pkg/issue"
+)
+
+func TestReviewAllowedAllocations(t *testing.T) {
+ v:= &Validator{}
+ sd:= &registry.StructureDefinition{URL:"http://example.org/p"}
+ node:= testfhir.Registry(t,"4.0.1").GetByType("Parameters").Tree().ByID("Parameters.parameter.value[x]")
+ t.Logf("declared types: %d",len(node.Def.Type))
+ seen:=map[string]bool{}
+ result:=issue.NewResult()
+ count:=testing.AllocsPerRun(1000,func(){ v.checkType(sd,node,"string","Parameters.parameter[0].valueString",seen,result) })
+ t.Logf("allowed choice check: %v allocations per value",count)
+}
+
+func TestReviewValuelessChoiceSlice(t *testing.T) {
+ v:= &Validator{}
+ sd:= &registry.StructureDefinition{URL:"http://example.org/p"}
+ base:= &registry.ElementNode{Def:&registry.ElementDefinition{Path:"X.value[x]",Type:[]registry.Type{{Code:"string"},{Code:"boolean"}}}}
+ node:= &registry.ElementNode{Def:&registry.ElementDefinition{Path:"X.value[x]",Type:[]registry.Type{{Code:"string"}}},SliceOf:base}
+ result:=issue.NewResult()
+ v.checkValueless(sd,node,"boolean",false,json.RawMessage(`{"id":"v"}`),"X.valueBoolean",&constraintEvalOpts{},result)
+ if result.ErrorCount()!=1 { t.Fatalf("got %d errors; want 1",result.ErrorCount()) }
+}

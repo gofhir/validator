@@ -1,0 +1,32 @@
+// extensibility.html: la url absoluta de una subextensión identifica su definición, también cuando el
+// padre declara una slice para ella: su valor se compara con ambas, y se informa una vez por definición.
+func TestDeclaredSubExtensionOwnDefinition(t *testing.T) {
+	defs := extValueDefs(t)
+	for i, d := range defs {
+		if strings.Contains(d, `"name": "BoolExt"`) {
+			defs[i] = strings.ReplaceAll(d, `"expression": "Patient"`, `"expression": "Element"`)
+		}
+		if strings.Contains(d, `"name": "NestedExt"`) {
+			d = strings.ReplaceAll(d, `"fixedUri": "part"`, `"fixedUri": "http://example.org/StructureDefinition/bool-ext"`)
+			// Se omite la restricción del valor en el padre: la define bool-ext.
+			start := strings.Index(d, "   {\n    \"id\": \"Extension.extension:part.value[x]\"")
+			end := strings.Index(d[start:], "   {\n    \"id\": \"Extension.url\"") + start
+			d = d[:start] + d[end:]
+			defs[i] = d
+		}
+	}
+	const data = `{"resourceType":"Patient","extension":[{"url":"http://example.org/StructureDefinition/nested-ext","extension":[{"url":"http://example.org/StructureDefinition/bool-ext","valueString":"bad"}]}]}`
+	for _, version := range orderVersions {
+		t.Run(version, func(t *testing.T) {
+			v := orderValidator(t, version, defs...)
+			res, err := v.Validate(context.Background(), []byte(data))
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := at{id: issue.DiagStructureTypeNotAllowed, expr: "Patient.extension[0].extension[0].valueString", text: "'http://example.org/StructureDefinition/bool-ext'"}
+			if n := countAt(res, want); n != 1 {
+				t.Fatalf("%d absolute child type errors, want 1; issues: %+v", n, res.Issues)
+			}
+		})
+	}
+}

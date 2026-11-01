@@ -1,0 +1,1 @@
+{"name": "example.slicetypes", "version": "0.1.0", "fhirVersions": ["5.0.0"], "type": "fhir.ig", "dependencies": {"hl7.fhir.r5.core": "5.0.0"}}

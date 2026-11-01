@@ -1,0 +1,22 @@
+package extension
+
+import (
+ "context"
+ "encoding/json"
+ "testing"
+ "github.com/gofhir/validator/v2/pkg/issue"
+)
+
+func TestReviewStandaloneType(t *testing.T) {
+ for _, version := range []string{"4.0.1","4.3.0","5.0.0"} {
+  t.Run(version,func(t *testing.T){
+   reg:=phaseRegistry(t,version)
+   var data map[string]any
+   json.Unmarshal([]byte(`{"resourceType":"Patient","extension":[{"url":"http://example.org/StructureDefinition/bool-ext","valueString":"bad"}]}`),&data)
+   res:=issue.NewResult()
+   New(reg,nil,nil).ValidateData(context.Background(),data,reg.GetByType("Patient"),res)
+   for _,is:=range res.Issues { if is.MessageID==string(issue.DiagStructureTypeNotAllowed) { return } }
+   t.Fatalf("missing type error; issues=%+v",res.Issues)
+  })
+ }
+}

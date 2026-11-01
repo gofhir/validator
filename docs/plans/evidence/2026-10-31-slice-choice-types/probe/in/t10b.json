@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "t10b",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/ext-t10b",
+   "valueString": "a"
+  }
+ ]
+}
