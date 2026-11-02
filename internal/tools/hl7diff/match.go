@@ -15,7 +15,14 @@ var (
 	// The element gofhir's cardinality messages quote: "Minimum cardinality of 'Observation.
 	// component:SystolicBP.system' is 1". Only element paths qualify, not URLs.
 	goQuotedElement = regexp.MustCompile(`'([A-Z][A-Za-z0-9]*(?:[.:][^'\s]+)+)'`)
+	// Las propiedades que gofhir lista cuando un objeto trae dos o más de una misma elección:
+	// "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString".
+	goFoundVariants = regexp.MustCompile(`but found: (\w+(?:, \w+)*)$`)
 )
+
+// mutualExclusionID es el ID del diagnóstico que lista esas propiedades (issue.DiagStructureChoiceMutualExclusion;
+// esta herramienta no importa pkg/issue): otro mensaje que termine igual no las lista.
+const mutualExclusionID = "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
 
 // splitSlices lists the slices in an element id or a location, in order, split into element slices
 // ("extension:cehrt") and type slices, which name the type a choice takes
@@ -74,6 +81,11 @@ func namesAgree(fam *Families, g GoIssue, h HL7Issue) bool {
 	}
 	goLoc := g.Location()
 	id := m[1] + m[2] + m[3]
+	if m[3] != "" && listsVariant(g, m[3]) {
+		// Las propiedades son las del mismo objeto: la regla "parent" de la familia aceptaría también el
+		// objeto padre o un hijo, donde HL7 informa una propiedad que gofhir no atribuye a esta elección.
+		return Located(ruleEqual, ComparableGoLocation(goLoc), h.Location)
+	}
 	want, got := lastSegment(id), lastSegment(goLoc)
 	if !strings.Contains(got, ":") {
 		want = stripSlice(want)
@@ -231,4 +243,25 @@ func sortedBy[T any](xs []T, key func(T) string) []T {
 		out[i] = k.x
 	}
 	return out
+}
+
+// listsVariant dice si el mensaje de gofhir lista la propiedad que HL7 descarta: gofhir informa
+// las propiedades de una elección en un solo error, en el objeto que las contiene; HL7 informa
+// "Unrecognized property 'valueString'" en ese mismo objeto, una por variante descartada, y una
+// primitiva descartada también puede nombrarse por su hermano "_valueString" (json.html#primitive).
+func listsVariant(g GoIssue, prop string) bool {
+	if g.MessageID != mutualExclusionID {
+		return false
+	}
+	m := goFoundVariants.FindStringSubmatch(g.Diagnostics)
+	if m == nil {
+		return false
+	}
+	prop = strings.TrimPrefix(prop, "_")
+	for v := range strings.SplitSeq(m[1], ", ") {
+		if v == prop {
+			return true
+		}
+	}
+	return false
 }

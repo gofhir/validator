@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-code",
+ "url": "http://example.org/fhir/StructureDefinition/p-code",
+ "name": "Pcode",
+ "status": "active",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Parameters",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Parameters",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Parameters",
+    "path": "Parameters"
+   },
+   {
+    "id": "Parameters.parameter.value[x]",
+    "path": "Parameters.parameter.value[x]",
+    "type": [
+     {
+      "code": "code"
+     }
+    ]
+   }
+  ]
+ }
+}

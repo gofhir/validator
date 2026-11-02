@@ -1,0 +1,25 @@
+{
+ "resourceType": "Parameters",
+ "id": "pr-two",
+ "parameter": [
+  {
+   "name": "r",
+   "resource": {
+    "resourceType": "Parameters",
+    "id": "pr1",
+    "parameter": [
+     {
+      "name": "x",
+      "valueCode": "a",
+      "valueString": "a"
+     }
+    ],
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/p-code"
+     ]
+    }
+   }
+  }
+ ]
+}

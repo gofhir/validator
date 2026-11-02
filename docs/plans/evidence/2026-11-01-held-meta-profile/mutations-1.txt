@@ -1,0 +1,12 @@
+control: exit=0 (27s)
+m1 un hermano _x solo no es variante: muere, 5 tests (28s): TestOf, TestChoiceVariants, TestExtensionValueContent, TestFixedAndPatternValuesOnEveryLayer
+m2 un tipo que solo declara el perfil es variante (#180): muere, 5 tests (29s): TestOf, TestCardinalityOnTheTree, TestChoiceKeyCase, TestChoiceVariants
+m3 variantes en el orden del mapa: muere, 5 tests (46s): TestChoiceVariants, TestChoiceVariantsKeyOrder, TestChoiceMutualExclusionListsVariantsByName, TestExtensionWithSeveralValues
+m4 cardinalidad: una aparición por variante: muere, 2 tests (36s): TestChoiceVariants, TestSliceChoiceTypes
+m5 slicing: una aparición por variante: muere, 1 tests (31s): TestChoiceVariants
+m6 estructural: sin exclusión mutua: muere, 6 tests (37s): TestValidateChoiceTypeExclusivityDeterministic, TestValidateChoiceTypeComponentScope, TestChoiceVariants, TestM1Fixtures
+m7 estructural: un tipo solo de la base es elemento desconocido: muere, 3 tests (28s): TestFixedValueOfAProfileThatChangesItsType, TestChoiceVariants, TestSliceChoiceTypes
+m8 constraint: sin comparar el tipo de una variante con el perfil: muere, 5 tests (26s): TestFixedValueOfAProfileThatChangesItsType, TestChoiceVariants, TestExtensionValueDescendantRestriction, TestSliceChoiceTypes
+m9 hl7diff: la exclusión mutua sin familia: muere, 2 tests (27s): TestFamiliesCoverEveryGofhirID, TestNamesAgreeChoiceVariants
+m10 hl7diff: el MUTUAL nunca empareja con la propiedad que HL7 nombra: muere, 1 tests (24s): TestNamesAgreeChoiceVariants
+sobreviven: 0

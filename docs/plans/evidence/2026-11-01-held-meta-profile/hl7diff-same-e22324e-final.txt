@@ -1,0 +1,172 @@
+# hl7diff same: baseline e22324e vs working tree
+
+decisions: identical (15 files, 26 lines)
+
+multimatch: identical (3 files, 9 lines)
+
+core-probes: identical (7 files, 12 lines)
+
+type-profile-probes: identical (47 files, 92 lines)
+
+nested-resource-probes: identical (4 files, 6 lines)
+
+review-probes: identical (5 files, 9 lines)
+
+extension-probes: identical (14 files, 27 lines)
+
+primitive-extension-probes: identical (5 files, 5 lines)
+
+context-probes: identical (33 files, 131 lines)
+
+context-eval-probes: identical (31 files, 55 lines)
+
+context-scope-probes: identical (198 files, 369 lines)
+
+interface-probes: identical (9 files, 35 lines)
+
+interface-probes-r5: identical (16 files, 20 lines)
+
+interface-probes-r4b: identical (9 files, 36 lines)
+
+constraint-probes: identical (81 files, 162 lines)
+
+invariant-probes: identical (61 files, 107 lines)
+
+fixedpattern-probes: identical (50 files, 86 lines)
+
+target-probes: identical (71 files, 104 lines)
+
+nested-slicing-probes: identical (18 files, 23 lines)
+
+json-shape-probes: identical (34 files, 103 lines)
+
+binding-probes: identical (5 files, 10 lines)
+
+binding-walk-probes: identical (14 files, 31 lines)
+
+extension-walk-probes: identical (20 files, 42 lines)
+
+binding-profile-probes: identical (10 files, 19 lines)
+
+valueset-membership-probes: identical (43 files, 52 lines)
+
+holder-profile-probes: identical (50 files, 93 lines)
+
+reference-walk-probes: identical (56 files, 137 lines)
+
+package-example-cpg-probes: identical (4 files, 10 lines)
+
+package-example-cql-probes: identical (2 files, 3 lines)
+
+unknown-codesystem-probes: identical (521 files, 1035 lines)
+
+fullurl-probes: identical (48 files, 135 lines)
+
+fullurl-probes-r4b: identical (1 files, 3 lines)
+
+fullurl-probes-r5: identical (4 files, 8 lines)
+
+held-resource-probes: identical (39 files, 146 lines)
+
+## choice-variant-probes: 68 lines differ (27 files, 69 baseline lines)
+
+- sorted line 3
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-cs-two.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["Bundle.entry[0].resource.parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'Bundle.entry[0].resource.parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-none-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-none-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-one.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Bundle.entry[0].resource.parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":14,"Column":20}}
+- sorted line 5
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-none-two.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["Bundle.entry[0].resource.parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'Bundle.entry[0].resource.parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-rev.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+- sorted line 6
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-one.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Bundle.entry[0].resource.parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":14,"Column":20}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-rev.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Bundle.entry[0].resource.parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":14,"Column":20}}
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-rev.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-two-profiles.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-rev.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["Bundle.entry[0].resource.parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'Bundle.entry[0].resource.parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-two-profiles.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Bundle.entry[0].resource.parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":15,"Column":20}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-two-profiles.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+- sorted line 10
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-two-profiles.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["Bundle.entry[0].resource.parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'Bundle.entry[0].resource.parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Bundle.entry[0].resource.parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":15,"Column":20}}
+- sorted line 11
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-two-profiles.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["Bundle.entry[0].resource.parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'Bundle.entry[0].resource.parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-unresolved.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_b-unresolved.json","severity":"warning","code":"not-found","messageId":"PROFILE_NOT_FOUND","expression":["Bundle.entry[0].resource.meta.profile[0]"],"diagnostics":"Profile 'http://example.org/fhir/StructureDefinition/nope' was not checked: no definition with its url is loaded","location":{"Line":20,"Column":7}}
+- sorted line 13
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-two.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["Bundle.entry[0].resource.parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'Bundle.entry[0].resource.parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_bb-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":19,"Column":9}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-unresolved.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":12,"Column":6}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_bb-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Bundle.entry[0].resource.entry[0].resource.parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":22,"Column":23}}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-unresolved.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["Bundle.entry[0].resource.parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'Bundle.entry[0].resource.parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_c-one.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["List.contained[0].parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":13,"Column":19}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_b-unresolved.json","severity":"warning","code":"not-found","messageId":"PROFILE_NOT_FOUND","expression":["Bundle.entry[0].resource.meta.profile[0]"],"diagnostics":"Profile 'http://example.org/fhir/StructureDefinition/nope' was not checked: no definition with its url is loaded","location":{"Line":20,"Column":7}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_c-one.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["List"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_bb-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Bundle.entry[0].resource.entry[0].resource.parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":19,"Column":9}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_c-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["List.contained[0].parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":11,"Column":5}}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_bb-two.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["Bundle.entry[0].resource.entry[0].resource.parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'Bundle.entry[0].resource.entry[0].resource.parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_c-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["List.contained[0].parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":14,"Column":19}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_c-one.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["List.contained[0].parameter[0].valueString"],"diagnostics":"The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string","location":{"Line":13,"Column":19}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_c-two.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["List"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_c-one.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["List"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_e-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Patient.extension[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString","location":{"Line":5,"Column":3}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_c-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["List.contained[0].parameter[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString","location":{"Line":11,"Column":5}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_e-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_TYPE_NOT_ALLOWED","expression":["Patient.extension[0].valueBoolean"],"diagnostics":"The profile 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' allows the type(s) string but found type boolean","location":{"Line":8,"Column":18}}
+- sorted line 22
+  base: {"file":"testdata/m12-slice-scoping/probes/ov_c-two.json","severity":"error","code":"value","messageId":"CARDINALITY_MAX","expression":["List.contained[0].parameter[0].value[x]"],"diagnostics":"Maximum cardinality of 'List.contained[0].parameter[0].value[x]' is 1, but found 2"}
+  head: {"file":"testdata/m12-slice-scoping/probes/ov_e-two.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+
+resolve-probes: identical (19 files, 31 lines)
+
+resource-element-probes: identical (6 files, 17 lines)
+
+canonical-probes: identical (17 files, 19 lines)
+
+r5-probes: identical (8 files, 12 lines)
+
+r4b-probes: identical (1 files, 1 lines)
+
+narrative-ucum-probes: identical (49 files, 82 lines)
+
+narrative-ucum-probes-r4b: identical (49 files, 82 lines)
+
+narrative-ucum-probes-r5: identical (49 files, 82 lines)
+
+deqm-probes: identical (15 files, 66 lines)
+
+deqm-examples: identical (108 files, 451 lines)
+
+uscore-probes: identical (7 files, 18 lines)
+
+uscore-examples: identical (183 files, 409 lines)
+
+ips: identical (44 files, 88 lines)
+
+mcode-examples: identical (179 files, 471 lines)
+
+aucore-examples: identical (65 files, 108 lines)
+
+chcore-examples: identical (48 files, 76 lines)
+
+clcore-examples: identical (20 files, 24 lines)
+
+r4-core-examples: identical (5301 files, 55193 lines)
+
+**DIFFERENT**
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/same-report.md
+exit status 1

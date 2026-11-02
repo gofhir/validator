@@ -83,29 +83,15 @@ func choiceProperties(base string, node *registry.ElementNode, inst map[string]a
 	types := node.Def.Type
 	var out []property
 	for k := range inst {
-		key, underscored := strings.CutPrefix(k, "_")
-		if len(key) <= len(base) || !strings.HasPrefix(key, base) {
+		key, code, ok := variantOf(base, node, k, inst, t)
+		if !ok {
 			continue
 		}
-		if underscored {
-			if _, hasValue := inst[key]; hasValue {
-				continue // the value's key stands for both
-			}
+		rank := len(types)
+		if i := registry.ChoiceTypeIndex(types, key[len(base):]); i >= 0 {
+			code, rank = types[i].Code, i
 		}
-		// La base decide si la clave es un valor: un tipo que solo el perfil declara (CodeableReference
-		// de un package de R5 cargado en R4) no es una propiedad (#180).
-		code := t.ChoiceType(node, key)
-		if code == "" {
-			continue
-		}
-		if rank := registry.ChoiceTypeIndex(types, key[len(base):]); rank >= 0 {
-			out = append(out, property{key: key, code: types[rank].Code, rank: rank})
-		} else if !underscored || primitive(t, code) {
-			// Un tipo que el perfil no permite y la base sí también es un valor, con el tipo
-			// equivocado; su hermano "_key" lo es solo si es de un primitivo (json.html#primitive;
-			// #178, #180).
-			out = append(out, property{key: key, code: code, rank: len(types)})
-		}
+		out = append(out, property{key: key, code: code, rank: rank})
 	}
 	sort.Slice(out, func(i, j int) bool {
 		if out[i].rank != out[j].rank {
@@ -114,6 +100,81 @@ func choiceProperties(base string, node *registry.ElementNode, inst map[string]a
 		return out[i].key < out[j].key
 	})
 	return out
+}
+
+// variantOf dice si k, una clave de inst, es una variante del elemento de elección node de nombre
+// base: devuelve el nombre de la variante (k sin el "_" de un hermano) y su tipo. Es la única
+// definición de variante, la que usan las fases estructural, de cardinalidad y de slicing: una
+// propiedad que nombra un tipo que la base del elemento declara (formats.html#choice), o el hermano
+// "_x" de un primitivo sin el valor (json.html#primitive); el hermano de otro tipo no es propiedad.
+// Un tipo que solo declara el perfil no lo es (CodeableReference de un package de R5 cargado en R4,
+// #180), y uno que el perfil no permite y la base sí es una variante, de tipo equivocado (#178).
+func variantOf(base string, node *registry.ElementNode, k string, inst map[string]any, t Types) (key, code string, ok bool) {
+	key, underscored := strings.CutPrefix(k, "_")
+	if len(key) <= len(base) || !strings.HasPrefix(key, base) {
+		return "", "", false
+	}
+	if underscored {
+		if _, hasValue := inst[key]; hasValue {
+			return "", "", false // the value's key stands for both
+		}
+	}
+	code = t.ChoiceType(node, key)
+	if code == "" || (underscored && !primitive(t, code)) {
+		return "", "", false
+	}
+	return key, code, true
+}
+
+// CompetingVariants returns the names of the variants inst holds of node, a choice element, in
+// name order, when there are two or more (they are the same fact as a repeated element,
+// formats.html#choice): nil otherwise. The profile does not decide which is the value, so the
+// result is the same for a resource validated against its profile or against its base type. It
+// allocates only when it finds a conflict.
+func CompetingVariants(node *registry.ElementNode, inst map[string]any, types Types) []string {
+	base, isChoice := strings.CutSuffix(node.Def.Path[strings.LastIndex(node.Def.Path, ".")+1:], "[x]")
+	if !isChoice {
+		return nil
+	}
+	var first string
+	var out []string
+	for k := range inst {
+		key, _, ok := variantOf(base, node, k, inst, types)
+		switch {
+		case !ok:
+		case first == "":
+			first = key
+		default:
+			if out == nil {
+				out = append(make([]string, 0, 3), first)
+			}
+			out = append(out, key)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// Occurrences returns how many times child occurs given its values, those Of returned (or the
+// ones of them that count): for a choice element the variants present are one occurrence
+// (formats.html#choice), not one per variant; of an element that repeats, the items of its variant
+// with the most. Cardinality and slicing count with it, so that two variants are the one issue the
+// structural phase reports (CompetingVariants) and not also a cardinality one. It assumes the values
+// of one key are contiguous, as Of returns them (by key, in name order).
+func Occurrences(child *registry.ElementNode, values []Value) int {
+	if !strings.HasSuffix(child.Def.Path, "[x]") {
+		return len(values)
+	}
+	most, run := 0, 0
+	for i, cv := range values {
+		if i > 0 && cv.Key == values[i-1].Key {
+			run++
+		} else {
+			run = 1
+		}
+		most = max(most, run)
+	}
+	return most
 }
 
 // primitive reports whether typeCode is a primitive type's, which a "_key" sibling may extend.

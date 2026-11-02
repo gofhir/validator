@@ -1,0 +1,12 @@
+{
+ "resourceType": "Parameters",
+ "id": "r-three",
+ "parameter": [
+  {
+   "name": "x",
+   "valueCode": "a",
+   "valueString": "a",
+   "valueBoolean": true
+  }
+ ]
+}

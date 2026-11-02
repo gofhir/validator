@@ -1,0 +1,18 @@
+{
+ "resourceType": "Observation",
+ "id": "o-timing",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "effectiveTiming": {
+  "repeat": {
+   "boundsDuration": {
+    "value": 1
+   },
+   "boundsPeriod": {
+    "start": "2020-01-01"
+   }
+  }
+ }
+}

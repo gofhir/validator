@@ -18,7 +18,7 @@ func TestValuelessPrimitiveOfChoiceSliceTypeNotAllowed(t *testing.T) {
 	base := &registry.ElementNode{Def: &registry.ElementDefinition{Path: "X.value[x]", Type: []registry.Type{{Code: "string"}, {Code: "boolean"}}}}
 	node := &registry.ElementNode{Def: &registry.ElementDefinition{Path: "X.value[x]", Type: []registry.Type{{Code: "string"}}}, SliceOf: base}
 	result := issue.NewResult()
-	v.checkValueless(sd, node, "boolean", false, json.RawMessage(`{"id":"v"}`), "X.valueBoolean", &constraintEvalOpts{}, result)
+	v.checkValueless(sd, node, "boolean", json.RawMessage(`{"id":"v"}`), "X.valueBoolean", &constraintEvalOpts{}, result)
 	if result.ErrorCount() != 1 {
 		t.Fatalf("got %d errors; want 1: %+v", result.ErrorCount(), result.Issues)
 	}

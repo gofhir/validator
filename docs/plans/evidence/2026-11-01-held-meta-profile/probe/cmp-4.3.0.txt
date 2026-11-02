@@ -1,0 +1,142 @@
+## b-cs-two
+  HL7 | error | Bundle.entry[0].resource.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Bundle.entry[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+## b-none-two
+  HL7 | error | Bundle.entry[0].resource.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Bundle.entry[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+## b-one
+  HL7 | error | Bundle.entry[0].resource/*Parameters/e1*/.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-code' definition allows for the type code but found type string
+  GO  | error | Bundle.entry[0].resource.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## b-rev
+  HL7 | error | Bundle.entry[0].resource.parameter[0] | Unrecognized property 'valueCode'
+  HL7 | error | Bundle.entry[0].resource/*Parameters/e1*/.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-code' definition allows for the type code but found type string
+  GO  | error | Bundle.entry[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Bundle.entry[0].resource.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## b-two
+  HL7 | error | Bundle.entry[0].resource.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Bundle.entry[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Bundle.entry[0].resource.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## b-two-profiles
+  HL7 | error | Bundle.entry[0].resource.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Bundle.entry[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Bundle.entry[0].resource.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## b-unresolved
+  HL7 | error | Bundle.entry[0].resource.parameter[0] | Unrecognized property 'valueString'
+  HL7 | error | Bundle.entry[0].resource/*Parameters/e1*/.meta.profile[0] | Example URLs are not allowed in this context (http://example.org/fhir/StructureDefinition/nope)
+  HL7 | warning | Bundle.entry[0].resource/*Parameters/e1*/.meta.profile[0] | Profile reference 'http://example.org/fhir/StructureDefinition/nope' has not been checked because it could not be found, and fetching it resulted in the error o
+  GO  | error | Bundle.entry[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | warning | Bundle.entry[0].resource.meta.profile[0] | Profile 'http://example.org/fhir/StructureDefinition/nope' was not checked: no definition with its url is loaded
+## bb-two
+  HL7 | error | Bundle.entry[0].resource.entry[0].resource.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Bundle.entry[0].resource.entry[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Bundle.entry[0].resource.entry[0].resource.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## c-one
+  HL7 | error | List.contained[0]/*Parameters/c1*/.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-code' definition allows for the type code but found type string
+  HL7 | warning | List | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | warning | List | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | List.contained[0].parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## c-two
+  HL7 | error | List.contained[0].parameter[0] | Unrecognized property 'valueString'
+  HL7 | warning | List | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | List.contained[0].parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | warning | List | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | List.contained[0].parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## e-two
+  HL7 | error | Patient.extension[0] | Unrecognized property 'valueBoolean'
+  HL7 | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Patient.extension[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString
+  GO  | error | Patient.extension[0].valueBoolean | The profile 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' allows the type(s) string but found type boolean
+  GO  | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+## e-u1
+  HL7 | error | Patient.extension[0] | The Extension 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' definition allows for the types [string] but found type code
+  HL7 | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Patient.extension[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Patient.extension[0].valueCode | The profile 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' allows the type(s) string but found type code
+  GO  | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Patient.extension[0].valueCode | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)
+## h-two
+  HL7 | error | Bundle.entry[0].resource.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Bundle.entry[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Bundle.entry[0].resource.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## o-qs
+  HL7 | error | Observation | Unrecognized property 'valueString'
+  HL7 | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a subject
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a performer
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have an effective[x] ()
+  GO  | error | Observation | Only one variant of choice type 'value[x]' is allowed, but found: valueQuantity, valueString
+  GO  | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+## o-timing
+  HL7 | error | Observation.effective[x].repeat | Unrecognized property 'boundsPeriod'
+  HL7 | error | Observation.effective.ofType(Timing).repeat.bounds.ofType(Duration) | Constraint failed: drt-1: 'There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.' (defined i
+  HL7 | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a subject
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a performer
+  GO  | error | Observation.effectiveTiming.repeat | Only one variant of choice type 'bounds[x]' is allowed, but found: boundsDuration, boundsPeriod
+  GO  | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Observation.effectiveTiming.repeat.boundsDuration | Constraint failed: drt-1: 'There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.' (defined i
+## o-ts-two
+  HL7 | error | Observation | Unrecognized property 'valueBoolean'
+  HL7 | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a subject
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a performer
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have an effective[x] ()
+  GO  | error | Observation | Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString
+  GO  | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Observation.valueBoolean | The profile 'http://example.org/fhir/StructureDefinition/o-ts' allows the type(s) string but found type boolean
+  GO  | error | Observation.valueBoolean | Element does not match any defined slice (slicing rules are 'closed')
+## o-u1
+  HL7 | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a subject
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a performer
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have an effective[x] ()
+  GO  | error | Observation | Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueTime
+  GO  | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Observation.valueTime | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)
+## o-u2
+  HL7 | error | Observation | Unrecognized property '_valueTime'
+  HL7 | error | Observation.value.ofType(string) | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)
+  HL7 | error | Observation.value.ofType(string) | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resource' (defined in http://hl7.org/fhir/StructureDefini
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a subject
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have a performer
+  HL7 | warning | Observation | Best Practice Recommendation: In general, all observations should have an effective[x] ()
+  GO  | error | Observation | Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueTime
+  GO  | warning | Observation | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Observation.valueString | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)
+  GO  | error | Observation.valueTime | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)
+## p-dec
+  HL7 | error | Patient | Unrecognized property 'deceasedDateTime'
+  HL7 | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Patient | Only one variant of choice type 'deceased[x]' is allowed, but found: deceasedBoolean, deceasedDateTime
+  GO  | warning | Patient | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+## pr-two
+  HL7 | error | Parameters.parameter[0].resource.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Parameters.parameter[0].resource.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Parameters.parameter[0].resource.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## q-cr
+  HL7 | error | Questionnaire.item[0].item[0].enableWhen[0] | Unrecognized property 'answerString'
+  HL7 | warning | Questionnaire | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+  GO  | error | Questionnaire.item[0].item[0].enableWhen[0] | Only one variant of choice type 'answer[x]' is allowed, but found: answerBoolean, answerString
+  GO  | warning | Questionnaire | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Pra
+## r-none-rev
+  HL7 | error | Parameters.parameter[0] | Unrecognized property 'valueCode'
+  GO  | error | Parameters.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+## r-none-two
+  HL7 | error | Parameters.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Parameters.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+## r-one
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-code' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## r-rev
+  HL7 | error | Parameters.parameter[0] | Unrecognized property 'valueCode'
+  HL7 | error | Parameters.parameter[0].value.ofType(string) | The Profile 'http://example.org/fhir/StructureDefinition/p-code' definition allows for the type code but found type string
+  GO  | error | Parameters.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string
+## r-three
+  HL7 | error | Parameters.parameter[0] | Unrecognized property 'valueString'
+  HL7 | error | Parameters.parameter[0] | Unrecognized property 'valueBoolean'
+  GO  | error | Parameters.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueCode, valueString
+## r-two
+  HL7 | error | Parameters.parameter[0] | Unrecognized property 'valueString'
+  GO  | error | Parameters.parameter[0] | Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString
+  GO  | error | Parameters.parameter[0].valueString | The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string

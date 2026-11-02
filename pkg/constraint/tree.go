@@ -37,9 +37,6 @@ import (
 // kindPrimitive is the StructureDefinition.kind of primitive types.
 const kindPrimitive = "primitive-type"
 
-// kindResource es el StructureDefinition.kind de los recursos.
-const kindResource = "resource"
-
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
 const resourceTypeKey = "resourceType"
 
@@ -52,10 +49,9 @@ const maxContentReferenceHops = 8
 
 // The walk checks one value of node, held at fhirPath, and recurses into its children. The node is
 // the most specific definition of the value: the slice it belongs to, or the element. The value's
-// type is typeCode (a choice element's type, or its only type). Con untyped, la propiedad no es el
-// valor del elemento para el perfil (ver unrecognizedChoice): no se compara su tipo.
-func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, untyped bool, value any, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
-	seen := typeCheckSeen(untyped, fhirPath)
+// type is typeCode (a choice element's type, or its only type).
+func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	seen := map[string]bool{}
 	base := node
 	for n := node; n != nil; n = n.SliceOf {
 		v.checkType(sd, n, typeCode, fhirPath, seen, opts, result)
@@ -164,7 +160,6 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 			path := elementvalues.ItemPath(child, cv, fhirPath)
 			valueRaw, extRaw := fields.of(cv.Key, cv), fields.of("_"+cv.Key, cv)
 			node := v.governing(sd, child, cv, opts)
-			untyped := sd.Kind == kindResource && unrecognizedChoice(child, values, cv)
 			if m, ok := cv.Value.(map[string]any); ok && v.registry.HoldsResource(child.Def) {
 				// A resource held in the element, validated as a resource of its own, against the
 				// profiles of the slice it matched, or of the element.
@@ -174,11 +169,11 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 				continue
 			}
 			if cv.Value != nil {
-				v.walk(sd, node, cv.TypeCode, untyped, cv.Value, valueRaw, extRaw, path, opts, result)
+				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, extRaw, path, opts, result)
 			} else if extRaw != nil && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
 				// A primitive with no value, its id and extensions in its "_key" sibling
 				// (json.html#primitive): Written leaves a null only as an array's item.
-				v.checkValueless(sd, node, cv.TypeCode, untyped, extRaw, path, opts, result)
+				v.checkValueless(sd, node, cv.TypeCode, extRaw, path, opts, result)
 			}
 			if cv.Ext != nil {
 				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, extRaw, path, opts, result)
@@ -274,7 +269,7 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 	}
 	for _, sd := range definitions {
 		if root := sd.Tree().Root(); root != nil {
-			v.walk(sd, root, "", false, res, raw, nil, fhirPath, &opts, result)
+			v.walk(sd, root, "", res, raw, nil, fhirPath, &opts, result)
 		}
 	}
 }
@@ -486,32 +481,8 @@ func (v *Validator) layer(def *registry.ElementNode, defPath string, value any, 
 	v.checkValue(def, *raw, element, fhirPath, opts, result)
 }
 
-// typeCheckSeen es el registro de lo que una caminata revisó de un valor (las restricciones evaluadas,
-// el tipo comparado): vacío, o con la comparación de tipo ya hecha cuando no corresponde (untyped).
-func typeCheckSeen(untyped bool, fhirPath string) map[string]bool {
-	seen := map[string]bool{}
-	if untyped {
-		seen[typeNotAllowedKey(fhirPath)] = true
-	}
-	return seen
-}
-
 func typeNotAllowedKey(fhirPath string) string {
 	return fhirPath + "\x00" + string(issue.DiagStructureTypeNotAllowed)
-}
-
-// unrecognizedChoice dice si cv, un valor del elemento de elección child, es una propiedad que el
-// perfil no toma para él: su tipo no es uno que child declare, y otro de values sí lo es. La fase
-// estructural la informa como elemento desconocido, y el validador HL7 como propiedad no
-// reconocida, sin tipo que comparar. La fase estructural lee los elementos de la definición de un
-// recurso, no los de los tipos de datos que contiene (lee los propios), así que la caminata lo
-// pregunta solo en la definición de un recurso. Un valor solo, de un tipo que únicamente declara la
-// base, es el valor del elemento, de tipo equivocado.
-func unrecognizedChoice(child *registry.ElementNode, values []elementvalues.Value, cv elementvalues.Value) bool {
-	if !strings.HasSuffix(child.Def.Path, "[x]") || declaresType(child, cv.TypeCode) {
-		return false
-	}
-	return slices.ContainsFunc(values, func(o elementvalues.Value) bool { return declaresType(child, o.TypeCode) })
 }
 
 // declaresType dice si la definición de node declara el tipo code.
@@ -581,11 +552,11 @@ func (v *Validator) checkValue(def *registry.ElementNode, raw, element json.RawM
 // them: node, the slices it reslices, and the elements a contentReference points to. Their
 // invariants are evaluated on it, a primitive of its type with no value (ele-1 among them), and
 // their fixed and pattern values checked. A primitive type's definition has neither.
-func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, untyped bool, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
 	if objectSpans(element) == nil {
 		return // not an object: a JSON error the primitive phase reports
 	}
-	seen := typeCheckSeen(untyped, fhirPath)
+	seen := map[string]bool{}
 	check := func(n *registry.ElementNode) {
 		v.evaluateValueless(n, choiceElementPath(n.Def.Path, typeCode), typeCode, element, fhirPath, seen, opts, result)
 		v.checkValue(n, nil, element, fhirPath, opts, result)

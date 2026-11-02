@@ -4,9 +4,11 @@ package structural
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 
+	"github.com/gofhir/validator/v2/internal/elementvalues"
 	"github.com/gofhir/validator/v2/internal/objectkeys"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
@@ -158,87 +160,56 @@ func (v *Validator) ValidateData(data map[string]any, sd *registry.StructureDefi
 	return result
 }
 
-// matchChoiceType checks if a data key matches a choice type defined as a
-// direct child of sdPath in the element index.
-// Returns the choice base path (e.g., "Observation.value") if matched, or empty string otherwise, and
-// whether the profile's own types name the key (else only the types of its base do).
-//
-// Scoping to sdPath is required for determinism: a StructureDefinition can have
-// multiple choice types sharing the same baseName at different levels (e.g.
-// Observation.value[x] and Observation.component.value[x]). Without the scope,
-// the result depended on Go's randomized map iteration order, so choice-type
-// mutual-exclusion detection became non-deterministic (issue #59).
-func (v *Validator) matchChoiceType(key, sdPath string, idx *elementIndex) (basePath string, byProfile bool) {
-	for choiceBasePath, choiceElemDef := range idx.choiceTypes {
-		dot := strings.LastIndex(choiceBasePath, ".")
-		choiceBaseName := choiceBasePath[dot+1:]
-		// Only consider choice types that are direct children of sdPath.
-		// Se compara el prefijo sin concatenar: esta función corre por cada clave de cada objeto.
-		if dot < 0 || choiceBasePath[:dot] != sdPath {
-			continue
-		}
-		if strings.HasPrefix(key, choiceBaseName) && len(key) > len(choiceBaseName) {
-			suffix := key[len(choiceBaseName):]
-			if choiceElemDef.ChoiceTypeOf(suffix) != "" {
-				return choiceBasePath, true
-			}
-			if v.baseChoiceType(idx, choiceElemDef, key) != "" {
-				return choiceBasePath, false
-			}
-		}
-	}
-	return "", false
-}
-
 // baseChoiceType devuelve el tipo que nombra key, una propiedad del elemento de elección def del
 // perfil de idx, según los tipos de su base, o "". Un valor de un tipo que el perfil no permite pero la
 // base declara es un valor de ese tipo (formats.html#choice), que las demás fases comparan con los
 // tipos del perfil; no es un elemento desconocido.
 func (v *Validator) baseChoiceType(idx *elementIndex, def *registry.ElementDefinition, key string) string {
-	if idx.sd == nil || def.ID == "" {
-		return ""
-	}
-	node := idx.sd.Tree().ByID(def.ID)
+	node := choiceNode(idx, def)
 	if node == nil {
 		return ""
 	}
 	return v.registry.ChoiceType(node, key)
 }
 
-// baseOnlyChoiceKeys son las claves de data (sin el "_" de un hermano de primitivo) que nombran el
-// tipo de un elemento de elección de sdPath solo según su base: el perfil no permite su tipo, y
-// ninguna otra variante del mismo elemento presente en data lo permite. Si otra variante sí lo
-// permite, esa es el valor, y las demás son propiedades desconocidas (HL7: «Unrecognized property»).
-func (v *Validator) baseOnlyChoiceKeys(keys []string, sdPath string, idx *elementIndex) map[string]bool {
-	var byBase map[string]string // clave -> elemento de elección
-	allowed := map[string]bool{} // elemento de elección -> alguna variante que el perfil permite
-	for _, key := range keys {
-		stripped := strings.TrimPrefix(key, "_")
-		if stripped == resourceTypeKey && v.registry.IsResourceType(sdPath) {
+// choiceNode devuelve el nodo del árbol del perfil de idx que es def, o nil si no se encuentra.
+func choiceNode(idx *elementIndex, def *registry.ElementDefinition) *registry.ElementNode {
+	if idx.sd == nil || def.ID == "" {
+		return nil
+	}
+	return idx.sd.Tree().ByID(def.ID)
+}
+
+// reportCompetingVariants informa, en data, un STRUCTURE_CHOICE_MUTUAL_EXCLUSION por elemento de
+// elección de sdPath que tiene dos o más propiedades que compiten por ser su valor (elementvalues.CompetingVariants, la
+// única definición de variante), en orden del elemento y con ellas en orden de nombre. El perfil no
+// interviene: es el mismo resultado en la raíz, validada contra su perfil, y en un recurso contenido,
+// contra su tipo base.
+func (v *Validator) reportCompetingVariants(data map[string]any, sdPath, fhirPath string, idx *elementIndex, result *issue.Result) {
+	type conflict struct {
+		basePath string
+		variants []string
+	}
+	var found []conflict
+	for choiceBasePath, def := range idx.choiceTypes {
+		// Solo los hijos inmediatos de sdPath (#59); se compara sin concatenar: corre por cada objeto.
+		if dot := strings.LastIndex(choiceBasePath, "."); dot < 0 || choiceBasePath[:dot] != sdPath {
 			continue
 		}
-		basePath, byProfile := v.matchChoiceType(stripped, sdPath, idx)
-		switch {
-		case basePath == "":
-		case byProfile:
-			allowed[basePath] = true
-		default:
-			if byBase == nil {
-				byBase = map[string]string{}
+		if node := choiceNode(idx, def); node != nil {
+			if variants := elementvalues.CompetingVariants(node, data, v.registry); variants != nil {
+				found = append(found, conflict{choiceBasePath, variants})
 			}
-			byBase[stripped] = basePath
 		}
 	}
-	var out map[string]bool
-	for key, basePath := range byBase {
-		if !allowed[basePath] {
-			if out == nil {
-				out = map[string]bool{}
-			}
-			out[key] = true
-		}
+	slices.SortFunc(found, func(a, b conflict) int { return strings.Compare(a.basePath, b.basePath) })
+	for _, c := range found {
+		result.AddErrorWithID(
+			issue.DiagStructureChoiceMutualExclusion,
+			map[string]any{"basePath": c.basePath[strings.LastIndex(c.basePath, ".")+1:], "variants": strings.Join(c.variants, ", ")},
+			fhirPath,
+		)
 	}
-	return out
 }
 
 // validateElement recursively validates an element and its children.
@@ -254,30 +225,8 @@ func (v *Validator) validateElement(
 	keys := objectkeys.Sorted(data)
 	defer keys.Release()
 
-	// Pre-scan: detect multiple variants of the same choice type (FHIR R4 §2.6.2)
-	baseOnly := v.baseOnlyChoiceKeys(keys.List, sdPath, idx)
-	choiceMatches := make(map[string][]string) // choiceBasePath -> list of data keys
-	for _, key := range keys.List {
-		if (key == resourceTypeKey && v.registry.IsResourceType(sdPath)) || strings.HasPrefix(key, "_") {
-			continue
-		}
-		basePath, byProfile := v.matchChoiceType(key, sdPath, idx)
-		if basePath != "" && (byProfile || baseOnly[key]) {
-			choiceMatches[basePath] = append(choiceMatches[basePath], key)
-		}
-	}
-	bases := objectkeys.Sorted(choiceMatches)
-	defer bases.Release()
-	for _, basePath := range bases.List {
-		if variants := choiceMatches[basePath]; len(variants) > 1 {
-			baseName := basePath[strings.LastIndex(basePath, ".")+1:]
-			result.AddErrorWithID(
-				issue.DiagStructureChoiceMutualExclusion,
-				map[string]any{"basePath": baseName, "variants": strings.Join(variants, ", ")},
-				fhirPath,
-			)
-		}
-	}
+	// Varias propiedades de un mismo elemento de elección (formats.html#choice), antes de revisar cada clave
+	v.reportCompetingVariants(data, sdPath, fhirPath, idx, result)
 
 	for _, key := range keys.List {
 		value := data[key]
@@ -290,7 +239,7 @@ func (v *Validator) validateElement(
 		// Handle shadow elements (_elementName) for primitive extensions
 		// Per FHIR spec, for any primitive element "foo", there can be "_foo" containing id and extension
 		if strings.HasPrefix(key, "_") {
-			v.validateShadow(data, key, value, sdPath, fhirPath, idx, baseOnly, ctx, result)
+			v.validateShadow(data, key, value, sdPath, fhirPath, idx, ctx, result)
 			continue
 		}
 
@@ -299,7 +248,7 @@ func (v *Validator) validateElement(
 		elementFHIRPath := fhirPath + "." + key
 
 		// Try to find the ElementDefinition
-		resolved := v.resolveElementDefinition(elementSDPath, key, idx, baseOnly[key])
+		resolved := v.resolveElementDefinition(elementSDPath, key, idx)
 
 		if resolved == nil {
 			// Unknown element - report error
@@ -321,9 +270,9 @@ func (v *Validator) validateElement(
 // validateShadow validates key, a "_key" property of data at fhirPath: a primitive's sibling, its
 // shape then its structure (only id and extension), reported at its element, as HL7 does; else an
 // unknown element.
-func (v *Validator) validateShadow(data map[string]any, key string, value any, sdPath, fhirPath string, idx *elementIndex, baseOnly map[string]bool, ctx *validationContext, result *issue.Result) {
+func (v *Validator) validateShadow(data map[string]any, key string, value any, sdPath, fhirPath string, idx *elementIndex, ctx *validationContext, result *issue.Result) {
 	baseKey := key[1:]
-	base := v.shadowedElement(baseKey, sdPath, idx, baseOnly[baseKey])
+	base := v.shadowedElement(baseKey, sdPath, idx)
 	if base == nil {
 		// The base element doesn't exist or isn't a primitive
 		result.AddErrorWithID(issue.DiagStructureUnknownElement, map[string]any{"element": key}, fhirPath+"."+key)
@@ -339,8 +288,8 @@ func (v *Validator) validateShadow(data map[string]any, key string, value any, s
 
 // shadowedElement returns the element a "_baseKey" property is the sibling of: a primitive element
 // of sdPath (only a primitive has one, json.html#primitive), present or not; nil for any other.
-func (v *Validator) shadowedElement(baseKey, sdPath string, idx *elementIndex, byBase bool) *resolvedElement {
-	resolved := v.resolveElementDefinition(sdPath+"."+baseKey, baseKey, idx, byBase)
+func (v *Validator) shadowedElement(baseKey, sdPath string, idx *elementIndex) *resolvedElement {
+	resolved := v.resolveElementDefinition(sdPath+"."+baseKey, baseKey, idx)
 	if resolved == nil || resolved.elemDef == nil || len(resolved.elemDef.Type) == 0 {
 		return nil
 	}
@@ -389,7 +338,6 @@ func (v *Validator) resolveElementDefinition(
 	elementPath string,
 	elementName string,
 	idx *elementIndex,
-	byBase bool, // reconocer también el tipo que solo declara la base del elemento de elección
 ) *resolvedElement {
 	// 1. Try exact path match
 	if elemDef := idx.byPath[elementPath]; elemDef != nil {
@@ -430,15 +378,11 @@ func (v *Validator) resolveElementDefinition(
 
 		// Check if element starts with the choice base name
 		if strings.HasPrefix(elementName, choiceBaseName) && len(elementName) > len(choiceBaseName) {
-			// Extract the type suffix (e.g., "deceasedBoolean" -> "Boolean")
-			typeSuffix := elementName[len(choiceBaseName):]
-
-			// El tipo declarado que nombra, con la inicial en mayúscula y nada más cambiado
-			// (formats.html#choice; json.html: los nombres distinguen mayúsculas)
-			matchedType := choiceElemDef.ChoiceTypeOf(typeSuffix)
-			if matchedType == "" && byBase {
-				matchedType = v.baseChoiceType(idx, choiceElemDef, elementName)
-			}
+			// El tipo que nombra, según los de la base del elemento y no los del perfil
+			// (formats.html#choice; json.html: los nombres distinguen mayúsculas): un tipo que solo
+			// declara el perfil no existe (#180), y uno que el perfil no permite y la base sí es un
+			// valor de tipo equivocado, que las demás fases comparan con los tipos del perfil
+			matchedType := v.baseChoiceType(idx, choiceElemDef, elementName)
 			if matchedType != "" {
 				return &resolvedElement{
 					elemDef:      choiceElemDef,

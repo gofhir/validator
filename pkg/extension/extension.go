@@ -461,8 +461,9 @@ func (v *Validator) validateExtensionValue(ctx context.Context, sd *registry.Str
 		result.AddErrorWithID(issue.DiagExtensionValueRequired, map[string]any{keyURL: url}, extPath)
 		return
 	}
-	// Cada valor, en el orden de elementvalues. Más de uno ya lo informan la cardinalidad y la
-	// exclusión mutua; lo que se valida de cada uno no depende de los otros (#174).
+	// Cada valor, en el orden de elementvalues. Más de uno lo informa solo la
+	// exclusión mutua (la cardinalidad los cuenta como una aparición, elementvalues.Occurrences); lo
+	// que se valida de cada uno no depende de los otros (#174).
 	for _, cv := range values {
 		if !elementvalues.Written(valueNode, cv, v.registry) {
 			continue // lo informa la fase estructural

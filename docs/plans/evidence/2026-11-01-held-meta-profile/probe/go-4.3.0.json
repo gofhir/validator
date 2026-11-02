@@ -1,0 +1,728 @@
+[
+  {
+    "resource": "in/b-cs-two.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0]"
+        ]
+      }
+    ],
+    "duration": "4.511ms"
+  },
+  {
+    "resource": "in/b-none-two.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0]"
+        ]
+      }
+    ],
+    "duration": "136µs"
+  },
+  {
+    "resource": "in/b-one.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "265µs"
+  },
+  {
+    "resource": "in/b-rev.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "124µs"
+  },
+  {
+    "resource": "in/b-two-profiles.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "144µs"
+  },
+  {
+    "resource": "in/b-two.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "108µs"
+  },
+  {
+    "resource": "in/b-unresolved.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "not-found",
+        "diagnostics": "Profile 'http://example.org/fhir/StructureDefinition/nope' was not checked: no definition with its url is loaded",
+        "expression": [
+          "Bundle.entry[0].resource.meta.profile[0]"
+        ]
+      }
+    ],
+    "duration": "120µs"
+  },
+  {
+    "resource": "in/bb-two.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Bundle.entry[0].resource.entry[0].resource.parameter[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Bundle.entry[0].resource.entry[0].resource.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "190µs"
+  },
+  {
+    "resource": "in/c-one.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "List"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "List.contained[0].parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "614µs"
+  },
+  {
+    "resource": "in/c-two.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "List.contained[0].parameter[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "List"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "List.contained[0].parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "157µs"
+  },
+  {
+    "resource": "in/e-two.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' allows the type(s) string but found type boolean",
+        "expression": [
+          "Patient.extension[0].valueBoolean"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "447µs"
+  },
+  {
+    "resource": "in/e-u1.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Patient.extension[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName' allows the type(s) string but found type code",
+        "expression": [
+          "Patient.extension[0].valueCode"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Patient.extension[0].valueCode"
+        ]
+      }
+    ],
+    "duration": "84µs"
+  },
+  {
+    "resource": "in/h-two.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Bundle.entry[0].resource.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "493µs"
+  },
+  {
+    "resource": "in/o-qs.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueQuantity, valueString",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      }
+    ],
+    "duration": "173µs"
+  },
+  {
+    "resource": "in/o-timing.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'bounds[x]' is allowed, but found: boundsDuration, boundsPeriod",
+        "expression": [
+          "Observation.effectiveTiming.repeat"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: drt-1: 'There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.' (defined in http://hl7.org/fhir/StructureDefinition/Duration)",
+        "expression": [
+          "Observation.effectiveTiming.repeat.boundsDuration"
+        ]
+      }
+    ],
+    "duration": "343µs"
+  },
+  {
+    "resource": "in/o-ts-two.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/o-ts' allows the type(s) string but found type boolean",
+        "expression": [
+          "Observation.valueBoolean"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Element does not match any defined slice (slicing rules are 'closed')",
+        "expression": [
+          "Observation.valueBoolean"
+        ]
+      }
+    ],
+    "duration": "613µs"
+  },
+  {
+    "resource": "in/o-u1.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueTime",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Observation.valueTime"
+        ]
+      }
+    ],
+    "duration": "72µs"
+  },
+  {
+    "resource": "in/o-u2.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueString, valueTime",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Observation.valueString"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)",
+        "expression": [
+          "Observation.valueTime"
+        ]
+      }
+    ],
+    "duration": "69µs"
+  },
+  {
+    "resource": "in/p-dec.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'deceased[x]' is allowed, but found: deceasedBoolean, deceasedDateTime",
+        "expression": [
+          "Patient"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "48µs"
+  },
+  {
+    "resource": "in/pr-two.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Parameters.parameter[0].resource.parameter[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].resource.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "97µs"
+  },
+  {
+    "resource": "in/q-cr.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'answer[x]' is allowed, but found: answerBoolean, answerString",
+        "expression": [
+          "Questionnaire.item[0].item[0].enableWhen[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Questionnaire"
+        ]
+      }
+    ],
+    "duration": "494µs"
+  },
+  {
+    "resource": "in/r-none-rev.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Parameters.parameter[0]"
+        ]
+      }
+    ],
+    "duration": "42µs"
+  },
+  {
+    "resource": "in/r-none-two.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Parameters.parameter[0]"
+        ]
+      }
+    ],
+    "duration": "42µs"
+  },
+  {
+    "resource": "in/r-one.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "52µs"
+  },
+  {
+    "resource": "in/r-rev.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Parameters.parameter[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "56µs"
+  },
+  {
+    "resource": "in/r-three.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueCode, valueString",
+        "expression": [
+          "Parameters.parameter[0]"
+        ]
+      }
+    ],
+    "duration": "45µs"
+  },
+  {
+    "resource": "in/r-two.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+        "expression": [
+          "Parameters.parameter[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The profile 'http://example.org/fhir/StructureDefinition/p-code' allows the type(s) code but found type string",
+        "expression": [
+          "Parameters.parameter[0].valueString"
+        ]
+      }
+    ],
+    "duration": "57µs"
+  }
+]

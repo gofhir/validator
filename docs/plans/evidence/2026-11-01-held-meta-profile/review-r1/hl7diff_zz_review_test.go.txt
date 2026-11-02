@@ -1,0 +1,23 @@
+package main
+
+import "testing"
+
+func TestReviewMutualPairsAcrossObjects(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := []struct{ goLoc, list, hlLoc, prop string }{
+		{"Observation", "valueQuantity, valueString", "Observation.code", "valueString"},
+		{"Observation.effectiveTiming.repeat", "boundsDuration, boundsPeriod", "Observation.effectiveTiming", "boundsPeriod"},
+	}
+	for _, c := range cases {
+		g := GoIssue{File: "p/x.json", Severity: "error", MessageID: "STRUCTURE_CHOICE_MUTUAL_EXCLUSION",
+			Expression:  []string{c.goLoc},
+			Diagnostics: "Only one variant of choice type 'value[x]' is allowed, but found: " + c.list}
+		h := HL7Issue{File: "p/x.json", Code: "structure", Location: c.hlLoc, Text: "Unrecognized property '" + c.prop + "'"}
+		if un := Assign(fam, []GoIssue{g}, []HL7Issue{h}); len(un.Paired) != 0 {
+			t.Errorf("MUTUAL at %s paired with HL7 Unrecognized property at another object %s", c.goLoc, c.hlLoc)
+		}
+	}
+}

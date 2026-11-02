@@ -1398,5 +1398,85 @@
     "file": "testdata/m12-slice-scoping/probes/nx_comment_after.json",
     "location": "Patient.text.div",
     "messageId": "CONSTRAINT_FAILED"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html: \"The order of properties of an object is not significant\". HL7 keeps the first variant of a choice in key order and drops the later ones, so it never compares the dropped variant's type with the profile; gofhir compares every variant with the profile.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_b-two-profiles.json",
+    "location": "Bundle.entry[0].resource.parameter[0].valueString",
+    "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html: \"The order of properties of an object is not significant\". HL7 keeps the first variant of a choice in key order and drops the later ones, so it never compares the dropped variant's type with the profile; gofhir compares every variant with the profile.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_b-two.json",
+    "location": "Bundle.entry[0].resource.parameter[0].valueString",
+    "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html: \"The order of properties of an object is not significant\". HL7 keeps the first variant of a choice in key order and drops the later ones, so it never compares the dropped variant's type with the profile; gofhir compares every variant with the profile.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_bb-two.json",
+    "location": "Bundle.entry[0].resource.entry[0].resource.parameter[0].valueString",
+    "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html: \"The order of properties of an object is not significant\". HL7 keeps the first variant of a choice in key order and drops the later ones, so it never compares the dropped variant's type with the profile; gofhir compares every variant with the profile.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_c-two.json",
+    "location": "List.contained[0].parameter[0].valueString",
+    "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html#primitive: the \"_x\" sibling of a primitive alone is a value of the element, so a choice variant written only as \"_valueX\" is a variant of the choice. HL7 reports \"Unrecognized property\" or stays silent depending on key order and the property prefix; gofhir reports the two variants as one mutual-exclusion error (formats.html#choice: one element, one issue).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_e-u1.json",
+    "location": "Patient.extension[0]",
+    "messageId": "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html: \"The order of properties of an object is not significant\". HL7 keeps the first variant of a choice in key order and drops the later ones, so it never compares the dropped variant's type with the profile; gofhir compares every variant with the profile.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_h-two.json",
+    "location": "Bundle.entry[0].resource.parameter[0].valueString",
+    "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html: \"The order of properties of an object is not significant\". HL7 keeps the first variant of a choice in key order and drops the later ones, so it never compares the dropped variant's type with the profile; gofhir compares every variant with the profile.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_o-ts-two.json",
+    "location": "Observation.valueBoolean",
+    "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html#primitive: the \"_x\" sibling of a primitive alone is a value of the element, so a choice variant written only as \"_valueX\" is a variant of the choice. HL7 reports \"Unrecognized property\" or stays silent depending on key order and the property prefix; gofhir reports the two variants as one mutual-exclusion error (formats.html#choice: one element, one issue).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_o-u1.json",
+    "location": "Observation",
+    "messageId": "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html: \"The order of properties of an object is not significant\". HL7 keeps the first variant of a choice in key order and drops the later ones, so it never compares the dropped variant's type with the profile; gofhir compares every variant with the profile.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_pr-two.json",
+    "location": "Parameters.parameter[0].resource.parameter[0].valueString",
+    "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
+  },
+  {
+    "decision": "#196",
+    "reason": "json.html: \"The order of properties of an object is not significant\". HL7 keeps the first variant of a choice in key order and drops the later ones, so it never compares the dropped variant's type with the profile; gofhir compares every variant with the profile.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ov_r-two.json",
+    "location": "Parameters.parameter[0].valueString",
+    "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
   }
 ]

@@ -1,0 +1,16 @@
+{
+ "resourceType": "Parameters",
+ "id": "r-two",
+ "parameter": [
+  {
+   "name": "x",
+   "valueCode": "a",
+   "valueString": "a"
+  }
+ ],
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/p-code"
+  ]
+ }
+}

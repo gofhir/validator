@@ -1,0 +1,32 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "b-hold",
+ "url": "http://example.org/fhir/StructureDefinition/b-hold",
+ "name": "Bhold",
+ "status": "active",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.entry.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Parameters",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/p-code"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,11 @@
+{
+ "resourceType": "Patient",
+ "id": "e-two",
+ "extension": [
+  {
+   "url": "http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName",
+   "valueString": "a",
+   "valueBoolean": true
+  }
+ ]
+}

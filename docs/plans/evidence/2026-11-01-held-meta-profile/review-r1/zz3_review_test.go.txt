@@ -1,0 +1,31 @@
+package validator
+
+import (
+	"strings"
+	"testing"
+)
+
+const zzProf = `{"resourceType":"StructureDefinition","id":"p-cr","url":"http://example.org/fhir/StructureDefinition/p-cr","name":"Pcr","status":"active","kind":"resource","abstract":false,"type":"Parameters","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Parameters","derivation":"constraint","differential":{"element":[{"id":"Parameters","path":"Parameters"},{"id":"Parameters.parameter.value[x]","path":"Parameters.parameter.value[x]","type":[{"code":"code"},{"code":"CodeableReference"}]}]}}`
+
+func TestReviewProbe3(t *testing.T) {
+	p := func(par string) string {
+		return `{"resourceType":"Parameters","id":"x","meta":{"profile":["http://example.org/fhir/StructureDefinition/p-cr"]},"parameter":[` + par + `]}`
+	}
+	cases := map[string]string{
+		"cr-alone":   p(`{"name":"x","valueCodeableReference":{"concept":{"text":"a"}}}`),
+		"cr-and-code": p(`{"name":"x","valueCode":"a","valueCodeableReference":{"concept":{"text":"a"}}}`),
+		"cr-and-string": p(`{"name":"x","valueString":"a","valueCodeableReference":{"concept":{"text":"a"}}}`),
+		"held-cr-and-code": `{"resourceType":"Bundle","id":"b","type":"collection","entry":[{"fullUrl":"urn:uuid:3f1c1b4e-2a5f-4c55-9d8e-0d7a8a6f1b00","resource":` + p(`{"name":"x","valueCode":"a","valueCodeableReference":{"concept":{"text":"a"}}}`) + `}]}`,
+	}
+	v := orderValidator(t, "4.0.1", zzProf)
+	for name, data := range cases {
+		res := stableIssues(t, v, data)
+		var keep []string
+		for _, l := range issueLines(res, false) {
+			if !strings.Contains(l, "dom-6") && !strings.Contains(l, "Best Practice") {
+				keep = append(keep, l)
+			}
+		}
+		t.Logf("%s:\n  %s", name, strings.Join(keep, "\n  "))
+	}
+}

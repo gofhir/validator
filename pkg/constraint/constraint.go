@@ -243,7 +243,7 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	}
 	evalOpts.resolver = resolverWithin(evalOpts.resolver, evalOpts.scope.RootResource, nil)
 
-	v.walk(sd, root, "", false, resource, resourceData, nil, sd.RootName(resource), evalOpts, result)
+	v.walk(sd, root, "", resource, resourceData, nil, sd.RootName(resource), evalOpts, result)
 }
 
 // buildEvalOpts constructs constraintEvalOpts from the validator state and per-call options.
