@@ -1,0 +1,40 @@
+go vet ./...
+GOTOOLCHAIN=go1.25.13 go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.3 run
+0 issues.
+go test -race -short ./...
+ok  	github.com/gofhir/validator/v2/cmd/gofhir-validator	(cached)
+ok  	github.com/gofhir/validator/v2/internal/bundleref	(cached)
+ok  	github.com/gofhir/validator/v2/internal/elementvalues	1.374s
+?   	github.com/gofhir/validator/v2/internal/exactjson	[no test files]
+?   	github.com/gofhir/validator/v2/internal/fhirpathcache	[no test files]
+ok  	github.com/gofhir/validator/v2/internal/objectkeys	(cached)
+ok  	github.com/gofhir/validator/v2/internal/reslang	(cached)
+ok  	github.com/gofhir/validator/v2/internal/slicerecord	(cached)
+?   	github.com/gofhir/validator/v2/internal/testfhir	[no test files]
+?   	github.com/gofhir/validator/v2/internal/tools/corpusrun	[no test files]
+ok  	github.com/gofhir/validator/v2/internal/tools/hl7diff	(cached)
+ok  	github.com/gofhir/validator/v2/internal/versionorder	(cached)
+ok  	github.com/gofhir/validator/v2/pkg/binding	(cached)
+ok  	github.com/gofhir/validator/v2/pkg/cardinality	227.490s
+ok  	github.com/gofhir/validator/v2/pkg/constraint	279.694s
+ok  	github.com/gofhir/validator/v2/pkg/extension	249.200s
+ok  	github.com/gofhir/validator/v2/pkg/fixedpattern	251.454s
+ok  	github.com/gofhir/validator/v2/pkg/issue	(cached)
+ok  	github.com/gofhir/validator/v2/pkg/jsoncompare	(cached)
+ok  	github.com/gofhir/validator/v2/pkg/loader	(cached)
+ok  	github.com/gofhir/validator/v2/pkg/location	(cached)
+?   	github.com/gofhir/validator/v2/pkg/logger	[no test files]
+ok  	github.com/gofhir/validator/v2/pkg/primitive	69.553s
+ok  	github.com/gofhir/validator/v2/pkg/reference	3.236s
+ok  	github.com/gofhir/validator/v2/pkg/registry	535.090s
+ok  	github.com/gofhir/validator/v2/pkg/slicematch	89.745s
+ok  	github.com/gofhir/validator/v2/pkg/slicing	149.985s
+ok  	github.com/gofhir/validator/v2/pkg/specs	(cached)
+ok  	github.com/gofhir/validator/v2/pkg/structural	71.862s
+ok  	github.com/gofhir/validator/v2/pkg/terminology	(cached)
+?   	github.com/gofhir/validator/v2/pkg/ucumvalidator	[no test files]
+ok  	github.com/gofhir/validator/v2/pkg/validator	423.529s
+ok  	github.com/gofhir/validator/v2/pkg/walker	70.283s
+go test -run DoesNotAllocate ./internal/objectkeys
+ok  	github.com/gofhir/validator/v2/internal/objectkeys	(cached)
+check exit=0

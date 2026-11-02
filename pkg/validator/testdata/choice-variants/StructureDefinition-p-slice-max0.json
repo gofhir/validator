@@ -1,0 +1,48 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-slice-max0",
+ "url": "http://example.org/fhir/StructureDefinition/p-slice-max0",
+ "name": "Pslicemax0",
+ "status": "active",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Parameters",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Parameters",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Parameters",
+    "path": "Parameters"
+   },
+   {
+    "id": "Parameters.parameter",
+    "path": "Parameters.parameter",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "name"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Parameters.parameter:op",
+    "path": "Parameters.parameter",
+    "sliceName": "op"
+   },
+   {
+    "id": "Parameters.parameter:op.name",
+    "path": "Parameters.parameter.name",
+    "fixedString": "op"
+   },
+   {
+    "id": "Parameters.parameter:op.value[x]",
+    "path": "Parameters.parameter.value[x]",
+    "max": "0"
+   }
+  ]
+ }
+}

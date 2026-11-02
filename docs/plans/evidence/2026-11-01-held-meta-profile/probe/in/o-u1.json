@@ -1,0 +1,12 @@
+{
+ "resourceType": "Observation",
+ "id": "o-u1",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "a",
+ "_valueTime": {
+  "id": "t"
+ }
+}

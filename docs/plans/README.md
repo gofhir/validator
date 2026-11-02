@@ -13,7 +13,14 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #187 cerrado (pasos 1-9, 01-11-2026), espera «commit y pr»; tipos de un elemento de elección en un slice (rama `fix/slice-choice-types`, desde `a957f2e`)
+## Frente activo: #196 cerrado (pasos 1-9, 02-11-2026), espera «commit y pr»; dos variantes de un elemento de elección (rama `fix/choice-two-variants`, desde `e22324e`)
+
+[2026-11-01-held-meta-profile.md](2026-11-01-held-meta-profile.md): #188 cerrado con la evidencia del §1 y reemplazado por #196.
+Plan con ronda adversarial (Opus, excepción mientras Codex no tiene cuota: 9 de 10 hallazgos aceptados). Code review convergió
+en la ronda 2. `make check` verde; hl7diff 52 PASS con el grupo nuevo `choice-variant-probes`; mutaciones 11/11; barrido de #180
+idéntico. **Pendiente:** el tiempo del bench con la máquina libre (las asignaciones bajan). Próximo: «commit y pr»; después, #189.
+
+## Cerrado: #187 (mergeado como #195, `e22324e`, 01-11-2026); tipos de un elemento de elección en un slice (rama `fix/slice-choice-types`, desde `a957f2e`)
 
 [2026-10-31-slice-choice-types.md](2026-10-31-slice-choice-types.md):
 - Paso 1 (§1, revisión previa) hecho: sondas t1–t10 contra HL7 en `evidence/2026-10-31-slice-choice-types/probe/`.

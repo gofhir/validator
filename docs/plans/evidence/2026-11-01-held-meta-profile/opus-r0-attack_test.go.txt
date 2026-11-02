@@ -1,0 +1,58 @@
+package validator
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"testing"
+)
+
+func atkSD(id, elems string) string {
+	return `{"resourceType":"StructureDefinition","url":"http://example.org/StructureDefinition/` + id + `","name":"` + strings.ReplaceAll(id, "-", "") + `","status":"active","kind":"resource","abstract":false,"type":"Observation","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Observation","derivation":"constraint","differential":{"element":[{"id":"Observation","path":"Observation"},` + elems + `]}}`
+}
+
+func TestZZAttack(t *testing.T) {
+	defs := []string{
+		atkSD("a-max0", `{"id":"Observation.value[x]","path":"Observation.value[x]","max":"0"}`),
+		atkSD("a-min1", `{"id":"Observation.value[x]","path":"Observation.value[x]","min":1}`),
+		atkSD("a-slice", `{"id":"Observation.value[x]","path":"Observation.value[x]","slicing":{"discriminator":[{"type":"type","path":"$this"}],"rules":"closed"}},{"id":"Observation.value[x]:valueString","path":"Observation.value[x]","sliceName":"valueString","min":1,"type":[{"code":"string"}]}`),
+		atkSD("a-comp", `{"id":"Observation.component","path":"Observation.component","slicing":{"discriminator":[{"type":"pattern","path":"code"}],"rules":"open"}},{"id":"Observation.component:c","path":"Observation.component","sliceName":"c","min":0,"max":"1"},{"id":"Observation.component:c.code","path":"Observation.component.code","patternCodeableConcept":{"text":"c"}},{"id":"Observation.component:c.value[x]","path":"Observation.component.value[x]","min":1,"type":[{"code":"string"}]}`),
+	}
+	obs := func(prof, m string) string {
+		p := ""
+		if prof != "" {
+			p = `"meta":{"profile":["http://example.org/StructureDefinition/` + prof + `"]},`
+		}
+		return `{"resourceType":"Observation","id":"o",` + p + `"status":"final","code":{"text":"x"},` + m + `}`
+	}
+	cases := []struct{ name, data string }{
+		{"string+_codeOnly", obs("", `"valueString":"a","_valueTime":{"extension":[{"url":"http://e.org/x","valueString":"y"}]}`)},
+		{"_string+_time only", obs("", `"_valueString":{"id":"a"},"_valueTime":{"id":"b"}`)},
+		{"string+notBaseType", obs("", `"valueString":"a","valueCode":"b"`)},
+		{"ext two variants", obs("", `"extension":[{"url":"http://e.org/x","valueString":"a","valueBoolean":true}]`)},
+		{"max0 two", obs("a-max0", `"valueString":"a","valueBoolean":true`)},
+		{"min1 two", obs("a-min1", `"valueString":"a","valueBoolean":true`)},
+		{"slice two", obs("a-slice", `"valueString":"a","valueBoolean":true`)},
+		{"compslice two", obs("a-comp", `"component":[{"code":{"text":"c"},"valueString":"a","valueBoolean":true}]`)},
+		{"comp two nopro", obs("", `"component":[{"code":{"text":"c"},"valueString":"a","valueBoolean":true}]`)},
+		{"patient deceased two", `{"resourceType":"Patient","id":"p","deceasedBoolean":true,"deceasedDateTime":"2020"}`},
+		{"q item.item contentRef", `{"resourceType":"Questionnaire","id":"q","status":"draft","item":[{"linkId":"1","type":"group","item":[{"linkId":"2","type":"boolean","enableWhen":[{"question":"1","operator":"exists","answerBoolean":true,"answerString":"x"}]}]}]}`},
+		{"datatype bounds two", `{"resourceType":"MedicationRequest","id":"m","status":"active","intent":"order","subject":{"reference":"Patient/p"},"medicationCodeableConcept":{"text":"x"},"dosageInstruction":[{"timing":{"repeat":{"boundsDuration":{"value":1},"boundsPeriod":{"start":"2020"}}}}]}`},
+		{"three variants", obs("", `"valueString":"a","valueBoolean":true,"valueInteger":1`)},
+		{"string+_stringOnlyExt in ext", obs("", `"extension":[{"url":"http://e.org/x","valueString":"a","_valueCode":{"id":"z"}}]`)},
+		{"dar+two values obs-6", obs("", `"dataAbsentReason":{"text":"x"},"valueString":"a","valueBoolean":true`)},
+	}
+	for _, ver := range orderVersions {
+		v := orderValidator(t, ver, defs...)
+		for _, tc := range cases {
+			res, err := v.Validate(context.Background(), []byte(tc.data))
+			if err != nil {
+				t.Fatal(err)
+			}
+			fmt.Printf("## %s %s\n", ver, tc.name)
+			for _, l := range issueLines(res, false) {
+				fmt.Println("  ", l)
+			}
+		}
+	}
+}

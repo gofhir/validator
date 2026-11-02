@@ -1,0 +1,25 @@
+{
+ "resourceType": "Bundle",
+ "id": "b-one",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:3f1c1b4e-2a5f-4c55-9d8e-0d7a8a6f1b00",
+   "resource": {
+    "resourceType": "Parameters",
+    "id": "e1",
+    "parameter": [
+     {
+      "name": "x",
+      "valueString": "a"
+     }
+    ],
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/p-code"
+     ]
+    }
+   }
+  }
+ ]
+}

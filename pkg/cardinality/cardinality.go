@@ -148,7 +148,7 @@ func (v *Validator) validateChildren(data map[string]any, childSD *registry.Stru
 		values := slices.DeleteFunc(elementvalues.Of(child, data, v.registry), func(cv elementvalues.Value) bool {
 			return !elementvalues.Written(child, cv, v.registry)
 		})
-		count := len(values)
+		count := elementvalues.Occurrences(child, values)
 
 		if child.Def.Min > 0 && count < int(child.Def.Min) {
 			result.AddErrorWithID(

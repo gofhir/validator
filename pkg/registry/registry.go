@@ -206,6 +206,8 @@ func (ed *ElementDefinition) Repeats() bool {
 // ChoiceTypeOf devuelve el código del tipo del elemento que nombra el sufijo de una propiedad de
 // elección: el código con la primera letra en mayúscula y nada más cambiado (formats.html#choice; los
 // nombres de propiedad distinguen mayúsculas, json.html), o "" si ningún tipo declarado coincide.
+// Mira solo los tipos de ed: una propiedad de una instancia se reconoce por los de la base de su
+// elemento (Registry.ChoiceType), no por los de un perfil (#180, #196).
 func (ed *ElementDefinition) ChoiceTypeOf(suffix string) string {
 	if i := ChoiceTypeIndex(ed.Type, suffix); i >= 0 {
 		return ed.Type[i].Code

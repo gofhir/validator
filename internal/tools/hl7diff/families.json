@@ -115,7 +115,8 @@
       "name": "unknown-element",
       "rule": "parent",
       "gofhir": [
-        "STRUCTURE_UNKNOWN_ELEMENT"
+        "STRUCTURE_UNKNOWN_ELEMENT",
+        "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
       ],
       "hl7NoID": [
         {
@@ -535,7 +536,6 @@
     "REFERENCE_NOT_IN_BUNDLE": "no HL7 counterpart verified yet",
     "SLICING_OPEN_AT_END": "D-5, declared divergence: HL7 6.10.4 does not report content before a slice when the slicing is openAtEnd",
     "SLICING_MEMBERSHIP_UNKNOWN": "information: ValueSet membership unknown for a binding discriminator (decision D-6); HL7 says nothing",
-    "STRUCTURE_CHOICE_MUTUAL_EXCLUSION": "no HL7 counterpart verified yet",
     "STRUCTURE_INVALID_CHOICE_TYPE": "no HL7 counterpart verified yet",
     "STRUCTURE_INVALID_JSON": "input failure; HL7 aborts the whole run instead",
     "STRUCTURE_NO_RESOURCE_TYPE": "input failure",

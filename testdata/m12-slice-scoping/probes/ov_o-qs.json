@@ -1,0 +1,12 @@
+{
+ "resourceType": "Observation",
+ "id": "o-qs",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueQuantity": {
+  "value": 1
+ },
+ "valueString": "a"
+}

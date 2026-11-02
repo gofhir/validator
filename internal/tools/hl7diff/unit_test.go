@@ -141,6 +141,7 @@ func TestNamesAgree(t *testing.T) {
 		{"MeasureReport.extension[0].valueIdentifier", "MeasureReport.extension:cehrt.value[x]: minimum required = 1", true},
 		{"MeasureReport.extension:cehrt.value[x]", "Slice 'MeasureReport.extension:cehrt.value[x]:valueIdentifier': a matching slice is required", true}, // a type slice is not an element slice
 		{"Observation.component:SystolicBP.code", "Observation.component:DiastolicBP.code: minimum required = 1", false},                                 // slices named in the location differ
+		{"Parameters.parameter[0]", "Unrecognized property 'valueString'", false},                                                                        // sin lista de propiedades: el objeto no termina en la propiedad
 		{"Patient.name", "The Extension 'x' definition is for a simple extension, so it must contain a value", true},                                     // unnamed
 	}
 	for _, c := range cases {
@@ -665,5 +666,59 @@ func TestEffectiveBase(t *testing.T) {
 	want := "hl7.fhir.r4.core#4.0.1,hl7.fhir.uv.extensions.r4#5.3.0,hl7.terminology.r4#7.4.0,x.only.gofhir#1.0.0"
 	if got := joinIDs(EffectiveBase(embedded, loaded)); got != want {
 		t.Errorf("got %s, want %s", got, want)
+	}
+}
+
+func TestNamesAgreeChoiceVariants(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := GoIssue{
+		File: "p/x.json", Severity: "error", MessageID: "STRUCTURE_CHOICE_MUTUAL_EXCLUSION",
+		Expression:  []string{"Parameters.parameter[0]"},
+		Diagnostics: "Only one variant of choice type 'value[x]' is allowed, but found: valueCode, valueString",
+	}
+	h := func(loc, text string) HL7Issue {
+		return HL7Issue{File: "p/x.json", Code: "structure", Location: loc, Text: text}
+	}
+	if !namesAgree(fam, g, h("Parameters.parameter[0]", "Unrecognized property 'valueString'")) {
+		t.Error("a property the message lists must agree")
+	}
+	if !namesAgree(fam, g, h("Parameters.parameter[0]", "Unrecognized property '_valueString'")) {
+		t.Error("a primitive's _sibling must agree with its variant")
+	}
+	if namesAgree(fam, g, h("Parameters.parameter[0]", "Unrecognized property 'valueInteger'")) {
+		t.Error("a property the message does not list must not agree")
+	}
+	// Otra ubicación: la regla de ubicación de la familia lo rechaza, aunque los nombres coincidan.
+	for _, loc := range []string{"Parameters.parameter[1]", "Parameters.parameter[0].part[0]"} {
+		un := Assign(fam, []GoIssue{g}, []HL7Issue{h(loc, "Unrecognized property 'valueString'")})
+		if len(un.Paired) != 0 {
+			t.Errorf("an HL7 error at %s must not pair with an error at the other object", loc)
+		}
+	}
+	// La propiedad que lista el mensaje, en el objeto padre o en un hijo del que tiene las propiedades de la elección:
+	// la regla "parent" de la familia lo aceptaría, pero no es el mismo objeto.
+	for _, c := range []struct{ goLoc, list, hlLoc, prop string }{
+		{"Observation", "valueQuantity, valueString", "Observation.code", "valueString"},
+		{"Observation.effectiveTiming.repeat", "boundsDuration, boundsPeriod", "Observation.effectiveTiming", "boundsPeriod"},
+	} {
+		gc := GoIssue{File: "p/x.json", Severity: "error", MessageID: "STRUCTURE_CHOICE_MUTUAL_EXCLUSION",
+			Expression:  []string{c.goLoc},
+			Diagnostics: "Only one variant of choice type 'value[x]' is allowed, but found: " + c.list}
+		if un := Assign(fam, []GoIssue{gc}, []HL7Issue{h(c.hlLoc, "Unrecognized property '"+c.prop+"'")}); len(un.Paired) != 0 {
+			t.Errorf("MUTUAL at %s paired with HL7 Unrecognized property at %s", c.goLoc, c.hlLoc)
+		}
+	}
+	// Otro mensaje que termine en "but found: " no lista propiedades de una elección.
+	other := g
+	other.MessageID = "STRUCTURE_UNKNOWN_ELEMENT"
+	if listsVariant(other, "valueString") {
+		t.Error("only the mutual exclusion diagnostic lists variants")
+	}
+	un := Assign(fam, []GoIssue{g}, []HL7Issue{h("Parameters.parameter[0]", "Unrecognized property 'valueString'")})
+	if len(un.Paired) != 1 {
+		t.Errorf("same object: want 1 pair, got %d", len(un.Paired))
 	}
 }

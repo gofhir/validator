@@ -1,0 +1,25 @@
+{
+ "resourceType": "Questionnaire",
+ "id": "q-cr",
+ "status": "draft",
+ "item": [
+  {
+   "linkId": "1",
+   "type": "group",
+   "item": [
+    {
+     "linkId": "1.1",
+     "type": "boolean",
+     "enableWhen": [
+      {
+       "question": "1",
+       "operator": "=",
+       "answerBoolean": true,
+       "answerString": "a"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -76,9 +76,13 @@ func sliceChoiceCases() []extValueCase {
 			want: []at{notAllowed("Patient.extension[0].valueString", "ext-t10b", "Coding", "string")}},
 		{name: "t11 only the primitive extension", data: `{"resourceType":"Parameters","id":"t11","meta":{"profile":["http://example.org/fhir/StructureDefinition/p-t2"]},"parameter":[{"name":"op","_valueString":{"id":"v"}}]}`,
 			want: []at{notAllowed("Parameters.parameter[0].valueString", "p-t2", "code", "string"), ele1("Parameters.parameter[0].valueString")}},
+		// t12: #196 (plan 2026-11-01-held-meta-profile.md, §2 y §3) revierte lo que fijaba #187. Antes el perfil
+		// decidía cuál variante era «el valor» y la otra salía como elemento desconocido. Según
+		// formats.html#choice las dos son claves de tipo del mismo elemento: una exclusión mutua en el objeto, el
+		// tipo de valueString contra el perfil, y ningún «Unknown element».
 		{name: "t12 allowed and not allowed together", data: `{"resourceType":"Parameters","id":"t12","meta":{"profile":["http://example.org/fhir/StructureDefinition/p-t1"]},"parameter":[{"name":"x","valueCode":"a","valueString":"a"}]}`,
-			want:   []at{unknown("Parameters.parameter[0].valueString")},
-			absent: []at{notAllowedAt("Parameters.parameter[0].valueString")}},
+			want:   []at{{id: issue.DiagStructureChoiceMutualExclusion, expr: "Parameters.parameter[0]", text: "valueCode, valueString"}, notAllowed("Parameters.parameter[0].valueString", "p-t1", "code", "string")},
+			absent: []at{unknown("Parameters.parameter[0].valueString"), {id: issue.DiagCardinalityMax, expr: "Parameters.parameter[0].value[x]"}}},
 		{name: "t13 two profiles", data: `{"resourceType":"Parameters","id":"t13","meta":{"profile":["http://example.org/fhir/StructureDefinition/p-ha","http://example.org/fhir/StructureDefinition/p-hb"]},"parameter":[{"name":"x","valueInteger":1}]}`,
 			want:   []at{notAllowed("Parameters.parameter[0].valueInteger", "p-ha", "code, string", "integer"), notAllowed("Parameters.parameter[0].valueInteger", "p-hb", "code, boolean", "integer")},
 			absent: []at{unknown("Parameters.parameter[0].valueInteger")}},

@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "o1", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/o-a", "http://example.org/fhir/StructureDefinition/o-b"]}, "code": {"text": "x"}}
