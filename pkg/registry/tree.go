@@ -312,25 +312,33 @@ func isOwnCanonical(sd *StructureDefinition, canonical string) bool {
 // is not loaded or has no element with that id. The target's tree comes from its snapshot, so a
 // StructureDefinition loaded without one needs [Registry.EnsureSnapshot] first.
 func (r *Registry) ContentReference(sd *StructureDefinition, n *ElementNode) (*ElementNode, Resolution) {
+	_, node, res := r.ContentReferenceTarget(sd, n)
+	return node, res
+}
+
+// ContentReferenceTarget is [Registry.ContentReference] that also returns the StructureDefinition the
+// target is an element of: sd, or the one a "url#id" names. It is nil unless the resolution is
+// [ResolutionExact].
+func (r *Registry) ContentReferenceTarget(sd *StructureDefinition, n *ElementNode) (*StructureDefinition, *ElementNode, Resolution) {
 	if n == nil || n.Def.ContentReference == nil {
-		return nil, ResolutionInvalid
+		return nil, nil, ResolutionInvalid
 	}
 	if n.Content != nil {
-		return n.Content, ResolutionExact
+		return sd, n.Content, ResolutionExact
 	}
 	url, id, ok := SplitContentReference(*n.Def.ContentReference)
 	if !ok {
-		return nil, ResolutionInvalid
+		return nil, nil, ResolutionInvalid
 	}
 	target := sd
 	if !isOwnCanonical(sd, url) {
 		var res Resolution
 		if target, res = r.ResolveCanonical(url); target == nil {
-			return nil, res
+			return nil, nil, res
 		}
 	}
 	if node := target.Tree().ByID(id); node != nil {
-		return node, ResolutionExact
+		return target, node, ResolutionExact
 	}
-	return nil, ResolutionNotFound
+	return nil, nil, ResolutionNotFound
 }

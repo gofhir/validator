@@ -1,0 +1,13 @@
+control: exit=0 (34s)
+m1 primitivos: no sigue la contentReference: muere, 4 tests (32s): TestContentReferencePrimitivesProbes, TestContentReferencePrimitivesMetamorphic, TestContentReferencePrimitivesEdges, TestContentReferencePrimitivesProfiles
+m2 primitivos: sigue la referencia aunque el snapshot desenrolle los hijos: muere, 1 tests (36s): TestContentReferencePrimitivesProfiles
+m3 primitivos: el destino como contenedor en línea, sin despachar por tipo: muere, 1 tests (34s): TestContentReferencePrimitivesProfiles
+m4 primitivos: sin cadenas (un salto): muere, 1 tests (34s): TestContentReferencePrimitivesProfiles
+m5 primitivos: el índice de la definición propia para un destino de otra: muere, 1 tests (36s): TestContentReferencePrimitivesProfiles
+m6 primitivos: un solo destino en cache por índice: muere, 3 tests (38s): TestContentReferencePrimitivesMetamorphic, TestContentReferencePrimitivesEdges, TestContentReferencePrimitivesProfiles
+m7 registro: url#id resuelto en la definición propia: muere, 3 tests (39s): TestChoiceTypeBaseElement, TestContentReference, TestContentReferencePrimitivesProfiles
+m8 hl7diff: el error de tipo JSON sin familia: muere, 2 tests (35s): TestFamiliesCoverEveryGofhirID, TestPrimitiveJSONTypePairsWithHL7ParserError
+m9 hl7diff: el texto del parser de HL7 no coincide: muere, 1 tests (35s): TestPrimitiveJSONTypePairsWithHL7ParserError
+m10 primitivos: sigue el destino primero; los hijos propios solo si no resuelve: muere, 1 tests (35s): TestContentReferencePrimitivesProfiles
+m11 primitivos: los hijos propios solo en el primer salto: muere, 1 tests (36s): TestContentReferencePrimitivesProfiles
+sobreviven: 0

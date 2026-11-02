@@ -1,0 +1,65 @@
+== 4.0.1 q-deep-int.json
+   Questionnaire.item[0].item[0].item[0].maxLength | Error parsing JSON: the primitive value must be a number
+== 4.0.1 q-def-space.json
+   Questionnaire.item[0].item[0].definition | URI values cannot have whitespace('has space')
+== 4.0.1 q-ext-str.json
+   Questionnaire.item[0].item[0].extension[0].value[x] | Error parsing JSON: the primitive value must be a boolean
+   Questionnaire.item[0].item[0].extension[0] | The extension http://example.org/x could not be found so is not allowed here
+   Questionnaire.item[0].item[0].extension[0].url | Example URLs are not allowed in this context (http://example.org/x)
+== 4.0.1 q-req-ok.json
+== 4.0.1 q-req-str.json
+   Questionnaire.item[0].item[0].required | Error parsing JSON: the primitive value must be a boolean
+   Questionnaire.item[0].item[0].required | Boolean values must be 'true' or 'false'
+== 4.0.1 rr-comp-decstr.json
+   Observation.component[0].referenceRange[0].low.value | Error parsing JSON: the primitive value must be a number
+== 4.0.1 rr-comp-empty.json
+   Observation.component[0].referenceRange[0].text | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in h
+   Observation.component[0].referenceRange[0].text | value cannot be empty
+== 4.0.1 rr-comp-ok.json
+== 4.0.1 rr-root-empty.json
+   Observation.referenceRange[0].text | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in h
+   Observation.referenceRange[0].text | value cannot be empty
+== 4.3.0 q-deep-int.json
+   Questionnaire.item[0].item[0].item[0].maxLength | Error parsing JSON: the primitive value must be a number
+== 4.3.0 q-def-space.json
+   Questionnaire.item[0].item[0].definition | URI values cannot have whitespace('has space')
+== 4.3.0 q-ext-str.json
+   Questionnaire.item[0].item[0].extension[0].value[x] | Error parsing JSON: the primitive value must be a boolean
+   Questionnaire.item[0].item[0].extension[0] | The extension http://example.org/x could not be found so is not allowed here
+   Questionnaire.item[0].item[0].extension[0].url | Example URLs are not allowed in this context (http://example.org/x)
+== 4.3.0 q-req-ok.json
+== 4.3.0 q-req-str.json
+   Questionnaire.item[0].item[0].required | Error parsing JSON: the primitive value must be a boolean
+   Questionnaire.item[0].item[0].required | Boolean values must be 'true' or 'false'
+== 4.3.0 rr-comp-decstr.json
+   Observation.component[0].referenceRange[0].low.value | Error parsing JSON: the primitive value must be a number
+== 4.3.0 rr-comp-empty.json
+   Observation.component[0].referenceRange[0].text | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in h
+   Observation.component[0].referenceRange[0].text | value cannot be empty
+   Observation.component[0].referenceRange[0].text | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empt
+== 4.3.0 rr-comp-ok.json
+== 4.3.0 rr-root-empty.json
+   Observation.referenceRange[0].text | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in h
+   Observation.referenceRange[0].text | value cannot be empty
+   Observation.referenceRange[0].text | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empt
+== 5.0.0 q-deep-int.json
+   Questionnaire.item[0].item[0].item[0].maxLength | Error parsing JSON: the primitive value must be a number
+== 5.0.0 q-def-space.json
+   Questionnaire.item[0].item[0].definition | URI values cannot have whitespace('has space')
+== 5.0.0 q-ext-str.json
+   Questionnaire.item[0].item[0].extension[0].value[x] | Error parsing JSON: the primitive value must be a boolean
+   Questionnaire.item[0].item[0].extension[0] | The extension http://example.org/x could not be found so is not allowed here
+   Questionnaire.item[0].item[0].extension[0].url | Example URLs are not allowed in this context (http://example.org/x)
+== 5.0.0 q-req-ok.json
+== 5.0.0 q-req-str.json
+   Questionnaire.item[0].item[0].required | Error parsing JSON: the primitive value must be a boolean
+   Questionnaire.item[0].item[0].required | Boolean values must be 'true' or 'false'
+== 5.0.0 rr-comp-decstr.json
+   Observation.component[0].referenceRange[0].low.value | Error parsing JSON: the primitive value must be a number
+== 5.0.0 rr-comp-empty.json
+   Observation.component[0].referenceRange[0].text | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in h
+   Observation.component[0].referenceRange[0].text | value cannot be empty
+== 5.0.0 rr-comp-ok.json
+== 5.0.0 rr-root-empty.json
+   Observation.referenceRange[0].text | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in h
+   Observation.referenceRange[0].text | value cannot be empty

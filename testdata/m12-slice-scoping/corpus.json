@@ -212,6 +212,20 @@
       "files": ["testdata/m12-slice-scoping/probes/ov_*.json"]
     },
     {
+      "name": "content-reference-probes",
+      "files": ["testdata/m12-slice-scoping/probes/kr_*.json"]
+    },
+    {
+      "name": "content-reference-probes-r4b",
+      "version": "4.3.0",
+      "files": ["testdata/m12-slice-scoping/probes/kr_*.json"]
+    },
+    {
+      "name": "content-reference-probes-r5",
+      "version": "5.0.0",
+      "files": ["testdata/m12-slice-scoping/probes/kr_*.json", "testdata/m12-slice-scoping/probes/kr5_*.json"]
+    },
+    {
       "name": "resolve-probes",
       "packageFiles": ["testdata/m12-slice-scoping/packages/acme.resolve-0.1.0.tgz"],
       "files": ["testdata/m12-slice-scoping/probes/rs_*.json"]

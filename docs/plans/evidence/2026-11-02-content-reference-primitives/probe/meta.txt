@@ -1,0 +1,87 @@
+4.0.1 answer-dec-str DIFF
+  root: [('error', None, '@.enableWhen[0].answerDecimal'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.0.1 answeropt-int-str DIFF
+  root: [('error', None, '@.answerOption[0].valueInteger'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.0.1 code-sys-space DIFF
+  root: [('error', None, '@.code[0].system'), ('information', None, '@.code[0].system'), ('warning', None, 'Questionnaire')]
+  cref: [('information', None, '@.code[0].system'), ('warning', None, 'Questionnaire')]
+4.0.1 def-space DIFF
+  root: [('error', None, '@.definition'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.0.1 empty-prefix DIFF
+  root: [('error', None, '@.prefix'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.0.1 enable-op-bad same
+4.0.1 ext-bool-str DIFF
+  root: [('error', None, '@.extension[0].valueBoolean'), ('warning', None, '@.extension[0]'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, '@.extension[0]'), ('warning', None, 'Questionnaire')]
+4.0.1 initial-two same
+4.0.1 linkid-missing same
+4.0.1 maxlen-str DIFF
+  root: [('error', None, '@.maxLength'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.0.1 req-str DIFF
+  root: [('error', None, '@.required'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.0.1 type-badcode same
+4.0.1 unknown-prop same
+4.3.0 answer-dec-str DIFF
+  root: [('error', None, '@.enableWhen[0].answerDecimal'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.3.0 answeropt-int-str DIFF
+  root: [('error', None, '@.answerOption[0].valueInteger'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.3.0 code-sys-space DIFF
+  root: [('error', None, '@.code[0].system'), ('information', None, '@.code[0].system'), ('warning', None, 'Questionnaire')]
+  cref: [('information', None, '@.code[0].system'), ('warning', None, 'Questionnaire')]
+4.3.0 def-space DIFF
+  root: [('error', None, '@.definition'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.3.0 empty-prefix DIFF
+  root: [('error', None, '@.prefix'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.3.0 enable-op-bad same
+4.3.0 ext-bool-str DIFF
+  root: [('error', None, '@.extension[0].valueBoolean'), ('warning', None, '@.extension[0]'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, '@.extension[0]'), ('warning', None, 'Questionnaire')]
+4.3.0 initial-two same
+4.3.0 linkid-missing same
+4.3.0 maxlen-str DIFF
+  root: [('error', None, '@.maxLength'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.3.0 req-str DIFF
+  root: [('error', None, '@.required'), ('warning', None, 'Questionnaire')]
+  cref: [('warning', None, 'Questionnaire')]
+4.3.0 type-badcode same
+4.3.0 unknown-prop same
+5.0.0 answer-dec-str DIFF
+  root: [('error', None, '@.enableWhen[0].answerDecimal')]
+  cref: []
+5.0.0 answeropt-int-str DIFF
+  root: [('error', None, '@.answerOption[0].valueInteger')]
+  cref: []
+5.0.0 code-sys-space DIFF
+  root: [('error', None, '@.code[0].system'), ('information', None, '@.code[0].system')]
+  cref: [('information', None, '@.code[0].system')]
+5.0.0 def-space DIFF
+  root: [('error', None, '@.definition')]
+  cref: []
+5.0.0 empty-prefix DIFF
+  root: [('error', None, '@.prefix')]
+  cref: []
+5.0.0 enable-op-bad same
+5.0.0 ext-bool-str DIFF
+  root: [('error', None, '@.extension[0].valueBoolean'), ('warning', None, '@.extension[0]')]
+  cref: [('warning', None, '@.extension[0]')]
+5.0.0 initial-two same
+5.0.0 linkid-missing same
+5.0.0 maxlen-str DIFF
+  root: [('error', None, '@.maxLength')]
+  cref: []
+5.0.0 req-str DIFF
+  root: [('error', None, '@.required')]
+  cref: []
+5.0.0 type-badcode same
+5.0.0 unknown-prop same

@@ -1,0 +1,1 @@
+{"resourceType":"Questionnaire","status":"draft","item":[{"linkId":"a","type":"group","_required":{"extension":[{"url":"http://example.org/x","valueBoolean":"true"}]},"item":[{"linkId":"b","type":"string","_required":{"extension":[{"url":"http://example.org/x","valueBoolean":"true"}]}}]}]}

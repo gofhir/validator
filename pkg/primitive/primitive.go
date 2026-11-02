@@ -63,10 +63,25 @@ type validationContext struct {
 
 // elementIndex holds pre-processed element lookups for a StructureDefinition.
 type elementIndex struct {
+	// sd es la definición de la que sale el índice: la contentReference de un elemento se resuelve desde ella.
+	sd     *registry.StructureDefinition
 	byPath map[string]*registry.ElementDefinition
+	// parents son las rutas que tienen hijos en el snapshot (los hijos propios van antes que la
+	// contentReference, como en Registry.ChildrenOf).
+	parents map[string]bool
+	// targets guarda, por elemento con contentReference, adonde apunta (*contentTarget): se resuelve
+	// una vez, no por objeto. Los índices se comparten entre goroutines.
+	targets sync.Map // map[*registry.ElementDefinition]*contentTarget
 	// choiceTypes son los elementos de elección, por su ruta sin "[x]", como nodos del árbol del
 	// snapshot: Registry.ChoiceType los toma para llegar a su elemento base.
 	choiceTypes map[string]*registry.ElementNode
+}
+
+// contentTarget es el elemento al que apunta una contentReference y el índice de su definición; def es
+// nil si la referencia no resuelve (la estructural informa lo que corresponda).
+type contentTarget struct {
+	def *registry.ElementDefinition
+	idx *elementIndex
 }
 
 // Validate validates primitive types in a FHIR resource against its StructureDefinition.
@@ -137,7 +152,9 @@ func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any
 // buildElementIndex creates an index for fast element lookup from a StructureDefinition.
 func buildElementIndex(sd *registry.StructureDefinition) *elementIndex {
 	idx := &elementIndex{
+		sd:          sd,
 		byPath:      make(map[string]*registry.ElementDefinition),
+		parents:     make(map[string]bool),
 		choiceTypes: make(map[string]*registry.ElementNode),
 	}
 
@@ -149,6 +166,9 @@ func buildElementIndex(sd *registry.StructureDefinition) *elementIndex {
 	for i := range sd.Snapshot.Element {
 		elem := &sd.Snapshot.Element[i]
 		idx.byPath[elem.Path] = elem
+		if i := strings.LastIndexByte(elem.Path, '.'); i >= 0 {
+			idx.parents[elem.Path[:i]] = true
+		}
 
 		if strings.HasSuffix(elem.Path, "[x]") {
 			basePath := strings.TrimSuffix(elem.Path, "[x]")
@@ -177,10 +197,14 @@ func (v *Validator) getOrBuildIndex(sd *registry.StructureDefinition) *elementIn
 		}
 	}
 
-	// Build and cache
-	idx := buildElementIndex(sd)
-	v.idxCache.Store(sd.URL, idx)
-	return idx
+	// Construir y guardar en el cache: con LoadOrStore, dos goroutines que construyen a la vez comparten un solo índice
+	built := buildElementIndex(sd)
+	if stored, loaded := v.idxCache.LoadOrStore(sd.URL, built); loaded {
+		if idx, ok := stored.(*elementIndex); ok {
+			return idx
+		}
+	}
+	return built
 }
 
 // validateElement recursively validates primitive types in an element and its children.
@@ -332,6 +356,12 @@ func (v *Validator) validateComplexElement(
 	}
 
 	if typeName == "" {
+		// Sin tipo: o es una contentReference, cuyo contenido es el del elemento al que apunta
+		// (elementdefinition.html#ElementDefinition.contentReference), o no hay nada que recorrer.
+		if resolved.elemDef == nil || resolved.elemDef.ContentReference == nil {
+			return
+		}
+		v.validateContentReference(data, resolved.elemDef, fhirPath, currentIdx, ctx, result)
 		return
 	}
 
@@ -357,6 +387,62 @@ func (v *Validator) validateComplexElement(
 
 	typeIdx := v.getOrBuildIndex(typeSD)
 	v.validateElement(data, typeName, fhirPath, typeIdx, ctx, result)
+}
+
+// validateContentReference sigue data, el valor de un elemento con contentReference, con la definición
+// del elemento al que apunta: la misma u otra (url#id), de un contenedor en línea o de un tipo de datos,
+// que a su vez puede ser una contentReference. Si el snapshot desenrolla hijos bajo el elemento, esos van
+// primero, como en Registry.ChildrenOf. Una referencia que no resuelve, o una cadena que no termina,
+// no sigue nada.
+func (v *Validator) validateContentReference(
+	data map[string]any,
+	elemDef *registry.ElementDefinition,
+	fhirPath string,
+	idx *elementIndex,
+	ctx *validationContext,
+	result *issue.Result,
+) {
+	for hops := 0; ; hops++ {
+		if idx.parents[elemDef.Path] {
+			v.validateElement(data, elemDef.Path, fhirPath, idx, ctx, result)
+			return
+		}
+		if hops >= registry.MaxContentReferenceHops {
+			return
+		}
+		target := v.resolveContentTarget(idx, elemDef)
+		if target.def == nil {
+			return
+		}
+		elemDef, idx = target.def, target.idx
+		if elemDef.ContentReference == nil {
+			v.validateComplexElement(data, &resolvedElement{elemDef: elemDef}, elemDef.Path, fhirPath, idx, ctx, result)
+			return
+		}
+	}
+}
+
+// resolveContentTarget resuelve la contentReference de elemDef, un elemento de idx, una vez por elemento.
+func (v *Validator) resolveContentTarget(idx *elementIndex, elemDef *registry.ElementDefinition) *contentTarget {
+	if cached, ok := idx.targets.Load(elemDef); ok {
+		if t, ok := cached.(*contentTarget); ok {
+			return t
+		}
+	}
+	target := &contentTarget{}
+	if idx.sd != nil {
+		if node := idx.sd.Tree().ByID(elemDef.ID); node != nil {
+			if tsd, tnode, _ := v.registry.ContentReferenceTarget(idx.sd, node); tnode != nil {
+				target.def, target.idx = tnode.Def, v.getOrBuildIndex(tsd)
+			}
+		}
+	}
+	if actual, loaded := idx.targets.LoadOrStore(elemDef, target); loaded {
+		if t, ok := actual.(*contentTarget); ok {
+			return t
+		}
+	}
+	return target
 }
 
 // validatePrimitiveValue validates a primitive value against its expected type.

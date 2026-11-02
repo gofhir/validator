@@ -722,3 +722,34 @@ func TestNamesAgreeChoiceVariants(t *testing.T) {
 		t.Errorf("same object: want 1 pair, got %d", len(un.Paired))
 	}
 }
+
+// El parser de HL7 informa un primitivo con el tipo JSON equivocado sin ID de mensaje (sondas de #189,
+// validator_cli 6.10.2): se empareja por código y texto, en la misma ubicación.
+func TestPrimitiveJSONTypePairsWithHL7ParserError(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const loc = "Questionnaire.item[0].item[0].required"
+	g := GoIssue{
+		File: "p/x.json", Severity: "error", MessageID: "TYPE_WRONG_JSON_TYPE",
+		Expression: []string{loc}, Diagnostics: "Error parsing JSON: the primitive value must be a boolean",
+	}
+	h := func(loc, text string) HL7Issue {
+		return HL7Issue{File: "p/x.json", Severity: "error", Key: "invalid", Code: "invalid", Location: loc, Text: text}
+	}
+	for _, kind := range []string{"boolean", "number"} {
+		un := Assign(fam, []GoIssue{g}, []HL7Issue{h(loc, "Error parsing JSON: the primitive value must be a "+kind)})
+		if len(un.Paired) != 1 {
+			t.Errorf("the HL7 parser error for a %s must pair", kind)
+		}
+	}
+	for _, x := range []HL7Issue{
+		h("Questionnaire.item[0].required", "Error parsing JSON: the primitive value must be a boolean"),
+		h(loc, "Boolean values must be 'true' or 'false'"),
+	} {
+		if un := Assign(fam, []GoIssue{g}, []HL7Issue{x}); len(un.Paired) != 0 {
+			t.Errorf("%s at %s must not pair", x.Text, x.Location)
+		}
+	}
+}

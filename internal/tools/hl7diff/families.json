@@ -200,6 +200,19 @@
       ]
     },
     {
+      "name": "primitive-json-type",
+      "rule": "equal",
+      "gofhir": [
+        "TYPE_WRONG_JSON_TYPE"
+      ],
+      "hl7NoID": [
+        {
+          "code": "invalid",
+          "text": "^Error parsing JSON: the primitive value must be a "
+        }
+      ]
+    },
+    {
       "name": "extension-value-type",
       "rule": "parent",
       "gofhir": [
@@ -541,7 +554,6 @@
     "STRUCTURE_NO_RESOURCE_TYPE": "input failure",
     "STRUCTURE_NO_TYPE": "input failure",
     "STRUCTURE_UNKNOWN_RESOURCE": "input failure",
-    "TYPE_WRONG_JSON_TYPE": "no HL7 counterpart verified yet",
     "UCUM_INVALID_CODE": "HL7 reports it only with a terminology server (Unknown code ... in the CodeSystem http://unitsofmeasure.org); under -tx n/a it warns it cannot validate the code (B-D22)",
     "CODING_NO_CODE": "deprecated, no longer reported (Coding.code 0..1)",
     "CODESYSTEM_EXAMPLE_CONTENT": "processing notice, a warning: the code cannot be checked (HL7: Unable to validate code without using server, no message id)"

@@ -1,0 +1,300 @@
+# hl7diff same: baseline 8730fc4 vs working tree
+
+decisions: identical (15 files, 26 lines)
+
+multimatch: identical (3 files, 9 lines)
+
+core-probes: identical (7 files, 12 lines)
+
+type-profile-probes: identical (47 files, 92 lines)
+
+nested-resource-probes: identical (4 files, 6 lines)
+
+review-probes: identical (5 files, 9 lines)
+
+extension-probes: identical (14 files, 27 lines)
+
+primitive-extension-probes: identical (5 files, 5 lines)
+
+context-probes: identical (33 files, 131 lines)
+
+context-eval-probes: identical (31 files, 55 lines)
+
+context-scope-probes: identical (198 files, 369 lines)
+
+interface-probes: identical (9 files, 35 lines)
+
+interface-probes-r5: identical (16 files, 20 lines)
+
+interface-probes-r4b: identical (9 files, 36 lines)
+
+constraint-probes: identical (81 files, 162 lines)
+
+invariant-probes: identical (61 files, 107 lines)
+
+fixedpattern-probes: identical (50 files, 86 lines)
+
+target-probes: identical (71 files, 104 lines)
+
+nested-slicing-probes: identical (18 files, 23 lines)
+
+json-shape-probes: identical (34 files, 103 lines)
+
+binding-probes: identical (5 files, 10 lines)
+
+binding-walk-probes: identical (14 files, 31 lines)
+
+extension-walk-probes: identical (20 files, 42 lines)
+
+binding-profile-probes: identical (10 files, 19 lines)
+
+valueset-membership-probes: identical (43 files, 52 lines)
+
+holder-profile-probes: identical (50 files, 93 lines)
+
+reference-walk-probes: identical (56 files, 137 lines)
+
+package-example-cpg-probes: identical (4 files, 10 lines)
+
+package-example-cql-probes: identical (2 files, 3 lines)
+
+unknown-codesystem-probes: identical (521 files, 1035 lines)
+
+fullurl-probes: identical (48 files, 135 lines)
+
+fullurl-probes-r4b: identical (1 files, 3 lines)
+
+fullurl-probes-r5: identical (4 files, 8 lines)
+
+held-resource-probes: identical (39 files, 146 lines)
+
+choice-variant-probes: identical (27 files, 56 lines)
+
+## content-reference-probes: 66 lines differ (32 files, 55 baseline lines)
+
+- sorted line 2
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answer-dec-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answer-dec-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].enableWhen[0].answerDecimal"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":204}}
+- sorted line 3
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answeropt-int-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answer-dec-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"information","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: has space for 'c'","location":{"Line":1,"Column":157}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answeropt-int-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].answerOption[0].valueInteger"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":171}}
+- sorted line 5
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answeropt-int-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 6
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-def-space.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":157}}
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-empty-prefix.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"information","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: has space for 'c'","location":{"Line":1,"Column":157}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].enableWhen[0].operator"],"diagnostics":"The value provided ('~') is not in the value set 'http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1' (required)","location":{"Line":1,"Column":182}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-def-space.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].definition"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":151}}
+- sorted line 10
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Questionnaire.item[0].item[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":1,"Column":153}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-def-space.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 11
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-empty-prefix.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].prefix"],"diagnostics":"Value '' does not match expected format for type string","location":{"Line":1,"Column":147}}
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Questionnaire.item[0].item[0].initial[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString","location":{"Line":1,"Column":151}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-empty-prefix.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 13
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].enableWhen[0].operator"],"diagnostics":"The value provided ('~') is not in the value set 'http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1' (required)","location":{"Line":1,"Column":182}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Questionnaire.item[0].item[0].linkId"],"diagnostics":"Minimum cardinality of 'Questionnaire.item[0].item[0].linkId' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].extension[0].valueBoolean"],"diagnostics":"Error parsing JSON: the primitive value must be a boolean","location":{"Line":1,"Column":199}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-maxlen-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Questionnaire.item[0].item[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":1,"Column":153}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-req-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-type-badcode.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].type"],"diagnostics":"The value provided ('nope') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|4.0.1' (required)","location":{"Line":1,"Column":127}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Questionnaire.item[0].item[0].initial[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString","location":{"Line":1,"Column":151}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-type-badcode.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-unknown-prop.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Questionnaire.item[0].item[0].foo"],"diagnostics":"Unknown element 'foo'","location":{"Line":1,"Column":144}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Questionnaire.item[0].item[0].linkId"],"diagnostics":"Minimum cardinality of 'Questionnaire.item[0].item[0].linkId' is 1, but found 0"}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-unknown-prop.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+
+## content-reference-probes-r4b: 66 lines differ (32 files, 55 baseline lines)
+
+- sorted line 2
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answer-dec-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answer-dec-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].enableWhen[0].answerDecimal"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":204}}
+- sorted line 3
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answeropt-int-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answer-dec-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"information","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: has space for 'c'","location":{"Line":1,"Column":157}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answeropt-int-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].answerOption[0].valueInteger"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":171}}
+- sorted line 5
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answeropt-int-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 6
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-def-space.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":157}}
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-empty-prefix.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"information","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: has space for 'c'","location":{"Line":1,"Column":157}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].enableWhen[0].operator"],"diagnostics":"The value provided ('~') is not in the value set 'http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.3.0' (required)","location":{"Line":1,"Column":182}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-def-space.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].definition"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":151}}
+- sorted line 10
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Questionnaire.item[0].item[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":1,"Column":153}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-def-space.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 11
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-empty-prefix.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].prefix"],"diagnostics":"Value '' does not match expected format for type string","location":{"Line":1,"Column":147}}
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Questionnaire.item[0].item[0].initial[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString","location":{"Line":1,"Column":151}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-empty-prefix.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 13
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].enableWhen[0].operator"],"diagnostics":"The value provided ('~') is not in the value set 'http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.3.0' (required)","location":{"Line":1,"Column":182}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Questionnaire.item[0].item[0].linkId"],"diagnostics":"Minimum cardinality of 'Questionnaire.item[0].item[0].linkId' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].extension[0].valueBoolean"],"diagnostics":"Error parsing JSON: the primitive value must be a boolean","location":{"Line":1,"Column":199}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-maxlen-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Questionnaire.item[0].item[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":1,"Column":153}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-req-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-type-badcode.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].type"],"diagnostics":"The value provided ('nope') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|4.3.0' (required)","location":{"Line":1,"Column":127}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Questionnaire.item[0].item[0].initial[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString","location":{"Line":1,"Column":151}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-type-badcode.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-unknown-prop.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Questionnaire.item[0].item[0].foo"],"diagnostics":"Unknown element 'foo'","location":{"Line":1,"Column":144}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Questionnaire.item[0].item[0].linkId"],"diagnostics":"Minimum cardinality of 'Questionnaire.item[0].item[0].linkId' is 1, but found 0"}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-unknown-prop.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+
+## content-reference-probes-r5: 42 lines differ (33 files, 37 baseline lines)
+
+- sorted line 2
+  base: {"file":"testdata/m12-slice-scoping/probes/kr5_bundle-entry-link.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Bundle.link[0].url"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":85}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr5_bundle-entry-link.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Bundle.entry[0].link[0].url"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":148}}
+- sorted line 3
+  base: {"file":"testdata/m12-slice-scoping/probes/kr5_bundle-entry-link.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Bundle.entry[0].resource"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":235}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr5_bundle-entry-link.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Bundle.link[0].url"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":85}}
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answer-dec-str.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr5_bundle-entry-link.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Bundle.entry[0].resource"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":235}}
+- sorted line 5
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answeropt-int-str.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answer-dec-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].enableWhen[0].answerDecimal"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":204}}
+- sorted line 6
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"information","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: has space for 'c'","location":{"Line":1,"Column":157}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-answeropt-int-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].answerOption[0].valueInteger"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":171}}
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-def-space.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":157}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-empty-prefix.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-code-sys-space.json","severity":"information","code":"processing","messageId":"CODESYSTEM_NOT_FOUND","expression":["Questionnaire.item[0].item[0].code[0].system"],"diagnostics":"CodeSystem is unknown and can't be validated: has space for 'c'","location":{"Line":1,"Column":157}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].enableWhen[0].operator"],"diagnostics":"The value provided ('~') is not in the value set 'http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|5.0.0' (required)","location":{"Line":1,"Column":182}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-def-space.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].definition"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":151}}
+- sorted line 10
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Questionnaire.item[0].item[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":1,"Column":153}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-empty-prefix.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].item[0].prefix"],"diagnostics":"Value '' does not match expected format for type string","location":{"Line":1,"Column":147}}
+- sorted line 11
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Questionnaire.item[0].item[0].initial[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString","location":{"Line":1,"Column":151}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-enable-op-bad.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].enableWhen[0].operator"],"diagnostics":"The value provided ('~') is not in the value set 'http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|5.0.0' (required)","location":{"Line":1,"Column":182}}
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Questionnaire.item[0].item[0].linkId"],"diagnostics":"Minimum cardinality of 'Questionnaire.item[0].item[0].linkId' is 1, but found 0"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].extension[0].valueBoolean"],"diagnostics":"Error parsing JSON: the primitive value must be a boolean","location":{"Line":1,"Column":199}}
+- sorted line 13
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-maxlen-str.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-ext-bool-str.json","severity":"warning","code":"extension","messageId":"EXTENSION_UNKNOWN","expression":["Questionnaire.item[0].item[0].extension[0]"],"diagnostics":"Unknown extension 'http://example.org/x'","location":{"Line":1,"Column":153}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-req-str.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-initial-two.json","severity":"error","code":"structure","messageId":"STRUCTURE_CHOICE_MUTUAL_EXCLUSION","expression":["Questionnaire.item[0].item[0].initial[0]"],"diagnostics":"Only one variant of choice type 'value[x]' is allowed, but found: valueBoolean, valueString","location":{"Line":1,"Column":151}}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-type-badcode.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].type"],"diagnostics":"The value provided ('nope') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0' (required)","location":{"Line":1,"Column":127}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-linkid-missing.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Questionnaire.item[0].item[0].linkId"],"diagnostics":"Minimum cardinality of 'Questionnaire.item[0].item[0].linkId' is 1, but found 0"}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_cref-unknown-prop.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Questionnaire.item[0].item[0].foo"],"diagnostics":"Unknown element 'foo'","location":{"Line":1,"Column":144}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-maxlen-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].maxLength"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":150}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_q-deep-int.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-req-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].required"],"diagnostics":"Error parsing JSON: the primitive value must be a boolean","location":{"Line":1,"Column":149}}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_q-req-ok.json"}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-type-badcode.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].type"],"diagnostics":"The value provided ('nope') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|5.0.0' (required)","location":{"Line":1,"Column":127}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_root-answer-dec-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].enableWhen[0].answerDecimal"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":162}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_cref-unknown-prop.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Questionnaire.item[0].item[0].foo"],"diagnostics":"Unknown element 'foo'","location":{"Line":1,"Column":144}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_root-answeropt-int-str.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].answerOption[0].valueInteger"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":129}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_q-deep-int.json","severity":"error","code":"value","messageId":"TYPE_WRONG_JSON_TYPE","expression":["Questionnaire.item[0].item[0].item[0].maxLength"],"diagnostics":"Error parsing JSON: the primitive value must be a number","location":{"Line":1,"Column":193}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/kr_root-code-sys-space.json","severity":"error","code":"value","messageId":"TYPE_INVALID_FORMAT","expression":["Questionnaire.item[0].code[0].system"],"diagnostics":"Value 'has space' does not match expected format for type uri","location":{"Line":1,"Column":115}}
+  head: {"file":"testdata/m12-slice-scoping/probes/kr_q-req-ok.json"}
+
+resolve-probes: identical (19 files, 31 lines)
+
+resource-element-probes: identical (6 files, 17 lines)
+
+canonical-probes: identical (17 files, 19 lines)
+
+r5-probes: identical (8 files, 12 lines)
+
+r4b-probes: identical (1 files, 1 lines)
+
+narrative-ucum-probes: identical (49 files, 82 lines)
+
+narrative-ucum-probes-r4b: identical (49 files, 82 lines)
+
+narrative-ucum-probes-r5: identical (49 files, 82 lines)
+
+deqm-probes: identical (15 files, 66 lines)
+
+deqm-examples: identical (108 files, 451 lines)
+
+uscore-probes: identical (7 files, 18 lines)
+
+uscore-examples: identical (183 files, 409 lines)
+
+ips: identical (44 files, 88 lines)
+
+mcode-examples: identical (179 files, 471 lines)
+
+aucore-examples: identical (65 files, 108 lines)
+
+chcore-examples: identical (48 files, 76 lines)
+
+clcore-examples: identical (20 files, 24 lines)
+
+r4-core-examples: identical (5301 files, 55193 lines)
+
+**DIFFERENT**
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/same-report.md
+exit status 1

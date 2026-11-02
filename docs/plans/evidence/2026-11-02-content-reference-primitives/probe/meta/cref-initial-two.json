@@ -1,0 +1,1 @@
+{"resourceType": "Questionnaire", "status": "draft", "item": [{"linkId": "a", "type": "group", "item": [{"linkId": "b", "type": "string", "initial": [{"valueString": "a", "valueBoolean": true}]}]}]}
