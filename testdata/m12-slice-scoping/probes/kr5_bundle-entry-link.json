@@ -1,0 +1,1 @@
+{"resourceType": "Bundle", "type": "collection", "link": [{"relation": "self", "url": "has space"}], "entry": [{"link": [{"relation": "self", "url": "has space"}], "fullUrl": "urn:uuid:9b8a6f6e-2f0e-4c39-9a3e-1d7f0c2b5a10", "resource": {"resourceType": "Basic", "code": {"text": "x"}}}]}

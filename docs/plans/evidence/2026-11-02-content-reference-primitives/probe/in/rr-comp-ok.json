@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "status": "final", "code": {"text": "x"}, "component": [{"code": {"text": "y"}, "referenceRange": [{"low": {"value": 1.5}, "text": "t"}]}]}

@@ -1,0 +1,22 @@
+19:20  up 3 days, 20:31, 19 users, load averages: 15.88 21.00 20.46
+19:20  up 3 days, 20:32, 19 users, load averages: 21.67 21.91 20.80
+== base189
+BenchmarkValidateDeepQuestionnaire-12    	     255	   5094253 ns/op	 5873073 B/op	  104753 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     172	   6239121 ns/op	 5866990 B/op	  104676 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     240	   4952634 ns/op	 5863188 B/op	  104659 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     236	   4981422 ns/op	 5863161 B/op	  104658 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     241	   4983192 ns/op	 5862962 B/op	  104657 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     244	   4983272 ns/op	 5862968 B/op	  104657 allocs/op
+== head189
+BenchmarkValidateDeepQuestionnaire-12    	     117	   9826078 ns/op	 5963652 B/op	  107023 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     100	  10713481 ns/op	 5944062 B/op	  106826 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     164	   8155169 ns/op	 5934810 B/op	  106782 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     170	   8740963 ns/op	 5934142 B/op	  106778 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     141	   7568375 ns/op	 5937113 B/op	  106793 allocs/op
+BenchmarkValidateDeepQuestionnaire-12    	     242	   4850797 ns/op	 5929926 B/op	  106758 allocs/op
+base189 BenchmarkValidateFlatQuestionnaire-12    	     262	   4614757 ns/op	 5723551 B/op	  107429 allocs/op
+base189 BenchmarkValidateFlatQuestionnaire-12    	     280	   5644488 ns/op	 5712727 B/op	  107331 allocs/op
+base189 BenchmarkValidateFlatQuestionnaire-12    	     231	   4589298 ns/op	 5714528 B/op	  107339 allocs/op
+head189 BenchmarkValidateFlatQuestionnaire-12    	     259	   4814471 ns/op	 5723830 B/op	  107431 allocs/op
+head189 BenchmarkValidateFlatQuestionnaire-12    	     242	   7728670 ns/op	 5714236 B/op	  107338 allocs/op
+head189 BenchmarkValidateFlatQuestionnaire-12    	     226	   4703636 ns/op	 5714681 B/op	  107340 allocs/op

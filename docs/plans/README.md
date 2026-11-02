@@ -13,12 +13,19 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #196 cerrado (pasos 1-9, 02-11-2026), espera «commit y pr»; dos variantes de un elemento de elección (rama `fix/choice-two-variants`, desde `e22324e`)
+## Frente activo: #189 cerrado (pasos 1-9, 02-11-2026), espera «commit y pr»; primitivos bajo una contentReference (rama `fix/content-reference-primitives`, desde `8730fc4`)
+
+[2026-11-02-content-reference-primitives.md](2026-11-02-content-reference-primitives.md). Ronda adversarial (Opus): 8 aceptados.
+Code review convergió en la ronda 3. `make check` verde; hl7diff 55 PASS (3 grupos nuevos `content-reference-probes*`, familia
+`primitive-json-type`); mutaciones 12/12; asignaciones iguales a la base. **Pendiente del usuario:** publicar dos issues aparte
+(borradores en la evidencia: valores de extensiones en `_x`; la estructural con `url#id`, falta su reproducción). Después: #190.
+
+## Cerrado: #196 (PR #197, `8730fc4`): dos variantes de un elemento de elección (rama `fix/choice-two-variants`, desde `e22324e`)
 
 [2026-11-01-held-meta-profile.md](2026-11-01-held-meta-profile.md): #188 cerrado con la evidencia del §1 y reemplazado por #196.
 Plan con ronda adversarial (Opus, excepción mientras Codex no tiene cuota: 9 de 10 hallazgos aceptados). Code review convergió
 en la ronda 2. `make check` verde; hl7diff 52 PASS con el grupo nuevo `choice-variant-probes`; mutaciones 11/11; barrido de #180
-idéntico. **Pendiente:** el tiempo del bench con la máquina libre (las asignaciones bajan). Próximo: «commit y pr»; después, #189.
+idéntico. **Pendiente:** el tiempo del bench con la máquina libre, antes del release (las asignaciones bajan).
 
 ## Cerrado: #187 (mergeado como #195, `e22324e`, 01-11-2026); tipos de un elemento de elección en un slice (rama `fix/slice-choice-types`, desde `a957f2e`)
 

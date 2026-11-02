@@ -11,8 +11,8 @@ type InstanceChildren struct {
 	Unresolved TypeProfile
 }
 
-// maxContentReferenceHops bounds a chain of contentReferences (a cycle in a malformed definition).
-const maxContentReferenceHops = 8
+// MaxContentReferenceHops bounds a chain of contentReferences (a cycle in a malformed definition).
+const MaxContentReferenceHops = 8
 
 // ChildrenOf returns the children that govern an instance of node, an element of sd:
 //
@@ -38,19 +38,13 @@ func (r *Registry) childrenOf(ctx context.Context, sd *StructureDefinition, node
 			return InstanceChildren{SD: sd, Nodes: n.Children}
 		}
 	}
-	if ref := node.Def.ContentReference; ref != nil {
-		if hops >= maxContentReferenceHops {
+	if node.Def.ContentReference != nil {
+		if hops >= MaxContentReferenceHops {
 			return InstanceChildren{}
 		}
-		target, _ := r.ContentReference(sd, node)
+		tsd, target, _ := r.ContentReferenceTarget(sd, node)
 		if target == nil {
 			return InstanceChildren{}
-		}
-		tsd := sd
-		if url, _, ok := SplitContentReference(*ref); ok && url != "" && url != sd.URL {
-			if s, _ := r.ResolveCanonical(url); s != nil {
-				tsd = s
-			}
 		}
 		return r.childrenOf(ctx, tsd, target, typeCode, self, hops+1)
 	}

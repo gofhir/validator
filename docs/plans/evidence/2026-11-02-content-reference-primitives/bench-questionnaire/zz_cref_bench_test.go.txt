@@ -1,0 +1,69 @@
+package validator
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"testing"
+)
+
+// Questionnaire con ítems anidados a tres niveles (Questionnaire.item.item → #Questionnaire.item):
+// el costo de seguir la contentReference por objeto (#189). Se copia a pkg/validator para correrlo.
+func BenchmarkValidateDeepQuestionnaire(b *testing.B) {
+	v, err := New()
+	if err != nil {
+		b.Skipf("Cannot create validator: %v", err)
+	}
+	leaf := func(id string) map[string]any {
+		return map[string]any{"linkId": id, "type": "string", "text": "q " + id, "required": true, "maxLength": 10}
+	}
+	var items []any
+	for i := 0; i < 5; i++ {
+		var mid []any
+		for j := 0; j < 5; j++ {
+			var leaves []any
+			for k := 0; k < 4; k++ {
+				leaves = append(leaves, leaf(fmt.Sprintf("%d.%d.%d", i, j, k)))
+			}
+			mid = append(mid, map[string]any{"linkId": fmt.Sprintf("%d.%d", i, j), "type": "group", "text": "g", "item": leaves})
+		}
+		items = append(items, map[string]any{"linkId": fmt.Sprint(i), "type": "group", "text": "g", "item": mid})
+	}
+	resource, _ := json.Marshal(map[string]any{"resourceType": "Questionnaire", "status": "draft", "item": items})
+	ctx := context.Background()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for b.Loop() {
+		if _, err := v.Validate(ctx, resource); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+// El mismo trabajo sin contentReference: los 125 ítems en la raíz (Questionnaire.item), que la fase ya revisaba.
+func BenchmarkValidateFlatQuestionnaire(b *testing.B) {
+	v, err := New()
+	if err != nil {
+		b.Skipf("Cannot create validator: %v", err)
+	}
+	var items []any
+	for i := 0; i < 5; i++ {
+		items = append(items, map[string]any{"linkId": fmt.Sprint(i), "type": "group", "text": "g"})
+		for j := 0; j < 5; j++ {
+			items = append(items, map[string]any{"linkId": fmt.Sprintf("%d.%d", i, j), "type": "group", "text": "g"})
+			for k := 0; k < 4; k++ {
+				id := fmt.Sprintf("%d.%d.%d", i, j, k)
+				items = append(items, map[string]any{"linkId": id, "type": "string", "text": "q " + id, "required": true, "maxLength": 10})
+			}
+		}
+	}
+	resource, _ := json.Marshal(map[string]any{"resourceType": "Questionnaire", "status": "draft", "item": items})
+	ctx := context.Background()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for b.Loop() {
+		if _, err := v.Validate(ctx, resource); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
