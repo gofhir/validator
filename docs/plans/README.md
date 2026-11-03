@@ -13,12 +13,29 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #189 cerrado (pasos 1-9, 02-11-2026), espera «commit y pr»; primitivos bajo una contentReference (rama `fix/content-reference-primitives`, desde `8730fc4`)
+## Frente activo: #190 cerrado (pasos 1-9, 03-11-2026), espera «commit y pr»; un array JSON vacío se acepta (rama `fix/empty-array`, desde `68589e6`)
 
-[2026-11-02-content-reference-primitives.md](2026-11-02-content-reference-primitives.md). Ronda adversarial (Opus): 8 aceptados.
-Code review convergió en la ronda 3. `make check` verde; hl7diff 55 PASS (3 grupos nuevos `content-reference-probes*`, familia
-`primitive-json-type`); mutaciones 12/12; asignaciones iguales a la base. **Pendiente del usuario:** publicar dos issues aparte
-(borradores en la evidencia: valores de extensiones en `_x`; la estructural con `url#id`, falta su reproducción). Después: #190.
+[2026-11-02-empty-array.md](2026-11-02-empty-array.md), [ADR-003](../adr/ADR-003-empty-primitive-arrays-by-release.md).
+- Revisiones:
+  - ronda adversarial (Opus): 11 aceptados;
+  - code review: converge en la ronda 2.
+- Verificación:
+  - `make check` verde;
+  - hl7diff 58 PASS;
+  - mutaciones 15/15;
+  - asignaciones iguales.
+- **Pendiente del usuario**, borradores en
+  [evidence/2026-11-02-empty-array/drafts/](evidence/2026-11-02-empty-array/drafts/):
+  - comentario de corrección en #190;
+  - issue para `hapifhir/org.hl7.fhir.core`;
+  - issue de paths bajo `_x`.
+
+Después: #191.
+
+## Cerrado: #189 (PR #198, `68589e6`): primitivos bajo una contentReference
+
+[2026-11-02-content-reference-primitives.md](2026-11-02-content-reference-primitives.md). Issues nuevos: #199 (`_x`)
+y #200 (estructural con `url#id`). **Pendiente:** el tiempo del bench con la máquina libre, antes del release.
 
 ## Cerrado: #196 (PR #197, `8730fc4`): dos variantes de un elemento de elección (rama `fix/choice-two-variants`, desde `e22324e`)
 

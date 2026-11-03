@@ -1,0 +1,52 @@
+== 4.0.1 e26-shadow-unknown.json
+   Patient.birthDate | structure | Unrecognized property 'foo'
+== 4.0.1 e27-shadow-item-ext-empty.json
+   Patient.name[0].given.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e28-shadow-single-arr.json
+   Patient.birthDate | invalid | This property must be an object, not an Array (birthDate at Patient.birthDate)
+== 4.0.1 e29-ext-ext-empty.json
+   Patient.extension[0].extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e31-cref-item-empty.json
+   Questionnaire.item[0].item | invalid | Array cannot be empty - the property should not be present if it has no values
+   Questionnaire.item[0] | invariant | Constraint failed: que-1: 'Group items must have nested items, display items cannot have nested items'
+== 4.0.1 e35-choice-coding-empty.json
+   Observation.value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e36-given-null-only.json
+   Patient.name[0].given | invalid | The JSON array for '0' is invalid at index {1} - must have at least one valid value
+== 4.0.1 e37-contained-item-empty.json
+   Patient.contained[0].telecom | invalid | Array cannot be empty - the property should not be present if it has no values
+   Patient.contained[0]/*Organization/o*/ | invariant | Constraint failed: org-1: 'The organization SHALL at least have a name or an identifier, and possibly more tha
+== 4.3.0 e26-shadow-unknown.json
+   Patient.birthDate | structure | Unrecognized property 'foo'
+== 4.3.0 e27-shadow-item-ext-empty.json
+   Patient.name[0].given.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e28-shadow-single-arr.json
+   Patient.birthDate | invalid | This property must be an object, not an Array (birthDate at Patient.birthDate)
+== 4.3.0 e29-ext-ext-empty.json
+   Patient.extension[0].extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e31-cref-item-empty.json
+   Questionnaire.item[0].item | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e35-choice-coding-empty.json
+   Observation.value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e36-given-null-only.json
+   Patient.name[0].given | invalid | The JSON array for '0' is invalid at index {1} - must have at least one valid value
+== 4.3.0 e37-contained-item-empty.json
+   Patient.contained[0].telecom | invalid | Array cannot be empty - the property should not be present if it has no values
+   Patient.contained[0]/*Organization/o*/ | invariant | Constraint failed: org-1: 'The organization SHALL at least have a name or an identifier, and possibly more tha
+== 5.0.0 e26-shadow-unknown.json
+   Patient.birthDate | structure | Unrecognized property 'foo'
+== 5.0.0 e27-shadow-item-ext-empty.json
+   Patient.name[0].given.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e28-shadow-single-arr.json
+   Patient.birthDate | invalid | This property must be an object, not an Array (birthDate at Patient.birthDate)
+== 5.0.0 e29-ext-ext-empty.json
+   Patient.extension[0].extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e31-cref-item-empty.json
+   Questionnaire.item[0].item | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e35-choice-coding-empty.json
+   Observation.value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e36-given-null-only.json
+   Patient.name[0].given | invalid | The JSON array for '0' is invalid at index {1} - must have at least one valid value
+== 5.0.0 e37-contained-item-empty.json
+   Patient.contained[0] | structure | Unrecognized property 'telecom'
+   Patient.contained[0]/*Organization/o*/ | invariant | Constraint failed: org-1: 'The organization SHALL at least have a name or an identifier, and possibly more tha

@@ -30,6 +30,9 @@ const (
 	// An element written as an empty object: an element has a value or children (ele-1), and an
 	// object has content (json.html).
 	DiagStructureEmptyObject DiagnosticID = "STRUCTURE_EMPTY_OBJECT"
+	// Un elemento que se repite escrito como array vacío: json.html dice que una propiedad sin valores
+	// se omite (los releases que lo dicen del array de un primitivo están en pkg/structural).
+	DiagStructureArrayEmpty DiagnosticID = "STRUCTURE_ARRAY_EMPTY"
 )
 
 // Diagnostic IDs for cardinality validation (M2).
@@ -304,6 +307,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "'{element}' is an empty object: an element must have a value or children",
+	},
+	DiagStructureArrayEmpty: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "'{element}' is an empty array: a property with no values must be omitted",
 	},
 
 	// Cardinality (M2)

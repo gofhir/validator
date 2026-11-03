@@ -1,0 +1,39 @@
+go vet ./...
+GOTOOLCHAIN=go1.25.13 go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.3 run
+0 issues.
+go test -race -short ./...
+ok  	github.com/gofhir/validator/v2/cmd/gofhir-validator	1.949s
+ok  	github.com/gofhir/validator/v2/internal/bundleref	2.983s
+ok  	github.com/gofhir/validator/v2/internal/elementvalues	3.810s
+?   	github.com/gofhir/validator/v2/internal/exactjson	[no test files]
+?   	github.com/gofhir/validator/v2/internal/fhirpathcache	[no test files]
+ok  	github.com/gofhir/validator/v2/internal/objectkeys	2.225s
+ok  	github.com/gofhir/validator/v2/internal/reslang	3.524s
+ok  	github.com/gofhir/validator/v2/internal/slicerecord	3.246s
+?   	github.com/gofhir/validator/v2/internal/testfhir	[no test files]
+?   	github.com/gofhir/validator/v2/internal/tools/corpusrun	[no test files]
+ok  	github.com/gofhir/validator/v2/internal/tools/hl7diff	1.708s
+ok  	github.com/gofhir/validator/v2/internal/versionorder	2.707s
+ok  	github.com/gofhir/validator/v2/pkg/binding	4.052s
+ok  	github.com/gofhir/validator/v2/pkg/cardinality	86.192s
+ok  	github.com/gofhir/validator/v2/pkg/constraint	109.462s
+ok  	github.com/gofhir/validator/v2/pkg/extension	94.680s
+ok  	github.com/gofhir/validator/v2/pkg/fixedpattern	95.131s
+ok  	github.com/gofhir/validator/v2/pkg/issue	3.967s
+ok  	github.com/gofhir/validator/v2/pkg/jsoncompare	4.439s
+ok  	github.com/gofhir/validator/v2/pkg/loader	16.389s
+ok  	github.com/gofhir/validator/v2/pkg/location	4.349s
+?   	github.com/gofhir/validator/v2/pkg/logger	[no test files]
+ok  	github.com/gofhir/validator/v2/pkg/primitive	28.347s
+ok  	github.com/gofhir/validator/v2/pkg/reference	4.645s
+ok  	github.com/gofhir/validator/v2/pkg/registry	254.451s
+ok  	github.com/gofhir/validator/v2/pkg/slicematch	35.936s
+ok  	github.com/gofhir/validator/v2/pkg/slicing	55.165s
+ok  	github.com/gofhir/validator/v2/pkg/specs	3.106s
+ok  	github.com/gofhir/validator/v2/pkg/structural	49.434s
+ok  	github.com/gofhir/validator/v2/pkg/terminology	2.182s
+?   	github.com/gofhir/validator/v2/pkg/ucumvalidator	[no test files]
+ok  	github.com/gofhir/validator/v2/pkg/validator	250.791s
+ok  	github.com/gofhir/validator/v2/pkg/walker	25.345s
+go test -run DoesNotAllocate ./internal/objectkeys
+ok  	github.com/gofhir/validator/v2/internal/objectkeys	0.302s

@@ -1,0 +1,57 @@
+== 4.0.1 f01-ext1-holder.json
+   Patient.extension[0] | invariant | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+   Patient.extension[0].valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 4.0.1 f02-obs6-holder.json
+   Observation.valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 4.0.1 f03-pat1-holder.json
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization'
+   Patient.contact[0].name | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 4.0.1 f04-wrapped-given.json
+   Patient.name | structure | 'name' repeats: it must be a JSON array, not an object
+== 4.0.1 f05-wrapped-coding.json
+   Patient.name | structure | 'name' repeats: it must be a JSON array, not an object
+== 4.0.1 f06-given-short-r5.json
+== 4.0.1 f07-pat1-omit.json
+   Patient.contact[0].name | structure | 'name' is an empty object: an element must have a value or children
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization'
+== 4.0.1 f08-type-omit.json
+   Patient.identifier[0].type | structure | 'type' is an empty object: an element must have a value or children
+== 4.3.0 f01-ext1-holder.json
+   Patient.extension[0] | invariant | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+   Patient.extension[0].valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+   Patient.extension[0].valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resourc
+== 4.3.0 f02-obs6-holder.json
+   Observation.valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+   Observation.valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resourc
+== 4.3.0 f03-pat1-holder.json
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization' (defi
+   Patient.contact[0].name | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+   Patient.contact[0].name | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resourc
+== 4.3.0 f04-wrapped-given.json
+   Patient.name | structure | 'name' repeats: it must be a JSON array, not an object
+== 4.3.0 f05-wrapped-coding.json
+   Patient.name | structure | 'name' repeats: it must be a JSON array, not an object
+== 4.3.0 f06-given-short-r5.json
+== 4.3.0 f07-pat1-omit.json
+   Patient.contact[0].name | structure | 'name' is an empty object: an element must have a value or children
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization' (defi
+== 4.3.0 f08-type-omit.json
+   Patient.identifier[0].type | structure | 'type' is an empty object: an element must have a value or children
+== 5.0.0 f01-ext1-holder.json
+   Patient.extension[0] | invariant | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+   Patient.extension[0].valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 5.0.0 f02-obs6-holder.json
+   Observation.valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 5.0.0 f03-pat1-holder.json
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization' (defi
+   Patient.contact[0].name | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 5.0.0 f04-wrapped-given.json
+   Patient.name | structure | 'name' repeats: it must be a JSON array, not an object
+== 5.0.0 f05-wrapped-coding.json
+   Patient.name | structure | 'name' repeats: it must be a JSON array, not an object
+== 5.0.0 f06-given-short-r5.json
+== 5.0.0 f07-pat1-omit.json
+   Patient.contact[0].name | structure | 'name' is an empty object: an element must have a value or children
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization' (defi
+== 5.0.0 f08-type-omit.json
+   Patient.identifier[0].type | structure | 'type' is an empty object: an element must have a value or children

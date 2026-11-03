@@ -753,3 +753,32 @@ func TestPrimitiveJSONTypePairsWithHL7ParserError(t *testing.T) {
 		}
 	}
 }
+
+// El array vacío de HL7 no trae ID de mensaje: la familia empty-array lo empareja por código y texto,
+// en la misma ubicación (#190).
+func TestEmptyArrayPairsWithHL7ParserError(t *testing.T) {
+	fam, err := LoadFamilies()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const loc = "Patient.identifier[0].type.coding"
+	const text = "Array cannot be empty - the property should not be present if it has no values"
+	g := GoIssue{
+		File: "p/x.json", Severity: "error", MessageID: "STRUCTURE_ARRAY_EMPTY",
+		Expression: []string{loc}, Diagnostics: "'coding' is an empty array: a property with no values must be omitted",
+	}
+	h := func(loc, text string) HL7Issue {
+		return HL7Issue{File: "p/x.json", Severity: "error", Key: "invalid", Code: "invalid", Location: loc, Text: text}
+	}
+	if un := Assign(fam, []GoIssue{g}, []HL7Issue{h(loc, text)}); len(un.Paired) != 1 {
+		t.Error("the HL7 empty-array error must pair")
+	}
+	for _, x := range []HL7Issue{
+		h("Patient.identifier[0].type", text),
+		h(loc, "Object must have some content"),
+	} {
+		if un := Assign(fam, []GoIssue{g}, []HL7Issue{x}); len(un.Paired) != 0 {
+			t.Errorf("%s at %s must not pair", x.Text, x.Location)
+		}
+	}
+}

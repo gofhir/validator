@@ -1,0 +1,142 @@
+== 4.0.1 e01-name-empty.json
+   Patient.name | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e02-given-empty.json
+== 4.0.1 e03-shadow-empty.json
+== 4.0.1 e04-both-empty.json
+== 4.0.1 e05-gender-arr.json
+   Patient.gender | invalid | This property must be a simple value, not an Array (gender at Patient.gender)
+== 4.0.1 e06-marital-arr.json
+   Patient.maritalStatus | invalid | The property maritalStatus must be an Object, not an Array (at Patient.maritalStatus)
+== 4.0.1 e07-coding-empty.json
+   Patient.identifier[0].type.coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e08-ext-empty.json
+   Patient.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e09-modext-empty.json
+   Patient.modifierExtension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e10-contained-empty.json
+   Patient.contained | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e11-unknown-empty.json
+   Patient | structure | Unrecognized property 'foo'
+== 4.0.1 e12-choice-arr.json
+   Patient.deceased[x] | invalid | This property must be a simple value, not an Array (deceasedBoolean at Patient.deceased[x])
+== 4.0.1 e13-min1-empty.json
+   Composition.author | invalid | Array cannot be empty - the property should not be present if it has no values
+   Composition | structure | Composition.author: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Compo
+== 4.0.1 e14-bundle-entry-empty.json
+   Bundle.entry | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e15-shadow-empty-values.json
+== 4.0.1 e16-nested-arr.json
+   ? | invalid | Error parsing JSON: Error parsing JSON source: Unexpected content at end of JSON: Close at Line 1 (path=[/name
+== 4.0.1 e17-control.json
+== 4.0.1 e18-meta-tag-empty.json
+   Patient.meta.tag | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e19-ext-value-line.json
+== 4.0.1 e20-contained-name.json
+   Patient.contained[0].name | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e21-bundle-res-name.json
+   Bundle.entry[0].resource.name | invalid | Array cannot be empty - the property should not be present if it has no values
+   Bundle.entry[0] | invariant | Constraint failed: bdl-5: 'must be a resource unless there's a request or response'
+== 4.0.1 e22-two-empty.json
+   Patient.name | invalid | Array cannot be empty - the property should not be present if it has no values
+   Patient.telecom | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e23-ext-in-elem.json
+   Patient.name[0].extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e24-shadow-single-ext.json
+   Patient.birthDate.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 e25-coding-empty-only.json
+   Patient.maritalStatus.coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e01-name-empty.json
+   Patient.name | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e02-given-empty.json
+== 4.3.0 e03-shadow-empty.json
+== 4.3.0 e04-both-empty.json
+== 4.3.0 e05-gender-arr.json
+   Patient.gender | invalid | This property must be a simple value, not an Array (gender at Patient.gender)
+== 4.3.0 e06-marital-arr.json
+   Patient.maritalStatus | invalid | The property maritalStatus must be an Object, not an Array (at Patient.maritalStatus)
+== 4.3.0 e07-coding-empty.json
+   Patient.identifier[0].type.coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e08-ext-empty.json
+   Patient.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e09-modext-empty.json
+   Patient.modifierExtension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e10-contained-empty.json
+   Patient.contained | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e11-unknown-empty.json
+   Patient | structure | Unrecognized property 'foo'
+== 4.3.0 e12-choice-arr.json
+   Patient.deceased[x] | invalid | This property must be a simple value, not an Array (deceasedBoolean at Patient.deceased[x])
+== 4.3.0 e13-min1-empty.json
+   Composition.author | invalid | Array cannot be empty - the property should not be present if it has no values
+   Composition | structure | Composition.author: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Compo
+== 4.3.0 e14-bundle-entry-empty.json
+   Bundle.entry | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e15-shadow-empty-values.json
+== 4.3.0 e16-nested-arr.json
+   ? | invalid | Error parsing JSON: Error parsing JSON source: Unexpected content at end of JSON: Close at Line 1 (path=[/name
+== 4.3.0 e17-control.json
+== 4.3.0 e18-meta-tag-empty.json
+   Patient.meta.tag | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e19-ext-value-line.json
+== 4.3.0 e20-contained-name.json
+   Patient.contained[0].name | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e21-bundle-res-name.json
+   Bundle.entry[0].resource.name | invalid | Array cannot be empty - the property should not be present if it has no values
+   Bundle.entry[0] | invariant | Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org
+== 4.3.0 e22-two-empty.json
+   Patient.name | invalid | Array cannot be empty - the property should not be present if it has no values
+   Patient.telecom | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e23-ext-in-elem.json
+   Patient.name[0].extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e24-shadow-single-ext.json
+   Patient.birthDate.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 e25-coding-empty-only.json
+   Patient.maritalStatus.coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e01-name-empty.json
+   Patient.name | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e02-given-empty.json
+== 5.0.0 e03-shadow-empty.json
+== 5.0.0 e04-both-empty.json
+== 5.0.0 e05-gender-arr.json
+   Patient.gender | invalid | This property must be a simple value, not an Array (gender at Patient.gender)
+== 5.0.0 e06-marital-arr.json
+   Patient.maritalStatus | invalid | The property maritalStatus must be an Object, not an Array (at Patient.maritalStatus)
+== 5.0.0 e07-coding-empty.json
+   Patient.identifier[0].type.coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e08-ext-empty.json
+   Patient.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e09-modext-empty.json
+   Patient.modifierExtension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e10-contained-empty.json
+   Patient.contained | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e11-unknown-empty.json
+   Patient | structure | Unrecognized property 'foo'
+== 5.0.0 e12-choice-arr.json
+   Patient.deceased[x] | invalid | This property must be a simple value, not an Array (deceasedBoolean at Patient.deceased[x])
+== 5.0.0 e13-min1-empty.json
+   Composition.author | invalid | Array cannot be empty - the property should not be present if it has no values
+   Composition | structure | Composition.author: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Compo
+== 5.0.0 e14-bundle-entry-empty.json
+   Bundle.entry | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e15-shadow-empty-values.json
+== 5.0.0 e16-nested-arr.json
+   ? | invalid | Error parsing JSON: Error parsing JSON source: Unexpected content at end of JSON: Close at Line 1 (path=[/name
+== 5.0.0 e17-control.json
+== 5.0.0 e18-meta-tag-empty.json
+   Patient.meta.tag | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e19-ext-value-line.json
+== 5.0.0 e20-contained-name.json
+   Patient.contained[0].name | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e21-bundle-res-name.json
+   Bundle.entry[0].resource.name | invalid | Array cannot be empty - the property should not be present if it has no values
+   Bundle.entry[0] | invariant | Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org
+   Bundle | invariant | Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries mu
+== 5.0.0 e22-two-empty.json
+   Patient.name | invalid | Array cannot be empty - the property should not be present if it has no values
+   Patient.telecom | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e23-ext-in-elem.json
+   Patient.name[0].extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e24-shadow-single-ext.json
+   Patient.birthDate.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 e25-coding-empty-only.json
+   Patient.maritalStatus.coding | invalid | Array cannot be empty - the property should not be present if it has no values

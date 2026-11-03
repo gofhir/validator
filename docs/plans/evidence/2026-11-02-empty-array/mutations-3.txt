@@ -1,0 +1,19 @@
+control ./pkg/validator -run TestEmptyArray -failfast: exit=0 (10s)
+control ./internal/tools/hl7diff: exit=0 (1s)
+control ./pkg/structural ./pkg/validator -run EmptyArray|EmptyPrimitive -failfast: exit=0 (10s)
+m1 el chequeo apagado: MUERE (4s) ['--- FAIL: TestEmptyArrayMetamorphic (2.82s)']
+m2 solo complejos (sin primitivos en R4/R4B): MUERE (4s) ['--- FAIL: TestEmptyArrayMetamorphic (2.78s)']
+m3 primitivos también en R5: MUERE (11s) ['--- FAIL: TestEmptyArrayMetamorphic (9.87s)']
+m4 R4B fuera de la lista de releases: MUERE (7s) ['--- FAIL: TestEmptyArrayMetamorphic (5.68s)']
+m5 también cuando el elemento no se repite: MUERE (10s) ['--- FAIL: TestEmptyArray (0.01s)']
+m6 sin registrar el objeto que lo contiene (ele-1): MUERE (4s) ['--- FAIL: TestEmptyArrayMetamorphic (2.79s)']
+m7 el path con índice: MUERE (4s) ['--- FAIL: TestEmptyArrayMetamorphic (2.78s)']
+m8 también sin edits (duplicado en la fase estructural): MUERE (11s) ['--- FAIL: TestEmptyArrayReportedOnlyByNormalize (1.40s)']
+m9 el ID nuevo fuera del switch de Normalize: MUERE (4s) ['--- FAIL: TestEmptyArrayMetamorphic (2.88s)']
+m10 el chequeo detrás de la compuerta primitiveKind (D8): MUERE (11s) ['--- FAIL: TestEmptyArrayOfAnElementOfSeveralTypes (0.62s)']
+m11 el _x vacío no se revisa: MUERE (4s) ['--- FAIL: TestEmptyArrayMetamorphic (2.72s)']
+m12 hl7diff: el ID de gofhir mal escrito en la familia: MUERE (1s) ['--- FAIL: TestFamiliesCoverEveryGofhirID (0.00s)', '--- FAIL: TestEmptyArrayPairsWithHL7ParserError (0.00s)']
+m13 hl7diff: el texto de HL7 no coincide: MUERE (1s) ['--- FAIL: TestEmptyArrayPairsWithHL7ParserError (0.00s)']
+m14 DSTU2 fuera de la lista de releases: MUERE (10s) ['--- FAIL: TestEmptyPrimitiveArraysForbidden (0.00s)']
+m15 una versión desconocida sigue la regla de R4: MUERE (10s) ['--- FAIL: TestEmptyPrimitiveArraysForbidden (0.00s)']
+15/15 mueren

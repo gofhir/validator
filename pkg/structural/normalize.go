@@ -101,7 +101,7 @@ func (v *Validator) Normalize(data map[string]any, raw []byte, sd *registry.Stru
 	}
 	for _, is := range all.Issues {
 		switch issue.DiagnosticID(is.MessageID) {
-		case issue.DiagStructureEmptyObject:
+		case issue.DiagStructureEmptyObject, issue.DiagStructureArrayEmpty:
 			n.Issues.AddIssue(is)
 		case issue.DiagStructureArrayExpected, issue.DiagStructureObjectExpected, issue.DiagStructureValueExpected:
 			if applied { // else data is as written, and the structural phase reports them on it

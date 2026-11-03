@@ -1,0 +1,54 @@
+== 4.0.1 f01-ext1-holder.json
+   Patient.extension[0].value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+   Patient.extension[0] | invariant | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+== 4.0.1 f02-obs6-holder.json
+   Observation.value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 f03-pat1-holder.json
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization'
+== 4.0.1 f04-wrapped-given.json
+   Patient.name | invalid | The property name must be a JSON Array, not an Object (at Patient)
+== 4.0.1 f05-wrapped-coding.json
+   Patient.name | invalid | The property name must be a JSON Array, not an Object (at Patient)
+   Patient.name.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.0.1 f06-given-short-r5.json
+== 4.0.1 f07-pat1-omit.json
+   Patient.contact[0].name | invalid | Object must have some content
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization'
+== 4.0.1 f08-type-omit.json
+   Patient.identifier[0].type | invalid | Object must have some content
+== 4.3.0 f01-ext1-holder.json
+   Patient.extension[0].value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+   Patient.extension[0] | invariant | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+== 4.3.0 f02-obs6-holder.json
+   Observation.value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 f03-pat1-holder.json
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization' (defi
+== 4.3.0 f04-wrapped-given.json
+   Patient.name | invalid | The property name must be a JSON Array, not an Object (at Patient)
+== 4.3.0 f05-wrapped-coding.json
+   Patient.name | invalid | The property name must be a JSON Array, not an Object (at Patient)
+   Patient.name.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 4.3.0 f06-given-short-r5.json
+== 4.3.0 f07-pat1-omit.json
+   Patient.contact[0].name | invalid | Object must have some content
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization' (defi
+== 4.3.0 f08-type-omit.json
+   Patient.identifier[0].type | invalid | Object must have some content
+== 5.0.0 f01-ext1-holder.json
+   Patient.extension[0].value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+   Patient.extension[0] | invariant | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/
+== 5.0.0 f02-obs6-holder.json
+   Observation.value[x].coding | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 f03-pat1-holder.json
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization' (defi
+== 5.0.0 f04-wrapped-given.json
+   Patient.name | invalid | The property name must be a JSON Array, not an Object (at Patient)
+== 5.0.0 f05-wrapped-coding.json
+   Patient.name | invalid | The property name must be a JSON Array, not an Object (at Patient)
+   Patient.name.extension | invalid | Array cannot be empty - the property should not be present if it has no values
+== 5.0.0 f06-given-short-r5.json
+== 5.0.0 f07-pat1-omit.json
+   Patient.contact[0].name | invalid | Object must have some content
+   Patient.contact[0] | invariant | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization' (defi
+== 5.0.0 f08-type-omit.json
+   Patient.identifier[0].type | invalid | Object must have some content

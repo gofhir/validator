@@ -185,6 +185,19 @@
       ]
     },
     {
+      "name": "empty-array",
+      "rule": "equal",
+      "gofhir": [
+        "STRUCTURE_ARRAY_EMPTY"
+      ],
+      "hl7NoID": [
+        {
+          "code": "invalid",
+          "text": "^Array cannot be empty"
+        }
+      ]
+    },
+    {
       "name": "json-shape",
       "rule": "equal",
       "gofhir": [
