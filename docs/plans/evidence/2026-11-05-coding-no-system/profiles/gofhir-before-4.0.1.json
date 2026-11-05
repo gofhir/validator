@@ -1,0 +1,220 @@
+[
+  {
+    "resource": "inst/r1.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided",
+        "expression": [
+          "Observation.code.coding[0]"
+        ]
+      }
+    ],
+    "duration": "5.021ms"
+  },
+  {
+    "resource": "inst/r2.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      }
+    ],
+    "duration": "130µs"
+  },
+  {
+    "resource": "inst/r3.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided",
+        "expression": [
+          "Observation.code.coding[0]"
+        ]
+      }
+    ],
+    "duration": "461µs"
+  },
+  {
+    "resource": "inst/r4.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "information",
+        "code": "code-invalid",
+        "diagnostics": "The value provided ('active') could not be checked against value set 'http://example.org/fhir/ValueSet/missing': no terminology source could resolve it",
+        "expression": [
+          "Observation.code"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided",
+        "expression": [
+          "Observation.code.coding[0]"
+        ]
+      }
+    ],
+    "duration": "412µs"
+  },
+  {
+    "resource": "inst/r5.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "information",
+        "code": "code-invalid",
+        "diagnostics": "The value provided ('http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical#active') could not be checked against value set 'http://example.org/fhir/ValueSet/missing': no terminology source could resolve it",
+        "expression": [
+          "Observation.code"
+        ]
+      }
+    ],
+    "duration": "94µs"
+  },
+  {
+    "resource": "inst/r6.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided",
+        "expression": [
+          "Observation.category[0].coding[0]"
+        ]
+      }
+    ],
+    "duration": "461µs"
+  },
+  {
+    "resource": "inst/r7.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      }
+    ],
+    "duration": "99µs"
+  },
+  {
+    "resource": "inst/r8.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided",
+        "expression": [
+          "Observation.extension[0].valueCodeableConcept.coding[0]"
+        ]
+      }
+    ],
+    "duration": "427µs"
+  },
+  {
+    "resource": "inst/r9.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      }
+    ],
+    "duration": "93µs"
+  }
+]

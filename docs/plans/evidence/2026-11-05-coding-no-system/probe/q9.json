@@ -1,0 +1,1 @@
+{"resourceType":"Appointment","id":"q9","status":"proposed","participant":[{"actor":{"display":"x"},"status":"accepted"}],"recurrenceTemplate":[{"recurrenceType":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation","code":"MO"}]},"monthlyTemplate":{"dayOfWeek":{"code":"mon"},"monthFrequency":1}}]}

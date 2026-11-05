@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "r3", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-bind-ext"]}, "status": "final", "code": {"coding": [{"code": "active"}]}, "subject": {"display": "x"}}

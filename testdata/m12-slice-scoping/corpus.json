@@ -345,6 +345,9 @@
         {"file": "ValueSet-use-context.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915): compose.include.valueSet entries are unresolvable"},
         {"file": "Bundle-valueset-expansions.json", "reason": "HL7 validator 6.10.4 crashes on it under -tx n/a (NullPointerException, ValueSetValidator.java:915) when CodeSystem-snomedct.json (content not-present) is in the same batch"}
       ]
-    }
+    },
+    {"name": "coding-no-system-probes", "files": ["testdata/m12-slice-scoping/probes/nsys_q*.json"]},
+    {"name": "coding-no-system-probes-r4b", "version": "4.3.0", "files": ["testdata/m12-slice-scoping/probes/nsys_q*.json"]},
+    {"name": "coding-no-system-probes-r5", "version": "5.0.0", "files": ["testdata/m12-slice-scoping/probes/nsys_q[1-6].json"]}
   ]
 }

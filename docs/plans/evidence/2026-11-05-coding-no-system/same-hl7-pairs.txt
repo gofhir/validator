@@ -1,0 +1,12 @@
+6 ('coding-no-system-probes', 'BINDING_EXTENSIBLE_NO_CODING', True)
+2 ('coding-no-system-probes', 'BINDING_REQUIRED_NO_CODING', True)
+6 ('coding-no-system-probes-r4b', 'BINDING_EXTENSIBLE_NO_CODING', True)
+2 ('coding-no-system-probes-r4b', 'BINDING_REQUIRED_NO_CODING', True)
+1 ('coding-no-system-probes-r5', 'BINDING_EXTENSIBLE_NO_CODING', True)
+3 ('coding-no-system-probes-r5', 'BINDING_REQUIRED_NO_CODING', True)
+3 ('r4-core-examples', 'BINDING_EXTENSIBLE_NO_CODING', False)
+166 ('r4-core-examples', 'BINDING_EXTENSIBLE_NO_CODING', True)
+--- unmatched
+('r4-core-examples', ('Claim-100152.json', 'Claim.contained[4].relationship'), [])
+('r4-core-examples', ('Claim-MED-00050.json', 'Claim.contained[1].relationship'), [])
+('r4-core-examples', ('CoverageEligibilityResponse-E2502.json', 'CoverageEligibilityResponse.contained[0].relationship'), [])

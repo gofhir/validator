@@ -1,0 +1,14 @@
+{
+ "resourceType": "ValueSet",
+ "id": "whole-loinc",
+ "url": "http://example.org/fhir/ValueSet/whole-loinc",
+ "name": "WholeLoinc",
+ "status": "draft",
+ "compose": {
+  "include": [
+   {
+    "system": "http://loinc.org"
+   }
+  ]
+ }
+}

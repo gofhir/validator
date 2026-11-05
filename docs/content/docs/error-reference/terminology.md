@@ -39,6 +39,8 @@ Terminology errors occur when coded values do not conform to the terminology bin
 
 A Coding element has a `code` but no `system`. While not always an error (hence the warning severity), a code without a system is ambiguous because the same code string can mean different things in different code systems.
 
+A Coding without a `system` is never a member of a value set, because a value set is a set of system and code pairs. In a CodeableConcept bound to a value set, such a Coding does not count as a member: if no other Coding is a member, `BINDING_REQUIRED_NO_CODING` (required binding, error) or `BINDING_EXTENSIBLE_NO_CODING` (extensible binding, warning) is reported at the CodeableConcept, whatever its code is. This needs the value set to be found: when it is not, the binding is reported as one that could not be checked, as for a Coding with a system.
+
 **Example:**
 
 ```json

@@ -1,0 +1,8 @@
+M0 resolver verdict ignored (always Invalid) -> KILLED []
+M1 rule removed -> KILLED ['--- FAIL: TestCodingNoSystemBindingCodeableConcept (1.70s)', '--- FAIL: TestCodingNoSystemBindingLabel (0.01s)', '--- FAIL: TestCodingNoSystemBindingConsent (0.01s)']
+M2 rule applies to any system -> KILLED ['--- FAIL: TestCodingNoSystemBindingCodeableConcept (1.88s)', '--- FAIL: TestCodingNoSystemBindingConsent (0.01s)', '--- FAIL: TestCodingNoSystemBindingProfiles (0.02s)']
+M3 unresolved rejects -> KILLED ['--- FAIL: TestCodingNoSystemBindingProfiles (0.01s)', '--- FAIL: TestCodingNoSystemBindingUnresolvedAuthority (0.00s)', '--- FAIL: TestCodingNoSystemBindingFailingAuthority (0.01s)']
+M4 label always system#code -> KILLED ['--- FAIL: TestCodingNoSystemBindingLabel (0.01s)']
+M5 extra no-code error (Codex r1) -> KILLED ['--- FAIL: TestCodingNoSystemBindingCodeableConcept (2.05s)', '--- FAIL: TestCodingNoSystemBindingProfiles (0.02s)']
+M6 strict membership kept -> KILLED ['--- FAIL: TestCodingNoSystemBindingProfiles (0.01s)']
+M7 authority error ignored -> KILLED []

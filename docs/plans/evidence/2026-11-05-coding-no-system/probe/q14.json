@@ -1,0 +1,1 @@
+{"resourceType":"Consent","id":"q14","status":"active","scope":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/consentscope","code":"patient-privacy"}]},"category":[{"coding":[{"code":"59284-0","version":"2.7"}]}],"policyRule":{"text":"x"}}

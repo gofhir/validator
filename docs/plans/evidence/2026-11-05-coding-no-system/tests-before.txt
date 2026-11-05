@@ -1,0 +1,46 @@
+--- FAIL: TestCodingNoSystemBindingCodeableConcept (3.11s)
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/4.0.1/cs_q4 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ Patient.maritalStatus.coding[0]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Patient.maritalStatus" "warning CODING_NO_SYSTEM @ Patient.maritalStatus.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/4.0.1/cs_q6 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ AllergyIntolerance.clinicalStatus" "warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/4.0.1/cs_q1 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ AllergyIntolerance.clinicalStatus" "warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/4.3.0/cs_q1 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ AllergyIntolerance.clinicalStatus" "warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/4.3.0/cs_q4 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ Patient.maritalStatus.coding[0]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Patient.maritalStatus" "warning CODING_NO_SYSTEM @ Patient.maritalStatus.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/4.3.0/cs_q6 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ AllergyIntolerance.clinicalStatus" "warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/5.0.0/cs_q4 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ Patient.maritalStatus.coding[0]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Patient.maritalStatus" "warning CODING_NO_SYSTEM @ Patient.maritalStatus.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/5.0.0/cs_q6 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ AllergyIntolerance.clinicalStatus" "warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/5.0.0/cs_q5 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ Patient.communication[0].language.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ Patient.communication[0].language" "warning CODING_NO_SYSTEM @ Patient.communication[0].language.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingCodeableConcept/5.0.0/cs_q1 (0.00s)
+        coding_no_system_binding_test.go:91: got ["warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ AllergyIntolerance.clinicalStatus" "warning CODING_NO_SYSTEM @ AllergyIntolerance.clinicalStatus.coding[0]"]
+--- FAIL: TestCodingNoSystemBindingLabel (0.02s)
+    coding_no_system_binding_test.go:106: 0 issues BINDING_REQUIRED_NO_CODING at AllergyIntolerance.clinicalStatus, want exactly 1 (all: [warning | CONSTRAINT_FAILED | Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation) | AllergyIntolerance warning | CODING_NO_SYSTEM | Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided | AllergyIntolerance.clinicalStatus.coding[0]])
+--- FAIL: TestCodingNoSystemBindingConsent (0.01s)
+    --- FAIL: TestCodingNoSystemBindingConsent/cs_q11 (0.00s)
+        coding_no_system_binding_test.go:135: got ["warning CODING_NO_SYSTEM @ Consent.category[0].coding[0]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Consent.category[0]" "warning CODING_NO_SYSTEM @ Consent.category[0].coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingConsent/cs_q12 (0.00s)
+        coding_no_system_binding_test.go:135: got ["warning CODING_NO_SYSTEM @ Consent.category[0].coding[0]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Consent.category[0]" "warning CODING_NO_SYSTEM @ Consent.category[0].coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingConsent/cs_q14 (0.00s)
+        coding_no_system_binding_test.go:135: got ["warning CODING_NO_SYSTEM @ Consent.category[0].coding[0]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Consent.category[0]" "warning CODING_NO_SYSTEM @ Consent.category[0].coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingConsent/cs_q15 (0.00s)
+        coding_no_system_binding_test.go:135: got ["warning CODING_NO_SYSTEM @ Consent.category[0].coding[0]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Consent.category[0]" "warning CODING_NO_SYSTEM @ Consent.category[0].coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingConsent/cs_q16 (0.00s)
+        coding_no_system_binding_test.go:135: got ["warning CODING_NO_SYSTEM @ Consent.category[0].coding[1]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Consent.category[0]" "warning CODING_NO_SYSTEM @ Consent.category[0].coding[1]"]
+--- FAIL: TestCodingNoSystemBindingProfiles (0.02s)
+    --- FAIL: TestCodingNoSystemBindingProfiles/r3 (0.00s)
+        coding_no_system_binding_test.go:169: got ["warning CODING_NO_SYSTEM @ Observation.code.coding[0]"], want ["warning BINDING_EXTENSIBLE_NO_CODING @ Observation.code" "warning CODING_NO_SYSTEM @ Observation.code.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingProfiles/r6 (0.00s)
+        coding_no_system_binding_test.go:169: got ["warning CODING_NO_SYSTEM @ Observation.category[0].coding[0]"], want ["error SLICING_CARDINALITY_MIN @ Observation.category:status" "warning CODING_NO_SYSTEM @ Observation.category[0].coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingProfiles/r8 (0.00s)
+        coding_no_system_binding_test.go:169: got ["warning CODING_NO_SYSTEM @ Observation.extension[0].valueCodeableConcept.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ Observation.extension[0].valueCodeableConcept" "warning CODING_NO_SYSTEM @ Observation.extension[0].valueCodeableConcept.coding[0]"]
+    --- FAIL: TestCodingNoSystemBindingProfiles/r1 (0.00s)
+        coding_no_system_binding_test.go:169: got ["warning CODING_NO_SYSTEM @ Observation.code.coding[0]"], want ["error BINDING_REQUIRED_NO_CODING @ Observation.code" "warning CODING_NO_SYSTEM @ Observation.code.coding[0]"]
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	3.828s
+FAIL
