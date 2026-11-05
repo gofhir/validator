@@ -1,0 +1,14 @@
+# core 81aa65b16 (fix-expansion-npe on master 38efe7c38), CLI 7.0.5-SNAPSHOT, -version 4.0.1 -tx n/a
+# lote: ValueSet-media-modality, ValueSet-use-context, CodeSystem-snomedct, Bundle-valueset-expansions, Bundle-valuesets
+-- ValueSet-media-modality.json ------------------------------------------------------------------------------------------------------------
+Success: 0 errors, 3 warnings, 2 notes
+-- ValueSet-use-context.json ---------------------------------------------------------------------------------------------------------
+*FAILURE*: 2 errors, 8 warnings, 4 notes
+-- CodeSystem-snomedct.json --------------------------------------------------------------------------------------------------------
+*FAILURE*: 4 errors, 80 warnings, 82 notes
+-- Bundle-valueset-expansions.json ---------------------------------------------------------------------------------------------------------------
+*FAILURE*: 2680 errors, 3717 warnings, 3881 notes
+-- Bundle-valuesets.json -----------------------------------------------------------------------------------------------------
+*FAILURE*: 1407 errors, 6475 warnings, 1146 notes
+# infrastructure fails: 0
+# issues distintos frente a 7.0.4 con -XX:-OmitStackTraceInFastThrow: 0
