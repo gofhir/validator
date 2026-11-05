@@ -80,7 +80,7 @@ func (v *Validator) checkShape(data map[string]any, key string, value any, resol
 	if isArray && len(items) == 0 && repeats(resolved) {
 		// Antes de saber el tipo: solo depende de que el elemento se repita (un no repetido escrito [] deja
 		// el error de forma de abajo)
-		v.checkEmptyArray(data, key, path, primitive, ctx, result)
+		v.checkEmptyArray(key, path, primitive, ctx, result)
 		return value, true
 	}
 	if !known {
@@ -158,17 +158,16 @@ func (v *Validator) checkItems(data map[string]any, key string, items []any, pri
 	}
 }
 
-// checkEmptyArray reporta key, una propiedad de data en path que se repite, escrita como array vacío:
+// checkEmptyArray reporta key, una propiedad de un objeto en path que se repite, escrita como array vacío:
 // json.html dice que una propiedad sin valores se omite. Se reporta en el elemento, sin índice, como lo
 // nombra el parser de HL7, y solo sobre la fuente (ctx.edits, igual que un objeto vacío). El de un
 // primitivo se reporta solo donde el json.html de su release dice que los arrays nunca están vacíos
-// (emptyPrimitiveArraysForbidden). Reporte o no, data se juzga por su contenido tal como está escrito:
-// tiene una propiedad, así que no es un elemento sin contenido (ele-1).
-func (v *Validator) checkEmptyArray(data map[string]any, key, path string, primitive bool, ctx *validationContext, result *issue.Result) {
+// (emptyPrimitiveArraysForbidden). Un array vacío no es contenido (HL7 7.0.4): el objeto que lo contiene
+// no se registra en ctx.edits.holders, así que, si no tiene otro contenido, ele-1 se juzga como siempre.
+func (v *Validator) checkEmptyArray(key, path string, primitive bool, ctx *validationContext, result *issue.Result) {
 	if ctx.edits == nil {
 		return
 	}
-	ctx.edits.holders.add(data)
 	if primitive && !emptyPrimitiveArraysForbidden(v.registry.FHIRVersion()) {
 		return
 	}
@@ -245,7 +244,7 @@ func (v *Validator) checkShadowShape(data map[string]any, key string, value any,
 		return false
 	}
 	if len(items) == 0 {
-		v.checkEmptyArray(data, sibling, path, true, ctx, result)
+		v.checkEmptyArray(sibling, path, true, ctx, result)
 		return true
 	}
 	reported := map[string]bool{}

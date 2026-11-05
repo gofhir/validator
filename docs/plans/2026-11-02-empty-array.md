@@ -65,7 +65,8 @@ y `probe/hl7-property-canBeEmpty-6.10.2.txt`. Todas las sondas, con `-tx n/a`.
 - Un objeto que solo tiene un array vacío cuenta como ausente para las demás invariantes, en HL7 y en gofhir. f01:
   ext-1 se dispara en las dos. f02: obs-6 no se dispara en ninguna. f03: pat-1 se dispara en las dos.
 - f03 `contact[0].name: {given: []}`: HL7 no reporta nada en `name` (ni ele-1 ni objeto vacío); gofhir reporta
-  ele-1. El array vacío de un primitivo también cuenta como contenido escrito.
+  ele-1. El array vacío de un primitivo también cuenta como contenido escrito. (Con la 6.10.2. La 7.0.4 sí reporta
+  ele-1 en `contact[0].name`: ver §10.)
 - f05 `name: {extension: []}` (un objeto donde va un array): HL7 da la forma y el array vacío en
   `Patient.name.extension`, sin índice. f04 `name: {given: []}`: solo la forma.
 - f07 y f08 (omitir en vez de `[]`): `Object must have some content` en el objeto, y las mismas invariantes.
@@ -107,8 +108,9 @@ y `probe/hl7-property-canBeEmpty-6.10.2.txt`. Todas las sondas, con `-tx n/a`.
     recomienda que sí: el formato es el mismo y HL7 lo aplica igual a los complejos en R5.
 - **D3.** Un elemento que no se repite escrito `[]` deja solo el error de forma que ya existe (paridad e05, e06,
   e12, e28). Un elemento desconocido escrito `[]` deja solo el desconocido (e11).
-- **D4.** El objeto que contiene un array vacío, de un complejo o de un primitivo, se juzga por su contenido tal
-  como está escrito: no recibe ele-1 (paridad e07, e18, e25, e35 y f03). Se registra en `edits.holders`, el mismo conjunto que usa el objeto vacío. Las demás
+- **D4** (revisado el 03-11-2026, §10; antes seguía a la 6.10.2). Un array vacío no es contenido: el objeto que lo
+  contiene, de un complejo o de un primitivo, recibe ele-1 si no tiene otro contenido (paridad con la 7.0.4 en
+  e07, e18, e25, e35, f01, f02 y f03). No se registra en `edits.holders`. Las demás
   invariantes siguen igual (que-1 en e31). La cardinalidad cuenta 0 y se reporta además (paridad e13).
 - **D5.** Se reporta solo en `Normalize` (con `ctx.edits`), como `STRUCTURE_EMPTY_OBJECT`; la fase estructural
   sin `edits` no lo repite. El array no se borra del recurso (no hay `apply`): para FHIRPath, `[]` ya es vacío.
@@ -196,7 +198,7 @@ Revisor independiente sobre una copia sin `.git`, sin mi razonamiento. 11 hallaz
 | A3 | media | Los issues llevan línea y columna; agregar una propiedad las corre | **Aceptado.** Comparación sin `Location` |
 | A4 | media | e27 no se empareja en hl7diff (índice en `given`) | **Aceptado.** Divergencia en los dos lados (D6) |
 | A5 | media | e04 da dos issues en el mismo path | **Aceptado.** D7 |
-| A6 | media | No se sondeó una invariante sobre el objeto que solo tiene `[]` | **Aceptado.** Sondas f01–f03: misma conducta en HL7 y gofhir; f03 además muestra que un array vacío de primitivo cuenta como contenido (D4) |
+| A6 | media | No se sondeó una invariante sobre el objeto que solo tiene `[]` | **Aceptado.** Sondas f01–f03: misma conducta en HL7 y gofhir; f03 además mostraba, con la 6.10.2, que un array vacío de primitivo contaba como contenido. Con la 7.0.4 no cuenta: D4 revisado (§10) |
 | A7 | baja | El chequeo puede quedar detrás de la compuerta `primitiveKind` | **Aceptado.** D8 y una mutación |
 | A8 | baja | `name: {extension: []}` sin sondear | **Aceptado.** Sondas f04/f05 a la tabla |
 | A9 | baja | Evidencia de HL7 escasa; ¿7.x ya lo corrige? | **Aceptado.** Extractos de bytecode guardados; `master` tampoco lo revisa (§1) |
@@ -265,8 +267,45 @@ El usuario aprobó el plan ajustado, con D2 «según cada versión» (ADR-003).
 - Mutaciones 15/15. Asignaciones iguales a la base.
 - ADR-003 aceptado.
 
+## 10. Reapertura (03-11-2026): la referencia HL7 era la 6.10.2; la última es la 7.0.4
+
+El usuario preguntó por la última versión. La referencia de hl7diff y de las sondas era validator_cli 6.10.2;
+la 7.0.0 salió el 06-10-2026 y la 7.0.4 el 02-11-2026. `~/tools/validator_cli.jar` pasa a ser un enlace a la
+7.0.4; la 6.10.2 queda como `~/tools/validator_cli-6.10.2.jar`.
+
+- hl7diff `run` con la 7.0.4 ([hl7diff-run-7.0.4.txt](evidence/2026-11-02-empty-array/hl7diff-run-7.0.4.txt)):
+  - 55 grupos PASS;
+  - fallan solo `empty-array-probes*`, y todo por la misma causa: la 7.0.4 reporta ele-1 en el objeto que contiene
+    el array vacío (e07, e18, e25, e35, f01, f02, f03), en las tres versiones. Pasa también con un primitivo (f03,
+    `contact[0].name: {given: []}`). En R4B, la 7.0.4 lo reporta dos veces, una por cada texto de ele-1.
+- #190 tenía razón con la 7.0.3 (ele-1 en `type`). El comentario de corrección queda descartado.
+- **D4 revisado:** un array vacío no es contenido. El objeto que lo contiene se juzga como si la propiedad no
+  estuviera: `checkEmptyArray` no lo registra en `edits.holders`, y ele-1 se evalúa como siempre. D5 (reportar solo
+  en `Normalize`) no cambia.
+- En R4B, la 7.0.4 da dos ele-1 en un tipo de datos (uno por cada texto de ele-1) y uno en un BackboneElement
+  ([probe/hl7-7.0.4/out-r4b-holders.txt](evidence/2026-11-02-empty-array/probe/hl7-7.0.4/out-r4b-holders.txt),
+  `ValueSet.compose` con `include: []`). Las sondas de Go fijan el número exacto en los tipos de datos; el
+  metamórfico acepta 1 o 2 en R4B.
+- Verificación del D4 revisado:
+  - tests dirigidos ([tests-7.0.4.txt](evidence/2026-11-02-empty-array/tests-7.0.4.txt));
+  - hl7diff de los tres grupos PASS ([hl7diff-empty-array-7.0.4.txt](evidence/2026-11-02-empty-array/hl7diff-empty-array-7.0.4.txt));
+  - `same` sobre todo el manifiesto ([hl7diff-same-d4.txt](evidence/2026-11-02-empty-array/hl7diff-same-d4.txt)):
+    los grupos pesados son idénticos, y fuera de los grupos nuevos solo cambia `Patient.link` en
+    `bw_contained_profile.json`;
+  - mutaciones 15/15 ([mutations-4.txt](evidence/2026-11-02-empty-array/mutations-4.txt));
+  - `make check` verde ([make-check-7.0.4.txt](evidence/2026-11-02-empty-array/make-check-7.0.4.txt)).
+- Ronda de revisión (Opus) del D4 revisado: sin hallazgos de severidad media o mayor; converge. Hallazgos bajos:
+  - evidencia de R4B en un BackboneElement: agregada;
+  - la fila A6 y el texto de f03: anotados;
+  - el `same` vacío: el archivo se copió mientras se generaba; en el worktree tiene 367 líneas;
+  - las sondas de Go no son exhaustivas: es anterior a este cambio, y lo cubre hl7diff.
+- El fix de HL7 sigue vigente: la 7.0.4 tampoco reporta `given: []` ni `_given: []`. En 7.x, el validador usa
+  `org.hl7.fhir.services.elementmodel.JsonParser`. Se preparó un PR con el fix en las dos copias y casos en
+  fhir-test-cases (`/Volumes/dev/hl7/logs/pr-empty-array-*.md`), con una revisión independiente (Opus) cuyos
+  hallazgos se aplicaron: copia de r5, un issue por propiedad, dos casos más y la asimetría con R5 explicada.
+
 ## Pendientes
 
-- Comentario en #190: la versión es 6.10.2, y ele-1 en `type` no lo reporta HL7 (§1).
+- ~~Comentario en #190~~: descartado, era erróneo (§10).
 - Borrador de issue para `hapifhir/org.hl7.fhir.core`: `parseChildPrimitive` no reporta un array vacío.
 - Borrador de issue: paths de la fase estructural bajo `_x` (`Patient._birthDate.foo`).

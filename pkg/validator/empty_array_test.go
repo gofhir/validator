@@ -16,12 +16,12 @@ import (
 //
 // R4 y R4B, json.html §2.6.2.1 («Comparison with XML»): «Just as in XML, JSON objects and arrays are never
 // empty, and properties never have null values (except for a special case documented below). Omit a
-// property if it is empty». HL7 6.10.2 reporta el array vacío de un complejo o un recurso en todas las
+// property if it is empty». HL7 7.0.4 reporta el array vacío de un complejo o un recurso en todas las
 // releases y no el de un primitivo ni el de su "_x"; la regla de los primitivos sigue a json.html de cada
 // versión (ADR-003): se reporta en R4 y R4B y no en R5, cuyo texto ya no lo dice.
 //
-// Los valores esperados salen de HL7 6.10.2 (docs/plans/evidence/2026-11-02-empty-array/probe/hl7*.txt) y de
-// la especificación, no de la salida de este validador.
+// Los valores esperados salen de HL7 7.0.4 (docs/plans/evidence/2026-11-02-empty-array/hl7diff-run-7.0.4.txt)
+// y de la especificación, no de la salida de este validador.
 
 const eaArrayEmpty = "STRUCTURE_ARRAY_EMPTY"
 
@@ -48,7 +48,8 @@ var eaCases = []eaCase{
 	{file: "e04-both-empty", r4: []string{"Patient.name[0].given (given)", "Patient.name[0].given (_given)"}},
 	{file: "e05-gender-arr", other: []string{"STRUCTURE_VALUE_EXPECTED @ Patient.gender"}},
 	{file: "e06-marital-arr", other: []string{"STRUCTURE_OBJECT_EXPECTED @ Patient.maritalStatus"}},
-	{file: "e07-coding-empty", all: []string{"Patient.identifier[0].type.coding (coding)"}, absent: []string{"ele-1"}},
+	{file: "e07-coding-empty", all: []string{"Patient.identifier[0].type.coding (coding)"},
+		other: []string{"ele-1 @ Patient.identifier[0].type"}},
 	{file: "e08-ext-empty", all: []string{"Patient.extension (extension)"}},
 	{file: "e09-modext-empty", all: []string{"Patient.modifierExtension (modifierExtension)"}},
 	{file: "e10-contained-empty", all: []string{"Patient.contained (contained)"}},
@@ -59,29 +60,33 @@ var eaCases = []eaCase{
 	{file: "e14-bundle-entry-empty", all: []string{"Bundle.entry (entry)"}},
 	{file: "e15-shadow-empty-values", r4: []string{"Patient.name[0].given (_given)"}},
 	{file: "e17-control"},
-	{file: "e18-meta-tag-empty", all: []string{"Patient.meta.tag (tag)"}, absent: []string{"ele-1"}},
+	{file: "e18-meta-tag-empty", all: []string{"Patient.meta.tag (tag)"}, other: []string{"ele-1 @ Patient.meta"}},
 	{file: "e19-ext-value-line", r4: []string{"Patient.extension[0].valueAddress.line (line)"}},
 	{file: "e20-contained-name", all: []string{"Patient.contained[0].name (name)"}},
 	{file: "e21-bundle-res-name", all: []string{"Bundle.entry[0].resource.name (name)"}},
 	{file: "e22-two-empty", all: []string{"Patient.name (name)", "Patient.telecom (telecom)"}},
 	{file: "e23-ext-in-elem", all: []string{"Patient.name[0].extension (extension)"}},
 	{file: "e24-shadow-single-ext", all: []string{"Patient._birthDate.extension (extension)"}},
-	{file: "e25-coding-empty-only", all: []string{"Patient.maritalStatus.coding (coding)"}, absent: []string{"ele-1"}},
+	{file: "e25-coding-empty-only", all: []string{"Patient.maritalStatus.coding (coding)"},
+		other: []string{"ele-1 @ Patient.maritalStatus"}},
 	{file: "e27-shadow-item-ext-empty", all: []string{"Patient.name[0]._given[0].extension (extension)"}},
 	{file: "e29-ext-ext-empty", all: []string{"Patient.extension[0].extension (extension)"}},
 	{file: "e31-cref-item-empty", all: []string{"Questionnaire.item[0].item (item)"},
 		otherA: []string{"que-1 @ Questionnaire.item[0]"}, otherB: []string{"que-1b @ Questionnaire.item[0]"}},
-	{file: "e35-choice-coding-empty", all: []string{"Observation.valueCodeableConcept.coding (coding)"}, absent: []string{"ele-1"}},
+	{file: "e35-choice-coding-empty", all: []string{"Observation.valueCodeableConcept.coding (coding)"},
+		other: []string{"ele-1 @ Observation.valueCodeableConcept"}},
 	// Organization ya no tiene telecom en R5: solo el elemento desconocido.
 	{file: "e37-contained-item-empty", r4: []string{"Patient.contained[0].telecom (telecom)"},
 		other5: []string{"STRUCTURE_UNKNOWN_ELEMENT @ Patient.contained[0].telecom"}},
-	// El objeto que contiene un array vacío tiene contenido: las demás invariantes lo juzgan como escrito.
+	// Un array vacío no es contenido (HL7 7.0.4): el objeto que lo contiene recibe ele-1 si no tiene otro
+	// contenido, y las demás invariantes lo juzgan como si la propiedad no estuviera.
 	{file: "f01-ext1-holder", all: []string{"Patient.extension[0].valueCodeableConcept.coding (coding)"},
-		other: []string{"ext-1 @ Patient.extension[0]"}, absent: []string{"ele-1"}},
-	{file: "f02-obs6-holder", all: []string{"Observation.valueCodeableConcept.coding (coding)"}, absent: []string{"ele-1", "obs-6"}},
-	// El array vacío de un primitivo cuenta como contenido aunque no se reporte (R5): sin ele-1 en toda versión.
+		other: []string{"ext-1 @ Patient.extension[0]", "ele-1 @ Patient.extension[0].valueCodeableConcept"}},
+	{file: "f02-obs6-holder", all: []string{"Observation.valueCodeableConcept.coding (coding)"},
+		other: []string{"ele-1 @ Observation.valueCodeableConcept"}, absent: []string{"obs-6"}},
+	// Tampoco el array vacío de un primitivo es contenido (HL7 7.0.4), se reporte o no (R5): ele-1 en toda versión.
 	{file: "f03-pat1-holder", r4: []string{"Patient.contact[0].name.given (given)"},
-		other: []string{"pat-1 @ Patient.contact[0]"}, absent: []string{"ele-1"}},
+		other: []string{"pat-1 @ Patient.contact[0]", "ele-1 @ Patient.contact[0].name"}},
 	{file: "f04-wrapped-given", r4: []string{"Patient.name.given (given)"},
 		other: []string{"STRUCTURE_ARRAY_EXPECTED @ Patient.name"}},
 	{file: "f05-wrapped-coding", all: []string{"Patient.name.extension (extension)"},
@@ -162,6 +167,12 @@ func TestEmptyArray(t *testing.T) {
 				for _, w := range wantOther {
 					if !slices.Contains(got, w) {
 						t.Errorf("missing issue %q in %q", w, got)
+					}
+					// HL7 7.0.4 da dos ele-1 en R4B, uno por cada texto de la invariante.
+					if strings.HasPrefix(w, "ele-1 @ ") {
+						if n := strings.Count(strings.Join(got, "\n")+"\n", w+"\n"); n != eaEle1Max(version) {
+							t.Errorf("%q reported %d times, want %d", w, n, eaEle1Max(version))
+						}
 					}
 				}
 				for _, a := range c.absent {

@@ -9,9 +9,9 @@ instead locates what it finds there under `_x`: `Patient._birthDate.foo`, `Patie
 
 ## Reproduction
 
-`main` at `68589e6`, `-version 4.0.1`; validator_cli 6.10.2 (`-tx n/a`) as reference.
+`main` at `68589e6`, `-version 4.0.1`; validator_cli 7.0.4, the latest release (`-tx n/a`), as reference; 6.10.2 gives the same.
 
-| Input | gofhir | validator_cli 6.10.2 |
+| Input | gofhir | validator_cli 7.0.4 |
 |---|---|---|
 | `{"resourceType":"Patient","birthDate":"2000-01-01","_birthDate":{"foo":1}}` | Unknown element at `Patient._birthDate.foo` | `Unrecognized property 'foo'` at `Patient.birthDate` |
 | `{"resourceType":"Patient","name":[{"family":"X","given":["a"],"_given":[{"extension":[]}]}]}` (after #190) | `Patient.name[0]._given[0].extension` | `Patient.name[0].given.extension` |

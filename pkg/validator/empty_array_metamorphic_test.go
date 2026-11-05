@@ -28,7 +28,8 @@ import (
 //     STRUCTURE_ARRAY_EMPTY en ese path (si la regla de la versión lo pide), y ningún otro cambio.
 //   - vaciar: un array existente pasa a []. Lo esperado es lo que da la instancia con la propiedad omitida
 //     más el STRUCTURE_ARRAY_EMPTY; salvo que la omisión deje el objeto {} (A2): entonces la omitida suma un
-//     STRUCTURE_EMPTY_OBJECT en el objeto, que la escrita con [] no tiene.
+//     STRUCTURE_EMPTY_OBJECT en el objeto, y la escrita con [] en su lugar un ele-1 en el mismo path (un
+//     array vacío no es contenido, HL7 7.0.4).
 //
 // El esquema (qué hijos hay, cuáles se repiten, de qué tipo es cada objeto) sale del snapshot por el
 // registro, sin nombres de elementos. Se compara por (ID, severidad, expresión), sin ubicación (A3).
@@ -406,7 +407,9 @@ func eaCheck(t *testing.T, v *Validator, version, file string, root map[string]a
 		twin := validateJSON(t, v, eaMarshal(omitted))
 		want := eaLines(twin)
 		if c.holder0 {
-			// A2: la omisión deja {} y suma un objeto vacío que la escrita con [] no tiene
+			// A2: la omisión deja {} y suma un objeto vacío que la escrita con [] no tiene. Un array vacío no
+			// es contenido (HL7 7.0.4): la escrita con [] no recibe STRUCTURE_EMPTY_OBJECT sino ele-1, en el
+			// mismo path, que la omitida no tiene (el objeto vacío ya se reporta).
 			if c.shadowCtx {
 				return 1 // el path del objeto vacío bajo un "_x" es otro (el del elemento): no se predice aquí
 			}
@@ -416,13 +419,45 @@ func eaCheck(t *testing.T, v *Validator, version, file string, root map[string]a
 				return 2
 			}
 		}
+		res := validateJSON(t, v, eaMarshal(emptied))
+		if c.holder0 {
+			// ele-1 es uno por texto de la invariante: HL7 7.0.4 da dos en un tipo de datos de R4B (los dos
+			// textos, hl7diff-run-7.0.4.txt) y uno en un BackboneElement (sonda ValueSet.compose) y en las
+			// demás releases. Aquí se exige entre uno y el máximo de la release; las sondas fijan el número.
+			n := eaEle1At(res, c.path)
+			if n < 1 || n > eaEle1Max(version) {
+				t.Errorf("%s: %s holds only the empty array: %d ele-1, want 1..%d: %q", where, c.path, n, eaEle1Max(version), eaLines(res))
+			}
+			for range n {
+				want = append(want, eaMakeLine(string(issue.DiagConstraintFailed), c.path))
+			}
+		}
 		if report {
 			want = append(want, arrayEmpty)
 		}
-		res := validateJSON(t, v, eaMarshal(emptied))
 		eaCompare(t, where, res, want, report)
 		return 2
 	}
+}
+
+// eaEle1At cuenta los ele-1 de res en path.
+func eaEle1At(res *issue.Result, path string) int {
+	n := 0
+	for _, is := range res.Issues {
+		if is.MessageID == string(issue.DiagConstraintFailed) && strings.Contains(is.Diagnostics, "ele-1:") &&
+			strings.Join(is.Expression, ",") == path {
+			n++
+		}
+	}
+	return n
+}
+
+// eaEle1Max es el máximo de ele-1 que HL7 7.0.4 da sobre un objeto: R4B tiene dos textos de la invariante.
+func eaEle1Max(version string) int {
+	if version == "4.3.0" {
+		return 2
+	}
+	return 1
 }
 
 func eaMakeLine(id, expr string) string {

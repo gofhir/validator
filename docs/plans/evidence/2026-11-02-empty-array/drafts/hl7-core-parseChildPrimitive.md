@@ -1,7 +1,8 @@
 Title: JsonParser does not report an empty array for a primitive element or its "_x" sibling (R4/R4B)
 
-**Library:** org.hl7.fhir.core, `org.hl7.fhir.r5.elementmodel.JsonParser` (validator_cli 6.10.2, Git# d06577dbc5c6;
-same code on `master` as of 2026-11-02).
+**Library:** org.hl7.fhir.core, `org.hl7.fhir.services.elementmodel.JsonParser`, the parser the validator uses
+(validator_cli 7.0.4, Git# 26ac5363b325, the latest release; also 6.10.2; unchanged on `master` 428bcd5 as of
+2026-11-03). `org.hl7.fhir.r5.elementmodel.JsonParser` has the same code.
 
 **Spec:** R4 and R4B json.html §2.6.2.1, "Comparison with XML": "Just as in XML, JSON objects and arrays are never
 empty, and properties never have null values (except for a special case documented below). Omit a property if it is
@@ -21,5 +22,8 @@ all-null array SHOULD be omitted.)
 nothing is logged.
 
 **Proposed fix:** in `parseChildPrimitive`, when either array is present and empty (and `!property.canBeEmpty()`),
-log `ARRAY_CANNOT_BE_EMPTY` for the versions whose JSON format forbids empty arrays (R4, R4B; and STU3), as
-`parseChildComplex` does.
+log `ARRAY_CANNOT_BE_EMPTY`, as `parseChildComplex` does, for the versions whose JSON format says arrays are never
+empty (DSTU2, STU3, R4, R4B). A PR with the fix and test cases follows.
+
+**Related:** #2806 (a NullPointerException in the same `parseChildPrimitive` array loop, for `[null]` with no
+`_x` sibling). Both fixes touch the block that iterates `max(arrC(arr1), arrC(arr2))`.

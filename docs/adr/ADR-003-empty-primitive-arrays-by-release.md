@@ -24,11 +24,12 @@ entre versiones.
   - Un `_x` vacío es, por lo tanto, uno más corto que sus valores: se infieren nulls.
   - Un array de puros nulls (y uno vacío lo es) se SHOULD omitir. Eso es una recomendación, no un error.
 
-**HL7 validator_cli 6.10.2** (y `master` de `org.hl7.fhir.core` al 02-11-2026):
-- reporta `ARRAY_CANNOT_BE_EMPTY` solo en `JsonParser.parseChildComplex`, en todas las versiones;
+**HL7 validator_cli 7.0.4** (la última release al 03-11-2026; igual en la 6.10.2 y en `master` `428bcd5`):
+- reporta `ARRAY_CANNOT_BE_EMPTY` solo en `JsonParser.parseChildComplex`, en todas las versiones. En 7.x, el
+  validador usa `org.hl7.fhir.services.elementmodel.JsonParser`;
 - no lo revisa en `parseChildPrimitive`, así que nunca reporta `given: []` ni `_given: []`.
 
-Evidencia en `docs/plans/evidence/2026-11-02-empty-array/probe/`.
+Evidencia en `docs/plans/evidence/2026-11-02-empty-array/probe/` (la 7.0.4 en `probe/hl7-7.0.4/`).
 
 ## Decisión
 
@@ -45,7 +46,8 @@ versión que no está en la lista, o desconocida, sigue la regla de R5: es el te
 
 En R4 y R4B, la diferencia con HL7 en primitivos y `_x` se declara en
 `testdata/m12-slice-scoping/declared-divergences.json`. Además se redacta un issue para `hapifhir/org.hl7.fhir.core`
-sobre `parseChildPrimitive`, acotado a las versiones cuyo texto lo exige.
+sobre `parseChildPrimitive`, acotado a las versiones cuyo texto lo exige, con un PR del fix y casos en
+`FHIR/fhir-test-cases`.
 
 ## Consecuencias
 
