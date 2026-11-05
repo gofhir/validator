@@ -1,0 +1,184 @@
+--- FAIL: TestEmptyArray (2.48s)
+    --- FAIL: TestEmptyArray/4.0.1/e01-name-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name (name)"]
+    --- FAIL: TestEmptyArray/4.0.1/e02-given-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].given (given)"]
+    --- FAIL: TestEmptyArray/4.0.1/e03-shadow-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].given (_given)"]
+    --- FAIL: TestEmptyArray/4.0.1/e04-both-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].given (_given)" "Patient.name[0].given (given)"]
+    --- FAIL: TestEmptyArray/4.0.1/e07-coding-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.identifier[0].type.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.identifier[0].type" "BINDING_TEXT_ONLY_WARNING @ Patient.identifier[0].type"]
+    --- FAIL: TestEmptyArray/4.0.1/e08-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension (extension)"]
+    --- FAIL: TestEmptyArray/4.0.1/e09-modext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.modifierExtension (modifierExtension)"]
+    --- FAIL: TestEmptyArray/4.0.1/e10-contained-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contained (contained)"]
+    --- FAIL: TestEmptyArray/4.0.1/e13-min1-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Composition.author (author)"]
+    --- FAIL: TestEmptyArray/4.0.1/e14-bundle-entry-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Bundle.entry (entry)"]
+    --- FAIL: TestEmptyArray/4.0.1/e15-shadow-empty-values (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].given (_given)"]
+    --- FAIL: TestEmptyArray/4.0.1/e18-meta-tag-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.meta.tag (tag)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.meta"]
+    --- FAIL: TestEmptyArray/4.0.1/e19-ext-value-line (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension[0].valueAddress.line (line)"]
+    --- FAIL: TestEmptyArray/4.0.1/e20-contained-name (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contained[0].name (name)"]
+    --- FAIL: TestEmptyArray/4.0.1/e21-bundle-res-name (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Bundle.entry[0].resource.name (name)"]
+    --- FAIL: TestEmptyArray/4.0.1/e22-two-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name (name)" "Patient.telecom (telecom)"]
+    --- FAIL: TestEmptyArray/4.0.1/e23-ext-in-elem (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/4.0.1/e24-shadow-single-ext (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient._birthDate.extension (extension)"]
+    --- FAIL: TestEmptyArray/4.0.1/e25-coding-empty-only (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.maritalStatus.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.maritalStatus" "BINDING_TEXT_ONLY_WARNING @ Patient.maritalStatus"]
+    --- FAIL: TestEmptyArray/4.0.1/e27-shadow-item-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0]._given[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/4.0.1/e29-ext-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/4.0.1/e31-cref-item-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Questionnaire.item[0].item (item)"]
+    --- FAIL: TestEmptyArray/4.0.1/e35-choice-coding-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Observation.valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Observation" "ele-1 @ Observation.valueCodeableConcept"]
+    --- FAIL: TestEmptyArray/4.0.1/e37-contained-item-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contained[0].telecom (telecom)"]
+    --- FAIL: TestEmptyArray/4.0.1/f01-ext1-holder (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension[0].valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ext-1 @ Patient.extension[0]" "ele-1 @ Patient.extension[0].valueCodeableConcept"]
+    --- FAIL: TestEmptyArray/4.0.1/f02-obs6-holder (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Observation.valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Observation" "ele-1 @ Observation.valueCodeableConcept" "BINDING_TEXT_ONLY_WARNING @ Observation.dataAbsentReason"]
+    --- FAIL: TestEmptyArray/4.0.1/f03-pat1-holder (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contact[0].name.given (given)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "pat-1 @ Patient.contact[0]" "ele-1 @ Patient.contact[0].name"]
+    --- FAIL: TestEmptyArray/4.0.1/f04-wrapped-given (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name.given (given)"]
+    --- FAIL: TestEmptyArray/4.0.1/f05-wrapped-coding (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name.extension (extension)"]
+    --- FAIL: TestEmptyArray/4.3.0/e01-name-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name (name)"]
+    --- FAIL: TestEmptyArray/4.3.0/e02-given-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].given (given)"]
+    --- FAIL: TestEmptyArray/4.3.0/e03-shadow-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].given (_given)"]
+    --- FAIL: TestEmptyArray/4.3.0/e04-both-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].given (_given)" "Patient.name[0].given (given)"]
+    --- FAIL: TestEmptyArray/4.3.0/e07-coding-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.identifier[0].type.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.identifier[0].type" "ele-1 @ Patient.identifier[0].type" "BINDING_TEXT_ONLY_WARNING @ Patient.identifier[0].type"]
+    --- FAIL: TestEmptyArray/4.3.0/e08-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension (extension)"]
+    --- FAIL: TestEmptyArray/4.3.0/e09-modext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.modifierExtension (modifierExtension)"]
+    --- FAIL: TestEmptyArray/4.3.0/e10-contained-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contained (contained)"]
+    --- FAIL: TestEmptyArray/4.3.0/e13-min1-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Composition.author (author)"]
+    --- FAIL: TestEmptyArray/4.3.0/e14-bundle-entry-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Bundle.entry (entry)"]
+    --- FAIL: TestEmptyArray/4.3.0/e15-shadow-empty-values (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].given (_given)"]
+    --- FAIL: TestEmptyArray/4.3.0/e18-meta-tag-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.meta.tag (tag)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.meta" "ele-1 @ Patient.meta"]
+    --- FAIL: TestEmptyArray/4.3.0/e19-ext-value-line (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension[0].valueAddress.line (line)"]
+    --- FAIL: TestEmptyArray/4.3.0/e20-contained-name (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contained[0].name (name)"]
+    --- FAIL: TestEmptyArray/4.3.0/e21-bundle-res-name (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Bundle.entry[0].resource.name (name)"]
+    --- FAIL: TestEmptyArray/4.3.0/e22-two-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name (name)" "Patient.telecom (telecom)"]
+    --- FAIL: TestEmptyArray/4.3.0/e23-ext-in-elem (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/4.3.0/e24-shadow-single-ext (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient._birthDate.extension (extension)"]
+    --- FAIL: TestEmptyArray/4.3.0/e25-coding-empty-only (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.maritalStatus.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.maritalStatus" "ele-1 @ Patient.maritalStatus" "BINDING_TEXT_ONLY_WARNING @ Patient.maritalStatus"]
+    --- FAIL: TestEmptyArray/4.3.0/e27-shadow-item-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0]._given[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/4.3.0/e29-ext-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/4.3.0/e31-cref-item-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Questionnaire.item[0].item (item)"]
+    --- FAIL: TestEmptyArray/4.3.0/e35-choice-coding-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Observation.valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Observation" "ele-1 @ Observation.valueCodeableConcept" "ele-1 @ Observation.valueCodeableConcept"]
+    --- FAIL: TestEmptyArray/4.3.0/e37-contained-item-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contained[0].telecom (telecom)"]
+    --- FAIL: TestEmptyArray/4.3.0/f01-ext1-holder (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension[0].valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ext-1 @ Patient.extension[0]" "ele-1 @ Patient.extension[0].valueCodeableConcept" "ele-1 @ Patient.extension[0].valueCodeableConcept" "BINDING_TEXT_ONLY_WARNING @ Patient.extension[0].valueCodeableConcept"]
+    --- FAIL: TestEmptyArray/4.3.0/f02-obs6-holder (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Observation.valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Observation" "ele-1 @ Observation.valueCodeableConcept" "ele-1 @ Observation.valueCodeableConcept" "BINDING_TEXT_ONLY_WARNING @ Observation.dataAbsentReason"]
+    --- FAIL: TestEmptyArray/4.3.0/f03-pat1-holder (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contact[0].name.given (given)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "pat-1 @ Patient.contact[0]" "ele-1 @ Patient.contact[0].name" "ele-1 @ Patient.contact[0].name"]
+    --- FAIL: TestEmptyArray/4.3.0/f04-wrapped-given (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name.given (given)"]
+    --- FAIL: TestEmptyArray/4.3.0/f05-wrapped-coding (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name.extension (extension)"]
+    --- FAIL: TestEmptyArray/5.0.0/e01-name-empty (0.01s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name (name)"]
+    --- FAIL: TestEmptyArray/5.0.0/e07-coding-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.identifier[0].type.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.identifier[0].type" "BINDING_TEXT_ONLY_WARNING @ Patient.identifier[0].type"]
+    --- FAIL: TestEmptyArray/5.0.0/e08-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension (extension)"]
+    --- FAIL: TestEmptyArray/5.0.0/e09-modext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.modifierExtension (modifierExtension)"]
+    --- FAIL: TestEmptyArray/5.0.0/e10-contained-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contained (contained)"]
+    --- FAIL: TestEmptyArray/5.0.0/e13-min1-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Composition.author (author)"]
+    --- FAIL: TestEmptyArray/5.0.0/e14-bundle-entry-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Bundle.entry (entry)"]
+    --- FAIL: TestEmptyArray/5.0.0/e18-meta-tag-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.meta.tag (tag)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.meta"]
+    --- FAIL: TestEmptyArray/5.0.0/e20-contained-name (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.contained[0].name (name)"]
+    --- FAIL: TestEmptyArray/5.0.0/e21-bundle-res-name (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Bundle.entry[0].resource.name (name)"]
+    --- FAIL: TestEmptyArray/5.0.0/e22-two-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name (name)" "Patient.telecom (telecom)"]
+    --- FAIL: TestEmptyArray/5.0.0/e23-ext-in-elem (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/5.0.0/e24-shadow-single-ext (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient._birthDate.extension (extension)"]
+    --- FAIL: TestEmptyArray/5.0.0/e25-coding-empty-only (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.maritalStatus.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ele-1 @ Patient.maritalStatus" "BINDING_TEXT_ONLY_WARNING @ Patient.maritalStatus"]
+    --- FAIL: TestEmptyArray/5.0.0/e27-shadow-item-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name[0]._given[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/5.0.0/e29-ext-ext-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension[0].extension (extension)"]
+    --- FAIL: TestEmptyArray/5.0.0/e31-cref-item-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Questionnaire.item[0].item (item)"]
+    --- FAIL: TestEmptyArray/5.0.0/e35-choice-coding-empty (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Observation.valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Observation" "ele-1 @ Observation.valueCodeableConcept"]
+    --- FAIL: TestEmptyArray/5.0.0/f01-ext1-holder (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.extension[0].valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "ext-1 @ Patient.extension[0]" "ele-1 @ Patient.extension[0].valueCodeableConcept"]
+    --- FAIL: TestEmptyArray/5.0.0/f02-obs6-holder (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Observation.valueCodeableConcept.coding (coding)"]
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Observation" "ele-1 @ Observation.valueCodeableConcept" "BINDING_TEXT_ONLY_WARNING @ Observation.dataAbsentReason"]
+    --- FAIL: TestEmptyArray/5.0.0/f03-pat1-holder (0.00s)
+        empty_array_test.go:169: ele-1 must not be reported: ["dom-6 @ Patient" "pat-1 @ Patient.contact[0]" "ele-1 @ Patient.contact[0].name"]
+    --- FAIL: TestEmptyArray/5.0.0/f05-wrapped-coding (0.00s)
+        empty_array_test.go:151: STRUCTURE_ARRAY_EMPTY = [], want ["Patient.name.extension (extension)"]
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	37.985s
+FAIL

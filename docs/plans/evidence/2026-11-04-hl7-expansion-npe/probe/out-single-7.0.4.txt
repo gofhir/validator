@@ -1,0 +1,23 @@
+ 00:00.027
+Done. Times: Loading: 00:04.765, validation: 00:00.128 (#3). Memory = 504Mb
+
+-- m4/cs1.json ----------------------------------------
+Success: 0 errors, 1 warnings, 1 notes
+  Warning @ CodeSystem (line 1, col133): Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation), validating against Base FHIR Standard
+  Information @ CodeSystem: CodeSystems SHOULD have a stated value for the caseSensitive element so that users know the status and meaning of the code system clearly
+-------------------------------------------------------
+
+-- m4/cs2.json ----------------------------------------
+Success: 0 errors, 1 warnings, 1 notes
+  Warning @ CodeSystem (line 1, col147): Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation), validating against Base FHIR Standard
+  Information @ CodeSystem: CodeSystems SHOULD have a stated value for the caseSensitive element so that users know the status and meaning of the code system clearly
+-------------------------------------------------------
+
+-- m4/vs.json ----------------------------------------
+Success: 0 errors, 2 warnings, 2 notes
+  Warning @ ValueSet (line 1, col274): Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation), validating against Base FHIR Standard
+  Information @ ValueSet.compose.include[0] (line 1, col151): The concepts in the value set include have not been validated because there is no terminology server
+  Warning @ ValueSet.expansion (line 1, col273): This expansion has no parameters; in the absence of the parameters that controlled the expansion, systems may not be able to determine whether it is safe to use this expansion
+  Information @ ValueSet.expansion (line 1, col273): This expansion has no identifier. Identifiers are recommended to help with audit and traceability
+------------------------------------------------------
+

@@ -1,0 +1,36 @@
+  Validate /Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/CodeSystem-snomedct.json
+ 00:00.137
+  Validate /Users/robertoaraneda/.fhir/packages/hl7.fhir.r4.examples#4.0.1/package/Bundle-valueset-expansions.json
+
+Exception occurred: java.lang.NullPointerException (to be caught at: org.hl7.fhir.standalone.terminology.expansion.ValueSetExpander.expand(), line=857 bci=220)"thread=main", java.util.ComparableTimSort.countRunAndMakeAscending(), line=320 bci=42
+
+main[1]   [1] java.util.ComparableTimSort.countRunAndMakeAscending (ComparableTimSort.java:320)
+  [2] java.util.ComparableTimSort.sort (ComparableTimSort.java:188)
+  [3] java.util.Arrays.sort (Arrays.java:1,104)
+  [4] java.util.Arrays.sort (Arrays.java:1,298)
+  [5] java.util.ArrayList.sortRange (ArrayList.java:1,817)
+  [6] java.util.ArrayList.sort (ArrayList.java:1,810)
+  [7] java.util.Collections.sort (Collections.java:145)
+  [8] org.hl7.fhir.standalone.terminology.expansion.ValueSetExpander.includeCodes (ValueSetExpander.java:1,481)
+  [9] org.hl7.fhir.standalone.terminology.expansion.ValueSetExpander.handleCompose (ValueSetExpander.java:1,194)
+  [10] org.hl7.fhir.standalone.terminology.expansion.ValueSetExpander.expandInternal (ValueSetExpander.java:894)
+  [11] org.hl7.fhir.standalone.terminology.expansion.ValueSetExpander.expand (ValueSetExpander.java:827)
+  [12] org.hl7.fhir.standalone.context.BaseWorkerContext.expandVS (BaseWorkerContext.java:1,161)
+  [13] org.hl7.fhir.standalone.context.BaseWorkerContext.expandVS (BaseWorkerContext.java:1,070)
+  [14] org.hl7.fhir.standalone.context.BaseWorkerContext.expandVS (BaseWorkerContext.java:1,005)
+  [15] org.hl7.fhir.validation.instance.type.ValueSetValidator.validateValueSetExpansion (ValueSetValidator.java:907)
+  [16] org.hl7.fhir.validation.instance.type.ValueSetValidator.validateValueSet (ValueSetValidator.java:250)
+  [17] org.hl7.fhir.validation.instance.InstanceValidator.checkSpecials (InstanceValidator.java:7,327)
+  [18] org.hl7.fhir.validation.instance.InstanceValidator.validateContains (InstanceValidator.java:7,639)
+  [19] org.hl7.fhir.validation.instance.InstanceValidator.checkChildByDefinition (InstanceValidator.java:8,183)
+  [20] org.hl7.fhir.validation.instance.InstanceValidator.checkChild (InstanceValidator.java:7,962)
+  [21] org.hl7.fhir.validation.instance.InstanceValidator.validateElement (InstanceValidator.java:7,839)
+  [22] org.hl7.fhir.validation.instance.InstanceValidator.checkChildByDefinition (InstanceValidator.java:8,206)
+  [23] org.hl7.fhir.validation.instance.InstanceValidator.checkChild (InstanceValidator.java:7,962)
+  [24] org.hl7.fhir.validation.instance.InstanceValidator.validateElement (InstanceValidator.java:7,839)
+  [25] org.hl7.fhir.validation.instance.InstanceValidator.startInner (InstanceValidator.java:7,244)
+  [26] org.hl7.fhir.validation.instance.InstanceValidator.start (InstanceValidator.java:6,978)
+  [27] org.hl7.fhir.validation.instance.InstanceValidator.validateResource (InstanceValidator.java:9,147)
+  [28] org.hl7.fhir.validation.instance.InstanceValidator.validate (InstanceValidator.java:1,062)
+  [29] org.hl7.fhir.validation.instance.InstanceValidator.validate (InstanceValidator.java:900)
+  [30] org.hl7.fhir.validation.ValidationEngine.validate (ValidationEngine.java:754)

@@ -1478,5 +1478,69 @@
     "file": "testdata/m12-slice-scoping/probes/ov_r-two.json",
     "location": "Parameters.parameter[0].valueString",
     "messageId": "STRUCTURE_TYPE_NOT_ALLOWED"
+  },
+  {
+    "decision": "ADR-003",
+    "reason": "An empty array of a repeating primitive or of its \"_x\" sibling is an error in the releases whose json.html says \"JSON objects and arrays are never empty\" (R4/R4B §2.6.2.1; ADR-003); HL7 6.10.2 checks it only in JsonParser.parseChildComplex. The R5 group reports none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ea_e02-given-empty.json",
+    "location": "Patient.name[0].given",
+    "messageId": "STRUCTURE_ARRAY_EMPTY"
+  },
+  {
+    "decision": "ADR-003",
+    "reason": "An empty array of a repeating primitive or of its \"_x\" sibling is an error in the releases whose json.html says \"JSON objects and arrays are never empty\" (R4/R4B §2.6.2.1; ADR-003); HL7 6.10.2 checks it only in JsonParser.parseChildComplex. The R5 group reports none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json",
+    "location": "Patient.name[0].given",
+    "messageId": "STRUCTURE_ARRAY_EMPTY"
+  },
+  {
+    "decision": "ADR-003",
+    "reason": "An empty array of a repeating primitive or of its \"_x\" sibling is an error in the releases whose json.html says \"JSON objects and arrays are never empty\" (R4/R4B §2.6.2.1; ADR-003); HL7 6.10.2 checks it only in JsonParser.parseChildComplex. The R5 group reports none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ea_e04-both-empty.json",
+    "location": "Patient.name[0].given",
+    "messageId": "STRUCTURE_ARRAY_EMPTY"
+  },
+  {
+    "decision": "ADR-003",
+    "reason": "An empty array of a repeating primitive or of its \"_x\" sibling is an error in the releases whose json.html says \"JSON objects and arrays are never empty\" (R4/R4B §2.6.2.1; ADR-003); HL7 6.10.2 checks it only in JsonParser.parseChildComplex. The R5 group reports none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ea_e15-shadow-empty-values.json",
+    "location": "Patient.name[0].given",
+    "messageId": "STRUCTURE_ARRAY_EMPTY"
+  },
+  {
+    "decision": "ADR-003",
+    "reason": "An empty array of a repeating primitive or of its \"_x\" sibling is an error in the releases whose json.html says \"JSON objects and arrays are never empty\" (R4/R4B §2.6.2.1; ADR-003); HL7 6.10.2 checks it only in JsonParser.parseChildComplex. The R5 group reports none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ea_e19-ext-value-line.json",
+    "location": "Patient.extension[0].valueAddress.line",
+    "messageId": "STRUCTURE_ARRAY_EMPTY"
+  },
+  {
+    "decision": "ADR-003",
+    "reason": "An empty array of a repeating primitive or of its \"_x\" sibling is an error in the releases whose json.html says \"JSON objects and arrays are never empty\" (R4/R4B §2.6.2.1; ADR-003); HL7 6.10.2 checks it only in JsonParser.parseChildComplex. The R5 group reports none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ea_f03-pat1-holder.json",
+    "location": "Patient.contact[0].name.given",
+    "messageId": "STRUCTURE_ARRAY_EMPTY"
+  },
+  {
+    "decision": "ADR-003",
+    "reason": "An empty array of a repeating primitive or of its \"_x\" sibling is an error in the releases whose json.html says \"JSON objects and arrays are never empty\" (R4/R4B §2.6.2.1; ADR-003); HL7 6.10.2 checks it only in JsonParser.parseChildComplex. The R5 group reports none.",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ea_f04-wrapped-given.json",
+    "location": "Patient.name.given",
+    "messageId": "STRUCTURE_ARRAY_EMPTY"
+  },
+  {
+    "decision": "#190 D6",
+    "reason": "Inside a primitive's \"_x\" sibling the structural phase locates what it finds under \"_x\" (Patient.name[0]._given[0].extension); HL7 names it Patient.name[0].given.extension, without the item's index. The path naming under \"_x\" is a separate issue (docs/plans/evidence/2026-11-02-empty-array/drafts/issue-structural-shadow-paths.md).",
+    "side": "gofhir",
+    "file": "testdata/m12-slice-scoping/probes/ea_e27-shadow-item-ext-empty.json",
+    "location": "Patient.name[0]._given[0].extension",
+    "messageId": "STRUCTURE_ARRAY_EMPTY"
   }
 ]

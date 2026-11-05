@@ -13,12 +13,47 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #189 cerrado (pasos 1-9, 02-11-2026), espera «commit y pr»; primitivos bajo una contentReference (rama `fix/content-reference-primitives`, desde `8730fc4`)
+## Frente activo: #190 cerrado (pasos 1-9, 03-11-2026), PR #201 abierto, con D4 revisado por la referencia HL7 7.0.4 (05-11-2026); un array JSON vacío se acepta (rama `fix/empty-array`, desde `68589e6`)
 
-[2026-11-02-content-reference-primitives.md](2026-11-02-content-reference-primitives.md). Ronda adversarial (Opus): 8 aceptados.
-Code review convergió en la ronda 3. `make check` verde; hl7diff 55 PASS (3 grupos nuevos `content-reference-probes*`, familia
-`primitive-json-type`); mutaciones 12/12; asignaciones iguales a la base. **Pendiente del usuario:** publicar dos issues aparte
-(borradores en la evidencia: valores de extensiones en `_x`; la estructural con `url#id`, falta su reproducción). Después: #190.
+[2026-11-02-empty-array.md](2026-11-02-empty-array.md), [ADR-003](../adr/ADR-003-empty-primitive-arrays-by-release.md).
+- Revisiones:
+  - ronda adversarial (Opus): 11 aceptados;
+  - code review: converge en la ronda 2.
+- Verificación:
+  - `make check` verde;
+  - hl7diff 58 PASS;
+  - mutaciones 15/15;
+  - asignaciones iguales.
+- **Reapertura (03-11-2026), commiteada en #201 (05-11-2026):** la referencia HL7 era la 6.10.2; ahora es la 7.0.4
+  (`~/tools/validator_cli.jar` → 7.0.4; la 6.10.2 queda como `validator_cli-6.10.2.jar`). La 7.0.4 reporta ele-1
+  en el objeto que contiene el array vacío. Con eso:
+  - D4 revisado: el holder ya no se registra; plan §10;
+  - hl7diff con la 7.0.4: 58 PASS; `same` sin cambios fuera de los grupos nuevos y de `Patient.link`;
+  - mutaciones 15/15; `make check` verde; revisión de Opus: converge.
+  - **Próximo:** «merge» de #201 (cuerpo actualizado a la 7.0.4).
+- **Pendiente del usuario**, borradores en
+  [evidence/2026-11-02-empty-array/drafts/](evidence/2026-11-02-empty-array/drafts/):
+  - ~~comentario de corrección en #190~~ (erróneo, ver arriba);
+  - issue publicado: [hapifhir/org.hl7.fhir.core#2824](https://github.com/hapifhir/org.hl7.fhir.core/issues/2824) (04-11-2026; relacionado #2806). El fix y los
+    casos están publicados (04-11-2026): PR [hapifhir/org.hl7.fhir.core#2825](https://github.com/hapifhir/org.hl7.fhir.core/pull/2825) y [FHIR/fhir-test-cases#337](https://github.com/FHIR/fhir-test-cases/pull/337):
+    - fix en `/Volumes/dev/hl7/core-ea`, rama `fix-json-empty-primitive-array` (`547376cfb`), en las copias de services y r5 de
+      `JsonParser` (el validador 7.x usa la de services); revisión independiente aplicada;
+    - casos en `/Volumes/dev/hl7/fhir-test-cases-ea`, rama `fix-json-empty-primitive-array-cases` (`e96eed9`), 8 casos;
+    - cuerpos de PR en `/Volumes/dev/hl7/logs/pr-empty-array-*.md`;
+    - `ValidationTests` completo: 1153 tests; solo cambian los 6 casos nuevos de R3/R4/R4B, que fallan en master y
+      pasan con el fix. Las 4 fallas de supplements son previas a este cambio.
+  - issue de paths bajo `_x`.
+  - NPE de HL7 en `validateValueSetExpansion`: issue publicado [hapifhir/org.hl7.fhir.core#2828](https://github.com/hapifhir/org.hl7.fhir.core/issues/2828) (05-11-2026); borrador en
+    [evidence/2026-11-04-hl7-expansion-npe/drafts/](evidence/2026-11-04-hl7-expansion-npe/drafts/); estado en
+    [2026-09-28-hl7-validator-npe-upstream-fix.md](2026-09-28-hl7-validator-npe-upstream-fix.md). Fix en curso en
+    `/Volumes/dev/hl7/core-npe` (rama `fix-expansion-npe`, commit `883a25a16`, en el fork): tests 4/4, mutaciones 4/4, lote R4 sin caída, Codex convergió en la ronda 1 (solo hallazgos bajos, corregidos); PR [hapifhir/org.hl7.fhir.core#2829](https://github.com/hapifhir/org.hl7.fhir.core/pull/2829) abierto (05-11-2026); tras una release con el fix, quitar las 4 exclusiones del corpus.
+
+Después: #191.
+
+## Cerrado: #189 (PR #198, `68589e6`): primitivos bajo una contentReference
+
+[2026-11-02-content-reference-primitives.md](2026-11-02-content-reference-primitives.md). Issues nuevos: #199 (`_x`)
+y #200 (estructural con `url#id`). **Pendiente:** el tiempo del bench con la máquina libre, antes del release.
 
 ## Cerrado: #196 (PR #197, `8730fc4`): dos variantes de un elemento de elección (rama `fix/choice-two-variants`, desde `e22324e`)
 

@@ -1,7 +1,30 @@
 # HL7 validator NPE on unresolvable ValueSet includes: upstream fix strategy
 
-Status: **not started**. We have not reported this upstream. This note keeps what we know, so a fix can be
-picked up later.
+Status: **root cause found on 7.0.4 (04-11-2026); reported as [#2828](https://github.com/hapifhir/org.hl7.fhir.core/issues/2828) (05-11-2026); fix proposed in [#2829](https://github.com/hapifhir/org.hl7.fhir.core/pull/2829) (05-11-2026). After a release with it, remove the four corpus exclusions.** The sections below this one
+are from 6.10.4 (28-09-2026).
+
+## 7.0.4 (04-11-2026)
+
+Evidence: [evidence/2026-11-04-hl7-expansion-npe/](evidence/2026-11-04-hl7-expansion-npe/); issue draft:
+[drafts/hl7-core-expansion-npe.md](evidence/2026-11-04-hl7-expansion-npe/drafts/hl7-core-expansion-npe.md).
+
+- The deterministic minimal case below no longer crashes on 7.0.4. Neither do `Bundle-valuesets.json`,
+  `ValueSet-media-modality.json` and `ValueSet-use-context.json` on their own.
+- The batch case still crashes, at `ValueSetValidator.java:910`. It is the same line, and `master` is the same.
+- **Cause, confirmed with `jdb` (`jdb-swallowed-npe.txt`):**
+  - `ValueSetExpander.includeCodes` sorts the loaded versions of a code system, and a CodeSystem without
+    `version` (here `CodeSystem-snomedct.json`) puts a `null` in the list, so the sort throws an NPE;
+  - `expand` catches it and uses `e.getMessage()` as the error;
+  - after many throws, the JVM's fast-throw throws an NPE with no message, so the outcome is OK with no
+    ValueSet, and line 910 dereferences it.
+- This is why the case depends on the batch.
+  - With `-XX:-OmitStackTraceInFastThrow`, the same batch completes (`out-r4-examples-noomit-7.0.4.txt`).
+  - Bisecting the Bundle in halves finds no single culprit entry: each half completes on its own.
+- **Minimal reproduction:** `probe/cs1.json`, `cs2.json` and a Bundle of 500 copies of `vs.json` (`make-bundle.py`)
+  crash 7.0.4 (`out-bundle-7.0.4.txt`). One ValueSet completes, but its expansion comparison is silently skipped.
+- **The batch is lost on purpose:** `ValidationEngine.validateSources` rethrows any exception (line 711). The
+  `errList` NPE in `ValidateCommand` from 6.10.4 is not what loses the batch on 7.0.4.
+- **Duplicates:** none. #2818 (`filterParameters`, fixed in `c21e899a9`) and #2540 are other paths.
 
 ## Why it matters here
 

@@ -1,0 +1,7 @@
+    empty_array_metamorphic_test.go:361: 4.0.1: 251 resources, 1124 cases (map[add:657 addshadow:206 empty:455 shadow:12]), 1852 validations, 2.871s
+    empty_array_metamorphic_test.go:361: 4.3.0: 259 resources, 1114 cases (map[add:653 addshadow:192 empty:449 shadow:12]), 1843 validations, 3.262s
+    empty_array_metamorphic_test.go:361: 5.0.0: 247 resources, 1026 cases (map[add:603 addshadow:159 empty:406 shadow:17]), 1710 validations, 3.485s
+--- PASS: TestEmptyArrayMetamorphic (9.62s)
+ok  	github.com/gofhir/validator/v2/pkg/validator	10.156s
+       11.11 real        10.69 user         1.20 sys
+           947814400  maximum resident set size

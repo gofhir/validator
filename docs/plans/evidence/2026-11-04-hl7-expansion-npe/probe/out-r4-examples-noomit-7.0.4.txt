@@ -1,0 +1,3 @@
+# java -XX:-OmitStackTraceInFastThrow, mismo lote que out-r4-examples-7.0.4.txt
+results: 5
+infrastructure fails: 0

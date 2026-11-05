@@ -1,0 +1,47 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (32 hours old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7-704, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: in/vs-compose-include-empty.json in/r2b.json -version 4.3.0 -tx n/a
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.3.0 from hl7.fhir.r4b.core#4.3.0
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:02.300)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.623)
+  Loaded FHIR - 8372 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.005)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.304)
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.350)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.381)
+  Package Summary: [hl7.fhir.r4b.core#4.3.0, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+  ...go! (00:00.405)
+Cached new session. Cache size = 1
+Sources to validate: in/vs-compose-include-empty.jsonin/r2b.json
+Validating
+  Validate in/vs-compose-include-empty.json
+ 00:00.132
+  Validate in/r2b.json
+ 00:00.015
+Done. Times: Loading: 00:05.405, validation: 00:00.149 (#2). Memory = 426Mb
+
+-- in/vs-compose-include-empty.json ----------------------------------------
+*FAILURE*: 3 errors, 2 warnings, 0 notes
+  Error @ ValueSet.compose.include (line 1, col98): Array cannot be empty - the property should not be present if it has no values
+  Error @ ValueSet.compose (line 1, col99): Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resource' (defined in http://hl7.org/fhir/StructureDefinition/Element), validating against Base FHIR Standard
+  Error @ ValueSet.compose (line 1, col99): ValueSet.compose.include: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/ValueSet|4.3.0), validating against Base FHIR Standard
+  Warning @ ValueSet (line 1, col100): Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation), validating against Base FHIR Standard
+  Warning @ ValueSet (line 1, col100): Constraint failed: vsd-0: 'Name should be usable as an identifier for the module by machine processing applications such as code generation' (defined in http://hl7.org/fhir/StructureDefinition/ValueSet), validating against Base FHIR Standard
+----------------------------------------------------------------------------
+
+-- in/r2b.json ----------------------------------------
+*FAILURE*: 3 errors, 2 warnings, 0 notes
+  Error @ Patient.identifier[0].type.coding (line 1, col61): Array cannot be empty - the property should not be present if it has no values
+  Error @ Patient.identifier[0].type (line 1, col62): Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element), validating against Base FHIR Standard
+  Warning @ Patient.identifier[0].type (line 1, col62): No code provided, and a code should be provided from the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.3.0), validating against Base FHIR Standard
+  Error @ Patient.identifier[0].type (line 1, col62): Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resource' (defined in http://hl7.org/fhir/StructureDefinition/Element), validating against Base FHIR Standard
+  Warning @ Patient (line 1, col77): Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation), validating against Base FHIR Standard
+-------------------------------------------------------
+
+Done. Times: Loading: 00:05.405, validation: 00:00.149 (#2). Max Memory = 6Gb

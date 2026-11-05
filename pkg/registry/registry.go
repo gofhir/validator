@@ -489,6 +489,13 @@ func (r *Registry) SetFHIRVersion(fhirVersion string) {
 	r.publishTypesUnlocked()
 }
 
+// FHIRVersion returns the FHIR version validated ("4.0.1"), or "" when none was set.
+func (r *Registry) FHIRVersion() string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.fhirVersion
+}
+
 // reindexUnlocked indexes again the definitions loaded, after what decides which version of a URL
 // is preferred changed. Must be called while the write lock is held.
 func (r *Registry) reindexUnlocked() {

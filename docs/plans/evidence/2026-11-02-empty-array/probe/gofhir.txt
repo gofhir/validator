@@ -1,0 +1,109 @@
+== 4.0.1 e01-name-empty.json
+== 4.0.1 e02-given-empty.json
+== 4.0.1 e03-shadow-empty.json
+== 4.0.1 e04-both-empty.json
+== 4.0.1 e05-gender-arr.json
+   Patient.gender | structure | 'gender' is a primitive: it must be a simple value, not an array
+== 4.0.1 e06-marital-arr.json
+   Patient.maritalStatus | structure | 'maritalStatus' must be a JSON object, not an array
+== 4.0.1 e07-coding-empty.json
+   Patient.identifier[0].type | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 4.0.1 e08-ext-empty.json
+== 4.0.1 e09-modext-empty.json
+== 4.0.1 e10-contained-empty.json
+== 4.0.1 e11-unknown-empty.json
+   Patient.foo | structure | Unknown element 'foo'
+== 4.0.1 e12-choice-arr.json
+   Patient.deceasedBoolean | structure | 'deceasedBoolean' is a primitive: it must be a simple value, not an array
+== 4.0.1 e13-min1-empty.json
+   Composition.author | required | Minimum cardinality of 'Composition.author' is 1, but found 0
+== 4.0.1 e14-bundle-entry-empty.json
+== 4.0.1 e15-shadow-empty-values.json
+== 4.0.1 e16-nested-arr.json
+   Patient.name[0] | structure | 'name' must be a JSON object, not an array
+== 4.0.1 e17-control.json
+== 4.0.1 e18-meta-tag-empty.json
+   Patient.meta | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 4.0.1 e19-ext-value-line.json
+== 4.0.1 e20-contained-name.json
+== 4.0.1 e21-bundle-res-name.json
+   Bundle.entry[0] | invariant | Constraint failed: bdl-5: 'must be a resource unless there's a request or response'
+== 4.0.1 e22-two-empty.json
+== 4.0.1 e23-ext-in-elem.json
+== 4.0.1 e24-shadow-single-ext.json
+== 4.0.1 e25-coding-empty-only.json
+   Patient.maritalStatus | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 4.3.0 e01-name-empty.json
+== 4.3.0 e02-given-empty.json
+== 4.3.0 e03-shadow-empty.json
+== 4.3.0 e04-both-empty.json
+== 4.3.0 e05-gender-arr.json
+   Patient.gender | structure | 'gender' is a primitive: it must be a simple value, not an array
+== 4.3.0 e06-marital-arr.json
+   Patient.maritalStatus | structure | 'maritalStatus' must be a JSON object, not an array
+== 4.3.0 e07-coding-empty.json
+   Patient.identifier[0].type | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+   Patient.identifier[0].type | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resourc
+== 4.3.0 e08-ext-empty.json
+== 4.3.0 e09-modext-empty.json
+== 4.3.0 e10-contained-empty.json
+== 4.3.0 e11-unknown-empty.json
+   Patient.foo | structure | Unknown element 'foo'
+== 4.3.0 e12-choice-arr.json
+   Patient.deceasedBoolean | structure | 'deceasedBoolean' is a primitive: it must be a simple value, not an array
+== 4.3.0 e13-min1-empty.json
+   Composition.author | required | Minimum cardinality of 'Composition.author' is 1, but found 0
+== 4.3.0 e14-bundle-entry-empty.json
+== 4.3.0 e15-shadow-empty-values.json
+== 4.3.0 e16-nested-arr.json
+   Patient.name[0] | structure | 'name' must be a JSON object, not an array
+== 4.3.0 e17-control.json
+== 4.3.0 e18-meta-tag-empty.json
+   Patient.meta | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+   Patient.meta | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resourc
+== 4.3.0 e19-ext-value-line.json
+== 4.3.0 e20-contained-name.json
+== 4.3.0 e21-bundle-res-name.json
+   Bundle.entry[0] | invariant | Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org
+== 4.3.0 e22-two-empty.json
+== 4.3.0 e23-ext-in-elem.json
+== 4.3.0 e24-shadow-single-ext.json
+== 4.3.0 e25-coding-empty-only.json
+   Patient.maritalStatus | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+   Patient.maritalStatus | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resourc
+== 5.0.0 e01-name-empty.json
+== 5.0.0 e02-given-empty.json
+== 5.0.0 e03-shadow-empty.json
+== 5.0.0 e04-both-empty.json
+== 5.0.0 e05-gender-arr.json
+   Patient.gender | structure | 'gender' is a primitive: it must be a simple value, not an array
+== 5.0.0 e06-marital-arr.json
+   Patient.maritalStatus | structure | 'maritalStatus' must be a JSON object, not an array
+== 5.0.0 e07-coding-empty.json
+   Patient.identifier[0].type | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 5.0.0 e08-ext-empty.json
+== 5.0.0 e09-modext-empty.json
+== 5.0.0 e10-contained-empty.json
+== 5.0.0 e11-unknown-empty.json
+   Patient.foo | structure | Unknown element 'foo'
+== 5.0.0 e12-choice-arr.json
+   Patient.deceasedBoolean | structure | 'deceasedBoolean' is a primitive: it must be a simple value, not an array
+== 5.0.0 e13-min1-empty.json
+   Composition.author | required | Minimum cardinality of 'Composition.author' is 1, but found 0
+== 5.0.0 e14-bundle-entry-empty.json
+== 5.0.0 e15-shadow-empty-values.json
+== 5.0.0 e16-nested-arr.json
+   Patient.name[0] | structure | 'name' must be a JSON object, not an array
+== 5.0.0 e17-control.json
+== 5.0.0 e18-meta-tag-empty.json
+   Patient.meta | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 5.0.0 e19-ext-value-line.json
+== 5.0.0 e20-contained-name.json
+== 5.0.0 e21-bundle-res-name.json
+   Bundle | invariant | Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries mu
+   Bundle.entry[0] | invariant | Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org
+== 5.0.0 e22-two-empty.json
+== 5.0.0 e23-ext-in-elem.json
+== 5.0.0 e24-shadow-single-ext.json
+== 5.0.0 e25-coding-empty-only.json
+   Patient.maritalStatus | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S

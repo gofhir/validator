@@ -1,0 +1,11 @@
+# ValueSetExpanderTests (r5 y standalone), ./mvnw -o -pl <módulo> -am test -Dtest=ValueSetExpanderTests
+con el fix (81aa65b16): r5 2/2 pasan; standalone 2/2 pasan
+sin el fix (ValueSetExpander.java de master, tests del commit): r5 2/2 fallan; standalone 2/2 fallan
+ValueSetValidator (cambio C) sin test unitario: la clase no tiene tests en el módulo y exige un InstanceValidator completo
+
+# mutaciones de una corrección a la vez (05-11-2026), ./mvnw -o -pl <módulo> -am test -Dtest=ValueSetExpanderTests
+A (versions.add sin hasVersion), r5:         falla testUnknownVersionWhenALoadedCodeSystemHasNoVersion (NPE en el sort); el otro pasa
+B (catch-all con e.getMessage()), r5:        falla testExceptionWithoutAMessageIsNotOk (isOk true); el otro pasa
+A, standalone:                               falla testUnknownVersionWhenALoadedCodeSystemHasNoVersion:66
+B, standalone:                               falla testExceptionWithoutAMessageIsNotOk:79
+4/4 mutantes muertos, cada uno por su test

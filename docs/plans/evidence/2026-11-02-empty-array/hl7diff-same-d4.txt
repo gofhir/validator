@@ -1,0 +1,367 @@
+# hl7diff same: baseline origin/main vs working tree
+
+decisions: identical (15 files, 26 lines)
+
+multimatch: identical (3 files, 9 lines)
+
+core-probes: identical (7 files, 12 lines)
+
+type-profile-probes: identical (47 files, 92 lines)
+
+nested-resource-probes: identical (4 files, 6 lines)
+
+review-probes: identical (5 files, 9 lines)
+
+extension-probes: identical (14 files, 27 lines)
+
+primitive-extension-probes: identical (5 files, 5 lines)
+
+context-probes: identical (33 files, 131 lines)
+
+context-eval-probes: identical (31 files, 55 lines)
+
+context-scope-probes: identical (198 files, 369 lines)
+
+interface-probes: identical (9 files, 35 lines)
+
+interface-probes-r5: identical (16 files, 20 lines)
+
+interface-probes-r4b: identical (9 files, 36 lines)
+
+constraint-probes: identical (81 files, 162 lines)
+
+invariant-probes: identical (61 files, 107 lines)
+
+fixedpattern-probes: identical (50 files, 86 lines)
+
+target-probes: identical (71 files, 104 lines)
+
+nested-slicing-probes: identical (18 files, 23 lines)
+
+json-shape-probes: identical (34 files, 103 lines)
+
+binding-probes: identical (5 files, 10 lines)
+
+## binding-walk-probes: 27 lines differ (14 files, 31 baseline lines)
+
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_contained_profile.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_contained_profile.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.link"],"diagnostics":"'link' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":420}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_contained_profile.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":49}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_contained_profile.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_content_reference.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].type"],"diagnostics":"The value provided ('bogus') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|4.0.1' (required)","location":{"Line":1,"Column":125}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_contained_profile.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.contained[0]"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":49}}
+- sorted line 10
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_content_reference.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_content_reference.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Questionnaire.item[0].item[0].type"],"diagnostics":"The value provided ('bogus') is not in the value set 'http://hl7.org/fhir/ValueSet/item-type|4.0.1' (required)","location":{"Line":1,"Column":125}}
+- sorted line 11
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_ext_address.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.extension[0].valueAddress.use"],"diagnostics":"The value provided ('bogus') is not in the value set 'http://hl7.org/fhir/ValueSet/address-use|4.0.1' (required)","location":{"Line":1,"Column":130}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_content_reference.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Questionnaire"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_ext_address.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_ext_address.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.extension[0].valueAddress.use"],"diagnostics":"The value provided ('bogus') is not in the value set 'http://hl7.org/fhir/ValueSet/address-use|4.0.1' (required)","location":{"Line":1,"Column":130}}
+- sorted line 13
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_ext_datatype_binding.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.extension[0].valueAddress.use"],"diagnostics":"The value provided ('bogus') is not in the value set 'http://hl7.org/fhir/ValueSet/address-use|4.0.1' (required)","location":{"Line":1,"Column":138}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_ext_address.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_ext_datatype_binding.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_ext_datatype_binding.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["Patient.extension[0].valueAddress.use"],"diagnostics":"The value provided ('bogus') is not in the value set 'http://hl7.org/fhir/ValueSet/address-use|4.0.1' (required)","location":{"Line":1,"Column":138}}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_ext_datetime.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_ext_datatype_binding.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_ext_time.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_ext_datetime.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_meta_tag_code.json","severity":"error","code":"invalid","messageId":"CODE_NOT_IN_CODESYSTEM","expression":["Observation.meta.tag[0].code"],"diagnostics":"The code 'INVENTED' is not valid in the CodeSystem 'http://terminology.hl7.org/CodeSystem/v3-ActCode'","location":{"Line":1,"Column":241}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_ext_time.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_meta_tag_code.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Observation"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_meta_tag_code.json","severity":"error","code":"invalid","messageId":"CODE_NOT_IN_CODESYSTEM","expression":["Observation.meta.tag[0].code"],"diagnostics":"The code 'INVENTED' is not valid in the CodeSystem 'http://terminology.hl7.org/CodeSystem/v3-ActCode'","location":{"Line":1,"Column":241}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_mixed_codings.json","severity":"error","code":"invalid","messageId":"CODE_NOT_IN_CODESYSTEM","expression":["Observation.code.coding[0].code"],"diagnostics":"The code 'zzz' is not valid in the CodeSystem 'http://example.org/cs/a'","location":{"Line":1,"Column":335}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_meta_tag_code.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Observation"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_mixed_slice.json","severity":"error","code":"invalid","messageId":"CODE_NOT_IN_CODESYSTEM","expression":["Observation.category[0].coding[0].code"],"diagnostics":"The code 'zzz' is not valid in the CodeSystem 'http://example.org/cs/a'","location":{"Line":1,"Column":266}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_mixed_codings.json","severity":"error","code":"invalid","messageId":"CODE_NOT_IN_CODESYSTEM","expression":["Observation.code.coding[0].code"],"diagnostics":"The code 'zzz' is not valid in the CodeSystem 'http://example.org/cs/a'","location":{"Line":1,"Column":335}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_mixed_slice.json","severity":"error","code":"required","messageId":"SLICING_CARDINALITY_MIN","expression":["Observation.category:cat"],"diagnostics":"Minimum cardinality of 'Observation.category:cat' is 1, but found 0","location":{"Line":1,"Column":211}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_mixed_slice.json","severity":"error","code":"invalid","messageId":"CODE_NOT_IN_CODESYSTEM","expression":["Observation.category[0].coding[0].code"],"diagnostics":"The code 'zzz' is not valid in the CodeSystem 'http://example.org/cs/a'","location":{"Line":1,"Column":266}}
+- sorted line 22
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_mixed_slice.json","severity":"information","code":"informational","messageId":"SLICING_MEMBERSHIP_UNKNOWN","expression":["Observation.category[0]"],"diagnostics":"Slice not matched: Observation.category:cat: membership in http://example.org/vs/mix could not be determined","location":{"Line":1,"Column":213}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_mixed_slice.json","severity":"error","code":"required","messageId":"SLICING_CARDINALITY_MIN","expression":["Observation.category:cat"],"diagnostics":"Minimum cardinality of 'Observation.category:cat' is 1, but found 0","location":{"Line":1,"Column":211}}
+- sorted line 23
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_no_value.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Patient.gender"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'","location":{"Line":1,"Column":45}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_mixed_slice.json","severity":"information","code":"informational","messageId":"SLICING_MEMBERSHIP_UNKNOWN","expression":["Observation.category[0]"],"diagnostics":"Slice not matched: Observation.category:cat: membership in http://example.org/vs/mix could not be determined","location":{"Line":1,"Column":213}}
+- sorted line 24
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_no_value.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_no_value.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED_NO_CODE","expression":["Patient.gender"],"diagnostics":"No code provided, and a code is required from the value set 'http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1'","location":{"Line":1,"Column":45}}
+- sorted line 25
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_repeating_code.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["AllergyIntolerance.category[0]"],"diagnostics":"The value provided ('bogus') is not in the value set 'http://hl7.org/fhir/ValueSet/allergy-intolerance-category|4.0.1' (required)","location":{"Line":1,"Column":59}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_no_value.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 26
+  base: {"file":"testdata/m12-slice-scoping/probes/bw_repeating_code.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["AllergyIntolerance"],"diagnostics":"Constraint failed: ait-1: 'AllergyIntolerance.clinicalStatus SHALL be present if verificationStatus is not entered-in-error.'","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/bw_repeating_code.json","severity":"error","code":"code-invalid","messageId":"BINDING_REQUIRED","expression":["AllergyIntolerance.category[0]"],"diagnostics":"The value provided ('bogus') is not in the value set 'http://hl7.org/fhir/ValueSet/allergy-intolerance-category|4.0.1' (required)","location":{"Line":1,"Column":59}}
+
+extension-walk-probes: identical (20 files, 42 lines)
+
+binding-profile-probes: identical (10 files, 19 lines)
+
+valueset-membership-probes: identical (43 files, 52 lines)
+
+holder-profile-probes: identical (50 files, 93 lines)
+
+reference-walk-probes: identical (56 files, 137 lines)
+
+package-example-cpg-probes: identical (4 files, 10 lines)
+
+package-example-cql-probes: identical (2 files, 3 lines)
+
+unknown-codesystem-probes: identical (521 files, 1035 lines)
+
+fullurl-probes: identical (48 files, 135 lines)
+
+fullurl-probes-r4b: identical (1 files, 3 lines)
+
+fullurl-probes-r5: identical (4 files, 8 lines)
+
+held-resource-probes: identical (39 files, 146 lines)
+
+choice-variant-probes: identical (27 files, 56 lines)
+
+content-reference-probes: identical (32 files, 66 lines)
+
+content-reference-probes-r4b: identical (32 files, 66 lines)
+
+content-reference-probes-r5: identical (33 files, 42 lines)
+
+## empty-array-probes: 95 lines differ (37 files, 65 baseline lines)
+
+- sorted line 2
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name"],"diagnostics":"'name' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":33}}
+- sorted line 3
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e02-given-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e02-given-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name[0].given"],"diagnostics":"'given' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":56}}
+- sorted line 5
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e02-given-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 6
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.gender"],"diagnostics":"'gender' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":35}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name[0].given"],"diagnostics":"'_given' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":57}}
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_OBJECT_EXPECTED","expression":["Patient.maritalStatus"],"diagnostics":"'maritalStatus' must be a JSON object, not an array","location":{"Line":1,"Column":42}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name[0].given"],"diagnostics":"'_given' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":56}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name[0].given"],"diagnostics":"'given' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":56}}
+- sorted line 10
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.identifier[0].type"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":48}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 11
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"code-invalid","messageId":"BINDING_TEXT_ONLY_WARNING","expression":["Patient.identifier[0].type"],"diagnostics":"No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)","location":{"Line":1,"Column":48}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.gender"],"diagnostics":"'gender' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":35}}
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 13
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_OBJECT_EXPECTED","expression":["Patient.maritalStatus"],"diagnostics":"'maritalStatus' must be a JSON object, not an array","location":{"Line":1,"Column":42}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e09-modext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e10-contained-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.identifier[0].type"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":48}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e11-unknown-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Patient.foo"],"diagnostics":"Unknown element 'foo'","location":{"Line":1,"Column":32}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.identifier[0].type.coding"],"diagnostics":"'coding' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":58}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e11-unknown-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"code-invalid","messageId":"BINDING_TEXT_ONLY_WARNING","expression":["Patient.identifier[0].type"],"diagnostics":"No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)","location":{"Line":1,"Column":48}}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e12-choice-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.deceasedBoolean"],"diagnostics":"'deceasedBoolean' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":44}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e12-choice-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.extension"],"diagnostics":"'extension' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":38}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e13-min1-empty.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Composition.author"],"diagnostics":"Minimum cardinality of 'Composition.author' is 1, but found 0","location":{"Line":1,"Column":108}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e13-min1-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Composition"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e09-modext-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.modifierExtension"],"diagnostics":"'modifierExtension' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":46}}
+
+## empty-array-probes-r4b: 103 lines differ (37 files, 73 baseline lines)
+
+- sorted line 2
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name"],"diagnostics":"'name' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":33}}
+- sorted line 3
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e02-given-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e02-given-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name[0].given"],"diagnostics":"'given' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":56}}
+- sorted line 5
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e02-given-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 6
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.gender"],"diagnostics":"'gender' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":35}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name[0].given"],"diagnostics":"'_given' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":57}}
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_OBJECT_EXPECTED","expression":["Patient.maritalStatus"],"diagnostics":"'maritalStatus' must be a JSON object, not an array","location":{"Line":1,"Column":42}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name[0].given"],"diagnostics":"'_given' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":56}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name[0].given"],"diagnostics":"'given' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":56}}
+- sorted line 10
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.identifier[0].type"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resource' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":48}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 11
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.identifier[0].type"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":48}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.gender"],"diagnostics":"'gender' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":35}}
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"code-invalid","messageId":"BINDING_TEXT_ONLY_WARNING","expression":["Patient.identifier[0].type"],"diagnostics":"No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)","location":{"Line":1,"Column":48}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 13
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_OBJECT_EXPECTED","expression":["Patient.maritalStatus"],"diagnostics":"'maritalStatus' must be a JSON object, not an array","location":{"Line":1,"Column":42}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e09-modext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.identifier[0].type"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resource' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":48}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e10-contained-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.identifier[0].type"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":48}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e11-unknown-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Patient.foo"],"diagnostics":"Unknown element 'foo'","location":{"Line":1,"Column":32}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.identifier[0].type.coding"],"diagnostics":"'coding' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":58}}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e11-unknown-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"code-invalid","messageId":"BINDING_TEXT_ONLY_WARNING","expression":["Patient.identifier[0].type"],"diagnostics":"No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)","location":{"Line":1,"Column":48}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e12-choice-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.deceasedBoolean"],"diagnostics":"'deceasedBoolean' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":44}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e12-choice-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.extension"],"diagnostics":"'extension' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":38}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e13-min1-empty.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Composition.author"],"diagnostics":"Minimum cardinality of 'Composition.author' is 1, but found 0","location":{"Line":1,"Column":108}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+
+## empty-array-probes-r5: 87 lines differ (37 files, 66 baseline lines)
+
+- sorted line 2
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.name"],"diagnostics":"'name' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":33}}
+- sorted line 3
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e02-given-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e01-name-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 4
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e02-given-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 5
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e03-shadow-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 6
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.gender"],"diagnostics":"'gender' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":35}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e04-both-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 7
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.gender"],"diagnostics":"'gender' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":35}}
+- sorted line 8
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_OBJECT_EXPECTED","expression":["Patient.maritalStatus"],"diagnostics":"'maritalStatus' must be a JSON object, not an array","location":{"Line":1,"Column":42}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e05-gender-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 9
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_OBJECT_EXPECTED","expression":["Patient.maritalStatus"],"diagnostics":"'maritalStatus' must be a JSON object, not an array","location":{"Line":1,"Column":42}}
+- sorted line 10
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.identifier[0].type"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":48}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e06-marital-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 11
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"code-invalid","messageId":"BINDING_TEXT_ONLY_WARNING","expression":["Patient.identifier[0].type"],"diagnostics":"No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)","location":{"Line":1,"Column":48}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient.identifier[0].type"],"diagnostics":"Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element)","location":{"Line":1,"Column":48}}
+- sorted line 12
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.identifier[0].type.coding"],"diagnostics":"'coding' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":58}}
+- sorted line 13
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"code-invalid","messageId":"BINDING_TEXT_ONLY_WARNING","expression":["Patient.identifier[0].type"],"diagnostics":"No code provided, and a code should be provided from the value set 'http://hl7.org/fhir/ValueSet/identifier-type' (extensible)","location":{"Line":1,"Column":48}}
+- sorted line 14
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e09-modext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e07-coding-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 15
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e10-contained-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.extension"],"diagnostics":"'extension' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":38}}
+- sorted line 16
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e11-unknown-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Patient.foo"],"diagnostics":"Unknown element 'foo'","location":{"Line":1,"Column":32}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e08-ext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 17
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e11-unknown-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e09-modext-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.modifierExtension"],"diagnostics":"'modifierExtension' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":46}}
+- sorted line 18
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e12-choice-arr.json","severity":"error","code":"structure","messageId":"STRUCTURE_VALUE_EXPECTED","expression":["Patient.deceasedBoolean"],"diagnostics":"'deceasedBoolean' is a primitive: it must be a simple value, not an array","location":{"Line":1,"Column":44}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e09-modext-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 19
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e12-choice-arr.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e10-contained-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_ARRAY_EMPTY","expression":["Patient.contained"],"diagnostics":"'contained' is an empty array: a property with no values must be omitted","location":{"Line":1,"Column":38}}
+- sorted line 20
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e13-min1-empty.json","severity":"error","code":"required","messageId":"CARDINALITY_MIN","expression":["Composition.author"],"diagnostics":"Minimum cardinality of 'Composition.author' is 1, but found 0","location":{"Line":1,"Column":108}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e10-contained-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Patient"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+- sorted line 21
+  base: {"file":"testdata/m12-slice-scoping/probes/ea_e13-min1-empty.json","severity":"warning","code":"invariant","messageId":"CONSTRAINT_FAILED","expression":["Composition"],"diagnostics":"Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)","location":{"Line":1,"Column":2}}
+  head: {"file":"testdata/m12-slice-scoping/probes/ea_e11-unknown-empty.json","severity":"error","code":"structure","messageId":"STRUCTURE_UNKNOWN_ELEMENT","expression":["Patient.foo"],"diagnostics":"Unknown element 'foo'","location":{"Line":1,"Column":32}}
+
+resolve-probes: identical (19 files, 31 lines)
+
+resource-element-probes: identical (6 files, 17 lines)
+
+canonical-probes: identical (17 files, 19 lines)
+
+r5-probes: identical (8 files, 12 lines)
+
+r4b-probes: identical (1 files, 1 lines)
+
+narrative-ucum-probes: identical (49 files, 82 lines)
+
+narrative-ucum-probes-r4b: identical (49 files, 82 lines)
+
+narrative-ucum-probes-r5: identical (49 files, 82 lines)
+
+deqm-probes: identical (15 files, 66 lines)
+
+deqm-examples: identical (108 files, 451 lines)
+
+uscore-probes: identical (7 files, 18 lines)
+
+uscore-examples: identical (183 files, 409 lines)
+
+ips: identical (44 files, 88 lines)
+
+mcode-examples: identical (179 files, 471 lines)
+
+aucore-examples: identical (65 files, 108 lines)
+
+chcore-examples: identical (48 files, 76 lines)
+
+clcore-examples: identical (20 files, 24 lines)
+
+r4-core-examples: identical (5301 files, 55193 lines)
+
+**DIFFERENT**
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/same-report.md
+exit status 1

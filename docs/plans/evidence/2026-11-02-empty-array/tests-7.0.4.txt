@@ -1,0 +1,2 @@
+ok  	github.com/gofhir/validator/v2/pkg/structural	5.536s
+ok  	github.com/gofhir/validator/v2/pkg/validator	21.170s

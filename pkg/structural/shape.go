@@ -2,9 +2,29 @@ package structural
 
 import (
 	"fmt"
+	"slices"
 
+	"github.com/gofhir/validator/v2/internal/versionorder"
 	"github.com/gofhir/validator/v2/pkg/issue"
 )
+
+// emptyPrimitiveArrayReleases son los releases de FHIR cuyo json.html dice que un array nunca está
+// vacío, y por eso rechazan el de un primitivo (given: []) y el de su "_x" (_given: []): DSTU2 (1.0),
+// STU3 (3.0), R4 (4.0) y R4B (4.3), «Just as in XML, JSON objects and arrays are never empty, and
+// properties never have null values (except for a special case documented below). Omit a property if it
+// is empty» (json.html#2.6.2.1, «Comparison with XML»). R5 ya no tiene esa frase: un "_x" más corto que
+// sus valores infiere nulls, y un array de puros nulls solo se recomienda omitir (json.html#2.1.6.4.2,
+// SHOULD). Una versión fuera de la lista, o desconocida, sigue la regla de R5, el texto vigente
+// (ADR-003). El array vacío de un complejo o un recurso se rechaza en todas.
+var emptyPrimitiveArrayReleases = []string{"1.0", "3.0", "4.0", "4.3"}
+
+// emptyPrimitiveArraysForbidden reporta si el json.html de la versión de FHIR dada rechaza el array
+// vacío de un primitivo y el de su "_x" (emptyPrimitiveArrayReleases). Una versión vacía no lo rechaza.
+func emptyPrimitiveArraysForbidden(version string) bool {
+	return version != "" && slices.ContainsFunc(emptyPrimitiveArrayReleases, func(release string) bool {
+		return versionorder.SameRelease(release, version)
+	})
+}
 
 // Shapes a JSON value takes, as the diagnostics name them.
 const (
@@ -56,45 +76,23 @@ func (v *Validator) primitiveKind(resolved *resolvedElement) (primitive, known b
 // With ctx.edits, it records how the HL7 validator's parser leaves the instance (normalize).
 func (v *Validator) checkShape(data map[string]any, key string, value any, resolved *resolvedElement, path string, ctx *validationContext, result *issue.Result) (any, bool) {
 	primitive, known := v.primitiveKind(resolved)
+	items, isArray := value.([]any)
+	if isArray && len(items) == 0 && repeats(resolved) {
+		// Antes de saber el tipo: solo depende de que el elemento se repita (un no repetido escrito [] deja
+		// el error de forma de abajo)
+		v.checkEmptyArray(key, path, primitive, ctx, result)
+		return value, true
+	}
 	if !known {
 		return value, true
 	}
-	items, isArray := value.([]any)
 	switch {
 	case isArray && !repeats(resolved):
 		v.reportShape(primitive, key, foundArray, path, result)
 		ctx.edits.drop(data, key, primitive)
 		return nil, false
 	case isArray:
-		siblings, _ := data["_"+key].([]any)
-		var reported map[string]bool // a primitive array's items are reported at the array: once per shape
-		for i, item := range items {
-			var sibling any
-			if i < len(siblings) {
-				sibling = siblings[i]
-			}
-			if m, empty := v.emptyObject(ctx, primitive, item); empty {
-				v.reportEmpty(key, fmt.Sprintf("%s[%d]", path, i), result)
-				ctx.edits.empty(data, m)
-				continue
-			}
-			if !misshapenItem(primitive, item, sibling) {
-				continue
-			}
-			ctx.edits.dropItem(data, key, i, primitive, path)
-			found := foundShape(item)
-			if !primitive {
-				v.reportShape(primitive, key, found, fmt.Sprintf("%s[%d]", path, i), result)
-			} else if !reported[found] {
-				// HL7 names a primitive array's item by the array ("The JSON array for 'given' is
-				// invalid at index 1"), and reports it once.
-				if reported == nil {
-					reported = map[string]bool{}
-				}
-				reported[found] = true
-				v.reportShape(primitive, key, found, path, result)
-			}
-		}
+		v.checkItems(data, key, items, primitive, path, ctx, result)
 		return value, true
 	case repeats(resolved):
 		result.AddErrorWithID(issue.DiagStructureArrayExpected,
@@ -123,6 +121,57 @@ func (v *Validator) checkShape(data map[string]any, key string, value any, resol
 		ctx.edits.drop(data, key, primitive)
 	}
 	return value, true
+}
+
+// checkItems revisa los items de key, un array de data en path (un elemento que se repite), y reporta
+// los que están escritos de otro modo que como dice el elemento; con ctx.edits, registra cómo los deja
+// el parser de HL7.
+func (v *Validator) checkItems(data map[string]any, key string, items []any, primitive bool, path string, ctx *validationContext, result *issue.Result) {
+	siblings, _ := data["_"+key].([]any)
+	var reported map[string]bool // a primitive array's items are reported at the array: once per shape
+	for i, item := range items {
+		var sibling any
+		if i < len(siblings) {
+			sibling = siblings[i]
+		}
+		if m, empty := v.emptyObject(ctx, primitive, item); empty {
+			v.reportEmpty(key, fmt.Sprintf("%s[%d]", path, i), result)
+			ctx.edits.empty(data, m)
+			continue
+		}
+		if !misshapenItem(primitive, item, sibling) {
+			continue
+		}
+		ctx.edits.dropItem(data, key, i, primitive, path)
+		found := foundShape(item)
+		if !primitive {
+			v.reportShape(primitive, key, found, fmt.Sprintf("%s[%d]", path, i), result)
+		} else if !reported[found] {
+			// HL7 names a primitive array's item by the array ("The JSON array for 'given' is
+			// invalid at index 1"), and reports it once.
+			if reported == nil {
+				reported = map[string]bool{}
+			}
+			reported[found] = true
+			v.reportShape(primitive, key, found, path, result)
+		}
+	}
+}
+
+// checkEmptyArray reporta key, una propiedad de un objeto en path que se repite, escrita como array vacío:
+// json.html dice que una propiedad sin valores se omite. Se reporta en el elemento, sin índice, como lo
+// nombra el parser de HL7, y solo sobre la fuente (ctx.edits, igual que un objeto vacío). El de un
+// primitivo se reporta solo donde el json.html de su release dice que los arrays nunca están vacíos
+// (emptyPrimitiveArraysForbidden). Un array vacío no es contenido (HL7 7.0.4): el objeto que lo contiene
+// no se registra en ctx.edits.holders, así que, si no tiene otro contenido, ele-1 se juzga como siempre.
+func (v *Validator) checkEmptyArray(key, path string, primitive bool, ctx *validationContext, result *issue.Result) {
+	if ctx.edits == nil {
+		return
+	}
+	if primitive && !emptyPrimitiveArraysForbidden(v.registry.FHIRVersion()) {
+		return
+	}
+	result.AddErrorWithID(issue.DiagStructureArrayEmpty, map[string]any{"element": key}, path)
 }
 
 // emptyObject reports whether value, one value of a complex element or a resource an element
@@ -193,6 +242,10 @@ func (v *Validator) checkShadowShape(data map[string]any, key string, value any,
 			map[string]any{"element": sibling, "found": foundShape(value)}, path)
 		ctx.edits.drop(data, key, true)
 		return false
+	}
+	if len(items) == 0 {
+		v.checkEmptyArray(sibling, path, true, ctx, result)
+		return true
 	}
 	reported := map[string]bool{}
 	for i, item := range items {

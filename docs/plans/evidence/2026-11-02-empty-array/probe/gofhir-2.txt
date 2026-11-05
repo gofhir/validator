@@ -1,0 +1,42 @@
+== 4.0.1 e26-shadow-unknown.json
+   Patient._birthDate.foo | structure | Unknown element 'foo'
+== 4.0.1 e27-shadow-item-ext-empty.json
+== 4.0.1 e28-shadow-single-arr.json
+   Patient.birthDate | structure | '_birthDate' must be a JSON object, not an array
+== 4.0.1 e29-ext-ext-empty.json
+== 4.0.1 e31-cref-item-empty.json
+   Questionnaire.item[0] | invariant | Constraint failed: que-1: 'Group items must have nested items, display items cannot have nested items'
+== 4.0.1 e35-choice-coding-empty.json
+   Observation.valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 4.0.1 e36-given-null-only.json
+   Patient.name[0].given | structure | 'given' is a primitive: it must be a simple value, not null
+== 4.0.1 e37-contained-item-empty.json
+   Patient.contained[0] | invariant | Constraint failed: org-1: 'The organization SHALL at least have a name or an identifier, and possibly more tha
+== 4.3.0 e26-shadow-unknown.json
+   Patient._birthDate.foo | structure | Unknown element 'foo'
+== 4.3.0 e27-shadow-item-ext-empty.json
+== 4.3.0 e28-shadow-single-arr.json
+   Patient.birthDate | structure | '_birthDate' must be a JSON object, not an array
+== 4.3.0 e29-ext-ext-empty.json
+== 4.3.0 e31-cref-item-empty.json
+== 4.3.0 e35-choice-coding-empty.json
+   Observation.valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+   Observation.valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children unless an empty Parameters resourc
+== 4.3.0 e36-given-null-only.json
+   Patient.name[0].given | structure | 'given' is a primitive: it must be a simple value, not null
+== 4.3.0 e37-contained-item-empty.json
+   Patient.contained[0] | invariant | Constraint failed: org-1: 'The organization SHALL at least have a name or an identifier, and possibly more tha
+== 5.0.0 e26-shadow-unknown.json
+   Patient._birthDate.foo | structure | Unknown element 'foo'
+== 5.0.0 e27-shadow-item-ext-empty.json
+== 5.0.0 e28-shadow-single-arr.json
+   Patient.birthDate | structure | '_birthDate' must be a JSON object, not an array
+== 5.0.0 e29-ext-ext-empty.json
+== 5.0.0 e31-cref-item-empty.json
+== 5.0.0 e35-choice-coding-empty.json
+   Observation.valueCodeableConcept | invariant | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/S
+== 5.0.0 e36-given-null-only.json
+   Patient.name[0].given | structure | 'given' is a primitive: it must be a simple value, not null
+== 5.0.0 e37-contained-item-empty.json
+   Patient.contained[0].telecom | structure | Unknown element 'telecom'
+   Patient.contained[0] | invariant | Constraint failed: org-1: 'The organization SHALL at least have a name or an identifier, and possibly more tha

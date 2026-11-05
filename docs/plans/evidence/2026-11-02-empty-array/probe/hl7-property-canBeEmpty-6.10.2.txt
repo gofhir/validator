@@ -1,0 +1,18 @@
+  public boolean canBeEmpty();
+    Code:
+         0: aload_0
+         1: getfield      #13                 // Field definition:Lorg/hl7/fhir/r5/model/ElementDefinition;
+         4: ldc_w         #535                // String http://hl7.org/fhir/tools/StructureDefinition/json-empty-behavior
+         7: invokevirtual #114                // Method org/hl7/fhir/r5/model/ElementDefinition.hasExtension:(Ljava/lang/String;)Z
+        10: ifeq          38
+        13: ldc_w         #537                // String absent
+        16: aload_0
+        17: getfield      #13                 // Field definition:Lorg/hl7/fhir/r5/model/ElementDefinition;
+        20: ldc_w         #535                // String http://hl7.org/fhir/tools/StructureDefinition/json-empty-behavior
+        23: invokestatic  #117                // Method org/hl7/fhir/r5/extensions/ExtensionUtilities.readStringExtension:(Lorg/hl7/fhir/r5/model/Element;Ljava/lang/String;)Ljava/lang/String;
+        26: invokevirtual #57                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+        29: ifne          36
+        32: iconst_1
+        33: goto          37
+        36: iconst_0
+        37: ireturn

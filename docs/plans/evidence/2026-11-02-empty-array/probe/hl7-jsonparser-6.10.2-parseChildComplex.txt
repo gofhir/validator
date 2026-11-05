@@ -1,0 +1,91 @@
+         6: invokedynamic #651,  0            // InvokeDynamic #4:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+        11: astore        8
+        13: aload         4
+        15: invokevirtual #652                // Method org/hl7/fhir/r5/elementmodel/Element.getPath:()Ljava/lang/String;
+        18: aload         5
+        20: invokevirtual #568                // Method org/hl7/fhir/r5/elementmodel/Property.getName:()Ljava/lang/String;
+        23: invokedynamic #651,  0            // InvokeDynamic #4:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+        28: astore        9
+        30: aload_3
+        31: ifnull        39
+        34: aload_3
+        35: iconst_1
+        36: invokevirtual #555                // Method org/hl7/fhir/utilities/json/model/JsonProperty.setTag:(I)V
+        39: aload_3
+        40: ifnonnull     47
+        43: aconst_null
+        44: goto          51
+        47: aload_3
+        48: invokevirtual #110                // Method org/hl7/fhir/utilities/json/model/JsonProperty.getValue:()Lorg/hl7/fhir/utilities/json/model/JsonElement;
+        51: astore        10
+        53: aload         5
+        55: invokevirtual #653                // Method org/hl7/fhir/r5/elementmodel/Property.isList:()Z
+        58: ifeq          303
+        61: aload         5
+        63: invokevirtual #656                // Method org/hl7/fhir/r5/elementmodel/Property.isJsonKeyArray:()Z
+        66: ifne          303
+        69: aload         10
+        71: instanceof    #504                // class org/hl7/fhir/utilities/json/model/JsonArray
+        74: ifeq          303
+        77: aload         10
+        79: checkcast     #504                // class org/hl7/fhir/utilities/json/model/JsonArray
+        82: astore        11
+        84: aload         11
+        86: invokevirtual #659                // Method org/hl7/fhir/utilities/json/model/JsonArray.isExtraComma:()Z
+        89: ifeq          146
+        92: aload_0
+        93: aload_1
+        94: ldc_w         #292                // String 2022-11-26
+        97: aload         11
+        99: invokevirtual #660                // Method org/hl7/fhir/utilities/json/model/JsonArray.getEnd:()Lorg/hl7/fhir/utilities/json/model/JsonLocationData;
+       102: invokevirtual #405                // Method org/hl7/fhir/utilities/json/model/JsonLocationData.getLine:()I
+       105: aload         11
+       107: invokevirtual #660                // Method org/hl7/fhir/utilities/json/model/JsonArray.getEnd:()Lorg/hl7/fhir/utilities/json/model/JsonLocationData;
+       110: invokevirtual #410                // Method org/hl7/fhir/utilities/json/model/JsonLocationData.getCol:()I
+       113: aload         8
+       115: getstatic     #217                // Field org/hl7/fhir/utilities/validation/ValidationMessage$IssueType.INVALID:Lorg/hl7/fhir/utilities/validation/ValidationMessage$IssueType;
+       118: aload_0
+       119: getfield      #131                // Field context:Lorg/hl7/fhir/r5/context/IWorkerContext;
+       122: ldc_w         #442                // String JSON_COMMA_EXTRA
+       125: iconst_1
+       126: anewarray     #227                // class java/lang/Object
+       129: dup
+       130: iconst_0
+       131: ldc_w         #661                // String Array
+       134: aastore
+       135: invokeinterface #232,  3          // InterfaceMethod org/hl7/fhir/r5/context/IWorkerContext.formatMessage:(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+       140: getstatic     #314                // Field org/hl7/fhir/utilities/validation/ValidationMessage$IssueSeverity.ERROR:Lorg/hl7/fhir/utilities/validation/ValidationMessage$IssueSeverity;
+       143: invokevirtual #244                // Method logError:(Ljava/util/List;Ljava/lang/String;IILjava/lang/String;Lorg/hl7/fhir/utilities/validation/ValidationMessage$IssueType;Ljava/lang/String;Lorg/hl7/fhir/utilities/validation/ValidationMessage$IssueSeverity;)V
+       146: aload         11
+       148: invokevirtual #663                // Method org/hl7/fhir/utilities/json/model/JsonArray.size:()Ljava/lang/Integer;
+       151: invokevirtual #666                // Method java/lang/Integer.intValue:()I
+       154: ifne          212
+       157: aload         5
+       159: invokevirtual #671                // Method org/hl7/fhir/r5/elementmodel/Property.canBeEmpty:()Z
+       162: ifeq          168
+       165: goto          212
+       168: aload_0
+       169: aload_1
+       170: getstatic     #211                // Field org/hl7/fhir/utilities/validation/ValidationMessage.NO_RULE_DATE:Ljava/lang/String;
+       173: aload_0
+       174: aload         10
+       176: invokevirtual #294                // Method line:(Lorg/hl7/fhir/utilities/json/model/JsonElement;)I
+       179: aload_0
+       180: aload         10
+       182: invokevirtual #298                // Method col:(Lorg/hl7/fhir/utilities/json/model/JsonElement;)I
+       185: aload         8
+       187: getstatic     #217                // Field org/hl7/fhir/utilities/validation/ValidationMessage$IssueType.INVALID:Lorg/hl7/fhir/utilities/validation/ValidationMessage$IssueType;
+       190: aload_0
+       191: getfield      #131                // Field context:Lorg/hl7/fhir/r5/context/IWorkerContext;
+       194: ldc_w         #674                // String ARRAY_CANNOT_BE_EMPTY
+       197: iconst_0
+       198: anewarray     #227                // class java/lang/Object
+       201: invokeinterface #232,  3          // InterfaceMethod org/hl7/fhir/r5/context/IWorkerContext.formatMessage:(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+       206: getstatic     #314                // Field org/hl7/fhir/utilities/validation/ValidationMessage$IssueSeverity.ERROR:Lorg/hl7/fhir/utilities/validation/ValidationMessage$IssueSeverity;
+       209: invokevirtual #244                // Method logError:(Ljava/util/List;Ljava/lang/String;IILjava/lang/String;Lorg/hl7/fhir/utilities/validation/ValidationMessage$IssueType;Ljava/lang/String;Lorg/hl7/fhir/utilities/validation/ValidationMessage$IssueSeverity;)V
+       212: iconst_0
+       213: istore        12
+       215: aconst_null
+       216: astore        13
+       218: aload         11
+       220: invokevirtual #503                // Method org/hl7/fhir/utilities/json/model/JsonArray.iterator:()Ljava/util/Iterator;
