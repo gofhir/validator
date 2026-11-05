@@ -1,0 +1,122 @@
+# hl7diff same: baseline origin/main vs working tree
+
+decisions: identical (15 files, 26 lines, expect file applied: 0 baseline lines rewritten)
+
+multimatch: identical (3 files, 9 lines, expect file applied: 0 baseline lines rewritten)
+
+core-probes: identical (7 files, 12 lines, expect file applied: 0 baseline lines rewritten)
+
+type-profile-probes: identical (47 files, 92 lines, expect file applied: 0 baseline lines rewritten)
+
+nested-resource-probes: identical (4 files, 6 lines, expect file applied: 0 baseline lines rewritten)
+
+review-probes: identical (5 files, 9 lines, expect file applied: 0 baseline lines rewritten)
+
+extension-probes: identical (14 files, 27 lines, expect file applied: 0 baseline lines rewritten)
+
+primitive-extension-probes: identical (5 files, 5 lines, expect file applied: 0 baseline lines rewritten)
+
+context-probes: identical (33 files, 131 lines, expect file applied: 0 baseline lines rewritten)
+
+context-eval-probes: identical (31 files, 55 lines, expect file applied: 0 baseline lines rewritten)
+
+context-scope-probes: identical (198 files, 369 lines, expect file applied: 0 baseline lines rewritten)
+
+interface-probes: identical (9 files, 35 lines, expect file applied: 0 baseline lines rewritten)
+
+interface-probes-r5: identical (16 files, 20 lines, expect file applied: 0 baseline lines rewritten)
+
+interface-probes-r4b: identical (9 files, 36 lines, expect file applied: 0 baseline lines rewritten)
+
+constraint-probes: identical (81 files, 162 lines, expect file applied: 0 baseline lines rewritten)
+
+invariant-probes: identical (61 files, 107 lines, expect file applied: 0 baseline lines rewritten)
+
+fixedpattern-probes: identical (50 files, 86 lines, expect file applied: 0 baseline lines rewritten)
+
+target-probes: identical (71 files, 104 lines, expect file applied: 0 baseline lines rewritten)
+
+nested-slicing-probes: identical (18 files, 23 lines, expect file applied: 0 baseline lines rewritten)
+
+json-shape-probes: identical (34 files, 103 lines, expect file applied: 0 baseline lines rewritten)
+
+binding-probes: identical (5 files, 10 lines, expect file applied: 0 baseline lines rewritten)
+
+binding-walk-probes: identical (14 files, 32 lines, expect file applied: 4 baseline lines rewritten)
+
+extension-walk-probes: identical (20 files, 42 lines, expect file applied: 3 baseline lines rewritten)
+
+binding-profile-probes: identical (10 files, 19 lines, expect file applied: 0 baseline lines rewritten)
+
+valueset-membership-probes: identical (43 files, 52 lines, expect file applied: 8 baseline lines rewritten)
+
+holder-profile-probes: identical (50 files, 93 lines, expect file applied: 0 baseline lines rewritten)
+
+reference-walk-probes: identical (56 files, 137 lines, expect file applied: 0 baseline lines rewritten)
+
+package-example-cpg-probes: identical (4 files, 10 lines, expect file applied: 1 baseline lines rewritten)
+
+package-example-cql-probes: identical (2 files, 3 lines, expect file applied: 2 baseline lines rewritten)
+
+unknown-codesystem-probes: identical (521 files, 1035 lines, expect file applied: 18 baseline lines rewritten)
+
+fullurl-probes: identical (48 files, 135 lines, expect file applied: 0 baseline lines rewritten)
+
+fullurl-probes-r4b: identical (1 files, 3 lines, expect file applied: 0 baseline lines rewritten)
+
+fullurl-probes-r5: identical (4 files, 8 lines, expect file applied: 0 baseline lines rewritten)
+
+held-resource-probes: identical (39 files, 146 lines, expect file applied: 5 baseline lines rewritten)
+
+choice-variant-probes: identical (27 files, 56 lines, expect file applied: 0 baseline lines rewritten)
+
+content-reference-probes: identical (32 files, 66 lines, expect file applied: 0 baseline lines rewritten)
+
+content-reference-probes-r4b: identical (32 files, 66 lines, expect file applied: 0 baseline lines rewritten)
+
+content-reference-probes-r5: identical (33 files, 42 lines, expect file applied: 0 baseline lines rewritten)
+
+empty-array-probes: identical (37 files, 95 lines, expect file applied: 0 baseline lines rewritten)
+
+empty-array-probes-r4b: identical (37 files, 103 lines, expect file applied: 0 baseline lines rewritten)
+
+empty-array-probes-r5: identical (37 files, 87 lines, expect file applied: 0 baseline lines rewritten)
+
+resolve-probes: identical (19 files, 31 lines, expect file applied: 0 baseline lines rewritten)
+
+resource-element-probes: identical (6 files, 17 lines, expect file applied: 0 baseline lines rewritten)
+
+canonical-probes: identical (17 files, 19 lines, expect file applied: 0 baseline lines rewritten)
+
+r5-probes: identical (8 files, 12 lines, expect file applied: 0 baseline lines rewritten)
+
+r4b-probes: identical (1 files, 1 lines, expect file applied: 0 baseline lines rewritten)
+
+narrative-ucum-probes: identical (49 files, 82 lines, expect file applied: 2 baseline lines rewritten)
+
+narrative-ucum-probes-r4b: identical (49 files, 82 lines, expect file applied: 2 baseline lines rewritten)
+
+narrative-ucum-probes-r5: identical (49 files, 82 lines, expect file applied: 2 baseline lines rewritten)
+
+deqm-probes: identical (15 files, 66 lines, expect file applied: 0 baseline lines rewritten)
+
+deqm-examples: identical (108 files, 451 lines, expect file applied: 0 baseline lines rewritten)
+
+uscore-probes: identical (7 files, 18 lines, expect file applied: 1 baseline lines rewritten)
+
+uscore-examples: identical (183 files, 409 lines, expect file applied: 0 baseline lines rewritten)
+
+ips: identical (44 files, 88 lines, expect file applied: 0 baseline lines rewritten)
+
+mcode-examples: identical (179 files, 471 lines, expect file applied: 1 baseline lines rewritten)
+
+aucore-examples: identical (65 files, 108 lines, expect file applied: 0 baseline lines rewritten)
+
+chcore-examples: identical (48 files, 76 lines, expect file applied: 0 baseline lines rewritten)
+
+clcore-examples: identical (20 files, 24 lines, expect file applied: 0 baseline lines rewritten)
+
+r4-core-examples: identical (5301 files, 55193 lines, expect file applied: 43 baseline lines rewritten)
+
+**IDENTICAL**
+report: /Users/robertoaraneda/Library/Caches/gofhir-hl7diff/1cd63cd0ce9f/same-report.md

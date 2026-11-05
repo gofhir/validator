@@ -26,7 +26,12 @@ const maxShownLines = 20
 // embebe: si un cambio actualiza los embebidos, same lo informa como diferencia. No usa el
 // validador de HL7.
 //
-//	hl7diff same -baseline ref [-manifest corpus.json] [-group a,b] [-heavy] [-work dir]
+// Con -expect, un archivo JSON de cambios declarados
+// ([{"messageId":"X","field":"code","from":"invalid","to":"code-invalid"}]), la salida base se
+// reescribe antes de comparar, solo en las líneas de ese messageId cuyo campo vale from, y ambas
+// salidas se normalizan igual; la comparación sigue siendo exacta, con la misma multiplicidad.
+//
+//	hl7diff same -baseline ref [-manifest corpus.json] [-group a,b] [-heavy] [-work dir] [-expect changes.json]
 func cmdSame(ctx context.Context, args []string, out io.Writer) (bool, error) {
 	flags := flag.NewFlagSet("same", flag.ContinueOnError)
 	manifestPath := flags.String("manifest", "testdata/m12-slice-scoping/corpus.json", "corpus manifest, repository-relative")
@@ -34,6 +39,7 @@ func cmdSame(ctx context.Context, args []string, out io.Writer) (bool, error) {
 	work := flags.String("work", "", "work directory (default: per checkout, under the user cache directory)")
 	heavy := flags.Bool("heavy", false, "also run the groups marked heavy")
 	only := flags.String("group", "", "run only these groups (comma-separated); unknown names are an error")
+	expectPath := flags.String("expect", "", "JSON file of declared changes applied to the baseline output before comparing")
 	if err := flags.Parse(args); err != nil {
 		return false, err
 	}
@@ -42,6 +48,13 @@ func cmdSame(ctx context.Context, args []string, out io.Writer) (bool, error) {
 	}
 	if *baseline == "" {
 		return false, errors.New("same needs -baseline")
+	}
+	var changes []change
+	if *expectPath != "" {
+		var err error
+		if changes, err = readExpect(*expectPath); err != nil {
+			return false, err
+		}
 	}
 	root, err := gitOutput(ctx, "", "rev-parse", "--show-toplevel")
 	if err != nil {
@@ -64,8 +77,9 @@ func cmdSame(ctx context.Context, args []string, out io.Writer) (bool, error) {
 	var report strings.Builder
 	_, _ = fmt.Fprintf(&report, "# hl7diff same: baseline %s vs working tree\n\n", env.baseline)
 	allOK := true
+	rewrites := make([]int, len(changes))
 	for _, g := range groups {
-		ok, err := sameGroup(ctx, env, g, &report)
+		ok, err := sameGroup(ctx, env, g, changes, rewrites, &report)
 		if err != nil {
 			// Un grupo que no corre no prueba nada: la corrida falla.
 			_, _ = fmt.Fprintf(&report, "## %s: FAILED TO RUN\n\n%v\n\n", g.Name, err)
@@ -73,6 +87,9 @@ func cmdSame(ctx context.Context, args []string, out io.Writer) (bool, error) {
 			continue
 		}
 		allOK = allOK && ok
+	}
+	if err := checkRewrites(changes, rewrites); err != nil {
+		return false, err
 	}
 	verdict := "IDENTICAL"
 	if !allOK {
@@ -91,7 +108,7 @@ func cmdSame(ctx context.Context, args []string, out io.Writer) (bool, error) {
 
 // sameGroup corre la línea base y el árbol de trabajo sobre un grupo, con los mismos parámetros, y
 // compara.
-func sameGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (bool, error) {
+func sameGroup(ctx context.Context, env *runEnv, g Group, changes []change, rewrites []int, report io.Writer) (bool, error) {
 	p, err := planGroup(env, g)
 	if err != nil {
 		return false, err
@@ -120,13 +137,20 @@ func sameGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (boo
 			return false, fmt.Errorf("%s output: %w", o.name, err)
 		}
 	}
-	diffs, total := differingLines(base, head)
+	diffs, total, rewritten, err := compareOutputs(base, head, changes, rewrites)
+	if err != nil {
+		return false, err
+	}
+	note := ""
+	if changes != nil {
+		note = fmt.Sprintf(", expect file applied: %d baseline lines rewritten", rewritten)
+	}
 	lines := bytes.Count(base, []byte("\n"))
 	if total == 0 {
-		_, err := fmt.Fprintf(report, "%s: identical (%d files, %d lines)\n\n", g.Name, len(p.files), lines)
+		_, err := fmt.Fprintf(report, "%s: identical (%d files, %d lines%s)\n\n", g.Name, len(p.files), lines, note)
 		return true, err
 	}
-	if _, err := fmt.Fprintf(report, "## %s: %d lines differ (%d files, %d baseline lines)\n\n", g.Name, total, len(p.files), lines); err != nil {
+	if _, err := fmt.Fprintf(report, "## %s: %d lines differ (%d files, %d baseline lines%s)\n\n", g.Name, total, len(p.files), lines, note); err != nil {
 		return false, err
 	}
 	for _, d := range diffs {
@@ -136,6 +160,29 @@ func sameGroup(ctx context.Context, env *runEnv, g Group, report io.Writer) (boo
 	}
 	_, err = fmt.Fprintln(report)
 	return false, err
+}
+
+// compareOutputs compara la salida base con la del árbol de trabajo. Sin cambios declarados es
+// differingLines tal cual; con ellos, reescribe la base (rewritten líneas) y normaliza ambas igual
+// antes de comparar. Suma en rewrites, por cambio, las líneas que reescribió.
+func compareOutputs(base, head []byte, changes []change, rewrites []int) (shown []string, total, rewritten int, err error) {
+	if changes == nil {
+		shown, total = differingLines(base, head)
+		return shown, total, 0, nil
+	}
+	nb, rb, err := normalize(base, changes)
+	if err != nil {
+		return nil, 0, 0, fmt.Errorf("baseline output: %w", err)
+	}
+	nh, _, err := normalize(head, nil)
+	if err != nil {
+		return nil, 0, 0, fmt.Errorf("head output: %w", err)
+	}
+	for i := range changes {
+		rewrites[i] += rb.perChange[i]
+	}
+	shown, total = differingLines(nb, nh)
+	return shown, total, rb.rewritten, nil
 }
 
 // coverage comprueba que una salida de corpusrun valida exactamente los archivos dados: cada uno
@@ -204,4 +251,15 @@ func differingLines(base, head []byte) (shown []string, total int) {
 		}
 	}
 	return shown, total
+}
+
+// checkRewrites rechaza un cambio declarado que no reescribió ninguna línea de la base en ningún
+// grupo (messageId, campo o from mal escritos): haría pasar `same` sin declarar nada real.
+func checkRewrites(changes []change, rewrites []int) error {
+	for i, c := range changes {
+		if rewrites[i] == 0 {
+			return fmt.Errorf("expect file: entry %d (%s.%s %s→%s) rewrote no baseline line", i, c.MessageID, c.Field, c.From, c.To)
+		}
+	}
+	return nil
 }

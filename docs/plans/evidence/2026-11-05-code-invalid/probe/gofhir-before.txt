@@ -1,0 +1,14 @@
+# gofhir main 169de67, -tx n/a, errores y warnings (sin dom-6)
+4.0.1 p1.json error code-invalid AllergyIntolerance.clinicalStatus
+4.0.1 p1.json error invalid AllergyIntolerance.clinicalStatus.coding[0].code
+4.0.1 p3.json error invalid Observation.valueQuantity.code
+4.0.1 p4.json error code-invalid Patient.gender
+4.3.0 p1.json error code-invalid AllergyIntolerance.clinicalStatus
+4.3.0 p1.json error invalid AllergyIntolerance.clinicalStatus.coding[0].code
+4.3.0 p3.json error invalid Observation.valueQuantity.code
+4.3.0 p4.json error code-invalid Patient.gender
+5.0.0 p1.json error code-invalid AllergyIntolerance.clinicalStatus
+5.0.0 p1.json error invalid AllergyIntolerance.clinicalStatus.coding[0].code
+5.0.0 p2.json warning invariant Observation.code.coding[0]
+5.0.0 p3.json error invalid Observation.valueQuantity.code
+5.0.0 p4.json error code-invalid Patient.gender
