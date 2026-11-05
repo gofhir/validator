@@ -13,7 +13,23 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #190 cerrado (pasos 1-9, 03-11-2026), PR #201 abierto, con D4 revisado por la referencia HL7 7.0.4 (05-11-2026); un array JSON vacío se acepta (rama `fix/empty-array`, desde `68589e6`)
+## Frente activo: #191, IssueType `code-invalid` para un código que su CodeSystem no define (rama `fix/code-invalid-issue-type`, desde `169de67`)
+
+[2026-11-05-code-invalid-issue-type.md](2026-11-05-code-invalid-issue-type.md),
+[evidencia](evidence/2026-11-05-code-invalid/).
+- Paso 1 hecho (05-11-2026): HL7 7.0.4 da `code-invalid` para `CODE_NOT_IN_CODESYSTEM` y, con servidor, para un UCUM
+  inválido (`UCUM_INVALID_CODE`), en R4, R4B y R5. hl7diff no compara IssueType: unas 100 combinaciones difieren (frente
+  aparte, fuera del alcance).
+- Pasos 2 y 3 hechos: plan escrito; ronda adversarial de Codex con 4 hallazgos (3 medios), registrados en el plan §3.
+- Pasos 4-7 hechos: aprobado; tests y fix; `hl7diff same -expect` IDENTICAL (92 líneas reescritas); mutaciones 7/7;
+  `make check` verde (plan §5-7).
+- Pasos 8 y 9 hechos (05-11-2026): Codex convergió en la ronda 2 (ronda 1: un medio en `-expect`, corregido); mutaciones
+  10/10; `same -expect` IDENTICAL; `make check` verde (plan §8-9). Sin commit.
+- Frente aparte publicado como [#202](https://github.com/gofhir/validator/issues/202) (IssueType frente a HL7; hl7diff no lo
+  compara).
+- **Próximo:** «commit y pr» (cierra #191), después «merge». Siguiente issue: #192.
+
+## Cerrado: #190, mergeado como #201 (`169de67`, 05-11-2026), con D4 revisado por la referencia HL7 7.0.4; un array JSON vacío se reporta según el json.html de cada release
 
 [2026-11-02-empty-array.md](2026-11-02-empty-array.md), [ADR-003](../adr/ADR-003-empty-primitive-arrays-by-release.md).
 - Revisiones:
@@ -30,7 +46,7 @@ Rama `refactor/composition-evaluator`, sin push.
   - D4 revisado: el holder ya no se registra; plan §10;
   - hl7diff con la 7.0.4: 58 PASS; `same` sin cambios fuera de los grupos nuevos y de `Patient.link`;
   - mutaciones 15/15; `make check` verde; revisión de Opus: converge.
-  - **Próximo:** «merge» de #201 (cuerpo actualizado a la 7.0.4).
+  - Mergeado como #201 (`169de67`, 05-11-2026).
 - **Pendiente del usuario**, borradores en
   [evidence/2026-11-02-empty-array/drafts/](evidence/2026-11-02-empty-array/drafts/):
   - ~~comentario de corrección en #190~~ (erróneo, ver arriba);

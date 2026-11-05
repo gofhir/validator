@@ -1,0 +1,4 @@
+[
+  {"messageId": "CODE_NOT_IN_CODESYSTEM", "field": "code", "from": "invalid", "to": "code-invalid"},
+  {"messageId": "UCUM_INVALID_CODE", "field": "code", "from": "invalid", "to": "code-invalid"}
+]

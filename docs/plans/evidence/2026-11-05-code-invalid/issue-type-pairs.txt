@@ -1,0 +1,109 @@
+7090 CODESYSTEM_NOT_FOUND | processing | UNKNOWN_CODESYSTEM | not-found  e.g. aucore-examples Medication-2active-ingredients.json Medication.code.coding[0].system
+852 CONSTRAINT_FAILED | invariant | Language_XHTML_Lang_Missing1 | business-rule  e.g. r4-core-examples CodeSystem-v2-0001.json CodeSystem
+509 CONSTRAINT_FAILED | invariant | VALIDATION_HL7_WG_URL | business-rule  e.g. r4-core-examples CodeSystem-messageheader-response-request.json CodeSystem
+477 CONSTRAINT_FAILED | invariant | VALIDATION_HL7_PUBLISHER_MISMATCH | business-rule  e.g. r4-core-examples CodeSystem-messageheader-response-request.json CodeSystem
+424 CONSTRAINT_FAILED | invariant | CODESYSTEM_CS_HL7_MISSING_ELEMENT_SHOULD | business-rule  e.g. r4-core-examples CodeSystem-v2-0001.json CodeSystem
+379 CODING_NO_SYSTEM | processing | Coding_has_no_system__cannot_validate | invalid  e.g. r4-core-examples ActivityDefinition-blood-tubes-supply.json ActivityDefinition.code.coding[0]
+236 EXTENSION_INVALID_CONTEXT | extension | Extension_EXTP_Context_Wrong | structure  e.g. context-eval-probes ue_t15_inunknownext.json Patient.extension[0]
+158 CONSTRAINT_FAILED | invariant | All_observations_should_have_a_performer | invalid  e.g. binding-walk-probes bw_choice_datatype.json Observation
+155 CONSTRAINT_FAILED | invariant | All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod | invalid  e.g. binding-walk-probes bw_choice_datatype.json Observation
+130 BINDING_EXTENSIBLE_NO_CODING | processing | Terminology_TX_NoValid_2_CC | code-invalid  e.g. aucore-examples Condition-condition-masked.json Condition.category[0]
+129 CONSTRAINT_FAILED | invariant | All_observations_should_have_a_subject | invalid  e.g. choice-variant-probes ov_o-qs.json Observation
+92 CODESYSTEM_NOT_FOUND | processing | UNKNOWN_CODESYSTEM_VERSION | not-found  e.g. aucore-examples Medication-2active-ingredients.json Medication.code.coding[0].system
+89 BINDING_CANNOT_VALIDATE | informational | Error_validating_code_running_without_terminology_services | business-rule  e.g. chcore-examples MedicationAdministration-3-2-MedAdminFentanyl.json MedicationAdministration.dosage.dose
+85 CONSTRAINT_FAILED | invariant | VALIDATION_HL7_PUBLISHER_MISMATCH2 | business-rule  e.g. r4-core-examples StructureDefinition-codesystem-alternate.json StructureDefinition
+54 STRUCTURE_ARRAY_EMPTY | structure |  | invalid  e.g. binding-walk-probes bw_contained_profile.json Patient.link
+48 EXTENSION_INVALID_CONTEXT | extension | Validation_VAL_Profile_Minimum | structure  e.g. interface-probes ui_CompartmentDefinition.json CompartmentDefinition
+48 CONSTRAINT_FAILED | invariant | XHTML_XHTML_Element_Illegal | invalid  e.g. narrative-ucum-probes nv_script.json Patient.text.div
+42 CONSTRAINT_FAILED | invariant | XHTML_XHTML_Attribute_Illegal | invalid  e.g. narrative-ucum-probes nv_onclick.json Patient.text.div
+38 STRUCTURE_OBJECT_EXPECTED | structure |  | invalid  e.g. context-scope-probes us_q_p05_null.json Patient.name[0]
+37 CONSTRAINT_FAILED | invariant | Validation_VAL_Profile_Minimum | structure  e.g. core-probes r4_q_nested.json Questionnaire.item[0].item[0]
+33 CODE_NOT_IN_CODESYSTEM | invalid | Unknown_Code_in_Version | code-invalid  e.g. binding-walk-probes bw_meta_tag_code.json Observation.meta.tag[0].code
+32 PROFILE_NOT_FOUND | not-found | VALIDATION_VAL_PROFILE_UNKNOWN_ERROR | structure  e.g. canonical-probes cn_06_root_version_missing.json Patient.meta.profile[0]
+28 CODESYSTEM_VERSION_NOT_FOUND | not-found | UNKNOWN_CODESYSTEM_VERSION_UNK | code-invalid  e.g. unknown-codesystem-probes ux_r32v_known_bad_a_req.json Location.operationalStatus.system
+26 STRUCTURE_ARRAY_EXPECTED | structure |  | invalid  e.g. empty-array-probes ea_f04-wrapped-given.json Patient.name
+25 CONSTRAINT_FAILED | invariant |  | invalid  e.g. json-shape-probes js_d1_renumbered.json Patient.telecom[0]
+24 BINDING_CANNOT_VALIDATE | informational |  | code-invalid  e.g. unknown-codesystem-probes ux_p10_s10.json Observation.meta.security[0]
+23 CODESYSTEM_NOT_FOUND | processing | Type_Specific_Checks_DT_URL_Resolve | invalid  e.g. unknown-codesystem-probes ux_a2_h21_loc_req_hfhir.json Location.operationalStatus.system
+22 STRUCTURE_VALUE_EXPECTED | structure |  | invalid  e.g. binding-probes bn_cc_text_misshapen.json Patient.maritalStatus.text
+21 EXTENSION_CONTEXT_INVARIANT | extension | Profile_EXT_Not_Here | structure  e.g. context-eval-probes ue_t06b_invprim_bad.json Patient.name[0].given[0]
+21 CODING_NO_SYSTEM | processing | TERMINOLOGY_TX_SYSTEM_NO_CODE | code-invalid  e.g. r4-core-examples AuditEvent-example-disclosure.json AuditEvent.subtype[0]
+19 TYPE_INVALID_FORMAT | value | Type_Specific_Checks_DT_URI_WS | invalid  e.g. content-reference-probes kr_cref-code-sys-space.json Questionnaire.item[0].item[0].code[0].system
+19 CODESYSTEM_NO_CODES | unknown |  | code-invalid  e.g. unknown-codesystem-probes ux_a2_e5_loc_ext.json Location.operationalStatus
+18 TYPE_WRONG_JSON_TYPE | value |  | invalid  e.g. content-reference-probes kr_cref-maxlen-str.json Questionnaire.item[0].item[0].maxLength
+18 CONSTRAINT_FAILED | invariant | XHTML_XHTML_NS_InValid | invalid  e.g. narrative-ucum-probes nx_inner_wrong_ns.json Patient.text.div
+16 BINDING_REQUIRED | code-invalid | UNABLE_TO_INFER_CODESYSTEM | not-found  e.g. binding-walk-probes bw_content_reference.json Questionnaire.item[0].item[0].type
+16 TYPE_INVALID_FORMAT | value | http://hl7.org/fhir/StructureDefinition/Element#ele-1 | invariant  e.g. content-reference-probes kr_cref-empty-prefix.json Questionnaire.item[0].item[0].prefix
+16 REFERENCE_INVALID_TARGET | value | Reference_REF_BadTargetType | structure  e.g. context-scope-probes us_v_g6_contained_sibling.json Patient.generalPractitioner[0]
+13 STRUCTURE_EMPTY_OBJECT | structure |  | invalid  e.g. binding-probes bn_cc_empty.json Patient.maritalStatus
+13 CONSTRAINT_FAILED | invariant | Measure_MR_M_NotFound | required  e.g. deqm-probes probe_P1_scoring_ok_base.json MeasureReport
+12 TYPE_INVALID_FORMAT | value | Type_Specific_Checks_DT_Primitive_NotEmpty | invalid  e.g. content-reference-probes kr_cref-empty-prefix.json Questionnaire.item[0].item[0].prefix
+11 STRUCTURE_EMPTY_OBJECT | structure | http://hl7.org/fhir/StructureDefinition/Element#ele-1 | invariant  e.g. binding-probes bn_cc_empty.json Patient.maritalStatus
+10 CONSTRAINT_FAILED | invariant | VALIDATION_VAL_STATUS_INCONSISTENT | business-rule  e.g. r4-core-examples CodeSystem-v2-0092.json CodeSystem
+8 CONSTRAINT_FAILED | invariant | Reference_REF_CantResolve | structure  e.g. constraint-probes ci_e12_fragment_not_contained.json Observation.subject
+8 CARDINALITY_MIN | required |  | invalid  e.g. empty-array-probes ea_e13-min1-empty.json Composition.author
+8 CODESYSTEM_NOT_FOUND | processing | UNKNOWN_CODESYSTEM | code-invalid  e.g. unknown-codesystem-probes ux_r23m_obscod_ndfrt.json Observation.category[0].coding[0].system
+7 CONSTRAINT_FAILED | invariant | Validation_VAL_Profile_Maximum | structure  e.g. context-scope-probes us_v_b2_extext_top.json Patient.extension[0]
+7 CONSTRAINT_FAILED | invariant | Validation_VAL_Profile_NoMatch | structure  e.g. holder-profile-probes ht_alt_bundle_two_profiles_none.json Bundle.entry[0].resource
+6 TYPE_WRONG_JSON_TYPE | value | Type_Specific_Checks_DT_Boolean_Value | invalid  e.g. content-reference-probes kr_cref-req-str.json Questionnaire.item[0].item[0].required
+6 CONSTRAINT_FAILED | invariant | Type_Specific_Checks_DT_Primitive_NotEmpty | invalid  e.g. narrative-ucum-probes nv_empty.json Patient.text.div
+6 CODESYSTEM_URI_INVALID | code-invalid | Terminology_TX_System_ValueSet2 | invalid  e.g. unknown-codesystem-probes ux_r28v_ccown.json Observation.code.coding[0].system
+5 CONSTRAINT_COMPILE_ERROR | processing | Problem_processing_expression__in_profile__path__ | invariant  e.g. constraint-probes c1_compile_error.json Patient
+5 SLICING_MULTIPLE_MATCH | structure | Validation_VAL_Profile_MatchMultiple | invalid  e.g. decisions Q1_exists_one.json Patient.identifier[0]
+5 CONSTRAINT_FAILED | invariant | Validation_VAL_Profile_Minimum_SLICE | structure  e.g. deqm-probes probe_P2_scoring_novalue_base.json MeasureReport.extension[0]
+5 CODESYSTEM_EXAMPLE_CONTENT | processing |  | code-invalid  e.g. unknown-codesystem-probes ux_p2_obs_ex_zz.json Observation.meta.security[0]
+4 BINDING_VALUESET_NOT_FOUND | not-found | Terminology_TX_ValueSet_NotFound | code-invalid  e.g. binding-profile-probes bp_unres_extensible_id.json Patient.maritalStatus
+4 TYPE_INVALID_FORMAT | value | Resource_RES_ID_Malformed_Chars | invalid  e.g. core-probes e1_resource_id_colon.json Patient.id
+4 MODIFIER_EXTENSION_UNKNOWN | extension | Extension_EXT_Unknown_NotHere | structure  e.g. r4-core-examples Basic-referral.json Basic.modifierExtension[0]
+4 BINDING_CANNOT_VALIDATE | informational | TERMINOLOGY_TX_SYSTEM_UNSUPPORTED | business-rule  e.g. unknown-codesystem-probes ux_p10_s06.json Observation.meta.tag[0]
+4 CODESYSTEM_EXAMPLE_CONTENT | processing | Terminology_PassThrough_TX_Message | code-invalid  e.g. unknown-codesystem-probes ux_p2_obs_ex_zz.json Observation.meta.tag[0]
+3 BINDING_VALUESET_NOT_FOUND | not-found | Terminology_TX_Code_ValueSet_Ext | code-invalid  e.g. binding-profile-probes bp_unres_extensible_id.json Patient.maritalStatus
+3 CONSTRAINT_FAILED | invariant | Extension_EXTP_Context_Wrong | structure  e.g. context-probes uc_npatient.json Patient.extension[1]
+3 EXTENSION_VALUE_REQUIRED | required | http://hl7.org/fhir/StructureDefinition/Extension#ext-1 | invariant  e.g. deqm-probes probe_P2_scoring_novalue_base.json MeasureReport.extension[0]
+3 EXTENSION_VALUE_REQUIRED | required | Extension_EXT_Simple_ABSENT | structure  e.g. deqm-probes probe_P2_scoring_novalue_base.json MeasureReport.extension[0]
+3 CONSTRAINT_FAILED | invariant | Extension_EXT_Simple_ABSENT | structure  e.g. deqm-probes probe_P2_scoring_novalue_base.json MeasureReport.extension[0]
+3 EXTENSION_VALUE_REQUIRED | required | Validation_VAL_Profile_Minimum | structure  e.g. deqm-probes probe_P2_scoring_novalue_base.json MeasureReport.extension[0]
+3 EXTENSION_VALUE_NOT_ALLOWED | structure | http://hl7.org/fhir/StructureDefinition/Extension#ext-1 | invariant  e.g. extension-probes xd10_req_primitive.json Patient.birthDate.extension[0]
+3 CONSTRAINT_FAILED | invariant | Extension_EXT_Type | structure  e.g. extension-probes xd10_req_primitive.json Patient.birthDate.extension[0]
+3 HOLDER_PROFILE_NOT_FOUND | not-found | Validation_VAL_Unknown_Profile | structure  e.g. holder-profile-probes ht_u1_unres.json Bundle.entry[0].resource
+3 CODESYSTEM_NOT_FOUND | processing | UNKNOWN_CODESYSTEM_VERSION_NONE | not-found  e.g. unknown-codesystem-probes ux_p1_obs_ver.json Observation.category[0].coding[0].system
+3 CODESYSTEM_NOT_FOUND | processing | TYPE_SPECIFIC_CHECKS_DT_SID_INCORRECT | informational  e.g. unknown-codesystem-probes ux_r23m_obscod_dsm5.json Observation.category[0].coding[0].system
+3 TYPE_INVALID_FORMAT | value | Terminology_TX_System_Relative | invalid  e.g. unknown-codesystem-probes ux_r28r_space_ext.json Location.operationalStatus.system
+3 BINDING_REQUIRED | code-invalid | INVALID_DISPLAY_NAME | processing  e.g. valueset-membership-probes vm_b_prim_q.json Patient.language
+2 EXTENSION_INVALID_CONTEXT | extension | http://hl7.org/fhir/StructureDefinition/Extension#ext-1 | invariant  e.g. context-probes uc_npatient.json Patient.extension[1]
+2 CONSTRAINT_FAILED | invariant |  | structure  e.g. core-probes r4_q_nested.json Questionnaire.item[0].item[0]
+2 BINDING_DISPLAY_MISMATCH | code-invalid | Display_Name_for__should_be_one_of__instead_of | invalid  e.g. deqm-examples Measure-measure-pi-example.json Measure.useContext[0].code.display
+2 EXTENSION_VALUE_REQUIRED | required | Validation_VAL_Profile_Minimum_SLICE | structure  e.g. deqm-probes probe_P2_scoring_novalue_base.json MeasureReport.extension[0]
+2 CODESYSTEM_NOT_FOUND | processing | UNKNOWN_CODESYSTEM_CODING_NOT_CHECKED | not-found  e.g. fixedpattern-probes fp_h2_slice_pattern_extra_coding.json Patient.identifier[0].type.coding[0].system
+2 FIXED_VALUE_MISSING | required | Terminology_TX_Code_ValueSet_MISSING | code-invalid  e.g. fixedpattern-probes fp_r02_status_only_ext.json Observation.status
+2 EXTENSION_INVALID_URL | value | Extension_EXT_Unknown_NotHere | structure  e.g. held-resource-probes hr_z1_list_entry_extension.json List.note[0].extension[0]
+2 STRUCTURE_NO_RESOURCE_TYPE | structure |  | invalid  e.g. json-shape-probes js_e3_empty_resource_and_siblings.json Patient.contained[0]
+1 BINDING_REQUIRED_NO_CODE | code-invalid | http://hl7.org/fhir/StructureDefinition/Element#ele-1 | invariant  e.g. binding-probes bn_cc_required_no_code.json AllergyIntolerance.clinicalStatus
+1 CONSTRAINT_FAILED | invariant | Terminology_TX_Code_ValueSet | code-invalid  e.g. binding-probes bn_cc_required_no_code.json AllergyIntolerance.clinicalStatus
+1 EXTENSION_SUBEXTENSION_INVALID | invalid | Extension_EXTP_Context_Wrong | structure  e.g. context-eval-probes ue_t11_sub.json Patient.extension[0].extension[0]
+1 EXTENSION_INVALID_CONTEXT | extension | Extension_EXT_Unknown_NotHere | structure  e.g. context-eval-probes ue_t15_inunknownext.json Patient.extension[0]
+1 EXTENSION_CONTEXT_INVARIANT | extension | http://hl7.org/fhir/StructureDefinition/Extension#ext-1 | invariant  e.g. context-scope-probes us_n_e02_onext25.json Patient.extension[0]
+1 CONSTRAINT_FAILED | invariant | Profile_EXT_Not_Here | structure  e.g. context-scope-probes us_n_e02_onext25.json Patient.extension[0]
+1 EXTENSION_INVALID_CONTEXT | extension | Validation_VAL_Profile_Maximum | structure  e.g. context-scope-probes us_v_b2_extext_top.json Patient.extension[0]
+1 EXTENSION_INVALID_CONTEXT | extension | Extension_EXTM_Context_Wrong | structure  e.g. context-scope-probes us_v_d3_mod_contact_bad.json Patient.contact[0]
+1 EXTENSION_INVALID_CONTEXT | extension | http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5 | invariant  e.g. context-scope-probes us_v_f3_entry_bad.json Bundle.entry[0]
+1 SLICING_CANNOT_BE_EVALUATED | processing | Extension_EXT_Unknown_NotHere | structure  e.g. decisions Q3_unresolvable_present.json Patient.extension[0]
+1 SLICING_ORDER | structure | Validation_VAL_Profile_SliceOrder | invalid  e.g. decisions Q4_ordered_wrong.json Patient.identifier[1]
+1 FIXED_VALUE_MISMATCH | value | TYPE_SPECIFIC_CHECKS_DT_URL_EXAMPLE | invalid  e.g. fixedpattern-probes fp_a1_slice_fixed_bad.json Patient.identifier[0].system
+1 FIXED_VALUE_EXTRA | value | Terminology_TX_Code_ValueSet_MISSING | code-invalid  e.g. fixedpattern-probes fp_r02_status_only_ext.json Observation.status
+1 FIXED_VALUE_MISSING | required | Extension_EXT_Count_Mismatch | value  e.g. fixedpattern-probes fp_r22_gender_fixed_ext_missing.json Patient.gender
+1 HOLDER_PROFILE_MULTIPLE_MATCHES | informational | Validation_VAL_Profile_MultipleMatches | structure  e.g. holder-profile-probes ht_rv_x7_both_met.json Bundle.entry[0].resource
+1 STRUCTURE_OBJECT_EXPECTED | structure | http://hl7.org/fhir/StructureDefinition/ContactPoint#cpt-2 | invariant  e.g. json-shape-probes js_d1_renumbered.json Patient.telecom[0]
+1 CONSTRAINT_FAILED | invariant | Extension_EXT_Unknown_NotHere | structure  e.g. json-shape-probes js_d5_sibling_extension_value.json Patient.birthDate.extension[0]
+1 STRUCTURE_EMPTY_OBJECT | structure | CONTAINED_ORPHAN_DOM3 | invalid  e.g. json-shape-probes js_e3_empty_resource_and_siblings.json Patient.contained[0]
+1 STRUCTURE_NO_RESOURCE_TYPE | structure | CONTAINED_ORPHAN_DOM3 | invalid  e.g. json-shape-probes js_e3_empty_resource_and_siblings.json Patient.contained[0]
+1 CONSTRAINT_FAILED | invariant | IG_HL7_FMM_SHOULD | business-rule  e.g. r4-core-examples ImplementationGuide-fhir.json ImplementationGuide
+1 TYPE_INVALID_FORMAT | value | Resource_RES_ID_Malformed_Length | invalid  e.g. r4-core-examples SearchParameter-questionnaireresponse-extensions-QuestionnaireResponse-item-subject.json SearchParameter.id
+1 TYPE_INVALID_FORMAT | value | Type_Specific_Checks_DT_ID_Valid | invalid  e.g. r5-probes e3_datatype_id_colon.json Patient.maritalStatus.coding[0].id
+1 TYPE_PROFILE_NOT_FOUND | not-found | Validation_VAL_Unknown_Profile | structure  e.g. reference-walk-probes rw_rv_q02_unresolved_type_profile.json Patient.identifier[0]
+1 CONSTRAINT_FAILED | invariant | Reference_REF_NotFound_Bundle | required  e.g. reference-walk-probes rw_rv_q09_root_hash_contained_agg.json Observation.subject
+1 REFERENCE_TYPE_MISMATCH | value | Reference_REF_WrongTarget | structure  e.g. reference-walk-probes rw_w2_literal_type_mismatch.json Observation.subject
+1 REFERENCE_INVALID_TARGET | value | Reference_REF_WrongTarget | structure  e.g. reference-walk-probes rw_w2_literal_type_mismatch.json Observation.subject
+1 REFERENCE_TYPE_MISMATCH | value | Reference_REF_BadTargetType | structure  e.g. reference-walk-probes rw_w2_literal_type_mismatch.json Observation.subject
+1 CONSTRAINT_FAILED | invariant | BUNDLE_ENTRY_URL_MATCHES_TYPE_ID | invalid  e.g. resolve-probes rs_14_referring_entry_versioned_fullurl.json Bundle.entry[0]
+1 BINDING_EXTENSIBLE_OTHER_SYSTEM | code-invalid | DEPRECATED_CONCEPT_FOUND | business-rule  e.g. uscore-examples DocumentReference-episode-summary.json DocumentReference.content[0].format

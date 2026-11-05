@@ -1,0 +1,14 @@
+M1 CodeNotInCodeSystem back -> KILLED ['--- FAIL: TestCodeNotInCodeSystemIssueType (2.63s)', '--- FAIL: TestCodeNotInCodeSystemIssueType/4.0.1 (0.76s)', '--- FAIL: TestCodeNotInCodeSystemIssueType/4.3.0 (0.97s)']
+M2 UCUM back -> KILLED ['--- FAIL: TestUCUMInvalidCodeIssueType (0.04s)', '--- FAIL: TestUCUMInvalidCodeIssueType/4.0.1 (0.01s)', '--- FAIL: TestUCUMInvalidCodeIssueType/4.3.0 (0.01s)']
+Traceback (most recent call last):
+  File "/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/tools/mut191.py", line 16, in <module>
+    p = os.path.join(root, f); s = open(p).read()
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/mut191/internal/tools/hl7diff/expect.go'
+M3 any messageId -> KILLED ['--- FAIL: TestExpectDeclaredChange (0.00s)', '--- FAIL: TestExpectUndeclaredChangeFails (0.00s)', '--- FAIL: TestExpectChangeRewritingNothing (0.00s)']
+M4 head not normalized -> KILLED ['--- FAIL: TestExpectDeclaredChange (0.00s)']
+M5 base not normalized -> KILLED ['--- FAIL: TestExpectDeclaredChange (0.00s)']
+M6 ignore from -> KILLED ['--- FAIL: TestExpectRewritesOnlyFrom (0.00s)']
+M7 zero-rewrite check off -> KILLED ['--- FAIL: TestExpectChangeRewritingNothing (0.00s)']
+M8 EOF check off -> KILLED ['--- FAIL: TestParseExpect (0.00s)']
+M9 multiplicity lost -> KILLED ['--- FAIL: TestExpectKeepsMultiplicity (0.00s)']
+M10 accumulation (= instead of +=) -> KILLED [--- FAIL: TestExpectRewritesAccumulateAcrossGroups (0.00s) ]

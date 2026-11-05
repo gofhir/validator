@@ -9,7 +9,7 @@
 //	hl7diff run   -jar validator_cli.jar [-manifest corpus.json] [-baseline ref] [-group a,b] [-heavy] [-identical]
 //	hl7diff fetch [-manifest corpus.json] [-heavy]
 //	hl7diff diff  -base base.jsonl -head head.jsonl -hl7 hl7.json [-divergences d.json]
-//	hl7diff same  -baseline ref [-manifest corpus.json] [-group a,b] [-heavy]
+//	hl7diff same  -baseline ref [-manifest corpus.json] [-group a,b] [-heavy] [-expect changes.json]
 //
 // "run" produces the three outputs and checks them: it builds corpusrun from the working tree and
 // from a git worktree of the baseline, runs both and the HL7 validator on every group of the

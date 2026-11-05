@@ -424,7 +424,7 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 	},
 	DiagCodeNotInCodeSystem: {
 		Severity: SeverityError,
-		Code:     CodeInvalid,
+		Code:     CodeCodeInvalid,
 		Template: "The code '{code}' is not valid in the CodeSystem '{system}'",
 	},
 	DiagCodeSystemNotFound: {
@@ -717,13 +717,16 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 
 	// UCUM validation.
 	//
-	// An error, not a warning: the instance names http://unitsofmeasure.org as its system and
-	// the code does not exist there, which is the same rule as DiagCodeNotInCodeSystem — a
-	// code absent from the CodeSystem the instance declares. The reference agrees, reporting
-	// "Unknown code 'mmHg' in the CodeSystem 'http://unitsofmeasure.org'".
+	// Es un error y no un warning: la instancia nombra http://unitsofmeasure.org como su sistema y
+	// el código no existe ahí, la misma regla de DiagCodeNotInCodeSystem: un código ausente del
+	// CodeSystem que la instancia declara. La referencia coincide y reporta
+	// "Unknown code 'mmHg' in the CodeSystem 'http://unitsofmeasure.org'". El tipo es code-invalid
+	// (CodeSystem/issue-type: el código no pudo entenderse), como lo reporta el validador HL7 7.0.4
+	// con un servidor de terminología (Unknown_Code_in_Version, en R4, R4B y R5); sin servidor no
+	// valida UCUM.
 	DiagUCUMInvalidCode: {
 		Severity: SeverityError,
-		Code:     CodeInvalid,
+		Code:     CodeCodeInvalid,
 		Template: "Invalid UCUM code '{code}': {error}",
 	},
 }
