@@ -1,0 +1,1 @@
+{"resourceType":"AllergyIntolerance","id":"q3","patient":{"display":"x"},"clinicalStatus":{"coding":[{"code":"bogus"}]}}

@@ -1,0 +1,1 @@
+{"resourceType":"Consent","id":"q16","status":"active","scope":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/consentscope","code":"patient-privacy"}]},"category":[{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/consentcategorycodes"},{"code":"acd"}]}],"policyRule":{"text":"x"}}

@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "r11", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-loinc"]}, "status": "final", "code": {"coding": [{"system": "http://loinc.org", "code": "8867-4"}]}, "subject": {"display": "x"}}

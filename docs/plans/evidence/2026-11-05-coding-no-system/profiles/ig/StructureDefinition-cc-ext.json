@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "cc-ext",
+ "url": "http://example.org/fhir/StructureDefinition/cc-ext",
+ "name": "ccext",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/cc-ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "CodeableConcept"
+     }
+    ],
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://hl7.org/fhir/ValueSet/allergyintolerance-clinical"
+    }
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Observation"
+  }
+ ]
+}

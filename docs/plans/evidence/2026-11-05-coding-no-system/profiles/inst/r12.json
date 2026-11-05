@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "r12", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-slice-loinc"]}, "status": "final", "category": [{"coding": [{"code": "8867-4"}]}], "code": {"text": "x"}, "subject": {"display": "x"}}

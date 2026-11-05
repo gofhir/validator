@@ -13,7 +13,24 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #191, IssueType `code-invalid` para un código que su CodeSystem no define (rama `fix/code-invalid-issue-type`, desde `169de67`)
+## Frente activo: #192, un Coding sin system en un CodeableConcept no pertenece al value set (rama `fix/coding-no-system-binding`, desde `dd3ea6c`)
+
+[2026-11-05-coding-no-system-binding.md](2026-11-05-coding-no-system-binding.md),
+[evidencia](evidence/2026-11-05-coding-no-system/).
+- Paso 1 hecho (05-11-2026): HL7 7.0.4 nunca da por miembro a un Coding sin system de un CodeableConcept (required: error;
+  extensible: warning), en R4, R4B y R5; gofhir lo acepta si el código coincide (`codingInValueSet`). Coding suelto:
+  coinciden.
+- Pasos 2 y 3 hechos: Codex dejó 5 medios y 1 bajo (plan §3); A2 y A5 medidos en HL7 (q11–q16).
+- Paso 4 hecho: aprobado (05-11-2026). Sondas A1/A2 hechas (plan §5): HL7 rechaza en perfil, slice y extensión; con un
+  value set inexistente no rechaza. Regla: `Invalid` solo si `ResolvesValueSet`.
+- Pasos 5-7 hechos (plan §6-7): tests fallan antes y pasan después; mutaciones 6/6; corpus: solo se agregan 9 errores y
+  188 warnings de los dos IDs, todos con par en HL7; `make check` verde. Paso 8: ronda 1 con 1 medio y 2 bajos, ronda 2 converge (2 bajos, corregidos); mutaciones 8/8. Paso 9 hecho: corpus y
+  `make check` en verde (plan §9). Sin commit.
+- Pendiente aparte: falso positivo `STRUCTURE_TYPE_NOT_ALLOWED` en `ov_e-two.json`, regresión posterior a v2.2.0 (plan §7).
+- Pendiente aparte: value set inexistente, gofhir `information` vs HL7 warning `Terminology_TX_ValueSet_NotFound` (issue).
+- **Próximo:** «commit y pr» (cierra #192), después «merge». Pendientes para issues en plan §9. Siguiente issue: #193.
+
+## Cerrado: #191, IssueType `code-invalid` para un código que su CodeSystem no define, mergeado como #203 (`dd3ea6c`, 05-11-2026)
 
 [2026-11-05-code-invalid-issue-type.md](2026-11-05-code-invalid-issue-type.md),
 [evidencia](evidence/2026-11-05-code-invalid/).
@@ -27,7 +44,7 @@ Rama `refactor/composition-evaluator`, sin push.
   10/10; `same -expect` IDENTICAL; `make check` verde (plan §8-9). Sin commit.
 - Frente aparte publicado como [#202](https://github.com/gofhir/validator/issues/202) (IssueType frente a HL7; hl7diff no lo
   compara).
-- **Próximo:** «commit y pr» (cierra #191), después «merge». Siguiente issue: #192.
+- Mergeado como #203 (`dd3ea6c`).
 
 ## Cerrado: #190, mergeado como #201 (`169de67`, 05-11-2026), con D4 revisado por la referencia HL7 7.0.4; un array JSON vacío se reporta según el json.html de cada release
 

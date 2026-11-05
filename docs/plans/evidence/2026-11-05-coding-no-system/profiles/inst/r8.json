@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "r8", "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "extension": [{"url": "http://example.org/fhir/StructureDefinition/cc-ext", "valueCodeableConcept": {"coding": [{"code": "active"}]}}]}

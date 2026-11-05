@@ -800,6 +800,12 @@ func WithStrictMembership(ctx context.Context) context.Context {
 	return context.WithValue(ctx, strictMembershipKey{}, true)
 }
 
+// WithoutStrictMembership returns a context in which ResolveCodeInValueSet answers as it does without
+// WithStrictMembership.
+func WithoutStrictMembership(ctx context.Context) context.Context {
+	return context.WithValue(ctx, strictMembershipKey{}, false)
+}
+
 func strictMembership(ctx context.Context) bool {
 	strict, _ := ctx.Value(strictMembershipKey{}).(bool)
 	return strict

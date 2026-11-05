@@ -574,6 +574,15 @@ func (v *Validator) codingInValueSet(ctx context.Context, coding map[string]any,
 	if code == "" {
 		return terminology.Unresolved
 	}
+	// Un Coding con código y sin system no es miembro de ningún value set: sin system el código no
+	// tiene significado definido (R4 datatypes.html#Coding) y un value set es un conjunto de pares
+	// sistema-código (valueset.html). HL7 7.0.4 lo rechaza de forma definitiva
+	// (Terminology_TX_NoValid_1_CC / _2_CC), pero solo cuando encuentra el value set: si no existe,
+	// avisa eso y no rechaza. El resolvedor compartido, el `code` primitivo y el Coding suelto no
+	// cambian: infieren el sistema del value set.
+	if system == "" {
+		return v.systemlessCodingInValueSet(ctx, code, binding)
+	}
 	if version, _ := coding["version"].(string); v.versionUnknown(system, version) {
 		return v.termRegistry.VersionMembership(binding.ValueSet, system, version, code)
 	}
@@ -597,6 +606,22 @@ func (v *Validator) codingInValueSet(ctx context.Context, coding map[string]any,
 	}
 
 	return terminology.Valid
+}
+
+// systemlessCodingInValueSet decide un Coding con código y sin system: no es miembro cuando el value
+// set se encuentra, y queda sin decidir cuando no, igual que con system. Lo decide el resolvedor, no
+// ResolvesValueSet: con una autoridad, Supports es optimista y no prueba que el value set exista, y
+// el veredicto no puede depender de qué otra consulta haya llenado antes la caché negativa. La
+// pertenencia estricta (WithStrictMembership, la de un discriminador de slice) no aplica aquí: no
+// pregunta si el código está en el value set, que nunca lo está, sino si el value set se encuentra, y
+// con ella un value set que se encuentra pero no se puede expandir quedaría sin decidir.
+func (v *Validator) systemlessCodingInValueSet(ctx context.Context, code string, binding *registry.Binding) terminology.Resolution {
+	res, err := v.termRegistry.ResolveCodeInValueSet(terminology.WithoutStrictMembership(ctx), "", code, binding.ValueSet,
+		terminology.LookupOptions{})
+	if err != nil || res.Resolution == terminology.Unresolved {
+		return terminology.Unresolved
+	}
+	return terminology.Invalid
 }
 
 // validateCodings decides each Coding of a CodeableConcept against binding and returns what the set

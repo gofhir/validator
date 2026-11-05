@@ -1,0 +1,24 @@
+== 4.0.1
+q1.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q2.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q3.json error code-invalid AllergyIntolerance.clinicalStatus None of the codings provided are in the value set 'http://hl
+q3.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q4.json warning processing Patient.maritalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q5.json warning processing Patient.communication[0].language.coding[0] Coding has no system. A code with no system has no defined m
+q6.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+== 4.3.0
+q1.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q2.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q3.json error code-invalid AllergyIntolerance.clinicalStatus None of the codings provided are in the value set 'http://hl
+q3.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q4.json warning processing Patient.maritalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q5.json warning processing Patient.communication[0].language.coding[0] Coding has no system. A code with no system has no defined m
+q6.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+== 5.0.0
+q1.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q2.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q3.json error code-invalid AllergyIntolerance.clinicalStatus None of the codings provided are in the value set 'http://hl
+q3.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q4.json warning processing Patient.maritalStatus.coding[0] Coding has no system. A code with no system has no defined m
+q5.json warning processing Patient.communication[0].language.coding[0] Coding has no system. A code with no system has no defined m
+q6.json warning processing AllergyIntolerance.clinicalStatus.coding[0] Coding has no system. A code with no system has no defined m

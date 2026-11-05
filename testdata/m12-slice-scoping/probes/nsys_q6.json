@@ -1,0 +1,1 @@
+{"resourceType":"AllergyIntolerance","id":"q6","patient":{"display":"x"},"clinicalStatus":{"coding":[{"code":"active"}],"text":"Active"}}
