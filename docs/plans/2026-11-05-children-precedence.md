@@ -250,7 +250,7 @@ cortado la falta de memoria del sistema. El FAIL es `deqm-examples`, con 2 falso
 `http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData`.
 
 - `main` ya da ahí el warning `EXTENSION_UNKNOWN`. HL7 no da nada: resuelve las extensiones entre versiones (R4
-  versions.html#extensions, el paquete `hl7.fhir.xver-extensions`), y gofhir no las resuelve. No hay issue de esto.
+  versions.html#extensions, el paquete `hl7.fhir.xver-extensions`), y gofhir no las resuelve: [#210](https://github.com/gofhir/validator/issues/210) (06-11-2026).
 - s18 y s19 (slice de extensión con un perfil inexistente): en s19, con la url fijada, HL7 da
   `Extension_EXT_Unknown_NotHere` y además `SLICING_CANNOT_BE_EVALUATED` «Unable to resolve profile». El cambio da la
   misma cantidad de reportes, así que la regla de la pieza es correcta. La diferencia en deqm viene de que gofhir no
@@ -378,5 +378,5 @@ aplicables.
 - Queda para después:
   - s22 (el slice de un primitivo con un perfil inexistente no informa nada) pasa a la pieza 3 de #193;
   - s16;
-  - el issue de las extensiones entre versiones (B-D41), que aún no está publicado;
+  - las extensiones entre versiones (B-D41), [#210](https://github.com/gofhir/validator/issues/210);
   - piezas 2 y 3, y el incremento 2 de #193 (s11 y s12).
