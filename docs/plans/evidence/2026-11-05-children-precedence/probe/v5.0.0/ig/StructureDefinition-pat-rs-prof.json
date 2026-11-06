@@ -1,0 +1,70 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pat-rs-prof",
+ "url": "http://example.org/fhir/StructureDefinition/pat-rs-prof",
+ "name": "patrsprof",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "use"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier:a",
+    "path": "Patient.identifier",
+    "sliceName": "a",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    },
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/missing-id"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:a.use",
+    "path": "Patient.identifier.use",
+    "fixedCode": "official"
+   },
+   {
+    "id": "Patient.identifier:a/b",
+    "path": "Patient.identifier",
+    "sliceName": "a/b",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/id-inv"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

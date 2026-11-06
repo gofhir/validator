@@ -538,11 +538,6 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 // included. A resource an element holds is checked by the resource walk.
 func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, rc *refContext, result *issue.Result) {
 	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
-	if c.Unresolved.Canonical != "" {
-		// The profile its type declares cannot be used (the cardinality phase reports it): the value
-		// is still one of its type, whose definition governs it, as the HL7 validator checks it.
-		c = v.registry.TypeChildrenOf(node, typeCode)
-	}
 	matched := slicerecord.In(ctx)
 	for _, child := range c.Nodes {
 		for _, cv := range elementvalues.Of(child, inst, v.registry) {

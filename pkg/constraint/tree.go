@@ -364,17 +364,16 @@ func (v *Validator) declaredProfile(ctx context.Context, url, at, fhirPath strin
 	return nil
 }
 
-// typeLayer is the definition that governs a value through its type: the one profile that the type
-// of node, or of an element node slices, declares for typeCode, the most specific first; else the
-// definition the value declares itself (self); else the type's own definition, as layer (node, or
-// the element its contentReference points to) declares it; with its root element. A declared
-// profile that does not resolve (reported by the cardinality phase) leaves the value under its
-// type's definition, as the HL7 validator checks it.
+// typeLayer es la definición que gobierna un valor por su tipo: el único perfil que el tipo de
+// node, o de un elemento que node divide, declara para typeCode, el más específico que se resuelve
+// (Registry.TypeProfilesOf, de donde Registry.ChildrenOf lo toma); si no, la definición que el
+// valor declara de sí mismo (self); si no, la definición propia del tipo, tal como la declara layer
+// (node, o el elemento al que apunta su contentReference); con su elemento raíz. Un perfil
+// declarado que no se resuelve (lo informa la fase de cardinalidad) deja el valor bajo la
+// definición de su tipo, como lo comprueba el validador HL7.
 func (v *Validator) typeLayer(ctx context.Context, node, layer *registry.ElementNode, typeCode string, self *registry.StructureDefinition) (*registry.StructureDefinition, *registry.ElementNode) {
-	for n := node; n != nil; n = n.SliceOf {
-		if tp := v.registry.TypeProfile(ctx, n, typeCode); tp.SD != nil {
-			return tp.SD, tp.SD.Tree().Root()
-		}
+	if tp := v.registry.TypeProfilesOf(ctx, node, typeCode).Governing; tp.SD != nil {
+		return tp.SD, tp.SD.Tree().Root()
 	}
 	if layer != node {
 		if tp := v.registry.TypeProfile(ctx, layer, typeCode); tp.SD != nil {

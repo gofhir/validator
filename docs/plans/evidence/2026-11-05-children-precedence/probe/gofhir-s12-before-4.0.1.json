@@ -1,0 +1,20 @@
+[
+  {
+    "resource": "/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/p193b/inst/s12.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient"
+        ]
+      }
+    ],
+    "duration": "5.849ms"
+  }
+]

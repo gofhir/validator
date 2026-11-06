@@ -185,11 +185,6 @@ func (v *Validator) validateResource(ctx context.Context, sd *registry.Structure
 // primitive.
 func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, path string, result *issue.Result) {
 	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, nil)
-	if children.Unresolved.Canonical != "" {
-		// El perfil que declara su tipo no se puede usar (otra fase lo informa): el valor sigue siendo
-		// de su tipo, cuya definición lo gobierna, y HL7 lo valida así (#178).
-		children = v.registry.TypeChildrenOf(node, typeCode)
-	}
 	v.validateChildren(ctx, children, inst, path, result)
 }
 

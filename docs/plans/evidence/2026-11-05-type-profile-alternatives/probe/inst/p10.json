@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "p10", "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "extension": [{"url": "http://example.org/fhir/StructureDefinition/qty-ext", "valueQuantity": {"value": 5, "comparator": "<", "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}]}

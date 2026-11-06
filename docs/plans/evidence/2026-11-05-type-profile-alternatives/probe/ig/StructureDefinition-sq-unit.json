@@ -1,0 +1,23 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "sq-unit",
+ "url": "http://example.org/fhir/StructureDefinition/sq-unit",
+ "version": "1.0.0",
+ "name": "squnit",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity.unit",
+    "path": "Quantity.unit",
+    "min": 1
+   }
+  ]
+ }
+}

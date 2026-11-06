@@ -2,9 +2,11 @@ package registry
 
 import "context"
 
-// InstanceChildren is what governs the children of one instance of an element: the definition
-// they are in and their elements. When the one profile the instance's type declares cannot be used,
-// Unresolved says which and why, and there are no children.
+// InstanceChildren es lo que gobierna los hijos de una instancia de un elemento: la definición en
+// que están y sus elementos. Cuando el perfil que declara el propio elemento para el tipo de la
+// instancia no se puede usar, Unresolved dice cuál y por qué; eso no corta el descenso: los hijos
+// salen de la definición que la instancia declara para sí o del tipo (HL7 7.0.4 valida el valor
+// contra el tipo base y además informa el perfil desconocido).
 type InstanceChildren struct {
 	SD         *StructureDefinition
 	Nodes      []*ElementNode
@@ -14,20 +16,28 @@ type InstanceChildren struct {
 // MaxContentReferenceHops bounds a chain of contentReferences (a cycle in a malformed definition).
 const MaxContentReferenceHops = 8
 
-// ChildrenOf returns the children that govern an instance of node, an element of sd:
+// ChildrenOf devuelve los hijos que gobiernan una instancia de node, un elemento de sd:
 //
-//   - node's own in the snapshot, or, for a slice the snapshot does not unroll, those of the element
-//     it slices;
-//   - else those its contentReference points to;
-//   - else those of the one profile its type declares for the instance's type, typeCode
-//     (type.profile, which picks the type of a choice element; "" for the only type);
-//   - else those of the definition the instance declares for itself, which self returns for the
-//     instance's type (an extension's url names the definition it conforms to, extensibility.html);
-//   - else those of its type's definition, which is used even when it is the one being walked
-//     (Extension.extension is an Extension): the recursion follows the instance, so it ends with it.
+//   - los propios de node en el snapshot o, para un slice que el snapshot no despliega, los del
+//     elemento que divide;
+//   - si no, los que apunta su contentReference;
+//   - si no, los del perfil que su tipo declara para el tipo de la instancia, typeCode
+//     (type.profile, que elige el tipo de un elemento de elección; "" para el único tipo): el más
+//     específico que se resuelve entre el del nodo y los de los elementos que divide
+//     (TypeProfilesOf);
+//   - si no, los de la definición que la instancia declara para sí, que self devuelve para el tipo
+//     de la instancia (la url de una extensión nombra la definición a la que se ajusta,
+//     extensibility.html);
+//   - si no, los de la definición de su tipo, que se usa aun cuando es la misma que se camina
+//     (Extension.extension es una Extension): la recursión sigue a la instancia, así que termina
+//     con ella.
 //
-// Every phase that walks an instance with its definitions (cardinality, slicing) takes the
-// children from here, so that they check a value against the same definition.
+// Un perfil de tipo que no se resuelve nunca corta el descenso. Si nada que se resuelva gobierna,
+// Unresolved dice el más específico que el propio nodo declara y no se resuelve (para que la fase
+// dueña lo informe), y los hijos son los de los dos últimos puntos.
+//
+// Toda fase que camina una instancia con sus definiciones (cardinalidad, slicing, binding) toma
+// los hijos de aquí, para comprobar un valor contra la misma definición.
 func (r *Registry) ChildrenOf(ctx context.Context, sd *StructureDefinition, node *ElementNode, typeCode string, self func(typeCode string) *StructureDefinition) InstanceChildren {
 	return r.childrenOf(ctx, sd, node, typeCode, self, 0)
 }
@@ -48,32 +58,40 @@ func (r *Registry) childrenOf(ctx context.Context, sd *StructureDefinition, node
 		}
 		return r.childrenOf(ctx, tsd, target, typeCode, self, hops+1)
 	}
-	if tp := r.TypeProfile(ctx, node, typeCode); tp.Canonical != "" {
-		if tp.SD == nil {
-			return InstanceChildren{Unresolved: tp}
-		}
+	// El destino de un contentReference se mira solo a él, sin la cadena de slices que divide.
+	profiles := r.typeProfilesOf(ctx, node, typeCode, hops == 0)
+	if tp := profiles.Governing; tp.SD != nil {
 		return InstanceChildren{SD: tp.SD, Nodes: tp.SD.Tree().Root().Children}
+	}
+	// Se informa el perfil sin resolver que el propio nodo declara; uno declarado solo por un
+	// ancestro de la cadena SliceOf lo informa quien camina esa cadena. En ambos casos el descenso
+	// sigue por el tipo del valor, como HL7.
+	var unresolved TypeProfile
+	if len(profiles.Unresolved) > 0 && profiles.Unresolved[0].Node == node {
+		unresolved = profiles.Unresolved[0].TypeProfile
 	}
 	code := typeCode
 	if code == "" && len(node.Def.Type) == 1 {
 		code = node.Def.Type[0].Code
 	}
 	if code == "" {
-		return InstanceChildren{}
+		return InstanceChildren{Unresolved: unresolved}
 	}
 	if self != nil {
 		if def := self(code); def != nil {
 			if root := def.Tree().Root(); root != nil {
-				return InstanceChildren{SD: def, Nodes: root.Children}
+				return InstanceChildren{SD: def, Nodes: root.Children, Unresolved: unresolved}
 			}
 		}
 	}
-	return r.TypeChildrenOf(node, typeCode)
+	c := r.TypeChildrenOf(node, typeCode)
+	c.Unresolved = unresolved
+	return c
 }
 
-// TypeChildrenOf returns the children of an instance of node under its type's own definition:
-// typeCode, or node's only type. A phase that goes on below a value whose type's profile cannot be
-// used (ChildrenOf's Unresolved) takes them from here.
+// TypeChildrenOf devuelve los hijos de una instancia de node bajo la definición propia de su tipo:
+// typeCode, o el único tipo de node. Una fase que baja por un valor de un tipo que el elemento no
+// permite (la definición del tipo, no la del elemento) los toma de aquí.
 func (r *Registry) TypeChildrenOf(node *ElementNode, typeCode string) InstanceChildren {
 	if typeCode == "" && len(node.Def.Type) == 1 {
 		typeCode = node.Def.Type[0].Code

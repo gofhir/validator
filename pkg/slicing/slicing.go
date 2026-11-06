@@ -144,21 +144,20 @@ type validation struct {
 	scope slicematch.Scope
 }
 
-// memberDefinition returns the definition whose children govern an instance of a slice
-// (Registry.MemberTree).
-func (v *Validator) memberDefinition(slice *registry.ElementNode) *registry.ElementNode {
-	_, member := v.registry.MemberTree(context.Background(), nil, slice)
-	return member
-}
-
-// checkChildren checks the cardinality of node's children in one instance of node, and recurses
-// into the children that are present.
+// checkChildren comprueba la cardinalidad de children, nodos de sd, en una instancia, y baja
+// a los hijos que existen.
 //
-// The cardinality phase already checks every instance against the children that govern it there
-// (base), so a child is checked here only where the slice constrains it further: a missing child
-// is reported once, not once per definition that requires it.
-func (v *Validator) checkChildren(ctx context.Context, node *registry.ElementNode, base registry.InstanceChildren, inst map[string]any, instPath, defPath string, result *issue.Result) {
-	for _, child := range node.Children {
+// La fase de cardinalidad ya comprueba toda instancia contra los hijos que la gobiernan allí
+// (base), así que aquí un hijo se comprueba solo donde el slice lo restringe más: un hijo ausente
+// se informa una vez, no una vez por cada definición que lo exige.
+//
+// Un hijo que el snapshot no despliega lo gobierna la definición que le da su tipo
+// (Registry.ChildrenOf: el perfil que su tipo declara, en el hijo o en un elemento que divide):
+// se comprueba contra el mismo hijo del elemento sin slice cuando es otra definición, y un perfil
+// que declara y no se resuelve es un error del valor, salvo que el elemento sin slice lo declare
+// también, caso que informa la fase de cardinalidad.
+func (v *Validator) checkChildren(ctx context.Context, sd *registry.StructureDefinition, children []*registry.ElementNode, base registry.InstanceChildren, inst map[string]any, instPath, defPath string, result *issue.Result) {
+	for _, child := range children {
 		name := child.Name()
 		childPath := instPath + "." + name
 		childDef := defPath + "." + name
@@ -181,21 +180,46 @@ func (v *Validator) checkChildren(ctx context.Context, node *registry.ElementNod
 			}
 		}
 
-		if len(child.Children) == 0 {
-			continue
-		}
 		for _, cv := range values {
-			m, ok := cv.Value.(map[string]any)
-			if !ok {
-				continue
+			if m, ok := cv.Value.(map[string]any); ok {
+				v.checkChildValue(ctx, sd, child, baseChild, base, cv, m, instPath, childDef, result)
 			}
-			var next registry.InstanceChildren
-			if baseChild != nil {
-				next = v.registry.ChildrenOf(ctx, base.SD, baseChild, cv.TypeCode, v.selfDefinitions(ctx, m))
-			}
-			v.checkChildren(ctx, child, next, m, cv.Path(instPath), childDef, result)
 		}
 	}
+}
+
+// checkChildValue comprueba un valor, m, de child: contra los hijos que el snapshot despliega
+// debajo, o si no contra la definición que lo gobierna (véase checkChildren).
+func (v *Validator) checkChildValue(ctx context.Context, sd *registry.StructureDefinition, child, baseChild *registry.ElementNode, base registry.InstanceChildren, cv childValue, m map[string]any, instPath, childDef string, result *issue.Result) {
+	self := v.selfDefinitions(ctx, m)
+	var next registry.InstanceChildren
+	if baseChild != nil {
+		next = v.registry.ChildrenOf(ctx, base.SD, baseChild, cv.TypeCode, self)
+	}
+	if len(child.Children) > 0 {
+		v.checkChildren(ctx, sd, child.Children, next, m, cv.Path(instPath), childDef, result)
+		return
+	}
+	// Un recurso que el hijo contiene se valida contra su propia definición (recorrido de
+	// recursos), no contra la del elemento.
+	if v.registry.HoldsResource(child.Def) {
+		return
+	}
+	gov := v.registry.ChildrenOf(ctx, sd, child, cv.TypeCode, self)
+	// Se informa el perfil sin resolver (salvo el que ya informó la cadena base) y la bajada sigue
+	// por la definición del tipo.
+	if un := gov.Unresolved; un.Canonical != "" && un.Canonical != next.Unresolved.Canonical {
+		reportProfileNotFound(result, un, cv.Path(instPath))
+	}
+	if gov.SD != nil && gov.SD != next.SD {
+		v.checkChildren(ctx, gov.SD, gov.Nodes, next, m, cv.Path(instPath), childDef, result)
+	}
+}
+
+// reportProfileNotFound informa un perfil de tipo que no se puede usar, como error del valor.
+func reportProfileNotFound(result *issue.Result, tp registry.TypeProfile, at string) {
+	result.AddErrorWithID(issue.DiagTypeProfileNotFound,
+		map[string]any{"profile": tp.Canonical, "type": tp.TypeCode, "reason": tp.Reason}, at)
 }
 
 // named returns the node of nodes with this name, or nil.

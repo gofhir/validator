@@ -13,7 +13,33 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Frente activo: #192, un Coding sin system en un CodeableConcept no pertenece al value set (rama `fix/coding-no-system-binding`, desde `dd3ea6c`)
+## Próximo frente: #193
+
+- Paso 1 iniciado (05-11-2026): en `700d1c3` siguen fallando las reproducciones 1, 2 y 3 de #193
+  (`evidence/2026-10-31-slice-choice-types/next-front/`); la 4 (`type.profile` múltiple) no tiene test.
+  Frente arquitectónico (fases de constraint y cardinalidad; plan §9 de 2026-10-31-slice-choice-types).
+- Decisión del usuario (05-11-2026): tres incrementos. (1) `type.profile` con varios perfiles (O); (2) fase de
+  constraint: conjunto de definiciones gobernantes por valor (reproducciones 1–3); (3) lo mismo en la fase de
+  cardinalidad. Cada uno con su plan, ronda adversarial y PR.
+- Incremento 1 en curso, rama `fix/type-profile-alternatives` (desde `700d1c3`), plan
+  [2026-11-05-type-profile-alternatives.md](2026-11-05-type-profile-alternatives.md): pasos 1 y 2 hechos (HL7: NoMatch +
+  errores de cada perfil; gofhir hoy no dice nada). Ronda adversarial 1 (Opus, por elección del usuario): 2 altos,
+  4 medios, 1 bajo; rediseño en plan §2 v2 (como los recursos contenidos: elegir con `Conforms`, recorrer los elegidos
+  como capas en constraint y cardinalidad). Ronda 2 (Opus): no converge (2 altos, 3 medios; plan §3b): las capas
+  por valor las deben respetar los 11 paquetes que llaman `ChildrenOf`. Decisión del usuario (05-11-2026): «machinery first». El incremento 1
+  pasa a ser la maquinaria de capas por valor en `registry.ChildrenOf` (respetada por todos los llamadores), con el O de
+  `type.profile` como primer uso; el incremento 2 suma la definición propia de la extensión. Relevamiento y plan v3 hechos (plan §2 v3).
+  Ronda 3 (la última): **no converge** (2 altos, 3 medios; plan §3c). El usuario aprobó la partición (05-11-2026).
+  **Pieza 1** (rama `refactor/children-precedence`, plan `docs/plans/2026-11-05-children-precedence.md`): paso 2 hecho;
+  sondas s1–s5: 3 defectos con un solo perfil (s2, s3, s5). Ronda 1 (Codex): 1 alto, 3 medios, aceptados (plan §3,
+  §2 v2). Ronda 2: 5 medios (§3b); sondas s6–s7; plan §2 v3. Ronda 3 (última): **no converge** (2 medios, 1 bajo; §3c). El usuario pidió seguir sin cuarta ronda: plan §2 v4 (T1 con s4, T2 con s12; perfil de tipo bajo hijos
+  desplegados pasa al incremento 2). Plan aprobado (05-11-2026). Implementado, sin commit; `make check` verde; mutaciones 10/11 (la 4 es
+  equivalente; plan «Mutaciones»). hl7diff verde (B-D41 declarada: extensiones entre versiones, issue por crear), bench sin
+  regresión en asignaciones. **Paso 8:** ronda 1 con s20 corregida; mutaciones 12 de 13 (la 4, equivalente). Ronda 2: dos hallazgos medios preexistentes en `main` (s21–s23: HL7 cae al tipo base ante un perfil no resuelto; slice primitivo). Usuario: s21/s23 entran en la pieza 1 (plan §2 v5, un perfil no resuelto nunca corta la bajada; s24 confirma el binding); s22 pasa a la pieza 3. §2 v5 implementado, `make check` verde. hl7diff verde (61 livianos y r4-core-examples); mutaciones 17 de 18 (4 y 18, equivalentes). Ronda 3 converge (s25 rechazado con HL7; s26 y comentario aceptados). **Cerrada** (paso 9): s25/s26 matan las mutaciones 4 y 18; `make check` verde. **Próximo:** «commit y pr» cuando el usuario lo pida; publicar el issue de extensiones entre versiones y poner su número en B-D41; s22 pasa a la pieza 3. Sondas extra p6–p12 hechas: p8 corrige el plan; p12
+  (tipo de elección) parece un defecto de HL7, por confirmar en su código. Issues nuevos del cierre de #192:
+  #205 (`memberOf`), #206 (value set inexistente), #207 (segundo `value[x]` de una extensión), #208 (array vacío de un primitivo en R5: reemplaza ADR-003; HL7 lo aceptó en hapifhir/org.hl7.fhir.core#2825).
+
+## Cerrado: #192, un Coding sin system en un CodeableConcept no pertenece al value set, mergeado como #204 (`700d1c3`, 05-11-2026)
 
 [2026-11-05-coding-no-system-binding.md](2026-11-05-coding-no-system-binding.md),
 [evidencia](evidence/2026-11-05-coding-no-system/).
@@ -28,7 +54,7 @@ Rama `refactor/composition-evaluator`, sin push.
   `make check` en verde (plan §9). Sin commit.
 - Pendiente aparte: falso positivo `STRUCTURE_TYPE_NOT_ALLOWED` en `ov_e-two.json`, regresión posterior a v2.2.0 (plan §7).
 - Pendiente aparte: value set inexistente, gofhir `information` vs HL7 warning `Terminology_TX_ValueSet_NotFound` (issue).
-- **Próximo:** «commit y pr» (cierra #192), después «merge». Pendientes para issues en plan §9. Siguiente issue: #193.
+- Mergeado como #204 (`700d1c3`). Issues del cierre: #205, #206, #207 (plan §9).
 
 ## Cerrado: #191, IssueType `code-invalid` para un código que su CodeSystem no define, mergeado como #203 (`dd3ea6c`, 05-11-2026)
 

@@ -1,0 +1,99 @@
+{
+  "resourceType" : "OperationOutcome",
+  "text" : {
+    "status" : "generated",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Patient</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Patient.identifier[0]</td><td>Processing Failure</td><td>Slicing cannot be evaluated: Unable to resolve profile CanonicalType[https://example.org/review3-missing]</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Patient.identifier[0]</td><td>Validation rule failed</td><td>Constraint failed: idinv-1: 'value present' (defined in http://example.org/fhir/StructureDefinition/id-inv)</td><td/><td>InstanceValidator</td></tr></table></div>"
+  },
+  "extension" : [{
+    "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+    "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (3 days old)"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+    "valueString" : "inst/s26.json"
+  }],
+  "issue" : [{
+    "extension" : [{
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+      "valueInteger" : 1
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+      "valueInteger" : 175
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+      "valueString" : "InstanceValidator"
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+      "valueCode" : "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+      "valueString" : "http://hl7.org/fhir/StructureDefinition/Patient|4.3.0"
+    }],
+    "severity" : "warning",
+    "code" : "invariant",
+    "details" : {
+      "text" : "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    "expression" : ["Patient"]
+  },
+  {
+    "extension" : [{
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+      "valueInteger" : 1
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+      "valueInteger" : 173
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+      "valueString" : "InstanceValidator"
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+      "valueCode" : "SLICING_CANNOT_BE_EVALUATED"
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+      "valueString" : "http://example.org/fhir/StructureDefinition/pat-anc"
+    }],
+    "severity" : "error",
+    "code" : "processing",
+    "details" : {
+      "text" : "Slicing cannot be evaluated: Unable to resolve profile CanonicalType[https://example.org/review3-missing]"
+    },
+    "expression" : ["Patient.identifier[0]"]
+  },
+  {
+    "extension" : [{
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+      "valueInteger" : 1
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+      "valueInteger" : 173
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+      "valueString" : "InstanceValidator"
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+      "valueCode" : "http://example.org/fhir/StructureDefinition/id-inv#idinv-1"
+    },
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+      "valueString" : "http://example.org/fhir/StructureDefinition/pat-anc"
+    }],
+    "severity" : "error",
+    "code" : "invariant",
+    "details" : {
+      "text" : "Constraint failed: idinv-1: 'value present' (defined in http://example.org/fhir/StructureDefinition/id-inv)"
+    },
+    "expression" : ["Patient.identifier[0]"]
+  }]
+}

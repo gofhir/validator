@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "s12", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/pat-reslice"]}, "identifier": [{"use": "official", "system": "http://x.org/ids"}]}

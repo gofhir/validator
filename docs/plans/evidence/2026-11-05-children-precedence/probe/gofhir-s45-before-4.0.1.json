@@ -1,0 +1,62 @@
+[
+  {
+    "resource": "/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/p193b/inst/s4.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity'",
+        "expression": [
+          "Observation.valueQuantity"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "business-rule",
+        "diagnostics": "Maximum cardinality of 'Observation.value[x]:valueQuantity.comparator' is 0, but found 1",
+        "expression": [
+          "Observation.valueQuantity.comparator"
+        ]
+      }
+    ],
+    "duration": "7.147ms"
+  },
+  {
+    "resource": "/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/p193b/inst/s5.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Observation"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: qty-3: 'If a code for the unit is present, the system SHALL also be present'",
+        "expression": [
+          "Observation.valueQuantity"
+        ]
+      }
+    ],
+    "duration": "1.108ms"
+  }
+]

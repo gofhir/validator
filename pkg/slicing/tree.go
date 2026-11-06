@@ -237,8 +237,16 @@ func (v *Validator) checkMember(ctx context.Context, sd *registry.StructureDefin
 		// slice constrains inline is checked here.
 		return
 	}
+	// Las declaraciones del slice y de su cadena se juntan antes de que MemberTree reemplace el
+	// slice por el perfil de su tipo. Lo que declara el elemento sin slice lo informa la cardinalidad.
+	for _, d := range v.registry.TypeProfilesOf(ctx, slice, cv.TypeCode).Unresolved {
+		if d.Node != node {
+			reportProfileNotFound(result, d.TypeProfile, itemPath)
+		}
+	}
 	base := v.registry.ChildrenOf(ctx, sd, node, cv.TypeCode, v.selfDefinitions(ctx, m))
-	v.checkChildren(ctx, v.memberDefinition(slice), base, m, itemPath, node.Def.ID+":"+sliceNameOf(slice), result)
+	msd, member := v.registry.MemberTree(ctx, sd, slice)
+	v.checkChildren(ctx, msd, member.Children, base, m, itemPath, node.Def.ID+":"+sliceNameOf(slice), result)
 }
 
 // matchValue returns the slice that governs one value, or nil, reporting what the matcher found on

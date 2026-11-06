@@ -168,3 +168,12 @@ pertenencia estricta, M7 error de la autoridad). Sondas r12 y r13 en `profiles/`
   - falso positivo `STRUCTURE_TYPE_NOT_ALLOWED` en `ov_e-two.json`, regresión posterior a v2.2.0 (§7);
   - `memberOf` de FHIRPath con un Coding sin system (A3), sin sondear aún;
   - r13: un Coding con system de un sistema no cargado bajo un slice por binding; no se comparó con HL7.
+
+### Borradores de issues (05-11-2026, después del merge de #204)
+
+- [#205](https://github.com/gofhir/validator/issues/205) ([issue-memberof.md](evidence/2026-11-05-coding-no-system/drafts/issue-memberof.md)): `memberOf()` siempre falso para un
+  CodeableConcept (fhirpath entrega `[]map[string]interface{}` y el adaptador espera `[]any`) y verdadero para un Coding
+  sin system. Sondas en `memberof/`.
+- [#206](https://github.com/gofhir/validator/issues/206) ([issue-valueset-not-found.md](evidence/2026-11-05-coding-no-system/drafts/issue-valueset-not-found.md)).
+- [#207](https://github.com/gofhir/validator/issues/207) ([issue-extension-second-variant.md](evidence/2026-11-05-coding-no-system/drafts/issue-extension-second-variant.md)): no es
+  una regresión; v2.2.0 ya daba un error de más, que #195 cambió de mensaje.

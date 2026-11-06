@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-qty-or",
+ "url": "http://example.org/fhir/StructureDefinition/obs-qty-or",
+ "name": "obsqtyor",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "Quantity",
+      "profile": [
+       "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
+       "http://hl7.org/fhir/StructureDefinition/MoneyQuantity"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

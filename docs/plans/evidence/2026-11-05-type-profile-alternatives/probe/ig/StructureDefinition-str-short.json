@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "str-short",
+ "url": "http://example.org/fhir/StructureDefinition/str-short",
+ "version": "1.0.0",
+ "name": "strshort",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "short-1",
+      "severity": "error",
+      "human": "at most 3 characters",
+      "expression": "length() <= 3"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "p12", "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-choice-or"]}, "valueQuantity": {"value": 5, "comparator": "<", "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}

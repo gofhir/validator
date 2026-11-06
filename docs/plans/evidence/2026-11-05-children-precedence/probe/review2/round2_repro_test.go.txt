@@ -1,0 +1,48 @@
+package validator
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+)
+
+func TestChildrenPrecedenceReviewSampledData(t *testing.T) {
+	for _, missing := range []bool{false, true} {
+		t.Run(fmt.Sprint(missing), func(t *testing.T) {
+			profile := ""
+			if missing {
+				profile = `,"profile":["https://example.org/missing-sampled"]`
+			}
+			def := []byte(`{"resourceType":"StructureDefinition","url":"https://example.org/review-sampled","name":"ReviewSampled","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Observation","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Observation","derivation":"constraint","differential":{"element":[{"id":"Observation.value[x]","path":"Observation.value[x]","type":[{"code":"SampledData"` + profile + `}],"slicing":{"discriminator":[{"type":"type","path":"$this"}],"rules":"open"}},{"id":"Observation.value[x]:valueSampledData","path":"Observation.value[x]","sliceName":"valueSampledData","type":[{"code":"SampledData"}]}]}}`)
+			v := cpValidator(t, "4.0.1", def)
+			res, err := v.Validate(t.Context(), []byte(`{"resourceType":"Observation","meta":{"profile":["https://example.org/review-sampled"]},"status":"final","code":{"text":"x"},"valueSampledData":{"origin":{"value":0},"period":1,"data":"1"}}`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			lines := cpLines(res, nil)
+			t.Logf("issues: %q", lines)
+			for _, line := range lines {
+				if strings.Contains(line, "MIN @ Observation.valueSampledData.dimensions") {
+					return
+				}
+			}
+			t.Fatal("missing required SampledData.dimensions was not reported")
+		})
+	}
+}
+
+func TestChildrenPrecedenceReviewPrimitive(t *testing.T) {
+	def := []byte(`{"resourceType":"StructureDefinition","url":"https://example.org/review-primitive","name":"ReviewPrimitive","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Patient","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient","derivation":"constraint","differential":{"element":[{"id":"Patient.name.given","path":"Patient.name.given","slicing":{"discriminator":[{"type":"value","path":"$this"}],"rules":"open"}},{"id":"Patient.name.given:a","path":"Patient.name.given","sliceName":"a","type":[{"code":"string","profile":["https://example.org/missing-string"]}],"fixedString":"x"}]}}`)
+	v := cpValidator(t, "4.0.1", def)
+	res, err := v.Validate(t.Context(), []byte(`{"resourceType":"Patient","meta":{"profile":["https://example.org/review-primitive"]},"name":[{"given":["x"]}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, is := range res.Issues {
+		t.Logf("%s %s @ %v: %s", is.Severity, is.MessageID, is.Expression, is.Diagnostics)
+		if is.MessageID == "TYPE_PROFILE_NOT_FOUND" {
+			return
+		}
+	}
+	t.Fatal("missing primitive slice profile was not reported")
+}

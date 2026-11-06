@@ -1,0 +1,71 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-reslice",
+ "url": "http://example.org/fhir/StructureDefinition/obs-reslice",
+ "name": "obsreslice",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.component",
+    "path": "Observation.component",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "code"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.component:sq",
+    "path": "Observation.component",
+    "sliceName": "sq",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "id"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.component:sq.code",
+    "path": "Observation.component.code",
+    "patternCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8310-5"
+      }
+     ]
+    }
+   },
+   {
+    "id": "Observation.component:sq.value[x]",
+    "path": "Observation.component.value[x]",
+    "min": 1
+   },
+   {
+    "id": "Observation.component:sq/a",
+    "path": "Observation.component",
+    "sliceName": "sq/a"
+   },
+   {
+    "id": "Observation.component:sq/a.id",
+    "path": "Observation.component.id",
+    "fixedString": "a"
+   }
+  ]
+ }
+}

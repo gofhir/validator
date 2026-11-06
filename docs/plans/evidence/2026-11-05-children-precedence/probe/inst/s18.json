@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "s18", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/pat-extslice"]}, "extension": [{"url": "http://example.org/fhir/StructureDefinition/missing-ext", "valueString": "a"}]}

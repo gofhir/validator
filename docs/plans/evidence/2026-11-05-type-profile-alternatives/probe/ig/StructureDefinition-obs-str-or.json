@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-str-or",
+ "url": "http://example.org/fhir/StructureDefinition/obs-str-or",
+ "name": "obsstror",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/str-short",
+       "http://example.org/fhir/StructureDefinition/str-upper"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

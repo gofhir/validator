@@ -1,0 +1,1355 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "collection",
+  "entry" : [{
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation.value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Structural Issue</td><td>Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Structural Issue</td><td>Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/missing-quantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Structural Issue</td><td>Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Validation rule failed</td><td>Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (3 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "inst/p6.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 314
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 315
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 315
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 315
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 314
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Unknown_Profile"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-qty-miss"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 314
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_NoMatch"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-qty-miss"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/missing-quantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 314
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_Maximum"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-qty-miss"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 314
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-qty-miss"
+        }],
+        "severity" : "error",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation.value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Structural Issue</td><td>Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (3 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "inst/p7.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 295
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 296
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 296
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 296
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 295
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Unknown_Profile"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-qty-miss"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation.value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Structural Issue</td><td>Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Structural Issue</td><td>Unknown profile http://example.org/fhir/StructureDefinition/missing-2</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Structural Issue</td><td>Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/missing-2, http://example.org/fhir/StructureDefinition/missing-quantity</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (3 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "inst/p8.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 315
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 316
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 316
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 316
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 315
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Unknown_Profile"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-qty-miss2"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 315
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Unknown_Profile"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-qty-miss2"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unknown profile http://example.org/fhir/StructureDefinition/missing-2"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 315
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_NoMatch"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-qty-miss2"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/missing-2, http://example.org/fhir/StructureDefinition/missing-quantity"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation.component[0].value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation.component[1].value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.component[1].value.ofType(Quantity)</td><td>Structural Issue</td><td>Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.component[1].value.ofType(Quantity)</td><td>Structural Issue</td><td>Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.component[1].value.ofType(Quantity)</td><td>Validation rule failed</td><td>Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.component[1].value.ofType(Quantity)</td><td>Validation rule failed</td><td>Constraint failed: mqty-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|4.0.1 [MoneyQuantity])</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (3 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "inst/p9.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 332
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.component[0].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 474
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.component[1].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 477
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 477
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 477
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 474
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_NoMatch"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-comp-or"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+        },
+        "expression" : ["Observation.component[1].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 474
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_Maximum"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-comp-or"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])"
+        },
+        "expression" : ["Observation.component[1].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 474
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-comp-or"
+        }],
+        "severity" : "error",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])"
+        },
+        "expression" : ["Observation.component[1].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 474
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/MoneyQuantity#mqty-1"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-comp-or"
+        }],
+        "severity" : "error",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: mqty-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = \"urn:iso:std:iso:4217\" - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|4.0.1 [MoneyQuantity])"
+        },
+        "expression" : ["Observation.component[1].value.ofType(Quantity)"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation.extension[0].value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Error</td><td>Observation.extension[0].value.ofType(Quantity)</td><td>Structural Issue</td><td>Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.extension[0].value.ofType(Quantity)</td><td>Structural Issue</td><td>Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.extension[0].value.ofType(Quantity)</td><td>Validation rule failed</td><td>Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.extension[0].value.ofType(Quantity)</td><td>Validation rule failed</td><td>Constraint failed: mqty-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|4.0.1 [MoneyQuantity])</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (3 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "inst/p10.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 309
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.extension[0].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 309
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_NoMatch"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+        },
+        "expression" : ["Observation.extension[0].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 309
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_Maximum"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])"
+        },
+        "expression" : ["Observation.extension[0].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 309
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1 [SimpleQuantity])"
+        },
+        "expression" : ["Observation.extension[0].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 309
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/MoneyQuantity#mqty-1"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "error",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: mqty-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = \"urn:iso:std:iso:4217\" - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|4.0.1 [MoneyQuantity])"
+        },
+        "expression" : ["Observation.extension[0].value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 312
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 312
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 312
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+        },
+        "expression" : ["Observation"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (3 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "inst/p11.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 220
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 220
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 220
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+        },
+        "expression" : ["Observation"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Warning</td><td>Observation.value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation</td><td>Validation rule failed</td><td>Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have an effective[x] ()</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Structural Issue</td><td>Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1)</td><td/><td>InstanceValidator</td></tr><tr><td>Error</td><td>Observation.value.ofType(Quantity)</td><td>Validation rule failed</td><td>Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity'</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (3 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "inst/p12.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 316
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 317
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/DomainResource#dom-6"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://hl7.org/fhir/StructureDefinition/Observation|4.0.1"
+        }],
+        "severity" : "warning",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 317
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 317
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_an_effectiveDateTime_or_an_effectivePeriod"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have an effective[x] ()"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 316
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Validation_VAL_Profile_Maximum"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-choice-or"
+        }],
+        "severity" : "error",
+        "code" : "structure",
+        "details" : {
+          "text" : "Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1)"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 316
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/fhir/StructureDefinition/obs-choice-or"
+        }],
+        "severity" : "error",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity'"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      }]
+    }
+  }]
+}

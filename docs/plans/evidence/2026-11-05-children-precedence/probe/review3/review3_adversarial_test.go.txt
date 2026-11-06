@@ -1,0 +1,59 @@
+package validator
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestReview3ResliceMissingOverResolved(t *testing.T) {
+	for _, version := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		t.Run(version, func(t *testing.T) {
+			b, err := os.ReadFile(filepath.Join(cpEvidence, cpDirs[version], "StructureDefinition-pat-anc.json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			b = []byte(strings.Replace(string(b), `"sliceName": "a/b"`, `"sliceName": "a/b", "type":[{"code":"Identifier","profile":["https://example.org/review3-missing"]}]`, 1))
+			v := cpValidator(t, version, b)
+			res, err := v.Validate(t.Context(), []byte(`{"resourceType":"Patient","meta":{"profile":["http://example.org/fhir/StructureDefinition/pat-anc"]},"identifier":[{"use":"official","system":"http://x.org/ids"}]}`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			found := false
+			for _, line := range cpLines(res, nil) {
+				t.Log(line)
+				if strings.Contains(line, "idinv-1") {
+					found = true
+				}
+			}
+			if !found {
+				t.Error("resolved ancestor invariant idinv-1 was lost")
+			}
+		})
+	}
+}
+
+func TestReview3SignatureDuplicate(t *testing.T) {
+	for _, version := range []string{"4.0.1", "4.3.0", "5.0.0"} {
+		t.Run(version, func(t *testing.T) {
+			sig := []byte(`{"resourceType":"StructureDefinition","url":"https://example.org/review3-signature","name":"Sig","status":"active","fhirVersion":"` + version + `","kind":"complex-type","abstract":false,"type":"Signature","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Signature","derivation":"constraint","differential":{"element":[{"id":"Signature","path":"Signature"},{"id":"Signature.type","path":"Signature.type","min":2}]}}`)
+			par := []byte(`{"resourceType":"StructureDefinition","url":"https://example.org/review3-parameters","name":"Par","status":"active","fhirVersion":"` + version + `","kind":"resource","abstract":false,"type":"Parameters","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Parameters","derivation":"constraint","differential":{"element":[{"id":"Parameters","path":"Parameters"},{"id":"Parameters.parameter","path":"Parameters.parameter","slicing":{"discriminator":[{"type":"value","path":"name"}],"rules":"open"}},{"id":"Parameters.parameter.value[x]","path":"Parameters.parameter.value[x]","type":[{"code":"Signature","profile":["https://example.org/review3-signature"]}]},{"id":"Parameters.parameter:a","path":"Parameters.parameter","sliceName":"a"},{"id":"Parameters.parameter:a.name","path":"Parameters.parameter.name","fixedString":"a"},{"id":"Parameters.parameter:a.value[x]","path":"Parameters.parameter.value[x]","type":[{"code":"Signature","profile":["https://example.org/review3-missing"]}]}]}}`)
+			v := cpValidator(t, version, sig, par)
+			res, err := v.Validate(t.Context(), []byte(`{"resourceType":"Parameters","meta":{"profile":["https://example.org/review3-parameters"]},"parameter":[{"name":"a","valueSignature":{"when":"2026-01-01T00:00:00Z","who":{"reference":"Patient/p"}}}]}`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			n := 0
+			for _, line := range cpLines(res, nil) {
+				t.Log(line)
+				if strings.Contains(line, "MIN @ Parameters.parameter[0].valueSignature.type") {
+					n++
+				}
+			}
+			if n != 1 {
+				t.Errorf("got %d minimum-cardinality reports for the same absent Signature.type, want 1", n)
+			}
+		})
+	}
+}
