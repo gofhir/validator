@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.2.1](https://github.com/gofhir/validator/compare/v2.2.0...v2.2.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* **binding:** a coding with no system is not a member of a bound value set ([#204](https://github.com/gofhir/validator/issues/204)) ([700d1c3](https://github.com/gofhir/validator/commit/700d1c38ac7ff5917ac01fffa64b50f232350622))
+* **issue:** report a code its code system does not define, and an invalid UCUM code, as code-invalid ([#203](https://github.com/gofhir/validator/issues/203)) ([dd3ea6c](https://github.com/gofhir/validator/commit/dd3ea6c98ffc56383836a2f5d60d5523409cbdc5))
+* **narrative:** read the narrative as strict XHTML and derive its HTML rules from HTML 4.0 ([#185](https://github.com/gofhir/validator/issues/185)) ([970e2c1](https://github.com/gofhir/validator/commit/970e2c1b1e1a9657b55de9bbab56c7889b643650))
+* **primitive:** validate primitive values under an element defined by contentReference ([#198](https://github.com/gofhir/validator/issues/198)) ([68589e6](https://github.com/gofhir/validator/commit/68589e6e98f91798dbfd0d7c50fbf0fb23d7e5e6)), closes [#189](https://github.com/gofhir/validator/issues/189)
+* **registry:** find a choice element's base through contentReferences and typeless slices ([#194](https://github.com/gofhir/validator/issues/194)) ([9929825](https://github.com/gofhir/validator/commit/9929825fd2be710a736c8435eefd9eba122b01a4)), closes [#183](https://github.com/gofhir/validator/issues/183)
+* **registry:** take a value's type profile from its slice chain, and keep validating under one that does not resolve ([#209](https://github.com/gofhir/validator/issues/209)) ([580ec8d](https://github.com/gofhir/validator/commit/580ec8dbc07fe6c866ffa6795470b65529f56137))
+* **slicing:** check a choice element's type against every slice that restricts it ([#195](https://github.com/gofhir/validator/issues/195)) ([e22324e](https://github.com/gofhir/validator/commit/e22324e6c0e913d84e889f5b52c1b63d00784c96)), closes [#187](https://github.com/gofhir/validator/issues/187)
+* **structural:** report an empty JSON array, by the release's json.html for a primitive's ([#201](https://github.com/gofhir/validator/issues/201)) ([169de67](https://github.com/gofhir/validator/commit/169de6718ef9396d78a7e841ef6228b58d55fb00))
+* **structural:** report two variants of a choice element once, the same at the root and in a held resource ([#197](https://github.com/gofhir/validator/issues/197)) ([8730fc4](https://github.com/gofhir/validator/commit/8730fc485acbc48612d30f3d6e09267a53bf1cc1)), closes [#196](https://github.com/gofhir/validator/issues/196)
+
 ## [2.2.0](https://github.com/gofhir/validator/compare/v2.1.0...v2.2.0) (2026-10-29)
 
 
