@@ -1545,7 +1545,7 @@
   },
   {
     "decision": "B-D41",
-    "reason": "Cross-version extension URLs (http://hl7.org/fhir/[version]/StructureDefinition/extension-[Path], R4 versions.html#extensions) are not resolved by gofhir (issue pending: cross-version extensions), so the type profile of the deqm slice on one is reported as not found, as for any unresolvable extension (probe s19, which HL7 reports the same way). HL7 resolves it from hl7.fhir.xver-extensions.",
+    "reason": "Cross-version extension URLs (http://hl7.org/fhir/[version]/StructureDefinition/extension-[Path], R4 versions.html#extensions) are not resolved by gofhir (gofhir/validator#210), so the type profile of the deqm slice on one is reported as not found, as for any unresolvable extension (probe s19, which HL7 reports the same way). HL7 resolves it from hl7.fhir.xver-extensions.",
     "side": "gofhir",
     "file": "fhir-cache:/hl7.fhir.us.davinci-deqm#5.0.0/package/example/MeasureReport-summ-contained-supplemental.json",
     "location": "MeasureReport.extension[1]",
@@ -1553,7 +1553,7 @@
   },
   {
     "decision": "B-D41",
-    "reason": "Cross-version extension URLs (http://hl7.org/fhir/[version]/StructureDefinition/extension-[Path], R4 versions.html#extensions) are not resolved by gofhir (issue pending: cross-version extensions), so the type profile of the deqm slice on one is reported as not found, as for any unresolvable extension (probe s19, which HL7 reports the same way). HL7 resolves it from hl7.fhir.xver-extensions.",
+    "reason": "Cross-version extension URLs (http://hl7.org/fhir/[version]/StructureDefinition/extension-[Path], R4 versions.html#extensions) are not resolved by gofhir (gofhir/validator#210), so the type profile of the deqm slice on one is reported as not found, as for any unresolvable extension (probe s19, which HL7 reports the same way). HL7 resolves it from hl7.fhir.xver-extensions.",
     "side": "gofhir",
     "file": "fhir-cache:/hl7.fhir.us.davinci-deqm#5.0.0/package/example/MeasureReport-summ-contained-supplemental.json",
     "location": "MeasureReport.extension[2]",
