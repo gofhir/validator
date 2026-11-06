@@ -1,0 +1,35 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-memberof",
+ "url": "http://example.org/fhir/StructureDefinition/obs-memberof",
+ "name": "obsmemberof",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.code",
+    "path": "Observation.code",
+    "constraint": [
+     {
+      "key": "mo-cc",
+      "severity": "error",
+      "human": "code is in the value set",
+      "expression": "memberOf('http://hl7.org/fhir/ValueSet/allergyintolerance-clinical')"
+     },
+     {
+      "key": "mo-coding",
+      "severity": "error",
+      "human": "first coding is in the value set",
+      "expression": "coding.first().memberOf('http://hl7.org/fhir/ValueSet/allergyintolerance-clinical')"
+     }
+    ]
+   }
+  ]
+ }
+}

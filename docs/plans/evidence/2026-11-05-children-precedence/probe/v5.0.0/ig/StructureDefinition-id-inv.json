@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "id-inv",
+ "url": "http://example.org/fhir/StructureDefinition/id-inv",
+ "name": "idinv",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier",
+    "constraint": [
+     {
+      "key": "idinv-1",
+      "severity": "error",
+      "human": "value present",
+      "expression": "value.exists()"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "s20", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-onlyanc"]}, "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "valueQuantity": {"value": 5, "code": "mg", "comparator": "bogus"}}

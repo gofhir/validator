@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"s21","meta":{"profile":["https://example.org/review-sampled"]},"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"status":"final","code":{"text":"x"},"valueSampledData":{"origin":{"value":0},"period":1,"data":"1"}}

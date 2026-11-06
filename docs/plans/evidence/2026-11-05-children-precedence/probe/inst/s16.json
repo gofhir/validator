@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "s16", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/pat-rs-prof"]}, "identifier": [{"use": "official", "system": "http://x.org/ids"}]}

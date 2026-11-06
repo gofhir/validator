@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "id-prof",
+ "url": "http://example.org/fhir/StructureDefinition/id-prof",
+ "name": "IdProf",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "min": 1
+   }
+  ]
+ }
+}

@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "p6", "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-qty-miss"]}, "valueQuantity": {"value": 5, "comparator": "<", "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}

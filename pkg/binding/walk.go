@@ -20,9 +20,6 @@ import (
 // element holds is checked by the resource walk.
 func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, holder *registry.ElementDefinition, fhirPath string, result *issue.Result) {
 	c := v.sdRegistry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
-	if c.Unresolved.Canonical != "" {
-		return // reported by the cardinality phase
-	}
 	matched := slicerecord.In(ctx)
 	for _, child := range c.Nodes {
 		for _, cv := range elementvalues.Of(child, inst, v.sdRegistry) {

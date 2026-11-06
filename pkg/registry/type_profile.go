@@ -51,3 +51,50 @@ type TypeProfile struct {
 	SD        *StructureDefinition // its definition, with a snapshot; nil when it cannot be used
 	Reason    string               // why it cannot be used, when SD is nil
 }
+
+// TypeProfiles es lo que los perfiles de tipo declarados por un elemento y por los elementos que
+// divide dicen de la definición que gobierna un valor (véase [Registry.TypeProfilesOf]).
+type TypeProfiles struct {
+	// Governing es el perfil más específico que se resuelve; su SD es nil si ninguno se resuelve.
+	Governing TypeProfile
+	// Unresolved son los perfiles declarados que no se pueden usar, cada uno con el nodo que lo
+	// declara, del nodo más específico al más general.
+	Unresolved []DeclaredProfile
+}
+
+// DeclaredProfile es un perfil de tipo con el nodo del elemento que lo declara.
+type DeclaredProfile struct {
+	Node *ElementNode
+	TypeProfile
+}
+
+// TypeProfilesOf sigue node y la cadena de elementos que divide (SliceOf) y devuelve, por
+// separado, el perfil de tipo más específico que se resuelve para un valor de typeCode y los
+// perfiles declarados que no se resuelven, con su nodo declarante: un slice restringe el elemento
+// que divide (profiling.html#slicing), así que gobierna el perfil del slice más específico que se
+// resuelve, y uno que no se resuelve es un error del valor donde sea que se declare.
+// [Registry.ChildrenOf] toma de aquí el perfil que gobierna, igual que las fases que necesitan la
+// definición del tipo de un valor. La cadena del elemento al que apunta un contentReference no
+// forma parte: solo la del propio node.
+func (r *Registry) TypeProfilesOf(ctx context.Context, node *ElementNode, typeCode string) TypeProfiles {
+	return r.typeProfilesOf(ctx, node, typeCode, true)
+}
+
+func (r *Registry) typeProfilesOf(ctx context.Context, node *ElementNode, typeCode string, chain bool) TypeProfiles {
+	var out TypeProfiles
+	for n := node; n != nil; n = n.SliceOf {
+		tp := r.TypeProfile(ctx, n, typeCode)
+		switch {
+		case tp.SD != nil:
+			if out.Governing.SD == nil {
+				out.Governing = tp
+			}
+		case tp.Canonical != "":
+			out.Unresolved = append(out.Unresolved, DeclaredProfile{Node: n, TypeProfile: tp})
+		}
+		if !chain {
+			break
+		}
+	}
+	return out
+}

@@ -1,0 +1,1 @@
+{"resourceType": "Parameters", "meta": {"profile": ["https://example.org/review3-parameters"]}, "parameter": [{"name": "a", "valueSignature": {"when": "2026-01-01T00:00:00Z", "who": {"reference": "Patient/p"}}}], "id": "s25"}

@@ -115,8 +115,8 @@ func (v *Validator) validateRoot(data map[string]any, sd *registry.StructureDefi
 	v.validateNode(data, sd, root, "", fhirPath, result)
 }
 
-// validateNode checks the children of one instance of node: their counts against min and max, and
-// recursively the children of those present.
+// validateNode comprueba los hijos de una instancia de node: sus cuentas contra min y max, y,
+// y, en cada valor presente, sus hijos.
 func (v *Validator) validateNode(
 	data map[string]any,
 	sd *registry.StructureDefinition,
@@ -127,13 +127,12 @@ func (v *Validator) validateNode(
 ) {
 	childSD, children, missing := v.childrenOf(sd, node, typeCode, data)
 	if missing.canonical != "" {
-		// The value's type declares a profile that cannot be resolved: it cannot be checked, and is
-		// not checked against the base type instead (as in the HL7 validator, which reports the
-		// profile as unknown). Reported here only, not again by the slicing phase.
+		// El tipo del valor declara un perfil que no se resuelve: se informa aquí y no otra vez en
+		// la fase de slicing, y el valor se comprueba contra el tipo base, como hace el validador
+		// de HL7, que informa el perfil como desconocido y sigue.
 		result.AddErrorWithID(issue.DiagTypeProfileNotFound,
 			map[string]any{"profile": missing.canonical, "type": missing.typeCode, "reason": missing.reason},
 			fhirPath)
-		return
 	}
 	v.validateChildren(data, childSD, children, fhirPath, result)
 }
@@ -266,23 +265,22 @@ func (v *Validator) definedByPrimitive(n *registry.ElementNode) bool {
 	return base != nil && base.Kind == kindPrimitive
 }
 
-// unresolvedProfile is the profile an instance's type declares when it cannot be resolved.
+// unresolvedProfile es el perfil que declara el tipo de una instancia cuando no se puede resolver.
 type unresolvedProfile struct {
 	canonical string
 	typeCode  string
 	reason    string
 }
 
-// childrenOf returns the child elements of an instance of node, inst, and the StructureDefinition
-// they belong to (Registry.ChildrenOf), with the definition the instance declares for itself (an
-// extension's url, plan B B4c). A declared type profile that does not resolve is returned as
-// missing, with no children. The node is never a slice: slices are not children.
+// childrenOf devuelve los elementos hijos de una instancia de node, inst, y la StructureDefinition
+// a que pertenecen (Registry.ChildrenOf), con la definición que la instancia declara para sí (la
+// url de una extensión, plan B B4c). Un perfil de tipo declarado que no se resuelve se devuelve
+// como faltante, y los hijos siguen siendo los del tipo. El nodo nunca es un slice: los slices no
+// son hijos.
 func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any) (*registry.StructureDefinition, []*registry.ElementNode, unresolvedProfile) {
 	c := v.registry.ChildrenOf(context.Background(), sd, node, typeCode, v.selfDefinitions(inst))
-	if tp := c.Unresolved; tp.Canonical != "" {
-		return nil, nil, unresolvedProfile{tp.Canonical, tp.TypeCode, tp.Reason}
-	}
-	return c.SD, c.Nodes, unresolvedProfile{}
+	tp := c.Unresolved
+	return c.SD, c.Nodes, unresolvedProfile{tp.Canonical, tp.TypeCode, tp.Reason}
 }
 
 // selfDefinitions returns, for an instance, the definition it declares for itself for a type.

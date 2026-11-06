@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "s15", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-same-child"]}, "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "component": [{"code": {"coding": [{"system": "http://loinc.org", "code": "8310-5"}]}, "valueQuantity": {"value": 5, "code": "mg"}}]}

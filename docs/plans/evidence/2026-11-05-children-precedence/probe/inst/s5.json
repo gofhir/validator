@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "s5", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-tslice-miss"]}, "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "valueQuantity": {"value": 5, "code": "mg"}}

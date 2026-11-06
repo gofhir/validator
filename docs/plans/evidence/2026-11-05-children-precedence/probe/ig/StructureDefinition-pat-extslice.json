@@ -1,0 +1,43 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pat-extslice",
+ "url": "http://example.org/fhir/StructureDefinition/pat-extslice",
+ "name": "PatExtSlice",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension:m",
+    "path": "Patient.extension",
+    "sliceName": "m",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/missing-ext"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "s7", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-reslice"]}, "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "component": [{"id": "a", "code": {"coding": [{"system": "http://loinc.org", "code": "8310-5"}]}}]}

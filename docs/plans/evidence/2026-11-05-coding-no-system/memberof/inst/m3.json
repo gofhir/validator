@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "m3", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-memberof"]}, "status": "final", "code": {"coding": [{"code": "bogus"}]}, "subject": {"display": "x"}}

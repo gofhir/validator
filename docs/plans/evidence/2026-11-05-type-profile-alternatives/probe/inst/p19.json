@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "p19", "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-qty-derived"]}, "status": "final", "code": {"text": "x"}, "subject": {"display": "x"}, "valueQuantity": {"value": 5, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}
