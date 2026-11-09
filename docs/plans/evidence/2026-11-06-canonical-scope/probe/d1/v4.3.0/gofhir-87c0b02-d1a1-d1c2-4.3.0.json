@@ -1,0 +1,748 @@
+[
+  {
+    "resource": "inst/d1a1.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: bsig-1: 'bsig-1' (defined in http://example.org/fhir/StructureDefinition/bun-sig-id)",
+        "expression": [
+          "Patient.contained[1]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[1].entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[1].entry[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Patient.contained[1].entry[1].resource.contained[0]"
+        ]
+      }
+    ],
+    "duration": "6.779ms"
+  },
+  {
+    "resource": "inst/d1a10.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for #o among choices: http://example.org/fhir/StructureDefinition/org-rel",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+        ]
+      }
+    ],
+    "duration": "1.278ms"
+  },
+  {
+    "resource": "inst/d1a11.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      }
+    ],
+    "duration": "593µs"
+  },
+  {
+    "resource": "inst/d1a12.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Bundle.entry[0].resource.contained:B' is 1, but found 0",
+        "expression": [
+          "Bundle.entry[0].resource.contained:B"
+        ]
+      }
+    ],
+    "duration": "1.09ms"
+  },
+  {
+    "resource": "inst/d1a13.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      }
+    ],
+    "duration": "778µs"
+  },
+  {
+    "resource": "inst/d1a2.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: bsig-1: 'bsig-1' (defined in http://example.org/fhir/StructureDefinition/bun-sig-id)",
+        "expression": [
+          "Patient.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0].entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Patient.contained[0].entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0].entry[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[1]"
+        ]
+      }
+    ],
+    "duration": "1.305ms"
+  },
+  {
+    "resource": "inst/d1a3.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[1].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for #o among choices: http://example.org/fhir/StructureDefinition/org-rel",
+        "expression": [
+          "Patient.contained[1].signature.onBehalfOf"
+        ]
+      }
+    ],
+    "duration": "457µs"
+  },
+  {
+    "resource": "inst/d1a4.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[1]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for #o among choices: http://example.org/fhir/StructureDefinition/org-rel",
+        "expression": [
+          "Patient.contained[0].signature.onBehalfOf"
+        ]
+      }
+    ],
+    "duration": "438µs"
+  },
+  {
+    "resource": "inst/d1a5.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for #o among choices: http://example.org/fhir/StructureDefinition/org-rel",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+        ]
+      }
+    ],
+    "duration": "574µs"
+  },
+  {
+    "resource": "inst/d1a6.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for #o among choices: http://example.org/fhir/StructureDefinition/org-rel",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0].signature.onBehalfOf"
+        ]
+      }
+    ],
+    "duration": "556µs"
+  },
+  {
+    "resource": "inst/d1a7.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for #o among choices: http://example.org/fhir/StructureDefinition/org-rel",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+        ]
+      }
+    ],
+    "duration": "557µs"
+  },
+  {
+    "resource": "inst/d1a8.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 3,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[1]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for #o among choices: http://example.org/fhir/StructureDefinition/org-rel",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0].signature.onBehalfOf"
+        ]
+      }
+    ],
+    "duration": "568µs"
+  },
+  {
+    "resource": "inst/d1a9.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[1].entry[0].resource"
+        ]
+      }
+    ],
+    "duration": "442µs"
+  },
+  {
+    "resource": "inst/d1b1.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 4,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Parameters.parameter[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Parameters.parameter[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Parameters.parameter[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Parameters.parameter[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Parameters.parameter[3].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Parameters.parameter[3].resource.contained[0]"
+        ]
+      }
+    ],
+    "duration": "776µs"
+  },
+  {
+    "resource": "inst/d1b2.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 4,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Parameters.parameter[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Parameters.parameter[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Parameters.parameter[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Parameters.parameter[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Parameters.parameter[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Parameters.parameter[3].resource.contained[0]"
+        ]
+      }
+    ],
+    "duration": "651µs"
+  },
+  {
+    "resource": "inst/d1c1.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 4,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Bundle.entry[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[3].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Bundle.entry[3].resource.contained[0]"
+        ]
+      }
+    ],
+    "duration": "738µs"
+  },
+  {
+    "resource": "inst/d1c2.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 4,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: subh-1: 'subh-1' (defined in http://example.org/fhir/StructureDefinition/obs-sub-hash)",
+        "expression": [
+          "Bundle.entry[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[3].resource.contained[0]"
+        ]
+      }
+    ],
+    "duration": "693µs"
+  }
+]

@@ -12,6 +12,7 @@ import (
 
 	"github.com/gofhir/validator/v2/internal/bundleref"
 	"github.com/gofhir/validator/v2/internal/elementvalues"
+	"github.com/gofhir/validator/v2/internal/scopeindex"
 	"github.com/gofhir/validator/v2/internal/slicerecord"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
@@ -485,6 +486,20 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 
 	// Build contained resource index for the root resource
 	ctx = bundleref.EnsureIndexes(ctx)
+	in, _ := ctx.Value(containerKey{}).(containers)
+	var external *scopeindex.External
+	if in.container != nil {
+		external = &scopeindex.External{Container: in.container, Outer: in.outer}
+	}
+	// Una comprobación independiente sobre un recurso contenido (o un valor que un recurso tiene)
+	// indexa también al recurso que lo contiene: sus referencias "#id" y su destino dependen de ahí.
+	var holder map[string]any
+	if c, ok := ctx.Value(containingKey{}).(map[string]any); ok && c != nil {
+		holder = c
+	} else if h, ok := ctx.Value(holdingKey{}).(map[string]any); ok && h != nil {
+		holder = h
+	}
+	ctx = scopeindex.Ensure(ctx, resource, external, holder)
 	rc := rootContext(ctx, resource, bundleCtx)
 
 	// The root resource, over the definitions (walk).
@@ -849,11 +864,18 @@ func (v *Validator) checkTargetConformance(refStr string, target map[string]any,
 	if len(candidates) == 0 {
 		return
 	}
-	// The target is its own %resource; a contained one has the resource that contains it as its
-	// %rootResource (fhirpath.html#variables). Its own references resolve in the Bundle it is in.
+	// El destino está en el Scope que le da su posición, no en el del recurso que lo referencia
+	// (scopeindex): %resource es él mismo, %rootResource el recurso que lo contiene si es contenido
+	// (fhirpath.html#variables), y sus propias referencias resuelven en el Bundle donde está.
 	scope := slicematch.Scope{Resource: target, RootResource: target, Container: rc.container, Outer: rc.outer}
 	if strings.HasPrefix(refStr, "#") {
 		scope.RootResource = rc.root
+	}
+	if scopeindex.From(rc.ctx) != nil {
+		var ok bool
+		if scope, ok = scopeindex.Resolve(rc.ctx, target, "checkTargetConformance", slicematch.Scope{}); !ok {
+			return
+		}
 	}
 	for _, sd := range candidates {
 		if v.conformer.Conforms(rc.ctx, target, sd, scope) {

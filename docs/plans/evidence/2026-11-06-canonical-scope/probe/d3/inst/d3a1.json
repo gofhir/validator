@@ -1,0 +1,108 @@
+{
+ "resourceType": "Bundle",
+ "id": "d3a1",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Observation/r1",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "r1",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-ra"
+     ]
+    },
+    "hasMember": [
+     {
+      "reference": "Observation/z"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Observation/z",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "z",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "Patient/p1"
+    },
+    "performer": [
+     {
+      "reference": "Patient/p2"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/p2"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/p2",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p2",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "contained": [
+     {
+      "resourceType": "Observation",
+      "id": "c",
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+      },
+      "status": "final",
+      "code": {
+       "text": "x"
+      },
+      "subject": {
+       "reference": "Patient/p1"
+      },
+      "focus": [
+       {
+        "reference": "#"
+       }
+      ]
+     }
+    ],
+    "gender": "male"
+   }
+  }
+ ]
+}

@@ -1,0 +1,138 @@
+{
+ "resourceType": "Parameters",
+ "parameter": [
+  {
+   "name": "p0",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "cq2",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "contained": [
+     {
+      "resourceType": "Observation",
+      "id": "cq2",
+      "meta": {
+       "profile": [
+        "http://example.org/fhir/StructureDefinition/obs-sub-hash"
+       ]
+      },
+      "status": "final",
+      "code": {
+       "text": "x"
+      },
+      "subject": {
+       "reference": "#"
+      }
+     }
+    ],
+    "name": [
+     {
+      "family": "cq2"
+     }
+    ]
+   }
+  },
+  {
+   "name": "p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "cq",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "contained": [
+     {
+      "resourceType": "Observation",
+      "id": "cq",
+      "meta": {
+       "profile": [
+        "http://example.org/fhir/StructureDefinition/obs-sub-hash"
+       ]
+      },
+      "status": "final",
+      "code": {
+       "text": "x"
+      },
+      "subject": {
+       "reference": "#"
+      }
+     }
+    ],
+    "name": [
+     {
+      "family": "cq"
+     }
+    ]
+   }
+  },
+  {
+   "name": "p2",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "x2",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-pf-id"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "contained": [
+     {
+      "resourceType": "Organization",
+      "id": "o",
+      "name": "x2"
+     }
+    ],
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "performer": [
+     {
+      "reference": "#o"
+     }
+    ]
+   }
+  },
+  {
+   "name": "p3",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "x1",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-pf-id"
+     ]
+    },
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "contained": [
+     {
+      "resourceType": "Organization",
+      "id": "o",
+      "name": "x1"
+     }
+    ],
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "performer": [
+     {
+      "reference": "#o"
+     }
+    ]
+   }
+  }
+ ],
+ "id": "d1b2"
+}

@@ -1,0 +1,394 @@
+[
+ {
+  "resource": "inst/p1.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "4.641ms"
+ },
+ {
+  "resource": "inst/p10.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "557\u00b5s"
+ },
+ {
+  "resource": "inst/p11.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "498\u00b5s"
+ },
+ {
+  "resource": "inst/p12.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "177\u00b5s"
+ },
+ {
+  "resource": "inst/p13.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 1,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   },
+   {
+    "severity": "information",
+    "code": "processing",
+    "diagnostics": "CodeSystem is unknown and can't be validated: urn:iso:std:iso:4217 for 'USD'",
+    "expression": [
+     "Observation.valueQuantity.system"
+    ]
+   }
+  ],
+  "duration": "183\u00b5s"
+ },
+ {
+  "resource": "inst/p14.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "613\u00b5s"
+ },
+ {
+  "resource": "inst/p15.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "107\u00b5s"
+ },
+ {
+  "resource": "inst/p16.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "135\u00b5s"
+ },
+ {
+  "resource": "inst/p17.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "518\u00b5s"
+ },
+ {
+  "resource": "inst/p18.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "560\u00b5s"
+ },
+ {
+  "resource": "inst/p19.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "103\u00b5s"
+ },
+ {
+  "resource": "inst/p2.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 1,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   },
+   {
+    "severity": "information",
+    "code": "processing",
+    "diagnostics": "CodeSystem is unknown and can't be validated: urn:iso:std:iso:4217 for 'USD'",
+    "expression": [
+     "Observation.valueQuantity.system"
+    ]
+   }
+  ],
+  "duration": "123\u00b5s"
+ },
+ {
+  "resource": "inst/p20.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "473\u00b5s"
+ },
+ {
+  "resource": "inst/p3.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "127\u00b5s"
+ },
+ {
+  "resource": "inst/p4.json",
+  "valid": false,
+  "errors": 2,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "error",
+    "code": "value",
+    "diagnostics": "Maximum cardinality of 'Observation.valueQuantity.comparator' is 0, but found 1",
+    "expression": [
+     "Observation.valueQuantity.comparator"
+    ]
+   },
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   },
+   {
+    "severity": "error",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity'",
+    "expression": [
+     "Observation.valueQuantity"
+    ]
+   }
+  ],
+  "duration": "454\u00b5s"
+ },
+ {
+  "resource": "inst/p5.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "110\u00b5s"
+ },
+ {
+  "resource": "inst/p6.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "438\u00b5s"
+ },
+ {
+  "resource": "inst/p7.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "95\u00b5s"
+ },
+ {
+  "resource": "inst/p8.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "409\u00b5s"
+ },
+ {
+  "resource": "inst/p9.json",
+  "valid": true,
+  "errors": 0,
+  "warnings": 1,
+  "info": 0,
+  "issues": [
+   {
+    "severity": "warning",
+    "code": "invariant",
+    "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+    "expression": [
+     "Observation"
+    ]
+   }
+  ],
+  "duration": "480\u00b5s"
+ }
+]

@@ -52,3 +52,16 @@ errores de cada perfil llevan « (validating against <perfil>|<versión> [<nombr
 | p18 | SimpleQuantity o `sq-unit` (derivado de SimpleQuantity, `unit` 1..1); sin unit | nada (cumple solo SimpleQuantity) |
 | p19 | ídem, con unit | warning `MultipleMatches` |
 | p20 | SimpleQuantity o `cc-prof` (un perfil de CodeableConcept); no cumple SimpleQuantity | `NoMatch` + errores de SimpleQuantity + **el Quantity recorrido contra el perfil de CodeableConcept**: 5 `Validation_VAL_Profile_NotAllowed` y `CodeableConcept.text` mínimo |
+
+## Caso extra 3 (R4, pieza 2, 06-11-2026)
+
+`java -jar validator_cli.jar inst/p21.json -version 4.0.1 -ig ig -tx n/a -output hl7-p21-4.0.1-7.0.4.json`
+
+| Instancia | Qué prueba | HL7 7.0.4 |
+|---|---|---|
+| p21 | SimpleQuantity o `sq-unit`; comparator `<`, sin unit: los dos fallan, y `sqty-1` es común a ambos | `NoMatch`; `Profile_Maximum` de comparator **dos veces** (el texto difiere en «from <perfil>»); `sqty-1` **una vez**, con los dos «(validating against …)» unidos; `Profile_Minimum` de unit (sq-unit) |
+
+HL7 junta los mensajes de texto idéntico (`sqty-1`), no los de cardinalidad, que nombran la definición de origen.
+
+gofhir en `87c0b02` (después de la pieza 1): `gofhir-87c0b02-4.0.1.json`. Con dos o más perfiles, no informa nada de lo que HL7 da en
+p3, p5, p6 a p10, p12, p13, p14, p15, p17, p19 y p20; ni siquiera `TYPE_PROFILE_NOT_FOUND` en p6 a p8.

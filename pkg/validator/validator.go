@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gofhir/validator/v2/internal/scopeindex"
 	"github.com/gofhir/validator/v2/internal/slicerecord"
 	"github.com/gofhir/validator/v2/pkg/binding"
 	"github.com/gofhir/validator/v2/pkg/cardinality"
@@ -52,6 +53,8 @@ type Validator struct {
 	// matcher tells the slice a value belongs to, for the phases and the holders' profiles.
 	matcher       *slicematch.Matcher
 	ucumValidator *ucumvalidator.Validator
+	// positions reemplaza cómo una validación indexa las posiciones de sus recursos; solo lo fijan los tests.
+	positions func(data map[string]any) *scopeindex.Index
 }
 
 // PackageSpec represents an additional FHIR package to load.
@@ -771,6 +774,10 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	// Conformance checks made by slice matching share one memo for this validation, and read the
 	// resource's numbers as the JSON spells them.
 	ctx = withExact(ctx, data, resource)
+	// El Scope de cada recurso de la validación, por su posición, una sola vez: después de normalizar
+	// la forma y antes de elegir holders o comprobar conformidad (scopeindex).
+	positions := v.buildPositions(data)
+	ctx = scopeindex.With(ctx, positions)
 	ctx = withConformState(ctx)
 	ctx = reference.WithIndexes(ctx)
 	ctx = walker.WithDiscoveries(ctx)
@@ -806,6 +813,16 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		result.WarningCount(),
 	)
 
+	return resultOrAbort(result, positions.Err())
+}
+
+// resultOrAbort devuelve result o, si el índice de posiciones falló (se le pidió un recurso que no
+// tiene: un defecto del validador, no un hallazgo sobre el recurso), solo ese error: lo que la
+// validación evaluó después del fallo no tiene un Scope en que apoyarse, así que no se da resultado.
+func resultOrAbort(result *issue.Result, failure error) (*issue.Result, error) {
+	if failure != nil {
+		return nil, failure
+	}
 	return result, nil
 }
 
@@ -865,13 +882,6 @@ func contentJudged(ctx context.Context, vs *valueScope) func(map[string]any) boo
 // The value scope is nil for the resource being validated, and set for a value checked for
 // conformance inside it (a slice's profile discriminator), which may be a datatype or an extension.
 func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]any, rawJSON []byte, sd *registry.StructureDefinition, vs *valueScope, result *issue.Result) {
-	if rt, _ := data[resourceTypeKey].(string); vs != nil && rt == bundleType && !sameMap(vs.scope.Container, data) {
-		// A Bundle checked as a value is where the references of its entries resolve, as the
-		// Bundle validated is (bundle.html#references), and resolve() then the Bundles that hold it.
-		in := *vs
-		in.scope = constraint.ScopeInBundle(vs.scope, data)
-		vs = &in
-	}
 	// The walks check the resources data holds against what sd's holders name for them.
 	ctx = withRootScope(walker.WithRootDefinition(ctx, sd), data, vs)
 

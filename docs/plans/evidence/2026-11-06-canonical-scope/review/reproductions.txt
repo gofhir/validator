@@ -1,0 +1,26 @@
+=== RUN   TestReviewResolverPosition
+--- PASS: TestReviewResolverPosition (0.00s)
+=== RUN   TestReviewStandaloneContexts
+=== RUN   TestReviewStandaloneContexts/external
+    review_round1_test.go:82: conformance calls=1 issues=[{error structure Unable to find a profile match for http://x/Patient/p among choices: http://example.org/fhir/StructureDefinition/pat-t [Observation.subject] <nil>  REFERENCE_TARGET_PROFILE}]
+=== RUN   TestReviewStandaloneContexts/containing
+    review_round1_test.go:82: conformance calls=0 issues=[]
+    review_round1_test.go:84: target conformance calls=0 want 1
+--- FAIL: TestReviewStandaloneContexts (0.72s)
+    --- PASS: TestReviewStandaloneContexts/external (0.00s)
+    --- FAIL: TestReviewStandaloneContexts/containing (0.00s)
+=== RUN   TestReviewUnexpectedTargetError
+    review_round1_test.go:92: accepted unrelated target-profile error
+--- FAIL: TestReviewUnexpectedTargetError (0.00s)
+=== RUN   TestReviewBundleTargetChain
+--- PASS: TestReviewBundleTargetChain (0.01s)
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	1.534s
+=== RUN   TestReviewContainedCost
+    review_cost_test.go:19: contained=2000 three builds=32.7115ms
+    review_cost_test.go:19: contained=4000 three builds=130.907041ms
+    review_cost_test.go:19: contained=8000 three builds=513.3675ms
+--- PASS: TestReviewContainedCost (0.68s)
+PASS
+ok  	github.com/gofhir/validator/v2/internal/scopeindex	0.979s
+FAIL

@@ -12,6 +12,7 @@ import (
 
 	"github.com/gofhir/validator/v2/internal/bundleref"
 	"github.com/gofhir/validator/v2/internal/fhirpathcache"
+	"github.com/gofhir/validator/v2/internal/scopeindex"
 	"github.com/gofhir/validator/v2/pkg/constraint"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
@@ -145,7 +146,7 @@ const maxSwayedChecks = 3
 
 type conformKey struct {
 	profile string
-	value   uintptr // identity of the value's map within this validation
+	value   uintptr // identity of the value's map within this validation; one map has one Scope, so the key needs none
 	assume  bool    // the check's mode: a cycle's answer differs between them
 }
 
@@ -162,10 +163,32 @@ func withConformState(ctx context.Context) context.Context {
 	})
 }
 
+// scopeCheck recibe, antes de leer el memo, el Scope con que se pide la conformidad de un recurso y
+// el que el índice de posiciones tiene para él. Solo los tests lo fijan en un contexto
+// (withScopeCheck), de modo que pertenece a la validación que lleva ese contexto.
+type scopeCheck func(resource map[string]any, asked, indexed slicematch.Scope)
+
+type scopeCheckKey struct{}
+
 // Conforms implements slicematch.Conformer.
 func (c conformer) Conforms(ctx context.Context, value any, profile *registry.StructureDefinition, scope slicematch.Scope) bool {
 	data, ok := value.(map[string]any)
 	if !ok || profile == nil {
+		return false
+	}
+	// Un map, un Scope: el de un recurso es el que le da su posición, quienquiera que pregunte
+	// (scopeindex), y el memo se apoya en eso; el que llega lo confirma el test del invariante. Un valor
+	// que no es recurso está en el Scope de su recurso, el que da quien llama. Un recurso que el índice no tiene aborta la validación
+	// (Validate): nada se comprueba ni se guarda para él.
+	if _, isResource := data[resourceTypeKey].(string); isResource {
+		indexed, ok := scopeindex.Resolve(ctx, data, "Conforms", scope)
+		if !ok {
+			return false
+		}
+		if check, _ := ctx.Value(scopeCheckKey{}).(scopeCheck); check != nil {
+			check(data, scope, indexed)
+		}
+	} else if scopeindex.Aborted(ctx) {
 		return false
 	}
 	st, _ := ctx.Value(conformStateKey{}).(*conformState)
@@ -217,6 +240,13 @@ func (c conformer) Conforms(ctx context.Context, value any, profile *registry.St
 
 	st.mu.Lock()
 	defer st.mu.Unlock()
+	if scopeindex.Aborted(ctx) {
+		// La validación está abortada (Validate): esta respuesta se apoya en un recurso pedido sin
+		// Scope, así que no se guarda, ni las respuestas dadas dentro de ella.
+		st.stack = st.stack[:depth]
+		delete(st.running, key)
+		return false
+	}
 	st.settle(key, depth, ans)
 	return ans
 }
@@ -291,6 +321,10 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 	result.Stats = &issue.Stats{}
 	st, _ := ctx.Value(conformStateKey{}).(*conformState)
 	// The check's issues are discarded: it reports into a scope of its own.
+	// Una corrida especulativa no se memoiza en los grupos de los holders: se armaron con
+	// respuestas que pueden ser provisionales, y settle las descarta sin descartar los grupos
+	// (holderGroups).
+	ctx = withoutHolderGroups(ctx)
 	c.v.validateAgainstProfile(withExtensionScope(constraint.WithReportScope(ctx)), data, raw, profile, &valueScope{scope: scope, state: st}, result)
 	return result.ErrorCount() == 0
 }
@@ -332,15 +366,22 @@ func (r referenceResolver) Resolve(ref string, scope slicematch.Scope) (map[stri
 func (r referenceResolver) ResolveScoped(ref string, scope slicematch.Scope) (map[string]any, slicematch.Scope, bool) {
 	if id, ok := strings.CutPrefix(ref, "#"); ok {
 		res, ok := constraint.ContainedByID(scope.RootResource, id)
-		return res, slicematch.Scope{Resource: res, RootResource: scope.RootResource, Container: scope.Container, Outer: scope.Outer}, ok
+		if !ok {
+			return nil, slicematch.Scope{}, false
+		}
+		// El contenido está donde está, no donde se hace la referencia.
+		in, ok := scopeindex.Resolve(r.ctx, res, "ResolveScoped #id", slicematch.Scope{})
+		return res, in, ok
 	}
 	bundles := append([]map[string]any{scope.Container}, scope.Outer...)
-	// Made from the entry that holds the resource the reference is in.
+	// Se parte de la entry que contiene al recurso donde está la referencia.
 	from := bundleref.IndexOf(r.ctx, scope.Container).FullURLOf(scope.Resource)
 	for i, bundle := range bundles {
 		res, ok, ambiguous := bundleref.IndexOf(r.ctx, bundle).Find(ref, from)
 		if ok {
-			// It is an entry of bundle, where its own references resolve.
+			// Es una entry de bundle. Los pasos siguientes de la ruta de FHIRPath siguen resolviendo en el
+			// Bundle donde la encontró, no en el que ella misma sea: así lo hace HL7 (sonda r1b). Este Scope
+			// es solo el de la cadena; al comprobar un perfil, valueScope lo canoniza con ScopeOf.
 			return res, slicematch.Scope{Resource: res, RootResource: res, Container: bundle, Outer: bundles[i+1:]}, true
 		}
 		if ambiguous {
@@ -351,8 +392,12 @@ func (r referenceResolver) ResolveScoped(ref string, scope slicematch.Scope) (ma
 }
 
 // ScopeOf implements slicematch.ScopedResolver.
-func (referenceResolver) ScopeOf(scope slicematch.Scope, resource map[string]any) slicematch.Scope {
-	return constraint.ScopeOf(scope, resource)
+func (r referenceResolver) ScopeOf(scope slicematch.Scope, resource map[string]any) slicematch.Scope {
+	if scopeindex.From(r.ctx) == nil {
+		return constraint.ScopeOf(scope, resource) // una comprobación suelta, sin índice
+	}
+	in, _ := scopeindex.Resolve(r.ctx, resource, "ScopeOf", slicematch.Scope{})
+	return in
 }
 
 // memberChecker answers ValueSet membership with the binding phase itself: the value is checked

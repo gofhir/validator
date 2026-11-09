@@ -1,0 +1,62 @@
+[
+  {
+    "resource": "inst/d3a1.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for Observation/z among choices: http://example.org/fhir/StructureDefinition/obs-za",
+        "expression": [
+          "Bundle.entry[0].resource.hasMember[0]"
+        ]
+      }
+    ],
+    "duration": "8.469ms"
+  },
+  {
+    "resource": "inst/d3a2.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for Observation/z among choices: http://example.org/fhir/StructureDefinition/obs-za",
+        "expression": [
+          "Bundle.entry[3].resource.hasMember[0]"
+        ]
+      }
+    ],
+    "duration": "1.532ms"
+  },
+  {
+    "resource": "inst/d3b1.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "2.066ms"
+  },
+  {
+    "resource": "inst/d3b2.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "1.157ms"
+  },
+  {
+    "resource": "inst/d3c1.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "1.264ms"
+  }
+]

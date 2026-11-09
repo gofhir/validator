@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gofhir/validator/v2/internal/elementvalues"
+	"github.com/gofhir/validator/v2/internal/scopeindex"
 	"github.com/gofhir/validator/v2/pkg/constraint"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
@@ -122,6 +123,7 @@ func (v *Validator) ValidateDataContext(goCtx context.Context, resource map[stri
 		return
 	}
 
+	goCtx = scopeindex.Ensure(goCtx, resource, nil, nil)
 	run := &validation{ctx: goCtx, opts: opts}
 	if opts.Scope != nil {
 		run.scope = *opts.Scope

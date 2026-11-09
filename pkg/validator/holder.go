@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/gofhir/validator/v2/internal/elementvalues"
+	"github.com/gofhir/validator/v2/internal/scopeindex"
 	"github.com/gofhir/validator/v2/pkg/constraint"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
@@ -89,10 +90,19 @@ func (v *Validator) heldDefinitions(ctx context.Context, defs []*registry.Struct
 	if !ok || len(chain) == 0 {
 		return nil
 	}
-	for _, m := range chain[1:] {
-		scope = constraint.ScopeOf(scope, m)
-	}
 	parent := chain[len(chain)-1]
+	// Cada recurso está en el Scope de su posición, no en uno derivado del de su holder
+	// (scopeindex); el valor validado, chain[0], está en el Scope que le da la validación.
+	indexed := scopeindex.From(ctx) != nil
+	if indexed && len(chain) > 1 {
+		if scope, ok = scopeindex.Resolve(ctx, parent, "heldDefinitions parent", slicematch.Scope{}); !ok {
+			return nil
+		}
+	} else {
+		for _, m := range chain[1:] {
+			scope = constraint.ScopeOf(scope, m)
+		}
+	}
 	var out []*registry.StructureDefinition
 	h := holderProfiles{v: v}
 	for _, def := range defs {
@@ -100,7 +110,13 @@ func (v *Validator) heldDefinitions(ctx context.Context, defs []*registry.Struct
 		if len(profiles) == 0 {
 			continue
 		}
-		for _, sd := range h.Choose(ctx, profiles, held, constraint.ScopeOf(scope, held)).Chosen {
+		heldScope := constraint.ScopeOf(scope, held)
+		if indexed {
+			if heldScope, ok = scopeindex.Resolve(ctx, held, "heldDefinitions held", slicematch.Scope{}); !ok {
+				return nil
+			}
+		}
+		for _, sd := range h.Choose(ctx, profiles, held, heldScope).Chosen {
 			if !slices.Contains(out, sd) {
 				out = append(out, sd)
 			}
@@ -203,6 +219,12 @@ type holderGroupsMemo struct {
 
 type holderGroupsCtxKey struct{}
 
+// withoutHolderGroups devuelve ctx en el que holderGroups no memoiza: los grupos de una corrida que
+// puede apoyarse en respuestas provisionales (conformer.check).
+func withoutHolderGroups(ctx context.Context) context.Context {
+	return context.WithValue(ctx, holderGroupsCtxKey{}, (*holderGroupsMemo)(nil))
+}
+
 func withHolderGroups(ctx context.Context) context.Context {
 	return context.WithValue(ctx, holderGroupsCtxKey{}, &holderGroupsMemo{
 		groups: map[holderGroupsKey]map[uintptr][]string{}, inst: map[uintptr]map[string]any{},
@@ -224,4 +246,13 @@ func withRootScope(ctx context.Context, data map[string]any, vs *valueScope) con
 		scope = vs.scope
 	}
 	return context.WithValue(ctx, rootScopeKey{}, scope)
+}
+
+// buildPositions indexa las posiciones de los recursos de data (scopeindex). El constructor es un
+// campo para que un test pueda dejar fuera un recurso a propósito.
+func (v *Validator) buildPositions(data map[string]any) *scopeindex.Index {
+	if v.positions != nil {
+		return v.positions(data)
+	}
+	return scopeindex.Build(data, nil)
 }

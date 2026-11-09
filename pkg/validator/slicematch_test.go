@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"context"
 	"encoding/json"
 	"os"
 	"slices"
@@ -129,7 +128,7 @@ func TestProfileDiscriminatorOnValuesThatAreNotResources(t *testing.T) {
 			[]string{"SLICING_CARDINALITY_MIN @ Patient.identifier:mrn"}},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := v.Validate(context.Background(), patient(tt.ext, tt.ids))
+			res, err := v.Validate(checkedCtx(t), patient(tt.ext, tt.ids))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -187,7 +186,7 @@ func TestProfileDiscriminatorResolvesInsideTheBundle(t *testing.T) {
 		{"author is not a Patient", doc("urn:uuid:o", "", orgEntry), []string{"SLICING_CARDINALITY_MIN @ Bundle.entry:comp"}},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := v.Validate(context.Background(), tt.doc)
+			res, err := v.Validate(checkedCtx(t), tt.doc)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -233,7 +232,7 @@ func TestSlicingDecisionDiagnostics(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -258,7 +257,7 @@ func TestSlicingDecisionDiagnostics(t *testing.T) {
 // Practitioner also has does not match a Practitioner slice.
 func TestConformanceRequiresTheProfilesType(t *testing.T) {
 	v := sharedConformanceValidator(t)
-	res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/people"]},"type":"collection",
+	res, err := v.Validate(checkedCtx(t), []byte(`{"resourceType":"Bundle","meta":{"profile":["https://example.org/fhir/StructureDefinition/people"]},"type":"collection",
 "entry":[{"fullUrl":"urn:uuid:p","resource":{"resourceType":"Patient","id":"p","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"name":[{"family":"A"}],"gender":"male"}}]}`))
 	if err != nil {
 		t.Fatal(err)
@@ -331,7 +330,7 @@ func TestConformanceGeneratesSnapshotsConcurrently(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if _, err := v.Validate(context.Background(), doc); err != nil {
+			if _, err := v.Validate(checkedCtx(t), doc); err != nil {
 				t.Error(err)
 			}
 		}()
@@ -346,7 +345,7 @@ func TestConformanceGeneratesSnapshotsConcurrently(t *testing.T) {
 // own named-1 is reported at when the container is validated against named-patient next.
 func TestConformanceCheckDoesNotHideAFailure(t *testing.T) {
 	v := sharedConformanceValidator(t)
-	res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Patient",
+	res, err := v.Validate(checkedCtx(t), []byte(`{"resourceType":"Patient",
 "meta":{"profile":["`+containedByProfileURL+`","`+namedPatientURL+`"]},
 "text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},
 "contained":[{"resourceType":"Patient","id":"c"}],"link":[{"other":{"reference":"#c"},"type":"seealso"}]}`))

@@ -1,0 +1,4 @@
+{"resourceType":"StructureDefinition","id":"comp-chain","url":"http://x/comp-chain","name":"CompChain","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Composition","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Composition","derivation":"constraint","differential":{"element":[
+ {"id":"Composition.section","path":"Composition.section","slicing":{"discriminator":[{"type":"profile","path":"entry.resolve().signature.onBehalfOf.resolve()"}],"rules":"open"}},
+ {"id":"Composition.section:B","path":"Composition.section","sliceName":"B","min":1,"max":"*"},
+ {"id":"Composition.section:B.entry","path":"Composition.section.entry","type":[{"code":"Reference","targetProfile":["http://hl7.org/fhir/StructureDefinition/Bundle"]}]}]}}

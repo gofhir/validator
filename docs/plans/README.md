@@ -13,31 +13,23 @@ backlog B6; su code review convergió en dos rondas
 Próximo paso: el incremento 3 (el modo versión no cargada como un modo del evaluador), desde el paso 5.
 Rama `refactor/composition-evaluator`, sin push.
 
-## Próximo frente: #193
+## Frente activo: #193, pieza 2 (capas por valor)
 
-- Paso 1 iniciado (05-11-2026): en `700d1c3` siguen fallando las reproducciones 1, 2 y 3 de #193
-  (`evidence/2026-10-31-slice-choice-types/next-front/`); la 4 (`type.profile` múltiple) no tiene test.
-  Frente arquitectónico (fases de constraint y cardinalidad; plan §9 de 2026-10-31-slice-choice-types).
-- Decisión del usuario (05-11-2026): tres incrementos. (1) `type.profile` con varios perfiles (O); (2) fase de
-  constraint: conjunto de definiciones gobernantes por valor (reproducciones 1–3); (3) lo mismo en la fase de
-  cardinalidad. Cada uno con su plan, ronda adversarial y PR.
-- Incremento 1 en curso, rama `fix/type-profile-alternatives` (desde `700d1c3`), plan
-  [2026-11-05-type-profile-alternatives.md](2026-11-05-type-profile-alternatives.md): pasos 1 y 2 hechos (HL7: NoMatch +
-  errores de cada perfil; gofhir hoy no dice nada). Ronda adversarial 1 (Opus, por elección del usuario): 2 altos,
-  4 medios, 1 bajo; rediseño en plan §2 v2 (como los recursos contenidos: elegir con `Conforms`, recorrer los elegidos
-  como capas en constraint y cardinalidad). Ronda 2 (Opus): no converge (2 altos, 3 medios; plan §3b): las capas
-  por valor las deben respetar los 11 paquetes que llaman `ChildrenOf`. Decisión del usuario (05-11-2026): «machinery first». El incremento 1
-  pasa a ser la maquinaria de capas por valor en `registry.ChildrenOf` (respetada por todos los llamadores), con el O de
-  `type.profile` como primer uso; el incremento 2 suma la definición propia de la extensión. Relevamiento y plan v3 hechos (plan §2 v3).
-  Ronda 3 (la última): **no converge** (2 altos, 3 medios; plan §3c). El usuario aprobó la partición (05-11-2026).
-  **Pieza 1** (rama `refactor/children-precedence`, plan `docs/plans/2026-11-05-children-precedence.md`): paso 2 hecho;
-  sondas s1–s5: 3 defectos con un solo perfil (s2, s3, s5). Ronda 1 (Codex): 1 alto, 3 medios, aceptados (plan §3,
-  §2 v2). Ronda 2: 5 medios (§3b); sondas s6–s7; plan §2 v3. Ronda 3 (última): **no converge** (2 medios, 1 bajo; §3c). El usuario pidió seguir sin cuarta ronda: plan §2 v4 (T1 con s4, T2 con s12; perfil de tipo bajo hijos
-  desplegados pasa al incremento 2). Plan aprobado (05-11-2026). Implementado, sin commit; `make check` verde; mutaciones 10/11 (la 4 es
-  equivalente; plan «Mutaciones»). hl7diff verde (B-D41 declarada: extensiones entre versiones, #210), bench sin
-  regresión en asignaciones. **Paso 8:** ronda 1 con s20 corregida; mutaciones 12 de 13 (la 4, equivalente). Ronda 2: dos hallazgos medios preexistentes en `main` (s21–s23: HL7 cae al tipo base ante un perfil no resuelto; slice primitivo). Usuario: s21/s23 entran en la pieza 1 (plan §2 v5, un perfil no resuelto nunca corta la bajada; s24 confirma el binding); s22 pasa a la pieza 3. §2 v5 implementado, `make check` verde. hl7diff verde (61 livianos y r4-core-examples); mutaciones 17 de 18 (4 y 18, equivalentes). Ronda 3 converge (s25 rechazado con HL7; s26 y comentario aceptados). **Cerrada** (paso 9): s25/s26 matan las mutaciones 4 y 18; `make check` verde. PR [#209](https://github.com/gofhir/validator/pull/209) (`4faae1a`). **Próximo:** CI y «merge» cuando el usuario lo pida; extensiones entre versiones publicado como #210 (B-D41 lo cita); s22 pasa a la pieza 3. Sondas extra p6–p12 hechas: p8 corrige el plan; p12
-  (tipo de elección) parece un defecto de HL7, por confirmar en su código. Issues nuevos del cierre de #192:
-  #205 (`memberOf`), #206 (value set inexistente), #207 (segundo `value[x]` de una extensión), #208 (array vacío de un primitivo en R5: reemplaza ADR-003; HL7 lo aceptó en hapifhir/org.hl7.fhir.core#2825), #210 (extensiones entre versiones; B-D41).
+- Pieza 1 mergeada como #209 (`580ec8d`, 06-11-2026): precedencia unificada con cero o un perfil
+  ([2026-11-05-children-precedence.md](2026-11-05-children-precedence.md)); un perfil no resuelto se informa y se sigue
+  por el tipo base. #210 (extensiones entre versiones, B-D41) mergeado en #211.
+- **Pieza 2** (rama `refactor/type-profile-layers`, desde `87c0b02`): capas por valor, elector del O, alcance, memo y
+  deduplicación. Base: plan [2026-11-05-type-profile-alternatives.md](2026-11-05-type-profile-alternatives.md) §2 v3 y
+  hallazgos §3c (C1, C2, C5 siguen abiertos). **Paso 1 en curso (06-11-2026):**
+  - línea base después de la pieza 1: con dos o más perfiles, gofhir no informa nada
+    (`evidence/2026-11-05-type-profile-alternatives/probe/gofhir-87c0b02-4.0.1.json`);
+  - sonda p21 (C5) hecha en R4: HL7 junta los textos idénticos y no los de cardinalidad;
+  - relevamiento de llamadores hecho; C1 en parte refutado, C2 y C4 confirmados.
+  - Paso 2 hecho: plan [2026-11-06-type-profile-layers.md](2026-11-06-type-profile-layers.md). Ronda 1 (Codex): 4 altos y 2 medios, aceptados (A2 en parte); plan §2 v2. Ronda 2: 1 alto (B1, Scope del destino de una referencia, defecto de `main`) y 1 medio, aceptados; plan §2 v3. Ronda 3 (la última): **no converge** (C1 alto: Scopes distintos para un mismo map; C2 medio: `holderGroups` en corridas especulativas; los dos, defectos de `main`; plan §3c). Usuario: pieza previa (rama `fix/canonical-scope`, plan `2026-11-06-canonical-scope.md`): un solo constructor de Scope (C1, B1) y `holderGroups` por corrida especulativa (C2). Paso 1 en curso: sondas sc1–sc7 hechas; B1 no se observa en gofhir (los dos referentes fallan en los dos órdenes); HL7 informa un destino que no cumple una vez y gofhir en cada referente (pendiente aparte). C1 y C2 observables (sc8–sc14: resultado según el orden y distinto de HL7). Plan hecho (pasos 1 y 2): Scope del destino por su posición, corridas especulativas con `holderGroups` y `slicerecord` propios, test del invariante «un map, un Scope». Ronda 1: 2 altos y 3 medios, aceptados; plan §2 v2 (índice de posiciones por validación). Ronda 2: 1 alto y 2 medios, aceptados; plan §2 v3. Ronda 3: no converge por 1 medio (F1: qué hace producción si un recurso falta en el índice); propuesta §2 v4. Plan v4 aprobado (07-11-2026). Sondas hechas (plan §5): sc8–sc14 iguales en las tres versiones; D1 y D3 observables; D5 no, y el `slicerecord` nuevo sale del alcance. Implementado (pasos 5–6, 07-11-2026): `internal/scopeindex`, tests fallan antes (40) y pasan después, `make check` verde. hl7diff verde (61 livianos y r4-core-examples); bench sin regresión de tiempo, +0,3–1 % asignaciones (el índice). Mutaciones: 9 de 14 muertas; 6 vivas, probablemente consultas redundantes al índice (plan §7). Code review ronda 1: 1 alto, 2 medios y 1 bajo, aceptados; las consultas 4, 12 y 13 se quitan por redundantes, y la 2, la 3 y la 6 se mantienen con tests (plan §8). Correcciones hechas, `make check` verde; consulta 3 revertida por HL7 (r1b); inconsistencia de HL7 entre la validación de referencias y `resolve()` (r2, observación por redactar). Mutaciones: 14 de 16 (4 equivalente; 16, `place`, sin test). Ronda 2: 1 alto (invariante roto con `entry.resolve()` en `valueScope`) y 1 medio (Bundle raíz suelto con `External`), aceptados (plan §8). Medio corregido. El alto choca con HL7 (r3a1): el invariante «un map, un Scope» contradice a HL7, que comprueba `resolve()` con el Scope de la cadena (plan §8, «Decisión pendiente»). Usuario (08-11): seguir a HL7, invariante por camino. Invariante por camino, oráculo endurecido (mutaciones 18 y 20 muertas), `place` quitado por redundante, observación a HL7 redactada; hl7diff verde. Ronda 3 NO converge: 1 alto (el memo de `Conforms` no incluye el Scope) y 1 medio (la marca de cadena se activa al cruzar recursos que contiene un elemento), más 3 bajos (plan §8). Usuario (09-11): corregir y cerrar, sin ronda 4. La evidencia de r3 era un artefacto (perfil que corta un elemento 0..1). Con r4, HL7 comprueba `resolve()` con el Scope canónico (plan §8). Usuario (09-11): volver al invariante global. Correcciones finales hechas (invariante global, r4 con HL7, nota a HL7 «no enviar»), `make check` verde. Cerrada (09-11): 20 de 20 mutaciones muertas, hl7diff verde, bench sin regresión de tiempo, `make check` verde (plan §8). **Próximo:** commit y PR cuando el usuario lo pida; después, la pieza 2 de #193 (capas).
+- Pieza 3: primitivos, con s22 (slice de un primitivo con un perfil inexistente). Después: incremento 2 (s11, s12), s16.
+- Cola de issues: #199, #200, #202, #205, #206, #207, #208 (array vacío de un primitivo en R5: reemplaza ADR-003; HL7
+  lo aceptó en hapifhir/org.hl7.fhir.core#2825). Pendiente: issue y PR a HL7 del defecto de varios perfiles en un tipo
+  de elección (solo el primero, `InstanceValidator.java:8072`, `:8085`).
 
 ## Cerrado: #192, un Coding sin system en un CodeableConcept no pertenece al value set, mergeado como #204 (`700d1c3`, 05-11-2026)
 
