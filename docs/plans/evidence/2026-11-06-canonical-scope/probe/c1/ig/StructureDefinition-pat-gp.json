@@ -1,0 +1,5 @@
+{"resourceType":"StructureDefinition","id":"pat-gp","url":"http://example.org/fhir/StructureDefinition/pat-gp","name":"PatGp","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Patient","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient","derivation":"constraint","differential":{"element":[
+{"id":"Patient.generalPractitioner","path":"Patient.generalPractitioner","slicing":{"discriminator":[{"type":"profile","path":"resolve()"}],"rules":"open"}},
+{"id":"Patient.generalPractitioner:a","path":"Patient.generalPractitioner","sliceName":"a","min":0,"max":"*","type":[{"code":"Reference","targetProfile":["http://example.org/fhir/StructureDefinition/prac-a"]}]},
+{"id":"Patient.generalPractitioner:a.type","path":"Patient.generalPractitioner.type","binding":{"strength":"required","valueSet":"http://example.org/fhir/ValueSet/vs-org"}}
+]}}

@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"slices"
@@ -65,7 +64,7 @@ func TestHeldResources(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -150,7 +149,7 @@ func TestHeldResourceValues(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -175,7 +174,7 @@ func TestHeldResourceUnits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Parameters","parameter":[{"name":"a","resource":
+	res, err := v.Validate(checkedCtx(t), []byte(`{"resourceType":"Parameters","parameter":[{"name":"a","resource":
 {"resourceType":"Observation","status":"final","code":{"text":"x"},"valueQuantity":{"value":1,"system":"http://unitsofmeasure.org","code":"kg//"}}}]}`))
 	if err != nil {
 		t.Fatal(err)
@@ -243,7 +242,7 @@ func TestHeldResourceExtensions(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -274,7 +273,7 @@ func TestComplexKeySibling(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	res, err := v.Validate(context.Background(), data)
+	res, err := v.Validate(checkedCtx(t), data)
 	if err != nil {
 		t.Fatal(err)
 	}

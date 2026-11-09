@@ -1,0 +1,74 @@
+{
+ "resourceType": "Bundle",
+ "id": "d5s6a",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/R",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "R",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/pat-l1",
+      "http://example.org/fhir/StructureDefinition/pat-l2"
+     ]
+    },
+    "gender": "male",
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/R2"
+      },
+      "type": "seealso"
+     }
+    ],
+    "generalPractitioner": [
+     {
+      "reference": "Practitioner/pr"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/R2",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "R2",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "gender": "male",
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/R"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Practitioner/pr",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "pr",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "name": [
+     {
+      "family": "A"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,108 @@
+[
+  {
+    "resource": "inst/d5s1a.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "6.367ms"
+  },
+  {
+    "resource": "inst/d5s1b.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "468µs"
+  },
+  {
+    "resource": "inst/d5s2.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 0,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "diagnostics": "The value provided ('seealso') is not in the value set 'http://example.org/fhir/ValueSet/vs-refer' (required)",
+        "expression": [
+          "Bundle.entry[0].resource.link[0].type"
+        ]
+      }
+    ],
+    "duration": "298µs"
+  },
+  {
+    "resource": "inst/d5s3a.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "1.327ms"
+  },
+  {
+    "resource": "inst/d5s3b.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "1.006ms"
+  },
+  {
+    "resource": "inst/d5s4a.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "1.635ms"
+  },
+  {
+    "resource": "inst/d5s4b.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "622µs"
+  },
+  {
+    "resource": "inst/d5s5.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "865µs"
+  },
+  {
+    "resource": "inst/d5s6a.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "928µs"
+  },
+  {
+    "resource": "inst/d5s6b.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "839µs"
+  },
+  {
+    "resource": "inst/d5s7a.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "1.051ms"
+  },
+  {
+    "resource": "inst/d5s7b.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0,
+    "duration": "821µs"
+  }
+]

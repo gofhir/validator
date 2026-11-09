@@ -1,0 +1,81 @@
+{
+ "resourceType": "Bundle",
+ "id": "sc2",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Bundle/b2",
+   "resource": {
+    "resourceType": "Bundle",
+    "id": "b2",
+    "type": "collection",
+    "entry": [
+     {
+      "fullUrl": "http://ex.org/fhir/Observation/obs2",
+      "resource": {
+       "resourceType": "Observation",
+       "id": "obs2",
+       "meta": {
+        "profile": [
+         "http://example.org/fhir/StructureDefinition/obs-tp"
+        ]
+       },
+       "status": "final",
+       "code": {
+        "text": "x"
+       },
+       "subject": {
+        "reference": "Patient/p1"
+       }
+      }
+     },
+     {
+      "fullUrl": "http://ex.org/fhir/Organization/o1",
+      "resource": {
+       "resourceType": "Organization",
+       "id": "o1",
+       "name": "nested"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/p1",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "managingOrganization": {
+     "reference": "Organization/o1"
+    }
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Organization/o1",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "o1",
+    "name": "root"
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Observation/obs1",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "obs1",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-tp"
+     ]
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "subject": {
+     "reference": "Patient/p1"
+    }
+   }
+  }
+ ]
+}

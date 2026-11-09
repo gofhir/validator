@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"context"
 	"fmt"
 	"maps"
 	"os"
@@ -107,7 +106,7 @@ func TestReferenceTargetConformance(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -149,7 +148,7 @@ func TestReferenceTargetType(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -187,7 +186,7 @@ func TestRootProfilesReportOnce(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -268,7 +267,7 @@ func TestReferenceTargetCyclesStayPolynomial(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			start := time.Now()
-			res, err := v.Validate(context.Background(), patientGraph(n, profile, tt.links, tt.bad))
+			res, err := v.Validate(checkedCtx(t), patientGraph(n, profile, tt.links, tt.bad))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -302,7 +301,7 @@ func TestDiscriminatorCyclesStayBounded(t *testing.T) {
 	data := patientGraph(40, []string{base + "pz", base + "pb"},
 		func(i int) []int { return []int{i - 2, i - 1, i + 1, i + 2} }, func(i int) bool { return i%3 == 0 })
 	start := time.Now()
-	if _, err := v.Validate(context.Background(), data); err != nil {
+	if _, err := v.Validate(checkedCtx(t), data); err != nil {
 		t.Fatal(err)
 	}
 	took := time.Since(start)
@@ -327,7 +326,7 @@ func TestEntryIndexesPerValidation(t *testing.T) {
 {"fullUrl":"urn:uuid:aaaaaaaa-0000-0000-0000-000000000002","resource":{"resourceType":"Observation","status":"final",
 "code":{"text":"x"},"subject":{"reference":"urn:uuid:aaaaaaaa-0000-0000-0000-000000000001"}}}]}`)
 	}
-	ctx := reference.WithIndexes(context.Background())
+	ctx := reference.WithIndexes(checkedCtx(t))
 	missed := 0
 	for range 200 {
 		if _, err := v.Validate(ctx, bundle("1")); err != nil {
@@ -422,7 +421,7 @@ func TestReferencesInCheckedValues(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}

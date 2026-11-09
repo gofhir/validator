@@ -1,0 +1,760 @@
+{
+ "c1": {
+  "sc10": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "sc8": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].subject"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].subject"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].subject"
+     }
+    ]
+   },
+   "firstReferrer": true
+  },
+  "sc9": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].signature.who"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].signature.who"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].signature.who"
+     }
+    ]
+   },
+   "firstReferrer": true
+  }
+ },
+ "c2": {
+  "sc11": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[1].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.subject"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[1].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.subject"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[1].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.subject"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "sc12": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[1].resource.subject"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[1].resource.subject"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[1].resource.subject"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "sc13": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[2].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[1].resource.subject"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[2].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[1].resource.subject"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[2].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[1].resource.subject"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "sc14": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[1].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.subject"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[1].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.subject"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[1].resource"
+     },
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.subject"
+     }
+    ]
+   },
+   "firstReferrer": false
+  }
+ },
+ "d1": {
+  "d1a1": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "constraint:bsig-1",
+      "location": "Patient.contained[1]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Patient.contained[1].entry[1].resource.contained[0]"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "constraint:bsig-1",
+      "location": "Patient.contained[1]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Patient.contained[1].entry[1].resource.contained[0]"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "constraint:bsig-1",
+      "location": "Patient.contained[1]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Patient.contained[1].entry[1].resource.contained[0]"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1a10": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "d1a11": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1a12": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "d1a13": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1a2": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "constraint:bsig-1",
+      "location": "Patient.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Patient.contained[0].entry[0].resource.contained[0]"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "constraint:bsig-1",
+      "location": "Patient.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Patient.contained[0].entry[0].resource.contained[0]"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "constraint:bsig-1",
+      "location": "Patient.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Patient.contained[0].entry[0].resource.contained[0]"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1a3": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[1].signature.onBehalfOf"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[1].signature.onBehalfOf"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[1].signature.onBehalfOf"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1a4": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].signature.onBehalfOf"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].signature.onBehalfOf"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[0].signature.onBehalfOf"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1a5": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "d1a6": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "d1a7": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[1].signature.onBehalfOf"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1a8": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[0].signature.onBehalfOf"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[0].signature.onBehalfOf"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "Bundle.entry[0].resource.contained[0].signature.onBehalfOf"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1a9": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[1].signature.onBehalfOf"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[1].signature.onBehalfOf"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "Patient.contained[1].signature.onBehalfOf"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1b1": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[2].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[3].resource.contained[0]"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[2].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[3].resource.contained[0]"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[2].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[3].resource.contained[0]"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1b2": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[0].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[1].resource.contained[0]"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[0].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[1].resource.contained[0]"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[0].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Parameters.parameter[1].resource.contained[0]"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1c1": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[2].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[3].resource.contained[0]"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[2].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[3].resource.contained[0]"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[2].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[3].resource.contained[0]"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "d1c2": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[0].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[1].resource.contained[0]"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[0].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[1].resource.contained[0]"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[0].resource.contained[0]"
+     },
+     {
+      "kind": "constraint:subh-1",
+      "location": "Bundle.entry[1].resource.contained[0]"
+     }
+    ]
+   },
+   "firstReferrer": false
+  }
+ },
+ "d3": {
+  "d3a1": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "d3a2": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "d3b1": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "d3b2": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "d3c1": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  }
+ },
+ "r1": {
+  "r1a": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "target-profile",
+      "location": "DiagnosticReport.contained[0].subject"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "target-profile",
+      "location": "DiagnosticReport.contained[0].subject"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "target-profile",
+      "location": "DiagnosticReport.contained[0].subject"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "r1b": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ]
+   },
+   "firstReferrer": false
+  }
+ },
+ "r4": {
+  "r4a": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  },
+  "r4b": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "constraint:org-1",
+      "location": "Bundle.entry[1].resource.entry[0].resource"
+     },
+     {
+      "kind": "min",
+      "location": "Bundle"
+     },
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "constraint:org-1",
+      "location": "Bundle.entry[1].resource.entry[0].resource"
+     },
+     {
+      "kind": "min",
+      "location": "Bundle"
+     },
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "constraint:org-1",
+      "location": "Bundle.entry[1].resource.entry[0].resource"
+     },
+     {
+      "kind": "min",
+      "location": "Bundle"
+     },
+     {
+      "kind": "min",
+      "location": "Bundle.entry[0].resource"
+     }
+    ]
+   },
+   "firstReferrer": false
+  },
+  "r4c": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   },
+   "firstReferrer": false
+  }
+ }
+}

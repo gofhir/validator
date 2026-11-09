@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"context"
 	"encoding/json"
 	"slices"
 	"strings"
@@ -151,7 +150,7 @@ func TestExtensionContextOfUse(t *testing.T) {
 			if !strings.HasPrefix(content, `"text":`) {
 				content = text + "," + content
 			}
-			res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Patient",`+content+`}`))
+			res, err := v.Validate(checkedCtx(t), []byte(`{"resourceType":"Patient",`+content+`}`))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -216,7 +215,7 @@ func TestContextInvariantResolvesInTheBundle(t *testing.T) {
 			bundle := `{"resourceType":"Bundle","type":"transaction","entry":[` +
 				entry("urn:uuid:9d0a6c5e-3a2b-4c5d-8e7f-001122334455", first) + `,` +
 				entry("urn:uuid:5f4e3d2c-1b0a-4987-8654-aabbccddeeff", second) + `]}`
-			res, err := v.Validate(context.Background(), []byte(bundle))
+			res, err := v.Validate(checkedCtx(t), []byte(bundle))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -237,7 +236,7 @@ func TestContextInvariantResolvesInTheBundle(t *testing.T) {
 // depends on none of them.
 func TestExtensionIssuesOncePerValidation(t *testing.T) {
 	v := profileValidator(t)
-	res, err := v.Validate(context.Background(), []byte(`{"resourceType":"Patient","meta":{"profile":["`+treeA+`","`+treeB+`"]},`+
+	res, err := v.Validate(checkedCtx(t), []byte(`{"resourceType":"Patient","meta":{"profile":["`+treeA+`","`+treeB+`"]},`+
 		`"text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},"name":[{"family":"A"}],`+
 		`"extension":[{"url":"`+contextExtBase+`none","valueString":"v"},{"url":"https://example.org/unknown","valueString":"v"}]}`))
 	if err != nil {

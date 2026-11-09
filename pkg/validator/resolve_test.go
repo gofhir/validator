@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"slices"
@@ -59,7 +58,7 @@ func TestResolveInBundle(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			res, err := v.Validate(context.Background(), data)
+			res, err := v.Validate(checkedCtx(t), data)
 			if err != nil {
 				t.Fatal(err)
 			}

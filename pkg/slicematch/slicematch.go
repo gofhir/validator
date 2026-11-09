@@ -438,15 +438,24 @@ func (m *Matcher) profileMatches(ctx context.Context, req Request, slice *regist
 // valueScope is the scope of e's value. A resource value is its own %resource. Its %rootResource
 // is the resource containing it when it is contained there, else itself: a Bundle entry is not
 // contained (fhirpath.html#variables). References still resolve in the same container. A datatype
-// value keeps the resources it sits in. A value resolve() reached is in the scope of the resource
-// it is in.
+// value keeps the resources it sits in, or those of the resource resolve() reached it in. A resource
+// takes the scope its position gives it (ScopedResolver.ScopeOf), whichever way it was reached.
 func (m *Matcher) valueScope(req Request, e end) Scope {
 	scope := req.Scope
 	if e.in != nil {
 		scope = *e.in
 	}
 	res, _ := e.value.(map[string]any)
-	if _, isResource := res[resourceTypeKey]; !isResource || e.def == nil || !m.reg.HoldsResource(e.def.Def) {
+	if _, isResource := res[resourceTypeKey]; !isResource {
+		return scope
+	}
+	if sr, scoped := req.Resolver.(ScopedResolver); scoped {
+		// Todo recurso que llega a Conforms lleva el Scope que le da su posición, que el resolutor conoce,
+		// también la raíz de una definición que resolve() alcanzó: el Scope de la cadena sirve a los pasos
+		// siguientes de la ruta, no al perfil que se comprueba.
+		return sr.ScopeOf(scope, res)
+	}
+	if e.def == nil || !m.reg.HoldsResource(e.def.Def) {
 		return scope
 	}
 	root := res

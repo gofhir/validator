@@ -1,0 +1,104 @@
+[
+  {
+    "resource": "inst/sc10.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for # among choices: http://example.org/fhir/StructureDefinition/pat-gp",
+        "expression": [
+          "Patient.contained[0].signature.who"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "code-invalid",
+        "diagnostics": "The value provided ('Practitioner') is not in the value set 'http://example.org/fhir/ValueSet/vs-org' (required)",
+        "expression": [
+          "Patient.generalPractitioner[0].type"
+        ]
+      }
+    ],
+    "duration": "7.141ms"
+  },
+  {
+    "resource": "inst/sc8.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[1].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for # among choices: http://example.org/fhir/StructureDefinition/pat-root-org",
+        "expression": [
+          "Patient.contained[0].subject"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for # among choices: http://example.org/fhir/StructureDefinition/pat-root-org",
+        "expression": [
+          "Patient.contained[1].signature.who"
+        ]
+      }
+    ],
+    "duration": "2.168ms"
+  },
+  {
+    "resource": "inst/sc9.json",
+    "valid": true,
+    "errors": 0,
+    "warnings": 2,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[0].entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Patient.contained[1]"
+        ]
+      }
+    ],
+    "duration": "891µs"
+  }
+]

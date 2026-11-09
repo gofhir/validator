@@ -1,0 +1,154 @@
+[
+  {
+    "resource": "inst/sc11.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Bundle.entry[1].resource.gender' is 1, but found 0",
+        "expression": [
+          "Bundle.entry[1].resource.gender"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for Patient/p1 among choices: http://example.org/fhir/StructureDefinition/pat-t",
+        "expression": [
+          "Bundle.entry[0].resource.subject"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for Patient/p2 among choices: http://example.org/fhir/StructureDefinition/pat-t",
+        "expression": [
+          "Bundle.entry[1].resource.link[0].other"
+        ]
+      }
+    ],
+    "duration": "5.931ms"
+  },
+  {
+    "resource": "inst/sc12.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Bundle.entry[0].resource.gender' is 1, but found 0",
+        "expression": [
+          "Bundle.entry[0].resource.gender"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for Patient/p1 among choices: http://example.org/fhir/StructureDefinition/pat-t",
+        "expression": [
+          "Bundle.entry[1].resource.subject"
+        ]
+      }
+    ],
+    "duration": "782µs"
+  },
+  {
+    "resource": "inst/sc13.json",
+    "valid": false,
+    "errors": 3,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Bundle.entry[2].resource.gender' is 1, but found 0",
+        "expression": [
+          "Bundle.entry[2].resource.gender"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for Patient/p1 among choices: http://example.org/fhir/StructureDefinition/pat-t",
+        "expression": [
+          "Bundle.entry[1].resource.subject"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for Patient/p2 among choices: http://example.org/fhir/StructureDefinition/pat-t",
+        "expression": [
+          "Bundle.entry[2].resource.link[0].other"
+        ]
+      }
+    ],
+    "duration": "949µs"
+  },
+  {
+    "resource": "inst/sc14.json",
+    "valid": false,
+    "errors": 2,
+    "warnings": 1,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "required",
+        "diagnostics": "Minimum cardinality of 'Bundle.entry[1].resource.gender' is 1, but found 0",
+        "expression": [
+          "Bundle.entry[1].resource.gender"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[2].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "Unable to find a profile match for Patient/p1 among choices: http://example.org/fhir/StructureDefinition/pat-t",
+        "expression": [
+          "Bundle.entry[0].resource.subject"
+        ]
+      }
+    ],
+    "duration": "732µs"
+  }
+]

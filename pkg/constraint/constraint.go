@@ -15,6 +15,7 @@ import (
 	"github.com/gofhir/fhirpath/types"
 
 	"github.com/gofhir/validator/v2/internal/bundleref"
+	"github.com/gofhir/validator/v2/internal/scopeindex"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
@@ -226,6 +227,7 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	if root == nil || sd.RootName(resource) == "" {
 		return
 	}
+	ctx = scopeindex.Ensure(ctx, resource, nil, nil)
 
 	// A value that is not a resource takes %resource and %rootResource from the resources it sits
 	// in; a resource is both.

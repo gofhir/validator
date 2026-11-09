@@ -1,0 +1,20 @@
+{
+ "resourceType": "DiagnosticReport",
+ "id": "r1a",
+ "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"},
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "o",
+   "meta": {"profile": ["http://example.org/fhir/StructureDefinition/obs-p"]},
+   "status": "final",
+   "code": {"text": "x"},
+   "subject": {"reference": "#p"}
+  },
+  {"resourceType": "Patient", "id": "p"}
+ ],
+ "status": "final",
+ "code": {"text": "x"},
+ "subject": {"reference": "#p"},
+ "result": [{"reference": "#o"}]
+}

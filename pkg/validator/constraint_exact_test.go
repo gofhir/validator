@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"context"
 	"slices"
 	"strings"
 	"testing"
@@ -45,7 +44,7 @@ func TestProfileInvariantReadsTheDecimalAsWritten(t *testing.T) {
 		{"an entry of a Bundle, 1.5", `{"resourceType":"Bundle","type":"collection","entry":[{"fullUrl":"urn:uuid:9d0a6c5e-3a2b-4c5d-8e7f-001122334455","resource":` + obs("1.5") + `}]}`, true},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := v.Validate(context.Background(), []byte(tt.resource))
+			res, err := v.Validate(checkedCtx(t), []byte(tt.resource))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -89,7 +88,7 @@ func TestProfileInvariantResolvesInTheInnermostBundle(t *testing.T) {
 			entry("1", `{"resourceType":"Bundle","type":"collection","entry":[`+entry("3", member("9"))+`]}`) + `]}`, true},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := v.Validate(context.Background(), []byte(tt.resource))
+			res, err := v.Validate(checkedCtx(t), []byte(tt.resource))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -131,7 +130,7 @@ func TestProfileInvariantResolvesTheDecimalInABundleParametersHold(t *testing.T)
 			`"meta":{"profile":["` + url + `"]},"status":"final","code":{"text":"x"},"hasMember":[{"reference":"Observation/o1"}]}}]}}]}`
 	}
 	for value, fails := range map[string]bool{"1.50": false, "1.5": true} {
-		res, err := v.Validate(context.Background(), []byte(parameters(value)))
+		res, err := v.Validate(checkedCtx(t), []byte(parameters(value)))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +177,7 @@ func TestInvariantReadsDecimalsInKeysAndArraysAsWritten(t *testing.T) {
 		{"the array item after a null", sequence, "x-ms250", "MolecularSequence.quality[0].roc.precision[1]", false},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := v.Validate(context.Background(), []byte(tt.resource))
+			res, err := v.Validate(checkedCtx(t), []byte(tt.resource))
 			if err != nil {
 				t.Fatal(err)
 			}

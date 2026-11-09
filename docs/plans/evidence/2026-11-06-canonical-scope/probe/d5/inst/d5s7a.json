@@ -1,0 +1,73 @@
+{
+ "resourceType": "Bundle",
+ "id": "d5s7a",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Observation/o",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-l1"
+     ]
+    },
+    "subject": {
+     "reference": "Patient/R"
+    }
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/R",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "R",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/pat-l1"
+     ]
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/R2"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/R2",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "R2",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+    },
+    "link": [
+     {
+      "other": {
+       "reference": "Patient/R"
+      },
+      "type": "seealso"
+     }
+    ]
+   }
+  }
+ ]
+}

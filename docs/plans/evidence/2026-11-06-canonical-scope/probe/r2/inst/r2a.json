@@ -1,0 +1,59 @@
+{
+ "resourceType": "Bundle",
+ "id": "r2a",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "http://ex.org/fhir/Bundle/b2",
+   "resource": {
+    "resourceType": "Bundle",
+    "id": "b2",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/bun-tpw"
+     ]
+    },
+    "type": "collection",
+    "entry": [
+     {
+      "fullUrl": "http://ex.org/fhir/Patient/p",
+      "resource": {
+       "resourceType": "Patient",
+       "id": "p",
+       "name": [
+        {
+         "family": "inner"
+        }
+       ]
+      }
+     }
+    ],
+    "signature": {
+     "type": [
+      {
+       "system": "urn:iso-astm:E1762-95:2013",
+       "code": "1.2.840.10065.1.12.1.1"
+      }
+     ],
+     "when": "2026-01-01T00:00:00Z",
+     "who": {
+      "reference": "Patient/p"
+     },
+     "data": "AA=="
+    }
+   }
+  },
+  {
+   "fullUrl": "http://ex.org/fhir/Patient/p",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p",
+    "name": [
+     {
+      "family": "outer"
+     }
+    ]
+   }
+  }
+ ]
+}
