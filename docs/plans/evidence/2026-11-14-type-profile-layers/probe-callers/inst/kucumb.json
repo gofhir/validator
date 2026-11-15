@@ -1,0 +1,23 @@
+{
+ "resourceType": "Observation",
+ "id": "kucumb",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-kucum"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueRange": {
+  "low": {
+   "value": 1,
+   "system": "http://unitsofmeasure.org",
+   "code": "mg"
+  }
+ }
+}

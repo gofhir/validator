@@ -1,0 +1,53 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-cont0",
+ "url": "http://example.org/fhir/StructureDefinition/obs-cont0",
+ "name": "obs_cont0",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "contained": [
+  {
+   "resourceType": "StructureDefinition",
+   "id": "cq",
+   "url": "http://example.org/fhir/StructureDefinition/cq-inner",
+   "name": "cq",
+   "status": "draft",
+   "fhirVersion": "4.3.0",
+   "kind": "complex-type",
+   "abstract": false,
+   "type": "Quantity",
+   "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+   "derivation": "constraint",
+   "differential": {
+    "element": [
+     {
+      "id": "Quantity.unit",
+      "path": "Quantity.unit",
+      "min": 1
+     }
+    ]
+   }
+  }
+ ],
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "Quantity",
+      "profile": [
+       "#cq"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

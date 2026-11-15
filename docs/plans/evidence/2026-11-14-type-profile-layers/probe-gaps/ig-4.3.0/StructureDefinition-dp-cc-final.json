@@ -1,0 +1,53 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "dp-cc-final",
+ "url": "http://example.org/fhir/StructureDefinition/dp-cc-final",
+ "name": "dp_cc_final",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "CodeableConcept",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "CodeableConcept",
+    "path": "CodeableConcept",
+    "constraint": [
+     {
+      "key": "dp-cc-f",
+      "severity": "error",
+      "human": "resource must be final (dp-cc-final)",
+      "expression": "%resource.status = 'final'"
+     }
+    ]
+   },
+   {
+    "id": "CodeableConcept.coding",
+    "path": "CodeableConcept.coding",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "code"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "CodeableConcept.coding:c",
+    "path": "CodeableConcept.coding",
+    "sliceName": "c",
+    "min": 1
+   },
+   {
+    "id": "CodeableConcept.coding:c.code",
+    "path": "CodeableConcept.coding.code",
+    "patternCode": "c"
+   }
+  ]
+ }
+}

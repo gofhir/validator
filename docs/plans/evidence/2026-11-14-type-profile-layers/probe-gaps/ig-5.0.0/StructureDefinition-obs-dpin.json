@@ -1,0 +1,60 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-dpin",
+ "url": "http://example.org/fhir/StructureDefinition/obs-dpin",
+ "name": "obs_dpin",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.component",
+    "path": "Observation.component",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "code"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.component:c",
+    "path": "Observation.component",
+    "sliceName": "c"
+   },
+   {
+    "id": "Observation.component:c.code",
+    "path": "Observation.component.code",
+    "patternCodeableConcept": {
+     "coding": [
+      {
+       "system": "urn:review",
+       "code": "c"
+      }
+     ]
+    }
+   },
+   {
+    "id": "Observation.component:c.code.coding",
+    "path": "Observation.component.code.coding",
+    "type": [
+     {
+      "code": "Coding",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/dp-cd-final",
+       "http://example.org/fhir/StructureDefinition/dp-cd-amended"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

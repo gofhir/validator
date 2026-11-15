@@ -1,0 +1,64 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-c1d",
+ "url": "http://example.org/fhir/StructureDefinition/obs-c1d",
+ "name": "obs_c1d",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.identifier",
+    "path": "Observation.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    },
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ida",
+       "http://example.org/fhir/StructureDefinition/idb"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Observation.identifier:s1",
+    "path": "Observation.identifier",
+    "sliceName": "s1",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ida",
+       "http://example.org/fhir/StructureDefinition/idb"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Observation.identifier:s1.system",
+    "path": "Observation.identifier.system",
+    "min": 1,
+    "fixedUri": "urn:probe:s1"
+   },
+   {
+    "id": "Observation.identifier:s1.value",
+    "path": "Observation.identifier.value",
+    "min": 1
+   }
+  ]
+ }
+}

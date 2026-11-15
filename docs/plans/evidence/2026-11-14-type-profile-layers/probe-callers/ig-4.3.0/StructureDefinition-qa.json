@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qa",
+ "url": "http://example.org/fhir/StructureDefinition/qa",
+ "name": "qa",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity.unit",
+    "path": "Quantity.unit",
+    "min": 1
+   }
+  ]
+ }
+}

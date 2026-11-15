@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ra",
+ "url": "http://example.org/fhir/StructureDefinition/ra",
+ "name": "ra",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Range",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Range",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Range.high",
+    "path": "Range.high",
+    "min": 1
+   }
+  ]
+ }
+}

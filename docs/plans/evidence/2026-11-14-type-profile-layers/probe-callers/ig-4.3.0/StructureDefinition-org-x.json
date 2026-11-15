@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "org-x",
+ "url": "http://example.org/fhir/StructureDefinition/org-x",
+ "name": "org_x",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Organization",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Organization",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Organization.active",
+    "path": "Organization.active",
+    "min": 1
+   }
+  ]
+ }
+}

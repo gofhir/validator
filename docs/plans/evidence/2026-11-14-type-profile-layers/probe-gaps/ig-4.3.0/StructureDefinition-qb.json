@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qb",
+ "url": "http://example.org/fhir/StructureDefinition/qb",
+ "name": "qb",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity.code",
+    "path": "Quantity.code",
+    "min": 1
+   }
+  ]
+ }
+}

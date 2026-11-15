@@ -1,0 +1,28 @@
+{
+ "resourceType": "Observation",
+ "id": "gtok",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-gt"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "effectiveTiming": {
+  "repeat": {
+   "boundsRange": {
+    "extension": [
+     {
+      "url": "http://example.org/fhir/StructureDefinition/ext-rng",
+      "valueInteger": 3
+     }
+    ]
+   }
+  }
+ }
+}

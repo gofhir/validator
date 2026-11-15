@@ -1,0 +1,20 @@
+{
+ "resourceType": "Observation",
+ "id": "ele2",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-ele"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "id": "q1",
+  "value": 5
+ }
+}

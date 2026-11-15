@@ -1,0 +1,7842 @@
+{
+ "a1n": {
+  "description": "no unit (fails qa), value 5 (fails inv2-1): neither; inv2-1 only in qi2",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "inv2-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "inv2-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "inv2-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "a1p": {
+  "description": "unit present, value 5: only qa conforms",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "a1q": {
+  "description": "no unit (fails qa), value 20: only qi2 conforms",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "a1rn": {
+  "description": "no unit (fails qa), value 5 (fails inv2-1): neither; inv2-1 only in qi2",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "inv2-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "inv2-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "inv2-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "a1rp": {
+  "description": "unit present, value 5: only qa conforms",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "a1rq": {
+  "description": "no unit (fails qa), value 20: only qi2 conforms",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "bcyc1": {
+  "description": "cycle through assigner references between two Organizations, layers [cyc-a, cyc-b] at each turn; nothing breaks the cycle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "bcyc2": {
+  "description": "same cycle, o2 meets cyc-b by period",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "bcyc3": {
+  "description": "same cycle, o1 lacks active (org-cyc fails for it), so the top fails cyc-a through o1 and cyc-b by period",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].period",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].period",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].period",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence bcyc3: the target profile of a reference in a datatype is reported (spec); HL7 reports nothing"
+ },
+ "c1a": {
+  "description": "slice s1 min value matches 2nd layer (idb) only; value matches idb, not ida (period)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "c1b": {
+  "description": "matches ida only; slice requires value (matches idb layer only)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "c1c": {
+  "description": "matches neither layer; slice requires value",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "c1da": {
+  "description": "slice s1 min value matches 2nd layer (idb) only; value matches idb, not ida (period)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "c1db": {
+  "description": "matches ida only; slice requires value (matches idb layer only)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "c1dc": {
+  "description": "matches neither layer; slice requires value",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "c1dn": {
+  "description": "outside the slice: node layers only (idb ok)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "c1n": {
+  "description": "outside the slice: node layers only (idb ok)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "ct1c": {
+  "description": "IG/contained canonical: code present, no unit (qb ok)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ct1n": {
+  "description": "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ct1u": {
+  "description": "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ct2c": {
+  "description": "IG/contained canonical: code present, no unit (qb ok)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ct2n": {
+  "description": "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ct2u": {
+  "description": "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "#cq",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "d3": {
+  "description": "round 3 (15b): two shared CodeableConcept layers, only the 2nd assigns a Coding profile that needs display; the slice adds nothing",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "d3-fail",
+     "kind": "constraint",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "display",
+     "kind": "min",
+     "location": "Observation.component[0].code.coding[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "d3-fail",
+     "kind": "constraint",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "display",
+     "kind": "min",
+     "location": "Observation.component[0].code.coding[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "d3-fail",
+     "kind": "constraint",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "display",
+     "kind": "min",
+     "location": "Observation.component[0].code.coding[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "d4a": {
+  "description": "two unresolved profiles, invalid base content (unknown element, wrong type)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "type-invalid",
+     "location": "Observation.valueQuantity.unit",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "unknown-element",
+     "location": "Observation.valueQuantity.bogus",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "type-invalid",
+     "location": "Observation.valueQuantity.unit",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "unknown-element",
+     "location": "Observation.valueQuantity.bogus",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "type-invalid",
+     "location": "Observation.valueQuantity.unit",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "unknown-element",
+     "location": "Observation.valueQuantity.bogus",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "d4b": {
+  "description": "two unresolved profiles, valid base content",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "d4c": {
+  "description": "one unresolved + qa, invalid base content",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "type-invalid",
+     "location": "Observation.valueQuantity.unit",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "unknown-element",
+     "location": "Observation.valueQuantity.bogus",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "type-invalid",
+     "location": "Observation.valueQuantity.unit",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "unknown-element",
+     "location": "Observation.valueQuantity.bogus",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "type-invalid",
+     "location": "Observation.valueQuantity.unit",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-1",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "unknown-element",
+     "location": "Observation.valueQuantity.bogus",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "dpinc1": {
+  "description": "round 2: dpin: outer Observation amended (no profile), contained Observation final with the profile",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "dpprc1": {
+  "description": "round 2: dppr: outer Observation amended (no profile), contained Observation final with the profile",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "dpwkc1": {
+  "description": "round 2: dpwk: outer Observation amended (no profile), contained Observation final with the profile",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "dup": {
+  "description": "dup-1 and unit min fail in both layers: ['qdup-a', 'qdup-b']",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hnrempty": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rempty)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hnrexists": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rexists)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2hnrid1": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rid1)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hnrid2": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rid2)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2hnrrid0": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rrid0)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hnrrid1": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rrid1)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hnrro1": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rro1)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hnrrval": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rrval)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2hnrval": {
+  "description": "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rval)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2hrempty": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rempty); target in the same Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hrexists": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rexists); target in the same Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2hrid1": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rid1); target in the same Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hrid2": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rid2); target in the same Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2hrrid0": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rrid0); target in the same Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hrrid1": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rrid1); target in the same Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hrro1": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rro1); target in the same Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2hrrval": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rrval); target in the same Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2hrval": {
+  "description": "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rval); target in the same Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.hasMember[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2sremptyb": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rempty, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2sremptyn": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rempty, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2sremptyx": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rempty, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srexistsb": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rexists, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2srexistsn": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rexists, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2srexistsx": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rexists, standalone Observation",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2srid1b": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rid1, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srid1n": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rid1, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srid1x": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rid1, standalone Observation",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srid2b": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rid2, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srid2n": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rid2, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srid2x": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rid2, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srrid0b": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrid0, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srrid0n": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrid0, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srrid0x": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrid0, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srrid1b": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrid1, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srrid1n": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrid1, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srrid1x": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrid1, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2srro1b": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rro1, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srro1n": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rro1, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srro1x": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rro1, standalone Observation",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srrvalb": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrval, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srrvaln": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrval, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srrvalx": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rrval, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srvalb": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rval, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srvaln": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rval, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2srvalx": {
+  "description": "e2 profile-discriminator: Identifier profile ids-rval, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence E2: expected by the spec (owner resource), HL7 uses the datatype"
+ },
+ "e2tremptyb": {
+  "description": "e2 plain type.profile: Identifier profile ids-rempty, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2tremptyn": {
+  "description": "e2 plain type.profile: Identifier profile ids-rempty, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2tremptyx": {
+  "description": "e2 plain type.profile: Identifier profile ids-rempty, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rempty",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trexistsb": {
+  "description": "e2 plain type.profile: Identifier profile ids-rexists, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trexistsn": {
+  "description": "e2 plain type.profile: Identifier profile ids-rexists, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trexistsx": {
+  "description": "e2 plain type.profile: Identifier profile ids-rexists, standalone Observation",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trid1b": {
+  "description": "e2 plain type.profile: Identifier profile ids-rid1, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trid1n": {
+  "description": "e2 plain type.profile: Identifier profile ids-rid1, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trid1x": {
+  "description": "e2 plain type.profile: Identifier profile ids-rid1, standalone Observation",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trid2b": {
+  "description": "e2 plain type.profile: Identifier profile ids-rid2, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trid2n": {
+  "description": "e2 plain type.profile: Identifier profile ids-rid2, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trid2x": {
+  "description": "e2 plain type.profile: Identifier profile ids-rid2, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rid2",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trrid0b": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrid0, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trrid0n": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrid0, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trrid0x": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrid0, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrid0",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trrid1b": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrid1, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trrid1n": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrid1, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trrid1x": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrid1, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrid1",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trro1b": {
+  "description": "e2 plain type.profile: Identifier profile ids-rro1, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trro1n": {
+  "description": "e2 plain type.profile: Identifier profile ids-rro1, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trro1x": {
+  "description": "e2 plain type.profile: Identifier profile ids-rro1, standalone Observation",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "e2trrvalb": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrval, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trrvaln": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrval, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trrvalx": {
+  "description": "e2 plain type.profile: Identifier profile ids-rrval, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rrval",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trvalb": {
+  "description": "e2 plain type.profile: Identifier profile ids-rval, Observation in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trvaln": {
+  "description": "e2 plain type.profile: Identifier profile ids-rval, Observation in a Bundle in a Bundle",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.entry[0].resource.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "e2trvalx": {
+  "description": "e2 plain type.profile: Identifier profile ids-rval, standalone Observation",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "e2-rval",
+     "kind": "constraint",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ele1": {
+  "description": "Quantity with only an id: ele-1 fails, inherited by both layers (qa, qb also fail by cardinality)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ele-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ele-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "ele-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ele-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ele2": {
+  "description": "Quantity id+value, no unit/code: ele-1 ok; NoMatch only",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "gtctx": {
+  "description": "extension context: no profile met (boundsRange is only the 2nd layer's, whose count is missing); the extension on it is not for a Range",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "extension-context",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    },
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "extension-context",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    },
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "extension-context",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    },
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "gtok": {
+  "description": "extension control: same value, a valid extension",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "gtval": {
+  "description": "extension value: same value; the extension on boundsRange has a string where it needs an integer",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange.extension[0].valueString",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange.extension[0].valueString",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "count",
+     "kind": "min",
+     "location": "Observation.effectiveTiming.repeat",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.effectiveTiming",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange",
+     "severity": "error"
+    },
+    {
+     "kind": "type-not-allowed",
+     "location": "Observation.effectiveTiming.repeat.boundsRange.extension[0].valueString",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig1c": {
+  "description": "IG/contained canonical: code present, no unit (qb ok)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig1n": {
+  "description": "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig1u": {
+  "description": "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig2c": {
+  "description": "IG/contained canonical: code present, no unit (qb ok)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig2n": {
+  "description": "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig2u": {
+  "description": "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/igx",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig3c": {
+  "description": "IG/contained canonical: code present, no unit (qb ok)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig3n": {
+  "description": "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ig3u": {
+  "description": "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/ImplementationGuide/nope",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "kbind": {
+  "description": "binding walk: qa fails (no unit); only qbind (2nd) binds comparator to {>}",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "binding",
+     "location": "Observation.valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "binding",
+     "location": "Observation.valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "binding",
+     "location": "Observation.valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "kbindok": {
+  "description": "binding walk: comparator in the set, no unit: only qbind conforms",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "kctx": {
+  "description": "extension context: qa fails; only qctx (2nd) declares the extension whose context is Observation.component",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "extension-context",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "extension-context",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "extension-context",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "kext": {
+  "description": "extension: qa fails (no unit); only qext (2nd) requires the extension slice xi (profile ext-int), absent",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "kextok": {
+  "description": "extension: required extension present, no unit: only qext conforms",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "kslice": {
+  "description": "slicing tree: cc-a fails (no text); only cc-b (2nd) requires the slice x",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.code",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "kslicep": {
+  "description": "slicing tree: no text, slice x present: only cc-b conforms",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "kucum": {
+  "description": "UCUM: ra fails (no high); an invalid UCUM code inside the datatype",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "ucum",
+     "location": "Observation.valueRange.low.code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "ucum",
+     "location": "Observation.valueRange.low.code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "ucum",
+     "location": "Observation.valueRange.low.code",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "expected by the UCUM spec: HL7 with -tx n/a only warns"
+ },
+ "kucumb": {
+  "description": "UCUM control: valid code, ra fails",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "leafa": {
+  "description": "slice leaf [ida,idb]: matches idb only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "leafb": {
+  "description": "slice leaf: matches ida only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "leafc": {
+  "description": "slice leaf: neither",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "obind1": {
+  "description": "owner binding walk: top amended (qob chosen alone fails its rule: neither conforms), contained final (qoa conforms alone)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "binding",
+     "location": "Observation.valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "binding",
+     "location": "Observation.valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "binding",
+     "location": "Observation.valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "obind2": {
+  "description": "owner binding walk: top final (qoa conforms alone), contained amended (neither conforms)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "binding",
+     "location": "Observation.contained[0].valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "binding",
+     "location": "Observation.contained[0].valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "binding",
+     "location": "Observation.contained[0].valueQuantity.comparator",
+     "severity": "error"
+    },
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ocard1": {
+  "description": "owner cardinality: top amended (qob chosen alone fails its rule: neither conforms), contained final (qoa conforms alone)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ocard2": {
+  "description": "owner cardinality: top final (qoa conforms alone), contained amended (neither conforms)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "oext1": {
+  "description": "owner extension: top amended (qob chosen alone fails its rule: neither conforms), contained final (qoa conforms alone)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "oext2": {
+  "description": "owner extension: top final (qoa conforms alone), contained amended (neither conforms)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "extension",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "oslice1": {
+  "description": "owner slicing: top amended, contained final; cc-ob (amended) requires the slice x",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.code",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "oslice2": {
+  "description": "owner slicing: top final, contained amended; cc-ob (amended) requires the slice x",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "coding",
+     "kind": "min",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].code",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p1": {
+  "description": "",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "p10": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "mtqy-1",
+     "kind": "constraint",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.extension[0].valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p11": {
+  "description": "",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "p12": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "mtqy-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence p12: a choice type uses all its profiles (spec), as p3"
+ },
+ "p13": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    }
+   ]
+  }
+ },
+ "p14": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueString",
+     "severity": "warning"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueString",
+     "severity": "warning"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueString",
+     "severity": "warning"
+    }
+   ]
+  }
+ },
+ "p15": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "short-1",
+     "kind": "constraint",
+     "location": "Observation.valueString",
+     "severity": "error"
+    },
+    {
+     "detail": "upper-1",
+     "kind": "constraint",
+     "location": "Observation.valueString",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueString",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "short-1",
+     "kind": "constraint",
+     "location": "Observation.valueString",
+     "severity": "error"
+    },
+    {
+     "detail": "upper-1",
+     "kind": "constraint",
+     "location": "Observation.valueString",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueString",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "short-1",
+     "kind": "constraint",
+     "location": "Observation.valueString",
+     "severity": "error"
+    },
+    {
+     "detail": "upper-1",
+     "kind": "constraint",
+     "location": "Observation.valueString",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueString",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p16": {
+  "description": "",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "p17": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "mtqy-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p18": {
+  "description": "",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "p19": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    }
+   ]
+  }
+ },
+ "p2": {
+  "description": "",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "p20": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence p20: a profile of another type is not walked"
+ },
+ "p21": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  },
+  "note": "divergence p21: the cardinality common to both layers is reported once"
+ },
+ "p3": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "mtqy-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p4": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p5": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "mtqy-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p6": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p7": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p8": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-2",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-quantity",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "p9": {
+  "description": "",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "mqty-1",
+     "kind": "constraint",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "mtqy-1",
+     "kind": "constraint",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "sqty-1",
+     "kind": "constraint",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "comparator",
+     "kind": "max",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[1].valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "pd1a": {
+  "description": "profile discriminator: ida only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "pd1ab": {
+  "description": "profile discriminator: both",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.identifier[0]",
+     "severity": "warning"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.identifier[0]",
+     "severity": "warning"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.identifier[0]",
+     "severity": "warning"
+    }
+   ]
+  }
+ },
+ "pd1b": {
+  "description": "profile discriminator: idb only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "pd1n": {
+  "description": "profile discriminator: neither (closed)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "pd2a": {
+  "description": "profile discriminator: ida only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "pd2ab": {
+  "description": "profile discriminator: both",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.identifier[0]",
+     "severity": "warning"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.identifier[0]",
+     "severity": "warning"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-multiple-matches",
+     "location": "Observation.identifier[0]",
+     "severity": "warning"
+    }
+   ]
+  }
+ },
+ "pd2b": {
+  "description": "profile discriminator: idb only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "pd2n": {
+  "description": "profile discriminator: neither (closed)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "slice-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "rec1a": {
+  "description": "recursive: top and inner match idr-a",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "rec1b": {
+  "description": "recursive: top matches idr-b only (idr-b has no assigner rule)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "rec1c": {
+  "description": "recursive: inner matches neither, so top fails idr-a; idr-b needs period: neither",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "rec1d": {
+  "description": "recursive: top matches idr-b; idr-a fails by inner",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "rec2a": {
+  "description": "recursive: top and inner match idr-a",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "rec2b": {
+  "description": "recursive: top matches idr-b only (idr-b has no assigner rule)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "rec2c": {
+  "description": "recursive: inner matches neither, so top fails idr-a; idr-b needs period: neither",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0].assigner.identifier",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "rec2d": {
+  "description": "recursive: top matches idr-b; idr-a fails by inner",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "ref0n": {
+  "description": "control, single profile idh-a: target does not satisfy org-x",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ref0x": {
+  "description": "control, single profile idh-a: target satisfies org-x",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "ref1n": {
+  "description": "reference: target satisfies neither (D2: failure exclusive to each group)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ref1x": {
+  "description": "reference: contained Organization satisfies org-x only (active)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "ref1y": {
+  "description": "reference: contained Organization satisfies org-y only (contact)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "ref2n": {
+  "description": "reference: target satisfies neither (D2: failure exclusive to each group)",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "ref2x": {
+  "description": "reference: contained Organization satisfies org-x only (active)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "ref2y": {
+  "description": "reference: contained Organization satisfies org-y only (contact)",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "refb1n": {
+  "description": "held in a Bundle entry: satisfies neither",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "refb1x": {
+  "description": "held in a Bundle entry: Organization satisfies org-x only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "refb1y": {
+  "description": "held in a Bundle entry: satisfies org-y only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "refb2n": {
+  "description": "held in a Bundle entry: satisfies neither",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "kind": "ref-target-profile",
+     "location": "Bundle.entry[0].resource.identifier[0].assigner",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "refb2x": {
+  "description": "held in a Bundle entry: Organization satisfies org-x only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "refb2y": {
+  "description": "held in a Bundle entry: satisfies org-y only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "res1": {
+  "description": "top final + contained amended (contained has its own meta.profile); no unit: qres-a fails by unit, qres-b by status",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "res2": {
+  "description": "top amended: conforms qres-b only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "res3": {
+  "description": "top final with unit: conforms qres-a only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "res4": {
+  "description": "Bundle: entry final (no unit) and entry amended (no unit); same datatype value under two %resource",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "res5": {
+  "description": "top amended + contained final (no unit): top conforms qres-b; contained fails both unless HL7 uses the contained resource as %resource",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "rb-1",
+     "kind": "constraint",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "resla": {
+  "description": "reslice s3/ra [ida,idb]: matches idb only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "reslb": {
+  "description": "reslice: matches ida only",
+  "expected": {
+   "4.0.1": [],
+   "4.3.0": [],
+   "5.0.0": []
+  }
+ },
+ "reslc": {
+  "description": "reslice: neither",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "period",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "value",
+     "kind": "min",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s10c1": {
+  "description": "10: the sliced element declares both profiles, the slice none: top amended, contained final",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s10c2": {
+  "description": "10: the sliced element declares both profiles, the slice none: top final, contained amended",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s10e1": {
+  "description": "10: the sliced element declares both profiles, the slice none: Bundle entries, first amended, second final",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s10e2": {
+  "description": "10: the sliced element declares both profiles, the slice none: Bundle entries, first final, second amended",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s13ac1": {
+  "description": "13a: the slice declares both profiles: top amended, contained final",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.category[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s13ac2": {
+  "description": "13a: the slice declares both profiles: top final, contained amended",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].category[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s13ae1": {
+  "description": "13a: the slice declares both profiles: Bundle entries, first amended, second final",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.category[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s13ae2": {
+  "description": "13a: the slice declares both profiles: Bundle entries, first final, second amended",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.category[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s13bc1": {
+  "description": "13b/13c: a child of the slice member declares both profiles: top amended, contained final",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].code",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s13bc2": {
+  "description": "13b/13c: a child of the slice member declares both profiles: top final, contained amended",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.contained[0].component[0].code",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s13be1": {
+  "description": "13b/13c: a child of the slice member declares both profiles: Bundle entries, first amended, second final",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[0].resource.component[0].code",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "s13be2": {
+  "description": "13b/13c: a child of the slice member declares both profiles: Bundle entries, first final, second amended",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ro-a",
+     "kind": "constraint",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Bundle.entry[1].resource.component[0].code",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "sev1": {
+  "description": "dup-1 and unit min fail in both layers: ['qsev-a', 'qsev-b']",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "sev2": {
+  "description": "dup-1 and unit min fail in both layers: ['qsev-b', 'qsev-a']",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "single1": {
+  "description": "single profile qsev-a: dup-1 (error) and unit min fail",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "single2": {
+  "description": "single profile qa: ele-1 and unit min fail",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "ele-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "ele-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "ele-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "ele-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "single3": {
+  "description": "single profile qsev-b: dup-1 (warning) and unit min fail",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "warning"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "two": {
+  "description": "same two profiles on two nodes, both values fail both",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "code",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "twom": {
+  "description": "same unresolved canonical on two nodes (Unknown_Profile per node?)",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "twom1": {
+  "description": "unresolved canonical on two nodes, only the first value fails",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.component[0].valueQuantity",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/nope-x",
+     "kind": "type-profile-not-found",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "txt1": {
+  "description": "dup-1 and unit min fail in both layers: ['qtxt-a', 'qtxt-b']",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error",
+     "text": "text A"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error",
+     "text": "text A"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error",
+     "text": "text A"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "txt2": {
+  "description": "dup-1 and unit min fail in both layers: ['qtxt-b', 'qtxt-a']",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error",
+     "text": "text B"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error",
+     "text": "text B"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "dup-1",
+     "kind": "constraint",
+     "location": "Observation.valueQuantity",
+     "severity": "error",
+     "text": "text B"
+    },
+    {
+     "detail": "unit",
+     "kind": "min",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.valueQuantity",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "un17": {
+  "description": "round 2 (17a): two unavailable Annotation profiles on note, and a note with no text: the base type continues",
+  "expected": {
+   "4.0.1": [
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-a",
+     "kind": "type-profile-not-found",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-b",
+     "kind": "type-profile-not-found",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-a",
+     "kind": "type-profile-not-found",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-b",
+     "kind": "type-profile-not-found",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "detail": "text",
+     "kind": "min",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-a",
+     "kind": "type-profile-not-found",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-b",
+     "kind": "type-profile-not-found",
+     "location": "Observation.note[0]",
+     "severity": "error"
+    }
+   ]
+  }
+ },
+ "unk": {
+  "description": "round 1: two Identifier alternatives declare different missing profiles on assigner; each is unknown",
+  "expected": {
+   "4.0.1": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-a",
+     "kind": "type-profile-not-found",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-b",
+     "kind": "type-profile-not-found",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "4.3.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-a",
+     "kind": "type-profile-not-found",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-b",
+     "kind": "type-profile-not-found",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ],
+   "5.0.0": [
+    {
+     "kind": "profile-no-match",
+     "location": "Observation.identifier[0]",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-a",
+     "kind": "type-profile-not-found",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    },
+    {
+     "detail": "http://example.org/fhir/StructureDefinition/missing-b",
+     "kind": "type-profile-not-found",
+     "location": "Observation.identifier[0].assigner",
+     "severity": "error"
+    }
+   ]
+  }
+ }
+}

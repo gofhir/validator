@@ -1,0 +1,94 @@
+[
+ [
+  "kbind",
+  "binding walk: qa fails (no unit); only qbind (2nd) binds comparator to {>}"
+ ],
+ [
+  "kbindok",
+  "binding walk: comparator in the set, no unit: only qbind conforms"
+ ],
+ [
+  "kext",
+  "extension: qa fails (no unit); only qext (2nd) requires the extension slice xi (profile ext-int), absent"
+ ],
+ [
+  "kextok",
+  "extension: required extension present, no unit: only qext conforms"
+ ],
+ [
+  "kctx",
+  "extension context: qa fails; only qctx (2nd) declares the extension whose context is Observation.component"
+ ],
+ [
+  "kslice",
+  "slicing tree: cc-a fails (no text); only cc-b (2nd) requires the slice x"
+ ],
+ [
+  "kslicep",
+  "slicing tree: no text, slice x present: only cc-b conforms"
+ ],
+ [
+  "kucum",
+  "UCUM: ra fails (no high); an invalid UCUM code inside the datatype"
+ ],
+ [
+  "kucumb",
+  "UCUM control: valid code, ra fails"
+ ],
+ [
+  "single1",
+  "single profile qsev-a: dup-1 (error) and unit min fail"
+ ],
+ [
+  "single2",
+  "single profile qa: ele-1 and unit min fail"
+ ],
+ [
+  "single3",
+  "single profile qsev-b: dup-1 (warning) and unit min fail"
+ ],
+ [
+  "ocard1",
+  "owner cardinality: top amended (qob chosen alone fails its rule: neither conforms), contained final (qoa conforms alone)"
+ ],
+ [
+  "ocard2",
+  "owner cardinality: top final (qoa conforms alone), contained amended (neither conforms)"
+ ],
+ [
+  "obind1",
+  "owner binding walk: top amended (qob chosen alone fails its rule: neither conforms), contained final (qoa conforms alone)"
+ ],
+ [
+  "obind2",
+  "owner binding walk: top final (qoa conforms alone), contained amended (neither conforms)"
+ ],
+ [
+  "oext1",
+  "owner extension: top amended (qob chosen alone fails its rule: neither conforms), contained final (qoa conforms alone)"
+ ],
+ [
+  "oext2",
+  "owner extension: top final (qoa conforms alone), contained amended (neither conforms)"
+ ],
+ [
+  "oslice1",
+  "owner slicing: top amended, contained final; cc-ob (amended) requires the slice x"
+ ],
+ [
+  "oslice2",
+  "owner slicing: top final, contained amended; cc-ob (amended) requires the slice x"
+ ],
+ [
+  "bcyc1",
+  "cycle through assigner references between two Organizations, layers [cyc-a, cyc-b] at each turn; nothing breaks the cycle"
+ ],
+ [
+  "bcyc2",
+  "same cycle, o2 meets cyc-b by period"
+ ],
+ [
+  "bcyc3",
+  "same cycle, o1 lacks active (org-cyc fails for it), so the top fails cyc-a through o1 and cyc-b by period"
+ ]
+]

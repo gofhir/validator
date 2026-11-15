@@ -1,0 +1,622 @@
+[
+ [
+  "c1a",
+  "slice s1 min value matches 2nd layer (idb) only; value matches idb, not ida (period)"
+ ],
+ [
+  "c1b",
+  "matches ida only; slice requires value (matches idb layer only)"
+ ],
+ [
+  "c1c",
+  "matches neither layer; slice requires value"
+ ],
+ [
+  "c1n",
+  "outside the slice: node layers only (idb ok)"
+ ],
+ [
+  "c1da",
+  "slice s1 min value matches 2nd layer (idb) only; value matches idb, not ida (period)"
+ ],
+ [
+  "c1db",
+  "matches ida only; slice requires value (matches idb layer only)"
+ ],
+ [
+  "c1dc",
+  "matches neither layer; slice requires value"
+ ],
+ [
+  "c1dn",
+  "outside the slice: node layers only (idb ok)"
+ ],
+ [
+  "leafa",
+  "slice leaf [ida,idb]: matches idb only"
+ ],
+ [
+  "leafb",
+  "slice leaf: matches ida only"
+ ],
+ [
+  "leafc",
+  "slice leaf: neither"
+ ],
+ [
+  "resla",
+  "reslice s3/ra [ida,idb]: matches idb only"
+ ],
+ [
+  "reslb",
+  "reslice: matches ida only"
+ ],
+ [
+  "reslc",
+  "reslice: neither"
+ ],
+ [
+  "a1n",
+  "no unit (fails qa), value 5 (fails inv2-1): neither; inv2-1 only in qi2"
+ ],
+ [
+  "a1q",
+  "no unit (fails qa), value 20: only qi2 conforms"
+ ],
+ [
+  "a1p",
+  "unit present, value 5: only qa conforms"
+ ],
+ [
+  "a1rn",
+  "no unit (fails qa), value 5 (fails inv2-1): neither; inv2-1 only in qi2"
+ ],
+ [
+  "a1rq",
+  "no unit (fails qa), value 20: only qi2 conforms"
+ ],
+ [
+  "a1rp",
+  "unit present, value 5: only qa conforms"
+ ],
+ [
+  "rec1a",
+  "recursive: top and inner match idr-a"
+ ],
+ [
+  "rec1b",
+  "recursive: top matches idr-b only (idr-b has no assigner rule)"
+ ],
+ [
+  "rec1c",
+  "recursive: inner matches neither, so top fails idr-a; idr-b needs period: neither"
+ ],
+ [
+  "rec1d",
+  "recursive: top matches idr-b; idr-a fails by inner"
+ ],
+ [
+  "rec2a",
+  "recursive: top and inner match idr-a"
+ ],
+ [
+  "rec2b",
+  "recursive: top matches idr-b only (idr-b has no assigner rule)"
+ ],
+ [
+  "rec2c",
+  "recursive: inner matches neither, so top fails idr-a; idr-b needs period: neither"
+ ],
+ [
+  "rec2d",
+  "recursive: top matches idr-b; idr-a fails by inner"
+ ],
+ [
+  "ref1x",
+  "reference: contained Organization satisfies org-x only (active)"
+ ],
+ [
+  "ref1y",
+  "reference: contained Organization satisfies org-y only (contact)"
+ ],
+ [
+  "ref1n",
+  "reference: target satisfies neither (D2: failure exclusive to each group)"
+ ],
+ [
+  "ref2x",
+  "reference: contained Organization satisfies org-x only (active)"
+ ],
+ [
+  "ref2y",
+  "reference: contained Organization satisfies org-y only (contact)"
+ ],
+ [
+  "ref2n",
+  "reference: target satisfies neither (D2: failure exclusive to each group)"
+ ],
+ [
+  "ref0x",
+  "control, single profile idh-a: target satisfies org-x"
+ ],
+ [
+  "ref0n",
+  "control, single profile idh-a: target does not satisfy org-x"
+ ],
+ [
+  "refb1x",
+  "held in a Bundle entry: Organization satisfies org-x only"
+ ],
+ [
+  "refb1y",
+  "held in a Bundle entry: satisfies org-y only"
+ ],
+ [
+  "refb1n",
+  "held in a Bundle entry: satisfies neither"
+ ],
+ [
+  "refb2x",
+  "held in a Bundle entry: Organization satisfies org-x only"
+ ],
+ [
+  "refb2y",
+  "held in a Bundle entry: satisfies org-y only"
+ ],
+ [
+  "refb2n",
+  "held in a Bundle entry: satisfies neither"
+ ],
+ [
+  "pd1a",
+  "profile discriminator: ida only"
+ ],
+ [
+  "pd1b",
+  "profile discriminator: idb only"
+ ],
+ [
+  "pd1n",
+  "profile discriminator: neither (closed)"
+ ],
+ [
+  "pd1ab",
+  "profile discriminator: both"
+ ],
+ [
+  "pd2a",
+  "profile discriminator: ida only"
+ ],
+ [
+  "pd2b",
+  "profile discriminator: idb only"
+ ],
+ [
+  "pd2n",
+  "profile discriminator: neither (closed)"
+ ],
+ [
+  "pd2ab",
+  "profile discriminator: both"
+ ],
+ [
+  "two",
+  "same two profiles on two nodes, both values fail both"
+ ],
+ [
+  "twom",
+  "same unresolved canonical on two nodes (Unknown_Profile per node?)"
+ ],
+ [
+  "twom1",
+  "unresolved canonical on two nodes, only the first value fails"
+ ],
+ [
+  "res1",
+  "top final + contained amended (contained has its own meta.profile); no unit: qres-a fails by unit, qres-b by status"
+ ],
+ [
+  "res2",
+  "top amended: conforms qres-b only"
+ ],
+ [
+  "res3",
+  "top final with unit: conforms qres-a only"
+ ],
+ [
+  "res5",
+  "top amended + contained final (no unit): top conforms qres-b; contained fails both unless HL7 uses the contained resource as %resource"
+ ],
+ [
+  "res4",
+  "Bundle: entry final (no unit) and entry amended (no unit); same datatype value under two %resource"
+ ],
+ [
+  "d4a",
+  "two unresolved profiles, invalid base content (unknown element, wrong type)"
+ ],
+ [
+  "d4b",
+  "two unresolved profiles, valid base content"
+ ],
+ [
+  "d4c",
+  "one unresolved + qa, invalid base content"
+ ],
+ [
+  "ig1n",
+  "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)"
+ ],
+ [
+  "ig1u",
+  "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)"
+ ],
+ [
+  "ig1c",
+  "IG/contained canonical: code present, no unit (qb ok)"
+ ],
+ [
+  "ig2n",
+  "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)"
+ ],
+ [
+  "ig2u",
+  "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)"
+ ],
+ [
+  "ig2c",
+  "IG/contained canonical: code present, no unit (qb ok)"
+ ],
+ [
+  "ig3n",
+  "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)"
+ ],
+ [
+  "ig3u",
+  "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)"
+ ],
+ [
+  "ig3c",
+  "IG/contained canonical: code present, no unit (qb ok)"
+ ],
+ [
+  "ct1n",
+  "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)"
+ ],
+ [
+  "ct1u",
+  "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)"
+ ],
+ [
+  "ct1c",
+  "IG/contained canonical: code present, no unit (qb ok)"
+ ],
+ [
+  "ct2n",
+  "IG/contained canonical in type.profile: no unit, no code (fails qa/qb/cq)"
+ ],
+ [
+  "ct2u",
+  "IG/contained canonical: unit present, no code (qa/cq ok, qb fails)"
+ ],
+ [
+  "ct2c",
+  "IG/contained canonical: code present, no unit (qb ok)"
+ ],
+ [
+  "e2sremptyx",
+  "e2 profile-discriminator: Identifier profile ids-rempty, standalone Observation"
+ ],
+ [
+  "e2sremptyb",
+  "e2 profile-discriminator: Identifier profile ids-rempty, Observation in a Bundle"
+ ],
+ [
+  "e2sremptyn",
+  "e2 profile-discriminator: Identifier profile ids-rempty, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2tremptyx",
+  "e2 plain type.profile: Identifier profile ids-rempty, standalone Observation"
+ ],
+ [
+  "e2tremptyb",
+  "e2 plain type.profile: Identifier profile ids-rempty, Observation in a Bundle"
+ ],
+ [
+  "e2tremptyn",
+  "e2 plain type.profile: Identifier profile ids-rempty, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2srexistsx",
+  "e2 profile-discriminator: Identifier profile ids-rexists, standalone Observation"
+ ],
+ [
+  "e2srexistsb",
+  "e2 profile-discriminator: Identifier profile ids-rexists, Observation in a Bundle"
+ ],
+ [
+  "e2srexistsn",
+  "e2 profile-discriminator: Identifier profile ids-rexists, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2trexistsx",
+  "e2 plain type.profile: Identifier profile ids-rexists, standalone Observation"
+ ],
+ [
+  "e2trexistsb",
+  "e2 plain type.profile: Identifier profile ids-rexists, Observation in a Bundle"
+ ],
+ [
+  "e2trexistsn",
+  "e2 plain type.profile: Identifier profile ids-rexists, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2srid1x",
+  "e2 profile-discriminator: Identifier profile ids-rid1, standalone Observation"
+ ],
+ [
+  "e2srid1b",
+  "e2 profile-discriminator: Identifier profile ids-rid1, Observation in a Bundle"
+ ],
+ [
+  "e2srid1n",
+  "e2 profile-discriminator: Identifier profile ids-rid1, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2trid1x",
+  "e2 plain type.profile: Identifier profile ids-rid1, standalone Observation"
+ ],
+ [
+  "e2trid1b",
+  "e2 plain type.profile: Identifier profile ids-rid1, Observation in a Bundle"
+ ],
+ [
+  "e2trid1n",
+  "e2 plain type.profile: Identifier profile ids-rid1, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2srid2x",
+  "e2 profile-discriminator: Identifier profile ids-rid2, standalone Observation"
+ ],
+ [
+  "e2srid2b",
+  "e2 profile-discriminator: Identifier profile ids-rid2, Observation in a Bundle"
+ ],
+ [
+  "e2srid2n",
+  "e2 profile-discriminator: Identifier profile ids-rid2, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2trid2x",
+  "e2 plain type.profile: Identifier profile ids-rid2, standalone Observation"
+ ],
+ [
+  "e2trid2b",
+  "e2 plain type.profile: Identifier profile ids-rid2, Observation in a Bundle"
+ ],
+ [
+  "e2trid2n",
+  "e2 plain type.profile: Identifier profile ids-rid2, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2srro1x",
+  "e2 profile-discriminator: Identifier profile ids-rro1, standalone Observation"
+ ],
+ [
+  "e2srro1b",
+  "e2 profile-discriminator: Identifier profile ids-rro1, Observation in a Bundle"
+ ],
+ [
+  "e2srro1n",
+  "e2 profile-discriminator: Identifier profile ids-rro1, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2trro1x",
+  "e2 plain type.profile: Identifier profile ids-rro1, standalone Observation"
+ ],
+ [
+  "e2trro1b",
+  "e2 plain type.profile: Identifier profile ids-rro1, Observation in a Bundle"
+ ],
+ [
+  "e2trro1n",
+  "e2 plain type.profile: Identifier profile ids-rro1, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2srrid0x",
+  "e2 profile-discriminator: Identifier profile ids-rrid0, standalone Observation"
+ ],
+ [
+  "e2srrid0b",
+  "e2 profile-discriminator: Identifier profile ids-rrid0, Observation in a Bundle"
+ ],
+ [
+  "e2srrid0n",
+  "e2 profile-discriminator: Identifier profile ids-rrid0, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2trrid0x",
+  "e2 plain type.profile: Identifier profile ids-rrid0, standalone Observation"
+ ],
+ [
+  "e2trrid0b",
+  "e2 plain type.profile: Identifier profile ids-rrid0, Observation in a Bundle"
+ ],
+ [
+  "e2trrid0n",
+  "e2 plain type.profile: Identifier profile ids-rrid0, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2srrid1x",
+  "e2 profile-discriminator: Identifier profile ids-rrid1, standalone Observation"
+ ],
+ [
+  "e2srrid1b",
+  "e2 profile-discriminator: Identifier profile ids-rrid1, Observation in a Bundle"
+ ],
+ [
+  "e2srrid1n",
+  "e2 profile-discriminator: Identifier profile ids-rrid1, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2trrid1x",
+  "e2 plain type.profile: Identifier profile ids-rrid1, standalone Observation"
+ ],
+ [
+  "e2trrid1b",
+  "e2 plain type.profile: Identifier profile ids-rrid1, Observation in a Bundle"
+ ],
+ [
+  "e2trrid1n",
+  "e2 plain type.profile: Identifier profile ids-rrid1, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2srvalx",
+  "e2 profile-discriminator: Identifier profile ids-rval, standalone Observation"
+ ],
+ [
+  "e2srvalb",
+  "e2 profile-discriminator: Identifier profile ids-rval, Observation in a Bundle"
+ ],
+ [
+  "e2srvaln",
+  "e2 profile-discriminator: Identifier profile ids-rval, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2trvalx",
+  "e2 plain type.profile: Identifier profile ids-rval, standalone Observation"
+ ],
+ [
+  "e2trvalb",
+  "e2 plain type.profile: Identifier profile ids-rval, Observation in a Bundle"
+ ],
+ [
+  "e2trvaln",
+  "e2 plain type.profile: Identifier profile ids-rval, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2srrvalx",
+  "e2 profile-discriminator: Identifier profile ids-rrval, standalone Observation"
+ ],
+ [
+  "e2srrvalb",
+  "e2 profile-discriminator: Identifier profile ids-rrval, Observation in a Bundle"
+ ],
+ [
+  "e2srrvaln",
+  "e2 profile-discriminator: Identifier profile ids-rrval, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2trrvalx",
+  "e2 plain type.profile: Identifier profile ids-rrval, standalone Observation"
+ ],
+ [
+  "e2trrvalb",
+  "e2 plain type.profile: Identifier profile ids-rrval, Observation in a Bundle"
+ ],
+ [
+  "e2trrvaln",
+  "e2 plain type.profile: Identifier profile ids-rrval, Observation in a Bundle in a Bundle"
+ ],
+ [
+  "e2hrempty",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rempty); target in the same Bundle"
+ ],
+ [
+  "e2hnrempty",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rempty)"
+ ],
+ [
+  "e2hrexists",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rexists); target in the same Bundle"
+ ],
+ [
+  "e2hnrexists",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rexists)"
+ ],
+ [
+  "e2hrid1",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rid1); target in the same Bundle"
+ ],
+ [
+  "e2hnrid1",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rid1)"
+ ],
+ [
+  "e2hrid2",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rid2); target in the same Bundle"
+ ],
+ [
+  "e2hnrid2",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rid2)"
+ ],
+ [
+  "e2hrro1",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rro1); target in the same Bundle"
+ ],
+ [
+  "e2hnrro1",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rro1)"
+ ],
+ [
+  "e2hrrid0",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rrid0); target in the same Bundle"
+ ],
+ [
+  "e2hnrrid0",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rrid0)"
+ ],
+ [
+  "e2hrrid1",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rrid1); target in the same Bundle"
+ ],
+ [
+  "e2hnrrid1",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rrid1)"
+ ],
+ [
+  "e2hrval",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rval); target in the same Bundle"
+ ],
+ [
+  "e2hnrval",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rval)"
+ ],
+ [
+  "e2hrrval",
+  "e2 resolve(): hasMember discriminated by profile of resolve().identifier (ids-rrval); target in the same Bundle"
+ ],
+ [
+  "e2hnrrval",
+  "e2 resolve(): same, both Observations in a Bundle nested in a Bundle (ids-rrval)"
+ ],
+ [
+  "sev1",
+  "dup-1 and unit min fail in both layers: ['qsev-a', 'qsev-b']"
+ ],
+ [
+  "sev2",
+  "dup-1 and unit min fail in both layers: ['qsev-b', 'qsev-a']"
+ ],
+ [
+  "txt1",
+  "dup-1 and unit min fail in both layers: ['qtxt-a', 'qtxt-b']"
+ ],
+ [
+  "txt2",
+  "dup-1 and unit min fail in both layers: ['qtxt-b', 'qtxt-a']"
+ ],
+ [
+  "dup",
+  "dup-1 and unit min fail in both layers: ['qdup-a', 'qdup-b']"
+ ],
+ [
+  "ele1",
+  "Quantity with only an id: ele-1 fails, inherited by both layers (qa, qb also fail by cardinality)"
+ ],
+ [
+  "ele2",
+  "Quantity id+value, no unit/code: ele-1 ok; NoMatch only"
+ ]
+]

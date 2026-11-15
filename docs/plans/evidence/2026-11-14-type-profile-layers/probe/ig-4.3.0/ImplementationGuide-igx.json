@@ -1,0 +1,21 @@
+{
+ "resourceType": "ImplementationGuide",
+ "id": "igx",
+ "url": "http://example.org/fhir/ImplementationGuide/igx",
+ "name": "igx",
+ "status": "draft",
+ "packageId": "example.igx",
+ "fhirVersion": [
+  "4.3.0"
+ ],
+ "definition": {
+  "resource": [
+   {
+    "reference": {
+     "reference": "StructureDefinition/qa"
+    },
+    "exampleBoolean": false
+   }
+  ]
+ }
+}

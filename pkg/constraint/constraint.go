@@ -86,6 +86,14 @@ type constraintEvalOpts struct {
 	// own es la definición propia del valor cuyos hijos se recorren (DefinitionSource.DefinitionOf),
 	// nil si no hay ninguna: su tipo lo juzga pkg/extension, no esta fase.
 	own *registry.StructureDefinition
+
+	// layer es el estado de la capa de los perfiles de un tipo que se evalúa, o nil fuera de una
+	// (layerRun).
+	layer *layerState
+
+	// descended recuerda qué valores se recorrieron ya bajo qué hijos, dentro de las capas de un tipo
+	// (firstDescent); nil fuera de ellas.
+	descended map[descent]struct{}
 }
 
 // Validator validates constraints defined in ElementDefinitions.
@@ -325,14 +333,18 @@ func (v *Validator) evaluateConstraintsOn(on func() fhirpath.Collection, constra
 			// severity, as in the HL7 validator, whose checkInvariant takes an exception from
 			// the FHIRPath engine as a failed invariant.
 			if firstReport(opts.ctx, c, fhirPath) {
+				before := len(result.Issues)
 				v.addConstraintViolation(c, fhirPath, err, result)
+				opts.note(result, before, c, fhirPath)
 			}
 			continue
 		}
 
 		if !toBoolean(evalResult) {
 			if firstReport(opts.ctx, c, fhirPath) {
+				before := len(result.Issues)
 				v.addConstraintViolation(c, fhirPath, nil, result)
+				opts.note(result, before, c, fhirPath)
 			}
 		}
 	}
@@ -369,6 +381,8 @@ func (v *Validator) reportCompileError(c registry.Constraint, err error, fhirPat
 	if !firstReport(opts.ctx, c, fhirPath) {
 		return
 	}
+	before := len(result.Issues)
+	defer func() { opts.note(result, before, c, fhirPath) }()
 	params := failureParams(c, err)
 	if v.definedByBaseType(c) {
 		// A constraint of the specification's own definitions that does not parse is a defect of

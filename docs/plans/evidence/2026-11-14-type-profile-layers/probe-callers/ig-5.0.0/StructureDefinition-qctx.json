@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qctx",
+ "url": "http://example.org/fhir/StructureDefinition/qctx",
+ "name": "qctx",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity.extension",
+    "path": "Quantity.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Quantity.extension:xo",
+    "path": "Quantity.extension",
+    "sliceName": "xo",
+    "min": 0,
+    "max": "1",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ext-obsonly"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

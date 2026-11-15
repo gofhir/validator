@@ -779,6 +779,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	positions := v.buildPositions(data)
 	ctx = scopeindex.With(ctx, positions)
 	ctx = withConformState(ctx)
+	ctx = registry.WithProfileChooser(ctx, typeChooser{v: v})
 	ctx = reference.WithIndexes(ctx)
 	ctx = walker.WithDiscoveries(ctx)
 	ctx = constraint.WithReportScope(ctx)
@@ -852,7 +853,10 @@ func (v *Validator) normalize(ctx context.Context, data map[string]any, raw []by
 
 // structuralPhase checks data's structure against sd. The HL7 validator's parser reports these, at
 // the paths the source writes: a value of the resource validated (vs nil) is named as written.
-func (v *Validator) structuralPhase(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, vs *valueScope, result *issue.Result) {
+func (v *Validator) structuralPhase(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, vs *valueScope, result *issue.Result, skip bool) {
+	if skip {
+		return
+	}
 	structResult := v.structValidator.ValidateData(data, sd)
 	if n := normalizedIn(ctx); vs == nil && n != nil {
 		asWritten := writtenIssuesIn(ctx)
@@ -865,6 +869,23 @@ func (v *Validator) structuralPhase(ctx context.Context, data map[string]any, sd
 	}
 	result.Merge(structResult)
 	issue.ReleaseResult(structResult)
+}
+
+// primitivePhase checks data's primitive values against sd, unless skip.
+func (v *Validator) primitivePhase(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, result *issue.Result, skip bool) {
+	if skip {
+		return
+	}
+	primResult := v.primValidator.ValidateDataContext(ctx, data, sd)
+	result.Merge(primResult)
+	issue.ReleaseResult(primResult)
+}
+
+// ucumPhase checks the UCUM codes of data's Quantities, unless skip.
+func (v *Validator) ucumPhase(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, result *issue.Result, skip bool) {
+	if v.ucumValidator != nil && !skip {
+		v.ucumValidator.ValidateDataContext(ctx, data, sd, result)
+	}
 }
 
 // contentJudged tells the objects whose content the shape check judged, which the invariant that an
@@ -886,7 +907,10 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	ctx = withRootScope(walker.WithRootDefinition(ctx, sd), data, vs)
 
 	// Phase 1: Structural validation (uses cached element indexes)
-	v.structuralPhase(ctx, data, sd, vs, result)
+	// A value checked for the profile alone (valueScope.profileOnly) leaves out the phases that judge
+	// the content its type gives it whatever the profile: shape, primitives and UCUM.
+	profileOnly := vs != nil && vs.profileOnly
+	v.structuralPhase(ctx, data, sd, vs, result, profileOnly)
 	result.Stats.PhasesRun++
 
 	// Phase 2: Cardinality validation
@@ -896,9 +920,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	result.Stats.PhasesRun++
 
 	// Phase 3: Primitive type validation (uses cached regex)
-	primResult := v.primValidator.ValidateDataContext(ctx, data, sd)
-	result.Merge(primResult)
-	issue.ReleaseResult(primResult)
+	v.primitivePhase(ctx, data, sd, result, profileOnly)
 	result.Stats.PhasesRun++
 
 	// Phase 5: Extension validation. What it checks depends on no profile: an extension against its
@@ -906,6 +928,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	// declared profile.
 	if firstExtensionCheck(ctx, data) {
 		v.extValidator.ValidateDataWith(ctx, v.extensionData(ctx, data, rawJSON, vs), sd, result)
+		v.datatypeContexts(ctx, data, sd, vs, result)
 	}
 	result.Stats.PhasesRun++
 
@@ -976,9 +999,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	result.Stats.PhasesRun++
 
 	// Phase 9: UCUM validation (Quantity.code syntax)
-	if v.ucumValidator != nil {
-		v.ucumValidator.ValidateDataContext(ctx, data, sd, result)
-	}
+	v.ucumPhase(ctx, data, sd, result, profileOnly)
 	result.Stats.PhasesRun++
 }
 

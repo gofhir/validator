@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-rng",
+ "url": "http://example.org/fhir/StructureDefinition/ext-rng",
+ "name": "ext_rng",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-rng"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "integer"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Range"
+  },
+  {
+   "type": "element",
+   "expression": "Duration"
+  }
+ ]
+}

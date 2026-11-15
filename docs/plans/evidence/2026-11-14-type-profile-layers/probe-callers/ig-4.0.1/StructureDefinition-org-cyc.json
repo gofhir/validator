@@ -1,0 +1,35 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "org-cyc",
+ "url": "http://example.org/fhir/StructureDefinition/org-cyc",
+ "name": "org_cyc",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Organization",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Organization",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Organization.active",
+    "path": "Organization.active",
+    "min": 1
+   },
+   {
+    "id": "Organization.identifier",
+    "path": "Organization.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/cyc-a",
+       "http://example.org/fhir/StructureDefinition/cyc-b"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

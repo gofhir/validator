@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-txt2",
+ "url": "http://example.org/fhir/StructureDefinition/obs-txt2",
+ "name": "obs_txt2",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "Quantity",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/qtxt-b",
+       "http://example.org/fhir/StructureDefinition/qtxt-a"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "resourceType": "Observation",
+ "id": "s13ac2",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-s13a"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "category": [
+  {
+   "coding": [
+    {
+     "system": "urn:probe:p",
+     "code": "c"
+    }
+   ]
+  }
+ ],
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/obs-s13a"
+    ]
+   },
+   "status": "amended",
+   "code": {
+    "text": "x"
+   },
+   "category": [
+    {
+     "coding": [
+      {
+       "system": "urn:probe:p",
+       "code": "c"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "hasMember": [
+  {
+   "reference": "#c1"
+  }
+ ]
+}

@@ -88,17 +88,18 @@ func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any
 	if rootType == "" || sd.Snapshot == nil {
 		return result
 	}
-	v.validateRoot(data, sd, rootType, result)
+	v.validateRoot(ctx, data, sd, rootType, result)
 
 	// Walk every resource it holds (contained resources, Bundle entries, the resources other
 	// elements hold), each against each profile its meta.profile declares and its type.
+	goCtx := ctx
 	v.walker.WalkAllWithProfilesContext(ctx, data, rootType, rootType, func(ctx *walker.ResourceContext) bool {
 		// Skip root resource (already validated above)
 		if ctx.FHIRPath == rootType {
 			return true
 		}
 		if ctx.SD != nil && ctx.SD.Snapshot != nil {
-			v.validateRoot(ctx.Data, ctx.SD, ctx.FHIRPath, result)
+			v.validateRoot(goCtx, ctx.Data, ctx.SD, ctx.FHIRPath, result)
 		}
 		return true
 	})
@@ -107,39 +108,75 @@ func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any
 }
 
 // validateRoot checks a resource (or a datatype value) against the root of sd's tree.
-func (v *Validator) validateRoot(data map[string]any, sd *registry.StructureDefinition, fhirPath string, result *issue.Result) {
+func (v *Validator) validateRoot(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, fhirPath string, result *issue.Result) {
 	root := sd.Tree().Root()
 	if root == nil {
 		return
 	}
-	v.validateNode(data, sd, root, "", fhirPath, result)
+	v.validateNode(ctx, registry.ResourceOwner(data), data, sd, root, "", fhirPath, nil, result)
 }
 
 // validateNode comprueba los hijos de una instancia de node: sus cuentas contra min y max, y,
-// y, en cada valor presente, sus hijos.
+// y, en cada valor presente, sus hijos. Los hijos son los de cada capa que gobierna el valor, y lo
+// que dos capas informan igual se informa una vez. El dueño, owner, es el recurso que contiene el
+// valor (registry.Instance).
 func (v *Validator) validateNode(
+	ctx context.Context,
+	owner map[string]any,
 	data map[string]any,
 	sd *registry.StructureDefinition,
 	node *registry.ElementNode,
 	typeCode string,
 	fhirPath string,
+	done registry.Descended,
 	result *issue.Result,
 ) {
-	childSD, children, missing := v.childrenOf(sd, node, typeCode, data)
-	if missing.canonical != "" {
+	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, v.instance(owner, data))
+	// Los perfiles que no se resuelven se informan antes de quitar las capas ya recorridas: el valor que
+	// llega por una segunda capa de su padre puede declarar otros perfiles que faltan. Lo que ya se informó
+	// al caminarlo por la primera no se repite.
+	before := len(result.Issues)
+	for _, missing := range c.AllUnresolved {
 		// El tipo del valor declara un perfil que no se resuelve: se informa aquí y no otra vez en
 		// la fase de slicing, y el valor se comprueba contra el tipo base, como hace el validador
 		// de HL7, que informa el perfil como desconocido y sigue.
 		result.AddErrorWithID(issue.DiagTypeProfileNotFound,
-			map[string]any{"profile": missing.canonical, "type": missing.typeCode, "reason": missing.reason},
+			map[string]any{"profile": missing.Canonical, "type": missing.TypeCode, "reason": missing.Reason},
 			fhirPath)
 	}
-	v.validateChildren(data, childSD, children, fhirPath, result)
+	if done != nil {
+		result.DropRepeated(0, before)
+	}
+	// Un valor que declaran dos capas de su padre se camina una vez, bajo la unión de las capas.
+	c, ok := done.Fresh(data, c)
+	if !ok {
+		return
+	}
+	mine := done.Below(c)
+	if c.NumLayers() < 2 {
+		for i := range c.NumLayers() {
+			layer := c.LayerAt(i)
+			v.validateChildren(ctx, owner, data, layer.SD, layer.Nodes, fhirPath, true, true, mine, result)
+		}
+		return
+	}
+	// Each layer (a profile of the several the value's type declares) checks its children, and what
+	// two of them report the same is reported once. The counts of the value's own children come first,
+	// those of the values below them after.
+	for _, below := range []bool{false, true} {
+		start := len(result.Issues)
+		for i := range c.NumLayers() {
+			from := len(result.Issues)
+			layer := c.LayerAt(i)
+			v.validateChildren(ctx, owner, data, layer.SD, layer.Nodes, fhirPath, !below, below, mine, result)
+			result.DropRepeated(start, from)
+		}
+	}
 }
 
 // validateChildren checks children in one instance, data, held at fhirPath: their counts against
-// min and max, and recursively the children of those present.
-func (v *Validator) validateChildren(data map[string]any, childSD *registry.StructureDefinition, children []*registry.ElementNode, fhirPath string, result *issue.Result) {
+// min and max (counts), and recursively the children of those present (below).
+func (v *Validator) validateChildren(ctx context.Context, owner, data map[string]any, childSD *registry.StructureDefinition, children []*registry.ElementNode, fhirPath string, counts, below bool, done registry.Descended, result *issue.Result) {
 	for _, child := range children {
 		name := child.Name()
 		childPath := fhirPath + "." + name
@@ -149,14 +186,14 @@ func (v *Validator) validateChildren(data map[string]any, childSD *registry.Stru
 		})
 		count := elementvalues.Occurrences(child, values)
 
-		if child.Def.Min > 0 && count < int(child.Def.Min) {
+		if counts && child.Def.Min > 0 && count < int(child.Def.Min) {
 			result.AddErrorWithID(
 				issue.DiagCardinalityMin,
 				map[string]any{"path": childPath, "min": child.Def.Min, "count": count},
 				childPath,
 			)
 		}
-		if child.Def.Max != "" && child.Def.Max != "*" {
+		if counts && child.Def.Max != "" && child.Def.Max != "*" {
 			if maxInt, err := strconv.Atoi(child.Def.Max); err == nil && count > maxInt {
 				result.AddErrorWithID(
 					issue.DiagCardinalityMax,
@@ -166,10 +203,13 @@ func (v *Validator) validateChildren(data map[string]any, childSD *registry.Stru
 			}
 		}
 
+		if !below {
+			continue
+		}
 		for _, cv := range values {
 			m, ok := cv.Value.(map[string]any)
 			if !ok {
-				v.validatePrimitiveElement(cv.Value, cv.Ext, childSD, child, cv.TypeCode, cv.Path(fhirPath), result)
+				v.validatePrimitiveElement(ctx, owner, cv.Value, cv.Ext, childSD, child, cv.TypeCode, cv.Path(fhirPath), result)
 				continue
 			}
 			// A resource held in the element (Bundle.entry.resource, contained) is validated
@@ -177,7 +217,7 @@ func (v *Validator) validateChildren(data map[string]any, childSD *registry.Stru
 			if v.registry.HoldsResource(child.Def) {
 				continue
 			}
-			v.validateNode(m, childSD, child, cv.TypeCode, cv.Path(fhirPath), result)
+			v.validateNode(ctx, owner, m, childSD, child, cv.TypeCode, cv.Path(fhirPath), done, result)
 		}
 	}
 }
@@ -187,7 +227,7 @@ func (v *Validator) validateChildren(data map[string]any, childSD *registry.Stru
 // primitive's type definition. In JSON a primitive's value is its own property, and its id and
 // extensions are in its "_key" sibling, ext (json.html#primitive): the value is checked as the child
 // the primitive type defines for it, the others against the sibling, even when there is none.
-func (v *Validator) validatePrimitiveElement(value any, ext map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, result *issue.Result) {
+func (v *Validator) validatePrimitiveElement(ctx context.Context, owner map[string]any, value any, ext map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, result *issue.Result) {
 	code := typeCode
 	if code == "" && len(node.Def.Type) == 1 {
 		code = node.Def.Type[0].Code
@@ -216,7 +256,7 @@ func (v *Validator) validatePrimitiveElement(value any, ext map[string]any, sd *
 			inst[name] = value
 		}
 	}
-	v.validateChildren(inst, childSD, children, fhirPath, result)
+	v.validateChildren(ctx, owner, inst, childSD, children, fhirPath, true, true, nil, result)
 }
 
 // primitiveShape is what a primitive type's definition says about the JSON of its values.
@@ -265,32 +305,10 @@ func (v *Validator) definedByPrimitive(n *registry.ElementNode) bool {
 	return base != nil && base.Kind == kindPrimitive
 }
 
-// unresolvedProfile es el perfil que declara el tipo de una instancia cuando no se puede resolver.
-type unresolvedProfile struct {
-	canonical string
-	typeCode  string
-	reason    string
-}
-
-// childrenOf devuelve los elementos hijos de una instancia de node, inst, y la StructureDefinition
-// a que pertenecen (Registry.ChildrenOf), con la definición que la instancia declara para sí (la
-// url de una extensión, plan B B4c). Un perfil de tipo declarado que no se resuelve se devuelve
-// como faltante, y los hijos siguen siendo los del tipo. El nodo nunca es un slice: los slices no
-// son hijos.
-func (v *Validator) childrenOf(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any) (*registry.StructureDefinition, []*registry.ElementNode, unresolvedProfile) {
-	c := v.registry.ChildrenOf(context.Background(), sd, node, typeCode, v.selfDefinitions(inst))
-	tp := c.Unresolved
-	return c.SD, c.Nodes, unresolvedProfile{tp.Canonical, tp.TypeCode, tp.Reason}
-}
-
-// selfDefinitions returns, for an instance, the definition it declares for itself for a type.
-func (v *Validator) selfDefinitions(inst map[string]any) func(string) *registry.StructureDefinition {
-	if v.definitions == nil {
-		return nil
-	}
-	return func(typeCode string) *registry.StructureDefinition {
-		return v.definitions.DefinitionOf(context.Background(), typeCode, inst)
-	}
+// instance es la instancia inst, de dueño owner, con la definición que declara para sí (la url de una
+// extensión, plan B B4c).
+func (v *Validator) instance(owner, inst map[string]any) registry.Instance {
+	return registry.Instance{Value: inst, Self: v.definitions, Owner: owner}
 }
 
 // kindPrimitive is the StructureDefinition.kind of primitive types, whose children (id,

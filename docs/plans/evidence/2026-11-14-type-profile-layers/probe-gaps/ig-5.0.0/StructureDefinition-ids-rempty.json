@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ids-rempty",
+ "url": "http://example.org/fhir/StructureDefinition/ids-rempty",
+ "name": "ids_rempty",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier",
+    "constraint": [
+     {
+      "key": "e2-rempty",
+      "severity": "error",
+      "human": "identifier profile ids-rempty: %resource.empty()",
+      "expression": "%resource.empty()"
+     }
+    ]
+   }
+  ]
+ }
+}

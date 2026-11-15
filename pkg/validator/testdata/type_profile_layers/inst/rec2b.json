@@ -1,0 +1,31 @@
+{
+ "resourceType": "Observation",
+ "id": "rec2b",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-rec2"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "identifier": [
+  {
+   "period": {
+    "start": "2020-01-01"
+   },
+   "assigner": {
+    "display": "d",
+    "identifier": {
+     "period": {
+      "start": "2020-01-01"
+     }
+    }
+   }
+  }
+ ]
+}

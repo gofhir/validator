@@ -1,0 +1,25 @@
+{
+ "resourceType": "Observation",
+ "id": "reslb",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-reslice"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "identifier": [
+  {
+   "system": "urn:probe:s3",
+   "use": "usual",
+   "period": {
+    "start": "2020-01-01"
+   }
+  }
+ ]
+}

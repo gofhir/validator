@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ids-root",
+ "url": "http://example.org/fhir/StructureDefinition/ids-root",
+ "name": "ids_root",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier",
+    "constraint": [
+     {
+      "key": "sk-1",
+      "severity": "error",
+      "human": "root must be a Bundle (ids-root)",
+      "expression": "%rootResource.resourceType = 'Bundle'"
+     }
+    ]
+   }
+  ]
+ }
+}

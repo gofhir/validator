@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "un17",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-un17"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "note": [
+  {
+   "time": "2020-01-01T00:00:00Z"
+  }
+ ]
+}

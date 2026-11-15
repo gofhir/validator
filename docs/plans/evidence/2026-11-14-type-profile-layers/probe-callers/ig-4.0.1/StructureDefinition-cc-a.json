@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "cc-a",
+ "url": "http://example.org/fhir/StructureDefinition/cc-a",
+ "name": "cc_a",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "CodeableConcept",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "CodeableConcept.text",
+    "path": "CodeableConcept.text",
+    "min": 1
+   }
+  ]
+ }
+}

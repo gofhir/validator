@@ -1,0 +1,43 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-e2s-rid2",
+ "url": "http://example.org/fhir/StructureDefinition/obs-e2s-rid2",
+ "name": "obs_e2s_rid2",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.identifier",
+    "path": "Observation.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "$this"
+      }
+     ],
+     "rules": "closed"
+    }
+   },
+   {
+    "id": "Observation.identifier:sx",
+    "path": "Observation.identifier",
+    "sliceName": "sx",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ids-rid2"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

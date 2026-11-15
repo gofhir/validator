@@ -1,0 +1,38 @@
+{
+ "resourceType": "Observation",
+ "id": "ref2y",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-ref2"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "contained": [
+  {
+   "resourceType": "Organization",
+   "id": "o1",
+   "name": "N",
+   "contact": [
+    {
+     "purpose": {
+      "text": "p"
+     }
+    }
+   ]
+  }
+ ],
+ "identifier": [
+  {
+   "value": "x",
+   "assigner": {
+    "reference": "#o1"
+   }
+  }
+ ]
+}

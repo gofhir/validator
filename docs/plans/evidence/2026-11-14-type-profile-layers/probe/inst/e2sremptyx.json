@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "o1",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-e2s-rempty"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "identifier": [
+  {
+   "value": "v"
+  }
+ ]
+}

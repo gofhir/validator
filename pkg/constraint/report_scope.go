@@ -9,10 +9,58 @@ import (
 
 type reportScopeKey struct{}
 
-// reportScope is the set of constraint failures already reported in one validation.
+// reportScope is the set of constraint failures already reported in one validation. A scope made
+// by withChildReportScope also sees what its parent reported, but records only its own.
 type reportScope struct {
-	mu   sync.Mutex
-	seen map[string]bool
+	mu     sync.Mutex
+	seen   map[string]bool
+	parent *reportScope
+}
+
+// reported dice si k se informó en este scope o en el de un ancestro. Quien llama tiene s.mu.
+func (s *reportScope) reported(k string) bool {
+	if s.seen[k] {
+		return true
+	}
+	for p := s.parent; p != nil; p = p.parent {
+		p.mu.Lock()
+		hit := p.seen[k]
+		p.mu.Unlock()
+		if hit {
+			return true
+		}
+	}
+	return false
+}
+
+// withChildReportScope devuelve un contexto con un scope de informe propio dentro del de ctx: lo
+// que ctx ya informó no se repite, y lo que se informa aquí no lo ven las capas hermanas (cada
+// capa de los perfiles de un tipo informa por su cuenta, y después se juntan). Sin scope en ctx
+// devuelve uno nuevo.
+func withChildReportScope(ctx context.Context) context.Context {
+	parent, _ := ctx.Value(reportScopeKey{}).(*reportScope)
+	return context.WithValue(ctx, reportScopeKey{}, &reportScope{seen: map[string]bool{}, parent: parent})
+}
+
+// adoptReports registra en el scope de ctx lo que informó child, el contexto de una capa creado por
+// withChildReportScope, para que lo que se evalúa después no lo repita.
+func adoptReports(ctx, child context.Context) {
+	to, _ := ctx.Value(reportScopeKey{}).(*reportScope)
+	from, _ := child.Value(reportScopeKey{}).(*reportScope)
+	if to == nil || from == nil {
+		return
+	}
+	from.mu.Lock()
+	keys := make([]string, 0, len(from.seen))
+	for k := range from.seen {
+		keys = append(keys, k)
+	}
+	from.mu.Unlock()
+	to.mu.Lock()
+	for _, k := range keys {
+		to.seen[k] = true
+	}
+	to.mu.Unlock()
 }
 
 // WithReportScope returns a context in which a constraint that fails at one location is reported
@@ -46,7 +94,7 @@ func firstReport(ctx context.Context, c registry.Constraint, fhirPath string) bo
 	k := fhirPath + "\x00" + c.Key + "\x00" + c.Expression
 	scope.mu.Lock()
 	defer scope.mu.Unlock()
-	if scope.seen[k] {
+	if scope.reported(k) {
 		return false
 	}
 	scope.seen[k] = true
@@ -65,7 +113,7 @@ func firstReportKey(ctx context.Context, key string) bool {
 	}
 	scope.mu.Lock()
 	defer scope.mu.Unlock()
-	if scope.seen[key] {
+	if scope.reported(key) {
 		return false
 	}
 	scope.seen[key] = true

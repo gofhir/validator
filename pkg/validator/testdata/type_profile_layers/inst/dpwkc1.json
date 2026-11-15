@@ -1,0 +1,36 @@
+{
+ "resourceType": "Observation",
+ "id": "dpwkc1",
+ "status": "amended",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/obs-dpwk"
+    ]
+   },
+   "status": "final",
+   "code": {
+    "coding": [
+     {
+      "system": "urn:review",
+      "code": "c"
+     }
+    ]
+   }
+  }
+ ],
+ "hasMember": [
+  {
+   "reference": "#c1"
+  }
+ ]
+}

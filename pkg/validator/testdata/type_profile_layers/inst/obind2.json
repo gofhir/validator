@@ -1,0 +1,50 @@
+{
+ "resourceType": "Observation",
+ "id": "obind2",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-obind"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "comparator": "<",
+  "unit": "mg",
+  "system": "http://unitsofmeasure.org",
+  "code": "mg"
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "status": "amended",
+   "code": {
+    "text": "x"
+   },
+   "valueQuantity": {
+    "value": 5,
+    "comparator": "<",
+    "unit": "mg",
+    "system": "http://unitsofmeasure.org",
+    "code": "mg"
+   },
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/obs-obind"
+    ]
+   }
+  }
+ ],
+ "hasMember": [
+  {
+   "reference": "#c1"
+  }
+ ]
+}

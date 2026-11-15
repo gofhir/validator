@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-kucum",
+ "url": "http://example.org/fhir/StructureDefinition/obs-kucum",
+ "name": "obs_kucum",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "Range",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ra",
+       "http://example.org/fhir/StructureDefinition/rb"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

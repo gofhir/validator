@@ -1,0 +1,24 @@
+{
+ "resourceType": "Observation",
+ "id": "leafb",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-leaf"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "identifier": [
+  {
+   "system": "urn:probe:s2",
+   "period": {
+    "start": "2020-01-01"
+   }
+  }
+ ]
+}

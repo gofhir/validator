@@ -1,0 +1,52 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-s10",
+ "url": "http://example.org/fhir/StructureDefinition/obs-s10",
+ "name": "obs_s10",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.category",
+    "path": "Observation.category",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    },
+    "type": [
+     {
+      "code": "CodeableConcept",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/cc-oc",
+       "http://example.org/fhir/StructureDefinition/cc-od"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Observation.category:cat",
+    "path": "Observation.category",
+    "sliceName": "cat",
+    "patternCodeableConcept": {
+     "coding": [
+      {
+       "system": "urn:probe:p",
+       "code": "c"
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

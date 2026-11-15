@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ids-rval",
+ "url": "http://example.org/fhir/StructureDefinition/ids-rval",
+ "name": "ids_rval",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier",
+    "constraint": [
+     {
+      "key": "e2-rval",
+      "severity": "error",
+      "human": "identifier profile ids-rval: %resource.value = 'v'",
+      "expression": "%resource.value = 'v'"
+     }
+    ]
+   }
+  ]
+ }
+}

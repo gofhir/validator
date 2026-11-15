@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "idr-b",
+ "url": "http://example.org/fhir/StructureDefinition/idr-b",
+ "name": "idr_b",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.period",
+    "path": "Identifier.period",
+    "min": 1
+   }
+  ]
+ }
+}

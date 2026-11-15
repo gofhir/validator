@@ -70,7 +70,17 @@ func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.Elemen
 	}
 
 	self := v.selfDefinition(opts.ctx, layer, typeCode, value)
-	typeSD, typeRoot := v.typeLayer(opts.ctx, node, layer, typeCode, self)
+	tps := v.registry.TypeProfilesOf(opts.ctx, node, typeCode)
+	defs := v.alternativeTypes(tps, fhirPath, value, opts, result)
+	if len(defs) > 1 {
+		v.walkLayers(sd, node, typeCode, value, raw, element, fhirPath, seen, self, layerSD, layer, defs, opts, result)
+		return
+	}
+	typeSD, typeRoot := v.typeLayerOf(tps, layer, node, typeCode, self, opts)
+	if len(defs) == 1 {
+		// Of several profiles, the one the value is checked against.
+		typeSD, typeRoot = defs[0].sd, defs[0].root
+	}
 	if typeRoot != nil && typeSD.Kind != kindPrimitive {
 		v.layer(typeRoot, typeRoot.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
 	}
@@ -93,6 +103,98 @@ func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.Elemen
 		}
 		// Los hijos que son los de la definición propia del valor (self) no se comparan por tipo: esa
 		// definición la juzga la fase que la conoce (extensibility.html), no el perfil.
+		prevOwn := opts.own
+		if self != nil && childSD == self {
+			opts.own = self
+		}
+		if opts.firstDescent(obj, childSD, children) {
+			v.walkChildren(childSD, children, obj, raw, fhirPath, opts, result)
+		}
+		opts.own = prevOwn
+	}
+}
+
+// typeDef es una definición de tipo que gobierna un valor, con su elemento raíz.
+type typeDef struct {
+	sd   *registry.StructureDefinition
+	root *registry.ElementNode
+}
+
+// alternativeTypes devuelve, cuando el tipo del valor declara varios perfiles y ninguno más específico
+// gobierna, los que se eligen para el valor (registry.ChooseTypeProfiles), e informa que no cumple
+// ninguno (PROFILE_NO_MATCH) o que cumple varios (PROFILE_MULTIPLE_MATCHES), una vez en el valor. El
+// dueño del valor, que da su Scope a la elección, es el recurso de opts.scope.
+func (v *Validator) alternativeTypes(tps registry.TypeProfiles, fhirPath string, value any, opts *constraintEvalOpts, result *issue.Result) []typeDef {
+	alt := tps.Alternatives
+	obj, isObject := value.(map[string]any)
+	if tps.Governing.SD != nil || alt.Node == nil || !isObject {
+		return nil
+	}
+	choice := v.registry.ChooseTypeProfiles(opts.ctx, alt, registry.Instance{Value: obj, Owner: opts.scope.Resource})
+	switch {
+	case choice.NoMatch():
+		if firstReportKey(opts.ctx, fhirPath+"\x00"+string(issue.DiagProfileNoMatch)) {
+			names := make([]string, len(alt.Declared))
+			for i, tp := range alt.Declared {
+				names[i] = tp.Canonical
+			}
+			result.AddErrorWithID(issue.DiagProfileNoMatch, map[string]any{"profiles": strings.Join(names, ", ")}, fhirPath)
+		}
+	case choice.MultipleMatches():
+		if firstReportKey(opts.ctx, fhirPath+"\x00"+string(issue.DiagProfileMultipleMatches)) {
+			names := make([]string, len(choice.Met))
+			for i, sd := range choice.Met {
+				names[i] = sd.URL
+			}
+			result.AddWarningWithID(issue.DiagProfileMultipleMatches, map[string]any{"profiles": strings.Join(names, ", ")}, fhirPath)
+		}
+	}
+	defs := make([]typeDef, 0, len(choice.Chosen))
+	for _, sd := range choice.Chosen {
+		defs = append(defs, typeDef{sd: sd, root: sd.Tree().Root()})
+	}
+	return defs
+}
+
+// walkLayers evalúa un valor bajo cada uno de los perfiles de tipo que se le eligieron, defs (más de
+// uno), cada capa con su propio estado, y junta lo que informan. Primero, una vez, lo común a todas
+// (la definición propia del valor); los hijos que el propio elemento despliega se recorren una vez,
+// y los del perfil de cada capa dentro de ella.
+func (v *Validator) walkLayers(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, raw, element json.RawMessage, fhirPath string, seen map[string]bool, self, layerSD *registry.StructureDefinition, layerNode *registry.ElementNode, defs []typeDef, opts *constraintEvalOpts, result *issue.Result) {
+	if self != nil {
+		if root := self.Tree().Root(); root != nil {
+			v.layer(root, root.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
+		}
+	}
+	obj, isObject := value.(map[string]any)
+	childSD, children := sd, governedChildren(node)
+	if len(children) == 0 {
+		childSD, children = layerSD, layerNode.Children
+	}
+	own := len(children) > 0 && !v.wrongType(node, typeCode)
+
+	if opts.descended == nil && isObject {
+		// Desde aquí, un valor que dos capas llevan a los mismos hijos se camina una vez.
+		shared := *opts
+		shared.descended = map[descent]struct{}{}
+		opts = &shared
+	}
+	runs := make([]layerRun, 0, len(defs))
+	for _, td := range defs {
+		run := beginLayer(opts)
+		lseen := cloneSeen(seen)
+		lraw := raw
+		if td.sd.Kind != kindPrimitive {
+			v.layer(td.root, td.root.Def.Path, value, &lraw, element, fhirPath, lseen, run.opts, run.result)
+		}
+		if isObject && !own && run.opts.firstDescent(obj, td.sd, td.root.Children) {
+			v.walkChildren(td.sd, td.root.Children, obj, lraw, fhirPath, run.opts, run.result)
+		}
+		runs = append(runs, run)
+	}
+	mergeLayers(opts, runs, result)
+
+	if isObject && own && opts.firstDescent(obj, childSD, children) {
 		prevOwn := opts.own
 		if self != nil && childSD == self {
 			opts.own = self
@@ -372,7 +474,13 @@ func (v *Validator) declaredProfile(ctx context.Context, url, at, fhirPath strin
 // declarado que no se resuelve (lo informa la fase de cardinalidad) deja el valor bajo la
 // definición de su tipo, como lo comprueba el validador HL7.
 func (v *Validator) typeLayer(ctx context.Context, node, layer *registry.ElementNode, typeCode string, self *registry.StructureDefinition) (*registry.StructureDefinition, *registry.ElementNode) {
-	if tp := v.registry.TypeProfilesOf(ctx, node, typeCode).Governing; tp.SD != nil {
+	return v.typeLayerOf(v.registry.TypeProfilesOf(ctx, node, typeCode), layer, node, typeCode, self, &constraintEvalOpts{ctx: ctx})
+}
+
+// typeLayerOf es typeLayer, con los perfiles de tipo ya buscados.
+func (v *Validator) typeLayerOf(tps registry.TypeProfiles, layer, node *registry.ElementNode, typeCode string, self *registry.StructureDefinition, opts *constraintEvalOpts) (*registry.StructureDefinition, *registry.ElementNode) {
+	ctx := opts.ctx
+	if tp := tps.Governing; tp.SD != nil {
 		return tp.SD, tp.SD.Tree().Root()
 	}
 	if layer != node {

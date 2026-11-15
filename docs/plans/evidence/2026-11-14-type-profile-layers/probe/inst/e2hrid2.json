@@ -1,0 +1,44 @@
+{
+ "resourceType": "Bundle",
+ "id": "b0",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-000000000008",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o1",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-e2h-rid2"
+     ]
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "hasMember": [
+     {
+      "reference": "urn:uuid:00000000-0000-0000-0000-000000000009"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-000000000009",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "o2",
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "identifier": [
+     {
+      "value": "v"
+     }
+    ]
+   }
+  }
+ ]
+}

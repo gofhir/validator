@@ -5,6 +5,7 @@ package slicing
 import (
 	"context"
 	"encoding/json"
+	"slices"
 	"strconv"
 
 	"github.com/gofhir/validator/v2/internal/elementvalues"
@@ -132,7 +133,7 @@ func (v *Validator) ValidateDataContext(goCtx context.Context, resource map[stri
 	}
 
 	if root := sd.Tree().Root(); root != nil {
-		v.walk(run, run.scope, sd, root, "", resource, resourceType, result)
+		v.walk(run, run.scope, sd, root, "", resource, resourceType, nil, result)
 	}
 
 	// The resources it holds, against their own definitions.
@@ -158,16 +159,14 @@ type validation struct {
 // se comprueba contra el mismo hijo del elemento sin slice cuando es otra definición, y un perfil
 // que declara y no se resuelve es un error del valor, salvo que el elemento sin slice lo declare
 // también, caso que informa la fase de cardinalidad.
-func (v *Validator) checkChildren(ctx context.Context, sd *registry.StructureDefinition, children []*registry.ElementNode, base registry.InstanceChildren, inst map[string]any, instPath, defPath string, result *issue.Result) {
+func (v *Validator) checkChildren(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, children []*registry.ElementNode, base registry.InstanceChildren, inst map[string]any, instPath, defPath string, result *issue.Result) {
 	for _, child := range children {
 		name := child.Name()
 		childPath := instPath + "." + name
 		childDef := defPath + "." + name
 		values := elementvalues.Of(child, inst, v.registry)
 		count := elementvalues.Occurrences(child, values)
-		baseChild := named(base.Nodes, name)
-		sameMin := baseChild != nil && baseChild.Def.Min == child.Def.Min
-		sameMax := baseChild != nil && baseChild.Def.Max == child.Def.Max
+		baseChild, baseSD, sameMin, sameMax := named(base, child)
 
 		if !sameMin && count < int(child.Def.Min) {
 			result.AddErrorWithID(issue.DiagSlicingCardinalityMin, map[string]any{
@@ -184,22 +183,23 @@ func (v *Validator) checkChildren(ctx context.Context, sd *registry.StructureDef
 
 		for _, cv := range values {
 			if m, ok := cv.Value.(map[string]any); ok {
-				v.checkChildValue(ctx, sd, child, baseChild, base, cv, m, instPath, childDef, result)
+				v.checkChildValue(ctx, owner, sd, child, baseChild, baseSD, cv, m, instPath, childDef, result)
 			}
 		}
 	}
 }
 
 // checkChildValue comprueba un valor, m, de child: contra los hijos que el snapshot despliega
-// debajo, o si no contra la definición que lo gobierna (véase checkChildren).
-func (v *Validator) checkChildValue(ctx context.Context, sd *registry.StructureDefinition, child, baseChild *registry.ElementNode, base registry.InstanceChildren, cv childValue, m map[string]any, instPath, childDef string, result *issue.Result) {
-	self := v.selfDefinitions(ctx, m)
+// debajo, o si no contra la definición que lo gobierna (véase checkChildren). Con baseChild, el
+// mismo hijo en la base, de la definición baseSD, se compara el valor.
+func (v *Validator) checkChildValue(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, child, baseChild *registry.ElementNode, baseSD *registry.StructureDefinition, cv childValue, m map[string]any, instPath, childDef string, result *issue.Result) {
+	inst := registry.Instance{Value: m, Self: v.definitions, Owner: owner}
 	var next registry.InstanceChildren
 	if baseChild != nil {
-		next = v.registry.ChildrenOf(ctx, base.SD, baseChild, cv.TypeCode, self)
+		next = v.registry.ChildrenOf(ctx, baseSD, baseChild, cv.TypeCode, inst)
 	}
 	if len(child.Children) > 0 {
-		v.checkChildren(ctx, sd, child.Children, next, m, cv.Path(instPath), childDef, result)
+		v.checkChildren(ctx, owner, sd, child.Children, next, m, cv.Path(instPath), childDef, result)
 		return
 	}
 	// Un recurso que el hijo contiene se valida contra su propia definición (recorrido de
@@ -207,15 +207,30 @@ func (v *Validator) checkChildValue(ctx context.Context, sd *registry.StructureD
 	if v.registry.HoldsResource(child.Def) {
 		return
 	}
-	gov := v.registry.ChildrenOf(ctx, sd, child, cv.TypeCode, self)
+	gov := v.registry.ChildrenOf(ctx, sd, child, cv.TypeCode, inst)
 	// Se informa el perfil sin resolver (salvo el que ya informó la cadena base) y la bajada sigue
 	// por la definición del tipo.
-	if un := gov.Unresolved; un.Canonical != "" && un.Canonical != next.Unresolved.Canonical {
-		reportProfileNotFound(result, un, cv.Path(instPath))
+	for _, un := range gov.AllUnresolved {
+		if !slices.ContainsFunc(next.AllUnresolved, func(b registry.TypeProfile) bool { return b.Canonical == un.Canonical }) {
+			reportProfileNotFound(result, un, cv.Path(instPath))
+		}
 	}
-	if gov.SD != nil && gov.SD != next.SD {
-		v.checkChildren(ctx, gov.SD, gov.Nodes, next, m, cv.Path(instPath), childDef, result)
+	for i := range gov.NumLayers() {
+		layer := gov.LayerAt(i)
+		if !definedIn(next, layer.SD) {
+			v.checkChildren(ctx, owner, layer.SD, layer.Nodes, next, m, cv.Path(instPath), childDef, result)
+		}
 	}
+}
+
+// definedIn dice si alguna capa de c es la definición sd.
+func definedIn(c registry.InstanceChildren, sd *registry.StructureDefinition) bool {
+	for i := range c.NumLayers() {
+		if c.LayerAt(i).SD == sd {
+			return true
+		}
+	}
+	return false
 }
 
 // reportProfileNotFound informa un perfil de tipo que no se puede usar, como error del valor.
@@ -224,14 +239,27 @@ func reportProfileNotFound(result *issue.Result, tp registry.TypeProfile, at str
 		map[string]any{"profile": tp.Canonical, "type": tp.TypeCode, "reason": tp.Reason}, at)
 }
 
-// named returns the node of nodes with this name, or nil.
-func named(nodes []*registry.ElementNode, name string) *registry.ElementNode {
-	for _, n := range nodes {
-		if n.Name() == name {
-			return n
+// named returns the element of base, the layers that govern the unsliced element, that child
+// restricts: the first layer's, with its definition, and whether child's minimum and maximum equal
+// those of the same element in some layer (a slice's child is checked only where it constrains
+// more than the layers the cardinality phase checks the value against).
+func named(base registry.InstanceChildren, child *registry.ElementNode) (found *registry.ElementNode, in *registry.StructureDefinition, sameMin, sameMax bool) {
+	name := child.Name()
+	for i := range base.NumLayers() {
+		layer := base.LayerAt(i)
+		for _, n := range layer.Nodes {
+			if n.Name() != name {
+				continue
+			}
+			if found == nil {
+				found, in = n, layer.SD
+			}
+			sameMin = sameMin || n.Def.Min == child.Def.Min
+			sameMax = sameMax || n.Def.Max == child.Def.Max
+			break
 		}
 	}
-	return nil
+	return found, in, sameMin, sameMax
 }
 
 // childValue is one value of an element in an instance.
@@ -260,7 +288,7 @@ func (v *Validator) validateNested(run *validation, resource map[string]any, roo
 			return true
 		}
 		if root := w.SD.Tree().Root(); root != nil {
-			v.walk(run, scope, w.SD, root, "", w.Data, w.FHIRPath, result)
+			v.walk(run, scope, w.SD, root, "", w.Data, w.FHIRPath, nil, result)
 		}
 		return true
 	})

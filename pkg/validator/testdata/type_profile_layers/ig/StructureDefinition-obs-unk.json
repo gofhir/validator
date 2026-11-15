@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-unk",
+ "url": "http://example.org/fhir/StructureDefinition/obs-unk",
+ "name": "obs_unk",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.identifier",
+    "path": "Observation.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/id-ua",
+       "http://example.org/fhir/StructureDefinition/id-ub"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

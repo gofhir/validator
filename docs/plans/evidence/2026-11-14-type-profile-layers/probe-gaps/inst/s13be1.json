@@ -1,0 +1,63 @@
+{
+ "resourceType": "Bundle",
+ "id": "s13be1",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-000000000002",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "e1",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-s13b"
+     ]
+    },
+    "status": "amended",
+    "code": {
+     "text": "x"
+    },
+    "component": [
+     {
+      "code": {
+       "coding": [
+        {
+         "system": "urn:probe:p",
+         "code": "c"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-000000000003",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "e2",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-s13b"
+     ]
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "component": [
+     {
+      "code": {
+       "coding": [
+        {
+         "system": "urn:probe:p",
+         "code": "c"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -106,8 +106,8 @@ func (v *Validator) heldDefinitions(ctx context.Context, defs []*registry.Struct
 	var out []*registry.StructureDefinition
 	h := holderProfiles{v: v}
 	for _, def := range defs {
-		profiles := v.holderGroups(ctx, def, parent, scope)[mapKey(held)]
-		if len(profiles) == 0 {
+		groups := v.holderGroups(ctx, def, parent, scope)[mapKey(held)]
+		if len(groups) == 0 {
 			continue
 		}
 		heldScope := constraint.ScopeOf(scope, held)
@@ -116,9 +116,13 @@ func (v *Validator) heldDefinitions(ctx context.Context, defs []*registry.Struct
 				return nil
 			}
 		}
-		for _, sd := range h.Choose(ctx, profiles, held, heldScope).Chosen {
-			if !slices.Contains(out, sd) {
-				out = append(out, sd)
+		// Each group, the profiles one holder names (one per layer that holds the resource), is required
+		// on its own.
+		for _, profiles := range groups {
+			for _, sd := range h.Choose(ctx, profiles, held, heldScope).Chosen {
+				if !slices.Contains(out, sd) {
+					out = append(out, sd)
+				}
 			}
 		}
 	}
@@ -129,7 +133,7 @@ func (v *Validator) heldDefinitions(ctx context.Context, defs []*registry.Struct
 // names for its type: the holder that governs it, the slice its value (or an ancestor's) matched or
 // the element, as the shared matcher assigns them (the first slice when several match, as HL7
 // assigns it). Worked out once per definition and instance in a validation.
-func (v *Validator) holderGroups(ctx context.Context, def *registry.StructureDefinition, inst map[string]any, scope slicematch.Scope) map[uintptr][]string {
+func (v *Validator) holderGroups(ctx context.Context, def *registry.StructureDefinition, inst map[string]any, scope slicematch.Scope) map[uintptr][][]string {
 	memo := holderGroupsIn(ctx)
 	key := holderGroupsKey{def, mapKey(inst)}
 	if memo != nil {
@@ -140,9 +144,9 @@ func (v *Validator) holderGroups(ctx context.Context, def *registry.StructureDef
 			return groups
 		}
 	}
-	groups := map[uintptr][]string{}
+	groups := map[uintptr][][]string{}
 	if root := def.Tree().Root(); root != nil {
-		v.collectHolders(ctx, def, root, "", inst, scope, groups)
+		v.collectHolders(ctx, inst, def, root, "", inst, scope, nil, groups)
 	}
 	if memo != nil {
 		memo.mu.Lock()
@@ -153,36 +157,54 @@ func (v *Validator) holderGroups(ctx context.Context, def *registry.StructureDef
 	return groups
 }
 
-// collectHolders walks def's tree over inst, an instance of node, to the elements that hold
-// resources, recording each held resource's holder profiles in groups. It does not descend into a
-// held resource: its own holders are read against its own definitions.
-func (v *Validator) collectHolders(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, scope slicematch.Scope, groups map[uintptr][]string) {
-	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, nil)
-	for _, child := range c.Nodes {
-		for _, cv := range elementvalues.Of(child, inst, v.registry) {
-			m, ok := cv.Value.(map[string]any)
-			if !ok || !elementvalues.Written(child, cv, v.registry) {
-				continue
-			}
-			gov := child
-			if child.Def.Slicing != nil && len(child.Slices) > 0 {
-				match := v.matcher.Resolve(ctx, slicematch.Request{
-					SD: c.SD, Node: child, Key: cv.Key, Value: cv.Value, Scope: scope,
-					Resolver: referenceResolver{ctx: ctx}, Containment: constraint.IsContainedIn,
-				})
-				if match.Matched {
-					gov = match.Node
-				}
-			}
-			if v.registry.HoldsResource(child.Def) {
-				if profiles := typeProfiles(v.registry, gov.Def, m); len(profiles) > 0 {
-					groups[mapKey(m)] = profiles
-				}
-				continue
-			}
-			nsd, next := v.registry.MemberTree(ctx, c.SD, gov)
-			v.collectHolders(ctx, nsd, next, cv.TypeCode, m, scope, groups)
+// collectHolders walks def's tree over inst, an instance of node held by the resource owner, to the
+// elements that hold resources, recording each held resource's holder profiles in groups: one group
+// per element that holds it (the layers of a value's type each have their own). It does not descend
+// into a held resource: its own holders are read against its own definitions.
+func (v *Validator) collectHolders(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, scope slicematch.Scope, done registry.Descended, groups map[uintptr][][]string) {
+	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Owner: owner})
+	// A value two layers of its holder declare is walked once, under the union of the layers.
+	c, ok := done.Fresh(inst, c)
+	if !ok {
+		return
+	}
+	below := done.Below(c)
+	for li := range c.NumLayers() {
+		layer := c.LayerAt(li)
+		for _, child := range layer.Nodes {
+			v.collectHoldersIn(ctx, owner, layer.SD, child, inst, scope, below, groups)
 		}
+	}
+}
+
+// collectHoldersIn is collectHolders over the values inst holds for child, an element of sd.
+func (v *Validator) collectHoldersIn(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, child *registry.ElementNode, inst map[string]any, scope slicematch.Scope, below registry.Descended, groups map[uintptr][][]string) {
+	for _, cv := range elementvalues.Of(child, inst, v.registry) {
+		m, ok := cv.Value.(map[string]any)
+		if !ok || !elementvalues.Written(child, cv, v.registry) {
+			continue
+		}
+		gov := child
+		if child.Def.Slicing != nil && len(child.Slices) > 0 {
+			match := v.matcher.Resolve(ctx, slicematch.Request{
+				SD: sd, Node: child, Key: cv.Key, Value: cv.Value, Scope: scope,
+				Resolver: referenceResolver{ctx: ctx}, Containment: constraint.IsContainedIn,
+			})
+			if match.Matched {
+				gov = match.Node
+			}
+		}
+		if v.registry.HoldsResource(child.Def) {
+			if profiles := typeProfiles(v.registry, gov.Def, m); len(profiles) > 0 {
+				k := mapKey(m)
+				if !slices.ContainsFunc(groups[k], func(g []string) bool { return slices.Equal(g, profiles) }) {
+					groups[k] = append(groups[k], profiles)
+				}
+			}
+			continue
+		}
+		nsd, next := v.registry.MemberTree(ctx, sd, gov)
+		v.collectHolders(ctx, owner, nsd, next, cv.TypeCode, m, scope, below, groups)
 	}
 }
 
@@ -213,7 +235,7 @@ type holderGroupsKey struct {
 // address, so that no address is reused while it is a key.
 type holderGroupsMemo struct {
 	mu     sync.Mutex
-	groups map[holderGroupsKey]map[uintptr][]string
+	groups map[holderGroupsKey]map[uintptr][][]string
 	inst   map[uintptr]map[string]any
 }
 
@@ -227,7 +249,7 @@ func withoutHolderGroups(ctx context.Context) context.Context {
 
 func withHolderGroups(ctx context.Context) context.Context {
 	return context.WithValue(ctx, holderGroupsCtxKey{}, &holderGroupsMemo{
-		groups: map[holderGroupsKey]map[uintptr][]string{}, inst: map[uintptr]map[string]any{},
+		groups: map[holderGroupsKey]map[uintptr][][]string{}, inst: map[uintptr]map[string]any{},
 	})
 }
 

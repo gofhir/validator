@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-rec1",
+ "url": "http://example.org/fhir/StructureDefinition/obs-rec1",
+ "name": "obs_rec1",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.identifier",
+    "path": "Observation.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/idr-a",
+       "http://example.org/fhir/StructureDefinition/idr-b"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

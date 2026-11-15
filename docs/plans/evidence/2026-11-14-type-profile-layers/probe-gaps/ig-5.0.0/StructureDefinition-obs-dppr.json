@@ -1,0 +1,55 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-dppr",
+ "url": "http://example.org/fhir/StructureDefinition/obs-dppr",
+ "name": "obs_dppr",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.component",
+    "path": "Observation.component",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "code"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.component:c",
+    "path": "Observation.component",
+    "sliceName": "c"
+   },
+   {
+    "id": "Observation.component:c.code",
+    "path": "Observation.component.code",
+    "type": [
+     {
+      "code": "CodeableConcept",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/dp-wrap"
+      ]
+     }
+    ],
+    "patternCodeableConcept": {
+     "coding": [
+      {
+       "system": "urn:review",
+       "code": "c"
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

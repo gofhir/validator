@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "dp-cd-final",
+ "url": "http://example.org/fhir/StructureDefinition/dp-cd-final",
+ "name": "dp_cd_final",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Coding",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Coding",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Coding",
+    "path": "Coding",
+    "constraint": [
+     {
+      "key": "dp-f",
+      "severity": "error",
+      "human": "resource must be final (dp-cd-final)",
+      "expression": "%resource.status = 'final'"
+     }
+    ]
+   }
+  ]
+ }
+}

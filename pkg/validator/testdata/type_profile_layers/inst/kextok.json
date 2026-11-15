@@ -1,0 +1,27 @@
+{
+ "resourceType": "Observation",
+ "id": "kextok",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-kext"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "system": "http://unitsofmeasure.org",
+  "code": "mg",
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-int",
+    "valueInteger": 3
+   }
+  ]
+ }
+}

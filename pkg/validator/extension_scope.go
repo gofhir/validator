@@ -8,6 +8,8 @@ import (
 
 	"github.com/gofhir/validator/v2/pkg/constraint"
 	"github.com/gofhir/validator/v2/pkg/extension"
+	"github.com/gofhir/validator/v2/pkg/issue"
+	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
 type extensionScopeKey struct{}
@@ -95,4 +97,17 @@ func (v *Validator) extensionData(ctx context.Context, data map[string]any, raw 
 		}
 	}
 	return d
+}
+
+// datatypeContexts checks the contexts of use of the extensions a datatype's value holds, when the value
+// is checked among the profiles its element declares: its place is the element's (vs.at), which the value
+// alone does not tell.
+func (v *Validator) datatypeContexts(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, vs *valueScope, result *issue.Result) {
+	if vs == nil || vs.at == nil || vs.at.owner == nil {
+		return
+	}
+	owner := &valueScope{scope: vs.at.scope}
+	v.extValidator.ValidateDatatypeContexts(ctx, v.extensionData(ctx, vs.at.owner, nil, owner), extension.DatatypeAt{
+		Value: data, Node: vs.at.alt.Node, TypeCode: vs.at.alt.TypeCode,
+	}, sd, result)
 }

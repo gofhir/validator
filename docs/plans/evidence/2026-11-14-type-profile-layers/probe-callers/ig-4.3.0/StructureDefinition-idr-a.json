@@ -1,0 +1,35 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "idr-a",
+ "url": "http://example.org/fhir/StructureDefinition/idr-a",
+ "name": "idr_a",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "min": 1
+   },
+   {
+    "id": "Identifier.assigner.identifier",
+    "path": "Identifier.assigner.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/idr-a",
+       "http://example.org/fhir/StructureDefinition/idr-b"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

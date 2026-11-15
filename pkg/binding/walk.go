@@ -18,29 +18,40 @@ import (
 // contentReference, the profile its type declares, a backbone element's children, the definition
 // an extension's url names, or else Extension's), a primitive's extensions included. A resource an
 // element holds is checked by the resource walk.
-func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, holder *registry.ElementDefinition, fhirPath string, result *issue.Result) {
-	c := v.sdRegistry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
+func (v *Validator) walk(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, holder *registry.ElementDefinition, fhirPath string, done registry.Descended, result *issue.Result) {
+	c := v.sdRegistry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Self: v.definitions, Owner: owner})
+	// A value two layers of its holder declare is walked once, under the union of the layers.
+	c, ok := done.Fresh(inst, c)
+	if !ok {
+		return
+	}
+	below := done.Below(c)
 	matched := slicerecord.In(ctx)
-	for _, child := range c.Nodes {
-		for _, cv := range elementvalues.Of(child, inst, v.sdRegistry) {
-			if !elementvalues.Written(child, cv, v.sdRegistry) {
-				continue // the structural phase reports it, and HL7 checks nothing in it
-			}
-			gov := matched.Of(child, inst, cv.Key, cv.Index)
-			path := elementvalues.ItemPath(child, cv, fhirPath)
-			v.checkValue(ctx, gov.Def, conceptOf(typeCode, holder), cv, path, result)
-			if v.sdRegistry.HoldsResource(child.Def) {
-				continue
-			}
-			m, ok := cv.Value.(map[string]any)
-			if !ok {
-				// A primitive's id and extensions are its "_key" sibling (json.html#primitive).
-				if m = cv.Ext; m == nil {
+	// Each layer the value's type gives it (several profiles) checks its own children: what two of
+	// them report the same is merged by the caller (once).
+	for i := range c.NumLayers() {
+		layer := c.LayerAt(i)
+		for _, child := range layer.Nodes {
+			for _, cv := range elementvalues.Of(child, inst, v.sdRegistry) {
+				if !elementvalues.Written(child, cv, v.sdRegistry) {
+					continue // the structural phase reports it, and HL7 checks nothing in it
+				}
+				gov := matched.Of(child, inst, cv.Key, cv.Index)
+				path := elementvalues.ItemPath(child, cv, fhirPath)
+				v.checkValue(ctx, gov.Def, conceptOf(typeCode, holder), cv, path, result)
+				if v.sdRegistry.HoldsResource(child.Def) {
 					continue
 				}
+				m, ok := cv.Value.(map[string]any)
+				if !ok {
+					// A primitive's id and extensions are its "_key" sibling (json.html#primitive).
+					if m = cv.Ext; m == nil {
+						continue
+					}
+				}
+				nsd, next := v.sdRegistry.MemberTree(ctx, layer.SD, gov)
+				v.walk(ctx, owner, nsd, next, cv.TypeCode, m, gov.Def, path, below, result)
 			}
-			nsd, next := v.sdRegistry.MemberTree(ctx, c.SD, gov)
-			v.walk(ctx, nsd, next, cv.TypeCode, m, gov.Def, path, result)
 		}
 	}
 }
@@ -197,16 +208,6 @@ type DefinitionSource interface {
 // extension is checked against the definitions of the element that holds it only.
 func (v *Validator) SetDefinitions(d DefinitionSource) {
 	v.definitions = d
-}
-
-// selfDefinitions returns, for an instance, the definition it declares for itself for a type.
-func (v *Validator) selfDefinitions(ctx context.Context, inst map[string]any) func(string) *registry.StructureDefinition {
-	if v.definitions == nil {
-		return nil
-	}
-	return func(typeCode string) *registry.StructureDefinition {
-		return v.definitions.DefinitionOf(ctx, typeCode, inst)
-	}
 }
 
 // once collects issues and reports each once: a resource checked against several profiles, which

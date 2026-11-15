@@ -1,0 +1,53 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "dp-cc-amended",
+ "url": "http://example.org/fhir/StructureDefinition/dp-cc-amended",
+ "name": "dp_cc_amended",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "CodeableConcept",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "CodeableConcept",
+    "path": "CodeableConcept",
+    "constraint": [
+     {
+      "key": "dp-cc-a",
+      "severity": "error",
+      "human": "resource must be amended (dp-cc-amended)",
+      "expression": "%resource.status = 'amended'"
+     }
+    ]
+   },
+   {
+    "id": "CodeableConcept.coding",
+    "path": "CodeableConcept.coding",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "code"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "CodeableConcept.coding:c",
+    "path": "CodeableConcept.coding",
+    "sliceName": "c",
+    "min": 1
+   },
+   {
+    "id": "CodeableConcept.coding:c.code",
+    "path": "CodeableConcept.coding.code",
+    "patternCode": "other"
+   }
+  ]
+ }
+}

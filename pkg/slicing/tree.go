@@ -28,8 +28,29 @@ const (
 //
 // The instance's type, typeCode, picks the profile a choice element's type declares; it is ""
 // for any other element.
-func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, result *issue.Result) {
-	childSD, children := v.walkChildren(run.ctx, sd, node, typeCode, inst)
+func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, done registry.Descended, result *issue.Result) {
+	owner := scope.Resource
+	c := v.walkChildren(run.ctx, owner, sd, node, typeCode, inst)
+	// A value two layers of its holder declare is walked once, under the union of the layers.
+	c, ok := done.Fresh(inst, c)
+	if !ok {
+		return
+	}
+	below := done.Below(c)
+	// The value's type may give it several layers (the profiles it declares and the value conforms
+	// to); what two of them report the same is reported once.
+	start := len(result.Issues)
+	for li := range c.NumLayers() {
+		from := len(result.Issues)
+		layer := c.LayerAt(li)
+		v.walkLayer(run, scope, layer, inst, fhirPath, below, result)
+		result.DropRepeated(start, from)
+	}
+}
+
+// walkLayer is walk over one layer: the children a definition gives inst.
+func (v *Validator) walkLayer(run *validation, scope slicematch.Scope, layer registry.Layer, inst map[string]any, fhirPath string, below registry.Descended, result *issue.Result) {
+	childSD, children := layer.SD, layer.Nodes
 	for _, child := range children {
 		values := elementvalues.Of(child, inst, v.registry)
 		governs := make([]*registry.ElementNode, len(values))
@@ -66,30 +87,18 @@ func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.S
 				continue
 			}
 			nextSD, next := v.registry.MemberTree(run.ctx, childSD, governs[i])
-			v.walk(run, scope, nextSD, next, cv.TypeCode, m, cv.Path(fhirPath), result)
+			v.walk(run, scope, nextSD, next, cv.TypeCode, m, cv.Path(fhirPath), below, result)
 		}
 	}
 }
 
-// walkChildren returns the children that govern an instance of node, inst, and the
-// StructureDefinition they belong to (Registry.ChildrenOf, with the definition the instance
-// declares for itself): their slicing applies to the value. A type's base definition has no
-// slicing of its own, but the walk goes through it to the extensions it holds, a primitive's
-// included, each checked against its definition. A profile that does not resolve is reported by
-// the cardinality phase.
-func (v *Validator) walkChildren(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any) (*registry.StructureDefinition, []*registry.ElementNode) {
-	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
-	return c.SD, c.Nodes
-}
-
-// selfDefinitions returns, for an instance, the definition it declares for itself for a type.
-func (v *Validator) selfDefinitions(ctx context.Context, inst map[string]any) func(string) *registry.StructureDefinition {
-	if v.definitions == nil {
-		return nil
-	}
-	return func(typeCode string) *registry.StructureDefinition {
-		return v.definitions.DefinitionOf(ctx, typeCode, inst)
-	}
+// walkChildren returns the layers of children that govern an instance of node, inst, held by the
+// resource owner (Registry.ChildrenOf, with the definition the instance declares for itself):
+// their slicing applies to the value. A type's base definition has no slicing of its own, but the
+// walk goes through it to the extensions it holds, a primitive's included, each checked against its
+// definition. A profile that does not resolve is reported by the cardinality phase.
+func (v *Validator) walkChildren(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any) registry.InstanceChildren {
+	return v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Self: v.definitions, Owner: owner})
 }
 
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
@@ -122,7 +131,7 @@ func (v *Validator) checkSlicing(run *validation, scope slicematch.Scope, sd *re
 		governing[i] = node
 		if slice := v.matchValue(run, scope, sd, node, cv, cv.Path(fhirPath), result); slice != nil {
 			governing[i] = slice
-			v.checkMember(run.ctx, sd, node, slice, cv, cv.Path(fhirPath), result)
+			v.checkMember(run.ctx, scope.Resource, sd, node, slice, cv, cv.Path(fhirPath), result)
 		}
 	}
 	all := make([]int, len(values))
@@ -227,7 +236,7 @@ func checkSliceCount(s *registry.ElementNode, count int, elementPath string, res
 // them further than the definitions the cardinality phase checks the value against: the children
 // that govern a value of the unsliced element (Registry.ChildrenOf), which the cardinality phase
 // takes from the same place.
-func (v *Validator) checkMember(ctx context.Context, sd *registry.StructureDefinition, node, slice *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) {
+func (v *Validator) checkMember(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node, slice *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) {
 	m, ok := cv.Value.(map[string]any)
 	if !ok {
 		return
@@ -237,16 +246,23 @@ func (v *Validator) checkMember(ctx context.Context, sd *registry.StructureDefin
 		// slice constrains inline is checked here.
 		return
 	}
-	// Las declaraciones del slice y de su cadena se juntan antes de que MemberTree reemplace el
+	// Las declaraciones del slice y de su cadena se juntan antes de que MemberLayers reemplace el
 	// slice por el perfil de su tipo. Lo que declara el elemento sin slice lo informa la cardinalidad.
 	for _, d := range v.registry.TypeProfilesOf(ctx, slice, cv.TypeCode).Unresolved {
 		if d.Node != node {
 			reportProfileNotFound(result, d.TypeProfile, itemPath)
 		}
 	}
-	base := v.registry.ChildrenOf(ctx, sd, node, cv.TypeCode, v.selfDefinitions(ctx, m))
-	msd, member := v.registry.MemberTree(ctx, sd, slice)
-	v.checkChildren(ctx, msd, member.Children, base, m, itemPath, node.Def.ID+":"+sliceNameOf(slice), result)
+	inst := registry.Instance{Value: m, Self: v.definitions, Owner: owner}
+	base := v.registry.ChildrenOf(ctx, sd, node, cv.TypeCode, inst)
+	members := v.registry.MemberLayers(ctx, sd, slice, inst)
+	start := len(result.Issues)
+	for i := range members.NumLayers() {
+		from := len(result.Issues)
+		member := members.LayerAt(i)
+		v.checkChildren(ctx, owner, member.SD, member.Nodes, base, m, itemPath, node.Def.ID+":"+sliceNameOf(slice), result)
+		result.DropRepeated(start, from)
+	}
 }
 
 // matchValue returns the slice that governs one value, or nil, reporting what the matcher found on

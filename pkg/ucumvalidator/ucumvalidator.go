@@ -68,7 +68,7 @@ func (v *Validator) ValidateDataContext(ctx context.Context, data map[string]any
 // definition), from the root of sd.
 func (v *Validator) walkResource(ctx context.Context, data map[string]any, sd *registry.StructureDefinition, fhirPath string, result *issue.Result) {
 	if root := sd.Tree().Root(); root != nil {
-		v.walkNode(ctx, data, sd, root, "", fhirPath, result)
+		v.walkNode(ctx, registry.ResourceOwner(data), data, sd, root, "", fhirPath, nil, result)
 	}
 }
 
@@ -76,25 +76,38 @@ func (v *Validator) walkResource(ctx context.Context, data map[string]any, sd *r
 // into the others, following the definitions: a backbone's children inline, a contentReference's
 // target, a datatype's own definition (registry.ChildrenOf). A resource an element holds is the
 // walker's.
-func (v *Validator) walkNode(ctx context.Context, inst map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, result *issue.Result) {
-	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, nil)
-	for _, child := range children.Nodes {
-		if v.registry.HoldsResource(child.Def) {
-			continue
-		}
-		quantity := v.isQuantityType(child.Def)
-		for _, cv := range elementvalues.Of(child, inst, v.registry) {
-			m, ok := cv.Value.(map[string]any)
-			if !ok {
+func (v *Validator) walkNode(ctx context.Context, owner, inst map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, done registry.Descended, result *issue.Result) {
+	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Owner: owner})
+	// A value two layers of its holder declare is walked once, under the union of the layers.
+	children, ok := done.Fresh(inst, children)
+	if !ok {
+		return
+	}
+	below := done.Below(children)
+	// What two layers (the several profiles the value's type declares) report the same is reported once.
+	start := len(result.Issues)
+	for i := range children.NumLayers() {
+		from := len(result.Issues)
+		layer := children.LayerAt(i)
+		for _, child := range layer.Nodes {
+			if v.registry.HoldsResource(child.Def) {
 				continue
 			}
-			path := cv.Path(fhirPath)
-			if (cv.TypeCode != "" && v.derivesFromQuantity(cv.TypeCode)) || (cv.TypeCode == "" && quantity) {
-				v.validateQuantity(m, path, result)
-				continue
+			quantity := v.isQuantityType(child.Def)
+			for _, cv := range elementvalues.Of(child, inst, v.registry) {
+				m, ok := cv.Value.(map[string]any)
+				if !ok {
+					continue
+				}
+				path := cv.Path(fhirPath)
+				if (cv.TypeCode != "" && v.derivesFromQuantity(cv.TypeCode)) || (cv.TypeCode == "" && quantity) {
+					v.validateQuantity(m, path, result)
+					continue
+				}
+				v.walkNode(ctx, owner, m, layer.SD, child, cv.TypeCode, path, below, result)
 			}
-			v.walkNode(ctx, m, children.SD, child, cv.TypeCode, path, result)
 		}
+		result.DropRepeated(start, from)
 	}
 }
 

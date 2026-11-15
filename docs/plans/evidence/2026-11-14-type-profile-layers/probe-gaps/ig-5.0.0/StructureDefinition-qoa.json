@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qoa",
+ "url": "http://example.org/fhir/StructureDefinition/qoa",
+ "name": "qoa",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity",
+    "path": "Quantity",
+    "constraint": [
+     {
+      "key": "ro-a",
+      "severity": "error",
+      "human": "resource must be final (qoa)",
+      "expression": "%resource.status = 'final'"
+     }
+    ]
+   }
+  ]
+ }
+}

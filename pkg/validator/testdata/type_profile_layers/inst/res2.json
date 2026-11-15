@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "res2",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-res"
+  ]
+ },
+ "status": "amended",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "code": "mg",
+  "system": "http://unitsofmeasure.org"
+ }
+}

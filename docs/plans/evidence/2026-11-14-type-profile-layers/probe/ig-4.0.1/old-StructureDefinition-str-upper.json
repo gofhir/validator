@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "str-upper",
+ "url": "http://example.org/fhir/StructureDefinition/str-upper",
+ "version": "1.0.0",
+ "name": "strupper",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "upper-1",
+      "severity": "error",
+      "human": "upper case",
+      "expression": "matches('^[A-Z]+$')"
+     }
+    ]
+   }
+  ]
+ }
+}

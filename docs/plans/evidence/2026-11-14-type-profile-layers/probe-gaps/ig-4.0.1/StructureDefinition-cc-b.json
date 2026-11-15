@@ -1,0 +1,42 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "cc-b",
+ "url": "http://example.org/fhir/StructureDefinition/cc-b",
+ "name": "cc_b",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "CodeableConcept",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "CodeableConcept.coding",
+    "path": "CodeableConcept.coding",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "CodeableConcept.coding:x",
+    "path": "CodeableConcept.coding",
+    "sliceName": "x",
+    "min": 1
+   },
+   {
+    "id": "CodeableConcept.coding:x.system",
+    "path": "CodeableConcept.coding.system",
+    "min": 1,
+    "fixedUri": "urn:probe:x"
+   }
+  ]
+ }
+}

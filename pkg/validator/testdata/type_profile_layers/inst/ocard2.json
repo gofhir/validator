@@ -1,0 +1,44 @@
+{
+ "resourceType": "Observation",
+ "id": "ocard2",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-ocard"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "unit": "mg"
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "status": "amended",
+   "code": {
+    "text": "x"
+   },
+   "valueQuantity": {
+    "value": 5,
+    "unit": "mg"
+   },
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/obs-ocard"
+    ]
+   }
+  }
+ ],
+ "hasMember": [
+  {
+   "reference": "#c1"
+  }
+ ]
+}

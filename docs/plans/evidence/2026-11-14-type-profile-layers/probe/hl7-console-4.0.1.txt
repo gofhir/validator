@@ -1,0 +1,387 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (12 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-11-14-type-profile-layers/probe, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/a1n.json inst/a1p.json inst/a1q.json inst/a1rn.json inst/a1rp.json inst/a1rq.json inst/c1a.json inst/c1b.json inst/c1c.json inst/c1da.json inst/c1db.json inst/c1dc.json inst/c1dn.json inst/c1n.json inst/ct1c.json inst/ct1n.json inst/ct1u.json inst/ct2c.json inst/ct2n.json inst/ct2u.json inst/d4a.json inst/d4b.json inst/d4c.json inst/dup.json inst/e2hnrempty.json inst/e2hnrexists.json inst/e2hnrid1.json inst/e2hnrid2.json inst/e2hnrrid0.json inst/e2hnrrid1.json inst/e2hnrro1.json inst/e2hnrrval.json inst/e2hnrval.json inst/e2hrempty.json inst/e2hrexists.json inst/e2hrid1.json inst/e2hrid2.json inst/e2hrrid0.json inst/e2hrrid1.json inst/e2hrro1.json inst/e2hrrval.json inst/e2hrval.json inst/e2sremptyb.json inst/e2sremptyn.json inst/e2sremptyx.json inst/e2srexistsb.json inst/e2srexistsn.json inst/e2srexistsx.json inst/e2srid1b.json inst/e2srid1n.json inst/e2srid1x.json inst/e2srid2b.json inst/e2srid2n.json inst/e2srid2x.json inst/e2srrid0b.json inst/e2srrid0n.json inst/e2srrid0x.json inst/e2srrid1b.json inst/e2srrid1n.json inst/e2srrid1x.json inst/e2srro1b.json inst/e2srro1n.json inst/e2srro1x.json inst/e2srrvalb.json inst/e2srrvaln.json inst/e2srrvalx.json inst/e2srvalb.json inst/e2srvaln.json inst/e2srvalx.json inst/e2tremptyb.json inst/e2tremptyn.json inst/e2tremptyx.json inst/e2trexistsb.json inst/e2trexistsn.json inst/e2trexistsx.json inst/e2trid1b.json inst/e2trid1n.json inst/e2trid1x.json inst/e2trid2b.json inst/e2trid2n.json inst/e2trid2x.json inst/e2trrid0b.json inst/e2trrid0n.json inst/e2trrid0x.json inst/e2trrid1b.json inst/e2trrid1n.json inst/e2trrid1x.json inst/e2trro1b.json inst/e2trro1n.json inst/e2trro1x.json inst/e2trrvalb.json inst/e2trrvaln.json inst/e2trrvalx.json inst/e2trvalb.json inst/e2trvaln.json inst/e2trvalx.json inst/ele1.json inst/ele2.json inst/ig1c.json inst/ig1n.json inst/ig1u.json inst/ig2c.json inst/ig2n.json inst/ig2u.json inst/ig3c.json inst/ig3n.json inst/ig3u.json inst/leafa.json inst/leafb.json inst/leafc.json inst/p1.json inst/p10.json inst/p11.json inst/p12.json inst/p13.json inst/p14.json inst/p15.json inst/p16.json inst/p17.json inst/p18.json inst/p19.json inst/p2.json inst/p20.json inst/p21.json inst/p3.json inst/p4.json inst/p5.json inst/p6.json inst/p7.json inst/p8.json inst/p9.json inst/pd1a.json inst/pd1ab.json inst/pd1b.json inst/pd1n.json inst/pd2a.json inst/pd2ab.json inst/pd2b.json inst/pd2n.json inst/rec1a.json inst/rec1b.json inst/rec1c.json inst/rec1d.json inst/rec2a.json inst/rec2b.json inst/rec2c.json inst/rec2d.json inst/ref0n.json inst/ref0x.json inst/ref1n.json inst/ref1x.json inst/ref1y.json inst/ref2n.json inst/ref2x.json inst/ref2y.json inst/refb1n.json inst/refb1x.json inst/refb1y.json inst/refb2n.json inst/refb2x.json inst/refb2y.json inst/res1.json inst/res2.json inst/res3.json inst/res4.json inst/res5.json inst/resla.json inst/reslb.json inst/reslc.json inst/sev1.json inst/sev2.json inst/two.json inst/twom.json inst/twom1.json inst/txt1.json inst/txt2.json -version 4.0.1 -ig ig-4.0.1 -tx n/a -output hl7-4.0.1-7.0.4.json
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:03.977)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.486)
+  Loaded FHIR - 8265 resources (00:00.001)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.007)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.305)
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.412)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.421)
+  Load ig-4.0.1 - 102 resources (00:00.028)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/igx but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/nope-1 but trying to go on
+Can't find Quantity profile #cq but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/nope-1 but trying to go on
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/nope but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/missing-quantity but trying to go on
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/igx but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/missing-quantity but trying to go on
+Can't find Quantity profile #cq but trying to go on
+  ...go! (00:00.790)
+Cached new session. Cache size = 1
+Sources to validate: inst/a1n.jsoninst/a1p.jsoninst/a1q.jsoninst/a1rn.jsoninst/a1rp.jsoninst/a1rq.jsoninst/c1a.jsoninst/c1b.jsoninst/c1c.jsoninst/c1da.jsoninst/c1db.jsoninst/c1dc.jsoninst/c1dn.jsoninst/c1n.jsoninst/ct1c.jsoninst/ct1n.jsoninst/ct1u.jsoninst/ct2c.jsoninst/ct2n.jsoninst/ct2u.jsoninst/d4a.jsoninst/d4b.jsoninst/d4c.jsoninst/dup.jsoninst/e2hnrempty.jsoninst/e2hnrexists.jsoninst/e2hnrid1.jsoninst/e2hnrid2.jsoninst/e2hnrrid0.jsoninst/e2hnrrid1.jsoninst/e2hnrro1.jsoninst/e2hnrrval.jsoninst/e2hnrval.jsoninst/e2hrempty.jsoninst/e2hrexists.jsoninst/e2hrid1.jsoninst/e2hrid2.jsoninst/e2hrrid0.jsoninst/e2hrrid1.jsoninst/e2hrro1.jsoninst/e2hrrval.jsoninst/e2hrval.jsoninst/e2sremptyb.jsoninst/e2sremptyn.jsoninst/e2sremptyx.jsoninst/e2srexistsb.jsoninst/e2srexistsn.jsoninst/e2srexistsx.jsoninst/e2srid1b.jsoninst/e2srid1n.jsoninst/e2srid1x.jsoninst/e2srid2b.jsoninst/e2srid2n.jsoninst/e2srid2x.jsoninst/e2srrid0b.jsoninst/e2srrid0n.jsoninst/e2srrid0x.jsoninst/e2srrid1b.jsoninst/e2srrid1n.jsoninst/e2srrid1x.jsoninst/e2srro1b.jsoninst/e2srro1n.jsoninst/e2srro1x.jsoninst/e2srrvalb.jsoninst/e2srrvaln.jsoninst/e2srrvalx.jsoninst/e2srvalb.jsoninst/e2srvaln.jsoninst/e2srvalx.jsoninst/e2tremptyb.jsoninst/e2tremptyn.jsoninst/e2tremptyx.jsoninst/e2trexistsb.jsoninst/e2trexistsn.jsoninst/e2trexistsx.jsoninst/e2trid1b.jsoninst/e2trid1n.jsoninst/e2trid1x.jsoninst/e2trid2b.jsoninst/e2trid2n.jsoninst/e2trid2x.jsoninst/e2trrid0b.jsoninst/e2trrid0n.jsoninst/e2trrid0x.jsoninst/e2trrid1b.jsoninst/e2trrid1n.jsoninst/e2trrid1x.jsoninst/e2trro1b.jsoninst/e2trro1n.jsoninst/e2trro1x.jsoninst/e2trrvalb.jsoninst/e2trrvaln.jsoninst/e2trrvalx.jsoninst/e2trvalb.jsoninst/e2trvaln.jsoninst/e2trvalx.jsoninst/ele1.jsoninst/ele2.jsoninst/ig1c.jsoninst/ig1n.jsoninst/ig1u.jsoninst/ig2c.jsoninst/ig2n.jsoninst/ig2u.jsoninst/ig3c.jsoninst/ig3n.jsoninst/ig3u.jsoninst/leafa.jsoninst/leafb.jsoninst/leafc.jsoninst/p1.jsoninst/p10.jsoninst/p11.jsoninst/p12.jsoninst/p13.jsoninst/p14.jsoninst/p15.jsoninst/p16.jsoninst/p17.jsoninst/p18.jsoninst/p19.jsoninst/p2.jsoninst/p20.jsoninst/p21.jsoninst/p3.jsoninst/p4.jsoninst/p5.jsoninst/p6.jsoninst/p7.jsoninst/p8.jsoninst/p9.jsoninst/pd1a.jsoninst/pd1ab.jsoninst/pd1b.jsoninst/pd1n.jsoninst/pd2a.jsoninst/pd2ab.jsoninst/pd2b.jsoninst/pd2n.jsoninst/rec1a.jsoninst/rec1b.jsoninst/rec1c.jsoninst/rec1d.jsoninst/rec2a.jsoninst/rec2b.jsoninst/rec2c.jsoninst/rec2d.jsoninst/ref0n.jsoninst/ref0x.jsoninst/ref1n.jsoninst/ref1x.jsoninst/ref1y.jsoninst/ref2n.jsoninst/ref2x.jsoninst/ref2y.jsoninst/refb1n.jsoninst/refb1x.jsoninst/refb1y.jsoninst/refb2n.jsoninst/refb2x.jsoninst/refb2y.jsoninst/res1.jsoninst/res2.jsoninst/res3.jsoninst/res4.jsoninst/res5.jsoninst/resla.jsoninst/reslb.jsoninst/reslc.jsoninst/sev1.jsoninst/sev2.jsoninst/two.jsoninst/twom.jsoninst/twom1.jsoninst/txt1.jsoninst/txt2.json
+Validating
+  Validate inst/a1n.json
+ 00:00.156
+  Validate inst/a1p.json
+ 00:00.022
+  Validate inst/a1q.json
+ 00:00.031
+  Validate inst/a1rn.json
+ 00:00.020
+  Validate inst/a1rp.json
+ 00:00.026
+  Validate inst/a1rq.json
+ 00:00.014
+  Validate inst/c1a.json
+ 00:00.015
+  Validate inst/c1b.json
+ 00:00.014
+  Validate inst/c1c.json
+ 00:00.015
+  Validate inst/c1da.json
+ 00:00.013
+  Validate inst/c1db.json
+ 00:00.016
+  Validate inst/c1dc.json
+ 00:00.014
+  Validate inst/c1dn.json
+ 00:00.012
+  Validate inst/c1n.json
+ 00:00.013
+  Validate inst/ct1c.json
+ 00:00.022
+  Validate inst/ct1n.json
+ 00:00.013
+  Validate inst/ct1u.json
+ 00:00.011
+  Validate inst/ct2c.json
+ 00:00.012
+  Validate inst/ct2n.json
+ 00:00.013
+  Validate inst/ct2u.json
+ 00:00.013
+  Validate inst/d4a.json
+ 00:00.014
+  Validate inst/d4b.json
+ 00:00.012
+  Validate inst/d4c.json
+ 00:00.015
+  Validate inst/dup.json
+ 00:00.012
+  Validate inst/e2hnrempty.json
+ 00:00.023
+  Validate inst/e2hnrexists.json
+ 00:00.014
+  Validate inst/e2hnrid1.json
+ 00:00.015
+  Validate inst/e2hnrid2.json
+ 00:00.014
+  Validate inst/e2hnrrid0.json
+ 00:00.014
+  Validate inst/e2hnrrid1.json
+ 00:00.017
+  Validate inst/e2hnrro1.json
+ 00:00.012
+  Validate inst/e2hnrrval.json
+ 00:00.016
+  Validate inst/e2hnrval.json
+ 00:00.015
+  Validate inst/e2hrempty.json
+ 00:00.013
+  Validate inst/e2hrexists.json
+ 00:00.013
+  Validate inst/e2hrid1.json
+ 00:00.014
+  Validate inst/e2hrid2.json
+ 00:00.014
+  Validate inst/e2hrrid0.json
+ 00:00.013
+  Validate inst/e2hrrid1.json
+ 00:00.012
+  Validate inst/e2hrro1.json
+ 00:00.017
+  Validate inst/e2hrrval.json
+ 00:00.013
+  Validate inst/e2hrval.json
+ 00:00.014
+  Validate inst/e2sremptyb.json
+ 00:00.011
+  Validate inst/e2sremptyn.json
+ 00:00.015
+  Validate inst/e2sremptyx.json
+ 00:00.011
+  Validate inst/e2srexistsb.json
+ 00:00.014
+  Validate inst/e2srexistsn.json
+ 00:00.012
+  Validate inst/e2srexistsx.json
+ 00:00.012
+  Validate inst/e2srid1b.json
+ 00:00.012
+  Validate inst/e2srid1n.json
+ 00:00.015
+  Validate inst/e2srid1x.json
+ 00:00.013
+  Validate inst/e2srid2b.json
+ 00:00.012
+  Validate inst/e2srid2n.json
+ 00:00.011
+  Validate inst/e2srid2x.json
+ 00:00.012
+  Validate inst/e2srrid0b.json
+ 00:00.012
+  Validate inst/e2srrid0n.json
+ 00:00.013
+  Validate inst/e2srrid0x.json
+ 00:00.012
+  Validate inst/e2srrid1b.json
+ 00:00.011
+  Validate inst/e2srrid1n.json
+ 00:00.012
+  Validate inst/e2srrid1x.json
+ 00:00.010
+  Validate inst/e2srro1b.json
+ 00:00.010
+  Validate inst/e2srro1n.json
+ 00:00.010
+  Validate inst/e2srro1x.json
+ 00:00.016
+  Validate inst/e2srrvalb.json
+ 00:00.011
+  Validate inst/e2srrvaln.json
+ 00:00.010
+  Validate inst/e2srrvalx.json
+ 00:00.009
+  Validate inst/e2srvalb.json
+ 00:00.010
+  Validate inst/e2srvaln.json
+ 00:00.012
+  Validate inst/e2srvalx.json
+ 00:00.010
+  Validate inst/e2tremptyb.json
+ 00:00.010
+  Validate inst/e2tremptyn.json
+ 00:00.010
+  Validate inst/e2tremptyx.json
+ 00:00.009
+  Validate inst/e2trexistsb.json
+ 00:00.010
+  Validate inst/e2trexistsn.json
+ 00:00.010
+  Validate inst/e2trexistsx.json
+ 00:00.010
+  Validate inst/e2trid1b.json
+ 00:00.010
+  Validate inst/e2trid1n.json
+ 00:00.010
+  Validate inst/e2trid1x.json
+ 00:00.009
+  Validate inst/e2trid2b.json
+ 00:00.010
+  Validate inst/e2trid2n.json
+ 00:00.010
+  Validate inst/e2trid2x.json
+ 00:00.009
+  Validate inst/e2trrid0b.json
+ 00:00.009
+  Validate inst/e2trrid0n.json
+ 00:00.010
+  Validate inst/e2trrid0x.json
+ 00:00.010
+  Validate inst/e2trrid1b.json
+ 00:00.009
+  Validate inst/e2trrid1n.json
+ 00:00.011
+  Validate inst/e2trrid1x.json
+ 00:00.010
+  Validate inst/e2trro1b.json
+ 00:00.009
+  Validate inst/e2trro1n.json
+ 00:00.012
+  Validate inst/e2trro1x.json
+ 00:00.009
+  Validate inst/e2trrvalb.json
+ 00:00.010
+  Validate inst/e2trrvaln.json
+ 00:00.017
+  Validate inst/e2trrvalx.json
+ 00:00.022
+  Validate inst/e2trvalb.json
+ 00:00.016
+  Validate inst/e2trvaln.json
+ 00:00.014
+  Validate inst/e2trvalx.json
+ 00:00.026
+  Validate inst/ele1.json
+ 00:00.012
+  Validate inst/ele2.json
+ 00:00.013
+  Validate inst/ig1c.json
+ 00:00.010
+  Validate inst/ig1n.json
+ 00:00.010
+  Validate inst/ig1u.json
+ 00:00.009
+  Validate inst/ig2c.json
+ 00:00.009
+  Validate inst/ig2n.json
+ 00:00.010
+  Validate inst/ig2u.json
+ 00:00.010
+  Validate inst/ig3c.json
+ 00:00.010
+  Validate inst/ig3n.json
+ 00:00.009
+  Validate inst/ig3u.json
+ 00:00.010
+  Validate inst/leafa.json
+ 00:00.010
+  Validate inst/leafb.json
+ 00:00.009
+  Validate inst/leafc.json
+ 00:00.009
+  Validate inst/p1.json
+ 00:00.009
+  Validate inst/p10.json
+ 00:00.011
+  Validate inst/p11.json
+ 00:00.012
+  Validate inst/p12.json
+ 00:00.011
+  Validate inst/p13.json
+ 00:00.022
+  Validate inst/p14.json
+ 00:00.010
+  Validate inst/p15.json
+ 00:00.009
+  Validate inst/p16.json
+ 00:00.009
+  Validate inst/p17.json
+ 00:00.009
+  Validate inst/p18.json
+ 00:00.016
+  Validate inst/p19.json
+ 00:00.014
+  Validate inst/p2.json
+ 00:00.011
+  Validate inst/p20.json
+ 00:00.010
+  Validate inst/p21.json
+ 00:00.009
+  Validate inst/p3.json
+ 00:00.010
+  Validate inst/p4.json
+ 00:00.009
+  Validate inst/p5.json
+ 00:00.010
+  Validate inst/p6.json
+ 00:00.013
+  Validate inst/p7.json
+ 00:00.014
+  Validate inst/p8.json
+ 00:00.018
+  Validate inst/p9.json
+ 00:00.013
+  Validate inst/pd1a.json
+ 00:00.024
+  Validate inst/pd1ab.json
+ 00:00.014
+  Validate inst/pd1b.json
+ 00:00.010
+  Validate inst/pd1n.json
+ 00:00.009
+  Validate inst/pd2a.json
+ 00:00.022
+  Validate inst/pd2ab.json
+ 00:00.012
+  Validate inst/pd2b.json
+ 00:00.012
+  Validate inst/pd2n.json
+ 00:00.010
+  Validate inst/rec1a.json
+ 00:00.009
+  Validate inst/rec1b.json
+ 00:00.026
+  Validate inst/rec1c.json
+ 00:00.018
+  Validate inst/rec1d.json
+ 00:00.014
+  Validate inst/rec2a.json
+ 00:00.010
+  Validate inst/rec2b.json
+ 00:00.010
+  Validate inst/rec2c.json
+ 00:00.012
+  Validate inst/rec2d.json
+ 00:00.010
+  Validate inst/ref0n.json
+ 00:00.010
+  Validate inst/ref0x.json
+ 00:00.010
+  Validate inst/ref1n.json
+ 00:00.014
+  Validate inst/ref1x.json
+ 00:00.010
+  Validate inst/ref1y.json
+ 00:00.010
+  Validate inst/ref2n.json
+ 00:00.010
+  Validate inst/ref2x.json
+ 00:00.010
+  Validate inst/ref2y.json
+ 00:00.010
+  Validate inst/refb1n.json
+ 00:00.010
+  Validate inst/refb1x.json
+ 00:00.009
+  Validate inst/refb1y.json
+ 00:00.010
+  Validate inst/refb2n.json
+ 00:00.010
+  Validate inst/refb2x.json
+ 00:00.011
+  Validate inst/refb2y.json
+ 00:00.011
+  Validate inst/res1.json
+ 00:00.011
+  Validate inst/res2.json
+ 00:00.011
+  Validate inst/res3.json
+ 00:00.012
+  Validate inst/res4.json
+ 00:00.019
+  Validate inst/res5.json
+ 00:00.017
+  Validate inst/resla.json
+ 00:00.014
+  Validate inst/reslb.json
+ 00:00.016
+  Validate inst/reslc.json
+ 00:00.024
+  Validate inst/sev1.json
+ 00:00.018
+  Validate inst/sev2.json
+ 00:00.059
+  Validate inst/two.json
+ 00:00.017
+  Validate inst/twom.json
+ 00:00.018
+  Validate inst/twom1.json
+ 00:00.016
+  Validate inst/txt1.json
+ 00:00.015
+  Validate inst/txt2.json
+ 00:00.053
+Done. Times: Loading: 00:07.469, validation: 00:02.619 (#176). Memory = 516Mb
+
+Done. Times: Loading: 00:07.469, validation: 00:02.619 (#176). Max Memory = 6Gb
