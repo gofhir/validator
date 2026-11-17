@@ -256,10 +256,14 @@ func sameMap(a, b map[string]any) bool {
 // walkTargets checks the extensions t holds, held in inst (t's object, or a primitive's "_key"
 // sibling), and walks into its children.
 func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]any, done registry.Descended, result *issue.Result) {
-	children := v.registry.ChildrenOf(ctx, t.sd, t.node, t.typeCode, registry.Instance{
-		Value: inst, Owner: t.owner,
-		Self: v,
-	})
+	instance := registry.Instance{Value: inst, Owner: t.owner, Self: v}
+	if _, isObject := t.value.(map[string]any); !isObject && t.key != "" {
+		// Un primitivo: inst es su "_key", y lo que se elige entre sus perfiles es el primitivo.
+		instance = registry.Instance{Owner: t.owner, Primitive: registry.PrimitiveValue{
+			Value: t.value, Ext: t.element, Parent: t.holder, Key: t.key, Index: t.index, TypeCode: t.typeCode,
+		}}
+	}
+	children := v.registry.ChildrenOf(ctx, t.sd, t.node, t.typeCode, instance)
 	// A value two layers of its holder declare is walked once, under the union of the layers.
 	children, ok := done.Fresh(inst, children)
 	if !ok {

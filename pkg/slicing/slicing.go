@@ -133,7 +133,7 @@ func (v *Validator) ValidateDataContext(goCtx context.Context, resource map[stri
 	}
 
 	if root := sd.Tree().Root(); root != nil {
-		v.walk(run, run.scope, sd, root, "", resource, resourceType, nil, result)
+		v.walk(run, run.scope, sd, root, "", registry.PrimitiveValue{}, resource, resourceType, nil, result)
 	}
 
 	// The resources it holds, against their own definitions.
@@ -183,7 +183,16 @@ func (v *Validator) checkChildren(ctx context.Context, owner map[string]any, sd 
 
 		for _, cv := range values {
 			if m, ok := cv.Value.(map[string]any); ok {
-				v.checkChildValue(ctx, owner, sd, child, baseChild, baseSD, cv, m, instPath, childDef, result)
+				v.checkChildValue(ctx, owner, sd, child, baseChild, baseSD, cv, registry.PrimitiveValue{}, m, instPath, childDef, result)
+				continue
+			}
+			// Un primitivo con un perfil de tipo: sus hijos (id y extension) están en su "_key", que puede no existir.
+			if v.registry.DeclaresTypeProfile(child, cv.TypeCode) {
+				m := cv.Ext
+				if m == nil {
+					m = map[string]any{}
+				}
+				v.checkChildValue(ctx, owner, sd, child, baseChild, baseSD, cv, cv.Primitive(inst), m, instPath, childDef, result)
 			}
 		}
 	}
@@ -192,8 +201,11 @@ func (v *Validator) checkChildren(ctx context.Context, owner map[string]any, sd 
 // checkChildValue comprueba un valor, m, de child: contra los hijos que el snapshot despliega
 // debajo, o si no contra la definición que lo gobierna (véase checkChildren). Con baseChild, el
 // mismo hijo en la base, de la definición baseSD, se compara el valor.
-func (v *Validator) checkChildValue(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, child, baseChild *registry.ElementNode, baseSD *registry.StructureDefinition, cv childValue, m map[string]any, instPath, childDef string, result *issue.Result) {
+func (v *Validator) checkChildValue(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, child, baseChild *registry.ElementNode, baseSD *registry.StructureDefinition, cv childValue, prim registry.PrimitiveValue, m map[string]any, instPath, childDef string, result *issue.Result) {
 	inst := registry.Instance{Value: m, Self: v.definitions, Owner: owner}
+	if prim.Valid() {
+		inst = registry.Instance{Primitive: prim, Owner: owner}
+	}
 	var next registry.InstanceChildren
 	if baseChild != nil {
 		next = v.registry.ChildrenOf(ctx, baseSD, baseChild, cv.TypeCode, inst)
@@ -288,7 +300,7 @@ func (v *Validator) validateNested(run *validation, resource map[string]any, roo
 			return true
 		}
 		if root := w.SD.Tree().Root(); root != nil {
-			v.walk(run, scope, w.SD, root, "", w.Data, w.FHIRPath, nil, result)
+			v.walk(run, scope, w.SD, root, "", registry.PrimitiveValue{}, w.Data, w.FHIRPath, nil, result)
 		}
 		return true
 	})

@@ -1,0 +1,40 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-ref-t",
+ "url": "http://example.org/fhir/StructureDefinition/ext-ref-t",
+ "name": "ext_ref_t",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://example.org/fhir/StructureDefinition/ext-ref",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-ref"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://hl7.org/fhir/StructureDefinition/Patient"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  }
+ ]
+}

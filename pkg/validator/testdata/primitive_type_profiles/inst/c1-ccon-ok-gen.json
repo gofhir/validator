@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-ccon-ok-gen",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/ge-code-pc-ext"
+  ]
+ },
+ "gender": "male"
+}

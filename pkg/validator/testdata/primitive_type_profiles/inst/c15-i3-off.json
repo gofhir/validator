@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "id": "c15-i3-off",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/s15-i3"
+  ]
+ },
+ "name": [
+  {
+   "use": "official",
+   "given": [
+    "ab"
+   ],
+   "family": "x"
+  }
+ ]
+}

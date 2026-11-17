@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-rcx",
+ "url": "http://example.org/fhir/StructureDefinition/ps-rcx",
+ "name": "ps_rcx",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "rcx-1",
+      "severity": "error",
+      "human": "context has an extension (ps-rcx)",
+      "expression": "%context.extension.exists()"
+     }
+    ]
+   }
+  ]
+ }
+}

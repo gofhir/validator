@@ -135,9 +135,10 @@ type end struct {
 	branch   string // which alternative, when a type declares several profiles
 	def      *registry.ElementNode
 	allowed  []registry.Type
-	value    any    // nil when the instance has no value at the path
-	present  bool   // the instance has the element with no value: a primitive with extensions only
-	typeCode string // the instance value's type
+	value    any                     // nil when the instance has no value at the path
+	present  bool                    // the instance has the element with no value: a primitive with extensions only
+	typeCode string                  // the instance value's type
+	prim     registry.PrimitiveValue // the value as a primitive in its place, when it is one
 	profiles []string
 	frames   []frame
 	in       *Scope // the scope of the resource resolve() reached the value in; nil: the request's
@@ -160,6 +161,7 @@ type state struct {
 	value    any  // nil: no instance value, walking the definition only
 	present  bool // with value nil: a primitive with only an id or extensions (json.html#primitive)
 	typeCode string
+	prim     registry.PrimitiveValue // the value as a primitive in its place, when it is one
 	frames   []frame
 	resolved bool     // the last step was resolve()
 	targets  []string // targetProfile of the reference just resolved
@@ -168,14 +170,14 @@ type state struct {
 
 // walk follows steps from start, for each of the start values; valueless reports a start value
 // that is a primitive with only an id or extensions, there with no value.
-func (w walker) walk(start cursor, values []any, valueless bool, steps []step) ([]end, error) {
+func (w walker) walk(start cursor, values []any, valueless bool, prim registry.PrimitiveValue, steps []step) ([]end, error) {
 	var states []state
 	for _, v := range values {
 		tc := start.typeCode
 		if tc == "" {
 			tc = w.typeOf(start.allowed(), v)
 		}
-		states = append(states, state{cur: start, value: v, present: valueless && v == nil, typeCode: tc})
+		states = append(states, state{cur: start, value: v, present: valueless && v == nil, typeCode: tc, prim: prim})
 	}
 	for _, s := range steps {
 		next, err := w.advance(states, s)
@@ -186,7 +188,7 @@ func (w walker) walk(start cursor, values []any, valueless bool, steps []step) (
 	}
 	ends := make([]end, 0, len(states))
 	for _, st := range states {
-		e := end{branch: st.branch, def: st.cur.node, allowed: st.cur.allowed(), value: st.value, present: st.present, typeCode: st.typeCode, frames: st.frames, in: st.in}
+		e := end{branch: st.branch, def: st.cur.node, allowed: st.cur.allowed(), value: st.value, present: st.present, typeCode: st.typeCode, prim: st.prim, frames: st.frames, in: st.in}
 		if st.resolved {
 			e.profiles = st.targets
 		} else {
@@ -313,8 +315,21 @@ func (w walker) nameIn(st state, sd *registry.StructureDefinition, children []*r
 			if v == nil && el == nil {
 				continue
 			}
-			out = append(out, state{branch: st.branch, cur: cursor{sd: sd, node: child, key: key, types: types},
-				value: v, present: v == nil, typeCode: w.typeOf(elementTypes(child, types), v), frames: frames, in: w.within(st, child, v)})
+			tc := w.typeOf(elementTypes(child, types), v)
+			next := state{branch: st.branch, cur: cursor{sd: sd, node: child, key: key, types: types},
+				value: v, present: v == nil, typeCode: tc, frames: frames, in: w.within(st, child, v)}
+			if _, isObject := v.(map[string]any); !isObject && tc != "" && w.m.reg.IsPrimitiveTypeCode(tc) {
+				// Un primitivo se identifica por su lugar: el map que lo contiene, la propiedad y el índice.
+				ext, _ := el.(map[string]any)
+				index := -1
+				if _, repeats := obj[key].([]any); repeats {
+					index = i
+				} else if _, repeats := obj["_"+key].([]any); repeats {
+					index = i
+				}
+				next.prim = registry.PrimitiveValue{Value: v, Ext: ext, Parent: obj, Key: key, Index: index, TypeCode: tc}
+			}
+			out = append(out, next)
 		}
 	}
 	if choice {

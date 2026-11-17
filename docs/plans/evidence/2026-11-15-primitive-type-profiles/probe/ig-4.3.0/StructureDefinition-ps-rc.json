@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-rc",
+ "url": "http://example.org/fhir/StructureDefinition/ps-rc",
+ "name": "ps_rc",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "rc-1",
+      "severity": "error",
+      "human": "context at most 3 chars (ps-rc)",
+      "expression": "%context.length() <= 3"
+     }
+    ]
+   }
+  ]
+ }
+}

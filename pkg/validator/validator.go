@@ -940,6 +940,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	}
 	if vs != nil {
 		constraintOpts = vs.constraintOptions()
+		constraintOpts.Primitive = vs.primitive
 	}
 	// Slice matching shares what it learns about a value with the slicing phase by the value's
 	// identity: both read the same parse.

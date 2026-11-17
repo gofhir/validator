@@ -119,8 +119,10 @@ func TestChildrenOfPrecedence(t *testing.T) {
 	}{
 		{"own children come before the node's profile", "own", "Observation.value[x]", nil,
 			"https://example.org/own", "Observation.value[x].unit", ""},
-		{"own children come before an unresolved profile", "ownmissing", "Observation.value[x]", nil,
-			"https://example.org/ownmissing", "Observation.value[x].unit", ""},
+		// Los hijos propios gobiernan, pero el perfil que no se resuelve se informa igual: HL7 7.0.4 lo hace (pieza 3,
+		// ronda 1, R2: sondas c13-pgu-* y c13-pnu-*, en un primitivo y en un tipo de datos).
+		{"own children come before an unresolved profile, which is reported", "ownmissing", "Observation.value[x]", nil,
+			"https://example.org/ownmissing", "Observation.value[x].unit", missingURL},
 		{"the unrolled children of the element a slice slices", "unrolled", vq, nil,
 			"https://example.org/unrolled", "Observation.value[x].unit", ""},
 		{"the node's profile", "node", "Observation.value[x]", nil, simpleQuantity, "Quantity.comparator", ""},

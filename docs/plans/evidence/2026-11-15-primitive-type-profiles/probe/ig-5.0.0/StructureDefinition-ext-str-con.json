@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-str-con",
+ "url": "http://example.org/fhir/StructureDefinition/ext-str-con",
+ "name": "ext_str_con",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://example.org/fhir/StructureDefinition/ext-str",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-str"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ],
+    "constraint": [
+     {
+      "key": "esc-1",
+      "severity": "error",
+      "human": "at most 2 characters (ext-str-con)",
+      "expression": "$this.length() <= 2"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pi-fix",
+ "url": "http://example.org/fhir/StructureDefinition/pi-fix",
+ "name": "pi_fix",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "integer",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/integer",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "integer",
+    "path": "integer",
+    "constraint": [
+     {
+      "key": "fi-1",
+      "severity": "error",
+      "human": "must be 7 (pi-fix)",
+      "expression": "$this = 7"
+     }
+    ]
+   }
+  ]
+ }
+}

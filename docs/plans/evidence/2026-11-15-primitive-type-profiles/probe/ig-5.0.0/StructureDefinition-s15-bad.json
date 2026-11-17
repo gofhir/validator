@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s15-bad",
+ "url": "http://example.org/fhir/StructureDefinition/s15-bad",
+ "name": "s15_bad",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "error",
+      "human": "sev-1 false (error)",
+      "expression": "false"
+     }
+    ]
+   }
+  ]
+ }
+}

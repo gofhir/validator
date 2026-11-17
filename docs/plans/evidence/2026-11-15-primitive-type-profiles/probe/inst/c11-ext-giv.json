@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "id": "c11-ext-giv",
+ "name": [
+  {
+   "given": [
+    "ab"
+   ],
+   "_given": [
+    {
+     "id": "a1",
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-nosub",
+ "url": "http://example.org/fhir/StructureDefinition/ps-nosub",
+ "name": "ps_nosub",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.extension",
+    "path": "string.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "string.extension:bad",
+    "path": "string.extension",
+    "sliceName": "bad",
+    "max": "0",
+    "type": [
+     {
+      "code": "Extension"
+     }
+    ]
+   },
+   {
+    "id": "string.extension:bad.url",
+    "path": "string.extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-other"
+   }
+  ]
+ }
+}

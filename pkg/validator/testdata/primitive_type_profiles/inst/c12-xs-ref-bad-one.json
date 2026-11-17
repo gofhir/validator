@@ -1,0 +1,34 @@
+{
+ "resourceType": "Observation",
+ "id": "c12-xs-ref-bad-one",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-xref"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "ab",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-ref",
+    "valueReference": {
+     "reference": "#c1"
+    }
+   }
+  ]
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "status": "final",
+   "code": {
+    "text": "x"
+   }
+  }
+ ]
+}

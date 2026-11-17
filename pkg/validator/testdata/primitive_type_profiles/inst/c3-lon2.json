@@ -1,0 +1,34 @@
+{
+ "resourceType": "Patient",
+ "id": "c3-lon2",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-ext1+ps-len"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    },
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

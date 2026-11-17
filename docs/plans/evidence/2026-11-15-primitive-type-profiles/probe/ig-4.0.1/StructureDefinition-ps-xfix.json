@@ -1,0 +1,48 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-xfix",
+ "url": "http://example.org/fhir/StructureDefinition/ps-xfix",
+ "name": "ps_xfix",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.extension",
+    "path": "string.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "string.extension:s",
+    "path": "string.extension",
+    "sliceName": "s",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ext-str-con"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "string.extension:s.url",
+    "path": "string.extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-str"
+   }
+  ]
+ }
+}

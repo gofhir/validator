@@ -22,6 +22,15 @@ type Value struct {
 	Ext      map[string]any // a primitive's id and extensions, from its "_key" sibling
 }
 
+// Primitive es el valor como primitivo en su lugar, el map parent que lo contiene (registry.PrimitiveValue).
+func (v Value) Primitive(parent map[string]any) registry.PrimitiveValue {
+	index := -1
+	if v.Array {
+		index = v.Index
+	}
+	return registry.PrimitiveValue{Value: v.Value, Ext: v.Ext, Parent: parent, Key: v.Key, Index: index, TypeCode: v.TypeCode}
+}
+
 // Path is the value's path under the path of the instance that holds it.
 func (v Value) Path(parent string) string {
 	p := parent + "." + v.Key

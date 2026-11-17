@@ -1,6 +1,9 @@
 package registry
 
-import "context"
+import (
+	"context"
+	"slices"
+)
 
 // typeEntry returns the type entry of node that governs a value of typeCode: the one named typeCode,
 // or the only one when typeCode is "".
@@ -89,11 +92,24 @@ type Alternatives struct {
 func (a Alternatives) Candidates() []*StructureDefinition {
 	var out []*StructureDefinition
 	for _, tp := range a.Declared {
-		if tp.SD != nil && tp.SD.Type == tp.TypeCode {
+		// Un perfil declarado dos veces es uno: no cumple «varios» consigo mismo.
+		if tp.SD != nil && tp.SD.Type == tp.TypeCode && !slices.Contains(out, tp.SD) {
 			out = append(out, tp.SD)
 		}
 	}
 	return out
+}
+
+// DeclaredCount es la cantidad de perfiles distintos que el tipo declara, los que se resuelven y los que no
+// (HL7 cuenta un perfil que no se resuelve como declarado). Se llama por cada valor: no asigna memoria.
+func (a Alternatives) DeclaredCount() int {
+	n := 0
+	for i, tp := range a.Declared {
+		if !slices.ContainsFunc(a.Declared[:i], func(p TypeProfile) bool { return p.Canonical == tp.Canonical }) {
+			n++
+		}
+	}
+	return n
 }
 
 // DeclaredProfile es un perfil de tipo con el nodo del elemento que lo declara.
@@ -119,7 +135,7 @@ func (r *Registry) typeProfilesOf(ctx context.Context, node *ElementNode, typeCo
 	var unusable *Alternatives
 	for n := node; n != nil; n = n.SliceOf {
 		governed := out.Governing.SD != nil || out.Alternatives.Node != nil
-		if entry := typeEntry(n, typeCode); entry != nil && len(entry.Profile) > 1 && !r.IsPrimitiveTypeCode(entry.Code) {
+		if entry := typeEntry(n, typeCode); entry != nil && len(entry.Profile) > 1 {
 			alt := r.declaredAlternatives(ctx, n, entry)
 			for _, tp := range alt.Declared {
 				if tp.SD == nil {
@@ -161,4 +177,15 @@ func (r *Registry) declaredAlternatives(ctx context.Context, n *ElementNode, ent
 		alt.Declared = append(alt.Declared, r.resolveTypeProfile(ctx, canonical, entry.Code))
 	}
 	return alt
+}
+
+// DeclaresTypeProfile dice si node, o un elemento que divide, declara algún perfil (type.profile) para un valor
+// de typeCode, sin resolverlo.
+func (r *Registry) DeclaresTypeProfile(node *ElementNode, typeCode string) bool {
+	for n := node; n != nil; n = n.SliceOf {
+		if entry := typeEntry(n, typeCode); entry != nil && len(entry.Profile) > 0 {
+			return true
+		}
+	}
+	return false
 }

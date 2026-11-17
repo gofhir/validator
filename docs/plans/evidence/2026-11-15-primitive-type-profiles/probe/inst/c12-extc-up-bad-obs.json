@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "c12-extc-up-bad-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-extc+ps-up"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "AB",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-other",
+    "valueString": "q"
+   }
+  ]
+ }
+}

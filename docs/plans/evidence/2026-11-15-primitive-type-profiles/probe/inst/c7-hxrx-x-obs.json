@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "c7-hxrx-x-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-hx+ps-rx"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "ab",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-other",
+    "valueString": "q"
+   }
+  ]
+ }
+}

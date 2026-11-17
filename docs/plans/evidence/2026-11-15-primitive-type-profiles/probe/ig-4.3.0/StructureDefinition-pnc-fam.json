@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pnc-fam",
+ "url": "http://example.org/fhir/StructureDefinition/pnc-fam",
+ "name": "pnc_fam",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.family",
+    "path": "Patient.name.family",
+    "min": 1
+   }
+  ]
+ }
+}

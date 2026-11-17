@@ -1,0 +1,27 @@
+{
+ "resourceType": "Patient",
+ "id": "c7-rc-scx-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-rc"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ],
+   "_given": [
+    {
+     "id": "a1",
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

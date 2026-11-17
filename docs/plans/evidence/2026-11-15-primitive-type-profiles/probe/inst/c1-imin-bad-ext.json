@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-imin-bad-ext",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-integer-pi-min",
+   "valueInteger": 3
+  }
+ ]
+}

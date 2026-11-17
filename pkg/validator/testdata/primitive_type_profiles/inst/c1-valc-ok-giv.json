@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-valc-ok-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-valc"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

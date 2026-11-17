@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s14-he2",
+ "url": "http://example.org/fhir/StructureDefinition/s14-he2",
+ "name": "s14_he2",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "HumanName",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/HumanName",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "HumanName",
+    "path": "HumanName",
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "error",
+      "human": "sev-1 1 = 2 (error)",
+      "expression": "1 = 2"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "id": "c16-v3",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/s14-a3"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    null
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

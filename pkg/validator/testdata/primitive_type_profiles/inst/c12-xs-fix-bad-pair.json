@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "c12-xs-fix-bad-pair",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-len+ps-xfix"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "ab",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-str",
+    "valueString": "abc"
+   }
+  ]
+ }
+}

@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgp-con-up",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgp-con"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB"
+   ]
+  }
+ ]
+}

@@ -18,8 +18,8 @@ import (
 // contentReference, the profile its type declares, a backbone element's children, the definition
 // an extension's url names, or else Extension's), a primitive's extensions included. A resource an
 // element holds is checked by the resource walk.
-func (v *Validator) walk(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, holder *registry.ElementDefinition, fhirPath string, done registry.Descended, result *issue.Result) {
-	c := v.sdRegistry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Self: v.definitions, Owner: owner})
+func (v *Validator) walk(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, prim registry.PrimitiveValue, inst map[string]any, holder *registry.ElementDefinition, fhirPath string, done registry.Descended, result *issue.Result) {
+	c := v.sdRegistry.ChildrenOf(ctx, sd, node, typeCode, v.instance(owner, prim, inst))
 	// A value two layers of its holder declare is walked once, under the union of the layers.
 	c, ok := done.Fresh(inst, c)
 	if !ok {
@@ -43,14 +43,16 @@ func (v *Validator) walk(ctx context.Context, owner map[string]any, sd *registry
 					continue
 				}
 				m, ok := cv.Value.(map[string]any)
+				var below1 registry.PrimitiveValue
 				if !ok {
 					// A primitive's id and extensions are its "_key" sibling (json.html#primitive).
 					if m = cv.Ext; m == nil {
 						continue
 					}
+					below1 = cv.Primitive(inst)
 				}
 				nsd, next := v.sdRegistry.MemberTree(ctx, layer.SD, gov)
-				v.walk(ctx, owner, nsd, next, cv.TypeCode, m, gov.Def, path, below, result)
+				v.walk(ctx, owner, nsd, next, cv.TypeCode, below1, m, gov.Def, path, below, result)
 			}
 		}
 	}
@@ -231,4 +233,13 @@ func (o *once) merge(from, into *issue.Result) {
 		o.seen[key] = len(into.Issues)
 		into.AddIssue(is)
 	}
+}
+
+// instance es lo que se camina: el primitivo prim, con su `_x` inst, o el objeto inst, con la definición que
+// declara para sí (la url de una extensión).
+func (v *Validator) instance(owner map[string]any, prim registry.PrimitiveValue, inst map[string]any) registry.Instance {
+	if prim.Valid() {
+		return registry.Instance{Primitive: prim, Owner: owner}
+	}
+	return registry.Instance{Value: inst, Self: v.definitions, Owner: owner}
 }

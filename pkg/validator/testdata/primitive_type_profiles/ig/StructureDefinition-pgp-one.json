@@ -1,0 +1,43 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pgp-one",
+ "url": "http://example.org/fhir/StructureDefinition/pgp-one",
+ "name": "pgp_one",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "$this"
+      }
+     ],
+     "rules": "closed"
+    }
+   },
+   {
+    "id": "Patient.name.given:a",
+    "path": "Patient.name.given",
+    "sliceName": "a",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-ext1"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

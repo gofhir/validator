@@ -1,0 +1,25 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pc-bind",
+ "url": "http://example.org/fhir/StructureDefinition/pc-bind",
+ "name": "pc_bind",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "code",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/code",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "code.value",
+    "path": "code.value",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://example.org/fhir/StructureDefinition/vs-pc"
+    }
+   }
+  ]
+ }
+}

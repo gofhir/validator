@@ -209,7 +209,7 @@ func (v *Validator) validateChildren(ctx context.Context, owner, data map[string
 		for _, cv := range values {
 			m, ok := cv.Value.(map[string]any)
 			if !ok {
-				v.validatePrimitiveElement(ctx, owner, cv.Value, cv.Ext, childSD, child, cv.TypeCode, cv.Path(fhirPath), result)
+				v.validatePrimitiveElement(ctx, owner, data, cv, childSD, child, cv.Path(fhirPath), result)
 				continue
 			}
 			// A resource held in the element (Bundle.entry.resource, contained) is validated
@@ -222,13 +222,16 @@ func (v *Validator) validateChildren(ctx context.Context, owner, data map[string
 	}
 }
 
-// validatePrimitiveElement checks one primitive value against the children of its element: those
-// the snapshot unrolls for it (a profile that requires an extension on it), else those of the
-// primitive's type definition. In JSON a primitive's value is its own property, and its id and
-// extensions are in its "_key" sibling, ext (json.html#primitive): the value is checked as the child
-// the primitive type defines for it, the others against the sibling, even when there is none.
-func (v *Validator) validatePrimitiveElement(ctx context.Context, owner map[string]any, value any, ext map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode, fhirPath string, result *issue.Result) {
-	code := typeCode
+// validatePrimitiveElement checks one primitive value, cv, held by the object parent, against the
+// children of its element: those the snapshot unrolls for it (a profile that requires an extension on
+// it), else those of the profiles its type declares for it (one layer each when it declares several and
+// the value conforms to them, what two report the same is reported once), else those of the primitive's
+// type definition. In JSON a primitive's value is its own property, and its id and extensions are in its
+// "_key" sibling, ext (json.html#primitive): the value is checked as the child the primitive type defines
+// for it, the others against the sibling, even when there is none. A profile the type declares that does
+// not resolve is reported, and the value is checked against the type's definition.
+func (v *Validator) validatePrimitiveElement(ctx context.Context, owner, parent map[string]any, cv elementvalues.Value, sd *registry.StructureDefinition, node *registry.ElementNode, fhirPath string, result *issue.Result) {
+	code := cv.TypeCode
 	if code == "" && len(node.Def.Type) == 1 {
 		code = node.Def.Type[0].Code
 	}
@@ -236,27 +239,52 @@ func (v *Validator) validatePrimitiveElement(ctx context.Context, owner map[stri
 	if typeSD == nil || typeSD.Kind != kindPrimitive {
 		return
 	}
-	typeRoot := typeSD.Tree().Root()
-	if typeRoot == nil {
+	if typeSD.Tree().Root() == nil {
 		return
 	}
-	childSD, children := sd, node.Children
-	if len(children) == 0 {
-		if ext == nil && v.primitiveShape(typeSD).holdsAnyValue {
-			return // the type's definition requires nothing of a value with no sibling
-		}
-		childSD, children = typeSD, typeRoot.Children
+	// Sin hijos propios, sin contentReference, sin slices y sin perfil de tipo declarado, solo gobierna el tipo: un
+	// valor sin hermano que el tipo admite no tiene nada que comprobar (el atajo de antes de los perfiles de primitivo).
+	if cv.Ext == nil && v.onlyTheTypeGoverns(node, code) && v.primitiveShape(typeSD).holdsAnyValue {
+		return
 	}
-	inst := make(map[string]any, len(ext)+1)
-	for k, x := range ext {
+	prim := cv.Primitive(parent)
+	prim.TypeCode = code
+	c := v.registry.ChildrenOf(ctx, sd, node, code, registry.Instance{Primitive: prim, Owner: owner})
+	for _, missing := range c.AllUnresolved {
+		result.AddErrorWithID(issue.DiagTypeProfileNotFound,
+			map[string]any{"profile": missing.Canonical, "type": missing.TypeCode, "reason": missing.Reason},
+			fhirPath)
+	}
+	if c.NumLayers() == 0 {
+		return
+	}
+	shape := v.primitiveShape(typeSD)
+	if cv.Ext == nil && c.SD == typeSD && len(c.More) == 0 && shape.holdsAnyValue {
+		return // the type's definition requires nothing of a value with no sibling
+	}
+	inst := make(map[string]any, len(cv.Ext)+1)
+	for k, x := range cv.Ext {
 		inst[k] = x
 	}
-	if value != nil {
-		for _, name := range v.primitiveShape(typeSD).valueNames {
-			inst[name] = value
+	if cv.Value != nil {
+		for _, name := range shape.valueNames {
+			inst[name] = cv.Value
 		}
 	}
-	v.validateChildren(ctx, owner, inst, childSD, children, fhirPath, true, true, nil, result)
+	start := len(result.Issues)
+	for i := range c.NumLayers() {
+		from := len(result.Issues)
+		layer := c.LayerAt(i)
+		v.validateChildren(ctx, owner, inst, layer.SD, layer.Nodes, fhirPath, true, true, nil, result)
+		result.DropRepeated(start, from)
+	}
+}
+
+// onlyTheTypeGoverns dice si, por la definición, nada más que el tipo gobierna los hijos de un valor de node: sin
+// hijos propios, sin contentReference, sin slices y sin perfil de tipo declarado para code.
+func (v *Validator) onlyTheTypeGoverns(node *registry.ElementNode, code string) bool {
+	return len(node.Children) == 0 && node.Def.ContentReference == nil && len(node.Slices) == 0 && node.SliceOf == nil &&
+		!v.registry.DeclaresTypeProfile(node, code)
 }
 
 // primitiveShape is what a primitive type's definition says about the JSON of its values.

@@ -1,0 +1,52 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pnhs3",
+ "url": "http://example.org/fhir/StructureDefinition/pnhs3",
+ "name": "pnhs3",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name",
+    "path": "Patient.name",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "use"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.name:off",
+    "path": "Patient.name",
+    "sliceName": "off"
+   },
+   {
+    "id": "Patient.name:off.use",
+    "path": "Patient.name.use",
+    "fixedCode": "official"
+   },
+   {
+    "id": "Patient.name:off.given",
+    "path": "Patient.name.given",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-subc"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

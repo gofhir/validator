@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c15-g3r",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/s15-g3r"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

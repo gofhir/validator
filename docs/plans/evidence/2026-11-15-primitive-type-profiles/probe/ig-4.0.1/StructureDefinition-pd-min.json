@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pd-min",
+ "url": "http://example.org/fhir/StructureDefinition/pd-min",
+ "name": "pd_min",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "date",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/date",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "date.value",
+    "path": "date.value",
+    "minValueDate": "2000-01-01"
+   }
+  ]
+ }
+}

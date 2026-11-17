@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pnh2",
+ "url": "http://example.org/fhir/StructureDefinition/pnh2",
+ "name": "pnh2",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name",
+    "path": "Patient.name",
+    "type": [
+     {
+      "code": "HumanName",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/hn-sublen"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s14-d3",
+ "url": "http://example.org/fhir/StructureDefinition/s14-d3",
+ "name": "s14_d3",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/fhir/StructureDefinition/s14-d3b",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient",
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "error",
+      "human": "sev-1 1 = 2 (error)",
+      "expression": "1 = 2"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "o-ps-valc",
+ "url": "http://example.org/fhir/StructureDefinition/o-ps-valc",
+ "name": "o_ps_valc",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-valc"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

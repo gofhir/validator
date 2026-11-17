@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c13-pgu-two-bad",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgu-two"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "abcd"
+   ]
+  }
+ ]
+}

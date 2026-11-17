@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-code-bind",
+ "url": "http://example.org/fhir/StructureDefinition/ext-code-bind",
+ "name": "ext_code_bind",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://example.org/fhir/StructureDefinition/ext-code",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-code"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "Coding"
+     }
+    ],
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://example.org/fhir/StructureDefinition/vs-pc"
+    }
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  }
+ ]
+}

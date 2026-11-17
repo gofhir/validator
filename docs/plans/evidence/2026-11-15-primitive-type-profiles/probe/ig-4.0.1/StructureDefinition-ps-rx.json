@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-rx",
+ "url": "http://example.org/fhir/StructureDefinition/ps-rx",
+ "name": "ps_rx",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "rx-1",
+      "severity": "error",
+      "human": "must have an extension (ps-rx)",
+      "expression": "extension.exists()"
+     }
+    ]
+   }
+  ]
+ }
+}

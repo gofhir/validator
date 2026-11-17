@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pi-min",
+ "url": "http://example.org/fhir/StructureDefinition/pi-min",
+ "name": "pi_min",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "integer",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/integer",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "integer.value",
+    "path": "integer.value",
+    "minValueInteger": 5
+   }
+  ]
+ }
+}

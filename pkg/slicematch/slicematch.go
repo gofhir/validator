@@ -33,7 +33,8 @@ type Scope struct {
 }
 
 // Conformer answers whether value conforms to profile (discriminator type "profile"). The
-// implementation runs the full validation pipeline on the value, with a fresh result.
+// implementation runs the full validation pipeline on the value, with a fresh result. A value that
+// is a primitive comes as a registry.PrimitiveValue, its scalar with its "_key" sibling and its place.
 type Conformer interface {
 	Conforms(ctx context.Context, value any, profile *registry.StructureDefinition, scope Scope) bool
 }
@@ -146,6 +147,10 @@ type Request struct {
 	// extensions and no value (json.html#primitive): it is there, of the type its key names, with
 	// Value nil. A JSON null is no value and not this.
 	Valueless bool
+	// Primitive es el valor cuando es un primitivo, con el lugar donde está: un perfil de tipo que
+	// declara el slice se comprueba sobre el escalar con su `_key` (Conformer.Conforms recibe un
+	// registry.PrimitiveValue). El valor cero no es ninguno.
+	Primitive registry.PrimitiveValue
 	// Scope holds the resources the value sits in.
 	Scope Scope
 	// Resolver follows references for resolve(); it depends on the resource being validated.
@@ -240,7 +245,7 @@ func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *
 
 	start := cursor{sd: req.SD, node: slice, key: req.Key, typeCode: m.keyType(req.Node, req.Key)}
 	w := walker{m: m, resolver: req.Resolver, scope: req.Scope}
-	ends, err := w.walk(start, []any{req.Value}, req.Valueless, steps)
+	ends, err := w.walk(start, []any{req.Value}, req.Valueless, req.Primitive, steps)
 	if err != nil {
 		return cannot("%s: %v", slice.Def.ID, err)
 	}
@@ -249,6 +254,14 @@ func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *
 	// when it matches any of them.
 	var out verdict
 	for _, group := range byBranch(ends) {
+		if note := m.unresolvedPrimitiveProfile(slice, group); note != nil {
+			// El slice declara para el primitivo un perfil que no se resuelve: HL7 no puede evaluar el slicing.
+			out.constrained = true
+			if out.note == nil {
+				out.note = note
+			}
+			continue
+		}
 		v := m.decide(ctx, req, slice, group, d)
 		if v.ok {
 			return v
@@ -259,6 +272,23 @@ func (m *Matcher) discriminatorMatches(ctx context.Context, req Request, slice *
 		}
 	}
 	return out
+}
+
+// unresolvedPrimitiveProfile returns why the slicing of a primitive cannot be evaluated when the slice declares
+// for it a type profile that does not resolve, and nil otherwise.
+func (m *Matcher) unresolvedPrimitiveProfile(slice *registry.ElementNode, group []end) *Note {
+	for _, e := range group {
+		if len(e.profiles) == 0 || !e.isPresent() || !m.reg.IsPrimitiveTypeCode(e.typeCode) {
+			continue
+		}
+		for _, p := range e.profiles {
+			if psd, res := m.reg.ResolveCanonical(p); psd == nil {
+				return &Note{Kind: NoteCannotEvaluate, Slice: slice,
+					Message: fmt.Sprintf("profile %s on %s could not be resolved (%s)", p, slice.Def.ID, res)}
+			}
+		}
+	}
+	return nil
 }
 
 // decide evaluates one discriminator on one alternative. A slice that prohibits the element at the
@@ -481,13 +511,17 @@ func (m *Matcher) profileConforms(ctx context.Context, req Request, slice *regis
 				Message: fmt.Sprintf("%s: profile conformance cannot be checked", slice.Def.ID)}
 		}
 		conforms := false
+		value := e.value
+		if e.prim.Valid() {
+			value = e.prim
+		}
 		for _, p := range profiles {
 			psd, res := m.reg.ResolveCanonical(p)
 			if psd == nil {
 				return false, &Note{Kind: NoteCannotEvaluate, Slice: slice,
 					Message: fmt.Sprintf("profile %s on %s could not be resolved (%s)", p, slice.Def.ID, res)}
 			}
-			if m.conformer.Conforms(ctx, e.value, psd, m.valueScope(req, e)) {
+			if m.conformer.Conforms(ctx, value, psd, m.valueScope(req, e)) {
 				conforms = true
 				break
 			}

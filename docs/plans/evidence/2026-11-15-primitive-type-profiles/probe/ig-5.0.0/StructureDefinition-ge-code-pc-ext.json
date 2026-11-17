@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ge-code-pc-ext",
+ "url": "http://example.org/fhir/StructureDefinition/ge-code-pc-ext",
+ "name": "ge_code_pc_ext",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.gender",
+    "path": "Patient.gender",
+    "type": [
+     {
+      "code": "code",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/pc-ext"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

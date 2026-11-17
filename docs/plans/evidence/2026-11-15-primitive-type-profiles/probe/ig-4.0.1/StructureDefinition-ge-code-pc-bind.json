@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ge-code-pc-bind",
+ "url": "http://example.org/fhir/StructureDefinition/ge-code-pc-bind",
+ "name": "ge_code_pc_bind",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.gender",
+    "path": "Patient.gender",
+    "type": [
+     {
+      "code": "code",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/pc-bind"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

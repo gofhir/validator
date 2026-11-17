@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-mixe",
+ "url": "http://example.org/fhir/StructureDefinition/ps-mixe",
+ "name": "ps_mixe",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.extension",
+    "path": "string.extension",
+    "min": 1
+   },
+   {
+    "id": "string.value",
+    "path": "string.value",
+    "maxLength": 3
+   }
+  ]
+ }
+}

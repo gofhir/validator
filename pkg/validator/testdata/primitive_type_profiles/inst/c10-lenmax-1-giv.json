@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c10-lenmax-1-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-len+ps-max"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "abcd"
+   ]
+  }
+ ]
+}

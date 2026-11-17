@@ -1,0 +1,74 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (13 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-11-15-primitive-type-profiles/probe, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/c15-g1.json inst/c15-g2.json inst/c15-g2r.json inst/c15-g3.json inst/c15-g3r.json inst/c15-g4.json inst/c15-g5.json inst/c15-h1.json inst/c15-h2.json inst/c15-h3.json inst/c15-i1-off.json inst/c15-i1-usual.json inst/c15-i2-off.json inst/c15-i2-usual.json inst/c15-i3-off.json inst/c15-i3-usual.json inst/c15-i4-off.json inst/c15-i4-usual.json -version 4.3.0 -ig ig-4.3.0 -tx n/a -output hl7-c15-4.3.0-7.0.4.json
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.3.0 from hl7.fhir.r4b.core#4.3.0
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:01.859)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.415)
+  Loaded FHIR - 8372 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.004)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:00.891)
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.227)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.253)
+  Load ig-4.3.0 - 280 resources (00:00.032)
+  Package Summary: [hl7.fhir.r4b.core#4.3.0, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find HumanName profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find HumanName profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find integer profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find date profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+  ...go! (00:00.694)
+Cached new session. Cache size = 1
+Sources to validate: inst/c15-g1.jsoninst/c15-g2.jsoninst/c15-g2r.jsoninst/c15-g3.jsoninst/c15-g3r.jsoninst/c15-g4.jsoninst/c15-g5.jsoninst/c15-h1.jsoninst/c15-h2.jsoninst/c15-h3.jsoninst/c15-i1-off.jsoninst/c15-i1-usual.jsoninst/c15-i2-off.jsoninst/c15-i2-usual.jsoninst/c15-i3-off.jsoninst/c15-i3-usual.jsoninst/c15-i4-off.jsoninst/c15-i4-usual.json
+Validating
+  Validate inst/c15-g1.json
+ 00:00.099
+  Validate inst/c15-g2.json
+ 00:00.018
+  Validate inst/c15-g2r.json
+ 00:00.015
+  Validate inst/c15-g3.json
+ 00:00.012
+  Validate inst/c15-g3r.json
+ 00:00.010
+  Validate inst/c15-g4.json
+ 00:00.010
+  Validate inst/c15-g5.json
+ 00:00.010
+  Validate inst/c15-h1.json
+ 00:00.010
+  Validate inst/c15-h2.json
+ 00:00.010
+  Validate inst/c15-h3.json
+ 00:00.010
+  Validate inst/c15-i1-off.json
+ 00:00.015
+  Validate inst/c15-i1-usual.json
+ 00:00.011
+  Validate inst/c15-i2-off.json
+ 00:00.011
+  Validate inst/c15-i2-usual.json
+ 00:00.010
+  Validate inst/c15-i3-off.json
+ 00:00.011
+  Validate inst/c15-i3-usual.json
+ 00:00.012
+  Validate inst/c15-i4-off.json
+ 00:00.012
+  Validate inst/c15-i4-usual.json
+ 00:00.009
+Done. Times: Loading: 00:04.402, validation: 00:00.307 (#18). Memory = 673Mb
+
+Done. Times: Loading: 00:04.402, validation: 00:00.307 (#18). Max Memory = 6Gb

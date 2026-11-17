@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-len-bad-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-len"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "abcd"
+   ]
+  }
+ ]
+}

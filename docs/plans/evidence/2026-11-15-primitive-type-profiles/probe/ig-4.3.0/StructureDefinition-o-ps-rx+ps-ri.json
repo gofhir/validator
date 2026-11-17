@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "o-ps-rx+ps-ri",
+ "url": "http://example.org/fhir/StructureDefinition/o-ps-rx+ps-ri",
+ "name": "o_ps_rx+ps_ri",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-rx",
+       "http://example.org/fhir/StructureDefinition/ps-ri"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

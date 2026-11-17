@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "b-date-pd-min",
+ "url": "http://example.org/fhir/StructureDefinition/b-date-pd-min",
+ "name": "b_date_pd_min",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate",
+    "path": "Patient.birthDate",
+    "type": [
+     {
+      "code": "date",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/pd-min"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "x-ps-nosub",
+ "url": "http://example.org/fhir/StructureDefinition/x-ps-nosub",
+ "name": "x_ps_nosub",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/x-ps-nosub"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-nosub"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  },
+  {
+   "type": "element",
+   "expression": "Observation"
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s15-bad2",
+ "url": "http://example.org/fhir/StructureDefinition/s15-bad2",
+ "name": "s15_bad2",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "warning",
+      "human": "sev-1 1 = 2 (warning)",
+      "expression": "1 = 2"
+     }
+    ]
+   }
+  ]
+ }
+}

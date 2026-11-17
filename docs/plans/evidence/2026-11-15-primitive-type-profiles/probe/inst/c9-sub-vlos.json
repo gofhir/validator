@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "c9-sub-vlos",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-sub"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-req",
+    "valueString": "q"
+   }
+  ]
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "x-code-pc-bind",
+ "url": "http://example.org/fhir/StructureDefinition/x-code-pc-bind",
+ "name": "x_code_pc_bind",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/x-code-pc-bind"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "code",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/pc-bind"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  },
+  {
+   "type": "element",
+   "expression": "Observation"
+  }
+ ]
+}

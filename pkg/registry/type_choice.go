@@ -47,7 +47,7 @@ func (r *Registry) ChooseTypeProfiles(ctx context.Context, alt Alternatives, ins
 	candidates := alt.Candidates()
 	out := TypeChoice{Chosen: candidates}
 	chooser, _ := ctx.Value(chooserKey{}).(ProfileChooser)
-	if chooser == nil || inst.Value == nil {
+	if chooser == nil || (inst.Value == nil && !inst.Primitive.Valid()) {
 		return out
 	}
 	out.Decided = true

@@ -1,0 +1,65 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pnf-open",
+ "url": "http://example.org/fhir/StructureDefinition/pnf-open",
+ "name": "pnf_open",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name",
+    "path": "Patient.name",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "family"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.name:a",
+    "path": "Patient.name",
+    "sliceName": "a",
+    "min": 1
+   },
+   {
+    "id": "Patient.name:a.family",
+    "path": "Patient.name.family",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-ext1"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.name:b",
+    "path": "Patient.name",
+    "sliceName": "b"
+   },
+   {
+    "id": "Patient.name:b.family",
+    "path": "Patient.name.family",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-up"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

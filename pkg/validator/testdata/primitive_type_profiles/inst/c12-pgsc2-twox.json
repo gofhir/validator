@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgsc2-twox",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgsc2"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "cd",
+    "ab"
+   ],
+   "_given": [
+    null,
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

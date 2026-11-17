@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "id": "c8-idx-twoup-r",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-ext1+ps-up"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB",
+    "AB"
+   ],
+   "_given": [
+    null,
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

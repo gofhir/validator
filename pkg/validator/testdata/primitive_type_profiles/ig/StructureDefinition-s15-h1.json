@@ -1,0 +1,38 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s15-h1",
+ "url": "http://example.org/fhir/StructureDefinition/s15-h1",
+ "name": "s15_h1",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name",
+    "path": "Patient.name",
+    "type": [
+     {
+      "code": "HumanName",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/s15-hok",
+       "http://example.org/fhir/StructureDefinition/s14-he"
+      ]
+     }
+    ],
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "warning",
+      "human": "sev-1 false (warning)",
+      "expression": "false"
+     }
+    ]
+   }
+  ]
+ }
+}

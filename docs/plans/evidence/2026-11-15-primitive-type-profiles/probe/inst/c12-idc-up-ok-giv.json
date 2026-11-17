@@ -1,0 +1,21 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-idc-up-ok-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-idc+ps-up"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB"
+   ],
+   "_given": [
+    {
+     "id": "a1"
+    }
+   ]
+  }
+ ]
+}

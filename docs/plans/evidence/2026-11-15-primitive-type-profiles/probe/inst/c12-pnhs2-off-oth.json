@@ -1,0 +1,27 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pnhs2-off-oth",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnhs2"
+  ]
+ },
+ "name": [
+  {
+   "use": "official",
+   "given": [
+    "abcd"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

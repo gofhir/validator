@@ -28,9 +28,9 @@ const (
 //
 // The instance's type, typeCode, picks the profile a choice element's type declares; it is ""
 // for any other element.
-func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, done registry.Descended, result *issue.Result) {
+func (v *Validator) walk(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, prim registry.PrimitiveValue, inst map[string]any, fhirPath string, done registry.Descended, result *issue.Result) {
 	owner := scope.Resource
-	c := v.walkChildren(run.ctx, owner, sd, node, typeCode, inst)
+	c := v.walkChildren(run.ctx, owner, sd, node, typeCode, prim, inst)
 	// A value two layers of its holder declare is walked once, under the union of the layers.
 	c, ok := done.Fresh(inst, c)
 	if !ok {
@@ -58,7 +58,7 @@ func (v *Validator) walkLayer(run *validation, scope slicematch.Scope, layer reg
 			governs[i] = child
 		}
 		if child.Def.Slicing != nil && len(child.Slices) > 0 {
-			governs = v.checkSlicing(run, scope, childSD, child, values, fhirPath, result)
+			governs = v.checkSlicing(run, scope, childSD, child, values, inst, fhirPath, result)
 			// The definition that governs each value, the slice it matched or the element, in the
 			// phases that read it (slicerecord.Slices): recorded for every value, so that a later
 			// walk of the same value (another profile, a conformance check) is not read as an
@@ -70,11 +70,13 @@ func (v *Validator) walkLayer(run *validation, scope slicematch.Scope, layer reg
 		}
 		for i, cv := range values {
 			m, ok := cv.Value.(map[string]any)
+			var prim registry.PrimitiveValue
 			if !ok {
 				m = cv.Ext
-				// A primitive whose element the snapshot unrolls (a profile that slices its
-				// extensions) is checked even with no "_key" sibling: its slices may be required.
-				if m == nil && len(governedChildren(governs[i])) > 0 {
+				prim = cv.Primitive(inst)
+				// A primitive whose element the snapshot unrolls, or whose type declares a profile (that
+				// slices its extensions), is checked even with no "_key" sibling: its slices may be required.
+				if m == nil && (len(governedChildren(governs[i])) > 0 || v.registry.DeclaresTypeProfile(governs[i], cv.TypeCode)) {
 					m = map[string]any{}
 				}
 			}
@@ -87,7 +89,7 @@ func (v *Validator) walkLayer(run *validation, scope slicematch.Scope, layer reg
 				continue
 			}
 			nextSD, next := v.registry.MemberTree(run.ctx, childSD, governs[i])
-			v.walk(run, scope, nextSD, next, cv.TypeCode, m, cv.Path(fhirPath), below, result)
+			v.walk(run, scope, nextSD, next, cv.TypeCode, prim, m, cv.Path(fhirPath), below, result)
 		}
 	}
 }
@@ -97,7 +99,11 @@ func (v *Validator) walkLayer(run *validation, scope slicematch.Scope, layer reg
 // their slicing applies to the value. A type's base definition has no slicing of its own, but the
 // walk goes through it to the extensions it holds, a primitive's included, each checked against its
 // definition. A profile that does not resolve is reported by the cardinality phase.
-func (v *Validator) walkChildren(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any) registry.InstanceChildren {
+func (v *Validator) walkChildren(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, prim registry.PrimitiveValue, inst map[string]any) registry.InstanceChildren {
+	if prim.Valid() {
+		// Un primitivo: inst es su "_key", y lo que se elige entre sus perfiles es el primitivo.
+		return v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Primitive: prim, Owner: owner})
+	}
 	return v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Self: v.definitions, Owner: owner})
 }
 
@@ -125,13 +131,13 @@ func governedChildren(node *registry.ElementNode) []*registry.ElementNode {
 // in this parent instance, at every level: the element's slicing, and the slicing of each slice
 // that is resliced, over the values assigned to it. It returns the definition governing each
 // value.
-func (v *Validator) checkSlicing(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, values []childValue, fhirPath string, result *issue.Result) []*registry.ElementNode {
+func (v *Validator) checkSlicing(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, values []childValue, parent map[string]any, fhirPath string, result *issue.Result) []*registry.ElementNode {
 	governing := make([]*registry.ElementNode, len(values))
 	for i, cv := range values {
 		governing[i] = node
-		if slice := v.matchValue(run, scope, sd, node, cv, cv.Path(fhirPath), result); slice != nil {
+		if slice := v.matchValue(run, scope, sd, node, cv, parent, cv.Path(fhirPath), result); slice != nil {
 			governing[i] = slice
-			v.checkMember(run.ctx, scope.Resource, sd, node, slice, cv, cv.Path(fhirPath), result)
+			v.checkMember(run.ctx, scope.Resource, parent, sd, node, slice, cv, cv.Path(fhirPath), result)
 		}
 	}
 	all := make([]int, len(values))
@@ -236,10 +242,19 @@ func checkSliceCount(s *registry.ElementNode, count int, elementPath string, res
 // them further than the definitions the cardinality phase checks the value against: the children
 // that govern a value of the unsliced element (Registry.ChildrenOf), which the cardinality phase
 // takes from the same place.
-func (v *Validator) checkMember(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node, slice *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) {
+func (v *Validator) checkMember(ctx context.Context, owner, parent map[string]any, sd *registry.StructureDefinition, node, slice *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) {
 	m, ok := cv.Value.(map[string]any)
+	inst := registry.Instance{Value: m, Self: v.definitions, Owner: owner}
 	if !ok {
-		return
+		// Un primitivo: sus hijos (id y extension) están en su "_key", que puede no existir.
+		prim := cv.Primitive(parent)
+		if !prim.Valid() || !v.registry.DeclaresTypeProfile(slice, cv.TypeCode) {
+			return
+		}
+		if m = cv.Ext; m == nil {
+			m = map[string]any{}
+		}
+		inst = registry.Instance{Primitive: prim, Owner: owner}
 	}
 	if v.registry.HoldsResource(node.Def) && len(slice.Children) == 0 && walker.ChecksHolderProfiles(ctx) {
 		// A held resource is checked against its slice's profiles by the resource walk; what the
@@ -253,7 +268,6 @@ func (v *Validator) checkMember(ctx context.Context, owner map[string]any, sd *r
 			reportProfileNotFound(result, d.TypeProfile, itemPath)
 		}
 	}
-	inst := registry.Instance{Value: m, Self: v.definitions, Owner: owner}
 	base := v.registry.ChildrenOf(ctx, sd, node, cv.TypeCode, inst)
 	members := v.registry.MemberLayers(ctx, sd, slice, inst)
 	start := len(result.Issues)
@@ -268,11 +282,15 @@ func (v *Validator) checkMember(ctx context.Context, owner map[string]any, sd *r
 // matchValue returns the slice that governs one value, or nil, reporting what the matcher found on
 // the way: several matching slices (D-1), a discriminator that could not be evaluated (D-2, D-3),
 // and unknown ValueSet membership (D-6).
-func (v *Validator) matchValue(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, cv childValue, itemPath string, result *issue.Result) *registry.ElementNode {
-	m := v.matcher.Resolve(run.ctx, slicematch.Request{
+func (v *Validator) matchValue(run *validation, scope slicematch.Scope, sd *registry.StructureDefinition, node *registry.ElementNode, cv childValue, parent map[string]any, itemPath string, result *issue.Result) *registry.ElementNode {
+	req := slicematch.Request{
 		SD: sd, Node: node, Key: cv.Key, Value: cv.Value, Valueless: cv.Value == nil && cv.Ext != nil, Scope: scope,
 		Resolver: run.opts.Resolver, Containment: run.opts.Containment,
-	})
+	}
+	if _, isObject := cv.Value.(map[string]any); !isObject {
+		req.Primitive = cv.Primitive(parent)
+	}
+	m := v.matcher.Resolve(run.ctx, req)
 	for _, n := range m.Notes {
 		switch n.Kind {
 		case slicematch.NoteMembershipUnknown:

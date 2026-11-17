@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c9-sub-none-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-sub"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

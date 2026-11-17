@@ -1,0 +1,28 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-code-ctx",
+ "url": "http://example.org/fhir/StructureDefinition/ext-code-ctx",
+ "name": "ext_code_ctx",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://example.org/fhir/StructureDefinition/ext-code",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-code"
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Observation"
+  }
+ ]
+}

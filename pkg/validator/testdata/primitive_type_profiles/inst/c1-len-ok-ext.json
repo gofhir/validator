@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-len-ok-ext",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-ps-len",
+   "valueString": "ab"
+  }
+ ]
+}

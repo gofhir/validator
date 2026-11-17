@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-ri",
+ "url": "http://example.org/fhir/StructureDefinition/ps-ri",
+ "name": "ps_ri",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "ri-1",
+      "severity": "error",
+      "human": "must have an id (ps-ri)",
+      "expression": "id.exists()"
+     }
+    ]
+   }
+  ]
+ }
+}

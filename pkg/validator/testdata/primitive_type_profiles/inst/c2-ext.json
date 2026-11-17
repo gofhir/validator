@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c2-ext",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-miss",
+   "valueString": "ab"
+  }
+ ]
+}

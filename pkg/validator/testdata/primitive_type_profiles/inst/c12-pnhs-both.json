@@ -1,0 +1,23 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pnhs-both",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnhs"
+  ]
+ },
+ "name": [
+  {
+   "use": "usual",
+   "given": [
+    "ab"
+   ]
+  },
+  {
+   "use": "official",
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

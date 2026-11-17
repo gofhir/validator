@@ -507,7 +507,7 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 	if root == nil {
 		return
 	}
-	v.walk(ctx, registry.ResourceOwner(resource), sd, root, "", resource, resourceType, rc, nil, result)
+	v.walk(ctx, registry.ResourceOwner(resource), sd, root, "", registry.PrimitiveValue{}, resource, resourceType, rc, nil, result)
 
 	// Walk every resource it holds (contained resources, Bundle entries, the resources other
 	// elements hold), each against the profiles its meta.profile declares and its type's
@@ -531,7 +531,7 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 			contexts[w.FHIRPath] = here
 		}
 		if r := w.SD.Tree().Root(); r != nil {
-			v.walk(ctx, w.Data, w.SD, r, "", w.Data, w.FHIRPath, here, nil, nested)
+			v.walk(ctx, w.Data, w.SD, r, "", registry.PrimitiveValue{}, w.Data, w.FHIRPath, here, nil, nested)
 		}
 		return true
 	})
@@ -551,8 +551,12 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 // (Registry.ChildrenOf: a contentReference, the profile its type declares, a backbone element's
 // children, the definition an extension's url names, or else Extension's), a primitive's extensions
 // included. A resource an element holds is checked by the resource walk.
-func (v *Validator) walk(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, rc *refContext, done registry.Descended, result *issue.Result) {
-	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Self: v.definitions, Owner: owner})
+func (v *Validator) walk(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, prim registry.PrimitiveValue, inst map[string]any, fhirPath string, rc *refContext, done registry.Descended, result *issue.Result) {
+	instance := registry.Instance{Value: inst, Self: v.definitions, Owner: owner}
+	if prim.Valid() {
+		instance = registry.Instance{Primitive: prim, Owner: owner}
+	}
+	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, instance)
 	// A value two layers of its holder declare is walked once, under the union of the layers.
 	c, ok := done.Fresh(inst, c)
 	if !ok {
@@ -578,15 +582,12 @@ func (v *Validator) walk(ctx context.Context, owner map[string]any, sd *registry
 				if v.registry.HoldsResource(child.Def) {
 					continue
 				}
-				m, ok := cv.Value.(map[string]any)
+				m, member, ok := memberOf(cv, inst)
 				if !ok {
-					// A primitive's id and extensions are its "_key" sibling (json.html#primitive).
-					if m = cv.Ext; m == nil {
-						continue
-					}
+					continue
 				}
 				nsd, next := v.registry.MemberTree(ctx, layer.SD, gov)
-				v.walk(ctx, owner, nsd, next, cv.TypeCode, m, path, rc, below, result)
+				v.walk(ctx, owner, nsd, next, cv.TypeCode, member, m, path, rc, below, result)
 			}
 		}
 		result.DropRepeated(start, from)
@@ -1024,4 +1025,16 @@ func containedOf(resource map[string]any) []any {
 		return []any{c}
 	}
 	return nil
+}
+
+// memberOf devuelve lo que se camina bajo el valor cv de inst: su objeto, o, de un primitivo, su "_key"
+// (json.html#primitive: su id y extensions) con el primitivo en su lugar; false si no hay nada que caminar.
+func memberOf(cv elementvalues.Value, inst map[string]any) (m map[string]any, prim registry.PrimitiveValue, ok bool) {
+	if m, isObject := cv.Value.(map[string]any); isObject {
+		return m, registry.PrimitiveValue{}, true
+	}
+	if cv.Ext == nil {
+		return nil, registry.PrimitiveValue{}, false
+	}
+	return cv.Ext, cv.Primitive(inst), true
 }

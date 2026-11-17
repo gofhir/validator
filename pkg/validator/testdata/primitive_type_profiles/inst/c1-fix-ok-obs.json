@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c1-fix-ok-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-fix"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abc"
+}

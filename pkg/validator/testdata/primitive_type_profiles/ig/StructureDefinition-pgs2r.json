@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pgs2r",
+ "url": "http://example.org/fhir/StructureDefinition/pgs2r",
+ "name": "pgs2r",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.name.given:s",
+    "path": "Patient.name.given",
+    "sliceName": "s",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-len",
+       "http://example.org/fhir/StructureDefinition/ps-sub"
+      ]
+     }
+    ],
+    "patternString": "ab"
+   }
+  ]
+ }
+}

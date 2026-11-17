@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s15-ok2",
+ "url": "http://example.org/fhir/StructureDefinition/s15-ok2",
+ "name": "s15_ok2",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "warning",
+      "human": "sev-1 length() <= 3 (warning)",
+      "expression": "length() <= 3"
+     }
+    ]
+   }
+  ]
+ }
+}

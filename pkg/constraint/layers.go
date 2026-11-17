@@ -97,8 +97,8 @@ func mergeLayers(parent *constraintEvalOpts, runs []layerRun, result *issue.Resu
 
 // cloneSeen copia las invariantes ya evaluadas para una capa. Se copia a mano: maps.Clone haría que el
 // mapa de quien llama (casi siempre sin capas) se reservara en el heap.
-func cloneSeen(seen map[string]bool) map[string]bool {
-	out := make(map[string]bool, len(seen))
+func cloneSeen(seen seenSet) seenSet {
+	out := make(seenSet, len(seen))
 	for k, v := range seen {
 		out[k] = v
 	}

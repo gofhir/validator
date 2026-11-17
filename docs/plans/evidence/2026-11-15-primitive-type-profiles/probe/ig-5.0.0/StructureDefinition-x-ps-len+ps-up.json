@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "x-ps-len+ps-up",
+ "url": "http://example.org/fhir/StructureDefinition/x-ps-len+ps-up",
+ "name": "x_ps_len+ps_up",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/x-ps-len+ps-up"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-len",
+       "http://example.org/fhir/StructureDefinition/ps-up"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  },
+  {
+   "type": "element",
+   "expression": "Observation"
+  }
+ ]
+}

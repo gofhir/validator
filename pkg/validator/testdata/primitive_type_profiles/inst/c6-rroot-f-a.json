@@ -1,0 +1,29 @@
+{
+ "resourceType": "Observation",
+ "id": "c6-rroot-f-a",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/o-ps-rroot"
+    ]
+   },
+   "status": "amended",
+   "code": {
+    "text": "x"
+   },
+   "valueString": "ab"
+  }
+ ],
+ "hasMember": [
+  {
+   "reference": "#c1"
+  }
+ ]
+}

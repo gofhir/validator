@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c10-valcpat-0",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-valc+ps-pat"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abc"
+}

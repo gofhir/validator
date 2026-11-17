@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-idc",
+ "url": "http://example.org/fhir/StructureDefinition/ps-idc",
+ "name": "ps_idc",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.id",
+    "path": "string.id",
+    "constraint": [
+     {
+      "key": "idc-1",
+      "severity": "error",
+      "human": "id at most 3 chars (ps-idc)",
+      "expression": "length() <= 3"
+     }
+    ]
+   }
+  ]
+ }
+}

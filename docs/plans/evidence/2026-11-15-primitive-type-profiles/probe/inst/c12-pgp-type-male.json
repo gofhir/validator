@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgp-type-male",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgp-type"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "male"
+   ]
+  }
+ ]
+}

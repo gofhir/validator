@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-xs-fix-ok-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-len+ps-xfix"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-str",
+       "valueString": "ab"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

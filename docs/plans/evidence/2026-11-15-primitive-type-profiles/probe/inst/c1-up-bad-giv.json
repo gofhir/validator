@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-up-bad-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-up"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

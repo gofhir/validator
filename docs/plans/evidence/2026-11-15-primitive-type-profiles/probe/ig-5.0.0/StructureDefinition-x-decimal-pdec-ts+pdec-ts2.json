@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "x-decimal-pdec-ts+pdec-ts2",
+ "url": "http://example.org/fhir/StructureDefinition/x-decimal-pdec-ts+pdec-ts2",
+ "name": "x_decimal_pdec_ts+pdec_ts2",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/x-decimal-pdec-ts+pdec-ts2"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "decimal",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/pdec-ts",
+       "http://example.org/fhir/StructureDefinition/pdec-ts2"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  },
+  {
+   "type": "element",
+   "expression": "Observation"
+  }
+ ]
+}

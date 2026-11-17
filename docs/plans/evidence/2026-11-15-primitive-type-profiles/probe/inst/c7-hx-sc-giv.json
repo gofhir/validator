@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c7-hx-sc-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-hx"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

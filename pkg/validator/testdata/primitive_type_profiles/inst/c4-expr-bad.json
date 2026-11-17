@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c4-expr-bad",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-len+ps-len3"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abcd"
+}

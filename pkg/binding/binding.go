@@ -135,7 +135,7 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 	checked := issue.GetPooledResult()
 	defer issue.ReleaseResult(checked)
 	ctx = reslang.With(ctx, resource)
-	v.walk(ctx, registry.ResourceOwner(resource), sd, root, "", resource, nil, resourceType, nil, checked)
+	v.walk(ctx, registry.ResourceOwner(resource), sd, root, "", registry.PrimitiveValue{}, resource, nil, resourceType, nil, checked)
 	languages := reslang.NewWalk(ctx, resourceType)
 
 	// Every resource it holds, at any depth (contained resources, Bundle entries, the resources
@@ -147,7 +147,7 @@ func (v *Validator) ValidateData(ctx context.Context, resource map[string]any, s
 			return true
 		}
 		if r := rc.SD.Tree().Root(); r != nil {
-			v.walk(languages.Context(ctx, rc), rc.Data, rc.SD, r, "", rc.Data, nil, rc.FHIRPath, nil, checked)
+			v.walk(languages.Context(ctx, rc), rc.Data, rc.SD, r, "", registry.PrimitiveValue{}, rc.Data, nil, rc.FHIRPath, nil, checked)
 		}
 		return true
 	})

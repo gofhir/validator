@@ -1,0 +1,17 @@
+{
+ "resourceType": "Observation",
+ "id": "c7-rxri-i-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-rx+ps-ri"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "ab",
+ "_valueString": {
+  "id": "a1"
+ }
+}

@@ -190,14 +190,18 @@ func classifyLayers(is issue.Issue) (gotIssue, bool) {
 		if m == nil {
 			return gotIssue{}, false
 		}
-		if m[1] == "dom-3" || (sev == "warning" && m[1] != "dup-1") {
+		if m[1] == "dom-3" || (sev == "warning" && m[1] != "dup-1" && m[1] != "xw-1" && m[1] != "sev-1") {
 			return gotIssue{}, false
 		}
 		g.Kind, g.Detail, g.Text = "constraint", m[1], m[2]
 	case id == string(issue.DiagReferenceTargetProfile):
 		g.Kind = "ref-target-profile"
+	case id == "REFERENCE_INVALID_TARGET":
+		g.Kind = "reference-target-type"
 	case id == string(issue.DiagSlicingNoMatch):
 		g.Kind = "slice-no-match"
+	case id == string(issue.DiagSlicingCannotEvaluate):
+		g.Kind = "slicing-cannot-be-evaluated"
 	case id == string(issue.DiagExtensionInvalidContext):
 		g.Kind = "extension-context"
 	case strings.HasPrefix(id, "BINDING") || strings.HasPrefix(id, "CODESYSTEM"):
@@ -324,14 +328,9 @@ func expand(t *testing.T, re string) []string {
 	return out
 }
 
-// piece3Probes son las sondas de valores primitivos (valueString con varios perfiles de tipo), que
-// quedan fuera de esta pieza (#193, pieza 3). Su evidencia y su valor esperado siguen en testdata/ y expected.json;
-// la pieza 3 las corre con runLayerProbes(t, piece3Probes).
-var piece3Probes = []string{"p14", "p15"}
-
 // p1 a p21 (2026-11-05): elección por valor, NoMatch, MultipleMatches, perfil que no se resuelve, repetido,
 // extensión. P4 y p11 son de un solo perfil y están en el grupo de regresión; p12, p20 y p21 son las divergencias
-// declaradas. Las de un valor primitivo (p14, p15) no corren aquí: son de la pieza 3 (piece3Probes).
+// declaradas. Las de un valor primitivo (p14, p15) son de la pieza 3 y corren en primitive_type_profiles_test.go.
 func TestLayersProfileChoice(t *testing.T) {
 	runLayerProbes(t, expand(t, `p([1-9]|1[0-3]|1[6-9]|2[01])`))
 }
@@ -915,14 +914,4 @@ func TestLayersSameChildWithDifferentRulesIsReportedByBothAndWalkedOnce(t *testi
 		t.Errorf("%d visitas al elector, más que %d: un valor se camina más de una vez", visits.Load(), bound)
 	}
 	t.Logf("visitas: %d, comprobaciones: %d, reglas: %v", visits.Load(), checks.Load(), got)
-}
-
-// Las sondas de la pieza 3 siguen en el corpus (su evidencia y su valor esperado), aunque esta pieza no las corra.
-func TestLayersPiece3ProbesStayInTheCorpus(t *testing.T) {
-	probes := layerProbes(t)
-	for _, name := range piece3Probes {
-		if _, ok := probes[name]; !ok {
-			t.Errorf("la sonda %s de la pieza 3 no está en expected.json", name)
-		}
-	}
 }

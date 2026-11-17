@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-fix",
+ "url": "http://example.org/fhir/StructureDefinition/ps-fix",
+ "name": "ps_fix",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.value",
+    "path": "string.value",
+    "fixedString": "abc"
+   }
+  ]
+ }
+}

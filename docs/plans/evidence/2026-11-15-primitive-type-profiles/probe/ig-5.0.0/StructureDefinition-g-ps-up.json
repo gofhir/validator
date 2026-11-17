@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "g-ps-up",
+ "url": "http://example.org/fhir/StructureDefinition/g-ps-up",
+ "name": "g_ps_up",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-up"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
