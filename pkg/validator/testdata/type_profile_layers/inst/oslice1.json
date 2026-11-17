@@ -1,0 +1,46 @@
+{
+ "resourceType": "Observation",
+ "id": "oslice1",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-oslice"
+  ]
+ },
+ "status": "amended",
+ "code": {
+  "coding": [
+   {
+    "system": "urn:probe:other",
+    "code": "c"
+   }
+  ]
+ },
+ "subject": {
+  "display": "x"
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/obs-oslice"
+    ]
+   },
+   "status": "final",
+   "code": {
+    "coding": [
+     {
+      "system": "urn:probe:other",
+      "code": "c"
+     }
+    ]
+   }
+  }
+ ],
+ "hasMember": [
+  {
+   "reference": "#c1"
+  }
+ ]
+}

@@ -3,6 +3,9 @@ package extension
 import (
 	"context"
 	"errors"
+	"fmt"
+	"maps"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -92,8 +95,13 @@ type target struct {
 	value   any
 	element map[string]any
 	holder  map[string]any
-	key     string
-	index   int
+	// as is the element that names the target, when it is not node: a datatype's value checked against a
+	// profile it is declared (DatatypeAt) is as the element declares it, and walks the profile.
+	as *registry.ElementNode
+	// owner is the resource that holds the target (registry.Instance.Owner).
+	owner map[string]any
+	key   string
+	index int
 	// exact returns an object with its numbers as the JSON spells them (Data.Exact); nil for none.
 	exact func(map[string]any) map[string]any
 	// scope evaluates expressions on the resource it is in; nil without a FHIRPathEvaluator.
@@ -122,11 +130,21 @@ func (v *Validator) checkContexts(ctx context.Context, resource map[string]any, 
 	if sd == nil || sd.Snapshot == nil {
 		return
 	}
-	rootNode := sd.Tree().Root()
-	if rootNode == nil {
+	t, ok := v.rootTarget(ctx, sd, resource, location, in)
+	if !ok {
 		return
 	}
-	t := target{sd: sd, node: rootNode, path: rt, location: location, local: in.local, value: resource, index: -1, exact: in.exact}
+	v.walkTargets(ctx, t, resource, nil, result)
+}
+
+// rootTarget is the target a resource of sd is, at location, in the place in says.
+func (v *Validator) rootTarget(ctx context.Context, sd *registry.StructureDefinition, resource map[string]any, location string, in place) (target, bool) {
+	rootNode := sd.Tree().Root()
+	if rootNode == nil {
+		return target{}, false
+	}
+	rt, _ := resource[resourceTypeKey].(string)
+	t := target{sd: sd, node: rootNode, path: rt, location: location, local: in.local, value: resource, index: -1, exact: in.exact, owner: resource}
 	switch {
 	case in.parent != nil:
 		t.scope = in.parent.Within(in.local, resource, in.contained)
@@ -137,16 +155,129 @@ func (v *Validator) checkContexts(ctx context.Context, resource map[string]any, 
 	default:
 		t.local = rt
 	}
-	v.walkTargets(ctx, t, resource, result)
+	return t, true
+}
+
+// DatatypeAt is a datatype's value that is checked against one of the profiles its element declares, and
+// the element: the extensions it holds are allowed or not by where it is, which the profile does not say.
+type DatatypeAt struct {
+	Value    map[string]any
+	Node     *registry.ElementNode // the element that declares the profiles
+	TypeCode string                // the type they are declared in
+}
+
+// ValidateDatatypeContexts checks the contexts of use of the extensions at.Value holds, as the extension
+// phase checks them when it walks the resource under profile: the value is at.Node of d's resource, the
+// resource that holds it, and the extensions it declares are read in profile.
+func (v *Validator) ValidateDatatypeContexts(ctx context.Context, d Data, at DatatypeAt, profile *registry.StructureDefinition, result *issue.Result) {
+	if at.Node == nil || !holdsExtension(at.Value) {
+		return
+	}
+	rt, _ := d.Resource[resourceTypeKey].(string)
+	base := v.registry.GetByType(rt)
+	root := profile.Tree().Root()
+	if base == nil || base.Snapshot == nil || root == nil {
+		return
+	}
+	in := place{root: ScopeRoot{Raw: d.Raw, Bundle: d.Bundle, Outer: d.Outer, Exact: d.Exact}, exact: d.Exact}
+	if d.Container != nil && d.At != "" && v.fhirpath != nil {
+		container := v.fhirpath.Scope(ctx, ScopeRoot{Resource: d.Container, Bundle: d.Bundle, Outer: d.Outer, Exact: d.Exact})
+		in = place{local: d.At, parent: container, contained: true, exact: d.Exact}
+	}
+	t, ok := v.rootTarget(ctx, base, d.Resource, rt, in)
+	if !ok {
+		return
+	}
+	rel, found := pathTo(d.Resource, at.Value)
+	if !found {
+		return
+	}
+	t.sd, t.node, t.as, t.typeCode = profile, root, at.Node, at.TypeCode
+	t.path, t.location, t.local, t.value = at.Node.Def.Path, t.location+rel, t.local+rel, at.Value
+	v.walkTargets(ctx, t, at.Value, nil, result)
+}
+
+// holdsExtension reports whether m, or any object under it, has an extension.
+func holdsExtension(m map[string]any) bool {
+	for k, val := range m {
+		if k == "extension" || k == "modifierExtension" {
+			return true
+		}
+		switch x := val.(type) {
+		case map[string]any:
+			if holdsExtension(x) {
+				return true
+			}
+		case []any:
+			for _, item := range x {
+				if o, ok := item.(map[string]any); ok && holdsExtension(o) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// pathTo is where target is under m, as ".key" and "[i]" steps, by identity; the keys are visited in
+// order so the first found is the answer, and an object has one place.
+func pathTo(m, target map[string]any) (string, bool) {
+	for _, k := range slices.Sorted(maps.Keys(m)) {
+		switch x := m[k].(type) {
+		case map[string]any:
+			if sameMap(x, target) {
+				return "." + k, true
+			}
+			if rel, ok := pathTo(x, target); ok {
+				return "." + k + rel, true
+			}
+		case []any:
+			for i, item := range x {
+				o, ok := item.(map[string]any)
+				if !ok {
+					continue
+				}
+				if sameMap(o, target) {
+					return fmt.Sprintf(".%s[%d]", k, i), true
+				}
+				if rel, ok := pathTo(o, target); ok {
+					return fmt.Sprintf(".%s[%d]%s", k, i, rel), true
+				}
+			}
+		}
+	}
+	return "", false
+}
+
+func sameMap(a, b map[string]any) bool {
+	return reflect.ValueOf(a).Pointer() == reflect.ValueOf(b).Pointer()
 }
 
 // walkTargets checks the extensions t holds, held in inst (t's object, or a primitive's "_key"
 // sibling), and walks into its children.
-func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]any, result *issue.Result) {
-	children := v.registry.ChildrenOf(ctx, t.sd, t.node, t.typeCode, func(typeCode string) *registry.StructureDefinition {
-		return v.DefinitionOf(ctx, typeCode, inst)
+func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]any, done registry.Descended, result *issue.Result) {
+	children := v.registry.ChildrenOf(ctx, t.sd, t.node, t.typeCode, registry.Instance{
+		Value: inst, Owner: t.owner,
+		Self: v,
 	})
-	for _, child := range children.Nodes {
+	// A value two layers of its holder declare is walked once, under the union of the layers.
+	children, ok := done.Fresh(inst, children)
+	if !ok {
+		return
+	}
+	below := done.Below(children)
+	// What two layers (the several profiles the value's type declares) report the same is reported once.
+	start := len(result.Issues)
+	for i := range children.NumLayers() {
+		from := len(result.Issues)
+		v.walkLayer(ctx, t, children.LayerAt(i), inst, below, result)
+		result.DropRepeated(start, from)
+	}
+}
+
+// walkLayer is walkTargets over one layer: the children a definition gives inst.
+func (v *Validator) walkLayer(ctx context.Context, t target, layer registry.Layer, inst map[string]any, below registry.Descended, result *issue.Result) {
+	for _, child := range layer.Nodes {
 		for _, cv := range elementvalues.Of(child, inst, v.registry) {
 			if !elementvalues.Written(child, cv, v.registry) {
 				continue // written otherwise than the element says: structural reports it, HL7 drops it
@@ -160,20 +291,20 @@ func (v *Validator) walkTargets(ctx context.Context, t target, inst map[string]a
 				continue
 			}
 			next := target{
-				sd: children.SD, node: child, typeCode: cv.TypeCode, path: t.path + "." + child.Name(),
+				sd: layer.SD, node: child, typeCode: cv.TypeCode, path: t.path + "." + child.Name(),
 				location: location, local: cv.Path(t.local), value: cv.Value, element: cv.Ext, scope: t.scope,
-				holder: inst, key: cv.Key, index: -1, exact: t.exact,
+				holder: inst, key: cv.Key, index: -1, exact: t.exact, owner: t.owner,
 			}
 			if cv.Array {
 				next.index = cv.Index
 			}
 			if isObject {
 				next.extensions = v.extensionsOf(ctx, t, valueTypeOf(child, cv.TypeCode), m, result)
-				v.walkTargets(ctx, next, m, result)
+				v.walkTargets(ctx, next, m, below, result)
 			}
 			if cv.Ext != nil && elementvalues.ShapeOf(child, cv) == elementvalues.RightShape {
 				// a primitive's "_key" sibling, when the primitive is written as its element says
-				v.walkTargets(ctx, next, cv.Ext, result)
+				v.walkTargets(ctx, next, cv.Ext, below, result)
 			}
 		}
 	}
@@ -313,6 +444,9 @@ func exactOf(exact func(map[string]any) map[string]any, m map[string]any) map[st
 // it (Observation.valueQuantity, formats.html#choice).
 func (v *Validator) typedPath(t target) string {
 	node := t.node
+	if t.as != nil {
+		node = t.as
+	}
 	if node.Def.ContentReference != nil {
 		if ref, _ := v.registry.ContentReference(t.sd, node); ref != nil {
 			node = ref
@@ -387,15 +521,19 @@ func (v *Validator) targetNames(t target) []string {
 			names = append(names, n)
 		}
 	}
-	add(t.node.Def.ID)
-	add(t.node.Def.Path)
-	if t.node.Def.Base != nil {
-		add(t.node.Def.Base.Path)
+	named := t.node
+	if t.as != nil {
+		named = t.as
+	}
+	add(named.Def.ID)
+	add(named.Def.Path)
+	if named.Def.Base != nil {
+		add(named.Def.Base.Path)
 	}
 	add(t.path)
-	typed := t.node
-	if t.node.Def.ContentReference != nil {
-		if ref, _ := v.registry.ContentReference(t.sd, t.node); ref != nil {
+	typed := named
+	if named.Def.ContentReference != nil {
+		if ref, _ := v.registry.ContentReference(t.sd, named); ref != nil {
 			add(ref.Def.ID)
 			typed = ref
 		}

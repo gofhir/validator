@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ids-rexists",
+ "url": "http://example.org/fhir/StructureDefinition/ids-rexists",
+ "name": "ids_rexists",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier",
+    "constraint": [
+     {
+      "key": "e2-rexists",
+      "severity": "error",
+      "human": "identifier profile ids-rexists: %resource.exists()",
+      "expression": "%resource.exists()"
+     }
+    ]
+   }
+  ]
+ }
+}

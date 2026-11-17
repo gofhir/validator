@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qres-b",
+ "url": "http://example.org/fhir/StructureDefinition/qres-b",
+ "name": "qres_b",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity",
+    "path": "Quantity",
+    "constraint": [
+     {
+      "key": "rb-1",
+      "severity": "error",
+      "human": "resource must be amended (qres-b)",
+      "expression": "%resource.status = 'amended'"
+     }
+    ]
+   }
+  ]
+ }
+}

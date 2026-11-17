@@ -1,0 +1,81 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (12 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-11-14-type-profile-layers/probe-callers, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/bcyc1.json inst/bcyc2.json inst/bcyc3.json inst/kbind.json inst/kbindok.json inst/kctx.json inst/kext.json inst/kextok.json inst/kslice.json inst/kslicep.json inst/kucum.json inst/kucumb.json inst/obind1.json inst/obind2.json inst/ocard1.json inst/ocard2.json inst/oext1.json inst/oext2.json inst/oslice1.json inst/oslice2.json inst/single1.json inst/single2.json inst/single3.json -version 4.0.1 -ig ig-4.0.1 -tx n/a -output hl7-4.0.1-7.0.4.json
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:07.277)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:01.566)
+  Loaded FHIR - 8265 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.158)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.379)
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:01.062)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:01.095)
+  Load ig-4.0.1 - 134 resources (00:00.032)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+Can't find Quantity profile #cq but trying to go on
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/igx but trying to go on
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/nope but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/nope-1 but trying to go on
+Can't find Quantity profile #cq but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/nope-1 but trying to go on
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/igx but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/missing-quantity but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/missing-quantity but trying to go on
+  ...go! (00:01.976)
+Cached new session. Cache size = 1
+Sources to validate: inst/bcyc1.jsoninst/bcyc2.jsoninst/bcyc3.jsoninst/kbind.jsoninst/kbindok.jsoninst/kctx.jsoninst/kext.jsoninst/kextok.jsoninst/kslice.jsoninst/kslicep.jsoninst/kucum.jsoninst/kucumb.jsoninst/obind1.jsoninst/obind2.jsoninst/ocard1.jsoninst/ocard2.jsoninst/oext1.jsoninst/oext2.jsoninst/oslice1.jsoninst/oslice2.jsoninst/single1.jsoninst/single2.jsoninst/single3.json
+Validating
+  Validate inst/bcyc1.json
+ 00:00.440
+  Validate inst/bcyc2.json
+ 00:00.030
+  Validate inst/bcyc3.json
+ 00:00.021
+  Validate inst/kbind.json
+ 00:00.105
+  Validate inst/kbindok.json
+ 00:00.033
+  Validate inst/kctx.json
+ 00:00.051
+  Validate inst/kext.json
+ 00:00.022
+  Validate inst/kextok.json
+ 00:00.039
+  Validate inst/kslice.json
+ 00:00.037
+  Validate inst/kslicep.json
+ 00:00.018
+  Validate inst/kucum.json
+ 00:00.071
+  Validate inst/kucumb.json
+ 00:00.021
+  Validate inst/obind1.json
+ 00:00.026
+  Validate inst/obind2.json
+ 00:00.025
+  Validate inst/ocard1.json
+ 00:00.022
+  Validate inst/ocard2.json
+ 00:00.030
+  Validate inst/oext1.json
+ 00:00.059
+  Validate inst/oext2.json
+ 00:00.075
+  Validate inst/oslice1.json
+ 00:00.030
+  Validate inst/oslice2.json
+ 00:00.229
+  Validate inst/single1.json
+ 00:00.021
+  Validate inst/single2.json
+ 00:00.016
+  Validate inst/single3.json
+ 00:00.015
+Done. Times: Loading: 00:14.602, validation: 00:01.453 (#23). Memory = 504Mb
+
+Done. Times: Loading: 00:14.602, validation: 00:01.453 (#23). Max Memory = 6Gb

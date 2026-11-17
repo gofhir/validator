@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "d4c",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-d4m"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "bogus": 1,
+  "unit": 7
+ }
+}

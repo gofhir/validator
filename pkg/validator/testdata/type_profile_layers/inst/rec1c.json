@@ -1,0 +1,27 @@
+{
+ "resourceType": "Observation",
+ "id": "rec1c",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-rec1"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "identifier": [
+  {
+   "value": "x",
+   "assigner": {
+    "display": "d",
+    "identifier": {
+     "use": "usual"
+    }
+   }
+  }
+ ]
+}

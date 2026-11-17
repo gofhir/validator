@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ids-rrid1",
+ "url": "http://example.org/fhir/StructureDefinition/ids-rrid1",
+ "name": "ids_rrid1",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier",
+    "constraint": [
+     {
+      "key": "e2-rrid1",
+      "severity": "error",
+      "human": "identifier profile ids-rrid1: %rootResource.id = 'b1'",
+      "expression": "%rootResource.id = 'b1'"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-dpwk",
+ "url": "http://example.org/fhir/StructureDefinition/obs-dpwk",
+ "name": "obs_dpwk",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.code",
+    "path": "Observation.code",
+    "type": [
+     {
+      "code": "CodeableConcept",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/dp-cc-final",
+       "http://example.org/fhir/StructureDefinition/dp-cc-amended"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

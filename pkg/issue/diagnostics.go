@@ -58,6 +58,12 @@ const (
 	// DiagHolderProfileMultipleMatches: a held resource conforms to more than one of the profiles its
 	// element allows for it (alternatives).
 	DiagHolderProfileMultipleMatches DiagnosticID = "HOLDER_PROFILE_MULTIPLE_MATCHES"
+	// DiagProfileNoMatch: a value conforms to none of the profiles its element's type declares for it
+	// (ElementDefinition.type.profile, alternatives).
+	DiagProfileNoMatch DiagnosticID = "PROFILE_NO_MATCH"
+	// DiagProfileMultipleMatches: a value conforms to more than one of the profiles its element's type
+	// declares for it (alternatives).
+	DiagProfileMultipleMatches DiagnosticID = "PROFILE_MULTIPLE_MATCHES"
 	// DiagBindingRequiredNoCoding: none of a CodeableConcept's codings is in the value set of its
 	// required binding.
 	DiagBindingRequiredNoCoding DiagnosticID = "BINDING_REQUIRED_NO_CODING"
@@ -476,6 +482,16 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityWarning,
 		Code:     CodeInformational,
 		Template: "The resource conforms to more than one of the profiles the element that holds it allows ({profiles})",
+	},
+	DiagProfileNoMatch: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "The value conforms to none of the profiles its element's type allows ({profiles})",
+	},
+	DiagProfileMultipleMatches: {
+		Severity: SeverityWarning,
+		Code:     CodeInformational,
+		Template: "The value conforms to more than one of the profiles its element's type allows ({profiles})",
 	},
 	DiagBindingRequiredNoCoding: {
 		Severity: SeverityError,

@@ -1,0 +1,48 @@
+{
+ "resourceType": "Observation",
+ "id": "oext1",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-oext"
+  ]
+ },
+ "status": "amended",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "unit": "mg",
+  "system": "http://unitsofmeasure.org",
+  "code": "mg"
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "status": "final",
+   "code": {
+    "text": "x"
+   },
+   "valueQuantity": {
+    "value": 5,
+    "unit": "mg",
+    "system": "http://unitsofmeasure.org",
+    "code": "mg"
+   },
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/obs-oext"
+    ]
+   }
+  }
+ ],
+ "hasMember": [
+  {
+   "reference": "#c1"
+  }
+ ]
+}

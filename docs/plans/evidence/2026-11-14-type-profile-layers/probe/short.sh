@@ -1,0 +1,1 @@
+sed -E 's#http://(hl7|example)\.org/fhir/StructureDefinition/##g; s#\(validating against[^)]*\)#(VA)#; s#Unable to find a match for the specified profile among choices#NOMATCH#; s#^  (.) (structure|invariant|business-rule|invalid|required|value|processing|not-found|code-invalid) #  \1 #' "$1"

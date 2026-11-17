@@ -34,6 +34,14 @@ import (
 type conformer struct {
 	v      *Validator
 	assume bool
+	// profileOnly judges the value on what the profile adds, as the HL7 validator judges each of the
+	// profiles an element's type declares: the shape and primitive content the value has whatever the
+	// profile, and a UCUM code, are the value's own and are reported once (the structural, primitive
+	// and UCUM phases), and do not make it conform to none (typeChooser).
+	profileOnly bool
+	// at is where the value is, when it is a datatype's value chosen among the profiles of its element
+	// (typeChooser); nil otherwise.
+	at *datatypeAt
 }
 
 // conformState is shared by the conformance checks of one top-level validation: a memo of the
@@ -148,6 +156,17 @@ type conformKey struct {
 	profile string
 	value   uintptr // identity of the value's map within this validation; one map has one Scope, so the key needs none
 	assume  bool    // the check's mode: a cycle's answer differs between them
+	// profileOnly is the other mode (conformer.profileOnly): its answer differs too.
+	profileOnly bool
+}
+
+// datatypeAt is where the value a conformance check decides on is, when it is a datatype's value
+// among the alternatives its element declares: the extensions it holds must be allowed there
+// (extension.DatatypeAt).
+type datatypeAt struct {
+	alt   registry.Alternatives
+	owner map[string]any // the resource that holds the value
+	scope slicematch.Scope
 }
 
 type conformStateKey struct{}
@@ -169,6 +188,50 @@ func withConformState(ctx context.Context) context.Context {
 type scopeCheck func(resource map[string]any, asked, indexed slicematch.Scope)
 
 type scopeCheckKey struct{}
+
+// typeChooser decides which of the profiles an element's type declares a value conforms to
+// (registry.ProfileChooser), with the conformer, in the Scope of the resource that holds it.
+type typeChooser struct{ v *Validator }
+
+// probeKey y conformProbe cuentan, solo en los tests y los benchmarks, cuántas veces se pide una
+// elección entre perfiles de tipo ("visit") y cuántas comprobaciones de conformidad corren de verdad
+// ("check"), sin contar las respuestas de memo.
+type conformProbe func(event string)
+
+type probeKey struct{}
+
+func probe(ctx context.Context, event string) {
+	if p, _ := ctx.Value(probeKey{}).(conformProbe); p != nil {
+		p(event)
+	}
+}
+
+// Conforms implements registry.ProfileChooser. The owner's Scope is the canonical one of its resource
+// (scopeindex), or, with no owner, the one the validation gives the value it validates.
+func (c typeChooser) Conforms(ctx context.Context, inst registry.Instance, alt registry.Alternatives, profile *registry.StructureDefinition) (met, decided bool) {
+	probe(ctx, "visit")
+	scope, ok := c.scopeOf(ctx, inst.Owner)
+	if !ok {
+		return false, false
+	}
+	// El valor de un tipo de datos está en un solo lugar, el que da su mapa: el sitio que se le pasa
+	// a la comprobación (para el contexto de uso de las Extension) no entra en la clave del memo.
+	at := &datatypeAt{alt: alt, owner: inst.Owner, scope: scope}
+	return conformer{v: c.v, profileOnly: true, at: at}.Conforms(ctx, inst.Value, profile, scope), true
+}
+
+func (c typeChooser) scopeOf(ctx context.Context, owner map[string]any) (slicematch.Scope, bool) {
+	root, hasRoot := ctx.Value(rootScopeKey{}).(slicematch.Scope)
+	switch {
+	case owner == nil:
+		return root, hasRoot
+	case scopeindex.From(ctx) != nil:
+		return scopeindex.Resolve(ctx, owner, "type profile choice", slicematch.Scope{})
+	case hasRoot && root.Resource != nil && sameMap(root.Resource, owner):
+		return root, true
+	}
+	return slicematch.Scope{Resource: owner, RootResource: owner, Container: owner}, true
+}
 
 // Conforms implements slicematch.Conformer.
 func (c conformer) Conforms(ctx context.Context, value any, profile *registry.StructureDefinition, scope slicematch.Scope) bool {
@@ -196,7 +259,7 @@ func (c conformer) Conforms(ctx context.Context, value any, profile *registry.St
 		ctx = withConformState(ctx)
 		st, _ = ctx.Value(conformStateKey{}).(*conformState)
 	}
-	key := conformKey{profile: profile.URL + "|" + profile.Version, value: reflect.ValueOf(data).Pointer(), assume: c.assume}
+	key := conformKey{profile: profile.URL + "|" + profile.Version, value: reflect.ValueOf(data).Pointer(), assume: c.assume, profileOnly: c.profileOnly}
 
 	st.mu.Lock()
 	if ans, ok := st.memo[key]; ok {
@@ -236,6 +299,7 @@ func (c conformer) Conforms(ctx context.Context, value any, profile *registry.St
 	st.stack = append(st.stack, conformFrame{low: depth, made: st.made, target: c.assume})
 	st.mu.Unlock()
 
+	probe(ctx, "check")
 	ans := c.check(ctx, data, profile, scope)
 
 	st.mu.Lock()
@@ -325,7 +389,7 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 	// respuestas que pueden ser provisionales, y settle las descarta sin descartar los grupos
 	// (holderGroups).
 	ctx = withoutHolderGroups(ctx)
-	c.v.validateAgainstProfile(withExtensionScope(constraint.WithReportScope(ctx)), data, raw, profile, &valueScope{scope: scope, state: st}, result)
+	c.v.validateAgainstProfile(withExtensionScope(constraint.WithReportScope(ctx)), data, raw, profile, &valueScope{scope: scope, state: st, profileOnly: c.profileOnly, at: c.at}, result)
 	return result.ErrorCount() == 0
 }
 
@@ -334,6 +398,10 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 type valueScope struct {
 	scope slicematch.Scope
 	state *conformState
+	// profileOnly is conformer.profileOnly.
+	profileOnly bool
+	// at is conformer.at.
+	at *datatypeAt
 }
 
 // constraintOptions returns the resources a value's constraints read as %resource and

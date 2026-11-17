@@ -507,7 +507,7 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 	if root == nil {
 		return
 	}
-	v.walk(ctx, sd, root, "", resource, resourceType, rc, result)
+	v.walk(ctx, registry.ResourceOwner(resource), sd, root, "", resource, resourceType, rc, nil, result)
 
 	// Walk every resource it holds (contained resources, Bundle entries, the resources other
 	// elements hold), each against the profiles its meta.profile declares and its type's
@@ -531,7 +531,7 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 			contexts[w.FHIRPath] = here
 		}
 		if r := w.SD.Tree().Root(); r != nil {
-			v.walk(ctx, w.SD, r, "", w.Data, w.FHIRPath, here, nested)
+			v.walk(ctx, w.Data, w.SD, r, "", w.Data, w.FHIRPath, here, nil, nested)
 		}
 		return true
 	})
@@ -551,32 +551,45 @@ func (v *Validator) ValidateDataWithBundleContext(ctx context.Context, resource 
 // (Registry.ChildrenOf: a contentReference, the profile its type declares, a backbone element's
 // children, the definition an extension's url names, or else Extension's), a primitive's extensions
 // included. A resource an element holds is checked by the resource walk.
-func (v *Validator) walk(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, rc *refContext, result *issue.Result) {
-	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, v.selfDefinitions(ctx, inst))
+func (v *Validator) walk(ctx context.Context, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, fhirPath string, rc *refContext, done registry.Descended, result *issue.Result) {
+	c := v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Self: v.definitions, Owner: owner})
+	// A value two layers of its holder declare is walked once, under the union of the layers.
+	c, ok := done.Fresh(inst, c)
+	if !ok {
+		return
+	}
+	below := done.Below(c)
 	matched := slicerecord.In(ctx)
-	for _, child := range c.Nodes {
-		for _, cv := range elementvalues.Of(child, inst, v.registry) {
-			if !elementvalues.Written(child, cv, v.registry) || (cv.TypeCode != "" && !v.declares(child.Def, cv.TypeCode)) {
-				continue // the structural phase reports it, and HL7 checks nothing in it
-			}
-			gov := matched.Of(child, inst, cv.Key, cv.Index)
-			path := elementvalues.ItemPath(child, cv, fhirPath)
-			if cv.TypeCode == typeCodeReference {
-				v.validateReference(cv.Value, gov.Def, path, rc, result)
-			}
-			if v.registry.HoldsResource(child.Def) {
-				continue
-			}
-			m, ok := cv.Value.(map[string]any)
-			if !ok {
-				// A primitive's id and extensions are its "_key" sibling (json.html#primitive).
-				if m = cv.Ext; m == nil {
+	// What two layers (the several profiles the value's type declares) report the same is reported once.
+	start := len(result.Issues)
+	for i := range c.NumLayers() {
+		from := len(result.Issues)
+		layer := c.LayerAt(i)
+		for _, child := range layer.Nodes {
+			for _, cv := range elementvalues.Of(child, inst, v.registry) {
+				if !elementvalues.Written(child, cv, v.registry) || (cv.TypeCode != "" && !v.declares(child.Def, cv.TypeCode)) {
+					continue // the structural phase reports it, and HL7 checks nothing in it
+				}
+				gov := matched.Of(child, inst, cv.Key, cv.Index)
+				path := elementvalues.ItemPath(child, cv, fhirPath)
+				if cv.TypeCode == typeCodeReference {
+					v.validateReference(cv.Value, gov.Def, path, rc, result)
+				}
+				if v.registry.HoldsResource(child.Def) {
 					continue
 				}
+				m, ok := cv.Value.(map[string]any)
+				if !ok {
+					// A primitive's id and extensions are its "_key" sibling (json.html#primitive).
+					if m = cv.Ext; m == nil {
+						continue
+					}
+				}
+				nsd, next := v.registry.MemberTree(ctx, layer.SD, gov)
+				v.walk(ctx, owner, nsd, next, cv.TypeCode, m, path, rc, below, result)
 			}
-			nsd, next := v.registry.MemberTree(ctx, c.SD, gov)
-			v.walk(ctx, nsd, next, cv.TypeCode, m, path, rc, result)
 		}
+		result.DropRepeated(start, from)
 	}
 }
 
@@ -605,16 +618,6 @@ type DefinitionSource interface {
 // extension is checked against the definitions of the element that holds it only.
 func WithDefinitions(d DefinitionSource) Option {
 	return func(v *Validator) { v.definitions = d }
-}
-
-// selfDefinitions returns, for an instance, the definition it declares for itself for a type.
-func (v *Validator) selfDefinitions(ctx context.Context, inst map[string]any) func(string) *registry.StructureDefinition {
-	if v.definitions == nil {
-		return nil
-	}
-	return func(typeCode string) *registry.StructureDefinition {
-		return v.definitions.DefinitionOf(ctx, typeCode, inst)
-	}
 }
 
 // validateReference validates a single Reference value.

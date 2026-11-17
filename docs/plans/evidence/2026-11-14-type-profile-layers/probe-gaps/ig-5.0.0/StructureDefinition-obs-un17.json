@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-un17",
+ "url": "http://example.org/fhir/StructureDefinition/obs-un17",
+ "name": "obs_un17",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.note",
+    "path": "Observation.note",
+    "type": [
+     {
+      "code": "Annotation",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/missing-a",
+       "http://example.org/fhir/StructureDefinition/missing-b"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

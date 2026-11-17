@@ -1,0 +1,86 @@
+[
+ [
+  "unk",
+  "round 1: two Identifier alternatives declare different missing profiles on assigner; each is unknown"
+ ],
+ [
+  "gtctx",
+  "extension context: no profile met (boundsRange is only the 2nd layer's, whose count is missing); the extension on it is not for a Range"
+ ],
+ [
+  "gtval",
+  "extension value: same value; the extension on boundsRange has a string where it needs an integer"
+ ],
+ [
+  "gtok",
+  "extension control: same value, a valid extension"
+ ],
+ [
+  "s13ac1",
+  "13a: the slice declares both profiles: top amended, contained final"
+ ],
+ [
+  "s13ae1",
+  "13a: the slice declares both profiles: Bundle entries, first amended, second final"
+ ],
+ [
+  "s13ac2",
+  "13a: the slice declares both profiles: top final, contained amended"
+ ],
+ [
+  "s13ae2",
+  "13a: the slice declares both profiles: Bundle entries, first final, second amended"
+ ],
+ [
+  "s13bc1",
+  "13b/13c: a child of the slice member declares both profiles: top amended, contained final"
+ ],
+ [
+  "s13be1",
+  "13b/13c: a child of the slice member declares both profiles: Bundle entries, first amended, second final"
+ ],
+ [
+  "s13bc2",
+  "13b/13c: a child of the slice member declares both profiles: top final, contained amended"
+ ],
+ [
+  "s13be2",
+  "13b/13c: a child of the slice member declares both profiles: Bundle entries, first final, second amended"
+ ],
+ [
+  "s10c1",
+  "10: the sliced element declares both profiles, the slice none: top amended, contained final"
+ ],
+ [
+  "s10e1",
+  "10: the sliced element declares both profiles, the slice none: Bundle entries, first amended, second final"
+ ],
+ [
+  "s10c2",
+  "10: the sliced element declares both profiles, the slice none: top final, contained amended"
+ ],
+ [
+  "s10e2",
+  "10: the sliced element declares both profiles, the slice none: Bundle entries, first final, second amended"
+ ],
+ [
+  "un17",
+  "round 2 (17a): two unavailable Annotation profiles on note, and a note with no text: the base type continues"
+ ],
+ [
+  "dpinc1",
+  "round 2: dpin: outer Observation amended (no profile), contained Observation final with the profile"
+ ],
+ [
+  "dpprc1",
+  "round 2: dppr: outer Observation amended (no profile), contained Observation final with the profile"
+ ],
+ [
+  "dpwkc1",
+  "round 2: dpwk: outer Observation amended (no profile), contained Observation final with the profile"
+ ],
+ [
+  "d3",
+  "round 3 (15b): two shared CodeableConcept layers, only the 2nd assigns a Coding profile that needs display; the slice adds nothing"
+ ]
+]

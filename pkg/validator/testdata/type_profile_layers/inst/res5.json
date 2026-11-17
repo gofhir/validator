@@ -1,0 +1,41 @@
+{
+ "resourceType": "Observation",
+ "id": "res5",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-res"
+  ]
+ },
+ "status": "amended",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "code": "mg",
+  "system": "http://unitsofmeasure.org"
+ },
+ "contained": [
+  {
+   "resourceType": "Observation",
+   "id": "c1",
+   "meta": {
+    "profile": [
+     "http://example.org/fhir/StructureDefinition/obs-res"
+    ]
+   },
+   "status": "final",
+   "code": {
+    "text": "x"
+   },
+   "valueQuantity": {
+    "value": 5,
+    "code": "mg",
+    "system": "http://unitsofmeasure.org"
+   }
+  }
+ ]
+}

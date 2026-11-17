@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "idb",
+ "url": "http://example.org/fhir/StructureDefinition/idb",
+ "name": "idb",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "min": 1
+   }
+  ]
+ }
+}

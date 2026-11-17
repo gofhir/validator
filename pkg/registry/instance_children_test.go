@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+// selfFunc is a DefinitionSource that answers with a function of the type code.
+type selfFunc func(typeCode string) *StructureDefinition
+
+func (f selfFunc) DefinitionOf(_ context.Context, typeCode string, _ map[string]any) *StructureDefinition {
+	if f == nil {
+		return nil
+	}
+	return f(typeCode)
+}
+
 // The children of an instance come from the first definition that has them: the element's own,
 // its contentReference, the one profile its type declares, the definition the instance declares
 // for itself, the type's definition.
@@ -61,7 +71,7 @@ func TestChildrenOf(t *testing.T) {
 		{"a primitive type's definition", p, "Patient.birthDate", nil, "http://hl7.org/fhir/StructureDefinition/date", "date.extension"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			c := r.ChildrenOf(ctx, tt.sd, node(tt.sd, tt.path), "", tt.self)
+			c := r.ChildrenOf(ctx, tt.sd, node(tt.sd, tt.path), "", Instance{Self: selfFunc(tt.self)})
 			if c.SD == nil || c.SD.URL != tt.wantSD {
 				t.Fatalf("definition %v, want %s", c.SD, tt.wantSD)
 			}

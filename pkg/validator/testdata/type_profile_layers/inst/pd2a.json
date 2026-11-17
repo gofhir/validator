@@ -1,0 +1,23 @@
+{
+ "resourceType": "Observation",
+ "id": "pd2a",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-pd2"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "identifier": [
+  {
+   "period": {
+    "start": "2020-01-01"
+   }
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tm-a",
+ "url": "http://example.org/fhir/StructureDefinition/tm-a",
+ "name": "tm_a",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Timing",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Timing",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Timing.repeat.bounds[x]",
+    "path": "Timing.repeat.bounds[x]",
+    "type": [
+     {
+      "code": "Duration"
+     }
+    ]
+   }
+  ]
+ }
+}

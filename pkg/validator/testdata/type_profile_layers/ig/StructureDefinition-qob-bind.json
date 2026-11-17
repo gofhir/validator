@@ -1,0 +1,37 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qob-bind",
+ "url": "http://example.org/fhir/StructureDefinition/qob-bind",
+ "name": "qob_bind",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity",
+    "path": "Quantity",
+    "constraint": [
+     {
+      "key": "ro-b",
+      "severity": "error",
+      "human": "resource must be amended (qob)",
+      "expression": "%resource.status = 'amended'"
+     }
+    ]
+   },
+   {
+    "id": "Quantity.comparator",
+    "path": "Quantity.comparator",
+    "binding": {
+     "strength": "required",
+     "valueSet": "http://example.org/fhir/ValueSet/vs-gt"
+    }
+   }
+  ]
+ }
+}

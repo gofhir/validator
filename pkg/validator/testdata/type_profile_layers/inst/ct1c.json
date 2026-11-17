@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "ct1c",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-cont0"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "code": "mg",
+  "system": "http://unitsofmeasure.org"
+ }
+}

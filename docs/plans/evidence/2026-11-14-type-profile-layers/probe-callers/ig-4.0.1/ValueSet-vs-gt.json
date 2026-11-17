@@ -1,0 +1,19 @@
+{
+ "resourceType": "ValueSet",
+ "id": "vs-gt",
+ "url": "http://example.org/fhir/ValueSet/vs-gt",
+ "name": "vs_gt",
+ "status": "draft",
+ "compose": {
+  "include": [
+   {
+    "system": "http://hl7.org/fhir/quantity-comparator",
+    "concept": [
+     {
+      "code": ">"
+     }
+    ]
+   }
+  ]
+ }
+}

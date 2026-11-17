@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "id-ua",
+ "url": "http://example.org/fhir/StructureDefinition/id-ua",
+ "name": "id_ua",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.assigner",
+    "path": "Identifier.assigner",
+    "type": [
+     {
+      "code": "Reference",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/missing-a"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

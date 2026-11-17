@@ -1,0 +1,56 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-s13b",
+ "url": "http://example.org/fhir/StructureDefinition/obs-s13b",
+ "name": "obs_s13b",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.component",
+    "path": "Observation.component",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "code"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.component:c",
+    "path": "Observation.component",
+    "sliceName": "c"
+   },
+   {
+    "id": "Observation.component:c.code",
+    "path": "Observation.component.code",
+    "type": [
+     {
+      "code": "CodeableConcept",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/cc-oc",
+       "http://example.org/fhir/StructureDefinition/cc-od"
+      ]
+     }
+    ],
+    "patternCodeableConcept": {
+     "coding": [
+      {
+       "system": "urn:probe:p",
+       "code": "c"
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

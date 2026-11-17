@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-asg",
+ "url": "http://example.org/fhir/StructureDefinition/obs-asg",
+ "name": "ObsAsg",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.identifier.assigner",
+    "path": "Observation.identifier.assigner",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://example.org/fhir/StructureDefinition/org-cyc"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

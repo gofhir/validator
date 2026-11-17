@@ -140,7 +140,7 @@ func TestChildrenOfPrecedence(t *testing.T) {
 			quantityURL, "Quantity.comparator", ""},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			c := r.ChildrenOf(ctx, r.GetByURL("https://example.org/"+tt.profile), precNode(t, r, tt.profile, tt.id), "Quantity", tt.self)
+			c := r.ChildrenOf(ctx, r.GetByURL("https://example.org/"+tt.profile), precNode(t, r, tt.profile, tt.id), "Quantity", Instance{Self: selfFunc(tt.self)})
 			if c.SD == nil || c.SD.URL != tt.wantSD || c.Unresolved.Canonical != tt.wantUnresolved {
 				t.Fatalf("definition %s (unresolved %q), want %s (unresolved %q)", sdURL(c.SD), c.Unresolved.Canonical, tt.wantSD, tt.wantUnresolved)
 			}

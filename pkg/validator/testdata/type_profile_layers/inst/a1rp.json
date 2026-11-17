@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "a1rp",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-a1r"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "unit": "mg",
+  "code": "mg",
+  "system": "http://unitsofmeasure.org"
+ }
+}

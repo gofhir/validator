@@ -1,7 +1,10 @@
 // Package issue defines validation issues aligned with FHIR OperationOutcome.
 package issue
 
-import "sync"
+import (
+	"strings"
+	"sync"
+)
 
 // Severity represents the severity of a validation issue.
 type Severity string
@@ -287,6 +290,32 @@ func (r *Result) Merge(other *Result) {
 		return
 	}
 	r.Issues = append(r.Issues, other.Issues...)
+}
+
+// DropRepeated removes, from the issues at from and after, those that repeat one of the issues
+// from start up to from: same severity, message, location and diagnostic. A value walked under
+// several definitions (the layers its type's several profiles give it) reports what they share
+// once; what differs in severity or text is kept.
+func (r *Result) DropRepeated(start, from int) {
+	if from <= start || from >= len(r.Issues) {
+		return
+	}
+	seen := make(map[string]struct{}, from-start)
+	for _, is := range r.Issues[start:from] {
+		seen[RepeatKey(is)] = struct{}{}
+	}
+	kept := r.Issues[:from]
+	for _, is := range r.Issues[from:] {
+		if _, dup := seen[RepeatKey(is)]; !dup {
+			kept = append(kept, is)
+		}
+	}
+	r.Issues = kept
+}
+
+// RepeatKey identifies an issue for DropRepeated.
+func RepeatKey(is Issue) string {
+	return string(is.Severity) + "\x00" + is.MessageID + "\x00" + strings.Join(is.Expression, ",") + "\x00" + is.Diagnostics
 }
 
 // Filter returns a new Result with only issues matching the given severity.

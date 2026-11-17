@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "c1dn",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-c1d"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "identifier": [
+  {
+   "system": "urn:probe:other",
+   "value": "v"
+  }
+ ]
+}

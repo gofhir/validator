@@ -1,0 +1,43 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-two-miss",
+ "url": "http://example.org/fhir/StructureDefinition/obs-two-miss",
+ "name": "obs_two_miss",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "Quantity",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/qa",
+       "http://example.org/fhir/StructureDefinition/nope-x"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Observation.component.value[x]",
+    "path": "Observation.component.value[x]",
+    "type": [
+     {
+      "code": "Quantity",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/qa",
+       "http://example.org/fhir/StructureDefinition/nope-x"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

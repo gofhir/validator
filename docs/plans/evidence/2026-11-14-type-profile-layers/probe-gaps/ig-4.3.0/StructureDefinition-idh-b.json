@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "idh-b",
+ "url": "http://example.org/fhir/StructureDefinition/idh-b",
+ "name": "idh_b",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.assigner",
+    "path": "Identifier.assigner",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://example.org/fhir/StructureDefinition/org-y"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

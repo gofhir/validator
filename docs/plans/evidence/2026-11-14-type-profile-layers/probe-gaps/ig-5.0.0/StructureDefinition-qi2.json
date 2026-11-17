@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qi2",
+ "url": "http://example.org/fhir/StructureDefinition/qi2",
+ "name": "qi2",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Quantity",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Quantity",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Quantity",
+    "path": "Quantity",
+    "constraint": [
+     {
+      "key": "inv2-1",
+      "severity": "error",
+      "human": "value must exceed 10 (only in qi2)",
+      "expression": "value > 10"
+     }
+    ]
+   }
+  ]
+ }
+}

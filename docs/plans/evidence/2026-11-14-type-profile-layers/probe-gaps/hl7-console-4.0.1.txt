@@ -1,0 +1,80 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (12 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-11-14-type-profile-layers/probe-gaps, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/d3.json inst/dpinc1.json inst/dpprc1.json inst/dpwkc1.json inst/gtctx.json inst/gtok.json inst/gtval.json inst/s10c1.json inst/s10c2.json inst/s10e1.json inst/s10e2.json inst/s13ac1.json inst/s13ac2.json inst/s13ae1.json inst/s13ae2.json inst/s13bc1.json inst/s13bc2.json inst/s13be1.json inst/s13be2.json inst/un17.json inst/unk.json -version 4.0.1 -ig ig-4.0.1 -tx n/a -output hl7-4.0.1-7.0.4.json
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:03.070)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.378)
+  Loaded FHIR - 8265 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.005)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.025)
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.336)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.349)
+  Load ig-4.0.1 - 159 resources (00:00.044)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+Can't find Quantity profile #cq but trying to go on
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/igx but trying to go on
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/nope but trying to go on
+Can't find Quantity profile #cq but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/missing-quantity but trying to go on
+Can't find Annotation profile http://example.org/fhir/StructureDefinition/missing-a but trying to go on
+Can't find Reference profile http://example.org/fhir/StructureDefinition/missing-b but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/nope-1 but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/nope-1 but trying to go on
+Can't find Reference profile http://example.org/fhir/StructureDefinition/missing-a but trying to go on
+Can't find Quantity profile http://example.org/fhir/ImplementationGuide/igx but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/missing-quantity but trying to go on
+  ...go! (00:00.791)
+Cached new session. Cache size = 1
+Sources to validate: inst/d3.jsoninst/dpinc1.jsoninst/dpprc1.jsoninst/dpwkc1.jsoninst/gtctx.jsoninst/gtok.jsoninst/gtval.jsoninst/s10c1.jsoninst/s10c2.jsoninst/s10e1.jsoninst/s10e2.jsoninst/s13ac1.jsoninst/s13ac2.jsoninst/s13ae1.jsoninst/s13ae2.jsoninst/s13bc1.jsoninst/s13bc2.jsoninst/s13be1.jsoninst/s13be2.jsoninst/un17.jsoninst/unk.json
+Validating
+  Validate inst/d3.json
+ 00:00.217
+  Validate inst/dpinc1.json
+ 00:00.052
+  Validate inst/dpprc1.json
+ 00:00.022
+  Validate inst/dpwkc1.json
+ 00:00.040
+  Validate inst/gtctx.json
+ 00:00.030
+  Validate inst/gtok.json
+ 00:00.044
+  Validate inst/gtval.json
+ 00:00.021
+  Validate inst/s10c1.json
+ 00:00.032
+  Validate inst/s10c2.json
+ 00:00.018
+  Validate inst/s10e1.json
+ 00:00.026
+  Validate inst/s10e2.json
+ 00:00.017
+  Validate inst/s13ac1.json
+ 00:00.019
+  Validate inst/s13ac2.json
+ 00:00.023
+  Validate inst/s13ae1.json
+ 00:00.018
+  Validate inst/s13ae2.json
+ 00:00.019
+  Validate inst/s13bc1.json
+ 00:00.019
+  Validate inst/s13bc2.json
+ 00:00.016
+  Validate inst/s13be1.json
+ 00:00.014
+  Validate inst/s13be2.json
+ 00:00.017
+  Validate inst/un17.json
+ 00:00.015
+  Validate inst/unk.json
+ 00:00.017
+Done. Times: Loading: 00:06.030, validation: 00:00.711 (#21). Memory = 729Mb
+
+Done. Times: Loading: 00:06.030, validation: 00:00.711 (#21). Max Memory = 6Gb

@@ -1,0 +1,54 @@
+{
+ "resourceType": "Observation",
+ "id": "bcyc1",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-cyc"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "contained": [
+  {
+   "resourceType": "Organization",
+   "id": "o1",
+   "name": "N",
+   "identifier": [
+    {
+     "value": "y",
+     "assigner": {
+      "reference": "#o2"
+     }
+    }
+   ],
+   "active": true
+  },
+  {
+   "resourceType": "Organization",
+   "id": "o2",
+   "name": "N",
+   "identifier": [
+    {
+     "value": "z",
+     "assigner": {
+      "reference": "#o1"
+     }
+    }
+   ],
+   "active": true
+  }
+ ],
+ "identifier": [
+  {
+   "value": "x",
+   "assigner": {
+    "reference": "#o1"
+   }
+  }
+ ]
+}

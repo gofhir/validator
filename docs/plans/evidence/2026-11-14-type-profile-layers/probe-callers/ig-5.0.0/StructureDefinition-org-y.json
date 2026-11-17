@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "org-y",
+ "url": "http://example.org/fhir/StructureDefinition/org-y",
+ "name": "org_y",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Organization",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Organization",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Organization.contact",
+    "path": "Organization.contact",
+    "min": 1
+   }
+  ]
+ }
+}

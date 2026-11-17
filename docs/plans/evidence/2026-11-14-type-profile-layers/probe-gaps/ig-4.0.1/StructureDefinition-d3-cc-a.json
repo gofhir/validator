@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d3-cc-a",
+ "url": "http://example.org/fhir/StructureDefinition/d3-cc-a",
+ "name": "d3_cc_a",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "CodeableConcept",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "CodeableConcept",
+    "path": "CodeableConcept",
+    "constraint": [
+     {
+      "key": "d3-fail",
+      "severity": "error",
+      "human": "fail",
+      "expression": "false"
+     }
+    ]
+   }
+  ]
+ }
+}

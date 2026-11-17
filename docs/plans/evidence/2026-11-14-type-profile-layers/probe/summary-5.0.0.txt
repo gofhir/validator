@@ -1,0 +1,493 @@
+## p1
+  (none)
+## p2
+  (none)
+## p3
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/MoneyQuantity#mtqy-1 @Observation.value.ofType(Quantity) | Constraint failed: mtqy-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = "urn:iso:std:iso:4217" - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|5.0.0 [MoneyQuantity])
+## p4
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (defined in http://hl7.org/fhir/StructureDefinition/SimpleQuantity)
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0)
+## p5
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/MoneyQuantity#mtqy-1 @Observation.value.ofType(Quantity) | Constraint failed: mtqy-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = "urn:iso:std:iso:4217" - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|5.0.0 [MoneyQuantity])
+## p6
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/missing-quantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+## p7
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity
+## p8
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/missing-quantity
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/missing-2
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/missing-2, http://example.org/fhir/StructureDefinition/missing-quantity
+## p9
+  e structure V_Profile_NoMatch @Observation.component[1].value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+  e structure V_Profile_Maximum @Observation.component[1].value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.component[1].value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/MoneyQuantity#mtqy-1 @Observation.component[1].value.ofType(Quantity) | Constraint failed: mtqy-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = "urn:iso:std:iso:4217" - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|5.0.0 [MoneyQuantity])
+## p10
+  e structure V_Profile_NoMatch @Observation.extension[0].value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+  e structure V_Profile_Maximum @Observation.extension[0].value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.extension[0].value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/MoneyQuantity#mtqy-1 @Observation.extension[0].value.ofType(Quantity) | Constraint failed: mtqy-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = "urn:iso:std:iso:4217" - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|5.0.0 [MoneyQuantity])
+## p11
+  (none)
+## p12
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0)
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity'
+## p13
+  w structure V_Profile_MultipleMatches @Observation.value.ofType(Quantity) | Found multiple matching profiles among 2 choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+## p14
+  w structure V_Profile_MultipleMatches @Observation.value.ofType(string) | Found multiple matching profiles among 2 choices: http://example.org/fhir/StructureDefinition/str-short, http://example.org/fhir/StructureDefinition/str-upper
+## p15
+  e structure V_Profile_NoMatch @Observation.value.ofType(string) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/str-short, http://example.org/fhir/StructureDefinition/str-upper
+  e invariant http://example.org/fhir/StructureDefinition/str-short#short-1 @Observation.value.ofType(string) | Constraint failed: short-1: 'at most 3 characters' (validating against http://example.org/fhir/StructureDefinition/str-short|1.0.0 [strshort])
+  e invariant http://example.org/fhir/StructureDefinition/str-upper#upper-1 @Observation.value.ofType(string) | Constraint failed: upper-1: 'upper case' (validating against http://example.org/fhir/StructureDefinition/str-upper|1.0.0 [strupper])
+## p16
+  (none)
+## p17
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://hl7.org/fhir/StructureDefinition/MoneyQuantity|5.0.0, http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/MoneyQuantity#mtqy-1 @Observation.value.ofType(Quantity) | Constraint failed: mtqy-1: 'There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = "urn:iso:std:iso:4217" - currency).' (validating against http://hl7.org/fhir/StructureDefinition/MoneyQuantity|5.0.0 [MoneyQuantity])
+## p18
+  (none)
+## p19
+  w structure V_Profile_MultipleMatches @Observation.value.ofType(Quantity) | Found multiple matching profiles among 2 choices: http://example.org/fhir/StructureDefinition/sq-unit, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+## p20
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/cc-prof, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e not-supported V_Profile_NotAllowed @Observation.value.ofType(Quantity).value | This element is not allowed by the profile http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 (validating against http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 [ccprof])
+  e not-supported V_Profile_NotAllowed @Observation.value.ofType(Quantity).comparator | This element is not allowed by the profile http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 (validating against http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 [ccprof])
+  e not-supported V_Profile_NotAllowed @Observation.value.ofType(Quantity).unit | This element is not allowed by the profile http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 (validating against http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 [ccprof])
+  e not-supported V_Profile_NotAllowed @Observation.value.ofType(Quantity).system | This element is not allowed by the profile http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 (validating against http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 [ccprof])
+  e not-supported V_Profile_NotAllowed @Observation.value.ofType(Quantity).code | This element is not allowed by the profile http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 (validating against http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 [ccprof])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | CodeableConcept.text: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/cc-prof|1.0.0) (validating against http://example.org/fhir/StructureDefinition/cc-prof|1.0.0 [ccprof])
+## p21
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/sq-unit, http://hl7.org/fhir/StructureDefinition/SimpleQuantity
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0) (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity])
+  e invariant http://hl7.org/fhir/StructureDefinition/SimpleQuantity#sqty-1 @Observation.value.ofType(Quantity) | Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity' (validating against http://hl7.org/fhir/StructureDefinition/SimpleQuantity|5.0.0 [SimpleQuantity]) (validating against http://example.org/fhir/StructureDefinition/sq-unit|1.0.0 [squnit])
+  e structure V_Profile_Maximum @Observation.value.ofType(Quantity) | Quantity.comparator: max allowed = 0, but found 1 (from http://example.org/fhir/StructureDefinition/sq-unit|1.0.0) (validating against http://example.org/fhir/StructureDefinition/sq-unit|1.0.0 [squnit])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/sq-unit|1.0.0) (validating against http://example.org/fhir/StructureDefinition/sq-unit|1.0.0 [squnit])
+## a1n
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qa, http://example.org/fhir/StructureDefinition/qi2
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+  e invariant http://example.org/fhir/StructureDefinition/qi2#inv2-1 @Observation.value.ofType(Quantity) | Constraint failed: inv2-1: 'value must exceed 10 (only in qi2)' (validating against http://example.org/fhir/StructureDefinition/qi2 [qi2])
+## a1p
+  (none)
+## a1q
+  (none)
+## a1rn
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qa, http://example.org/fhir/StructureDefinition/qi2
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+  e invariant http://example.org/fhir/StructureDefinition/qi2#inv2-1 @Observation.value.ofType(Quantity) | Constraint failed: inv2-1: 'value must exceed 10 (only in qi2)' (validating against http://example.org/fhir/StructureDefinition/qi2 [qi2])
+## a1rp
+  (none)
+## a1rq
+  (none)
+## c1a
+  (none)
+## c1b
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+  e structure V_Profile_Minimum @Observation.identifier[0] | Observation.identifier:s1.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/obs-c1)
+## c1c
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (validating against http://example.org/fhir/StructureDefinition/idb [idb]) (validating agains
+  e structure V_Profile_Minimum @Observation.identifier[0] | Observation.identifier:s1.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/obs-c1)
+  e structure V_Profile_NoMatch @Observation.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/ida, http://example.org/fhir/StructureDefinition/idb
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idb) (validating against http://example.org/fhir/StructureDefinition/idb [idb])
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/ida) (validating against http://example.org/fhir/StructureDefinition/ida [ida])
+## c1da
+  (none)
+## c1db
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+  e structure V_Profile_Minimum @Observation.identifier[0] | Observation.identifier:s1.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/obs-c1d)
+## c1dc
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (validating against http://example.org/fhir/StructureDefinition/idb [idb]) (validating agains
+  e structure V_Profile_NoMatch @Observation.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/ida, http://example.org/fhir/StructureDefinition/idb
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idb) (validating against http://example.org/fhir/StructureDefinition/idb [idb])
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/ida) (validating against http://example.org/fhir/StructureDefinition/ida [ida])
+  e structure V_Profile_Minimum @Observation.identifier[0] | Observation.identifier:s1.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/obs-c1d)
+## c1dn
+  (none)
+## c1n
+  (none)
+## ct1c
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile #cq
+## ct1n
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile #cq
+## ct1u
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile #cq
+## ct2c
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile #cq
+## ct2n
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile #cq
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: #cq, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+## ct2u
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile #cq
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: #cq, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+## d4a
+  e invalid  @Observation.value[x].unit | Error parsing JSON: the primitive value must be a string
+  e structure  @Observation.value[x] | Unrecognized property 'bogus'
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-1
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-2
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/nope-1, http://example.org/fhir/StructureDefinition/nope-2
+## d4b
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-1
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-2
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/nope-1, http://example.org/fhir/StructureDefinition/nope-2
+## d4c
+  e invalid  @Observation.value[x].unit | Error parsing JSON: the primitive value must be a string
+  e structure  @Observation.value[x] | Unrecognized property 'bogus'
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-1
+## dup
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qdup-a, http://example.org/fhir/StructureDefinition/qdup-b
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qdup-b) (validating against http://example.org/fhir/StructureDefinition/qdup-b [qdup_b])
+  e invariant http://example.org/fhir/StructureDefinition/qdup-a#dup-1 @Observation.value.ofType(Quantity) | Constraint failed: dup-1: 'dup text' (validating against http://example.org/fhir/StructureDefinition/qdup-b [qdup_b]) (validating against http://example.org/fhir/StructureDefinition/qdup-a [qdup_a])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qdup-a) (validating against http://example.org/fhir/StructureDefinition/qdup-a [qdup_a])
+## e2hnrempty
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rempty and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rempty')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].re
+## e2hnrexists
+  (none)
+## e2hnrid1
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rid1 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid1')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resour
+## e2hnrid2
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rid2 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid2')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resour
+## e2hnrrid0
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rrid0 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid0')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].reso
+## e2hnrrid1
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rrid1 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid1')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].reso
+## e2hnrro1
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rro1 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rro1')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resour
+## e2hnrrval
+  (none)
+## e2hnrval
+  (none)
+## e2hrempty
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rempty and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rempty')), Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Details for Bundle.entr
+## e2hrexists
+  (none)
+## e2hrid1
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rid1 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid1')), Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Details for Bundle.entry[0]
+## e2hrid2
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rid2 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid2')), Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Details for Bundle.entry[0]
+## e2hrrid0
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rrid0 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid0')), Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Details for Bundle.entry[
+## e2hrrid1
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rrid1 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid1')), Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Details for Bundle.entry[
+## e2hrro1
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.hasMember[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2h-rro1 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Does not match slice 'sx' (discriminator: resolve().identifier.conformsTo('http://example.org/fhir/StructureDefinition/ids-rro1')), Bundle.entry[0].resource/*Observation/o1*/.hasMember[0]: Details for Bundle.entry[0]
+## e2hrrval
+  (none)
+## e2hrval
+  (none)
+## e2sremptyb
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rempty and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rempty')), Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Details for Bundle.entry[0].resource
+## e2sremptyn
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rempty and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rempty')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observ
+## e2sremptyx
+  e invalid V_Profile_NotSlice @Observation.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rempty and slicing is CLOSED: Observation.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rempty')), Observation.identifier[0]: Details for Observation matching against profile http://example.org/fhir/StructureDefinition/ids-r
+## e2srexistsb
+  (none)
+## e2srexistsn
+  (none)
+## e2srexistsx
+  (none)
+## e2srid1b
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rid1 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid1')), Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Details for Bundle.entry[0].resource/*Ob
+## e2srid1n
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rid1 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid1')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observatio
+## e2srid1x
+  e invalid V_Profile_NotSlice @Observation.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rid1 and slicing is CLOSED: Observation.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid1')), Observation.identifier[0]: Details for Observation matching against profile http://example.org/fhir/StructureDefinition/ids-rid1
+## e2srid2b
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rid2 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid2')), Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Details for Bundle.entry[0].resource/*Ob
+## e2srid2n
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rid2 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid2')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observatio
+## e2srid2x
+  e invalid V_Profile_NotSlice @Observation.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rid2 and slicing is CLOSED: Observation.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rid2')), Observation.identifier[0]: Details for Observation matching against profile http://example.org/fhir/StructureDefinition/ids-rid2
+## e2srrid0b
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rrid0 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid0')), Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Details for Bundle.entry[0].resource/*
+## e2srrid0n
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rrid0 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid0')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observat
+## e2srrid0x
+  e invalid V_Profile_NotSlice @Observation.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rrid0 and slicing is CLOSED: Observation.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid0')), Observation.identifier[0]: Details for Observation matching against profile http://example.org/fhir/StructureDefinition/ids-rri
+## e2srrid1b
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rrid1 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid1')), Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Details for Bundle.entry[0].resource/*
+## e2srrid1n
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rrid1 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid1')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observat
+## e2srrid1x
+  e invalid V_Profile_NotSlice @Observation.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rrid1 and slicing is CLOSED: Observation.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rrid1')), Observation.identifier[0]: Details for Observation matching against profile http://example.org/fhir/StructureDefinition/ids-rri
+## e2srro1b
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rro1 and slicing is CLOSED: Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rro1')), Bundle.entry[0].resource/*Observation/o1*/.identifier[0]: Details for Bundle.entry[0].resource/*Ob
+## e2srro1n
+  e invalid V_Profile_NotSlice @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rro1 and slicing is CLOSED: Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rro1')), Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observatio
+## e2srro1x
+  e invalid V_Profile_NotSlice @Observation.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-e2s-rro1 and slicing is CLOSED: Observation.identifier[0]: Does not match slice 'sx' (discriminator: $this.conformsTo('http://example.org/fhir/StructureDefinition/ids-rro1')), Observation.identifier[0]: Details for Observation matching against profile http://example.org/fhir/StructureDefinition/ids-rro1
+## e2srrvalb
+  (none)
+## e2srrvaln
+  (none)
+## e2srrvalx
+  (none)
+## e2srvalb
+  (none)
+## e2srvaln
+  (none)
+## e2srvalx
+  (none)
+## e2tremptyb
+  e invariant http://example.org/fhir/StructureDefinition/ids-rempty#e2-rempty @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rempty: 'identifier profile ids-rempty: %resource.empty()' (defined in http://example.org/fhir/StructureDefinition/ids-rempty)
+## e2tremptyn
+  e invariant http://example.org/fhir/StructureDefinition/ids-rempty#e2-rempty @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rempty: 'identifier profile ids-rempty: %resource.empty()' (defined in http://example.org/fhir/StructureDefinition/ids-rempty)
+## e2tremptyx
+  e invariant http://example.org/fhir/StructureDefinition/ids-rempty#e2-rempty @Observation.identifier[0] | Constraint failed: e2-rempty: 'identifier profile ids-rempty: %resource.empty()' (defined in http://example.org/fhir/StructureDefinition/ids-rempty)
+## e2trexistsb
+  (none)
+## e2trexistsn
+  (none)
+## e2trexistsx
+  (none)
+## e2trid1b
+  (none)
+## e2trid1n
+  (none)
+## e2trid1x
+  (none)
+## e2trid2b
+  e invariant http://example.org/fhir/StructureDefinition/ids-rid2#e2-rid2 @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rid2: 'identifier profile ids-rid2: %resource.id = 'o2'' (defined in http://example.org/fhir/StructureDefinition/ids-rid2)
+## e2trid2n
+  e invariant http://example.org/fhir/StructureDefinition/ids-rid2#e2-rid2 @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rid2: 'identifier profile ids-rid2: %resource.id = 'o2'' (defined in http://example.org/fhir/StructureDefinition/ids-rid2)
+## e2trid2x
+  e invariant http://example.org/fhir/StructureDefinition/ids-rid2#e2-rid2 @Observation.identifier[0] | Constraint failed: e2-rid2: 'identifier profile ids-rid2: %resource.id = 'o2'' (defined in http://example.org/fhir/StructureDefinition/ids-rid2)
+## e2trrid0b
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrid0#e2-rrid0 @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rrid0: 'identifier profile ids-rrid0: %rootResource.id = 'b0'' (defined in http://example.org/fhir/StructureDefinition/ids-rrid0)
+## e2trrid0n
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrid0#e2-rrid0 @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rrid0: 'identifier profile ids-rrid0: %rootResource.id = 'b0'' (defined in http://example.org/fhir/StructureDefinition/ids-rrid0)
+## e2trrid0x
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrid0#e2-rrid0 @Observation.identifier[0] | Constraint failed: e2-rrid0: 'identifier profile ids-rrid0: %rootResource.id = 'b0'' (defined in http://example.org/fhir/StructureDefinition/ids-rrid0)
+## e2trrid1b
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrid1#e2-rrid1 @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rrid1: 'identifier profile ids-rrid1: %rootResource.id = 'b1'' (defined in http://example.org/fhir/StructureDefinition/ids-rrid1)
+## e2trrid1n
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrid1#e2-rrid1 @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rrid1: 'identifier profile ids-rrid1: %rootResource.id = 'b1'' (defined in http://example.org/fhir/StructureDefinition/ids-rrid1)
+## e2trrid1x
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrid1#e2-rrid1 @Observation.identifier[0] | Constraint failed: e2-rrid1: 'identifier profile ids-rrid1: %rootResource.id = 'b1'' (defined in http://example.org/fhir/StructureDefinition/ids-rrid1)
+## e2trro1b
+  (none)
+## e2trro1n
+  (none)
+## e2trro1x
+  (none)
+## e2trrvalb
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrval#e2-rrval @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rrval: 'identifier profile ids-rrval: %rootResource.value = 'v'' (defined in http://example.org/fhir/StructureDefinition/ids-rrval)
+## e2trrvaln
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrval#e2-rrval @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rrval: 'identifier profile ids-rrval: %rootResource.value = 'v'' (defined in http://example.org/fhir/StructureDefinition/ids-rrval)
+## e2trrvalx
+  e invariant http://example.org/fhir/StructureDefinition/ids-rrval#e2-rrval @Observation.identifier[0] | Constraint failed: e2-rrval: 'identifier profile ids-rrval: %rootResource.value = 'v'' (defined in http://example.org/fhir/StructureDefinition/ids-rrval)
+## e2trvalb
+  e invariant http://example.org/fhir/StructureDefinition/ids-rval#e2-rval @Bundle.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rval: 'identifier profile ids-rval: %resource.value = 'v'' (defined in http://example.org/fhir/StructureDefinition/ids-rval)
+## e2trvaln
+  e invariant http://example.org/fhir/StructureDefinition/ids-rval#e2-rval @Bundle.entry[0].resource/*Bundle/b1*/.entry[0].resource/*Observation/o1*/.identifier[0] | Constraint failed: e2-rval: 'identifier profile ids-rval: %resource.value = 'v'' (defined in http://example.org/fhir/StructureDefinition/ids-rval)
+## e2trvalx
+  e invariant http://example.org/fhir/StructureDefinition/ids-rval#e2-rval @Observation.identifier[0] | Constraint failed: e2-rval: 'identifier profile ids-rval: %resource.value = 'v'' (defined in http://example.org/fhir/StructureDefinition/ids-rval)
+## ele1
+  e invariant http://hl7.org/fhir/StructureDefinition/Element#ele-1 @Observation.value.ofType(Quantity) | Constraint failed: ele-1: 'All FHIR elements must have a @value or children' (defined in http://hl7.org/fhir/StructureDefinition/Element) (validating against http://example.org/fhir/StructureDefinition/qb [qb]) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qa, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+## ele2
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qa, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+## ig1c
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/igx
+## ig1n
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/igx
+## ig1u
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/igx
+## ig2c
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/igx
+## ig2n
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/igx
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/ImplementationGuide/igx, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+## ig2u
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/igx
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/ImplementationGuide/igx, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+## ig3c
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/nope
+## ig3n
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/nope
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/ImplementationGuide/nope, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+## ig3u
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/ImplementationGuide/nope
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/ImplementationGuide/nope, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+## leafa
+  (none)
+## leafb
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+## leafc
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (validating against http://example.org/fhir/StructureDefinition/idb [idb]) (validating agains
+  e structure V_Profile_NoMatch @Observation.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/ida, http://example.org/fhir/StructureDefinition/idb
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idb) (validating against http://example.org/fhir/StructureDefinition/idb [idb])
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/ida) (validating against http://example.org/fhir/StructureDefinition/ida [ida])
+## pd1a
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+## pd1ab
+  w structure V_Profile_MultipleMatches @Observation.identifier[0] | Found multiple matching profiles among 2 choices: http://example.org/fhir/StructureDefinition/ida, http://example.org/fhir/StructureDefinition/idb
+## pd1b
+  (none)
+## pd1n
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+  e invalid V_Profile_NotSlice @Observation.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-pd1 and slicing is CLOSED: Observation.identifier[0]: Does not match slice 'sx' (discriminator: ($this.conformsTo('http://example.org/fhir/StructureDefinition/ida') or $this.conformsTo('http://example.org/fhir/StructureDefinition/idb'))), Observation.identifier[0]: Details for Observation matching agains
+## pd2a
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+## pd2ab
+  w structure V_Profile_MultipleMatches @Observation.identifier[0] | Found multiple matching profiles among 2 choices: http://example.org/fhir/StructureDefinition/ida, http://example.org/fhir/StructureDefinition/idb
+## pd2b
+  (none)
+## pd2n
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+  e invalid V_Profile_NotSlice @Observation.identifier[0] | This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/obs-pd2 and slicing is CLOSED: Observation.identifier[0]: Does not match slice 'sx' (discriminator: ($this.conformsTo('http://example.org/fhir/StructureDefinition/idb') or $this.conformsTo('http://example.org/fhir/StructureDefinition/ida'))), Observation.identifier[0]: Details for Observation matching agains
+## rec1a
+  (none)
+## rec1b
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0].assigner.identifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+## rec1c
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0].assigner.identifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (validating against http://example.org/fhir/StructureDefinition/idr-b [idr_b]) (validating ag
+  e structure V_Profile_NoMatch @Observation.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/idr-a, http://example.org/fhir/StructureDefinition/idr-b
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idr-b) (validating against http://example.org/fhir/StructureDefinition/idr-b [idr_b])
+  e structure V_Profile_NoMatch @Observation.identifier[0].assigner.identifier | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/idr-a, http://example.org/fhir/StructureDefinition/idr-b (validating against http://example.org/fhir/StructureDefinition/idr-a [idr_a])
+  e structure V_Profile_Minimum @Observation.identifier[0].assigner.identifier | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idr-b) (validating against http://example.org/fhir/StructureDefinition/idr-b [idr_b]) (validating against http://example.org/fhir/StructureDefinition/idr-a [idr_a])
+  e structure V_Profile_Minimum @Observation.identifier[0].assigner.identifier | Identifier.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idr-a) (validating against http://example.org/fhir/StructureDefinition/idr-a [idr_a]) (validating against http://example.org/fhir/StructureDefinition/idr-a [idr_a])
+## rec1d
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0].assigner.identifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (validating against http://example.org/fhir/StructureDefinition/idr-b [idr_b]) (validating ag
+## rec2a
+  (none)
+## rec2b
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0].assigner.identifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+## rec2c
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0].assigner.identifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (validating against http://example.org/fhir/StructureDefinition/idr-b [idr_b]) (validating ag
+  e structure V_Profile_NoMatch @Observation.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/idr-a, http://example.org/fhir/StructureDefinition/idr-b
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idr-b) (validating against http://example.org/fhir/StructureDefinition/idr-b [idr_b])
+  e structure V_Profile_NoMatch @Observation.identifier[0].assigner.identifier | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/idr-a, http://example.org/fhir/StructureDefinition/idr-b (validating against http://example.org/fhir/StructureDefinition/idr-a [idr_a])
+  e structure V_Profile_Minimum @Observation.identifier[0].assigner.identifier | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idr-b) (validating against http://example.org/fhir/StructureDefinition/idr-b [idr_b]) (validating against http://example.org/fhir/StructureDefinition/idr-a [idr_a])
+  e structure V_Profile_Minimum @Observation.identifier[0].assigner.identifier | Identifier.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idr-a) (validating against http://example.org/fhir/StructureDefinition/idr-a [idr_a]) (validating against http://example.org/fhir/StructureDefinition/idr-a [idr_a])
+## rec2d
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0].assigner.identifier | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (validating against http://example.org/fhir/StructureDefinition/idr-b [idr_b]) (validating ag
+## ref0n
+  e structure Reference_REF_CantMatchChoice @Observation.identifier[0].assigner | Unable to find a profile match for #o1 among choices: http://example.org/fhir/StructureDefinition/org-x
+## ref0x
+  (none)
+## ref1n
+  e structure V_Profile_NoMatch @Observation.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/idh-a, http://example.org/fhir/StructureDefinition/idh-b
+  e structure Reference_REF_CantMatchChoice @Observation.identifier[0].assigner | Unable to find a profile match for #o1 among choices: http://example.org/fhir/StructureDefinition/org-y (validating against http://example.org/fhir/StructureDefinition/idh-b [idh_b])
+  e structure Reference_REF_CantMatchChoice @Observation.identifier[0].assigner | Unable to find a profile match for #o1 among choices: http://example.org/fhir/StructureDefinition/org-x (validating against http://example.org/fhir/StructureDefinition/idh-a [idh_a])
+## ref1x
+  (none)
+## ref1y
+  (none)
+## ref2n
+  e structure V_Profile_NoMatch @Observation.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/idh-a, http://example.org/fhir/StructureDefinition/idh-b
+  e structure Reference_REF_CantMatchChoice @Observation.identifier[0].assigner | Unable to find a profile match for #o1 among choices: http://example.org/fhir/StructureDefinition/org-y (validating against http://example.org/fhir/StructureDefinition/idh-b [idh_b])
+  e structure Reference_REF_CantMatchChoice @Observation.identifier[0].assigner | Unable to find a profile match for #o1 among choices: http://example.org/fhir/StructureDefinition/org-x (validating against http://example.org/fhir/StructureDefinition/idh-a [idh_a])
+## ref2x
+  (none)
+## ref2y
+  (none)
+## refb1n
+  e structure V_Profile_NoMatch @Bundle.entry[0].resource/*Observation/ob1*/.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/idh-a, http://example.org/fhir/StructureDefinition/idh-b
+  e structure Reference_REF_CantMatchChoice @Bundle.entry[0].resource/*Observation/ob1*/.identifier[0].assigner | Unable to find a profile match for urn:uuid:00000000-0000-0000-0000-0000000000a2 among choices: http://example.org/fhir/StructureDefinition/org-y (validating against http://example.org/fhir/StructureDefinition/idh-b [idh_b])
+  e structure Reference_REF_CantMatchChoice @Bundle.entry[0].resource/*Observation/ob1*/.identifier[0].assigner | Unable to find a profile match for urn:uuid:00000000-0000-0000-0000-0000000000a2 among choices: http://example.org/fhir/StructureDefinition/org-x (validating against http://example.org/fhir/StructureDefinition/idh-a [idh_a])
+## refb1x
+  (none)
+## refb1y
+  (none)
+## refb2n
+  e structure V_Profile_NoMatch @Bundle.entry[0].resource/*Observation/ob1*/.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/idh-a, http://example.org/fhir/StructureDefinition/idh-b
+  e structure Reference_REF_CantMatchChoice @Bundle.entry[0].resource/*Observation/ob1*/.identifier[0].assigner | Unable to find a profile match for urn:uuid:00000000-0000-0000-0000-0000000000a2 among choices: http://example.org/fhir/StructureDefinition/org-y (validating against http://example.org/fhir/StructureDefinition/idh-b [idh_b])
+  e structure Reference_REF_CantMatchChoice @Bundle.entry[0].resource/*Observation/ob1*/.identifier[0].assigner | Unable to find a profile match for urn:uuid:00000000-0000-0000-0000-0000000000a2 among choices: http://example.org/fhir/StructureDefinition/org-x (validating against http://example.org/fhir/StructureDefinition/idh-a [idh_a])
+## refb2x
+  (none)
+## refb2y
+  (none)
+## res1
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qres-a, http://example.org/fhir/StructureDefinition/qres-b
+  e invariant http://example.org/fhir/StructureDefinition/qres-b#rb-1 @Observation.value.ofType(Quantity) | Constraint failed: rb-1: 'resource must be amended (qres-b)' (validating against http://example.org/fhir/StructureDefinition/qres-b [qres_b])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qres-a) (validating against http://example.org/fhir/StructureDefinition/qres-a [qres_a])
+  e invalid CONTAINED_ORPHAN_DOM3 @Observation.contained[0] | The contained resource 'c1' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)
+## res2
+  (none)
+## res3
+  (none)
+## res4
+  e structure V_Profile_NoMatch @Bundle.entry[0].resource/*Observation/e1*/.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qres-a, http://example.org/fhir/StructureDefinition/qres-b
+  e invariant http://example.org/fhir/StructureDefinition/qres-b#rb-1 @Bundle.entry[0].resource/*Observation/e1*/.value.ofType(Quantity) | Constraint failed: rb-1: 'resource must be amended (qres-b)' (validating against http://example.org/fhir/StructureDefinition/qres-b [qres_b])
+  e structure V_Profile_Minimum @Bundle.entry[0].resource/*Observation/e1*/.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qres-a) (validating against http://example.org/fhir/StructureDefinition/qres-a [qres_a])
+## res5
+  e structure V_Profile_NoMatch @Observation.contained[0]/*Observation/c1*/.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qres-a, http://example.org/fhir/StructureDefinition/qres-b
+  e invariant http://example.org/fhir/StructureDefinition/qres-b#rb-1 @Observation.contained[0]/*Observation/c1*/.value.ofType(Quantity) | Constraint failed: rb-1: 'resource must be amended (qres-b)' (validating against http://example.org/fhir/StructureDefinition/qres-b [qres_b])
+  e structure V_Profile_Minimum @Observation.contained[0]/*Observation/c1*/.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qres-a) (validating against http://example.org/fhir/StructureDefinition/qres-a [qres_a])
+  e invalid CONTAINED_ORPHAN_DOM3 @Observation.contained[0] | The contained resource 'c1' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)
+## resla
+  (none)
+## reslb
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier)
+## reslc
+  w invariant http://hl7.org/fhir/StructureDefinition/Identifier#ident-1 @Observation.identifier[0] | Constraint failed: ident-1: 'Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason' (defined in http://hl7.org/fhir/StructureDefinition/Identifier) (validating against http://example.org/fhir/StructureDefinition/idb [idb]) (validating agains
+  e structure V_Profile_NoMatch @Observation.identifier[0] | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/ida, http://example.org/fhir/StructureDefinition/idb
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.value: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/idb) (validating against http://example.org/fhir/StructureDefinition/idb [idb])
+  e structure V_Profile_Minimum @Observation.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/ida) (validating against http://example.org/fhir/StructureDefinition/ida [ida])
+## sev1
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qsev-a, http://example.org/fhir/StructureDefinition/qsev-b
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qsev-a) (validating against http://example.org/fhir/StructureDefinition/qsev-a [qsev_a])
+  e invariant http://example.org/fhir/StructureDefinition/qsev-a#dup-1 @Observation.value.ofType(Quantity) | Constraint failed: dup-1: 'dup text' (validating against http://example.org/fhir/StructureDefinition/qsev-a [qsev_a])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qsev-b) (validating against http://example.org/fhir/StructureDefinition/qsev-b [qsev_b])
+  w invariant http://example.org/fhir/StructureDefinition/qsev-b#dup-1 @Observation.value.ofType(Quantity) | Constraint failed: dup-1: 'dup text' (validating against http://example.org/fhir/StructureDefinition/qsev-b [qsev_b])
+## sev2
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qsev-a, http://example.org/fhir/StructureDefinition/qsev-b
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qsev-a) (validating against http://example.org/fhir/StructureDefinition/qsev-a [qsev_a])
+  e invariant http://example.org/fhir/StructureDefinition/qsev-a#dup-1 @Observation.value.ofType(Quantity) | Constraint failed: dup-1: 'dup text' (validating against http://example.org/fhir/StructureDefinition/qsev-a [qsev_a])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qsev-b) (validating against http://example.org/fhir/StructureDefinition/qsev-b [qsev_b])
+  w invariant http://example.org/fhir/StructureDefinition/qsev-b#dup-1 @Observation.value.ofType(Quantity) | Constraint failed: dup-1: 'dup text' (validating against http://example.org/fhir/StructureDefinition/qsev-b [qsev_b])
+## two
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qa, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+  e structure V_Profile_NoMatch @Observation.component[0].value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qa, http://example.org/fhir/StructureDefinition/qb
+  e structure V_Profile_Minimum @Observation.component[0].value.ofType(Quantity) | Quantity.code: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qb) (validating against http://example.org/fhir/StructureDefinition/qb [qb])
+  e structure V_Profile_Minimum @Observation.component[0].value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+## twom
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-x
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/nope-x, http://example.org/fhir/StructureDefinition/qa
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+  e structure V_Unknown_Profile @Observation.component[0].value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-x
+  e structure V_Profile_NoMatch @Observation.component[0].value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/nope-x, http://example.org/fhir/StructureDefinition/qa
+  e structure V_Profile_Minimum @Observation.component[0].value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+## twom1
+  e structure V_Unknown_Profile @Observation.value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-x
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/nope-x, http://example.org/fhir/StructureDefinition/qa
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qa) (validating against http://example.org/fhir/StructureDefinition/qa [qa])
+  e structure V_Unknown_Profile @Observation.component[0].value.ofType(Quantity) | Unknown profile http://example.org/fhir/StructureDefinition/nope-x
+## txt1
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qtxt-a, http://example.org/fhir/StructureDefinition/qtxt-b
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qtxt-a) (validating against http://example.org/fhir/StructureDefinition/qtxt-a [qtxt_a])
+  e invariant http://example.org/fhir/StructureDefinition/qtxt-a#dup-1 @Observation.value.ofType(Quantity) | Constraint failed: dup-1: 'text A' (validating against http://example.org/fhir/StructureDefinition/qtxt-a [qtxt_a]) (validating against http://example.org/fhir/StructureDefinition/qtxt-b [qtxt_b])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qtxt-b) (validating against http://example.org/fhir/StructureDefinition/qtxt-b [qtxt_b])
+## txt2
+  e structure V_Profile_NoMatch @Observation.value.ofType(Quantity) | Unable to find a match for the specified profile among choices: http://example.org/fhir/StructureDefinition/qtxt-a, http://example.org/fhir/StructureDefinition/qtxt-b
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qtxt-a) (validating against http://example.org/fhir/StructureDefinition/qtxt-a [qtxt_a])
+  e invariant http://example.org/fhir/StructureDefinition/qtxt-b#dup-1 @Observation.value.ofType(Quantity) | Constraint failed: dup-1: 'text B' (validating against http://example.org/fhir/StructureDefinition/qtxt-a [qtxt_a]) (validating against http://example.org/fhir/StructureDefinition/qtxt-b [qtxt_b])
+  e structure V_Profile_Minimum @Observation.value.ofType(Quantity) | Quantity.unit: minimum required = 1, but only found 0 (from http://example.org/fhir/StructureDefinition/qtxt-b) (validating against http://example.org/fhir/StructureDefinition/qtxt-b [qtxt_b])

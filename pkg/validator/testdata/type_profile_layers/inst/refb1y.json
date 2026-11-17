@@ -1,0 +1,46 @@
+{
+ "resourceType": "Bundle",
+ "id": "refb1y",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-0000000000a1",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "ob1",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-ref1"
+     ]
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "identifier": [
+     {
+      "value": "x",
+      "assigner": {
+       "reference": "urn:uuid:00000000-0000-0000-0000-0000000000a2"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-0000000000a2",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "og1",
+    "name": "N",
+    "contact": [
+     {
+      "purpose": {
+       "text": "p"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

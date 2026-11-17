@@ -56,6 +56,9 @@ type Discovery struct {
 	// Resources are the resources it holds, at any depth, in preorder: a resource before those it
 	// holds.
 	Resources []*Nested
+	// held son los recursos ya descubiertos, por identidad de su mapa, y solo existe cuando algún valor tuvo
+	// varias capas: con una sola capa por todo el camino no hay nada que repetir ni conjunto.
+	held map[uintptr]struct{}
 }
 
 // Discover finds the resources data, a resource of definition sd validated at path, holds: in the
@@ -71,7 +74,7 @@ func Discover(ctx context.Context, reg *registry.Registry, sd *registry.Structur
 		return d
 	}
 	if root := sd.Tree().Root(); root != nil {
-		d.walk(ctx, reg, nil, sd, root, "", data, nil, path)
+		d.walk(ctx, reg, nil, registry.ResourceOwner(data), sd, root, "", data, nil, path, nil)
 	}
 	return d
 }
@@ -80,25 +83,57 @@ func Discover(ctx context.Context, reg *registry.Registry, sd *registry.Structur
 // nested resource in (nil for the resource discovered) and holder the instance that holds inst.
 // A value written otherwise than its element's cardinality says (an array for one value, an object
 // for several) is not walked into.
-func (d *Discovery) walk(ctx context.Context, reg *registry.Registry, in *Nested, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst, holder map[string]any, path string) {
-	children := reg.ChildrenOf(ctx, sd, node, typeCode, nil)
-	for _, child := range children.Nodes {
-		if !reg.MayHoldResources(children.SD, child) {
-			continue
-		}
-		values := elementvalues.Of(child, inst, reg)
-		if reg.HoldsResource(child.Def) {
-			for _, cv := range values {
-				d.found(ctx, reg, in, child, cv, inst, holder, path)
+func (d *Discovery) walk(ctx context.Context, reg *registry.Registry, in *Nested, owner map[string]any, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst, holder map[string]any, path string, done registry.Descended) {
+	children := reg.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Owner: owner})
+	// A value two layers of its holder declare is walked once, under the union of the layers.
+	children, ok := done.Fresh(inst, children)
+	if !ok {
+		return
+	}
+	below := done.Below(children)
+	// Un recurso que alcanzan dos capas, o dos recorridos de capas distintas más arriba, se descubre una vez
+	// en todo el descubrimiento, por identidad de su mapa; el conjunto nace con el primer valor de varias
+	// capas, y con una sola capa por todo el camino no hay conjunto.
+	if d.held == nil && children.NumLayers() > 1 {
+		d.held = map[uintptr]struct{}{}
+	}
+	for i := range children.NumLayers() {
+		layer := children.LayerAt(i)
+		for _, child := range layer.Nodes {
+			if !reg.MayHoldResources(layer.SD, child) {
+				continue
 			}
-			continue
-		}
-		for _, cv := range values {
-			if m, ok := cv.Value.(map[string]any); ok && elementvalues.ShapeOf(child, cv) != elementvalues.ArrayForOne {
-				d.walk(ctx, reg, in, children.SD, child, cv.TypeCode, m, inst, elementvalues.ItemPath(child, cv, path))
+			values := elementvalues.Of(child, inst, reg)
+			if reg.HoldsResource(child.Def) {
+				for _, cv := range values {
+					if d.held != nil && seenBefore(d.held, cv.Value) {
+						continue
+					}
+					d.found(ctx, reg, in, child, cv, inst, holder, path)
+				}
+				continue
+			}
+			for _, cv := range values {
+				if m, ok := cv.Value.(map[string]any); ok && elementvalues.ShapeOf(child, cv) != elementvalues.ArrayForOne {
+					d.walk(ctx, reg, in, owner, layer.SD, child, cv.TypeCode, m, inst, elementvalues.ItemPath(child, cv, path), below)
+				}
 			}
 		}
 	}
+}
+
+// seenBefore dice si el mapa v ya está en held (por identidad), y lo agrega si no.
+func seenBefore(held map[uintptr]struct{}, v any) bool {
+	m, ok := v.(map[string]any)
+	if !ok {
+		return false
+	}
+	id := reflect.ValueOf(m).Pointer()
+	if _, dup := held[id]; dup {
+		return true
+	}
+	held[id] = struct{}{}
+	return false
 }
 
 // found records the resource cv holds in inst, an instance of child's parent (a Bundle entry for an
@@ -130,7 +165,7 @@ func (d *Discovery) found(ctx context.Context, reg *registry.Registry, in *Neste
 		n.FullURL, _ = inst["fullUrl"].(string)
 	}
 	d.Resources = append(d.Resources, n)
-	d.walk(ctx, reg, n, rsd, rsd.Tree().Root(), "", res, nil, at)
+	d.walk(ctx, reg, n, res, rsd, rsd.Tree().Root(), "", res, nil, at, nil)
 }
 
 // discoveries holds what Discover found in the resources one validation walks, by resource and

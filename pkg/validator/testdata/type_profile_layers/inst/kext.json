@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "kext",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-kext"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "system": "http://unitsofmeasure.org",
+  "code": "mg"
+ }
+}

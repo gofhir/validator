@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-gt",
+ "url": "http://example.org/fhir/StructureDefinition/obs-gt",
+ "name": "obs_gt",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.effective[x]",
+    "path": "Observation.effective[x]",
+    "type": [
+     {
+      "code": "Timing",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/tm-a",
+       "http://example.org/fhir/StructureDefinition/tm-b"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

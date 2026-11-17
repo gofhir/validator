@@ -1,0 +1,43 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-e2h-rempty",
+ "url": "http://example.org/fhir/StructureDefinition/obs-e2h-rempty",
+ "name": "obs_e2h_rempty",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.hasMember",
+    "path": "Observation.hasMember",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "resolve().identifier"
+      }
+     ],
+     "rules": "closed"
+    }
+   },
+   {
+    "id": "Observation.hasMember:sx",
+    "path": "Observation.hasMember",
+    "sliceName": "sx",
+    "type": [
+     {
+      "code": "Reference",
+      "targetProfile": [
+       "http://example.org/fhir/StructureDefinition/obs-e2t-rempty"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

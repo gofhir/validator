@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d3-cod-b",
+ "url": "http://example.org/fhir/StructureDefinition/d3-cod-b",
+ "name": "d3_cod_b",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Coding",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Coding",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Coding.display",
+    "path": "Coding.display",
+    "min": 1
+   }
+  ]
+ }
+}

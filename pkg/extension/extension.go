@@ -172,7 +172,9 @@ func (v *Validator) validateResource(ctx context.Context, sd *registry.Structure
 		return
 	}
 	if root := sd.Tree().Root(); root != nil {
-		v.validateNode(ctx, sd, root, "", data, path, result)
+		// The resource holds everything it walks: its Scope is the one a choice among the profiles of a
+		// value's type is made in (registry.Instance.Owner).
+		v.validateNode(withOwner(ctx, registry.ResourceOwner(data)), sd, root, "", data, path, nil, result)
 	}
 }
 
@@ -183,16 +185,46 @@ func (v *Validator) validateResource(ctx context.Context, sd *registry.Structure
 // written as an array where one goes (HL7 validates nothing in it), nor an element the definitions
 // do not have (the structural phase reports it), nor a primitive written otherwise than as a
 // primitive.
-func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, path string, result *issue.Result) {
-	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, nil)
-	v.validateChildren(ctx, children, inst, path, result)
+func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, path string, done registry.Descended, result *issue.Result) {
+	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Owner: ownerIn(ctx)})
+	// A value two layers of its holder declare is walked once, under the union of the layers.
+	children, ok := done.Fresh(inst, children)
+	if !ok {
+		return
+	}
+	v.validateChildren(ctx, children, inst, path, done, result)
+}
+
+type ownerKey struct{}
+
+// withOwner devuelve ctx con el recurso que contiene lo que se camina.
+func withOwner(ctx context.Context, owner map[string]any) context.Context {
+	return context.WithValue(ctx, ownerKey{}, owner)
+}
+
+// ownerIn es el recurso que contiene lo que se camina; nil si no se dijo.
+func ownerIn(ctx context.Context) map[string]any {
+	owner, _ := ctx.Value(ownerKey{}).(map[string]any)
+	return owner
 }
 
 // validateChildren valida lo que children declara como extensión en inst, una instancia en path, y
 // después lo que tienen adentro los valores de cada uno de los otros hijos.
-func (v *Validator) validateChildren(ctx context.Context, children registry.InstanceChildren, inst map[string]any, path string, result *issue.Result) {
-	v.validateDeclaredExtensions(ctx, children, inst, path, result)
-	for _, child := range children.Nodes {
+func (v *Validator) validateChildren(ctx context.Context, children registry.InstanceChildren, inst map[string]any, path string, done registry.Descended, result *issue.Result) {
+	// What two layers (the several profiles the value's type declares) report the same is reported once.
+	start := len(result.Issues)
+	below := done.Below(children)
+	for i := range children.NumLayers() {
+		from := len(result.Issues)
+		v.validateLayer(ctx, children.LayerAt(i), inst, path, below, result)
+		result.DropRepeated(start, from)
+	}
+}
+
+// validateLayer is validateChildren over one layer: the children a definition gives inst.
+func (v *Validator) validateLayer(ctx context.Context, layer registry.Layer, inst map[string]any, path string, below registry.Descended, result *issue.Result) {
+	v.validateDeclaredExtensions(ctx, layer, inst, path, result)
+	for _, child := range layer.Nodes {
 		if name := child.Name(); name == keyExtension || name == keyModifierExtension || v.registry.HoldsResource(child.Def) {
 			continue
 		}
@@ -211,13 +243,13 @@ func (v *Validator) validateChildren(ctx context.Context, children registry.Inst
 					if cv.Array {
 						sibling = fmt.Sprintf("%s[%d]", sibling, cv.Index)
 					}
-					v.validateNode(ctx, children.SD, child, cv.TypeCode, cv.Ext, sibling, result)
+					v.validateNode(ctx, layer.SD, child, cv.TypeCode, cv.Ext, sibling, below, result)
 				}
 				continue
 			}
 			if m, ok := cv.Value.(map[string]any); ok {
 				// A complex element's "_key" sibling is no property of it (HL7: unrecognized).
-				v.validateNode(ctx, children.SD, child, cv.TypeCode, m, elementvalues.ItemPath(child, cv, path), result)
+				v.validateNode(ctx, layer.SD, child, cv.TypeCode, m, elementvalues.ItemPath(child, cv, path), below, result)
 			}
 		}
 	}
@@ -398,7 +430,7 @@ func fixesURL(sd *registry.StructureDefinition, url string) bool {
 // validateDeclaredExtensions valida cada extensión de inst, solo donde la definición la tiene: un
 // modifierExtension en un tipo que no lo tiene es un elemento desconocido, que informa la fase
 // estructural, y HL7 informa solo eso (#178).
-func (v *Validator) validateDeclaredExtensions(ctx context.Context, children registry.InstanceChildren, inst map[string]any, path string, result *issue.Result) {
+func (v *Validator) validateDeclaredExtensions(ctx context.Context, children registry.Layer, inst map[string]any, path string, result *issue.Result) {
 	for _, child := range children.Nodes {
 		if name := child.Name(); name == keyExtension || name == keyModifierExtension {
 			if extensions, ok := inst[name]; ok {
@@ -413,7 +445,7 @@ func (v *Validator) validateDeclaredExtensions(ctx context.Context, children reg
 // contra el elemento de node que lo gobierna. El valor es el elemento de elección de node, el de
 // nombre terminado en "[x]" (elementdefinition.html#id): Extension tiene uno, su value[x] (#178).
 func (v *Validator) validateExtension(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, ext map[string]any, extPath string, result *issue.Result) {
-	children := v.registry.ChildrenOf(ctx, sd, node, "", nil)
+	children := v.registry.ChildrenOf(ctx, sd, node, "", registry.Instance{Owner: ownerIn(ctx)})
 	var nested *registry.ElementNode
 	for _, child := range children.Nodes {
 		switch name := child.Name(); {
@@ -486,12 +518,12 @@ func (v *Validator) validateExtensionValue(ctx context.Context, sd *registry.Str
 			continue
 		}
 		if allowed {
-			v.validateNode(ctx, sd, valueNode, cv.TypeCode, inst, at, result)
+			v.validateNode(ctx, sd, valueNode, cv.TypeCode, inst, at, nil, result)
 			continue
 		}
 		// Un valor de un tipo que el elemento no permite es de ese tipo, no del que el elemento
 		// restringe: se valida con la definición del tipo, y HL7 informa lo que tiene adentro (#178).
-		v.validateChildren(ctx, v.registry.TypeChildrenOf(valueNode, cv.TypeCode), inst, at, result)
+		v.validateChildren(ctx, v.registry.TypeChildrenOf(valueNode, cv.TypeCode), inst, at, nil, result)
 	}
 }
 

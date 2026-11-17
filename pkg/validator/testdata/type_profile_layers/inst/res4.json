@@ -1,0 +1,49 @@
+{
+ "resourceType": "Bundle",
+ "id": "res4",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-000000000001",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "e1",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-res"
+     ]
+    },
+    "status": "final",
+    "code": {
+     "text": "x"
+    },
+    "valueQuantity": {
+     "value": 5,
+     "code": "mg",
+     "system": "http://unitsofmeasure.org"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:00000000-0000-0000-0000-000000000002",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "e2",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/obs-res"
+     ]
+    },
+    "status": "amended",
+    "code": {
+     "text": "x"
+    },
+    "valueQuantity": {
+     "value": 5,
+     "code": "mg",
+     "system": "http://unitsofmeasure.org"
+    }
+   }
+  }
+ ],
+ "type": "collection"
+}

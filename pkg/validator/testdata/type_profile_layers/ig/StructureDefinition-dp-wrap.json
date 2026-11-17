@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "dp-wrap",
+ "url": "http://example.org/fhir/StructureDefinition/dp-wrap",
+ "name": "dp_wrap",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "CodeableConcept",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "CodeableConcept.coding",
+    "path": "CodeableConcept.coding",
+    "type": [
+     {
+      "code": "Coding",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/dp-cd-final",
+       "http://example.org/fhir/StructureDefinition/dp-cd-amended"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,47 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-leaf",
+ "url": "http://example.org/fhir/StructureDefinition/obs-leaf",
+ "name": "obs_leaf",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.identifier",
+    "path": "Observation.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.identifier:s2",
+    "path": "Observation.identifier",
+    "sliceName": "s2",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ida",
+       "http://example.org/fhir/StructureDefinition/idb"
+      ]
+     }
+    ],
+    "patternIdentifier": {
+     "system": "urn:probe:s2"
+    }
+   }
+  ]
+ }
+}

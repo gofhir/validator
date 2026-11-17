@@ -1,0 +1,69 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "obs-d3",
+ "url": "http://example.org/fhir/StructureDefinition/obs-d3",
+ "name": "obs_d3",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.component",
+    "path": "Observation.component",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "code"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.component.code",
+    "path": "Observation.component.code",
+    "type": [
+     {
+      "code": "CodeableConcept",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/d3-cc-a",
+       "http://example.org/fhir/StructureDefinition/d3-cc-b"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Observation.component:s",
+    "path": "Observation.component",
+    "sliceName": "s"
+   },
+   {
+    "id": "Observation.component:s.code",
+    "path": "Observation.component.code",
+    "type": [
+     {
+      "code": "CodeableConcept",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/d3-cc-a",
+       "http://example.org/fhir/StructureDefinition/d3-cc-b"
+      ]
+     }
+    ],
+    "patternCodeableConcept": {
+     "coding": [
+      {
+       "system": "urn:x",
+       "code": "c"
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

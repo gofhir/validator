@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ids-res",
+ "url": "http://example.org/fhir/StructureDefinition/ids-res",
+ "name": "ids_res",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier",
+    "constraint": [
+     {
+      "key": "sr-1",
+      "severity": "error",
+      "human": "resource must be an Observation (ids-res)",
+      "expression": "%resource.resourceType = 'Observation'"
+     }
+    ]
+   }
+  ]
+ }
+}

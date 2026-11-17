@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "kbindok",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-kbind"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "subject": {
+  "display": "x"
+ },
+ "valueQuantity": {
+  "value": 5,
+  "comparator": ">",
+  "system": "http://unitsofmeasure.org",
+  "code": "mg"
+ }
+}

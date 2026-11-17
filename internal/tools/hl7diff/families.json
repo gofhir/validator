@@ -140,7 +140,8 @@
       "name": "holder-profile-no-match",
       "rule": "equal",
       "gofhir": [
-        "HOLDER_PROFILE_NO_MATCH"
+        "HOLDER_PROFILE_NO_MATCH",
+        "PROFILE_NO_MATCH"
       ],
       "hl7": [
         "BUNDLE_BUNDLE_ENTRY_MULTIPLE_PROFILES_NO_MATCH",
@@ -154,7 +155,8 @@
       "name": "holder-profile-multiple-matches",
       "rule": "equal",
       "gofhir": [
-        "HOLDER_PROFILE_MULTIPLE_MATCHES"
+        "HOLDER_PROFILE_MULTIPLE_MATCHES",
+        "PROFILE_MULTIPLE_MATCHES"
       ],
       "hl7": [
         "Validation_VAL_Profile_MultipleMatches"

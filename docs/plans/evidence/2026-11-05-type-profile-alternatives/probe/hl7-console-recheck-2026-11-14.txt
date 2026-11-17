@@ -1,0 +1,70 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (12 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-11-05-type-profile-alternatives/probe, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/p1.json inst/p10.json inst/p11.json inst/p12.json inst/p13.json inst/p14.json inst/p15.json inst/p16.json inst/p17.json inst/p18.json inst/p19.json inst/p2.json inst/p20.json inst/p21.json inst/p3.json inst/p4.json inst/p5.json inst/p6.json inst/p7.json inst/p8.json inst/p9.json -version 4.0.1 -ig ig -tx n/a -output /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/p2-recheck/out.json
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:04.696)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:01.398)
+  Loaded FHIR - 8265 resources (00:00.001)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.021)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:02.148)
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.863)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:01.901)
+  Load ig - 15 resources (00:00.022)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/missing-quantity but trying to go on
+Can't find Quantity profile http://example.org/fhir/StructureDefinition/missing-quantity but trying to go on
+  ...go! (00:04.322)
+Cached new session. Cache size = 1
+Sources to validate: inst/p1.jsoninst/p10.jsoninst/p11.jsoninst/p12.jsoninst/p13.jsoninst/p14.jsoninst/p15.jsoninst/p16.jsoninst/p17.jsoninst/p18.jsoninst/p19.jsoninst/p2.jsoninst/p20.jsoninst/p21.jsoninst/p3.jsoninst/p4.jsoninst/p5.jsoninst/p6.jsoninst/p7.jsoninst/p8.jsoninst/p9.json
+Validating
+  Validate inst/p1.json
+ 00:00.465
+  Validate inst/p10.json
+ 00:00.163
+  Validate inst/p11.json
+ 00:00.079
+  Validate inst/p12.json
+ 00:00.046
+  Validate inst/p13.json
+ 00:00.094
+  Validate inst/p14.json
+ 00:00.229
+  Validate inst/p15.json
+ 00:00.051
+  Validate inst/p16.json
+ 00:00.087
+  Validate inst/p17.json
+ 00:00.034
+  Validate inst/p18.json
+ 00:00.026
+  Validate inst/p19.json
+ 00:00.025
+  Validate inst/p2.json
+ 00:00.094
+  Validate inst/p20.json
+ 00:00.032
+  Validate inst/p21.json
+ 00:00.035
+  Validate inst/p3.json
+ 00:00.026
+  Validate inst/p4.json
+ 00:00.034
+  Validate inst/p5.json
+ 00:00.029
+  Validate inst/p6.json
+ 00:00.038
+  Validate inst/p7.json
+ 00:00.033
+  Validate inst/p8.json
+ 00:00.033
+  Validate inst/p9.json
+ 00:00.052
+Done. Times: Loading: 00:15.409, validation: 00:01.723 (#21). Memory = 579Mb
+
+Done. Times: Loading: 00:15.409, validation: 00:01.723 (#21). Max Memory = 6Gb

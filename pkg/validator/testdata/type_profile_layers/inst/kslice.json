@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "kslice",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/obs-kslice"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "coding": [
+   {
+    "system": "urn:probe:other",
+    "code": "c"
+   }
+  ]
+ },
+ "subject": {
+  "display": "x"
+ }
+}
