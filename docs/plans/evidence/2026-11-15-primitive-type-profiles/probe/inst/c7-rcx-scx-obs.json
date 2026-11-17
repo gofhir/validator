@@ -1,0 +1,23 @@
+{
+ "resourceType": "Observation",
+ "id": "c7-rcx-scx-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-rcx"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "ab",
+ "_valueString": {
+  "id": "a1",
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-other",
+    "valueString": "q"
+   }
+  ]
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgsd1-oth",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgsd1"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "abcd"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

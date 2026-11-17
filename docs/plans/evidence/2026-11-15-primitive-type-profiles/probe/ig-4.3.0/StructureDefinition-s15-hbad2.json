@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s15-hbad2",
+ "url": "http://example.org/fhir/StructureDefinition/s15-hbad2",
+ "name": "s15_hbad2",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "HumanName",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/HumanName",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "HumanName",
+    "path": "HumanName",
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "warning",
+      "human": "sev-1 1 = 2 (warning)",
+      "expression": "1 = 2"
+     }
+    ]
+   }
+  ]
+ }
+}

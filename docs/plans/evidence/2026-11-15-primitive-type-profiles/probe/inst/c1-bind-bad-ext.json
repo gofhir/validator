@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-bind-bad-ext",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-code-pc-bind",
+   "valueCode": "other"
+  }
+ ]
+}

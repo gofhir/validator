@@ -1,0 +1,9 @@
+{
+ "resourceType": "Observation",
+ "id": "c11-plain-obs",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abcd"
+}

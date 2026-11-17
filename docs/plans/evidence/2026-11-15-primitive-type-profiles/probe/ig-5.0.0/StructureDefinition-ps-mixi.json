@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-mixi",
+ "url": "http://example.org/fhir/StructureDefinition/ps-mixi",
+ "name": "ps_mixi",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.id",
+    "path": "string.id",
+    "min": 1
+   },
+   {
+    "id": "string.value",
+    "path": "string.value",
+    "fixedString": "abc"
+   }
+  ]
+ }
+}

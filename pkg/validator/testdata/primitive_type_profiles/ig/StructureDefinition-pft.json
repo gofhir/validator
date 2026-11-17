@@ -1,0 +1,43 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pft",
+ "url": "http://example.org/fhir/StructureDefinition/pft",
+ "name": "pft",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.text",
+    "path": "Patient.name.text",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-ext1",
+       "http://example.org/fhir/StructureDefinition/ps-len"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.name.family",
+    "path": "Patient.name.family",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-ext1",
+       "http://example.org/fhir/StructureDefinition/ps-len"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "x-integer-pi-min",
+ "url": "http://example.org/fhir/StructureDefinition/x-integer-pi-min",
+ "name": "x_integer_pi_min",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/x-integer-pi-min"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "integer",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/pi-min"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  },
+  {
+   "type": "element",
+   "expression": "Observation"
+  }
+ ]
+}

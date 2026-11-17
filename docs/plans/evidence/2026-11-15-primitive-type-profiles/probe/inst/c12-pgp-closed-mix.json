@@ -1,0 +1,30 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgp-closed-mix",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgp-closed"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB",
+    "ab",
+    "cd"
+   ],
+   "_given": [
+    null,
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    },
+    null
+   ]
+  }
+ ]
+}

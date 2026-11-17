@@ -1,0 +1,41 @@
+{
+ "resourceType": "Patient",
+ "id": "c8-par-twoup-c",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-ext1+ps-up"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "given": [
+    "AB"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

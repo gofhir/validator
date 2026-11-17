@@ -1,0 +1,41 @@
+{
+ "resourceType": "Patient",
+ "id": "c8-par-one-c",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-ext1"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "given": [
+    "ab"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

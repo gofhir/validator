@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "b-date-pd-con",
+ "url": "http://example.org/fhir/StructureDefinition/b-date-pd-con",
+ "name": "b_date_pd_con",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate",
+    "path": "Patient.birthDate",
+    "type": [
+     {
+      "code": "date",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/pd-con"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

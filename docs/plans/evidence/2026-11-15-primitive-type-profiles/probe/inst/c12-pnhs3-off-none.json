@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pnhs3-off-none",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnhs3"
+  ]
+ },
+ "name": [
+  {
+   "use": "official",
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

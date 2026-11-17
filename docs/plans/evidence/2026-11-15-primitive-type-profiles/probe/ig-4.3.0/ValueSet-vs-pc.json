@@ -1,0 +1,21 @@
+{
+ "resourceType": "ValueSet",
+ "id": "vs-pc",
+ "url": "http://example.org/fhir/StructureDefinition/vs-pc",
+ "status": "draft",
+ "compose": {
+  "include": [
+   {
+    "system": "urn:probe:cs",
+    "concept": [
+     {
+      "code": "male"
+     },
+     {
+      "code": "female"
+     }
+    ]
+   }
+  ]
+ }
+}

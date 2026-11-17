@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "c7-rxri-x-vl",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-rx+ps-ri"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-other",
+    "valueString": "q"
+   }
+  ]
+ }
+}

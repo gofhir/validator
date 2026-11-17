@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-hx",
+ "url": "http://example.org/fhir/StructureDefinition/ps-hx",
+ "name": "ps_hx",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "hx-1",
+      "severity": "error",
+      "human": "must have a value (ps-hx)",
+      "expression": "hasValue()"
+     }
+    ]
+   }
+  ]
+ }
+}

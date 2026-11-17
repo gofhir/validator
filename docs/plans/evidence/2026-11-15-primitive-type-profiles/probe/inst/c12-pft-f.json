@@ -1,0 +1,23 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pft-f",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pft"
+  ]
+ },
+ "name": [
+  {
+   "family": "ab",
+   "text": "ab",
+   "_family": {
+    "extension": [
+     {
+      "url": "http://example.org/fhir/StructureDefinition/ext-other",
+      "valueString": "q"
+     }
+    ]
+   }
+  }
+ ]
+}

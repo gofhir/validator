@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-len2",
+ "url": "http://example.org/fhir/StructureDefinition/ps-len2",
+ "name": "ps_len2",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "len-1",
+      "severity": "error",
+      "human": "TEXT TWO: no more than 3 chars (ps-len2)",
+      "expression": "length() <= 3"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s15-i3",
+ "url": "http://example.org/fhir/StructureDefinition/s15-i3",
+ "name": "s15_i3",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name",
+    "path": "Patient.name",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "use"
+      }
+     ],
+     "rules": "open"
+    },
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "warning",
+      "human": "sev-1 false (warning)",
+      "expression": "false"
+     }
+    ]
+   },
+   {
+    "id": "Patient.name:off",
+    "path": "Patient.name",
+    "sliceName": "off",
+    "type": [
+     {
+      "code": "HumanName",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/s14-he"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.name:off.use",
+    "path": "Patient.name.use",
+    "fixedCode": "official"
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-valc",
+ "url": "http://example.org/fhir/StructureDefinition/ps-valc",
+ "name": "ps_valc",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.value",
+    "path": "string.value",
+    "constraint": [
+     {
+      "key": "vc-1",
+      "severity": "error",
+      "human": "value constraint at most 3 (ps-valc)",
+      "expression": "length() <= 3"
+     }
+    ]
+   }
+  ]
+ }
+}

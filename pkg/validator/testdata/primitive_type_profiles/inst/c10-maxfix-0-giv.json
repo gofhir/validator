@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c10-maxfix-0-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-max+ps-fix"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "abc"
+   ]
+  }
+ ]
+}

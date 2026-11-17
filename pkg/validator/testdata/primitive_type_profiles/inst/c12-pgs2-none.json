@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgs2-none",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgs2"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

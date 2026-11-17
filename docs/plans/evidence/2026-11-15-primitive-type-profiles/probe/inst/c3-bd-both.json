@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c3-bd-both",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/b-date-pd-min+pd-con"
+  ]
+ },
+ "birthDate": "2001-05-05"
+}

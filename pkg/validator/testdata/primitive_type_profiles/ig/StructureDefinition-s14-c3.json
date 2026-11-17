@@ -1,0 +1,48 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s14-c3",
+ "url": "http://example.org/fhir/StructureDefinition/s14-c3",
+ "name": "s14_c3",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/fhir/StructureDefinition/s14-c3b",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name",
+    "path": "Patient.name",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "use"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.name:off",
+    "path": "Patient.name",
+    "sliceName": "off",
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "error",
+      "human": "sev-1 1 = 2 (error)",
+      "expression": "1 = 2"
+     }
+    ]
+   },
+   {
+    "id": "Patient.name:off.use",
+    "path": "Patient.name.use",
+    "fixedCode": "official"
+   }
+  ]
+ }
+}

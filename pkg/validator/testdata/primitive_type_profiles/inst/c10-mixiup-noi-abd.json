@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c10-mixiup-noi-abd",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-mixi+ps-up"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abd"
+}

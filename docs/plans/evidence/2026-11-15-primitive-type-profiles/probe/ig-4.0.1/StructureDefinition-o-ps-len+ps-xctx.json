@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "o-ps-len+ps-xctx",
+ "url": "http://example.org/fhir/StructureDefinition/o-ps-len+ps-xctx",
+ "name": "o_ps_len+ps_xctx",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.value[x]",
+    "path": "Observation.value[x]",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-len",
+       "http://example.org/fhir/StructureDefinition/ps-xctx"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

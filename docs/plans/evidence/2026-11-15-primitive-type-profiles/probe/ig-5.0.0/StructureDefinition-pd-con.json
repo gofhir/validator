@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pd-con",
+ "url": "http://example.org/fhir/StructureDefinition/pd-con",
+ "name": "pd_con",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "date",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/date",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "date",
+    "path": "date",
+    "constraint": [
+     {
+      "key": "dc-1",
+      "severity": "error",
+      "human": "date from 2000 (pd-con)",
+      "expression": "$this >= @2000-01-01"
+     }
+    ]
+   }
+  ]
+ }
+}

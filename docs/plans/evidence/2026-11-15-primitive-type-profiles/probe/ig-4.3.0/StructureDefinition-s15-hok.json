@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s15-hok",
+ "url": "http://example.org/fhir/StructureDefinition/s15-hok",
+ "name": "s15_hok",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "HumanName",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/HumanName",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "HumanName",
+    "path": "HumanName",
+    "constraint": [
+     {
+      "key": "sev-1",
+      "severity": "error",
+      "human": "sev-1 true (error)",
+      "expression": "true"
+     }
+    ]
+   }
+  ]
+ }
+}

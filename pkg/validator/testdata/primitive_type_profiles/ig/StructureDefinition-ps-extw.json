@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-extw",
+ "url": "http://example.org/fhir/StructureDefinition/ps-extw",
+ "name": "ps_extw",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.extension",
+    "path": "string.extension",
+    "constraint": [
+     {
+      "key": "xw-1",
+      "severity": "warning",
+      "human": "extension should be ext-req (ps-extw)",
+      "expression": "url = 'http://example.org/fhir/StructureDefinition/ext-req'"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -155,7 +155,10 @@ const maxSwayedChecks = 3
 type conformKey struct {
 	profile string
 	value   uintptr // identity of the value's map within this validation; one map has one Scope, so the key needs none
-	assume  bool    // the check's mode: a cycle's answer differs between them
+	// pos is the identity of a primitive, which has no map: its place (registry.PrimitiveValue); the zero
+	// Position for a value that has one (value is then its identity).
+	pos    registry.Position
+	assume bool // the check's mode: a cycle's answer differs between them
 	// profileOnly is the other mode (conformer.profileOnly): its answer differs too.
 	profileOnly bool
 }
@@ -217,7 +220,11 @@ func (c typeChooser) Conforms(ctx context.Context, inst registry.Instance, alt r
 	// El valor de un tipo de datos está en un solo lugar, el que da su mapa: el sitio que se le pasa
 	// a la comprobación (para el contexto de uso de las Extension) no entra en la clave del memo.
 	at := &datatypeAt{alt: alt, owner: inst.Owner, scope: scope}
-	return conformer{v: c.v, profileOnly: true, at: at}.Conforms(ctx, inst.Value, profile, scope), true
+	var value any = inst.Value
+	if inst.Primitive.Valid() {
+		value = inst.Primitive
+	}
+	return conformer{v: c.v, profileOnly: true, at: at}.Conforms(ctx, value, profile, scope), true
 }
 
 func (c typeChooser) scopeOf(ctx context.Context, owner map[string]any) (slicematch.Scope, bool) {
@@ -233,25 +240,15 @@ func (c typeChooser) scopeOf(ctx context.Context, owner map[string]any) (slicema
 	return slicematch.Scope{Resource: owner, RootResource: owner, Container: owner}, true
 }
 
-// Conforms implements slicematch.Conformer.
+// Conforms implements slicematch.Conformer. A primitive comes as a registry.PrimitiveValue, and is
+// identified by its place.
 func (c conformer) Conforms(ctx context.Context, value any, profile *registry.StructureDefinition, scope slicematch.Scope) bool {
-	data, ok := value.(map[string]any)
-	if !ok || profile == nil {
+	if profile == nil {
 		return false
 	}
-	// Un map, un Scope: el de un recurso es el que le da su posición, quienquiera que pregunte
-	// (scopeindex), y el memo se apoya en eso; el que llega lo confirma el test del invariante. Un valor
-	// que no es recurso está en el Scope de su recurso, el que da quien llama. Un recurso que el índice no tiene aborta la validación
-	// (Validate): nada se comprueba ni se guarda para él.
-	if _, isResource := data[resourceTypeKey].(string); isResource {
-		indexed, ok := scopeindex.Resolve(ctx, data, "Conforms", scope)
-		if !ok {
-			return false
-		}
-		if check, _ := ctx.Value(scopeCheckKey{}).(scopeCheck); check != nil {
-			check(data, scope, indexed)
-		}
-	} else if scopeindex.Aborted(ctx) {
+	key := conformKey{profile: profile.URL + "|" + profile.Version, assume: c.assume, profileOnly: c.profileOnly}
+	data, prim, ok := identify(ctx, value, scope, &key)
+	if !ok {
 		return false
 	}
 	st, _ := ctx.Value(conformStateKey{}).(*conformState)
@@ -259,7 +256,6 @@ func (c conformer) Conforms(ctx context.Context, value any, profile *registry.St
 		ctx = withConformState(ctx)
 		st, _ = ctx.Value(conformStateKey{}).(*conformState)
 	}
-	key := conformKey{profile: profile.URL + "|" + profile.Version, value: reflect.ValueOf(data).Pointer(), assume: c.assume, profileOnly: c.profileOnly}
 
 	st.mu.Lock()
 	if ans, ok := st.memo[key]; ok {
@@ -300,7 +296,12 @@ func (c conformer) Conforms(ctx context.Context, value any, profile *registry.St
 	st.mu.Unlock()
 
 	probe(ctx, "check")
-	ans := c.check(ctx, data, profile, scope)
+	var ans bool
+	if prim.Valid() {
+		ans = c.checkPrimitive(ctx, prim, profile, scope)
+	} else {
+		ans = c.check(ctx, data, profile, scope)
+	}
 
 	st.mu.Lock()
 	defer st.mu.Unlock()
@@ -313,6 +314,40 @@ func (c conformer) Conforms(ctx context.Context, value any, profile *registry.St
 	}
 	st.settle(key, depth, ans)
 	return ans
+}
+
+// identify sets in key the identity of value, the subject of a conformance check, and returns it as a map or a
+// primitive; false when there is no check to make.
+func identify(ctx context.Context, value any, scope slicematch.Scope, key *conformKey) (data map[string]any, prim registry.PrimitiveValue, ok bool) {
+	switch x := value.(type) {
+	case map[string]any:
+		// Un map, un Scope: el de un recurso es el que le da su posición, quienquiera que pregunte
+		// (scopeindex), y el memo se apoya en eso; el que llega lo confirma el test del invariante. Un valor
+		// que no es recurso está en el Scope de su recurso, el que da quien llama. Un recurso que el índice no tiene aborta la validación
+		// (Validate): nada se comprueba ni se guarda para él.
+		if _, isResource := x[resourceTypeKey].(string); isResource {
+			indexed, found := scopeindex.Resolve(ctx, x, "Conforms", scope)
+			if !found {
+				return nil, prim, false
+			}
+			if check, _ := ctx.Value(scopeCheckKey{}).(scopeCheck); check != nil {
+				check(x, scope, indexed)
+			}
+		} else if scopeindex.Aborted(ctx) {
+			return nil, prim, false
+		}
+		key.value = reflect.ValueOf(x).Pointer()
+		return x, prim, true
+	case registry.PrimitiveValue:
+		// Un escalar no tiene identidad: su lugar la da (el map que lo contiene, la propiedad y el índice). El
+		// Scope es el del recurso que lo contiene, que da quien llama.
+		if !x.Valid() || scopeindex.Aborted(ctx) {
+			return nil, prim, false
+		}
+		key.pos = x.Position()
+		return nil, x, true
+	}
+	return nil, prim, false
 }
 
 // settle ends the check of key at depth, which answered ans: it keeps the answer, and those made
@@ -393,6 +428,37 @@ func (c conformer) check(ctx context.Context, data map[string]any, profile *regi
 	return result.ErrorCount() == 0
 }
 
+// checkPrimitive decides whether a primitive conforms to profile, a definition of its type: the pipeline runs on
+// its "_key" sibling (an empty object when it has none), which is an instance of the profile's children (id and
+// extension), and the constraints of the profile's root run on the scalar with that sibling
+// (valueScope.primitive). What the profile declares for the value itself is not applied (piece 3b).
+func (c conformer) checkPrimitive(ctx context.Context, prim registry.PrimitiveValue, profile *registry.StructureDefinition, scope slicematch.Scope) bool {
+	if prim.TypeCode != "" && prim.TypeCode != profile.Type {
+		return false
+	}
+	if err := c.v.registry.EnsureSnapshot(ctx, profile); err != nil {
+		return false
+	}
+	data := prim.Ext
+	if data == nil {
+		data = map[string]any{}
+	}
+	exact := exactOf(ctx, data)
+	if exact == nil {
+		exact = data
+	}
+	raw, err := json.Marshal(exact)
+	if err != nil {
+		return false
+	}
+	result := issue.NewResult()
+	result.Stats = &issue.Stats{}
+	st, _ := ctx.Value(conformStateKey{}).(*conformState)
+	ctx = withoutHolderGroups(ctx)
+	c.v.validateAgainstProfile(withExtensionScope(constraint.WithReportScope(ctx)), data, raw, profile, &valueScope{scope: scope, state: st, profileOnly: c.profileOnly, at: c.at, primitive: prim}, result)
+	return result.ErrorCount() == 0
+}
+
 // valueScope marks a run of the pipeline on a value inside another resource (a conformance
 // check), with the resources it sits in.
 type valueScope struct {
@@ -402,6 +468,8 @@ type valueScope struct {
 	profileOnly bool
 	// at is conformer.at.
 	at *datatypeAt
+	// primitive is the value when it is a primitive, whose "_key" sibling is the data of the run (checkPrimitive).
+	primitive registry.PrimitiveValue
 }
 
 // constraintOptions returns the resources a value's constraints read as %resource and

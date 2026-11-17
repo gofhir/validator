@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-ext1b",
+ "url": "http://example.org/fhir/StructureDefinition/ps-ext1b",
+ "name": "ps_ext1b",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.extension",
+    "path": "string.extension",
+    "min": 1
+   }
+  ]
+ }
+}

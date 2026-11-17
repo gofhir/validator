@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgsx2-two",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgsx2"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "cd",
+    "ab"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    },
+    null
+   ]
+  }
+ ]
+}

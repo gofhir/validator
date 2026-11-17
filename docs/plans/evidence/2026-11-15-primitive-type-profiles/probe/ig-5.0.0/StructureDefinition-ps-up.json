@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-up",
+ "url": "http://example.org/fhir/StructureDefinition/ps-up",
+ "name": "ps_up",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "up-1",
+      "severity": "error",
+      "human": "must be upper case (ps-up)",
+      "expression": "$this = $this.upper()"
+     }
+    ]
+   }
+  ]
+ }
+}

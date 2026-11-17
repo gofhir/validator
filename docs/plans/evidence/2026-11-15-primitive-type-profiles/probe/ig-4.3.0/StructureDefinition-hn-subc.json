@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "hn-subc",
+ "url": "http://example.org/fhir/StructureDefinition/hn-subc",
+ "name": "hn_subc",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "HumanName",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/HumanName",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "HumanName.given",
+    "path": "HumanName.given",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-subc"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

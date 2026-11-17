@@ -61,6 +61,13 @@ type ValidateOptions struct {
 	// parser judges it (structural.Normalized.ContentJudged): the invariant that an element have
 	// content is not judged again on it. Nil means none was.
 	ContentJudged func(map[string]any) bool
+
+	// Primitive, when valid, makes the value a primitive checked against a profile of its type: Data is
+	// its "_key" sibling (an empty object when it has none), resourceData that sibling's JSON, and sd the
+	// profile. The constraints of the profile's root are evaluated on the scalar with its sibling (json.html#primitive,
+	// elementdefinition.html#ElementDefinition.type.profile), and its id and extension children on Data.
+	// What the profile declares for its value (maxLength, fixed, binding) is not applied.
+	Primitive registry.PrimitiveValue
 }
 
 // constraintEvalOpts carries all contextual data for a single constraint evaluation.
@@ -253,7 +260,57 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	}
 	evalOpts.resolver = resolverWithin(evalOpts.resolver, evalOpts.scope.RootResource, nil)
 
-	v.walk(sd, root, "", resource, resourceData, nil, sd.RootName(resource), evalOpts, result)
+	if opts != nil && opts.Primitive.Valid() {
+		v.walkPrimitiveProfile(sd, root, resource, opts.Primitive, resourceData, sd.RootName(resource), evalOpts, result)
+		return
+	}
+	v.walk(sd, root, "", resource, registry.PrimitiveValue{}, resourceData, nil, sd.RootName(resource), evalOpts, result)
+}
+
+// walkPrimitiveProfile checks a primitive against sd, a profile of its type: the constraints of its root on
+// the scalar with its "_key" sibling, ext (raw is its JSON), then its children (id, extension) on the sibling.
+func (v *Validator) walkPrimitiveProfile(sd *registry.StructureDefinition, root *registry.ElementNode, ext map[string]any, prim registry.PrimitiveValue, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	var element json.RawMessage
+	if prim.Ext != nil {
+		element = raw
+	}
+	seen := seenSet{}
+	switch {
+	case prim.Value != nil:
+		b, err := json.Marshal(exactScalar(prim, opts))
+		if err != nil {
+			return
+		}
+		valueRaw := json.RawMessage(b)
+		v.typeRoot(sd, root, prim.Value, &valueRaw, element, fhirPath, seen, opts, result)
+	case element != nil:
+		v.evaluateValueless(root, root.Def.Path, prim.TypeCode, element, fhirPath, seen, opts, result)
+	}
+	v.walkChildren(sd, root.Children, ext, raw, fhirPath, opts, result)
+}
+
+// exactScalar es el escalar de prim como el JSON escribe su número (1.50 no es 1.5, json.html#primitive): el
+// de su gemelo exacto en el padre, o el escalar decodificado cuando la validación no tiene ninguno.
+func exactScalar(prim registry.PrimitiveValue, opts *constraintEvalOpts) any {
+	if opts.exact == nil {
+		return prim.Value
+	}
+	twin := opts.exact(prim.Parent)
+	if twin == nil {
+		return prim.Value
+	}
+	got := twin[prim.Key]
+	if prim.Index >= 0 {
+		items, ok := got.([]any)
+		if !ok || prim.Index >= len(items) {
+			return prim.Value
+		}
+		got = items[prim.Index]
+	}
+	if got == nil {
+		return prim.Value
+	}
+	return got
 }
 
 // buildEvalOpts constructs constraintEvalOpts from the validator state and per-call options.

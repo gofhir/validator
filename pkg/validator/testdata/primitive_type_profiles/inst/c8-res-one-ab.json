@@ -1,0 +1,55 @@
+{
+ "resourceType": "Bundle",
+ "id": "c8-res-one-ab",
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:3f1c0a2e-0000-4000-8000-00000000000a",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "pa",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/g-ps-ext1"
+     ]
+    },
+    "name": [
+     {
+      "given": [
+       "ab"
+      ],
+      "_given": [
+       {
+        "extension": [
+         {
+          "url": "http://example.org/fhir/StructureDefinition/ext-other",
+          "valueString": "q"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:3f1c0a2e-0000-4000-8000-00000000000b",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "pb",
+    "meta": {
+     "profile": [
+      "http://example.org/fhir/StructureDefinition/g-ps-ext1"
+     ]
+    },
+    "name": [
+     {
+      "given": [
+       "ab"
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

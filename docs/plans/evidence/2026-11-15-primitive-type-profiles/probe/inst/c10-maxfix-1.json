@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c10-maxfix-1",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-max+ps-fix"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abcd"
+}

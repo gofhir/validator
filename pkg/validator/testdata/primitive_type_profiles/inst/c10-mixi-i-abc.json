@@ -1,0 +1,17 @@
+{
+ "resourceType": "Observation",
+ "id": "c10-mixi-i-abc",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-mixi"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abc",
+ "_valueString": {
+  "id": "a1"
+ }
+}

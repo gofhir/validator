@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-rroot",
+ "url": "http://example.org/fhir/StructureDefinition/ps-rroot",
+ "name": "ps_rroot",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "rroot-1",
+      "severity": "error",
+      "human": "root resource must be final (ps-rroot)",
+      "expression": "%rootResource.status = 'final'"
+     }
+    ]
+   }
+  ]
+ }
+}

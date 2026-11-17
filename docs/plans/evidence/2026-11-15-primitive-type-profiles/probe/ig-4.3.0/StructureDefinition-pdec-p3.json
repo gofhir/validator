@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pdec-p3",
+ "url": "http://example.org/fhir/StructureDefinition/pdec-p3",
+ "name": "pdec_p3",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "decimal",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/decimal",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "decimal",
+    "path": "decimal",
+    "constraint": [
+     {
+      "key": "dp-3",
+      "severity": "error",
+      "human": "precision is 3 (pdec-p3)",
+      "expression": "precision() = 3"
+     }
+    ]
+   }
+  ]
+ }
+}

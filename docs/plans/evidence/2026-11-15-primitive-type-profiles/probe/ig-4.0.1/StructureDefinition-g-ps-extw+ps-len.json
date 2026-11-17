@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "g-ps-extw+ps-len",
+ "url": "http://example.org/fhir/StructureDefinition/g-ps-extw+ps-len",
+ "name": "g_ps_extw+ps_len",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-extw",
+       "http://example.org/fhir/StructureDefinition/ps-len"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

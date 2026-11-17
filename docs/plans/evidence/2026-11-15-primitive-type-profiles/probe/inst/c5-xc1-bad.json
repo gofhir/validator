@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c5-xc1-bad",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/xc1",
+   "valueString": "abcd"
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "g-ps-valc+ps-pat",
+ "url": "http://example.org/fhir/StructureDefinition/g-ps-valc+ps-pat",
+ "name": "g_ps_valc+ps_pat",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-valc",
+       "http://example.org/fhir/StructureDefinition/ps-pat"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

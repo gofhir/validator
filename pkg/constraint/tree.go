@@ -50,39 +50,50 @@ const maxContentReferenceHops = 8
 // The walk checks one value of node, held at fhirPath, and recurses into its children. The node is
 // the most specific definition of the value: the slice it belongs to, or the element. The value's
 // type is typeCode (a choice element's type, or its only type).
-func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
-	seen := map[string]bool{}
-	base := node
-	for n := node; n != nil; n = n.SliceOf {
-		v.checkType(sd, n, typeCode, fhirPath, seen, opts, result)
-		v.layer(n, choiceElementPath(n.Def.Path, typeCode), value, &raw, element, fhirPath, seen, opts, result)
-		base = n
-	}
-
-	layerSD, layer, hops := sd, base, 0
-	for layer.Def.ContentReference != nil && hops < maxContentReferenceHops {
-		target, tsd := v.contentTarget(layerSD, layer)
-		if target == nil {
-			break
-		}
-		v.layer(target, target.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
-		layerSD, layer, hops = tsd, target, hops+1
-	}
+//
+// Un valor primitivo (prim, su lugar) se evalúa también bajo la definición de su tipo (la raíz de su perfil,
+// o la del tipo base), con el primitivo y su `_x` (element) por foco.
+func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, prim registry.PrimitiveValue, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	seen := seenSet{}
+	// Primero se resuelven las definiciones del valor (sin evaluar nada) para saber qué claves redeclara
+	// el perfil de su tipo: el dueño no las evalúa (shadowedByType).
+	owners, nSlices, layerSD, layer := v.ownersOf(sd, node)
 
 	self := v.selfDefinition(opts.ctx, layer, typeCode, value)
 	tps := v.registry.TypeProfilesOf(opts.ctx, node, typeCode)
-	defs := v.alternativeTypes(tps, fhirPath, value, opts, result)
+	defs := v.alternativeTypes(tps, fhirPath, value, prim, opts, result)
+	var typeSD *registry.StructureDefinition
+	var typeRoot *registry.ElementNode
+	layers := defs
+	if len(defs) <= 1 {
+		typeSD, typeRoot = v.typeLayerOf(tps, layer, node, typeCode, self, opts)
+		if len(defs) == 1 {
+			// Of several profiles, the one the value is checked against.
+			typeSD, typeRoot = defs[0].sd, defs[0].root
+		}
+		layers = nil
+		if typeRoot != nil {
+			layers = []typeDef{{sd: typeSD, root: typeRoot}}
+		}
+	}
+	shadowed := shadowedByType(owners, tps.Alternatives.DeclaredCount(), layers, seen)
+
+	for i, n := range owners {
+		if i < nSlices {
+			v.checkType(sd, n, typeCode, fhirPath, seen, opts, result)
+			v.layer(n, choiceElementPath(n.Def.Path, typeCode), value, &raw, element, fhirPath, seen, opts, result)
+		} else {
+			v.layer(n, n.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
+		}
+	}
+
 	if len(defs) > 1 {
 		v.walkLayers(sd, node, typeCode, value, raw, element, fhirPath, seen, self, layerSD, layer, defs, opts, result)
 		return
 	}
-	typeSD, typeRoot := v.typeLayerOf(tps, layer, node, typeCode, self, opts)
-	if len(defs) == 1 {
-		// Of several profiles, the one the value is checked against.
-		typeSD, typeRoot = defs[0].sd, defs[0].root
-	}
-	if typeRoot != nil && typeSD.Kind != kindPrimitive {
-		v.layer(typeRoot, typeRoot.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
+	if typeRoot != nil {
+		releaseShadowed(seen, shadowed, typeRoot)
+		v.typeRoot(typeSD, typeRoot, value, &raw, element, fhirPath, seen, opts, result)
 	}
 	if self != nil && self != typeSD {
 		// The slice's profile governs the value, and so does the definition it declares itself.
@@ -114,6 +125,29 @@ func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.Elemen
 	}
 }
 
+// ownersOf da las definiciones del elemento que gobiernan un valor de node: node y los slices que divide
+// (nSlices de ellas, la más específica primero), y los elementos a que apunta su contentReference; layerSD y layer
+// son la última de ellas y su definición.
+func (v *Validator) ownersOf(sd *registry.StructureDefinition, node *registry.ElementNode) (owners []*registry.ElementNode, nSlices int, layerSD *registry.StructureDefinition, layer *registry.ElementNode) {
+	owners = make([]*registry.ElementNode, 0, 2)
+	base := node
+	for n := node; n != nil; n = n.SliceOf {
+		owners = append(owners, n)
+		base = n
+	}
+	nSlices = len(owners)
+	layerSD, layer = sd, base
+	for hops := 0; layer.Def.ContentReference != nil && hops < maxContentReferenceHops; hops++ {
+		target, tsd := v.contentTarget(layerSD, layer)
+		if target == nil {
+			break
+		}
+		owners = append(owners, target)
+		layerSD, layer = tsd, target
+	}
+	return owners, nSlices, layerSD, layer
+}
+
 // typeDef es una definición de tipo que gobierna un valor, con su elemento raíz.
 type typeDef struct {
 	sd   *registry.StructureDefinition
@@ -124,13 +158,20 @@ type typeDef struct {
 // gobierna, los que se eligen para el valor (registry.ChooseTypeProfiles), e informa que no cumple
 // ninguno (PROFILE_NO_MATCH) o que cumple varios (PROFILE_MULTIPLE_MATCHES), una vez en el valor. El
 // dueño del valor, que da su Scope a la elección, es el recurso de opts.scope.
-func (v *Validator) alternativeTypes(tps registry.TypeProfiles, fhirPath string, value any, opts *constraintEvalOpts, result *issue.Result) []typeDef {
+func (v *Validator) alternativeTypes(tps registry.TypeProfiles, fhirPath string, value any, prim registry.PrimitiveValue, opts *constraintEvalOpts, result *issue.Result) []typeDef {
 	alt := tps.Alternatives
-	obj, isObject := value.(map[string]any)
-	if tps.Governing.SD != nil || alt.Node == nil || !isObject {
+	if tps.Governing.SD != nil || alt.Node == nil {
 		return nil
 	}
-	choice := v.registry.ChooseTypeProfiles(opts.ctx, alt, registry.Instance{Value: obj, Owner: opts.scope.Resource})
+	inst := registry.Instance{Owner: opts.scope.Resource}
+	if obj, isObject := value.(map[string]any); isObject {
+		inst.Value = obj
+	} else if prim.Valid() {
+		inst.Primitive = prim
+	} else {
+		return nil
+	}
+	choice := v.registry.ChooseTypeProfiles(opts.ctx, alt, inst)
 	switch {
 	case choice.NoMatch():
 		if firstReportKey(opts.ctx, fhirPath+"\x00"+string(issue.DiagProfileNoMatch)) {
@@ -160,7 +201,7 @@ func (v *Validator) alternativeTypes(tps registry.TypeProfiles, fhirPath string,
 // uno), cada capa con su propio estado, y junta lo que informan. Primero, una vez, lo común a todas
 // (la definición propia del valor); los hijos que el propio elemento despliega se recorren una vez,
 // y los del perfil de cada capa dentro de ella.
-func (v *Validator) walkLayers(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, raw, element json.RawMessage, fhirPath string, seen map[string]bool, self, layerSD *registry.StructureDefinition, layerNode *registry.ElementNode, defs []typeDef, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) walkLayers(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, raw, element json.RawMessage, fhirPath string, seen seenSet, self, layerSD *registry.StructureDefinition, layerNode *registry.ElementNode, defs []typeDef, opts *constraintEvalOpts, result *issue.Result) {
 	if self != nil {
 		if root := self.Tree().Root(); root != nil {
 			v.layer(root, root.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
@@ -184,9 +225,7 @@ func (v *Validator) walkLayers(sd *registry.StructureDefinition, node *registry.
 		run := beginLayer(opts)
 		lseen := cloneSeen(seen)
 		lraw := raw
-		if td.sd.Kind != kindPrimitive {
-			v.layer(td.root, td.root.Def.Path, value, &lraw, element, fhirPath, lseen, run.opts, run.result)
-		}
+		v.typeRoot(td.sd, td.root, value, &lraw, element, fhirPath, lseen, run.opts, run.result)
 		if isObject && !own && run.opts.firstDescent(obj, td.sd, td.root.Children) {
 			v.walkChildren(td.sd, td.root.Children, obj, lraw, fhirPath, run.opts, run.result)
 		}
@@ -222,28 +261,94 @@ func governedChildren(node *registry.ElementNode) []*registry.ElementNode {
 
 // governing is the most specific definition of one value of node: the slice slice matching assigns
 // it to, or node itself when node is not sliced or the value is in none of its slices.
-func (v *Validator) governing(sd *registry.StructureDefinition, node *registry.ElementNode, cv elementvalues.Value, opts *constraintEvalOpts) *registry.ElementNode {
+func (v *Validator) governing(sd *registry.StructureDefinition, node *registry.ElementNode, cv elementvalues.Value, inst map[string]any, opts *constraintEvalOpts) *registry.ElementNode {
 	if node.Def.Slicing == nil || len(node.Slices) == 0 {
 		return node
 	}
-	m := v.matcher.Resolve(opts.ctx, slicematch.Request{
+	req := slicematch.Request{
 		SD: sd, Node: node, Key: cv.Key, Value: cv.Value, Valueless: cv.Value == nil && cv.Ext != nil,
 		Scope: opts.scope, Resolver: opts.sliceResolver, Containment: opts.containment,
-	})
+	}
+	if _, isObject := cv.Value.(map[string]any); !isObject {
+		req.Primitive = cv.Primitive(inst)
+	}
+	m := v.matcher.Resolve(opts.ctx, req)
 	if m.Matched {
 		return m.Node
 	}
 	return node
 }
 
-// walkPrimitiveExtensions walks a primitive's "_key" sibling (its id and extensions), whose JSON
-// is raw, against the children of the primitive's type definition.
-func (v *Validator) walkPrimitiveExtensions(node *registry.ElementNode, typeCode string, ext map[string]any, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
-	typeSD, typeRoot := v.typeLayer(opts.ctx, node, node, typeCode, nil)
+// walkPrimitiveExtensions walks a primitive's "_key" sibling (its id and extensions), whose JSON is
+// raw, against the children of the definitions that govern the primitive by its type: the profile its
+// type declares, each of those it conforms to when it declares several (one layer each, what two
+// report the same is reported once), else the type's own.
+func (v *Validator) walkPrimitiveExtensions(node *registry.ElementNode, typeCode string, ext map[string]any, prim registry.PrimitiveValue, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+	tps := v.registry.TypeProfilesOf(opts.ctx, node, typeCode)
+	if defs := v.alternativeTypes(tps, fhirPath, prim.Value, prim, opts, result); len(defs) > 1 {
+		runs := make([]layerRun, 0, len(defs))
+		for _, td := range defs {
+			run := beginLayer(opts)
+			v.walkChildren(td.sd, td.root.Children, ext, raw, fhirPath, run.opts, run.result)
+			runs = append(runs, run)
+		}
+		mergeLayers(opts, runs, result)
+		return
+	} else if len(defs) == 1 {
+		v.walkChildren(defs[0].sd, defs[0].root.Children, ext, raw, fhirPath, opts, result)
+		return
+	}
+	typeSD, typeRoot := v.typeLayerOf(tps, node, node, typeCode, nil, opts)
 	if typeRoot == nil || typeSD.Kind != kindPrimitive {
 		return
 	}
 	v.walkChildren(typeSD, typeRoot.Children, ext, raw, fhirPath, opts, result)
+}
+
+// typeRoot evalúa las constraints de la raíz de typeRoot, la definición de tipo typeSD que gobierna un
+// valor. Un primitivo se evalúa con su `_x` (element), sin perfil o con él, la raíz de su tipo
+// base incluida: su `ele-1` se junta con el de los elementos que lo gobiernan por clave y expresión.
+func (v *Validator) typeRoot(typeSD *registry.StructureDefinition, typeRoot *registry.ElementNode, value any, raw *json.RawMessage, element json.RawMessage, fhirPath string, seen seenSet, opts *constraintEvalOpts, result *issue.Result) {
+	if typeSD.Kind != kindPrimitive {
+		v.layer(typeRoot, typeRoot.Def.Path, value, raw, element, fhirPath, seen, opts, result)
+		return
+	}
+	if _, isObject := value.(map[string]any); isObject {
+		return
+	}
+	pending := pendingConstraints(typeRoot, seen)
+	if len(pending) == 0 {
+		return
+	}
+	if *raw == nil {
+		b, err := json.Marshal(value)
+		if err != nil {
+			return
+		}
+		*raw = b
+	}
+	v.evaluateConstraintsOn(func() fhirpath.Collection { return v.primitiveFocus(*raw, element, typeRoot.Def.Path) }, pending, fhirPath, typeRoot.Def.Path, opts, result)
+}
+
+// primitiveFocus es el foco de las constraints de un primitivo: el escalar raw, del tipo que el modelo
+// da a defPath, con su `_x` (element) como el elemento que lleva (json.html#primitive); un primitivo sin
+// valor es su elemento.
+func (v *Validator) primitiveFocus(raw, element json.RawMessage, defPath string) fhirpath.Collection {
+	var carried *types.ObjectValue
+	if element != nil {
+		carried = types.NewObjectValueWithType(element, typeOf(v.model(), defPath))
+	}
+	if raw == nil {
+		if carried == nil {
+			return nil
+		}
+		return fhirpath.Collection{carried}
+	}
+	on := focus(v.model(), raw, defPath)
+	if carried != nil && len(on) == 1 {
+		on[0] = withElement(on[0], carried)
+	}
+	return on
 }
 
 // walkChildren walks the values inst holds for each of children. Given raw, inst's JSON as the
@@ -261,7 +366,7 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 			}
 			path := elementvalues.ItemPath(child, cv, fhirPath)
 			valueRaw, extRaw := fields.of(cv.Key, cv), fields.of("_"+cv.Key, cv)
-			node := v.governing(sd, child, cv, opts)
+			node := v.governing(sd, child, cv, inst, opts)
 			if m, ok := cv.Value.(map[string]any); ok && v.registry.HoldsResource(child.Def) {
 				// A resource held in the element, validated as a resource of its own, against the
 				// profiles of the slice it matched, or of the element.
@@ -270,15 +375,19 @@ func (v *Validator) walkChildren(sd *registry.StructureDefinition, children []*r
 				}
 				continue
 			}
+			var prim registry.PrimitiveValue
+			if _, isObject := cv.Value.(map[string]any); !isObject && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
+				prim = cv.Primitive(inst)
+			}
 			if cv.Value != nil {
-				v.walk(sd, node, cv.TypeCode, cv.Value, valueRaw, extRaw, path, opts, result)
-			} else if extRaw != nil && v.registry.IsPrimitiveTypeCode(cv.TypeCode) {
+				v.walk(sd, node, cv.TypeCode, cv.Value, prim, valueRaw, extRaw, path, opts, result)
+			} else if extRaw != nil && prim.Valid() {
 				// A primitive with no value, its id and extensions in its "_key" sibling
 				// (json.html#primitive): Written leaves a null only as an array's item.
-				v.checkValueless(sd, node, cv.TypeCode, extRaw, path, opts, result)
+				v.checkValueless(sd, node, cv.TypeCode, prim, extRaw, path, opts, result)
 			}
 			if cv.Ext != nil {
-				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, extRaw, path, opts, result)
+				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, prim, extRaw, path, opts, result)
 			}
 		}
 	}
@@ -371,7 +480,7 @@ func (v *Validator) validateNested(holder *registry.ElementNode, res map[string]
 	}
 	for _, sd := range definitions {
 		if root := sd.Tree().Root(); root != nil {
-			v.walk(sd, root, "", res, raw, nil, fhirPath, &opts, result)
+			v.walk(sd, root, "", res, registry.PrimitiveValue{}, raw, nil, fhirPath, &opts, result)
 		}
 	}
 }
@@ -466,18 +575,13 @@ func (v *Validator) declaredProfile(ctx context.Context, url, at, fhirPath strin
 	return nil
 }
 
-// typeLayer es la definición que gobierna un valor por su tipo: el único perfil que el tipo de
+// typeLayerOf es la definición que gobierna un valor por su tipo: el único perfil que el tipo de
 // node, o de un elemento que node divide, declara para typeCode, el más específico que se resuelve
-// (Registry.TypeProfilesOf, de donde Registry.ChildrenOf lo toma); si no, la definición que el
+// (tps, de Registry.TypeProfilesOf, de donde Registry.ChildrenOf lo toma); si no, la definición que el
 // valor declara de sí mismo (self); si no, la definición propia del tipo, tal como la declara layer
 // (node, o el elemento al que apunta su contentReference); con su elemento raíz. Un perfil
 // declarado que no se resuelve (lo informa la fase de cardinalidad) deja el valor bajo la
 // definición de su tipo, como lo comprueba el validador HL7.
-func (v *Validator) typeLayer(ctx context.Context, node, layer *registry.ElementNode, typeCode string, self *registry.StructureDefinition) (*registry.StructureDefinition, *registry.ElementNode) {
-	return v.typeLayerOf(v.registry.TypeProfilesOf(ctx, node, typeCode), layer, node, typeCode, self, &constraintEvalOpts{ctx: ctx})
-}
-
-// typeLayerOf es typeLayer, con los perfiles de tipo ya buscados.
 func (v *Validator) typeLayerOf(tps registry.TypeProfiles, layer, node *registry.ElementNode, typeCode string, self *registry.StructureDefinition, opts *constraintEvalOpts) (*registry.StructureDefinition, *registry.ElementNode) {
 	ctx := opts.ctx
 	if tp := tps.Governing; tp.SD != nil {
@@ -546,7 +650,7 @@ func (v *Validator) contentTarget(sd *registry.StructureDefinition, node *regist
 
 // evaluate checks the constraints of one definition on a value, skipping those already evaluated
 // on it (seen). The value's JSON is built once, on the first constraint that needs it.
-func (v *Validator) evaluate(def *registry.ElementNode, defPath string, value any, raw *json.RawMessage, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) evaluate(def *registry.ElementNode, defPath string, value any, raw *json.RawMessage, fhirPath string, seen seenSet, opts *constraintEvalOpts, result *issue.Result) {
 	pending := pendingConstraints(def, seen)
 	if m, ok := value.(map[string]any); ok && opts.contentJudged != nil && opts.contentJudged(m) {
 		// An element whose content was judged on the source (an empty object, reported; one whose
@@ -573,7 +677,7 @@ func (v *Validator) evaluate(def *registry.ElementNode, defPath string, value an
 // invariants, and what the ValueChecker checks (its fixed and pattern values), element being a
 // primitive's "_x" sibling. An issue is reported once per location, however many definitions or
 // profiles find it.
-func (v *Validator) layer(def *registry.ElementNode, defPath string, value any, raw *json.RawMessage, element json.RawMessage, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) layer(def *registry.ElementNode, defPath string, value any, raw *json.RawMessage, element json.RawMessage, fhirPath string, seen seenSet, opts *constraintEvalOpts, result *issue.Result) {
 	v.evaluate(def, defPath, value, raw, fhirPath, seen, opts, result)
 	if v.values == nil || !v.values.Governs(def.Def) {
 		return
@@ -603,7 +707,7 @@ func declaresType(node *registry.ElementNode, code string) bool {
 // que declara tipos y no ese rechaza el valor. Cada valor se informa una vez por caminata (seen), por
 // la primera definición que lo rechaza: la más específica, el slice antes del elemento que parte. No
 // revisa las definiciones propias de un valor (opts.own), que juzga pkg/extension.
-func (v *Validator) checkType(sd *registry.StructureDefinition, def *registry.ElementNode, typeCode, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) checkType(sd *registry.StructureDefinition, def *registry.ElementNode, typeCode, fhirPath string, seen seenSet, opts *constraintEvalOpts, result *issue.Result) {
 	if typeCode == "" || len(def.Def.Type) == 0 || !strings.HasSuffix(def.Def.Path, "[x]") || judgedByExtension(sd, def, opts.own) {
 		return
 	}
@@ -614,7 +718,7 @@ func (v *Validator) checkType(sd *registry.StructureDefinition, def *registry.El
 	for i, t := range def.Def.Type {
 		codes[i] = t.Code
 	}
-	key := typeNotAllowedKey(fhirPath)
+	key := constraintID{key: typeNotAllowedKey(fhirPath)}
 	if seen[key] {
 		return
 	}
@@ -659,29 +763,65 @@ func (v *Validator) checkValue(def *registry.ElementNode, raw, element json.RawM
 // them: node, the slices it reslices, and the elements a contentReference points to. Their
 // invariants are evaluated on it, a primitive of its type with no value (ele-1 among them), and
 // their fixed and pattern values checked. A primitive type's definition has neither.
-func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, prim registry.PrimitiveValue, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
 	if objectSpans(element) == nil {
 		return // not an object: a JSON error the primitive phase reports
 	}
-	seen := map[string]bool{}
-	check := func(n *registry.ElementNode) {
+	seen := seenSet{}
+	owners, nSlices, _, layer := v.ownersOf(sd, node)
+	// La definición de tipo se resuelve antes de evaluar a los dueños: su perfil de tipo reemplaza la
+	// constraint del dueño con la misma clave, igual que con un valor (shadowedByType).
+	var defs []typeDef
+	var typeSD *registry.StructureDefinition
+	var root *registry.ElementNode
+	var shadowed []constraintID
+	if prim.Valid() {
+		tps := v.registry.TypeProfilesOf(opts.ctx, node, typeCode)
+		defs = v.alternativeTypes(tps, fhirPath, nil, prim, opts, result)
+		layers := defs
+		if len(defs) <= 1 {
+			typeSD, root = v.typeLayerOf(tps, layer, node, typeCode, nil, opts)
+			if len(defs) == 1 {
+				typeSD, root = defs[0].sd, defs[0].root
+			}
+			layers = nil
+			if root != nil && typeSD.Kind == kindPrimitive {
+				layers = []typeDef{{sd: typeSD, root: root}}
+			}
+		}
+		shadowed = shadowedByType(owners, tps.Alternatives.DeclaredCount(), layers, seen)
+	}
+	for i, n := range owners {
+		if i < nSlices {
+			v.checkType(sd, n, typeCode, fhirPath, seen, opts, result)
+		}
 		v.evaluateValueless(n, choiceElementPath(n.Def.Path, typeCode), typeCode, element, fhirPath, seen, opts, result)
 		v.checkValue(n, nil, element, fhirPath, opts, result)
 	}
-	base := node
-	for n := node; n != nil; n = n.SliceOf {
-		v.checkType(sd, n, typeCode, fhirPath, seen, opts, result)
-		check(n)
-		base = n
+	if prim.Valid() {
+		v.valuelessType(defs, typeSD, root, typeCode, element, fhirPath, seen, shadowed, opts, result)
 	}
-	layerSD, layer := sd, base
-	for hops := 0; layer.Def.ContentReference != nil && hops < maxContentReferenceHops; hops++ {
-		target, tsd := v.contentTarget(layerSD, layer)
-		if target == nil {
-			break
+}
+
+// valuelessType evalúa las constraints de la raíz de la definición de tipo que gobierna un primitivo sin
+// valor, sobre su `_x` (element): la de su tipo base (typeSD, root), o la de cada perfil de tipo que declara y
+// cumple (defs: una capa cada uno, y lo que dos informan igual se informa una vez). Una constraint que otra
+// definición del valor ya evaluó (seen, por clave y expresión) no se evalúa de nuevo; las que el perfil
+// de tipo reemplaza al dueño (shadowed) se sueltan aquí, en la capa que sí las declara.
+func (v *Validator) valuelessType(defs []typeDef, typeSD *registry.StructureDefinition, root *registry.ElementNode, typeCode string, element json.RawMessage, fhirPath string, seen seenSet, shadowed []constraintID, opts *constraintEvalOpts, result *issue.Result) {
+	if len(defs) > 1 {
+		runs := make([]layerRun, 0, len(defs))
+		for _, td := range defs {
+			run := beginLayer(opts)
+			v.evaluateValueless(td.root, td.root.Def.Path, typeCode, element, fhirPath, cloneSeen(seen), run.opts, run.result)
+			runs = append(runs, run)
 		}
-		check(target)
-		layerSD, layer = tsd, target
+		mergeLayers(opts, runs, result)
+		return
+	}
+	if root != nil && typeSD.Kind == kindPrimitive {
+		releaseShadowed(seen, shadowed, root)
+		v.evaluateValueless(root, root.Def.Path, typeCode, element, fhirPath, seen, opts, result)
 	}
 }
 
@@ -689,7 +829,7 @@ func (v *Validator) checkValueless(sd *registry.StructureDefinition, node *regis
 // value at fhirPath, whose "_x" sibling is element as the resource writes it: a primitive of the
 // type the model gives defPath, or else of typeCode, the element's type, carrying its id and
 // extensions. A profile's path below a data type ("Patient.name.family") is no path of the model.
-func (v *Validator) evaluateValueless(def *registry.ElementNode, defPath, typeCode string, element json.RawMessage, fhirPath string, seen map[string]bool, opts *constraintEvalOpts, result *issue.Result) {
+func (v *Validator) evaluateValueless(def *registry.ElementNode, defPath, typeCode string, element json.RawMessage, fhirPath string, seen seenSet, opts *constraintEvalOpts, result *issue.Result) {
 	pending := pendingConstraints(def, seen)
 	if len(pending) == 0 {
 		return
@@ -703,12 +843,113 @@ func (v *Validator) evaluateValueless(def *registry.ElementNode, defPath, typeCo
 	}, pending, fhirPath, defPath, opts, result)
 }
 
+// constraintID es la identidad de una invariante: dos con la misma identidad son la misma para el
+// informe y para la evaluación (no se evalúa ni se informa dos veces en un valor). Es un valor
+// comparable y no una cadena armada (clave + "\x00" + expresión) para que mirar una invariante, que
+// se hace por cada valor, no reserve memoria. Cambiar qué la identifica es cambiar identityOf y los campos.
+type constraintID struct {
+	key  string
+	expr string
+}
+
+// identityOf es la identidad de c: su clave y su expresión, sin la severidad. Un único lugar para la
+// evaluación (pendingConstraints) y el informe (firstReport).
+func identityOf(c registry.Constraint) constraintID {
+	return constraintID{key: c.Key, expr: c.Expression}
+}
+
+// shadowedByType aplica la precedencia del perfil de tipo sobre el dueño (plan 2026-11-15, §8, S1; HL7 7.0.4,
+// caso 14): cuando un elemento (sus owners: el slice, los que divide y los de su contentReference) y el
+// perfil del tipo de su valor (una capa de layers cuya definición es un perfil) declaran la misma clave, solo se
+// evalúa la del perfil, con su severidad y su expresión, aunque la expresión difiera. Solo vale con un único
+// perfil de tipo declarado (nProfiles cuenta también los que no se resuelven) y para el elemento propio del
+// valor (owners[0]). En los demás casos se informan las dos: la del dueño y la del perfil. Marca como evaluadas
+// (seen) las constraints del dueño propio que el perfil reemplaza y devuelve, con ellas, las identidades que
+// releaseShadowed suelta en la capa que sí la declara. Un slice o un perfil derivado que vuelve a declarar la
+// clave sigue como antes (gana la base): no son capas de tipo.
+func shadowedByType(owners []*registry.ElementNode, nProfiles int, layers []typeDef, seen seenSet) []constraintID {
+	// HL7 7.0.4 solo la reemplaza con un único perfil de tipo declarado y cuando el dueño es el elemento propio
+	// del valor (casos 14 y 15). Con dos o más perfiles declarados, aunque uno no se resuelva (casos 16 y 17), y
+	// con un elemento que un slice divide (o con otro dueño), informa las dos.
+	if len(layers) != 1 {
+		return nil
+	}
+	var keys map[string][]registry.Constraint
+	for _, l := range layers {
+		if l.sd.Derivation != registry.DerivationConstraint {
+			continue // la definición base del tipo no es un perfil de tipo
+		}
+		for _, c := range l.root.Def.Constraint {
+			if c.Expression == "" {
+				continue
+			}
+			if keys == nil {
+				keys = map[string][]registry.Constraint{}
+			}
+			keys[c.Key] = append(keys[c.Key], c)
+		}
+	}
+	if keys == nil {
+		return nil
+	}
+	var marked []constraintID
+	for i, o := range owners {
+		for _, c := range o.Def.Constraint {
+			if c.Expression == "" || !declaredByAnother(keys[c.Key], c) {
+				continue
+			}
+			id := identityOf(c)
+			own := i == 0 && !inSlice(o)
+			switch {
+			case nProfiles > 1 || !own:
+				// No se cubre (la snapshot de un slice repite la constraint del elemento que divide, sin dejar
+				// distinguir la propia), pero la capa informa la suya aunque la identidad sea la misma.
+				marked = append(marked, id)
+			case !seen[id]:
+				seen[id] = true
+				marked = append(marked, id)
+			}
+		}
+	}
+	return marked
+}
+
+// inSlice dice si el elemento o es un slice o está dentro de uno (el id de ElementDefinition nombra el slice:
+// `Patient.name:off.given`).
+func inSlice(o *registry.ElementNode) bool {
+	return o.SliceOf != nil || strings.Contains(o.Def.ID, ":")
+}
+
+// declaredByAnother dice si alguna de typed, las constraints de la misma clave de los perfiles de tipo, es otra
+// declaración que c: no si ambas son la misma heredada de una definición (la misma Source, como `ele-1` de Element
+// en el dueño y en la raíz de un tipo de datos, cuyas expresiones difieren en R4B): esa sigue por la identidad.
+func declaredByAnother(typed []registry.Constraint, c registry.Constraint) bool {
+	return slices.ContainsFunc(typed, func(t registry.Constraint) bool { return c.Source == "" || t.Source != c.Source })
+}
+
+// releaseShadowed suelta de seen las marcas de shadowed que root, la raíz de una capa de tipo, declara: esa capa
+// sí evalúa su constraint.
+func releaseShadowed(seen seenSet, shadowed []constraintID, root *registry.ElementNode) {
+	if len(shadowed) == 0 {
+		return
+	}
+	for _, c := range root.Def.Constraint {
+		if id := identityOf(c); slices.Contains(shadowed, id) {
+			delete(seen, id)
+		}
+	}
+}
+
+// seenSet son las invariantes ya evaluadas en un valor, por identidad (y las claves de otros informes
+// de la misma caminata, que no tienen expresión).
+type seenSet map[constraintID]bool
+
 // pendingConstraints are def's constraints with an expression that no definition of the value
-// has had evaluated yet (seen, by key and expression), which it records.
-func pendingConstraints(def *registry.ElementNode, seen map[string]bool) []registry.Constraint {
+// has had evaluated yet (seen, by identity), which it records.
+func pendingConstraints(def *registry.ElementNode, seen seenSet) []registry.Constraint {
 	var pending []registry.Constraint
 	for _, c := range def.Def.Constraint {
-		k := c.Key + "\x00" + c.Expression
+		k := identityOf(c)
 		if c.Expression == "" || seen[k] {
 			continue
 		}

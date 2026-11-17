@@ -1,0 +1,56 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pgp-type",
+ "url": "http://example.org/fhir/StructureDefinition/pgp-type",
+ "name": "pgp_type",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "$this"
+      }
+     ],
+     "rules": "closed"
+    }
+   },
+   {
+    "id": "Patient.name.given:a",
+    "path": "Patient.name.given",
+    "sliceName": "a",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/pc-ext"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.name.given:b",
+    "path": "Patient.name.given",
+    "sliceName": "b",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-up"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

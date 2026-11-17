@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c13-dec-p2-pairr",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-decimal-pdec-p3+pdec-p2",
+   "valueDecimal": 1.50
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-res",
+ "url": "http://example.org/fhir/StructureDefinition/ps-res",
+ "name": "ps_res",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string",
+    "path": "string",
+    "constraint": [
+     {
+      "key": "res-1",
+      "severity": "error",
+      "human": "resource must be final (ps-res)",
+      "expression": "%resource.status = 'final'"
+     }
+    ]
+   }
+  ]
+ }
+}

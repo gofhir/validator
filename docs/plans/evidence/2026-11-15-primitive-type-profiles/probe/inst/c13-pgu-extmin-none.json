@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c13-pgu-extmin-none",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgu-extmin"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

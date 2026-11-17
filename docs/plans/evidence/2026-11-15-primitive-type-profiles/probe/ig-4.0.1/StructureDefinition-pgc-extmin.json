@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pgc-extmin",
+ "url": "http://example.org/fhir/StructureDefinition/pgc-extmin",
+ "name": "pgc_extmin",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given.extension",
+    "path": "Patient.name.given.extension",
+    "min": 1
+   }
+  ]
+ }
+}

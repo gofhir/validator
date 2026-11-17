@@ -9,15 +9,55 @@ import (
 // Instance es el valor cuyos hijos se piden: el objeto, la definición que declara para sí y el
 // recurso que lo contiene.
 type Instance struct {
-	// Value es el valor; nil si quien llama no lo tiene (no se puede elegir entre perfiles).
+	// Value es el valor, si es un objeto; nil si quien llama no lo tiene (no se puede elegir entre
+	// perfiles) o si es un primitivo (Primitive).
 	Value map[string]any
 	// Self dice qué definición declara el valor para sí (la url de una extensión nombra la
 	// definición a la que se ajusta, extensibility.html); puede ser nil.
 	Self DefinitionSource
+	// Primitive es el valor cuando es un primitivo (Value es entonces nil): el escalar con su `_x` y
+	// su posición. El valor cero no es ninguno.
+	Primitive PrimitiveValue
 	// Owner es el recurso que contiene el valor, cuyo Scope canónico es el de la elección entre
 	// perfiles (%resource es el recurso que contiene el valor, fhirpath.html#variables). Nil es el
 	// recurso de la validación.
 	Owner map[string]any
+}
+
+// PrimitiveValue es un valor primitivo con el lugar donde está (json.html#primitive): el escalar en
+// la propiedad Key de su map padre, y su id y extension en el hermano "_Key", que es un objeto o,
+// en un arreglo, el elemento de la misma posición. Un escalar no tiene identidad propia (dos "AB"
+// son iguales), así que el lugar lo identifica: el map padre inmediato, la propiedad y el índice. El
+// recurso que lo contiene (Instance.Owner) da el Scope, no la identidad: name[0].given[0] y
+// name[1].given[0] están en el mismo recurso.
+type PrimitiveValue struct {
+	// Value es el escalar; nil si el primitivo solo tiene su `_x` (un valor ausente).
+	Value any
+	// Ext es el hermano "_Key" de este valor (su id y su extension); nil si no tiene.
+	Ext map[string]any
+	// Parent es el map que contiene la propiedad.
+	Parent map[string]any
+	// Key es la propiedad del escalar, sin el guion bajo.
+	Key string
+	// Index es la posición en el arreglo, o -1 si la propiedad no es un arreglo.
+	Index int
+	// TypeCode es el tipo del valor.
+	TypeCode string
+}
+
+// Valid dice si es un primitivo (el valor cero no lo es).
+func (p PrimitiveValue) Valid() bool { return p.Key != "" }
+
+// Position es el lugar de un primitivo en la validación: comparable, sirve de clave.
+type Position struct {
+	Parent uintptr
+	Key    string
+	Index  int
+}
+
+// Position devuelve el lugar del primitivo.
+func (p PrimitiveValue) Position() Position {
+	return Position{Parent: reflect.ValueOf(p.Parent).Pointer(), Key: p.Key, Index: p.Index}
 }
 
 // DefinitionSource nombra la definición que un valor declara para sí. Devuelve nil para un valor
@@ -173,7 +213,7 @@ func (r *Registry) ChildrenOf(ctx context.Context, sd *StructureDefinition, node
 func (r *Registry) childrenOf(ctx context.Context, sd *StructureDefinition, node *ElementNode, typeCode string, inst Instance, hops int) InstanceChildren {
 	for n := node; n != nil; n = n.SliceOf {
 		if len(n.Children) > 0 {
-			return InstanceChildren{SD: sd, Nodes: n.Children}
+			return r.withUnresolved(ctx, node, typeCode, hops, InstanceChildren{SD: sd, Nodes: n.Children})
 		}
 	}
 	if node.Def.ContentReference != nil {
@@ -194,16 +234,7 @@ func (r *Registry) childrenOf(ctx context.Context, sd *StructureDefinition, node
 	// Se informa el perfil sin resolver que el propio nodo declara; uno declarado solo por un
 	// ancestro de la cadena SliceOf lo informa quien camina esa cadena. En ambos casos el descenso
 	// sigue por el tipo del valor, como HL7.
-	var unresolved TypeProfile
-	var all []TypeProfile
-	for _, d := range profiles.Unresolved {
-		if d.Node == node {
-			if all == nil {
-				unresolved = d.TypeProfile
-			}
-			all = append(all, d.TypeProfile)
-		}
-	}
+	unresolved, all := declaredUnresolved(profiles, node)
 	if alt := profiles.Alternatives; alt.Node != nil {
 		// Varios perfiles: una capa por cada elegido. Sin ninguno que se pueda usar, el valor sigue
 		// bajo la definición propia o la del tipo.
@@ -232,6 +263,31 @@ func (r *Registry) childrenOf(ctx context.Context, sd *StructureDefinition, node
 	c := r.TypeChildrenOf(node, typeCode)
 	c.Unresolved, c.AllUnresolved = unresolved, all
 	return c
+}
+
+// withUnresolved agrega a c, los hijos que el snapshot despliega para node, los perfiles de tipo que node declara
+// y no se resuelven: los hijos propios mandan sobre los del perfil, pero no lo hacen callar (un perfil que no se
+// resuelve se informa aunque otros hijos gobiernen, como en HL7). Sin un perfil declarado no hace nada.
+func (r *Registry) withUnresolved(ctx context.Context, node *ElementNode, typeCode string, hops int, c InstanceChildren) InstanceChildren {
+	if !r.DeclaresTypeProfile(node, typeCode) {
+		return c
+	}
+	c.Unresolved, c.AllUnresolved = declaredUnresolved(r.typeProfilesOf(ctx, node, typeCode, hops == 0), node)
+	return c
+}
+
+// declaredUnresolved devuelve el perfil sin resolver más específico que declara node, y todos los que
+// declara (uno declarado dos veces cuenta una).
+func declaredUnresolved(profiles TypeProfiles, node *ElementNode) (first TypeProfile, all []TypeProfile) {
+	for _, d := range profiles.Unresolved {
+		if d.Node == node && !slices.ContainsFunc(all, func(tp TypeProfile) bool { return tp.Canonical == d.Canonical }) {
+			if all == nil {
+				first = d.TypeProfile
+			}
+			all = append(all, d.TypeProfile)
+		}
+	}
+	return first, all
 }
 
 // TypeChildrenOf devuelve los hijos de una instancia de node bajo la definición propia de su tipo:
@@ -277,7 +333,7 @@ func (r *Registry) MemberTree(ctx context.Context, sd *StructureDefinition, node
 // están, como MemberTree, pero con una capa por cada perfil que el tipo de un slice declara en varios
 // y cumple el valor (ChooseTypeProfiles), detrás de la de los hijos propios del slice si los tiene.
 func (r *Registry) MemberLayers(ctx context.Context, sd *StructureDefinition, node *ElementNode, inst Instance) InstanceChildren {
-	if node.SliceOf != nil && len(node.Def.Type) == 1 && len(node.Def.Type[0].Profile) > 1 && !r.IsPrimitiveTypeCode(node.Def.Type[0].Code) {
+	if node.SliceOf != nil && len(node.Def.Type) == 1 && len(node.Def.Type[0].Profile) > 1 {
 		alt := r.declaredAlternatives(ctx, node, &node.Def.Type[0])
 		if chosen := r.ChooseTypeProfiles(ctx, alt, inst).Chosen; len(chosen) > 0 {
 			var c InstanceChildren

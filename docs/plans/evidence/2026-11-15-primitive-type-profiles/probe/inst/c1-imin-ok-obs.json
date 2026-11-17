@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c1-imin-ok-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-integer-pi-min"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueInteger": 7
+}

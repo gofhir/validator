@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "id": "c9-sub-oth-ext",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-ps-sub",
+   "valueString": "ab",
+   "_valueString": {
+    "extension": [
+     {
+      "url": "http://example.org/fhir/StructureDefinition/ext-other",
+      "valueString": "q"
+     }
+    ]
+   }
+  }
+ ]
+}

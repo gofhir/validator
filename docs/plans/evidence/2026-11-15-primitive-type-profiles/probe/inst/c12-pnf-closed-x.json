@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pnf-closed-x",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnf-closed"
+  ]
+ },
+ "name": [
+  {
+   "family": "ab",
+   "_family": {
+    "extension": [
+     {
+      "url": "http://example.org/fhir/StructureDefinition/ext-other",
+      "valueString": "q"
+     }
+    ]
+   }
+  }
+ ]
+}

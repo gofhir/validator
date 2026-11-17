@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "id": "c9-sub-sub-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-sub"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-req",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

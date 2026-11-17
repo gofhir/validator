@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pnhc2-sub",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnhc2"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-req",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c13-pnu-fam-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnu-fam"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "a"
+   ]
+  }
+ ]
+}

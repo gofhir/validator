@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "id": "c17-k2-usual",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/s17-k2"
+  ]
+ },
+ "name": [
+  {
+   "use": "usual",
+   "given": [
+    "ab"
+   ],
+   "family": "x"
+  }
+ ]
+}

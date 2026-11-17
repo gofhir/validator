@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c3-i-both",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-integer-pi-min+pi-fx"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueInteger": 7
+}

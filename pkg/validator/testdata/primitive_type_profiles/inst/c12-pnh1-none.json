@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pnh1-none",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnh1"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

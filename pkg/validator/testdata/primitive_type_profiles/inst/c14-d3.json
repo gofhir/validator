@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "id": "c14-d3",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/s14-d3"
+  ]
+ },
+ "name": [
+  {
+   "family": "x"
+  }
+ ]
+}

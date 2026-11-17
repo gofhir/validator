@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-bind-bad-gen",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/ge-code-pc-bind"
+  ]
+ },
+ "gender": "other"
+}

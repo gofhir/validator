@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c13-pgu-id-none",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgu-id"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

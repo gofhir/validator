@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "c12-len-extw-ok-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-len+ps-extw"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "ab",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-req",
+    "valueString": "q"
+   }
+  ]
+ }
+}

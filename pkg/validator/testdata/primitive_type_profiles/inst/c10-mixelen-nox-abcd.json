@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c10-mixelen-nox-abcd",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-mixe+ps-len"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abcd"
+}

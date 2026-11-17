@@ -1,0 +1,22 @@
+{
+ "resourceType": "Observation",
+ "id": "c12-xstr-ok-both",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-len+ps-xstr"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abcd",
+ "_valueString": {
+  "extension": [
+   {
+    "url": "http://example.org/fhir/StructureDefinition/ext-two",
+    "valueString": "q"
+   }
+  ]
+ }
+}

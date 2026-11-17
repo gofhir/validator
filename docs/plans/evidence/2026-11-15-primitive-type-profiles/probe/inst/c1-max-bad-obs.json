@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c1-max-bad-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-max"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abcd"
+}

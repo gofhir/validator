@@ -174,7 +174,7 @@ func (v *Validator) validateResource(ctx context.Context, sd *registry.Structure
 	if root := sd.Tree().Root(); root != nil {
 		// The resource holds everything it walks: its Scope is the one a choice among the profiles of a
 		// value's type is made in (registry.Instance.Owner).
-		v.validateNode(withOwner(ctx, registry.ResourceOwner(data)), sd, root, "", data, path, nil, result)
+		v.validateNode(withOwner(ctx, registry.ResourceOwner(data)), sd, root, "", registry.PrimitiveValue{}, data, path, nil, result)
 	}
 }
 
@@ -185,8 +185,13 @@ func (v *Validator) validateResource(ctx context.Context, sd *registry.Structure
 // written as an array where one goes (HL7 validates nothing in it), nor an element the definitions
 // do not have (the structural phase reports it), nor a primitive written otherwise than as a
 // primitive.
-func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, inst map[string]any, path string, done registry.Descended, result *issue.Result) {
-	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, registry.Instance{Value: inst, Owner: ownerIn(ctx)})
+func (v *Validator) validateNode(ctx context.Context, sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, prim registry.PrimitiveValue, inst map[string]any, path string, done registry.Descended, result *issue.Result) {
+	instance := registry.Instance{Value: inst, Owner: ownerIn(ctx)}
+	if prim.Valid() {
+		// Un primitivo: inst es su "_key", y lo que se elige entre sus perfiles es el primitivo.
+		instance = registry.Instance{Primitive: prim, Owner: ownerIn(ctx)}
+	}
+	children := v.registry.ChildrenOf(ctx, sd, node, typeCode, instance)
 	// A value two layers of its holder declare is walked once, under the union of the layers.
 	children, ok := done.Fresh(inst, children)
 	if !ok {
@@ -243,13 +248,13 @@ func (v *Validator) validateLayer(ctx context.Context, layer registry.Layer, ins
 					if cv.Array {
 						sibling = fmt.Sprintf("%s[%d]", sibling, cv.Index)
 					}
-					v.validateNode(ctx, layer.SD, child, cv.TypeCode, cv.Ext, sibling, below, result)
+					v.validateNode(ctx, layer.SD, child, cv.TypeCode, cv.Primitive(inst), cv.Ext, sibling, below, result)
 				}
 				continue
 			}
 			if m, ok := cv.Value.(map[string]any); ok {
 				// A complex element's "_key" sibling is no property of it (HL7: unrecognized).
-				v.validateNode(ctx, layer.SD, child, cv.TypeCode, m, elementvalues.ItemPath(child, cv, path), below, result)
+				v.validateNode(ctx, layer.SD, child, cv.TypeCode, registry.PrimitiveValue{}, m, elementvalues.ItemPath(child, cv, path), below, result)
 			}
 		}
 	}
@@ -511,14 +516,17 @@ func (v *Validator) validateExtensionValue(ctx context.Context, sd *registry.Str
 		// Lo que tiene adentro: un complejo, en su objeto; un primitivo, en su "_key", que HL7 informa
 		// en la ruta del elemento (sin el guion bajo).
 		inst, at := cv.Ext, extPath+"."+cv.Key
+		var prim registry.PrimitiveValue
 		if m, ok := cv.Value.(map[string]any); ok {
 			inst = m
+		} else {
+			prim = cv.Primitive(ext)
 		}
 		if inst == nil {
 			continue
 		}
 		if allowed {
-			v.validateNode(ctx, sd, valueNode, cv.TypeCode, inst, at, nil, result)
+			v.validateNode(ctx, sd, valueNode, cv.TypeCode, prim, inst, at, nil, result)
 			continue
 		}
 		// Un valor de un tipo que el elemento no permite es de ese tipo, no del que el elemento

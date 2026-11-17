@@ -1,0 +1,23 @@
+{
+ "resourceType": "Patient",
+ "id": "c11-vlx-giv",
+ "name": [
+  {
+   "given": [
+    null,
+    "ab"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    },
+    null
+   ]
+  }
+ ]
+}

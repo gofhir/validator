@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-dcon-ok-bd",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/b-date-pd-con"
+  ]
+ },
+ "birthDate": "2001-05-05"
+}

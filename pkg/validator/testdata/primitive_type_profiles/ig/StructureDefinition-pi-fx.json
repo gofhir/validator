@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pi-fx",
+ "url": "http://example.org/fhir/StructureDefinition/pi-fx",
+ "name": "pi_fx",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "integer",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/integer",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "integer.value",
+    "path": "integer.value",
+    "fixedInteger": 7
+   }
+  ]
+ }
+}

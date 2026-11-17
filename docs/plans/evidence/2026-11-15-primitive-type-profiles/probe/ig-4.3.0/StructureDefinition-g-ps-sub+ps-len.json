@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "g-ps-sub+ps-len",
+ "url": "http://example.org/fhir/StructureDefinition/g-ps-sub+ps-len",
+ "name": "g_ps_sub+ps_len",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-sub",
+       "http://example.org/fhir/StructureDefinition/ps-len"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

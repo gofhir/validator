@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pc-ext",
+ "url": "http://example.org/fhir/StructureDefinition/pc-ext",
+ "name": "pc_ext",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "code",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/code",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "code",
+    "path": "code",
+    "constraint": [
+     {
+      "key": "cx-1",
+      "severity": "error",
+      "human": "must be male (pc-ext)",
+      "expression": "$this = 'male'"
+     }
+    ]
+   }
+  ]
+ }
+}

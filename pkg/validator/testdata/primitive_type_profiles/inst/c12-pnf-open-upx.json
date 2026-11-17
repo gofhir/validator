@@ -1,0 +1,25 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pnf-open-upx",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnf-open"
+  ]
+ },
+ "name": [
+  {
+   "family": "AB"
+  },
+  {
+   "family": "ab",
+   "_family": {
+    "extension": [
+     {
+      "url": "http://example.org/fhir/StructureDefinition/ext-other",
+      "valueString": "q"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "id": "c13-pnu-use-fam",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pnu-use"
+  ]
+ },
+ "name": [
+  {
+   "family": "x"
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-sub",
+ "url": "http://example.org/fhir/StructureDefinition/ps-sub",
+ "name": "ps_sub",
+ "status": "draft",
+ "fhirVersion": "5.0.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.extension",
+    "path": "string.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "string.extension:req",
+    "path": "string.extension",
+    "sliceName": "req",
+    "min": 1,
+    "type": [
+     {
+      "code": "Extension"
+     }
+    ]
+   },
+   {
+    "id": "string.extension:req.url",
+    "path": "string.extension.url",
+    "fixedUri": "http://example.org/fhir/StructureDefinition/ext-req"
+   }
+  ]
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pgu-two",
+ "url": "http://example.org/fhir/StructureDefinition/pgu-two",
+ "name": "pgu_two",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/missing-prim",
+       "http://example.org/fhir/StructureDefinition/ps-len"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.name.given.extension",
+    "path": "Patient.name.given.extension",
+    "max": "1"
+   }
+  ]
+ }
+}

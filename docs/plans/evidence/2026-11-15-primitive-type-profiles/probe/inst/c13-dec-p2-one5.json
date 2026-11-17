@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c13-dec-p2-one5",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-decimal-pdec-p2",
+   "valueDecimal": 1.5
+  }
+ ]
+}

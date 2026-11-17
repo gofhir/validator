@@ -1,0 +1,11 @@
+{
+ "resourceType": "Observation",
+ "id": "c11-vl-obs",
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "_valueString": {
+  "id": "z1"
+ }
+}

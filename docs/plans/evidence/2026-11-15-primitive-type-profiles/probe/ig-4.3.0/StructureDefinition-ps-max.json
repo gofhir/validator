@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ps-max",
+ "url": "http://example.org/fhir/StructureDefinition/ps-max",
+ "name": "ps_max",
+ "status": "draft",
+ "fhirVersion": "4.3.0",
+ "kind": "primitive-type",
+ "abstract": false,
+ "type": "string",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/string",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "string.value",
+    "path": "string.value",
+    "maxLength": 3
+   }
+  ]
+ }
+}

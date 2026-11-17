@@ -1,0 +1,64 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pgp-con",
+ "url": "http://example.org/fhir/StructureDefinition/pgp-con",
+ "name": "pgp_con",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "profile",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.name.given:a",
+    "path": "Patient.name.given",
+    "sliceName": "a",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-ext1"
+      ]
+     }
+    ],
+    "constraint": [
+     {
+      "key": "sc-1",
+      "severity": "error",
+      "human": "a member of slice a must be zz",
+      "expression": "$this = 'zz'"
+     }
+    ]
+   },
+   {
+    "id": "Patient.name.given:b",
+    "path": "Patient.name.given",
+    "sliceName": "b",
+    "type": [
+     {
+      "code": "string",
+      "profile": [
+       "http://example.org/fhir/StructureDefinition/ps-up"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

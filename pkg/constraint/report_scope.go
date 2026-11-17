@@ -9,16 +9,26 @@ import (
 
 type reportScopeKey struct{}
 
+// reportKey es lo que un scope recuerda de un informe: una invariante que falló en un lugar (at, id),
+// o cualquier otro informe por su clave (other). Es comparable, como constraintID, para no armar una
+// cadena por cada invariante que se mira.
+type reportKey struct {
+	at    string
+	id    constraintID
+	sev   string // la severidad: HL7 informa la misma clave con otra severidad como otro fallo (caso 15)
+	other string
+}
+
 // reportScope is the set of constraint failures already reported in one validation. A scope made
 // by withChildReportScope also sees what its parent reported, but records only its own.
 type reportScope struct {
 	mu     sync.Mutex
-	seen   map[string]bool
+	seen   map[reportKey]bool
 	parent *reportScope
 }
 
 // reported dice si k se informó en este scope o en el de un ancestro. Quien llama tiene s.mu.
-func (s *reportScope) reported(k string) bool {
+func (s *reportScope) reported(k reportKey) bool {
 	if s.seen[k] {
 		return true
 	}
@@ -39,7 +49,7 @@ func (s *reportScope) reported(k string) bool {
 // devuelve uno nuevo.
 func withChildReportScope(ctx context.Context) context.Context {
 	parent, _ := ctx.Value(reportScopeKey{}).(*reportScope)
-	return context.WithValue(ctx, reportScopeKey{}, &reportScope{seen: map[string]bool{}, parent: parent})
+	return context.WithValue(ctx, reportScopeKey{}, &reportScope{seen: map[reportKey]bool{}, parent: parent})
 }
 
 // adoptReports registra en el scope de ctx lo que informó child, el contexto de una capa creado por
@@ -51,7 +61,7 @@ func adoptReports(ctx, child context.Context) {
 		return
 	}
 	from.mu.Lock()
-	keys := make([]string, 0, len(from.seen))
+	keys := make([]reportKey, 0, len(from.seen))
 	for k := range from.seen {
 		keys = append(keys, k)
 	}
@@ -69,7 +79,7 @@ func adoptReports(ctx, child context.Context) {
 // whose issues are discarded (a slice's conformance check) needs a scope of its own, so that it
 // does not hide a failure from the validation that reports it.
 func WithReportScope(ctx context.Context) context.Context {
-	return context.WithValue(ctx, reportScopeKey{}, &reportScope{seen: map[string]bool{}})
+	return context.WithValue(ctx, reportScopeKey{}, &reportScope{seen: map[reportKey]bool{}})
 }
 
 // hasReportScope reports whether ctx has a report scope.
@@ -91,7 +101,7 @@ func firstReport(ctx context.Context, c registry.Constraint, fhirPath string) bo
 	if scope == nil {
 		return true
 	}
-	k := fhirPath + "\x00" + c.Key + "\x00" + c.Expression
+	k := reportKey{at: fhirPath, id: identityOf(c), sev: c.Severity}
 	scope.mu.Lock()
 	defer scope.mu.Unlock()
 	if scope.reported(k) {
@@ -111,11 +121,12 @@ func firstReportKey(ctx context.Context, key string) bool {
 	if scope == nil {
 		return true
 	}
+	k := reportKey{other: key}
 	scope.mu.Lock()
 	defer scope.mu.Unlock()
-	if scope.reported(key) {
+	if scope.reported(k) {
 		return false
 	}
-	scope.seen[key] = true
+	scope.seen[k] = true
 	return true
 }

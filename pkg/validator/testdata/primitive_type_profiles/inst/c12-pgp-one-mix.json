@@ -1,0 +1,30 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgp-one-mix",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgp-one"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB",
+    "ab",
+    "cd"
+   ],
+   "_given": [
+    null,
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    },
+    null
+   ]
+  }
+ ]
+}

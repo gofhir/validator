@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-valc-bad-ext",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-ps-valc",
+   "valueString": "abcd"
+  }
+ ]
+}

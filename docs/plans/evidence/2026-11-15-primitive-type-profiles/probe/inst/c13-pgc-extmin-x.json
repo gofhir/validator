@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "id": "c13-pgc-extmin-x",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgc-extmin"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

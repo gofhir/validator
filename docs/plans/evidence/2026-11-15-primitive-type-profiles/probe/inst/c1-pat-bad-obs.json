@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c1-pat-bad-obs",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/o-ps-pat"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "abd"
+}

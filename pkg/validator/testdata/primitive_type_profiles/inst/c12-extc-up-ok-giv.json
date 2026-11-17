@@ -1,0 +1,26 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-extc-up-ok-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-extc+ps-up"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB"
+   ],
+   "_given": [
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-req",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

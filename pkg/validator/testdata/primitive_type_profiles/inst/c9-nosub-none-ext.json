@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "c9-nosub-none-ext",
+ "extension": [
+  {
+   "url": "http://example.org/fhir/StructureDefinition/x-ps-nosub",
+   "valueString": "ab"
+  }
+ ]
+}

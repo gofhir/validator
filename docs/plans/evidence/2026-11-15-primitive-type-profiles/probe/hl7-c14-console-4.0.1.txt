@@ -1,0 +1,93 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (13 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-11-15-primitive-type-profiles/probe, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/c14-a1.json inst/c14-a2.json inst/c14-a3.json inst/c14-a4.json inst/c14-a5.json inst/c14-a6.json inst/c14-b1.json inst/c14-b2.json inst/c14-b3.json inst/c14-b4.json inst/c14-b5.json inst/c14-b6.json inst/c14-c1-off.json inst/c14-c1-usual.json inst/c14-c2-off.json inst/c14-c2-usual.json inst/c14-c3-off.json inst/c14-c3-usual.json inst/c14-c4-off.json inst/c14-c4-usual.json inst/c14-c5.json inst/c14-c6.json inst/c14-d1.json inst/c14-d2.json inst/c14-d3.json inst/c14-d4.json -version 4.0.1 -ig ig-4.0.1 -tx n/a -output hl7-c14-4.0.1-7.0.4.json
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:02.209)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.360)
+  Loaded FHIR - 8265 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.005)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.020)
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.274)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.304)
+  Load ig-4.0.1 - 259 resources (00:00.051)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find date profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find integer profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find HumanName profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find HumanName profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+  ...go! (00:00.829)
+Cached new session. Cache size = 1
+Sources to validate: inst/c14-a1.jsoninst/c14-a2.jsoninst/c14-a3.jsoninst/c14-a4.jsoninst/c14-a5.jsoninst/c14-a6.jsoninst/c14-b1.jsoninst/c14-b2.jsoninst/c14-b3.jsoninst/c14-b4.jsoninst/c14-b5.jsoninst/c14-b6.jsoninst/c14-c1-off.jsoninst/c14-c1-usual.jsoninst/c14-c2-off.jsoninst/c14-c2-usual.jsoninst/c14-c3-off.jsoninst/c14-c3-usual.jsoninst/c14-c4-off.jsoninst/c14-c4-usual.jsoninst/c14-c5.jsoninst/c14-c6.jsoninst/c14-d1.jsoninst/c14-d2.jsoninst/c14-d3.jsoninst/c14-d4.json
+Validating
+  Validate inst/c14-a1.json
+ 00:00.093
+  Validate inst/c14-a2.json
+ 00:00.017
+  Validate inst/c14-a3.json
+ 00:00.014
+  Validate inst/c14-a4.json
+ 00:00.010
+  Validate inst/c14-a5.json
+ 00:00.010
+  Validate inst/c14-a6.json
+ 00:00.011
+  Validate inst/c14-b1.json
+ 00:00.010
+  Validate inst/c14-b2.json
+ 00:00.010
+  Validate inst/c14-b3.json
+ 00:00.010
+  Validate inst/c14-b4.json
+ 00:00.010
+  Validate inst/c14-b5.json
+ 00:00.009
+  Validate inst/c14-b6.json
+ 00:00.011
+  Validate inst/c14-c1-off.json
+ 00:00.015
+  Validate inst/c14-c1-usual.json
+ 00:00.011
+  Validate inst/c14-c2-off.json
+ 00:00.016
+  Validate inst/c14-c2-usual.json
+ 00:00.011
+  Validate inst/c14-c3-off.json
+ 00:00.011
+  Validate inst/c14-c3-usual.json
+ 00:00.013
+  Validate inst/c14-c4-off.json
+ 00:00.011
+  Validate inst/c14-c4-usual.json
+ 00:00.011
+  Validate inst/c14-c5.json
+ 00:00.010
+  Validate inst/c14-c6.json
+ 00:00.009
+  Validate inst/c14-d1.json
+ 00:00.010
+  Validate inst/c14-d2.json
+ 00:00.009
+  Validate inst/c14-d3.json
+ 00:00.009
+  Validate inst/c14-d4.json
+ 00:00.009
+Done. Times: Loading: 00:05.081, validation: 00:00.387 (#26). Memory = 563Mb
+
+Done. Times: Loading: 00:05.081, validation: 00:00.387 (#26). Max Memory = 6Gb
+real 6.46
+user 13.44
+sys 0.71

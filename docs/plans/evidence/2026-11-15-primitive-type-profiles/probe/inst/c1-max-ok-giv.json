@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "c1-max-ok-giv",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/g-ps-max"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "ab"
+   ]
+  }
+ ]
+}

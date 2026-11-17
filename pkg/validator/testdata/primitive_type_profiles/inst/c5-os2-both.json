@@ -1,0 +1,14 @@
+{
+ "resourceType": "Observation",
+ "id": "c5-os2-both",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/os2"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "valueString": "AB"
+}

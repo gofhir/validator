@@ -1,0 +1,50 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (14 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-11-15-primitive-type-profiles/probe, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/c17-k1-off.json inst/c17-k1-usual.json inst/c17-k2-off.json inst/c17-k2-usual.json inst/c17-k3-off.json inst/c17-k3-usual.json -version 5.0.0 -ig ig-5.0.0 -tx n/a -output hl7-c17-5.0.0-7.0.4.json
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v5.0.0 from hl7.fhir.r5.core#5.0.0
+  Load hl7.terminology.r5#6.2.0 - 4288 resources (00:01.887)
+  Load hl7.fhir.uv.extensions.r5#5.2.0 - 759 resources (00:00.046)
+  Loaded FHIR - 8001 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r5
+  Terminology server null - Version n/a: No Terminology Server (00:00.005)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:00.941)
+  Load ig-5.0.0 - 286 resources (00:00.056)
+  Package Summary: [hl7.fhir.r5.core#5.0.0, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r5#6.2.0, hl7.fhir.uv.extensions.r5#5.2.0, hl7.terminology#7.5.0]
+  Get set... 
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/s16-missing but trying to go on
+Can't find date profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find HumanName profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find HumanName profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find integer profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/s16-missing but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+Can't find string profile http://example.org/fhir/StructureDefinition/missing-prim but trying to go on
+  ...go! (00:00.836)
+Cached new session. Cache size = 1
+Sources to validate: inst/c17-k1-off.jsoninst/c17-k1-usual.jsoninst/c17-k2-off.jsoninst/c17-k2-usual.jsoninst/c17-k3-off.jsoninst/c17-k3-usual.json
+Validating
+  Validate inst/c17-k1-off.json
+ 00:00.075
+  Validate inst/c17-k1-usual.json
+ 00:00.019
+  Validate inst/c17-k2-off.json
+ 00:00.022
+  Validate inst/c17-k2-usual.json
+ 00:00.016
+  Validate inst/c17-k3-off.json
+ 00:00.017
+  Validate inst/c17-k3-usual.json
+ 00:00.016
+Done. Times: Loading: 00:03.798, validation: 00:00.168 (#6). Memory = 390Mb
+
+Done. Times: Loading: 00:03.798, validation: 00:00.168 (#6). Max Memory = 6Gb

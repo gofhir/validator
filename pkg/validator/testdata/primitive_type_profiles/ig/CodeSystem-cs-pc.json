@@ -1,0 +1,19 @@
+{
+ "resourceType": "CodeSystem",
+ "id": "cs-pc",
+ "url": "urn:probe:cs",
+ "status": "draft",
+ "content": "complete",
+ "caseSensitive": true,
+ "concept": [
+  {
+   "code": "male"
+  },
+  {
+   "code": "female"
+  },
+  {
+   "code": "other"
+  }
+ ]
+}

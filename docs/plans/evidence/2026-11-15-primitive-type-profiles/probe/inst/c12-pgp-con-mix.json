@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "id": "c12-pgp-con-mix",
+ "meta": {
+  "profile": [
+   "http://example.org/fhir/StructureDefinition/pgp-con"
+  ]
+ },
+ "name": [
+  {
+   "given": [
+    "AB",
+    "ab"
+   ],
+   "_given": [
+    null,
+    {
+     "extension": [
+      {
+       "url": "http://example.org/fhir/StructureDefinition/ext-other",
+       "valueString": "q"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
