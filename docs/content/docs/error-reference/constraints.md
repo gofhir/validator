@@ -38,6 +38,8 @@ A few published invariants are empty where they should not apply. Each is correc
 
 Three other R4 invariants are wrong as published, and corrected the same way: `que-12` asks for `enableBehavior` from three `enableWhen` on (R4B: from two), `tim-9` cannot be evaluated with several `when` (R4 and R4B, corrected from R5), and `con-3` compares a CodeableConcept with a string (R4B, which asks for a clinicalStatus only where there is a verificationStatus).
 
+Each definition is corrected for its own FHIR version, so a profile of another version than the one validated keeps the right text: what it inherits comes from its base, already corrected for the base's version, and what its differential writes is corrected for the profile's version. An R4 profile validated as R4B therefore takes R4B's corrected `ref-1`, and a constraint the profile copies with R4's published `ref-1` text is corrected with R4's erratum.
+
 **Example -- invalid resource:**
 
 The constraint `ele-1` is defined on the base `Element` type with the expression `hasValue() or (children().count() > id.count())` and the human description "All FHIR elements must have a @value or children". If an element has neither a value nor children, this constraint fails:

@@ -1,0 +1,3 @@
+21 no slice-stripped match | KILLED: TestErrataCrossVersionSliceChildInheritsAddedConstraint | 12s
+20 inherit every base constraint the merged element lacks | SURVIVED(targeted) | 9s
+22 isAddedConstraint by key only | SURVIVED(targeted) | 9s

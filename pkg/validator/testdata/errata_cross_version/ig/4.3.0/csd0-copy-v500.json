@@ -1,0 +1,29 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeSystem",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "constraint": [
+     {
+      "expression": "name.exists() implies name.matches('^[A-Z]([A-Za-z0-9_]){1,254}$')",
+      "human": "Name should be usable as an identifier for the module by machine processing applications such as code generation",
+      "key": "cnl-0",
+      "severity": "warning"
+     }
+    ],
+    "id": "CodeSystem",
+    "path": "CodeSystem"
+   }
+  ]
+ },
+ "fhirVersion": "5.0.0",
+ "id": "csd0-copy-v500",
+ "kind": "resource",
+ "name": "EcvCsd0CopyV500",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "CodeSystem",
+ "url": "http://example.org/ecv/csd0-copy-v500"
+}

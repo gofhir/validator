@@ -1,0 +1,38 @@
+Round 3 review, no network, all generated files inside the disposable copy.
+
+Production errata.go restored after mutation probes; SHA1 git blob:
+f1cb6cd208cf803c958764b7d2f0971d4b5fc4a4 (same as original review input).
+
+Tests: review_round3_test.go.txt was installed as pkg/registry/review_round3_test.go.
+The archived round-2 reproducer was rerun with only test-name changes and removal
+of its diagnostic call to the now-deleted rootVersion method.
+
+G1: fixed for missing and cyclic ancestry. Optional-expression probe also passes.
+Removed R5 bdl-15 and replacement expression false stay removed/replaced in an
+R4 derived profile. Existing D1 tests cover authored R4 replacements and chains.
+Concurrent EnsureSnapshot, five independent generateSnapshot calls and repeated
+inheritAddedConstraints retain exactly one bdl-15.
+
+Low: errata.go:436-439 generic inheritance misses unrolled/contentReference
+children and nearer sliced ancestors of reslices. Synthetic additions to
+Timing.repeat disappear at Dosage.timing.repeat and Host.part.repeat. A synthetic
+added invariant present on Patient.identifier:b is absent from identifier:b/c.
+Renamed choice inheritance succeeds through its normalized choice/type-slice ID.
+Current actual additions only target the Bundle root, so these generic limits
+have no demonstrated current validation impact. E3 is expressly out of scope.
+
+Low: ADR-004:44-45 still specifies rootVersion, contradicting the actual fix.
+
+Mutation 20 was run by removing isAddedConstraint(c) from the append condition.
+Mutation 22 was run by removing the expression comparison from isAddedConstraint.
+Both pass the expanded targeted suite (mutation-20.txt, mutation-22.txt).
+The concrete MutationDomain probe independently compares outputs for an R5
+profile over embedded R4 Bundle, once inheriting bdl-15 and once declaring its
+own bdl-15 expression false. The production and both mutant outputs are equal.
+The only missing base constraint in the inheritance case is bdl-15; the authored
+case already has its key. For current loaded snapshots, ordinary constraints and
+authored bdl-15 expressions survive in raw, so both additional mutant predicates
+cannot append anything different. Equivalence is scoped to the current table
+and coherent loaded snapshots, not arbitrary manually inconsistent structs.
+
+No medium-or-higher issue established in this review.

@@ -1,0 +1,36 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.id",
+    "path": "Patient.id",
+    "type": [
+     {
+      "code": "http://hl7.org/fhirpath/System.String",
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+        "valueUrl": "id"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "fhirVersion": "4.3.0",
+ "id": "id-copy-v430",
+ "kind": "resource",
+ "name": "EcvIdCopyV430",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Patient",
+ "url": "http://example.org/ecv/id-copy-v430"
+}

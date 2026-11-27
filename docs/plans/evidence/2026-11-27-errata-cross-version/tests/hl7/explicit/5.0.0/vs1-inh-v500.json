@@ -1,0 +1,282 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "collection",
+  "entry" : [{
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Information</td><td>Observation.code</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|5.0.0 because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Error</td><td>Observation.effective.ofType(Period)</td><td>Validation rule failed</td><td>Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day' (defined in http://hl7.org/fhir/StructureDefinition/vitalsigns)</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation.value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code '/min' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Observation</td><td>Informational Note</td><td>Validate Observation against the Heart rate profile (http://hl7.org/fhir/StructureDefinition/heartrate) which is required by the FHIR specification because the LOINC code 8867-4 was found</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (25 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7work/gen/inst/vs1-aplica.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 12
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 3
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/ecv/vs1-inh-v500"
+        }],
+        "severity" : "information",
+        "code" : "code-invalid",
+        "details" : {
+          "text" : "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|5.0.0 because there is no terminology service"
+        },
+        "expression" : ["Observation.code"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 21
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 3
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "http://hl7.org/fhir/StructureDefinition/vitalsigns#vs-1"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/ecv/vs1-inh-v500"
+        }],
+        "severity" : "error",
+        "code" : "invariant",
+        "details" : {
+          "text" : "Constraint failed: vs-1: 'if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day' (defined in http://hl7.org/fhir/StructureDefinition/vitalsigns)"
+        },
+        "expression" : ["Observation.effective.ofType(Period)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 35
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 3
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/ecv/vs1-inh-v500"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code '/min' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 2
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "VALIDATION_VAL_PROFILE_SIGNPOST_OBS"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/ecv/vs1-inh-v500"
+        }],
+        "severity" : "information",
+        "code" : "informational",
+        "details" : {
+          "text" : "Validate Observation against the Heart rate profile (http://hl7.org/fhir/StructureDefinition/heartrate) which is required by the FHIR specification because the LOINC code 8867-4 was found"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 2
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Information</td><td>Observation.code</td><td>Invalid Code</td><td>Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|5.0.0 because there is no terminology service</td><td/><td>TerminologyEngine</td></tr><tr><td>Warning</td><td>Observation.value.ofType(Quantity)</td><td>Business Rule Violation</td><td>Unable to validate code '/min' in system 'http://unitsofmeasure.org' because the validator is running without terminology services</td><td/><td>TerminologyEngine</td></tr><tr><td>Information</td><td>Observation</td><td>Informational Note</td><td>Validate Observation against the Heart rate profile (http://hl7.org/fhir/StructureDefinition/heartrate) which is required by the FHIR specification because the LOINC code 8867-4 was found</td><td/><td>InstanceValidator</td></tr><tr><td>Warning</td><td>Observation</td><td>Invalid Content</td><td>Best Practice Recommendation: In general, all observations should have a performer</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (25 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7work/gen/inst/vs1-no.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 12
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 3
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "TERMINOLOGY_TX_NOSVC_BOUND_EXT"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/ecv/vs1-inh-v500"
+        }],
+        "severity" : "information",
+        "code" : "code-invalid",
+        "details" : {
+          "text" : "Could not confirm that the codes provided are from the extensible value set http://hl7.org/fhir/ValueSet/observation-vitalsignresult|5.0.0 because there is no terminology service"
+        },
+        "expression" : ["Observation.code"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 32
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 3
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "TerminologyEngine"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "Error_validating_code_running_without_terminology_services"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/ecv/vs1-inh-v500"
+        }],
+        "severity" : "warning",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "Unable to validate code '/min' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        "expression" : ["Observation.value.ofType(Quantity)"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 2
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "VALIDATION_VAL_PROFILE_SIGNPOST_OBS"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-context",
+          "valueString" : "http://example.org/ecv/vs1-inh-v500"
+        }],
+        "severity" : "information",
+        "code" : "informational",
+        "details" : {
+          "text" : "Validate Observation against the Heart rate profile (http://hl7.org/fhir/StructureDefinition/heartrate) which is required by the FHIR specification because the LOINC code 8867-4 was found"
+        },
+        "expression" : ["Observation"]
+      },
+      {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+          "valueInteger" : 1
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+          "valueInteger" : 2
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "All_observations_should_have_a_performer"
+        }],
+        "severity" : "warning",
+        "code" : "invalid",
+        "details" : {
+          "text" : "Best Practice Recommendation: In general, all observations should have a performer"
+        },
+        "expression" : ["Observation"]
+      }]
+    }
+  }]
+}

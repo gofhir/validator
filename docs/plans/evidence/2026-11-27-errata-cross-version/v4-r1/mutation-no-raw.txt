@@ -1,0 +1,23 @@
+=== RUN   TestV4EarlierScenarios
+=== RUN   TestV4EarlierScenarios/B1_renamed_constraint
+    v4_adversarial_probe_test.go:151: B1 path=Observation.effective[x] corrected=true
+=== RUN   TestV4EarlierScenarios/tim-9_verdict
+    v4_adversarial_probe_test.go:163: published result=[] error=SingletonExpectedError: the in operator takes a single item on the left, got 2; corrected result=[true] error=<nil>
+=== RUN   TestV4EarlierScenarios/controls_A1_A2_B4
+    v4_adversarial_probe_test.go:171: A1 fails
+=== RUN   TestV4EarlierScenarios/inherited_type_versus_B1_explicit_type
+    v4_adversarial_probe_test.go:194: C1/B1 type not corrected
+=== RUN   TestV4EarlierScenarios/cross_version_unrolled_child
+    v4_adversarial_probe_test.go:208: C2 unrolled child not corrected
+--- FAIL: TestV4EarlierScenarios (0.00s)
+    --- PASS: TestV4EarlierScenarios/B1_renamed_constraint (0.00s)
+    --- PASS: TestV4EarlierScenarios/tim-9_verdict (0.00s)
+    --- FAIL: TestV4EarlierScenarios/controls_A1_A2_B4 (0.00s)
+    --- FAIL: TestV4EarlierScenarios/inherited_type_versus_B1_explicit_type (0.00s)
+    --- FAIL: TestV4EarlierScenarios/cross_version_unrolled_child (0.00s)
+=== RUN   TestV4ReferenceChainAndTypes
+    v4_adversarial_probe_test.go:327: A1: [{Key:ref-1 Severity: Human: Expression:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) Source:http://example.org/mid}]
+--- FAIL: TestV4ReferenceChainAndTypes (0.00s)
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/registry	0.486s
+FAIL

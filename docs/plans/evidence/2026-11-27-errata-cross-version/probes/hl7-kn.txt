@@ -1,0 +1,42 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (23 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/p1, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/kn-i.json -version 4.0.1 -ig ig -tx n/a -no-http-access
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:02.049)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.384)
+  Loaded FHIR - 8265 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.017)
+Error fetching https://packages2.fhir.org/packages/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.terminology from server: build.fhir.org
+Latest version of package hl7.terminology found locally is 7.5.0 - using that
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.083)
+Error fetching https://packages2.fhir.org/packages/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: build.fhir.org
+Latest version of package hl7.fhir.uv.extensions found locally is 5.4.0 - using that
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.080)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.258)
+  Load ig - 3 resources (00:00.003)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+  ...go! (00:00.415)
+Cached new session. Cache size = 1
+Sources to validate: inst/kn-i.json
+Validating
+  Validate inst/kn-i.json
+ 00:00.095
+Done. Times: Loading: 00:04.333, validation: 00:00.095. Memory = 532Mb
+
+Success: 0 errors, 0 warnings, 1 notes
+  Information: All OK
+Done. Times: Loading: 00:04.333, validation: 00:00.095. Max Memory = 6Gb

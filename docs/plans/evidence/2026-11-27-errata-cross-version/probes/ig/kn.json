@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "kn",
+ "url": "http://example.org/hm/kn",
+ "name": "Kn",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/hm/tb2"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "gk",
+      "severity": "error",
+      "human": "elem text",
+      "expression": "$this.length() < 1"
+     }
+    ]
+   }
+  ]
+ }
+}

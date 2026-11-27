@@ -1,0 +1,26 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Timing",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Timing",
+    "path": "Timing",
+    "short": "x"
+   },
+   {
+    "id": "Timing.repeat",
+    "path": "Timing.repeat"
+   }
+  ]
+ },
+ "fhirVersion": "5.0.0",
+ "id": "tim9-inh-v500-tp",
+ "kind": "complex-type",
+ "name": "EcvTim9InhV500Tp",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Timing",
+ "url": "http://example.org/ecv/tim9-inh-v500-tp"
+}

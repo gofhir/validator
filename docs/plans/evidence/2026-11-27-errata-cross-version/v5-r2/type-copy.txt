@@ -1,0 +1,6 @@
+=== RUN   TestV5RedeclaredTypeCopiedToSliceChild
+    v5_review_probe_test.go:459: Patient.contained.id type=id
+    v5_review_probe_test.go:459: Patient.contained:mine.id type=string
+--- PASS: TestV5RedeclaredTypeCopiedToSliceChild (0.00s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	0.513s

@@ -1,0 +1,1 @@
+ok  	github.com/gofhir/validator/v2/pkg/registry	0.705s

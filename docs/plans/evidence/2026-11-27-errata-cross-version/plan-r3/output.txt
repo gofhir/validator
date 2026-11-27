@@ -1,0 +1,20 @@
+=== RUN   TestAdversarialR3
+=== RUN   TestAdversarialR3/B1_renamed_constraint
+    plan_r3_probe_test.go:117: B1 path=Observation.effective[x] corrected=true
+=== RUN   TestAdversarialR3/tim-9_verdict
+    plan_r3_probe_test.go:129: published result=[] error=SingletonExpectedError: the in operator takes a single item on the left, got 2; corrected result=[true] error=<nil>
+=== RUN   TestAdversarialR3/controls_A1_A2_B4
+    plan_r3_probe_test.go:146: A1: bdl-15 survives two merges; raw fixedString survives
+    plan_r3_probe_test.go:152: A2: custom R4B expression unchanged
+=== RUN   TestAdversarialR3/inherited_type_versus_B1_explicit_type
+    plan_r3_probe_test.go:159: corrected base=id; v3 inherited=string; B1 explicit=id
+=== RUN   TestAdversarialR3/cross_version_unrolled_child
+    plan_r3_probe_test.go:170: base corrected=true; v3 unrolled corrected=false; expression=offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))
+--- PASS: TestAdversarialR3 (0.00s)
+    --- PASS: TestAdversarialR3/B1_renamed_constraint (0.00s)
+    --- PASS: TestAdversarialR3/tim-9_verdict (0.00s)
+    --- PASS: TestAdversarialR3/controls_A1_A2_B4 (0.00s)
+    --- PASS: TestAdversarialR3/inherited_type_versus_B1_explicit_type (0.00s)
+    --- PASS: TestAdversarialR3/cross_version_unrolled_child (0.00s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	0.486s

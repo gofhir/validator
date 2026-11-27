@@ -1,0 +1,149 @@
+package registry
+
+import (
+	"context"
+	"strings"
+	"testing"
+)
+
+func TestV6RootTraversal(t *testing.T) {
+	for _, root := range []string{"Bundle", "Extension", "Timing"} {
+		t.Run(root, func(t *testing.T) {
+			r := sharedVersion(t, fhirR5).Clone()
+			core := r2SD(t, `{"url":"http://example.org/core","version":"4.0.1","fhirVersion":"4.0.1","type":"`+root+`","derivation":"specialization","baseDefinition":"http://example.org/ancestor","snapshot":{"element":[{"id":"`+root+`","path":"`+root+`"}]}}`)
+			r.indexUnlocked(core)
+			mid := r2SD(t, `{"url":"http://example.org/mid","fhirVersion":"5.0.0","derivation":"constraint","baseDefinition":"http://example.org/core|4.0.1","differential":{"element":[{"id":"`+root+`","path":"`+root+`"}]}}`)
+			r.indexUnlocked(mid)
+			applyErrata(core, "")
+			applyErrata(mid, "")
+			leaf := r2SD(t, `{"url":"http://example.org/leaf","fhirVersion":"5.0.0","derivation":"constraint","baseDefinition":"http://example.org/mid","differential":{"element":[{"id":"`+root+`","path":"`+root+`"}]}}`)
+			applyErrata(leaf, "")
+			if got := r.v6RootVersion(context.Background(), leaf); got != fhirR4 {
+				t.Fatalf("root version=%s", got)
+			}
+			if err := r.EnsureSnapshot(context.Background(), leaf); err != nil {
+				t.Fatal(err)
+			}
+			if root == "Bundle" && len(leaf.Snapshot.Element[0].Constraint) != 1 {
+				t.Fatal("missing addition")
+			}
+			t.Log("version-pinned chain stops at first specialization; root=R4 leaf=R5")
+		})
+	}
+	t.Run("logical specialization stops", func(t *testing.T) {
+		r := New()
+		s := r2SD(t, `{"kind":"logical","derivation":"specialization","fhirVersion":"4.3.0","baseDefinition":"http://example.org/not-needed"}`)
+		if r.v6RootVersion(context.Background(), s) != fhirR4B {
+			t.Fatal("wrong logical root")
+		}
+	})
+}
+
+func TestV6RealNestedBundlesUnroll(t *testing.T) {
+	for _, outer := range []string{"Bundle", "Parameters"} {
+		t.Run(outer, func(t *testing.T) {
+			r := sharedVersion(t, fhirR4).Clone()
+			parent := "Bundle.entry.resource"
+			if outer == "Parameters" {
+				parent = "Parameters.parameter.resource"
+			}
+			p := r2SD(t, `{"url":"http://example.org/nested-`+outer+`","fhirVersion":"4.0.1","type":"`+outer+`","derivation":"constraint","baseDefinition":"http://hl7.org/fhir/StructureDefinition/`+outer+`","differential":{"element":[{"id":"`+parent+`","path":"`+parent+`","type":[{"code":"Bundle"}]},{"id":"`+parent+`.type","path":"`+parent+`.type","min":1}]}}`)
+			applyErrata(p, "")
+			if err := r.EnsureSnapshot(context.Background(), p); err != nil {
+				t.Fatal(err)
+			}
+			if len(p.SnapshotNotes()) > 0 {
+				t.Fatal(p.SnapshotNotes())
+			}
+			count := 0
+			for _, e := range p.Snapshot.Element {
+				if strings.HasPrefix(e.ID, parent+".") {
+					count++
+				}
+				if e.ID == parent {
+					t.Logf("nested root constraints=%v base=%+v", constraintKeys(&e), e.Base)
+				}
+			}
+			if count == 0 {
+				t.Fatal("not unrolled")
+			}
+			t.Logf("%d nested Bundle descendant elements unrolled from official R4 Bundle", count)
+			if !constraintKeys(&r.GetByType("Bundle").Snapshot.Element[0])["bdl-15"] {
+				t.Fatal("own Bundle definition lacks bdl-15")
+			}
+		})
+	}
+}
+
+func TestV6ExternalContentReferenceAndExtension(t *testing.T) {
+	for _, root := range []string{"Extension", "Timing"} {
+		t.Run(root, func(t *testing.T) {
+			r := New()
+			source := r2SD(t, `{"url":"http://example.org/source","version":"4.0.1","fhirVersion":"4.0.1","type":"`+root+`","derivation":"specialization","snapshot":{"element":[{"id":"`+root+`","path":"`+root+`"},{"id":"`+root+`.repeat","path":"`+root+`.repeat","base":{"path":"Timing.repeat"},"constraint":[{"key":"tim-9","expression":`+jsonString(timNinePublished)+`}]}]}}`)
+			applyErrata(source, "")
+			r.indexUnlocked(source)
+			for _, external := range []bool{false, true} {
+				tail := `"type":[{"code":"` + root + `","profile":["http://example.org/source|4.0.1"]}]`
+				if external {
+					tail = `"contentReference":"http://example.org/source|4.0.1#` + root + `"`
+				}
+				b := r2SD(t, `{"snapshot":{"element":[{"id":"Host","path":"Host"},{"id":"Host.part","path":"Host.part",`+tail+`}]}}`)
+				out := r3Merge(t, r, b.Snapshot, fhirR5, `{"id":"Host.part.repeat","path":"Host.part.repeat","min":1}`)
+				found := false
+				for _, e := range out.Element {
+					if e.ID == "Host.part.repeat" {
+						found = true
+						if e.Constraint[0].Expression != timNineCorrected {
+							t.Fatal("lost correction")
+						}
+					}
+				}
+				if !found {
+					t.Fatal("missing child")
+				}
+				t.Logf("%s external=%v keeps R4 correction", root, external)
+			}
+		})
+	}
+}
+
+func TestV6LeftOutAndYieldCloned(t *testing.T) {
+	t.Run("left out before later unroll", func(t *testing.T) {
+		r := New()
+		s := r2SD(t, `{"url":"http://example.org/timing","type":"Timing","fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Timing","path":"Timing"},{"id":"Timing.repeat","path":"Timing.repeat","constraint":[{"key":"tim-9","expression":`+jsonString(timNinePublished)+`}]}]}}`)
+		applyErrata(s, "")
+		r.indexUnlocked(s)
+		b := r2SD(t, `{"snapshot":{"element":[{"id":"Host","path":"Host"},{"id":"Host.part","path":"Host.part","type":[{"code":"Timing","profile":["http://example.org/timing"]}]}]}}`)
+		d := r2SD(t, `{"differential":{"element":[{"id":"Host.part.invalid","path":"Host.part.invalid","min":1},{"id":"Host.part.repeat","path":"Host.part.repeat","min":1}]}}`)
+		out, notes, err := r.applyDifferential(context.WithValue(context.Background(), v6VersionKey{}, fhirR5), b.Snapshot, d.Differential, &choiceIndex{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(notes) != 1 {
+			t.Fatal(notes)
+		}
+		for _, e := range out.Element {
+			if e.ID == "Host.part.repeat" && e.Constraint[0].Expression != timNineCorrected {
+				t.Fatal("later unroll loses raw fix")
+			}
+		}
+		t.Log(notes)
+	})
+	t.Run("yield copied key", func(t *testing.T) {
+		b := r2SD(t, `{"snapshot":{"element":[{"id":"X","path":"X"},{"id":"X.part","path":"X.part","max":"*"},{"id":"X.part.child","path":"X.part.child"}]}}`)
+		out := r3Merge(t, New(), b.Snapshot, fhirR4, `{"id":"X.part.child","path":"X.part.child","constraint":[{"key":"own","expression":"true"}]}`, `{"id":"X.part:a","path":"X.part","sliceName":"a"}`, `{"id":"X.part:a.child","path":"X.part.child","constraint":[{"key":"own","expression":`+jsonString(expressionErrata[0].published)+`}]}`)
+		found := false
+		for _, e := range out.Element {
+			if e.ID == "X.part:a.child" {
+				found = true
+				if e.Constraint[0].Expression != expressionErrata[0].corrected {
+					t.Fatal("yielded expression uncorrected")
+				}
+				t.Log("yieldCloned accepts corrected differential leaf")
+			}
+		}
+		if !found {
+			t.Fatal("missing slice child")
+		}
+	})
+}

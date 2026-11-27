@@ -1,0 +1,29 @@
+=== RUN   TestV6EarlierScenarios
+=== RUN   TestV6EarlierScenarios/B1_renamed_constraint
+    v6_review_probe_test.go:164: B1 remains
+=== RUN   TestV6EarlierScenarios/tim-9_verdict
+    v6_review_probe_test.go:178: published result=[] error=SingletonExpectedError: the in operator takes a single item on the left, got 2; corrected result=[true] error=<nil>
+=== RUN   TestV6EarlierScenarios/controls_A1_A2_B4
+    v6_review_probe_test.go:195: A1: bdl-15 survives two merges; raw fixedString survives
+    v6_review_probe_test.go:201: A2: custom R4B expression unchanged
+=== RUN   TestV6EarlierScenarios/inherited_type_versus_B1_explicit_type
+    v6_review_probe_test.go:209: C1/B1 type not corrected
+=== RUN   TestV6EarlierScenarios/cross_version_unrolled_child
+    v6_review_probe_test.go:225: base corrected=true; v4 unrolled corrected=true; expression=offset.empty() or (when.exists() and when.select($this in ('C' | 'CM' | 'CD' | 'CV')).allFalse())
+--- FAIL: TestV6EarlierScenarios (0.00s)
+    --- FAIL: TestV6EarlierScenarios/B1_renamed_constraint (0.00s)
+    --- PASS: TestV6EarlierScenarios/tim-9_verdict (0.00s)
+    --- PASS: TestV6EarlierScenarios/controls_A1_A2_B4 (0.00s)
+    --- FAIL: TestV6EarlierScenarios/inherited_type_versus_B1_explicit_type (0.00s)
+    --- PASS: TestV6EarlierScenarios/cross_version_unrolled_child (0.00s)
+=== RUN   TestV6RenamedChoiceResliceLoadedDifferential
+    v6_review_probe_test.go:430: counterexample changed
+--- FAIL: TestV6RenamedChoiceResliceLoadedDifferential (0.00s)
+=== RUN   TestV6RedeclaredTypeCopiedToSliceChild
+    v6_review_probe_test.go:534: Patient.contained.id type=string
+    v6_review_probe_test.go:534: Patient.contained:mine.id type=string
+    v6_review_probe_test.go:539: counterexample changed
+--- FAIL: TestV6RedeclaredTypeCopiedToSliceChild (0.00s)
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/registry	0.501s
+FAIL

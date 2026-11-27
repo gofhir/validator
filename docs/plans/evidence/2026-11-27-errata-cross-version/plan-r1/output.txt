@@ -1,0 +1,18 @@
+=== RUN   TestAdversarialPlanProbe
+    adversarial_plan_probe_test.go:28: chain R4->R4B->R4B: mid corrected=true source="http://example.org/core-r4"; leaf corrected=false source=""
+    adversarial_plan_probe_test.go:34: Bundle R4->R5->R5: base constraints=1 mid=1 leaf=0
+    adversarial_plan_probe_test.go:40: R4B custom required-name on R4 base: before="name.matches('[A-Z]([A-Za-z0-9_]){0,254}')" after="name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')"
+    adversarial_plan_probe_test.go:45: R5 explicit Resource.id string on R4 base: after="id"
+    adversarial_plan_probe_test.go:49: cross-release corrected/published constraint expression collisions=0
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=4.0.1 profile=4.0.1 before=10 after=10
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=4.0.1 profile=4.3.0 before=10 after=10
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=4.0.1 profile=5.0.0 before=10 after=10
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=4.3.0 profile=4.0.1 before=10 after=10
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=4.3.0 profile=4.3.0 before=10 after=10
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=4.3.0 profile=5.0.0 before=10 after=10
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=5.0.0 profile=4.0.1 before=17 after=17
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=5.0.0 profile=4.3.0 before=17 after=17
+    adversarial_plan_probe_test.go:57: addConstraints-both mutation core=5.0.0 profile=5.0.0 before=17 after=17
+--- PASS: TestAdversarialPlanProbe (1.70s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	2.193s

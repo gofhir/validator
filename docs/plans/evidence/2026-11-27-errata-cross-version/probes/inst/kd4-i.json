@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "kd3i", "meta": {"profile": ["http://example.org/hm/kd4"]}, "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"}, "identifier": [{"system": "urn:s1", "value": "x"}]}

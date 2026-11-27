@@ -1,0 +1,39 @@
+package validator
+
+import (
+	"context"
+	"strings"
+	"testing"
+)
+
+func TestV6UnrolledNestedBundleAddition(t *testing.T) {
+	for _, outer := range []string{"Bundle", "Parameters"} {
+		t.Run(outer, func(t *testing.T) {
+			parent := "Bundle.entry.resource"
+			instance := `{"resourceType":"Bundle","meta":{"profile":["http://example.org/nested"]},"type":"collection","entry":[{"fullUrl":"urn:uuid:12345678-1234-4234-8234-123456789012","resource":{"resourceType":"Bundle","type":"collection","entry":[{"resource":{"resourceType":"Patient"}}]}}]}`
+			if outer == "Parameters" {
+				parent = "Parameters.parameter.resource"
+				instance = `{"resourceType":"Parameters","meta":{"profile":["http://example.org/nested"]},"parameter":[{"name":"nested","resource":{"resourceType":"Bundle","type":"collection","entry":[{"resource":{"resourceType":"Patient"}}]}}]}`
+			}
+			profile := `{"resourceType":"StructureDefinition","url":"http://example.org/nested","name":"Nested","status":"draft","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"` + outer + `","derivation":"constraint","baseDefinition":"http://hl7.org/fhir/StructureDefinition/` + outer + `","differential":{"element":[{"id":"` + parent + `","path":"` + parent + `","type":[{"code":"Bundle"}]},{"id":"` + parent + `.type","path":"` + parent + `.type","min":1}]}}`
+			v, err := New(WithVersion("4.0.1"), WithConformanceResources([][]byte{[]byte(profile)}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			res, err := v.Validate(context.Background(), []byte(instance))
+			if err != nil {
+				t.Fatal(err)
+			}
+			found := false
+			for _, is := range res.Issues {
+				if strings.Contains(is.Diagnostics, "bdl-15") {
+					found = true
+					t.Logf("%s at %v", is.Diagnostics, is.Expression)
+				}
+			}
+			if !found {
+				t.Fatalf("missing nested bdl-15; %+v", res.Issues)
+			}
+		})
+	}
+}

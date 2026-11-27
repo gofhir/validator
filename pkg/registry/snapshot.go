@@ -214,14 +214,17 @@ func (r *Registry) generateSnapshot(ctx context.Context, sd *StructureDefinition
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot generate snapshot for %s: %w", sd.URL, err)
 	}
-	snapshot, notes, err := r.applyDifferential(ctx, baseSnapshot, sd.Differential, choices)
+	// Cada definición se corrige con su versión: lo heredado viene del raw de la base, ya corregido, y lo que escribe el
+	// perfil se corrige antes de la mezcla (applyDifferential), con la versión del perfil o, si no declara, la validada.
+	profileVersion := cmp.Or(sd.errataVersion, sd.FHIRVersion, r.fhirVersion)
+	snapshot, notes, err := r.applyDifferential(context.WithValue(ctx, profileVersionKey{}, profileVersion), baseSnapshot, sd.Differential, choices)
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot generate snapshot for %s: %w", sd.URL, err)
 	}
-	// The merge rebuilds the elements from their base's published JSON, so the corrections are
-	// applied again, for the version the profile was corrected for (its own, or the version
-	// validated when it declares none), or else its base's.
-	correctSnapshot(cmp.Or(sd.errataVersion, sd.FHIRVersion, baseSD.errataVersion, baseSD.FHIRVersion), snapshot.Element)
+	// Las constraints que la errata agrega viven solo en el struct, así que la mezcla, que rearma los elementos desde el
+	// raw de la base, las pierde: se toman del elemento correspondiente del snapshot de la base, que ya las trae (al
+	// cargarlo, applyErrata, o por esta misma herencia), sin adivinar ninguna versión. Solo se copian ellas.
+	inheritAddedConstraints(snapshot, baseSnapshot)
 	// Los sources se sellan después de la errata: el snapshot de la base ya está corregido, y el de la mezcla trae la
 	// expresión publicada hasta que se corrige; sellar antes dejaba sin source toda constraint corregida (ref-1, bdl-8…)
 	// porque la clave y la expresión no coincidían.
@@ -234,6 +237,9 @@ func (r *Registry) generateSnapshot(ctx context.Context, sd *StructureDefinition
 	}
 	return snapshot, notes, nil
 }
+
+// profileVersionKey guarda en el contexto la versión FHIR con la que se corrige lo que escribe el perfil.
+type profileVersionKey struct{}
 
 // snapshotBuilder holds a snapshot being generated.
 type snapshotBuilder struct {
@@ -308,6 +314,8 @@ func (r *Registry) applyDifferential(ctx context.Context, base *Snapshot, diff *
 		if err := b.yieldCloned(idx, id, placed); err != nil {
 			return nil, nil, err
 		}
+		version, _ := ctx.Value(profileVersionKey{}).(string)
+		correctPlaced(version, placed, &b.elements[idx])
 		merged, left, err := mergeElements(&b.elements[idx], placed, choices)
 		if err != nil {
 			return nil, nil, fmt.Errorf("merge failed for %s: %w", id, err)

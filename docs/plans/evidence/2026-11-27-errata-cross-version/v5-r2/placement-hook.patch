@@ -1,0 +1,12 @@
+diff --git a/pkg/registry/snapshot.go b/pkg/registry/snapshot.go
+index 85f8550..57bc9a4 100644
+--- a/pkg/registry/snapshot.go
++++ b/pkg/registry/snapshot.go
+@@ -317,6 +317,7 @@ func (r *Registry) applyDifferential(ctx context.Context, base *Snapshot, diff *
+ 			notes = append(notes, fmt.Sprintf("differential element %s: property %s is left out: %s[x] has no such type in FHIR %s", id, key, name, choices.version))
+ 		}
+ 		b.elements[idx] = *merged
++ if v5Placed != nil { v5Placed[id] = append(v5Placed[id], diffElem) }
+ 		keys, err := rawToMap(placed.raw)
+ 		if err != nil {
+ 			return nil, nil, err

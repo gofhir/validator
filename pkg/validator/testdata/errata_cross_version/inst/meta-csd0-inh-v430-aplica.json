@@ -1,0 +1,15 @@
+{
+ "content": "not-present",
+ "id": "ca",
+ "meta": {
+  "profile": [
+   "http://example.org/ecv/csd0-inh-v430"
+  ]
+ },
+ "resourceType": "CodeSystem",
+ "status": "active",
+ "text": {
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>",
+  "status": "generated"
+ }
+}

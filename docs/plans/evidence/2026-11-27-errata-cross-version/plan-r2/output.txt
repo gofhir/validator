@@ -1,0 +1,25 @@
+=== RUN   TestAdversarialR2
+=== RUN   TestAdversarialR2/A1_A2_controls
+    adversarial_r2_probe_test.go:93: A1 bdl-15 survives two merges; A2 R4B custom expression remains unchanged
+=== RUN   TestAdversarialR2/type_differential_needs_inherited_base_path
+    adversarial_r2_probe_test.go:104: v2 Patient.id fhir-type=string
+    adversarial_r2_probe_test.go:109: existing post-merge correction fhir-type=id
+=== RUN   TestAdversarialR2/renamed_differential_needs_normalized_path
+    adversarial_r2_probe_test.go:127: v2 normalized path=Observation.effective[x] corrected=false
+    adversarial_r2_probe_test.go:135: existing post-merge correction corrected=true
+=== RUN   TestAdversarialR2/generated_type_profile_unrolling_source
+    adversarial_r2_probe_test.go:148: ordinary chain source="http://example.org/core-timing"
+    adversarial_r2_probe_test.go:155: unrolled corrected=true source=""
+=== RUN   TestAdversarialR2/whole_constraint_replacement_drops_published_members
+    adversarial_r2_probe_test.go:165: candidate whole-field rewrite raw={"constraint":[{"key":"ref-1","severity":"","human":"","expression":"reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))","source":""}],"fixedString":"keep","id":"Reference","path":"Reference"}
+=== RUN   TestAdversarialR2/versionless_clone_retains_old_fallback
+    adversarial_r2_probe_test.go:174: clone validated=4.0.1 errataVersion=5.0.0 corrected=false shared=true
+--- PASS: TestAdversarialR2 (0.00s)
+    --- PASS: TestAdversarialR2/A1_A2_controls (0.00s)
+    --- PASS: TestAdversarialR2/type_differential_needs_inherited_base_path (0.00s)
+    --- PASS: TestAdversarialR2/renamed_differential_needs_normalized_path (0.00s)
+    --- PASS: TestAdversarialR2/generated_type_profile_unrolling_source (0.00s)
+    --- PASS: TestAdversarialR2/whole_constraint_replacement_drops_published_members (0.00s)
+    --- PASS: TestAdversarialR2/versionless_clone_retains_old_fallback (0.00s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	0.487s

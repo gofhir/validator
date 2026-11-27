@@ -1,0 +1,24 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/vitalsigns",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.effective[x]",
+    "path": "Observation.effective[x]"
+   }
+  ]
+ },
+ "id": "vs1-inh-none",
+ "kind": "resource",
+ "name": "EcvVs1InhNone",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Observation",
+ "url": "http://example.org/ecv/vs1-inh-none"
+}

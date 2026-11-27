@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"encoding/json"
 	"slices"
 
 	"github.com/gofhir/validator/v2/internal/versionorder"
@@ -291,10 +292,110 @@ func applyErrata(sd *StructureDefinition, fallback string) {
 }
 
 // correctSnapshot corrects the elements of a snapshot written for fhirVersion: the constraints the
-// errata add, and those they correct. A generated snapshot is corrected the same way.
+// errata add, and those they correct.
 func correctSnapshot(fhirVersion string, elems []ElementDefinition) {
 	addConstraints(fhirVersion, elems)
 	correctElements(fhirVersion, elems)
+}
+
+// correctPlaced corrige, con la versión del perfil que lo escribió, el elemento del diferencial ubicado en base, antes
+// de la mezcla: los elementos que se generan desde él (slices, reslices, hijos desplegados) se arman desde su JSON raw,
+// así que heredan el texto corregido. La errata se identifica por el elemento de la base en esa posición (su path y
+// base.path), porque el diferencial puede no declarar base.path. Solo se corrige lo que escribió el perfil: la mezcla
+// toma lo heredado del raw de la base, ya corregido para su propia definición.
+func correctPlaced(fhirVersion string, placed, base *ElementDefinition) {
+	selected := *placed
+	selected.Path, selected.Base = base.Path, base.Base
+	// Se corrige una copia: los slices del placed son los del diferencial del perfil.
+	selected.Constraint = slices.Clone(placed.Constraint)
+	selected.Type = slices.Clone(placed.Type)
+	for i := range selected.Type {
+		selected.Type[i].Extension = slices.Clone(selected.Type[i].Extension)
+	}
+	if !correctElement(fhirVersion, &selected) {
+		return
+	}
+	selected.patchRaw()
+	placed.Constraint, placed.Type, placed.raw = selected.Constraint, selected.Type, selected.raw
+	placed.keepPrefixedValues()
+}
+
+// patchRaw escribe en el JSON raw de e las hojas que una errata corrigió en sus campos: la expresión de cada constraint
+// y el valueUrl de la extensión fhir-type de cada tipo, y nada más, así que todo miembro que el modelo no conoce
+// conserva su valor. Los elementos copiados de e (mezcla, despliegue, clon) se arman desde su raw y heredan la
+// corrección. Las constraints que una errata agrega no se escriben: viven solo en los campos (ver addConstraints).
+func (e *ElementDefinition) patchRaw() {
+	m, err := rawToMap(e.raw)
+	if err != nil || len(m) == 0 {
+		return
+	}
+	var constraints []map[string]json.RawMessage
+	if err := unmarshalMember(m, "constraint", &constraints); err != nil {
+		return
+	}
+	var types []map[string]json.RawMessage
+	if err := unmarshalMember(m, "type", &types); err != nil {
+		return
+	}
+	changed := false
+	for i := range min(len(e.Constraint), len(constraints)) {
+		if setString(constraints[i], "expression", e.Constraint[i].Expression) {
+			changed = true
+		}
+	}
+	if changed {
+		m["constraint"], _ = json.Marshal(constraints)
+	}
+	for i := range min(len(e.Type), len(types)) {
+		var exts []map[string]json.RawMessage
+		if unmarshalMember(types[i], "extension", &exts) != nil {
+			return
+		}
+		patched := false
+		for k := range min(len(e.Type[i].Extension), len(exts)) {
+			if x := e.Type[i].Extension[k]; x.URL == fhirTypeExtension && setString(exts[k], "valueUrl", x.ValueURL) {
+				patched = true
+			}
+		}
+		if patched {
+			changed = true
+			types[i]["extension"], _ = json.Marshal(exts)
+			m["type"], _ = json.Marshal(types)
+		}
+	}
+	if !changed {
+		return
+	}
+	raw, err := json.Marshal(m)
+	if err != nil {
+		return
+	}
+	e.raw = raw
+	e.keepPrefixedValues() // la caché de fixed[x] y pattern[x] vale solo para el raw que la produjo
+}
+
+// unmarshalMember decodifica el miembro member de m en v; si el miembro no está, v queda como estaba.
+func unmarshalMember(m map[string]json.RawMessage, member string, v any) error {
+	data, ok := m[member]
+	if !ok {
+		return nil
+	}
+	return json.Unmarshal(data, v)
+}
+
+// setString fija el miembro string member de obj en value, y informa si lo cambió.
+func setString(obj map[string]json.RawMessage, member, value string) bool {
+	var current string
+	data, ok := obj[member]
+	if !ok && value == "" {
+		// Un miembro ausente con valor vacío no cambió: no se agrega (la expresión de una constraint solo con xpath no existe).
+		return false
+	}
+	if ok && json.Unmarshal(data, &current) == nil && current == value {
+		return false
+	}
+	obj[member], _ = json.Marshal(value)
+	return true
 }
 
 // inRelease reports whether a definition written for fhirVersion is of the release an erratum names:
@@ -320,6 +421,38 @@ func addConstraints(fhirVersion string, elems []ElementDefinition) {
 	}
 }
 
+// inheritAddedConstraints agrega a cada elemento de snapshot las constraints que una errata agregó (iguales por clave y
+// expresión a una de addedConstraints) a su elemento correspondiente de base, donde el elemento no tiene su clave. El
+// elemento se busca como en stampConstraintSources: por id o, en el hijo de un slice, por el id sin el nombre del slice.
+func inheritAddedConstraints(snapshot, base *Snapshot) {
+	inBase := make(map[string]*ElementDefinition, len(base.Element))
+	for i := range base.Element {
+		inBase[base.Element[i].ID] = &base.Element[i]
+	}
+	for i := range snapshot.Element {
+		e := &snapshot.Element[i]
+		b := inBase[e.ID]
+		if b == nil {
+			b = inBase[sliceName.ReplaceAllString(e.ID, "")]
+		}
+		if b == nil {
+			continue
+		}
+		for _, c := range b.Constraint {
+			if isAddedConstraint(c) && !slices.ContainsFunc(e.Constraint, func(o Constraint) bool { return o.Key == c.Key }) {
+				e.Constraint = append(e.Constraint, c)
+			}
+		}
+	}
+}
+
+// isAddedConstraint dice si c es una constraint que una errata agrega: igual por clave y expresión a una de addedConstraints.
+func isAddedConstraint(c Constraint) bool {
+	return slices.ContainsFunc(addedConstraints, func(er addedConstraint) bool {
+		return er.constraint.Key == c.Key && er.constraint.Expression == c.Expression
+	})
+}
+
 // correctContexts adds the context of use an erratum names, where sd publishes exactly the
 // defective contexts.
 func correctContexts(fhirVersion string, sd *StructureDefinition) {
@@ -339,18 +472,21 @@ func correctContexts(fhirVersion string, sd *StructureDefinition) {
 	}
 }
 
-// correctElements corrects elements of a definition written for fhirVersion.
+// correctElements corrige los elementos de una definición escrita para fhirVersion, en sus campos y en su JSON raw.
 func correctElements(fhirVersion string, elems []ElementDefinition) {
 	if fhirVersion == "" {
 		return
 	}
 	for i := range elems {
-		correctElement(fhirVersion, &elems[i])
+		if correctElement(fhirVersion, &elems[i]) {
+			elems[i].patchRaw()
+		}
 	}
 }
 
-func correctElement(fhirVersion string, e *ElementDefinition) {
-	correctConstraints(fhirVersion, e)
+// correctElement corrige los campos de e, e informa si cambió alguno.
+func correctElement(fhirVersion string, e *ElementDefinition) bool {
+	changed := correctConstraints(fhirVersion, e)
 	for _, er := range typeErrata {
 		if !inRelease(er.fhirVersion, fhirVersion) || !elementAt(e, er.path) {
 			continue
@@ -360,15 +496,18 @@ func correctElement(fhirVersion string, e *ElementDefinition) {
 				ext := &e.Type[t].Extension[x]
 				if ext.URL == fhirTypeExtension && ext.ValueURL == er.published {
 					ext.ValueURL = er.corrected
+					changed = true
 				}
 			}
 		}
 	}
+	return changed
 }
 
-// correctConstraints corrects e's constraints that an erratum of fhirVersion names, by key and
-// element, or by expression alone.
-func correctConstraints(fhirVersion string, e *ElementDefinition) {
+// correctConstraints corrige las constraints de e que una errata de fhirVersion nombra, por clave y
+// element, o solo por expresión, e informa si corrigió alguna.
+func correctConstraints(fhirVersion string, e *ElementDefinition) bool {
+	changed := false
 	for _, er := range constraintErrata {
 		if !inRelease(er.fhirVersion, fhirVersion) {
 			continue
@@ -376,6 +515,7 @@ func correctConstraints(fhirVersion string, e *ElementDefinition) {
 		for c := range e.Constraint {
 			if cn := &e.Constraint[c]; cn.Key == er.key && er.names(e, cn) && cn.Expression == er.published {
 				cn.Expression = er.corrected
+				changed = true
 			}
 		}
 	}
@@ -386,9 +526,11 @@ func correctConstraints(fhirVersion string, e *ElementDefinition) {
 		for c := range e.Constraint {
 			if cn := &e.Constraint[c]; cn.Expression == er.published {
 				cn.Expression = er.corrected
+				changed = true
 			}
 		}
 	}
+	return changed
 }
 
 // names reports whether c, a constraint of e, is the one the erratum corrects.

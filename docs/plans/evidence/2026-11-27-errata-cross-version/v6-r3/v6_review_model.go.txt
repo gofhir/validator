@@ -1,0 +1,107 @@
+package registry
+
+import (
+	"cmp"
+	"context"
+	"encoding/json"
+)
+
+type v6VersionKey struct{}
+
+func v6Placed(version string, placed, base *ElementDefinition) {
+	selected := *placed
+	selected.Path, selected.Base = base.Path, base.Base
+	correctElement(version, &selected)
+	placed.Constraint, placed.Type = selected.Constraint, selected.Type
+	// patch helper updates slice elements, so propagate raw explicitly
+	es := []ElementDefinition{*placed}
+	v6Patch(es)
+	placed.raw = es[0].raw
+}
+func (r *Registry) v6RootVersion(ctx context.Context, sd *StructureDefinition) string {
+	seen := map[*StructureDefinition]bool{}
+	for sd != nil && !seen[sd] {
+		seen[sd] = true
+		if sd.Derivation == "specialization" || sd.BaseDefinition == "" {
+			return cmp.Or(sd.errataVersion, sd.FHIRVersion, r.fhirVersion)
+		}
+		u, v := ParseCanonical(sd.BaseDefinition)
+		sd = r.ResolveByCanonical(ctx, u, v)
+	}
+	return ""
+}
+func v6Patch(elems []ElementDefinition) {
+	for i := range elems {
+		e := &elems[i]
+		if e.raw == nil {
+			continue
+		}
+		m, err := rawToMap(e.raw)
+		if err != nil {
+			panic(err)
+		}
+		var cs []map[string]json.RawMessage
+		if m["constraint"] != nil {
+			if err := json.Unmarshal(m["constraint"], &cs); err != nil {
+				panic(err)
+			}
+		}
+		changed := false
+		for j, c := range e.Constraint {
+			if j >= len(cs) {
+				continue // v5: additions stay struct-only
+				/*
+					b, _ := json.Marshal(c)
+					var cm map[string]json.RawMessage
+					_ = json.Unmarshal(b, &cm)
+					cs = append(cs, cm)
+					changed = true
+				*/
+			} else if extractJSONStringField(v6JSON(cs[j]), "expression") != c.Expression {
+				cs[j]["expression"] = v6JSON(c.Expression)
+				changed = true
+			}
+		}
+		if changed {
+			m["constraint"] = v6JSON(cs)
+		}
+		var ts []map[string]json.RawMessage
+		if m["type"] != nil {
+			if err := json.Unmarshal(m["type"], &ts); err != nil {
+				panic(err)
+			}
+		}
+		for j, ty := range e.Type {
+			if j >= len(ts) {
+				panic("unexpected type length")
+			}
+			var xs []map[string]json.RawMessage
+			if ts[j]["extension"] != nil {
+				_ = json.Unmarshal(ts[j]["extension"], &xs)
+			}
+			tc := false
+			for k, x := range ty.Extension {
+				if x.URL == fhirTypeExtension && extractJSONStringField(v6JSON(xs[k]), "valueUrl") != x.ValueURL {
+					xs[k]["valueUrl"] = v6JSON(x.ValueURL)
+					tc = true
+				}
+			}
+			if tc {
+				ts[j]["extension"] = v6JSON(xs)
+				m["type"] = v6JSON(ts)
+				changed = true
+			}
+		}
+		if changed {
+			e.raw = v6JSON(m)
+			e.keepPrefixedValues()
+		}
+	}
+}
+func v6JSON(v any) json.RawMessage {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}

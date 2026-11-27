@@ -1,0 +1,74 @@
+=== RUN   TestV5EarlierScenarios
+=== RUN   TestV5EarlierScenarios/B1_renamed_constraint
+    v5_review_probe_test.go:168: B1 path=Observation.effective[x] corrected=true
+=== RUN   TestV5EarlierScenarios/tim-9_verdict
+    v5_review_probe_test.go:180: published result=[] error=SingletonExpectedError: the in operator takes a single item on the left, got 2; corrected result=[true] error=<nil>
+=== RUN   TestV5EarlierScenarios/controls_A1_A2_B4
+    v5_review_probe_test.go:197: A1: bdl-15 survives two merges; raw fixedString survives
+    v5_review_probe_test.go:203: A2: custom R4B expression unchanged
+=== RUN   TestV5EarlierScenarios/inherited_type_versus_B1_explicit_type
+    v5_review_probe_test.go:213: corrected base=id; v4 inherited=id; B1 explicit=id
+=== RUN   TestV5EarlierScenarios/cross_version_unrolled_child
+    v5_review_probe_test.go:227: base corrected=true; v4 unrolled corrected=true; expression=offset.empty() or (when.exists() and when.select($this in ('C' | 'CM' | 'CD' | 'CV')).allFalse())
+--- PASS: TestV5EarlierScenarios (0.00s)
+    --- PASS: TestV5EarlierScenarios/B1_renamed_constraint (0.00s)
+    --- PASS: TestV5EarlierScenarios/tim-9_verdict (0.00s)
+    --- PASS: TestV5EarlierScenarios/controls_A1_A2_B4 (0.00s)
+    --- PASS: TestV5EarlierScenarios/inherited_type_versus_B1_explicit_type (0.00s)
+    --- PASS: TestV5EarlierScenarios/cross_version_unrolled_child (0.00s)
+=== RUN   TestV5InverseGuard
+    v5_review_probe_test.go:262: guard source=4.0.1 target=4.3.0 expression collisions=0 type collisions=0
+    v5_review_probe_test.go:262: guard source=4.0.1 target=5.0.0 expression collisions=0 type collisions=0
+    v5_review_probe_test.go:262: guard source=4.3.0 target=4.0.1 expression collisions=0 type collisions=0
+    v5_review_probe_test.go:262: guard source=4.3.0 target=5.0.0 expression collisions=0 type collisions=0
+    v5_review_probe_test.go:262: guard source=5.0.0 target=4.0.1 expression collisions=0 type collisions=0
+    v5_review_probe_test.go:262: guard source=5.0.0 target=4.3.0 expression collisions=0 type collisions=0
+    v5_review_probe_test.go:270: IG inverse: before=name.matches('[A-Z]([A-Za-z0-9_]){0,254}') after=name.matches('[A-Z]([A-Za-z0-9_]){0,254}'); evaluate {} before=[]/<nil> after=[]/<nil>
+--- PASS: TestV5InverseGuard (2.34s)
+=== RUN   TestV5AddedConstraintOverride
+    v5_review_probe_test.go:300: differential bdl-15 override before="false" v4="false"
+--- PASS: TestV5AddedConstraintOverride (0.00s)
+=== RUN   TestV5LeafAndClone
+    v5_review_probe_test.go:333: leaf metadata and decimal preserved; double application and unpublished clone equivalent
+--- PASS: TestV5LeafAndClone (0.00s)
+=== RUN   TestV5ReferenceChainAndTypes
+    v5_review_probe_test.go:356: A1 reference chain keeps expression/source; type differential keeps raw metadata
+--- PASS: TestV5ReferenceChainAndTypes (0.00s)
+=== RUN   TestV5KeyOrderAndNilRaw
+    v5_review_probe_test.go:386: key order and prefixed-value cache equivalent; nil raw clone preserves corrected struct
+--- PASS: TestV5KeyOrderAndNilRaw (0.00s)
+=== RUN   TestV5RenamedChoiceReslice
+    v5_review_probe_test.go:394: Observation.effective[x]:effectiveDateTime path=Observation.effective[x] corrected=true expression=$this is dateTime implies $this.toString().length() >= 10
+    v5_review_probe_test.go:394: Observation.effective[x]:effectiveDateTime/extra path=Observation.effective[x] corrected=false expression=($this as dateTime).toString().length() >= 8
+--- PASS: TestV5RenamedChoiceReslice (0.00s)
+=== RUN   TestV5SameKeyInheritedOwnership
+    v5_review_probe_test.go:402: base=name.matches('[A-Z]([A-Za-z0-9_]){0,254}') differential=name.exists() merged=name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+--- PASS: TestV5SameKeyInheritedOwnership (0.00s)
+=== RUN   TestV5RenamedChoiceResliceLoadedDifferential
+    v5_review_probe_test.go:414: loaded differential: reslice retains published vs-1; Observation.effective[x]:effectiveDateTime/extra
+--- PASS: TestV5RenamedChoiceResliceLoadedDifferential (0.00s)
+=== RUN   TestV5MappingContexts
+=== RUN   TestV5MappingContexts/LogicalEnvelope
+    v5_review_probe_test.go:424: LogicalEnvelope unrolled child with differential constraint keeps corrected tim-9
+=== RUN   TestV5MappingContexts/Extension
+    v5_review_probe_test.go:424: Extension unrolled child with differential constraint keeps corrected tim-9
+=== RUN   TestV5MappingContexts/Timing
+    v5_review_probe_test.go:424: Timing unrolled child with differential constraint keeps corrected tim-9
+=== RUN   TestV5MappingContexts/contentReference
+    v5_review_probe_test.go:430: contentReference copied corrected raw and placed own constraint
+=== RUN   TestV5MappingContexts/path_slice_fallback_and_reslice
+    v5_review_probe_test.go:435: X.part:a key=own corrected=true
+    v5_review_probe_test.go:435: X.part:a/b key=own corrected=false
+    v5_review_probe_test.go:435: X.part:a/b key=reslice corrected=true
+--- PASS: TestV5MappingContexts (0.00s)
+    --- PASS: TestV5MappingContexts/LogicalEnvelope (0.00s)
+    --- PASS: TestV5MappingContexts/Extension (0.00s)
+    --- PASS: TestV5MappingContexts/Timing (0.00s)
+    --- PASS: TestV5MappingContexts/contentReference (0.00s)
+    --- PASS: TestV5MappingContexts/path_slice_fallback_and_reslice (0.00s)
+=== RUN   TestV5AddedConstraintForeignRootCopy
+    v5_review_probe_test.go:448: source root=R4 outer root=R5; source constraints=1 copied constraints=0 base.path=Bundle
+    v5_review_probe_test.go:449: standalone cloneElement constraints=0
+--- PASS: TestV5AddedConstraintForeignRootCopy (0.00s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	3.007s

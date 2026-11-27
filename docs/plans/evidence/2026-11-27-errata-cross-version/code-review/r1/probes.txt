@@ -1,0 +1,10 @@
+--- FAIL: TestReviewRound1PatchPreservesAbsentExpression (0.18s)
+    review_round1_test.go:29: unrelated XPath-only constraint gained expression=""; raw={"constraint":[{"expression":"reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))","human":"x","key":"ref-1","severity":"error"},{"expression":"","human":"XPath only","key":"own-1","severity":"error","xpath":"true()"}],"id":"Reference","path":"Reference"}
+--- FAIL: TestReviewRound1PublishedBaseAncestry (0.00s)
+    --- FAIL: TestReviewRound1PublishedBaseAncestry/missing (0.00s)
+        review_round1_test.go:83: published R4 base has bdl-15, derived R4 snapshot loses it; rootVersion=""
+    --- FAIL: TestReviewRound1PublishedBaseAncestry/cycle (0.00s)
+        review_round1_test.go:83: published R4 base has bdl-15, derived R4 snapshot loses it; rootVersion=""
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/registry	1.238s
+FAIL

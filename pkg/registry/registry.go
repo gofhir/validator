@@ -452,6 +452,9 @@ func (r *Registry) refreshDerivedUnlocked() {
 // loadResourceUnlocked parses and indexes a single resource if it is a StructureDefinition.
 // PackageID identifies the source package (e.g., "hl7.fhir.us.core#6.1.0"); empty if unknown.
 // Must be called while the write lock is held.
+// El resourceType de las definiciones que el registro carga (structureDefinitionType).
+const structureDefinitionType = "StructureDefinition"
+
 func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string, example bool) {
 	var peek struct {
 		ResourceType string `json:"resourceType"`
@@ -459,7 +462,7 @@ func (r *Registry) loadResourceUnlocked(data json.RawMessage, packageID string, 
 	if err := json.Unmarshal(data, &peek); err != nil {
 		return
 	}
-	if peek.ResourceType != "StructureDefinition" {
+	if peek.ResourceType != structureDefinitionType {
 		return
 	}
 

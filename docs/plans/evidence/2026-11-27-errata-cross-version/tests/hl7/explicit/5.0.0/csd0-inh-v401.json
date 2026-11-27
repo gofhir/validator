@@ -1,0 +1,70 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "collection",
+  "entry" : [{
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><p>All OK</p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Information</td><td>CodeSystem</td><td>Business Rule Violation</td><td>CodeSystems SHOULD have a stated value for the caseSensitive element so that users know the status and meaning of the code system clearly</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (25 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7work/gen/inst/csd0-aplica.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CODESYSTEM_CS_NONHL7_MISSING_ELEMENT"
+        }],
+        "severity" : "information",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "CodeSystems SHOULD have a stated value for the caseSensitive element so that users know the status and meaning of the code system clearly"
+        },
+        "expression" : ["CodeSystem"]
+      }]
+    }
+  },
+  {
+    "resource" : {
+      "resourceType" : "OperationOutcome",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>OperationOutcome </b></p><p>All OK</p><table class=\"grid\"><tr><td><b>Severity</b></td><td><b>Location</b></td><td><b>Code</b></td><td><b>Details</b></td><td><b>Diagnostics</b></td><td><b>Source</b></td></tr><tr><td>Information</td><td>CodeSystem</td><td>Business Rule Violation</td><td>CodeSystems SHOULD have a stated value for the caseSensitive element so that users know the status and meaning of the code system clearly</td><td/><td>InstanceValidator</td></tr></table></div>"
+      },
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/tools/StructureDefinition/validator-version",
+        "valueString" : "FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (25 days old)"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-file",
+        "valueString" : "/Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7work/gen/inst/csd0-no.json"
+      }],
+      "issue" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          "valueString" : "InstanceValidator"
+        },
+        {
+          "url" : "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          "valueCode" : "CODESYSTEM_CS_NONHL7_MISSING_ELEMENT"
+        }],
+        "severity" : "information",
+        "code" : "business-rule",
+        "details" : {
+          "text" : "CodeSystems SHOULD have a stated value for the caseSensitive element so that users know the status and meaning of the code system clearly"
+        },
+        "expression" : ["CodeSystem"]
+      }]
+    }
+  }]
+}

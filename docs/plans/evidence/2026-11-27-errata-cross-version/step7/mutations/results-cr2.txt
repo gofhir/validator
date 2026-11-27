@@ -1,0 +1,19 @@
+1 patchRaw does nothing | KILLED: TestErrataCrossVersionA1Chains | 7s
+2 patchRaw rewrites whole raw via json.Marshal(struct) | KILLED: TestErrataCrossVersionB4LeafPatch | 7s
+3 post-merge correctSnapshot(profileVersion) | KILLED: TestErrataCrossVersionD2InheritedFromAGuide | 10s
+4 post-merge correctSnapshot(profile) + correctSnapshot(root) | KILLED: TestErrataCrossVersionA2OwnConstraintKeepsItsVersion | 10s
+5 correctPlaced disabled | KILLED: TestErrataCrossVersionB1DifferentialRedeclaresTheType | 10s
+6 correctPlaced identifies by placed's own path/base | KILLED: TestErrataCrossVersionB1DifferentialRedeclaresTheType | 11s
+7 addConstraints also writes added constraint into raw | KILLED: TestErrataCrossVersionA1Chains | 10s
+10 inRelease always true | KILLED: TestErrataCrossVersionA2OwnConstraintKeepsItsVersion | 10s
+11 remove R4 ref-1 erratum (key renamed) | KILLED: TestErrataCrossVersionA1Chains | 10s
+12 remove R4 tim-9 erratum (key renamed) | KILLED: TestErrataCrossVersionA1Chains | 10s
+13 R4B ref-1 corrected text 1 char ('#' -> '##') | KILLED: TestErrataCrossVersionA1Chains | 10s
+14 patchRaw skips keepPrefixedValues | KILLED: TestErrataCrossVersionB4LeafPatch | 10s
+15 correctPlaced skips Type correction | KILLED: TestErrataCrossVersionB1DifferentialRedeclaresTheType | 11s
+16 correctPlaced uses validated version (r.fhirVersion) | KILLED: TestErrataCrossVersionA2OwnConstraintKeepsItsVersion | 10s
+17 setString adds an absent member with an empty value | KILLED: TestErrataCrossVersionPatchRawKeepsAbsentExpression | 10s
+19 inheritAddedConstraints does nothing | KILLED: TestErrataCrossVersionA1Chains | 10s
+20 inherit every base constraint the merged element lacks | SURVIVED(targeted) | 10s
+21 no slice-stripped match | SURVIVED(targeted) | 10s
+22 isAddedConstraint by key only | SURVIVED(targeted) | 10s

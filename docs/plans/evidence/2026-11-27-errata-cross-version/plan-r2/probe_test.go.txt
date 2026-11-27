@@ -1,0 +1,177 @@
+package registry
+
+import (
+	"context"
+	"encoding/json"
+	"testing"
+)
+
+// Sonda del algoritmo del plan; no cambia la implementación.
+func r2Correct(t *testing.T, sd *StructureDefinition, fallback string) {
+	t.Helper()
+	var before []map[string]json.RawMessage
+	for _, es := range [][]ElementDefinition{snapshotElements(sd), differentialElements(sd)} {
+		for _, e := range es {
+			data, _ := json.Marshal(e)
+			m, _ := rawToMap(data)
+			before = append(before, m)
+		}
+	}
+	applyErrata(sd, fallback)
+	n := 0
+	for _, es := range [][]ElementDefinition{snapshotElements(sd), differentialElements(sd)} {
+		for i := range es {
+			data, _ := json.Marshal(es[i])
+			after, _ := rawToMap(data)
+			set := map[string]any{}
+			for _, k := range []string{"constraint", "type"} {
+				if string(before[n][k]) != string(after[k]) {
+					set[k] = after[k]
+				}
+			}
+			n++
+			if len(set) > 0 {
+				out, err := cloneElement(&es[i], set)
+				if err != nil {
+					t.Fatal(err)
+				}
+				es[i] = *out
+			}
+		}
+	}
+}
+func r2Merge(t *testing.T, r *Registry, base *Snapshot, ds ...string) *Snapshot {
+	t.Helper()
+	d := &Differential{}
+	for _, s := range ds {
+		var e ElementDefinition
+		if err := json.Unmarshal([]byte(s), &e); err != nil {
+			t.Fatal(err)
+		}
+		e.SetRaw([]byte(s))
+		d.Element = append(d.Element, e)
+	}
+	out, notes, err := r.applyDifferential(context.Background(), base, d, &choiceIndex{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(notes) > 0 {
+		t.Fatal(notes)
+	}
+	return out
+}
+func r2SD(t *testing.T, s string) *StructureDefinition {
+	t.Helper()
+	var sd StructureDefinition
+	if err := json.Unmarshal([]byte(s), &sd); err != nil {
+		t.Fatal(err)
+	}
+	sd.raw = []byte(s)
+	return &sd
+}
+func TestAdversarialR2(t *testing.T) {
+	t.Run("A1 A2 controls", func(t *testing.T) {
+		bundle := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Bundle","path":"Bundle"}]}}`)
+		r2Correct(t, bundle, "")
+		r := New()
+		mid := r2Merge(t, r, bundle.Snapshot, `{"id":"Bundle","path":"Bundle"}`)
+		leaf := r2Merge(t, r, mid, `{"id":"Bundle","path":"Bundle"}`)
+		if len(leaf.Element[0].Constraint) != 1 || leaf.Element[0].Constraint[0].Key != "bdl-15" {
+			t.Fatal("bdl-15 lost")
+		}
+		own := r2SD(t, `{"fhirVersion":"4.3.0","differential":{"element":[{"id":"CodeSystem","path":"CodeSystem","constraint":[{"key":"custom","expression":`+jsonString(expressionErrata[0].published)+`}]}]}}`)
+		r2Correct(t, own, "")
+		b := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[{"id":"CodeSystem","path":"CodeSystem"}]}}`)
+		r2Correct(t, b, "")
+		out, _, err := r.applyDifferential(context.Background(), b.Snapshot, own.Differential, &choiceIndex{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if out.Element[0].Constraint[0].Expression != expressionErrata[0].published {
+			t.Fatal("A2 persists")
+		}
+		t.Log("A1 bdl-15 survives two merges; A2 R4B custom expression remains unchanged")
+	})
+	t.Run("type differential needs inherited base path", func(t *testing.T) {
+		base := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Patient.id","path":"Patient.id","base":{"path":"Resource.id"},"type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":"`+fhirTypeExtension+`","valueUrl":"string"}]}]}]}}`)
+		diff := r2SD(t, `{"fhirVersion":"4.0.1","differential":{"element":[{"id":"Patient.id","path":"Patient.id","type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":"`+fhirTypeExtension+`","valueUrl":"string"}]}]}]}}`)
+		r2Correct(t, base, "")
+		r2Correct(t, diff, "")
+		out, _, err := New().applyDifferential(context.Background(), base.Snapshot, diff.Differential, &choiceIndex{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("v2 Patient.id fhir-type=%s", out.Element[0].Type[0].Extension[0].ValueURL)
+		if out.Element[0].Type[0].Extension[0].ValueURL != "string" {
+			t.Fatal("counterexample disappeared")
+		}
+		correctSnapshot(fhirR4, out.Element)
+		t.Logf("existing post-merge correction fhir-type=%s", out.Element[0].Type[0].Extension[0].ValueURL)
+	})
+	t.Run("renamed differential needs normalized path", func(t *testing.T) {
+		base := r2SD(t, `{"snapshot":{"element":[{"id":"Observation","path":"Observation"},{"id":"Observation.effective[x]","path":"Observation.effective[x]","max":"1","type":[{"code":"dateTime"},{"code":"Period"}]}]}}`)
+		diff := r2SD(t, `{"fhirVersion":"4.0.1","differential":{"element":[{"id":"Observation.effectiveDateTime","path":"Observation.effectiveDateTime","type":[{"code":"dateTime"}],"constraint":[{"key":"vs-1","expression":`+jsonString(vsOnePublished)+`}]}]}}`)
+		r2Correct(t, diff, "")
+		r := New()
+		out, notes, err := r.applyDifferential(context.Background(), base.Snapshot, diff.Differential, &choiceIndex{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(notes) > 0 {
+			t.Fatal(notes)
+		}
+		for i := range out.Element {
+			e := &out.Element[i]
+			for _, c := range e.Constraint {
+				if c.Key == "vs-1" {
+					t.Logf("v2 normalized path=%s corrected=%v", e.Path, c.Expression == vsOneCorrected)
+				}
+			}
+		}
+		correctSnapshot(fhirR4, out.Element)
+		for _, e := range out.Element {
+			for _, c := range e.Constraint {
+				if c.Key == "vs-1" {
+					t.Logf("existing post-merge correction corrected=%v", c.Expression == vsOneCorrected)
+				}
+			}
+		}
+	})
+	t.Run("generated type profile unrolling source", func(t *testing.T) {
+		base := r2SD(t, `{"url":"http://example.org/core-timing","fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Timing","path":"Timing"},{"id":"Timing.repeat","path":"Timing.repeat","constraint":[{"key":"tim-9","expression":`+jsonString(timNinePublished)+`}]}]}}`)
+		r2Correct(t, base, "")
+		r := New()
+		mid := r2Merge(t, r, base.Snapshot, `{"id":"Timing","path":"Timing"}`)
+		stampConstraintSources(mid, base.Snapshot, base.URL)
+		leaf := r2Merge(t, r, mid, `{"id":"Timing","path":"Timing"}`)
+		stampConstraintSources(leaf, mid, "http://example.org/timing-profile")
+		t.Logf("ordinary chain source=%q", leaf.Element[1].Constraint[0].Source)
+		r.indexUnlocked(&StructureDefinition{URL: "http://example.org/timing-profile", Type: "Timing", Snapshot: mid})
+		patient := r2SD(t, `{"snapshot":{"element":[{"id":"Patient","path":"Patient"},{"id":"Patient.timing","path":"Patient.timing","type":[{"code":"Timing","profile":["http://example.org/timing-profile"]}]}]}}`)
+		out := r2Merge(t, r, patient.Snapshot, `{"id":"Patient.timing.repeat","path":"Patient.timing.repeat","min":1}`)
+		stampConstraintSources(out, patient.Snapshot, "http://example.org/patient")
+		for _, e := range out.Element {
+			if e.ID == "Patient.timing.repeat" {
+				t.Logf("unrolled corrected=%v source=%q", e.Constraint[0].Expression == timNineCorrected, e.Constraint[0].Source)
+				if e.Constraint[0].Source != "" {
+					t.Fatal("counterexample disappeared")
+				}
+			}
+		}
+	})
+	t.Run("whole constraint replacement drops published members", func(t *testing.T) {
+		sd := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Reference","path":"Reference","fixedString":"keep","constraint":[{"key":"ref-1","expression":`+jsonString(constraintErrata[2].published)+`,"xpath":"published xpath","extension":[{"url":"http://example.org/marker","valueBoolean":true}],"_human":{"id":"human-id"}}]}]}}`)
+		r2Correct(t, sd, "")
+		t.Logf("candidate whole-field rewrite raw=%s", sd.Snapshot.Element[0].raw)
+	})
+	t.Run("versionless clone retains old fallback", func(t *testing.T) {
+		r := New()
+		r.SetFHIRVersion(fhirR5)
+		r.loadResourceUnlocked([]byte(`{"resourceType":"StructureDefinition","url":"http://example.org/no-version","snapshot":{"element":[{"id":"CodeSystem","path":"CodeSystem","constraint":[{"key":"custom","expression":`+jsonString(expressionErrata[0].published)+`}]}]}}`), "", false)
+		c := r.Clone()
+		c.SetFHIRVersion(fhirR4)
+		sd := c.GetByURL("http://example.org/no-version")
+		t.Logf("clone validated=%s errataVersion=%s corrected=%v shared=%v", c.FHIRVersion(), sd.errataVersion, sd.Snapshot.Element[0].Constraint[0].Expression == expressionErrata[0].corrected, sd == r.GetByURL(sd.URL))
+	})
+}
+func jsonString(s string) string { b, _ := json.Marshal(s); return string(b) }
