@@ -83,7 +83,7 @@ func ecvOfficialSDs(t testing.TB, version string) map[string]json.RawMessage {
 				ResourceType string `json:"resourceType"`
 				URL          string `json:"url"`
 			}
-			if !example && json.Unmarshal(data, &peek) == nil && peek.ResourceType == "StructureDefinition" {
+			if !example && json.Unmarshal(data, &peek) == nil && peek.ResourceType == structureDefinitionType {
 				out[peek.URL] = data
 			}
 		})
