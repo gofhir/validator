@@ -218,6 +218,8 @@ Each slice then uses a pattern or value on the discriminator path to define whic
 }
 ```
 
+A slicing with no discriminator is allowed ("If there is no discriminator, the content is hard to process, but that is allowed", [ElementDefinition.slicing.discriminator](https://hl7.org/fhir/R4/elementdefinition-definitions.html#ElementDefinition.slicing.discriminator)). The validator assigns no element to any of its slices, as the HL7 validator does: with `rules: closed` every element is reported with `SLICING_NO_MATCH`, and a slice with a minimum cardinality reports it as unmet.
+
 {{< callout type="info" >}}
 Slicing rules, discriminators, and slice cardinalities are all read from the StructureDefinition. The validator does not hardcode any assumptions about which elements can be sliced or how slices are defined.
 {{< /callout >}}

@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -363,7 +363,7 @@
+ func (v *Validator) walkPrimitiveExtensions(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, ext map[string]any, prim registry.PrimitiveValue, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+ 	opts = opts.scoped()
+ 	for n := node; n != nil; n = n.SliceOf {
+-		if opts.firstDescent(ext, fhirPath, n.Children) {
++		if false && opts.firstDescent(ext, fhirPath, n.Children) {
+ 			v.walkChildren(sd, n.Children, ext, raw, fhirPath, opts, result)
+ 		}
+ 	}

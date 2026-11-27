@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "q-idp",
+ "url": "http://example.org/rv8/q-idp",
+ "name": "qidp",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier",
+    "constraint": [
+     {
+      "key": "qr-1",
+      "severity": "error",
+      "human": "qr-1",
+      "expression": "system.exists()"
+     }
+    ]
+   },
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "constraint": [
+     {
+      "key": "qc-1",
+      "severity": "error",
+      "human": "qc-1",
+      "expression": "startsWith('A')"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tp-period",
+ "url": "http://example.org/dl/tp-period",
+ "name": "DlTpPeriod",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Period",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Period",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Period",
+    "path": "Period",
+    "constraint": [
+     {
+      "key": "dl-tpa",
+      "severity": "error",
+      "human": "start",
+      "expression": "start.exists()"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "cx-pd",
+ "url": "http://example.org/ax/cx-pd",
+ "name": "AxCxpd",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/ax/cx-p0",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate.extension",
+    "path": "Patient.birthDate.extension",
+    "max": "0"
+   }
+  ]
+ }
+}

@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d1-fixed",
+ "url": "http://example.org/dl/d1-fixed",
+ "name": "DlD1Fixed",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/dl/d1b-fixed",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "fixedString": "fa"
+   }
+  ]
+ }
+}

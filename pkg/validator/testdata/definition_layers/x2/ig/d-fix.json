@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-fix",
+ "url": "http://example.org/ax/d-fix",
+ "name": "AxDfix",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/ax/d0",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "fixedString": "BASE"
+   }
+  ]
+ }
+}

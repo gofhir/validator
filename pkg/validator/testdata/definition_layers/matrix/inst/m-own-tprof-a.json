@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "id": "m-own-tprof-a",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/own-tprof"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "extension": [
+  {
+   "url": "http://example.org/dl/ext-b-tprof",
+   "valueIdentifier": {
+    "system": "urn:mrn",
+    "value": "z",
+    "period": {
+     "end": "2001-01-01"
+    },
+    "assigner": {
+     "display": "d"
+    }
+   }
+  }
+ ]
+}

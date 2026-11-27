@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d2-ew",
+ "url": "http://example.org/p5/d2-ew",
+ "name": "AxD2Ew",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/p5/d1-ew",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier"
+   },
+   {
+    "id": "Patient.identifier:mrn.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "k5",
+      "severity": "warning",
+      "human": "k5",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ }
+}

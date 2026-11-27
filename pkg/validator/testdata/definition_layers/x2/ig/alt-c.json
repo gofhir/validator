@@ -1,0 +1,60 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "alt-c",
+ "url": "http://example.org/ax/alt-c",
+ "name": "AxAltc",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.extension",
+    "path": "Identifier.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Identifier.extension.value[x]",
+    "path": "Identifier.extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ],
+    "fixedString": "BASE"
+   },
+   {
+    "id": "Identifier.extension:x",
+    "path": "Identifier.extension",
+    "sliceName": "x"
+   },
+   {
+    "id": "Identifier.extension:x.url",
+    "path": "Identifier.extension.url",
+    "fixedUri": "http://example.org/ax/e0"
+   },
+   {
+    "id": "Identifier.extension:x.value[x]",
+    "path": "Identifier.extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ],
+    "fixedString": "X"
+   }
+  ]
+ }
+}

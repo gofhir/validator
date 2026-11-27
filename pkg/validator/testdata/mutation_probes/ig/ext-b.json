@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-b",
+ "url": "http://example.org/hm/ext-b",
+ "name": "HmExtb",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/hm/ext-b"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "code"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ]
+}

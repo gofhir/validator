@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/13b.orig	2026-11-25 15:54:21
++++ pkg/registry/snapshot.go	2026-11-25 15:54:21
+@@ -1348,7 +1348,7 @@
+ 	}
+ 	yield := map[string]bool{}
+ 	for _, c := range diff.Constraint {
+-		if !b.baseKeys[src][c.Key] {
++		if true {
+ 			yield[c.Key] = true
+ 		}
+ 	}

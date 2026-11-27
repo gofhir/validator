@@ -1,0 +1,15 @@
+{
+ "resourceType": "CodeSystem",
+ "id": "cs",
+ "url": "http://example.org/dl/cs",
+ "status": "active",
+ "content": "complete",
+ "concept": [
+  {
+   "code": "A"
+  },
+  {
+   "code": "B"
+  }
+ ]
+}

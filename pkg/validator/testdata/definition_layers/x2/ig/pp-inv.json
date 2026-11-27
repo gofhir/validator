@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pp-inv",
+ "url": "http://example.org/ax/pp-inv",
+ "name": "AxPpinv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Period",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Period",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Period",
+    "path": "Period",
+    "constraint": [
+     {
+      "key": "ax-pp",
+      "severity": "error",
+      "human": "ax-pp",
+      "expression": "start.empty()"
+     }
+    ]
+   }
+  ]
+ }
+}

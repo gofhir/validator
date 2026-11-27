@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d2-fixed",
+ "url": "http://example.org/dl/d2-fixed",
+ "name": "DlD2Fixed",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/dl/d2b-fixed",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.assigner.display",
+    "path": "Patient.identifier.assigner.display",
+    "fixedString": "fb"
+   }
+  ]
+ }
+}

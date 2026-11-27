@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -581,7 +581,7 @@
+ 			continue
+ 		}
+ 		opts.nested[key] = struct{}{}
+-		if opts.probe != nil {
++		if false && opts.probe != nil {
+ 			opts.probe(walkprobe.Nested, fhirPath+"|"+sd.URL+"|"+sd.Version)
+ 		}
+ 		opts.profile = sd.URL

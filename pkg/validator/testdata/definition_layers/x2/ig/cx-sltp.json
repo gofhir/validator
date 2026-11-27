@@ -1,0 +1,53 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "cx-sltp",
+ "url": "http://example.org/ax/cx-sltp",
+ "name": "AxCxsltp",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/ax/tp-m"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:mrn.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.period",
+    "path": "Patient.identifier.period",
+    "min": 0
+   }
+  ]
+ }
+}

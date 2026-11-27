@@ -1,0 +1,11 @@
+--- a/pkg/constraint/layers.go
++++ b/pkg/constraint/layers.go
+@@ -79,7 +79,7 @@
+ 	}
+ 	if o.descended != nil {
+ 		key := descent{value: reflect.ValueOf(obj).Pointer(), owner: children[0].Parent}
+-		if _, done := o.descended[key]; done {
++		if _, done := o.descended[key]; done && false {
+ 			return false
+ 		}
+ 		o.descended[key] = struct{}{}

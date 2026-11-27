@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-own",
+ "url": "http://example.org/ax/p-own",
+ "name": "AxPown",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate.extension",
+    "path": "Patient.birthDate.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.birthDate.extension:e",
+    "path": "Patient.birthDate.extension",
+    "sliceName": "e"
+   },
+   {
+    "id": "Patient.birthDate.extension:e.id",
+    "path": "Patient.birthDate.extension.id",
+    "short": "i"
+   },
+   {
+    "id": "Patient.birthDate.extension:e.url",
+    "path": "Patient.birthDate.extension.url",
+    "fixedUri": "http://example.org/ax/e1"
+   }
+  ]
+ }
+}

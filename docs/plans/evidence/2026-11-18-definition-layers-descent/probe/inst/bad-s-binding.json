@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "id": "s-binding",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/s-binding"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "type": {
+    "coding": [
+     {
+      "system": "http://example.org/dl/cs",
+      "code": "B"
+     }
+    ]
+   }
+  }
+ ]
+}

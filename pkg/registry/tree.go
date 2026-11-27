@@ -36,6 +36,9 @@ type ElementNode struct {
 	Content *ElementNode
 }
 
+// Definition es la StructureDefinition de cuyo snapshot sale el elemento.
+func (n *ElementNode) Definition() *StructureDefinition { return n.sd }
+
 // Name returns the element's name, the last segment of its id without the slice part:
 // "value[x]" for Observation.value[x]:valueQuantity.
 func (n *ElementNode) Name() string {

@@ -1,0 +1,28 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tpi-pattern",
+ "url": "http://example.org/dl/tpi-pattern",
+ "name": "DlTpiPattern",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.assigner",
+    "path": "Identifier.assigner",
+    "patternReference": {
+     "display": "pa"
+    }
+   }
+  ]
+ }
+}

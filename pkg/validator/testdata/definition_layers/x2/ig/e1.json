@@ -1,0 +1,56 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "e1",
+ "url": "http://example.org/ax/e1",
+ "name": "AxE1",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/ax/e1"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "min": 1,
+    "type": [
+     {
+      "code": "string"
+     }
+    ],
+    "fixedString": "F",
+    "constraint": [
+     {
+      "key": "ax-e",
+      "severity": "error",
+      "human": "ax-e",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ]
+}

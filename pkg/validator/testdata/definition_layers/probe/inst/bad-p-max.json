@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "id": "p-max",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/p-max"
+  ]
+ },
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "http://example.org/dl/ext",
+    "valueString": "a"
+   }
+  ]
+ }
+}

@@ -1,0 +1,16 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://example.org/fhir/ConceptMap/cm1",
+      "resource": {
+        "resourceType": "ConceptMap",
+        "id": "cm1",
+        "url": "http://example.org/fhir/ConceptMap/cm1",
+        "name": "bad name",
+        "status": "draft"
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p19",
+ "url": "http://example.org/hm/p19",
+ "name": "HmP19",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "closed"
+    }
+   },
+   {
+    "id": "Patient.extension:either",
+    "path": "Patient.extension",
+    "sliceName": "either",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/hm/ext-a",
+       "http://example.org/hm/ext-b"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:either.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "code"
+     }
+    ]
+   }
+  ]
+ }
+}

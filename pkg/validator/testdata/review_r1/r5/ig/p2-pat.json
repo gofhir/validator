@@ -1,0 +1,26 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p2-pat",
+ "url": "http://example.org/rv8/p2-pat",
+ "name": "p2pat",
+ "status": "active",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.active",
+    "path": "Patient.active",
+    "short": "x"
+   }
+  ]
+ }
+}

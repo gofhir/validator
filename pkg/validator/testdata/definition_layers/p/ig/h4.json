@@ -1,0 +1,49 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "h4",
+ "url": "http://example.org/p5/h4",
+ "name": "AxH4",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.contained",
+    "path": "Patient.contained",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "type",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    },
+    "type": [
+     {
+      "code": "Patient",
+      "profile": [
+       "http://example.org/p5/qa",
+       "http://example.org/p5/qb"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.contained:a",
+    "path": "Patient.contained",
+    "sliceName": "a",
+    "type": [
+     {
+      "code": "Patient"
+     }
+    ]
+   }
+  ]
+ }
+}

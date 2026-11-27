@@ -1,0 +1,24 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "hb-pattern",
+ "url": "http://example.org/dl/hb-pattern",
+ "name": "DlHbPattern",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.period",
+    "path": "Patient.name.period",
+    "patternPeriod": {
+     "start": "2000-01-01"
+    }
+   }
+  ]
+ }
+}

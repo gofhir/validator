@@ -1,0 +1,22 @@
+bad-d-type 
+   soloHL7 E Observation.component[0].code ['Profile http://example.org/ax/d-type, Element matches more than one slice - ,']
+   soloHL7 W Observation ['Best Practice Recommendation: In general, all observations should have a subject']
+bad-d-type2 
+   soloHL7 E Observation.component[0].code ['Profile http://example.org/ax/d-type2, Element matches more than one slice - ,']
+   soloHL7 W Observation ['Best Practice Recommendation: In general, all observations should have a subject']
+bad-f-type 
+   soloHL7 E Observation.note[0].author.display ['This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/string|4.3.0']
+   soloHL7 W Observation ['Best Practice Recommendation: In general, all observations should have a subject']
+bad-h-ch 
+   soloHL7 W Observation ['Best Practice Recommendation: In general, all observations should have a subject']
+bad-m-nod 
+   soloGo  E Patient.identifier[0] ['Slicing cannot be evaluated: Patient.identifier:m: no discriminator constrains this slice']
+bad-o-alt 
+   soloGo  E Patient.extension[0].value ["The profile 'http://example.org/ax/e2' allows the type(s) string but found type integer"]
+bad-q-cr 
+   soloGo  E Questionnaire.item[0].item[0].text ['Value is "X", but the profile requires "T"']
+bad-v-s-ew 
+   soloGo  W Patient.identifier[0].value ["Constraint failed: ax-v: 'ax-v' (Best Practice Recommendation)"]
+bad-v-s-we 
+   soloGo  W Patient.identifier[0].value ["Constraint failed: ax-v: 'ax-v' (Best Practice Recommendation)"]
+difieren 9 de 49

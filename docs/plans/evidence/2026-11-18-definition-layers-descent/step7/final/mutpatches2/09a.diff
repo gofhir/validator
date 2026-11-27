@@ -1,0 +1,11 @@
+--- a/pkg/constraint/layers.go
++++ b/pkg/constraint/layers.go
+@@ -31,7 +31,7 @@
+ 		return
+ 	}
+ 	for i := before; i < len(result.Issues); i++ {
+-		o.layer.ids[i] = fhirPath + "\x00" + c.Key + "\x00" + c.Expression + "\x00" + string(result.Issues[i].Severity)
++		o.layer.ids[i] = fhirPath + "\x00" + c.Key + "\x00" + c.Expression + "\x00" + ""
+ 	}
+ }
+ 

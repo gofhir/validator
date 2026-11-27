@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "id": "m-sext-inv-a",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/sext-inv"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "extension": [
+  {
+   "url": "http://example.org/dl/e0",
+   "valueIdentifier": {
+    "system": "urn:mrn",
+    "value": "a",
+    "period": {
+     "start": "2000-01-01"
+    },
+    "assigner": {
+     "display": "d"
+    }
+   }
+  }
+ ]
+}

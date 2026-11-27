@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/08.orig	2026-11-25 15:41:04
++++ pkg/constraint/tree.go	2026-11-25 15:41:04
+@@ -116,7 +116,7 @@
+ 		if !wrongType {
+ 			sets = otherDefinitions(sd, node, owners, nSlices, layerSD, typeSD, typeRoot, self, children)
+ 		}
+-		if len(sets) > 0 {
++		if false && len(sets) > 0 {
+ 			// Más de una definición con hijos distintos: el ámbito cubre el subárbol del valor.
+ 			opts = opts.scoped()
+ 		}

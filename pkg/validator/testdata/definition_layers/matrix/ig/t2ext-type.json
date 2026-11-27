@@ -1,0 +1,55 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "t2ext-type",
+ "url": "http://example.org/dl/t2ext-type",
+ "name": "DlT2ExtType",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension:x",
+    "path": "Patient.extension",
+    "sliceName": "x",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/ext-a-type"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     },
+     {
+      "code": "boolean"
+     }
+    ]
+   }
+  ]
+ }
+}

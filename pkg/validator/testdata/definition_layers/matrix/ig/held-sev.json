@@ -1,0 +1,59 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "held-sev",
+ "url": "http://example.org/dl/held-sev",
+ "name": "DlHeldSev",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "type",
+       "path": "resource"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Bundle.entry.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Patient",
+      "profile": [
+       "http://example.org/dl/ha-sev"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Bundle.entry:s",
+    "path": "Bundle.entry",
+    "sliceName": "s"
+   },
+   {
+    "id": "Bundle.entry:s.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Patient",
+      "profile": [
+       "http://example.org/dl/hb-sev"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

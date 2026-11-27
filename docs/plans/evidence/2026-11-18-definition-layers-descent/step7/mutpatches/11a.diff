@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/11a.orig	2026-11-25 15:48:49
++++ pkg/constraint/tree.go	2026-11-25 15:48:49
+@@ -562,7 +562,7 @@
+ 
+ 	definitions := v.nestedDefinitions(opts.ctx, res, fhirPath, result)
+ 	// Los perfiles que declara toda la cadena SliceOf del elemento, cada nivel por separado (punto 6).
+-	for h := holder; h != nil; h = h.SliceOf {
++	for h := holder; h != nil; h = nil {
+ 		for _, sd := range v.holderDefinitions(h, res, fhirPath, &opts, result) {
+ 			if !slices.Contains(definitions, sd) {
+ 				definitions = append(definitions, sd)

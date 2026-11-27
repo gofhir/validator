@@ -1,0 +1,1 @@
+{"resourceType":"StructureDefinition","id":"rp-ref","url":"http://example.org/r2/rp-ref","name":"rpref","status":"active","fhirVersion":"4.0.1","kind":"complex-type","abstract":false,"type":"Reference","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Reference","derivation":"constraint","differential":{"element":[{"id":"Reference","path":"Reference","short":"x"}]}}

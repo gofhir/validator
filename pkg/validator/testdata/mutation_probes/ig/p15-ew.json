@@ -1,0 +1,30 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p15-ew",
+ "url": "http://example.org/hm/p15-ew",
+ "name": "HmP15Ew",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/hm/sa-ew",
+       "http://example.org/hm/sb-ew"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

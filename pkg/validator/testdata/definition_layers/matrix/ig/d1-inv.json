@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d1-inv",
+ "url": "http://example.org/dl/d1-inv",
+ "name": "DlD1Inv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/dl/d1b-inv",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "dl-a",
+      "severity": "error",
+      "human": "no a",
+      "expression": "$this.contains('a').not()"
+     }
+    ]
+   }
+  ]
+ }
+}

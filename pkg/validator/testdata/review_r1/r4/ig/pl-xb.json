@@ -1,0 +1,27 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pl-xb",
+ "url": "http://example.org/rv8/pl-xb",
+ "name": "plxb",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ]
+}

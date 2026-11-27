@@ -1,0 +1,33 @@
+{
+ "resourceType": "Patient",
+ "id": "m-pext-tprof-ab",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/pext-tprof"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "http://example.org/dl/e0",
+    "valueIdentifier": {
+     "system": "urn:mrn",
+     "value": "z",
+     "period": {
+      "end": "2001-01-01"
+     },
+     "assigner": {
+      "identifier": {
+       "value": "x"
+      }
+     }
+    }
+   }
+  ]
+ }
+}

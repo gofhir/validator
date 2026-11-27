@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "ok-l-a",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/l-two"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:x",
+   "value": "F"
+  }
+ ]
+}

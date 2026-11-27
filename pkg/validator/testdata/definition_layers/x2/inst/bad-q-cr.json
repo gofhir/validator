@@ -1,0 +1,24 @@
+{
+ "resourceType": "Questionnaire",
+ "id": "bad-q-cr",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/q-cr"
+  ]
+ },
+ "status": "draft",
+ "item": [
+  {
+   "linkId": "1",
+   "type": "group",
+   "text": "G",
+   "item": [
+    {
+     "linkId": "2",
+     "type": "group",
+     "text": "X"
+    }
+   ]
+  }
+ ]
+}

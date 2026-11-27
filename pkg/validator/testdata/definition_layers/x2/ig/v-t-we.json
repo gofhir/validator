@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "v-t-we",
+ "url": "http://example.org/ax/v-t-we",
+ "name": "AxVtwe",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/ax/tp-v-we"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "ax-v",
+      "severity": "error",
+      "human": "ax-v",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ }
+}

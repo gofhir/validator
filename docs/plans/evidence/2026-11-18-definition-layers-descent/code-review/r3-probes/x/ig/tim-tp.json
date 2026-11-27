@@ -1,0 +1,1 @@
+{"resourceType":"StructureDefinition","id":"tim-tp","url":"http://example.org/r2/tim-tp","name":"timtp","status":"active","fhirVersion":"4.0.1","kind":"complex-type","abstract":false,"type":"Timing","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Timing","derivation":"constraint","differential":{"element":[{"id":"Timing","path":"Timing","short":"x"}]}}

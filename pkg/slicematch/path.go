@@ -568,9 +568,48 @@ func (m *Matcher) children(c cursor, typeCode string) ([]branch, error) {
 		return nil, errors.New("the path continues past a value with no definition")
 	}
 	if b, ok := m.snapshotChildren(c); ok {
+		// Con varios perfiles de tipo el elemento puede cumplir cualquiera: cada uno es una alternativa, con lo
+		// que el propio elemento fija (un valor fijo gana al del perfil).
+		// Se mira antes si el tipo declara más de un perfil: es lo común que no, y resolverlos y armar sus árboles es caro.
+		if t, ok := typeOfCursor(c, typeCode); ok && len(t.Profile) > 1 {
+			if profiled, err := m.typeChildren(c, typeCode); err == nil && len(profiled) > 1 {
+				return overlayFixed(profiled, b.children), nil
+			}
+		}
 		return []branch{b}, nil
 	}
 	return m.typeChildren(c, typeCode)
+}
+
+// overlayFixed reemplaza, en cada alternativa, el hijo que el elemento mismo fija (fixed[x] o pattern[x]) por el
+// hijo del elemento.
+func overlayFixed(alternatives []branch, own []*registry.ElementNode) []branch {
+	fixed := map[string]*registry.ElementNode{}
+	for _, c := range own {
+		if ownValue(c) != nil {
+			fixed[lastSegment(c.Def.Path)] = c
+		}
+	}
+	if len(fixed) == 0 {
+		return alternatives
+	}
+	out := make([]branch, len(alternatives))
+	for i, alt := range alternatives {
+		children := make([]*registry.ElementNode, len(alt.children))
+		for j, c := range alt.children {
+			children[j] = c
+			if o, ok := fixed[lastSegment(c.Def.Path)]; ok {
+				children[j] = o
+			}
+		}
+		out[i] = branch{sd: alt.sd, children: children}
+	}
+	return out
+}
+
+// lastSegment es el nombre de un elemento, el último paso de su path.
+func lastSegment(path string) string {
+	return path[strings.LastIndexByte(path, '.')+1:]
 }
 
 // snapshotChildren returns the children the snapshot gives the element at c: its own, those of
@@ -601,27 +640,41 @@ func (m *Matcher) snapshotChildren(c cursor) (branch, bool) {
 	return branch{tsd, target.Children}, true
 }
 
+// pickedTypes son los tipos del elemento en c que el valor puede tener: los de su tipo (typeCode) si lo declara, o el
+// propio typeCode: un elemento de recurso (tipo Resource o un tipo base) tiene un recurso concreto.
+func pickedTypes(c cursor, typeCode string) []registry.Type {
+	types := c.allowed()
+	if typeCode == "" {
+		return types
+	}
+	var picked []registry.Type
+	for _, t := range types {
+		if t.Code == typeCode {
+			picked = append(picked, t)
+		}
+	}
+	if len(picked) == 0 {
+		picked = []registry.Type{{Code: typeCode}}
+	}
+	return picked
+}
+
+// typeOfCursor es el único tipo del elemento en c para el valor, y si lo hay.
+func typeOfCursor(c cursor, typeCode string) (registry.Type, bool) {
+	types := pickedTypes(c, typeCode)
+	if len(types) != 1 {
+		return registry.Type{}, false
+	}
+	return types[0], true
+}
+
 // typeChildren returns the children of the type of the element at c: one branch per profile the
 // type declares, or the base type's when it declares none.
 func (m *Matcher) typeChildren(c cursor, typeCode string) ([]branch, error) {
-	types := c.allowed()
-	if typeCode != "" {
-		var picked []registry.Type
-		for _, t := range types {
-			if t.Code == typeCode {
-				picked = append(picked, t)
-			}
-		}
-		if len(picked) == 0 {
-			// A resource element (type Resource or a base type) holds a concrete resource.
-			picked = []registry.Type{{Code: typeCode}}
-		}
-		types = picked
+	t, ok := typeOfCursor(c, typeCode)
+	if !ok {
+		return nil, fmt.Errorf("%s: the type is ambiguous (%d types)", describe(c), len(pickedTypes(c, typeCode)))
 	}
-	if len(types) != 1 {
-		return nil, fmt.Errorf("%s: the type is ambiguous (%d types)", describe(c), len(types))
-	}
-	t := types[0]
 	var sds []*registry.StructureDefinition
 	var lastErr error
 	for _, p := range t.Profile {

@@ -1,0 +1,1 @@
+{"resourceType":"StructureDefinition","id":"vs-pat","url":"http://example.org/r2/vs-pat","name":"vspat","status":"active","fhirVersion":"4.0.1","kind":"resource","abstract":false,"type":"Observation","baseDefinition":"http://hl7.org/fhir/StructureDefinition/vitalsigns","derivation":"constraint","differential":{"element":[{"id":"Observation","path":"Observation"}]}}

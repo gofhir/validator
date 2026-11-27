@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/01.orig	2026-11-25 15:33:47
++++ pkg/constraint/tree.go	2026-11-25 15:33:47
+@@ -142,7 +142,7 @@
+ 			sets = append(sets, defSet{s, kids})
+ 		}
+ 	}
+-	for n := node; n != nil; n = n.SliceOf {
++	for n := node; n != nil; n = nil {
+ 		add(sd, n.Children)
+ 	}
+ 	for _, o := range owners[nSlices:] {

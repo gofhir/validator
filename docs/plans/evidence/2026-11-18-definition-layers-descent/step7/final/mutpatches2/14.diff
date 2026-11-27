@@ -1,0 +1,12 @@
+--- a/pkg/registry/snapshot.go
++++ b/pkg/registry/snapshot.go
+@@ -1402,6 +1402,9 @@
+ // recibe el source que la base le da o, si no tiene, la URL de la base. La que agrega el diferencial queda sin source,
+ // como en HL7: el validador le pone el de la definición que la declara cuando es una capa de perfil de tipo.
+ func stampConstraintSources(snapshot, base *Snapshot, baseURL string) {
++if true {
++		return
++	}
+ 	inBase := map[string]map[string]string{}
+ 	for i := range base.Element {
+ 		e := &base.Element[i]

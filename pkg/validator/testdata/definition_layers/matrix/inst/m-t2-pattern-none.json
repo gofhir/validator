@@ -1,0 +1,25 @@
+{
+ "resourceType": "Patient",
+ "id": "m-t2-pattern-none",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/t2-pattern"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "z",
+   "period": {
+    "start": "2000-01-01"
+   },
+   "assigner": {
+    "display": "pa"
+   }
+  }
+ ]
+}

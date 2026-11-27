@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/16.orig	2026-11-25 15:57:09
++++ pkg/validator/testdata/definition_layers/expected.json	2026-11-25 15:57:09
+@@ -4,7 +4,7 @@
+   "expected": {
+    "4.0.1": [
+     {
+-     "detail": "gk",
++     "detail": "gX",
+      "kind": "constraint",
+      "location": "Patient.identifier[0].value",
+      "severity": "error",

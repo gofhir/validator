@@ -1,0 +1,54 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ctl-d-type",
+ "url": "http://example.org/ax/ctl-d-type",
+ "name": "AxCtldtype",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.component",
+    "path": "Observation.component",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "code.text"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Observation.component.value[x]",
+    "path": "Observation.component.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   },
+   {
+    "id": "Observation.component:a",
+    "path": "Observation.component",
+    "sliceName": "a"
+   },
+   {
+    "id": "Observation.component:a.id",
+    "path": "Observation.component.id",
+    "short": "i"
+   },
+   {
+    "id": "Observation.component:a.code.text",
+    "path": "Observation.component.code.text",
+    "fixedString": "A"
+   }
+  ]
+ }
+}

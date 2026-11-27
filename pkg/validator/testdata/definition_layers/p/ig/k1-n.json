@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "k1-n",
+ "url": "http://example.org/p5/k1-n",
+ "name": "AxK1N",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "gk",
+      "severity": "error",
+      "human": "gk",
+      "expression": "($this is FHIR.string).not()"
+     }
+    ]
+   }
+  ]
+ }
+}

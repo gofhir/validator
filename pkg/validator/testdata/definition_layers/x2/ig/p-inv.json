@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-inv",
+ "url": "http://example.org/ax/p-inv",
+ "name": "AxPinv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate.extension",
+    "path": "Patient.birthDate.extension",
+    "constraint": [
+     {
+      "key": "ax-pe",
+      "severity": "error",
+      "human": "ax-pe",
+      "expression": "url.startsWith('urn:')"
+     }
+    ]
+   }
+  ]
+ }
+}

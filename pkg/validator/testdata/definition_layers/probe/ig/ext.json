@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext",
+ "url": "http://example.org/dl/ext",
+ "name": "DlExt",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/dl/ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     },
+     {
+      "code": "code"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  }
+ ]
+}

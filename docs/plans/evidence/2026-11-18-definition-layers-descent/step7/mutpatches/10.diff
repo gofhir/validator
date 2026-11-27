@@ -1,0 +1,22 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/10.orig	2026-11-25 15:47:00
++++ pkg/constraint/tree.go	2026-11-25 15:47:00
+@@ -297,9 +297,6 @@
+ 
+ 	// Desde aquí, un valor que dos capas llevan a los mismos hijos se camina una vez.
+ 	opts = opts.scoped()
+-	if isObject && own {
+-		v.walkOwn(obj, raw, fhirPath, childSD, children, self, opts, result)
+-	}
+ 	runs := make([]layerRun, 0, len(defs))
+ 	for _, td := range defs {
+ 		run := beginLayer(opts)
+@@ -312,6 +309,9 @@
+ 		runs = append(runs, run)
+ 	}
+ 	mergeLayers(opts, runs, result)
++	if isObject && own {
++		v.walkOwn(obj, raw, fhirPath, childSD, children, self, opts, result)
++	}
+ 
+ 	if isObject && !wrongType {
+ 		v.walkSets(obj, raw, fhirPath, otherDefinitions(sd, node, owners, nSlices, layerSD, nil, nil, self, children), self, opts, result)

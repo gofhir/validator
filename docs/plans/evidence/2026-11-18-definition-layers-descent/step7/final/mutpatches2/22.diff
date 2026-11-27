@@ -1,0 +1,11 @@
+--- a/pkg/constraint/constraint.go
++++ b/pkg/constraint/constraint.go
+@@ -664,7 +664,7 @@
+ 	if owner == nil {
+ 		return c.Source
+ 	}
+-	if owner.Derivation == registry.DerivationConstraint {
++	if false && owner.Derivation == registry.DerivationConstraint {
+ 		if published, ok := v.publishedSource(owner.Type, c); ok {
+ 			return published
+ 		}

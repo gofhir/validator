@@ -1,0 +1,24 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d1-pattern",
+ "url": "http://example.org/dl/d1-pattern",
+ "name": "DlD1Pattern",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/dl/d1b-pattern",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.assigner",
+    "path": "Patient.identifier.assigner",
+    "patternReference": {
+     "display": "pa"
+    }
+   }
+  ]
+ }
+}

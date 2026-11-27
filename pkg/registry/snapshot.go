@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"regexp"
 	"slices"
 	"strings"
 )
@@ -102,6 +103,13 @@ func (sd *StructureDefinition) storedSnapshot() *Snapshot {
 	sd.snapshotMu.Lock()
 	defer sd.snapshotMu.Unlock()
 	return sd.Snapshot
+}
+
+// SnapshotGenerated dice si el snapshot de sd se generó a partir de su diferencial, y no se publicó con él.
+func (sd *StructureDefinition) SnapshotGenerated() bool {
+	sd.snapshotMu.Lock()
+	defer sd.snapshotMu.Unlock()
+	return sd.snapshotGenerated
 }
 
 // SnapshotNotes returns the elements of the StructureDefinition's differential its generated
@@ -214,6 +222,10 @@ func (r *Registry) generateSnapshot(ctx context.Context, sd *StructureDefinition
 	// applied again, for the version the profile was corrected for (its own, or the version
 	// validated when it declares none), or else its base's.
 	correctSnapshot(cmp.Or(sd.errataVersion, sd.FHIRVersion, baseSD.errataVersion, baseSD.FHIRVersion), snapshot.Element)
+	// Los sources se sellan después de la errata: el snapshot de la base ya está corregido, y el de la mezcla trae la
+	// expresión publicada hasta que se corrige; sellar antes dejaba sin source toda constraint corregida (ref-1, bdl-8…)
+	// porque la clave y la expresión no coincidían.
+	stampConstraintSources(snapshot, baseSnapshot, baseSD.URL)
 	// fixed[x] y pattern[x] se extraen aquí, sobre el snapshot terminado y antes de que otra
 	// goroutine lo vea: sus elementos llegan por varios caminos (copia de la base, mezcla con el
 	// diferencial, el elemento del diferencial tal cual).
@@ -239,6 +251,10 @@ type snapshotBuilder struct {
 	// renamed holds the ids of the type slices the differential named as renamed choices
 	// ("Observation.valueQuantity").
 	renamed map[string]bool
+	// cloned dice de qué hijo desplegado viene cada hijo clonado en unrollChildren (id del clon -> id del hijo
+	// clonado), y baseKeys las claves de constraint que cada elemento de la base trae (id -> claves).
+	cloned   map[string]string
+	baseKeys map[string]map[string]bool
 }
 
 // applyDifferential merges differential elements onto a deep copy of the base snapshot, as
@@ -259,9 +275,11 @@ func (r *Registry) applyDifferential(ctx context.Context, base *Snapshot, diff *
 		return nil, nil, fmt.Errorf("deep copy failed: %w", err)
 	}
 	b := &snapshotBuilder{r: r, ctx: ctx, elements: elements, inBase: map[string]bool{},
-		diffKeys: map[string]map[string]bool{}, floor: map[string]uint32{}, renamed: map[string]bool{}}
+		diffKeys: map[string]map[string]bool{}, floor: map[string]uint32{}, renamed: map[string]bool{},
+		cloned: map[string]string{}, baseKeys: map[string]map[string]bool{}}
 	for i := range elements {
 		b.inBase[elements[i].ID] = true
+		b.baseKeys[elements[i].ID] = constraintKeys(&elements[i])
 		b.floor[elements[i].ID] = elements[i].Min
 	}
 
@@ -287,6 +305,9 @@ func (r *Registry) applyDifferential(ctx context.Context, base *Snapshot, diff *
 			return nil, nil, err
 		}
 		before := typeCodesOf(&b.elements[idx])
+		if err := b.yieldCloned(idx, id, placed); err != nil {
+			return nil, nil, err
+		}
 		merged, left, err := mergeElements(&b.elements[idx], placed, choices)
 		if err != nil {
 			return nil, nil, fmt.Errorf("merge failed for %s: %w", id, err)
@@ -811,6 +832,7 @@ func (b *snapshotBuilder) unrollChildren(idx int) error {
 		if f, ok := b.floor[b.elements[i].ID]; ok {
 			b.floor[child.ID] = f
 		}
+		b.cloned[child.ID] = b.elements[i].ID
 		children = append(children, *child)
 	}
 	if len(children) == 0 {
@@ -819,7 +841,69 @@ func (b *snapshotBuilder) unrollChildren(idx int) error {
 		}
 		return b.unroll(idx)
 	}
+	if err := b.carryDeclaredValues(idx, children); err != nil {
+		return err
+	}
 	b.elements = slices.Insert(b.elements, idx+1, children...)
+	return nil
+}
+
+// carryDeclaredValues le da a los hijos clonados de un slice (children) el fixed[x] y el pattern[x] que el perfil
+// de su tipo declara para el mismo hijo y la copia no tiene: la copia es del hijo del elemento que el slice divide, y
+// sin esto taparía, por ejemplo, el `fixedUri` de la `url` de una extensión (el slice dejaría de poder evaluarse por
+// su discriminador). Solo vale con un único perfil de tipo declarado; el resto de lo que la copia trae (lo que el
+// elemento restringe para todos sus slices) queda como está.
+func (b *snapshotBuilder) carryDeclaredValues(idx int, children []ElementDefinition) error {
+	slice := &b.elements[idx]
+	if len(slice.Type) != 1 || len(slice.Type[0].Profile) != 1 {
+		return nil
+	}
+	snapshots, err := b.typeSnapshots(slice)
+	if err != nil {
+		return err
+	}
+	declared := snapshots[0]
+	if len(declared.Element) == 0 {
+		return nil
+	}
+	rootID := declared.Element[0].ID
+	byRest := make(map[string]*ElementDefinition, len(declared.Element))
+	for i := range declared.Element[1:] {
+		e := &declared.Element[i+1]
+		byRest[strings.TrimPrefix(e.ID, rootID+".")] = e
+	}
+	for i := range children {
+		child := &children[i]
+		from := byRest[strings.TrimPrefix(child.ID, slice.ID+".")]
+		if from == nil {
+			continue
+		}
+		own, err := rawToMap(child.raw)
+		if err != nil {
+			return err
+		}
+		given, err := rawToMap(from.raw)
+		if err != nil {
+			return err
+		}
+		set := map[string]any{}
+		for _, prefix := range []string{"fixed", "pattern"} {
+			if smallestWithPrefix(own, prefix).ok {
+				continue
+			}
+			if v := smallestWithPrefix(given, prefix); v.ok {
+				set[prefix+v.suffix] = v.value
+			}
+		}
+		if len(set) == 0 {
+			continue
+		}
+		carried, err := cloneElement(child, set)
+		if err != nil {
+			return err
+		}
+		*child = *carried
+	}
 	return nil
 }
 
@@ -1245,4 +1329,108 @@ func extractJSONStringField(raw json.RawMessage, field string) string {
 		return ""
 	}
 	return s
+}
+
+// constraintKeys son las claves de las constraints de e.
+func constraintKeys(e *ElementDefinition) map[string]bool {
+	keys := make(map[string]bool, len(e.Constraint))
+	for _, c := range e.Constraint {
+		keys[c.Key] = true
+	}
+	return keys
+}
+
+// yieldCloned hace que un hijo clonado en unrollChildren (el de un slice, copia del que despliega el elemento que
+// divide) ceda ante las constraints del diferencial con la misma clave: el slice las redeclara con otra expresión
+// o severidad y la copia no debe taparlas (HL7 las toma del diferencial). No cede las claves que el hijo original
+// trae de la base (`mergeArrayField` las hereda entre perfiles): esas siguen como están.
+func (b *snapshotBuilder) yieldCloned(idx int, id string, diff *ElementDefinition) error {
+	src, ok := b.cloned[id]
+	if !ok || len(diff.Constraint) == 0 {
+		return nil
+	}
+	for {
+		next, ok := b.cloned[src]
+		if !ok {
+			break
+		}
+		src = next
+	}
+	yield := map[string]bool{}
+	for _, c := range diff.Constraint {
+		if !b.baseKeys[src][c.Key] {
+			yield[c.Key] = true
+		}
+	}
+	if len(yield) == 0 {
+		return nil
+	}
+	m, err := rawToMap(b.elements[idx].raw)
+	if err != nil {
+		return err
+	}
+	encodedItems, ok := m["constraint"]
+	if !ok {
+		return nil
+	}
+	var items []json.RawMessage
+	if err := json.Unmarshal(encodedItems, &items); err != nil {
+		return err
+	}
+	kept := items[:0:0]
+	for _, it := range items {
+		if !yield[extractJSONStringField(it, "key")] {
+			kept = append(kept, it)
+		}
+	}
+	if len(kept) == len(items) {
+		return nil
+	}
+	encoded, err := json.Marshal(kept)
+	if err != nil {
+		return err
+	}
+	m["constraint"] = encoded
+	raw, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	var e ElementDefinition
+	if err := json.Unmarshal(raw, &e); err != nil {
+		return err
+	}
+	e.raw = raw
+	b.elements[idx] = e
+	return nil
+}
+
+// sliceName es el nombre de un slice en el id de un elemento ("Patient.identifier:mrn.value").
+var sliceName = regexp.MustCompile(`:[^.]*`)
+
+// stampConstraintSources anota en cada constraint de snapshot sin source el perfil base que la trae, como hace HL7
+// en «(defined in …)» (ProfileUtilities.updateFromDefinition): la heredada (misma clave y expresión en la base)
+// recibe el source que la base le da o, si no tiene, la URL de la base. La que agrega el diferencial queda sin source,
+// como en HL7: el validador le pone el de la definición que la declara cuando es una capa de perfil de tipo.
+func stampConstraintSources(snapshot, base *Snapshot, baseURL string) {
+	inBase := map[string]map[string]string{}
+	for i := range base.Element {
+		e := &base.Element[i]
+		m := make(map[string]string, len(e.Constraint))
+		for _, c := range e.Constraint {
+			m[c.Key+"\x00"+c.Expression] = cmp.Or(c.Source, baseURL)
+		}
+		inBase[e.ID] = m
+	}
+	for i := range snapshot.Element {
+		e := &snapshot.Element[i]
+		for j := range e.Constraint {
+			c := &e.Constraint[j]
+			if c.Source != "" {
+				continue
+			}
+			k := c.Key + "\x00" + c.Expression
+			// Un hijo de un slice es copia del hijo del elemento que divide: trae lo que ese trae de la base.
+			c.Source = cmp.Or(inBase[e.ID][k], inBase[sliceName.ReplaceAllString(e.ID, "")][k])
+		}
+	}
 }

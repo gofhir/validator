@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pb-idp",
+ "url": "http://example.org/rv8/pb-idp",
+ "name": "pbidp",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.type",
+    "path": "Identifier.type",
+    "patternCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+       "code": "MR"
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

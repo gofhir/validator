@@ -1,0 +1,1 @@
+{"resourceType":"StructureDefinition","id":"que-pat","url":"http://example.org/r2/que-pat","name":"quepat","status":"active","fhirVersion":"4.3.0","kind":"resource","abstract":false,"type":"Questionnaire","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Questionnaire","derivation":"constraint","differential":{"element":[{"id":"Questionnaire","path":"Questionnaire"}]}}

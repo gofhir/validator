@@ -1,0 +1,15 @@
+ok  	github.com/gofhir/validator/v2/pkg/constraint	4.330s
+ok  	github.com/gofhir/validator/v2/pkg/registry	29.982s
+--- FAIL: TestPrimitiveKeyOrderAndUnderscoreOrderDoNotMatter (0.29s)
+    --- FAIL: TestPrimitiveKeyOrderAndUnderscoreOrderDoNotMatter/4.0.1 (0.22s)
+        primitive_type_profiles_test.go:466: 
+            HL7 7.0.4 da [error constraint @ Observation.valueString [len-1] error profile-no-match @ Observation.valueString error type-not-allowed @ Observation.valueString.extension[0].valueInteger]
+            faltan []
+            de más [error type-not-allowed @ Observation.valueString.extension[0].valueInteger | The profile 'http://example.org/fhir/StructureDefinition/ext-two-str' allows the type(s) string but found type integer]
+        primitive_type_profiles_test.go:466: 
+            HL7 7.0.4 da [error type-not-allowed @ Observation.valueString.extension[0].valueInteger]
+            faltan []
+            de más [error type-not-allowed @ Observation.valueString.extension[0].valueInteger | The profile 'http://example.org/fhir/StructureDefinition/ext-two-str' allows the type(s) string but found type integer]
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	24.136s
+FAIL

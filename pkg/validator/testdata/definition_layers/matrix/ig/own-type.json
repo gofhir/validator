@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "own-type",
+ "url": "http://example.org/dl/own-type",
+ "name": "DlOwnType",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     },
+     {
+      "code": "integer"
+     }
+    ]
+   }
+  ]
+ }
+}

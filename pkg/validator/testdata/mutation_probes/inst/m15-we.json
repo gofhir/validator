@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "id": "m15-we",
+ "meta": {
+  "profile": [
+   "http://example.org/hm/p15-we"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "identifier": [
+  {
+   "value": "xy"
+  }
+ ]
+}

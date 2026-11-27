@@ -1,0 +1,26 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tpi-fixed",
+ "url": "http://example.org/dl/tpi-fixed",
+ "name": "DlTpiFixed",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "fixedString": "fa"
+   }
+  ]
+ }
+}

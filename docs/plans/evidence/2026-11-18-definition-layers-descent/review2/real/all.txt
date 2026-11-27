@@ -1,0 +1,55 @@
+ips base run1 ms=380.2
+ips unf run1 ms=214.3
+ips filt run1 ms=221.3
+ips base run2 ms=218.2
+ips unf run2 ms=213.4
+ips filt run2 ms=212.9
+ips base run3 ms=208.0
+ips unf run3 ms=219.0
+ips filt run3 ms=215.0
+ips issues base 57 unf 57 filt 57
+ unf-base nuevos 0 perdidos 0 | filt vs unf: solo-unf 0 solo-filt 0
+mcode base run1 ms=390.6
+mcode unf run1 ms=342.7
+mcode filt run1 ms=341.4
+mcode base run2 ms=310.9
+mcode unf run2 ms=327.7
+mcode filt run2 ms=348.9
+mcode base run3 ms=326.5
+mcode unf run3 ms=309.8
+mcode filt run3 ms=322.2
+mcode issues base 349 unf 349 filt 349
+ unf-base nuevos 0 perdidos 0 | filt vs unf: solo-unf 0 solo-filt 0
+usc610 base run1 ms=169.7
+usc610 unf run1 ms=148.8
+usc610 filt run1 ms=152.4
+usc610 base run2 ms=149.8
+usc610 unf run2 ms=151.0
+usc610 filt run2 ms=148.6
+usc610 base run3 ms=147.1
+usc610 unf run3 ms=155.1
+usc610 filt run3 ms=149.1
+usc610 issues base 257 unf 257 filt 257
+ unf-base nuevos 0 perdidos 0 | filt vs unf: solo-unf 0 solo-filt 0
+r4bvit base run1 ms=41.8
+r4bvit unf run1 ms=41.3
+r4bvit filt run1 ms=38.9
+r4bvit base run2 ms=41.8
+r4bvit unf run2 ms=42.4
+r4bvit filt run2 ms=41.8
+r4bvit base run3 ms=41.7
+r4bvit unf run3 ms=41.5
+r4bvit filt run3 ms=40.0
+r4bvit issues base 77 unf 77 filt 77
+ unf-base nuevos 0 perdidos 0 | filt vs unf: solo-unf 0 solo-filt 0
+r5vit base run1 ms=35.8
+r5vit unf run1 ms=39.3
+r5vit filt run1 ms=35.7
+r5vit base run2 ms=35.0
+r5vit unf run2 ms=34.4
+r5vit filt run2 ms=33.7
+r5vit base run3 ms=34.0
+r5vit unf run3 ms=34.4
+r5vit filt run3 ms=34.2
+r5vit issues base 69 unf 69 filt 69
+ unf-base nuevos 0 perdidos 0 | filt vs unf: solo-unf 0 solo-filt 0

@@ -1,0 +1,67 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pk-ext",
+ "url": "http://example.org/rv8/pk-ext",
+ "name": "pkext",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Extension.extension:sub",
+    "path": "Extension.extension",
+    "sliceName": "sub",
+    "min": 0,
+    "max": "*"
+   },
+   {
+    "id": "Extension.extension:sub.extension",
+    "path": "Extension.extension.extension",
+    "short": "deeper"
+   },
+   {
+    "id": "Extension.extension:sub.url",
+    "path": "Extension.extension.url",
+    "fixedUri": "sub"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/rv8/pk-ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "max": "0"
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ]
+}

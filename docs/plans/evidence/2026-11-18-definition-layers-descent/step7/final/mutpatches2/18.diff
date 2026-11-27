@@ -1,0 +1,18 @@
+--- a/pkg/slicematch/slicematch.go
++++ b/pkg/slicematch/slicematch.go
+@@ -227,13 +227,13 @@
+ 		return sliced.Def.Slicing.Discriminator
+ 	}
+ 	var out []registry.Discriminator
+-	if exp := ownValue(slice); exp != nil {
++	if exp := ownValue(slice); false && exp != nil {
+ 		out = append(out, registry.Discriminator{Type: kindOfValue(exp), Path: "$this"})
+ 	}
+ 	var visit func(n *registry.ElementNode)
+ 	visit = func(n *registry.ElementNode) {
+ 		for _, c := range n.Children {
+-			if exp := ownValue(c); exp != nil {
++			if exp := ownValue(c); false && exp != nil {
+ 				rel := c.Def.Path[len(slice.Def.Path)+1:] // el hijo extiende el path del slice con un separador
+ 				out = append(out, registry.Discriminator{Type: kindOfValue(exp), Path: strings.ReplaceAll(rel, "[x]", "")})
+ 			}

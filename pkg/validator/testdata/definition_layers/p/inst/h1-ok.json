@@ -1,0 +1,25 @@
+{
+ "resourceType": "Patient",
+ "id": "h1-ok",
+ "meta": {
+  "profile": [
+   "http://example.org/p5/h1"
+  ]
+ },
+ "link": [
+  {
+   "type": "seealso",
+   "other": {
+    "reference": "#c1"
+   }
+  }
+ ],
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "c1",
+   "birthDate": "2000-01-01",
+   "gender": "male"
+  }
+ ]
+}

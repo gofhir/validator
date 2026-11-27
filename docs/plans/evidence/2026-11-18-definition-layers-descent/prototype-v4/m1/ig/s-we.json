@@ -1,0 +1,64 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "s-we",
+ "url": "http://example.org/ax/s-we",
+ "name": "Mswe",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "ax-v",
+      "severity": "warning",
+      "human": "same",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "ax-v",
+      "severity": "error",
+      "human": "same",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ }
+}

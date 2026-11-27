@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "id": "km2i",
+ "meta": {
+  "profile": [
+   "http://example.org/hm/km2"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>"
+ },
+ "identifier": [
+  {
+   "value": "x"
+  }
+ ]
+}

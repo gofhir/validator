@@ -1,0 +1,26 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p5-b",
+ "url": "http://example.org/rv8/p5-b",
+ "name": "p5b",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/rv8/p5-a",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.active",
+    "path": "Patient.active",
+    "short": "b"
+   }
+  ]
+ }
+}

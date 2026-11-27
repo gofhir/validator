@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-max",
+ "url": "http://example.org/ax/d-max",
+ "name": "AxDmax",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/ax/d0",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.assigner",
+    "path": "Patient.identifier.assigner",
+    "max": "0"
+   }
+  ]
+ }
+}

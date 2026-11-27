@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-v-s-we",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/v-s-we"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "xy"
+  }
+ ]
+}

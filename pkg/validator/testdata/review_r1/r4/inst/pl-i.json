@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "a",
+ "meta": {
+  "profile": [
+   "http://example.org/rv8/pl-1"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:s",
+   "value": "X"
+  }
+ ]
+}

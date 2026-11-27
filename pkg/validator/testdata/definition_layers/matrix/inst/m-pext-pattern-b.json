@@ -1,0 +1,31 @@
+{
+ "resourceType": "Patient",
+ "id": "m-pext-pattern-b",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/pext-pattern"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "http://example.org/dl/e0",
+    "valueIdentifier": {
+     "system": "urn:mrn",
+     "value": "z",
+     "period": {
+      "start": "2001-01-01"
+     },
+     "assigner": {
+      "display": "pa"
+     }
+    }
+   }
+  ]
+ }
+}

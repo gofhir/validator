@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-o-alt",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/o-alt"
+  ]
+ },
+ "extension": [
+  {
+   "url": "http://example.org/ax/e2",
+   "valueInteger": 1
+  }
+ ]
+}

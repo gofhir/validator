@@ -1,0 +1,21 @@
+{
+ "resourceType": "Bundle",
+ "id": "h3-sl",
+ "meta": {
+  "profile": [
+   "http://example.org/p5/h3"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:11111111-1111-4111-8111-111111111111",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p1",
+    "birthDate": "2000-01-01",
+    "gender": "female"
+   }
+  }
+ ]
+}

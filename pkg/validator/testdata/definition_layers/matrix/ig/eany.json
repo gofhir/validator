@@ -1,0 +1,42 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "eany",
+ "url": "http://example.org/dl/eany",
+ "name": "DlEany",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension",
+    "short": "eany"
+   },
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/dl/eany"
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

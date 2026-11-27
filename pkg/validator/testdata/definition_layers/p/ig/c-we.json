@@ -1,0 +1,88 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "c-we",
+ "url": "http://example.org/p5/c-we",
+ "name": "AxCwe",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "k5",
+      "severity": "warning",
+      "human": "k5",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:a",
+    "path": "Patient.identifier",
+    "sliceName": "a",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "use"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier:a.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:a"
+   },
+   {
+    "id": "Patient.identifier:a/b",
+    "path": "Patient.identifier",
+    "sliceName": "a/b"
+   },
+   {
+    "id": "Patient.identifier:a/b.use",
+    "path": "Patient.identifier.use",
+    "fixedCode": "usual"
+   },
+   {
+    "id": "Patient.identifier:a/b.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:a"
+   },
+   {
+    "id": "Patient.identifier:a/b.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "k5",
+      "severity": "error",
+      "human": "k5",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ }
+}

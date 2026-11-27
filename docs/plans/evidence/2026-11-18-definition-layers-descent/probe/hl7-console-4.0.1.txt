@@ -1,0 +1,86 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (15 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/docs/plans/evidence/2026-11-18-definition-layers-descent/probe, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/bad-p-binding.json inst/bad-p-fixed.json inst/bad-p-inv.json inst/bad-p-max.json inst/bad-p-min.json inst/bad-s-binding.json inst/bad-s-deep.json inst/bad-s-fixed.json inst/bad-s-inv.json inst/bad-s-max.json inst/bad-s-min.json inst/bad-t-binding.json inst/bad-t-fixed.json inst/bad-t-inv.json inst/bad-t-max.json inst/bad-t-min.json inst/ok-p-binding.json inst/ok-p-fixed.json inst/ok-p-inv.json inst/ok-p-max.json inst/ok-p-min.json inst/ok-s-deep.json inst/ok-s-inv.json inst/ok-s-max.json inst/ok-s-min.json inst/ok-t-binding.json inst/ok-t-fixed.json inst/ok-t-inv.json inst/ok-t-max.json inst/ok-t-min.json -version 4.0.1 -ig ig -tx n/a -output hl7-4.0.1-7.0.4.json
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:02.589)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.386)
+  Loaded FHIR - 8265 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.005)
+  Load hl7.terminology#7.5.0 - 4190 resources (00:00.970)
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.269)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.272)
+  Load ig - 25 resources (00:00.007)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+  ...go! (00:00.447)
+Cached new session. Cache size = 1
+Sources to validate: inst/bad-p-binding.jsoninst/bad-p-fixed.jsoninst/bad-p-inv.jsoninst/bad-p-max.jsoninst/bad-p-min.jsoninst/bad-s-binding.jsoninst/bad-s-deep.jsoninst/bad-s-fixed.jsoninst/bad-s-inv.jsoninst/bad-s-max.jsoninst/bad-s-min.jsoninst/bad-t-binding.jsoninst/bad-t-fixed.jsoninst/bad-t-inv.jsoninst/bad-t-max.jsoninst/bad-t-min.jsoninst/ok-p-binding.jsoninst/ok-p-fixed.jsoninst/ok-p-inv.jsoninst/ok-p-max.jsoninst/ok-p-min.jsoninst/ok-s-deep.jsoninst/ok-s-inv.jsoninst/ok-s-max.jsoninst/ok-s-min.jsoninst/ok-t-binding.jsoninst/ok-t-fixed.jsoninst/ok-t-inv.jsoninst/ok-t-max.jsoninst/ok-t-min.json
+Validating
+  Validate inst/bad-p-binding.json
+ 00:00.112
+  Validate inst/bad-p-fixed.json
+ 00:00.021
+  Validate inst/bad-p-inv.json
+ 00:00.022
+  Validate inst/bad-p-max.json
+ 00:00.013
+  Validate inst/bad-p-min.json
+ 00:00.011
+  Validate inst/bad-s-binding.json
+ 00:00.017
+  Validate inst/bad-s-deep.json
+ 00:00.012
+  Validate inst/bad-s-fixed.json
+ 00:00.011
+  Validate inst/bad-s-inv.json
+ 00:00.011
+  Validate inst/bad-s-max.json
+ 00:00.011
+  Validate inst/bad-s-min.json
+ 00:00.010
+  Validate inst/bad-t-binding.json
+ 00:00.011
+  Validate inst/bad-t-fixed.json
+ 00:00.009
+  Validate inst/bad-t-inv.json
+ 00:00.009
+  Validate inst/bad-t-max.json
+ 00:00.009
+  Validate inst/bad-t-min.json
+ 00:00.009
+  Validate inst/ok-p-binding.json
+ 00:00.017
+  Validate inst/ok-p-fixed.json
+ 00:00.011
+  Validate inst/ok-p-inv.json
+ 00:00.011
+  Validate inst/ok-p-max.json
+ 00:00.011
+  Validate inst/ok-p-min.json
+ 00:00.010
+  Validate inst/ok-s-deep.json
+ 00:00.010
+  Validate inst/ok-s-inv.json
+ 00:00.008
+  Validate inst/ok-s-max.json
+ 00:00.009
+  Validate inst/ok-s-min.json
+ 00:00.009
+  Validate inst/ok-t-binding.json
+ 00:00.010
+  Validate inst/ok-t-fixed.json
+ 00:00.008
+  Validate inst/ok-t-inv.json
+ 00:00.009
+  Validate inst/ok-t-max.json
+ 00:00.008
+  Validate inst/ok-t-min.json
+ 00:00.009
+Done. Times: Loading: 00:04.974, validation: 00:00.456 (#30). Memory = 547Mb
+
+Done. Times: Loading: 00:04.974, validation: 00:00.456 (#30). Max Memory = 6Gb

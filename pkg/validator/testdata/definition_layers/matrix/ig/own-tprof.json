@@ -1,0 +1,38 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "own-tprof",
+ "url": "http://example.org/dl/own-tprof",
+ "name": "DlOwnTprof",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension.value[x].period",
+    "path": "Patient.extension.value[x].period",
+    "type": [
+     {
+      "code": "Period",
+      "profile": [
+       "http://example.org/dl/tp-period"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "t-inv",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/t-inv"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:x",
+   "value": "abcd"
+  }
+ ]
+}

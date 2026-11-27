@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "b1",
+ "url": "http://example.org/ax/b1",
+ "name": "AxB1",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://example.org/ax/b0",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle.entry.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Patient",
+      "profile": [
+       "http://example.org/ax/q-pat"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

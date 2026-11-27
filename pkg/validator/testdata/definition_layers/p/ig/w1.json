@@ -1,0 +1,60 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "w1",
+ "url": "http://example.org/p5/w1",
+ "name": "AxW1",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier.period",
+    "path": "Patient.identifier.period",
+    "type": [
+     {
+      "code": "Period",
+      "profile": [
+       "http://example.org/p5/ts"
+      ]
+     }
+    ],
+    "constraint": [
+     {
+      "key": "kw",
+      "severity": "error",
+      "human": "kw",
+      "expression": "start.empty()"
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:mrn"
+   }
+  ]
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tpi-inv",
+ "url": "http://example.org/dl/tpi-inv",
+ "name": "DlTpiInv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "constraint": [
+     {
+      "key": "dl-a",
+      "severity": "error",
+      "human": "no a",
+      "expression": "$this.contains('a').not()"
+     }
+    ]
+   }
+  ]
+ }
+}

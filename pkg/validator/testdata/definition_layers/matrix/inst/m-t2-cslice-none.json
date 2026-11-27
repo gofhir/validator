@@ -1,0 +1,35 @@
+{
+ "resourceType": "Patient",
+ "id": "m-t2-cslice-none",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/t2-cslice"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "z",
+   "period": {
+    "start": "2000-01-01"
+   },
+   "assigner": {
+    "display": "d"
+   },
+   "extension": [
+    {
+     "url": "http://example.org/dl/ea",
+     "valueString": "ea"
+    },
+    {
+     "url": "http://example.org/dl/eb",
+     "valueString": "eb"
+    }
+   ]
+  }
+ ]
+}

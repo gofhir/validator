@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "m-min",
+ "url": "http://example.org/ax/m-min",
+ "name": "AxMmin",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "rules": "closed"
+    }
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "fixedString": "BASE"
+   },
+   {
+    "id": "Patient.identifier:m",
+    "path": "Patient.identifier",
+    "sliceName": "m",
+    "min": 1
+   },
+   {
+    "id": "Patient.identifier:m.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:mrn"
+   },
+   {
+    "id": "Patient.identifier:m.value",
+    "path": "Patient.identifier.value",
+    "fixedString": "MRN"
+   }
+  ]
+ }
+}

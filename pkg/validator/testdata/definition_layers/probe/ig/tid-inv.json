@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tid-inv",
+ "url": "http://example.org/dl/tid-inv",
+ "name": "DlTidinv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "constraint": [
+     {
+      "key": "dl-t",
+      "severity": "error",
+      "human": "dl-t",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ }
+}

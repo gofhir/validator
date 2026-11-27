@@ -1,0 +1,19 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-cx-nest",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/cx-nest"
+  ]
+ },
+ "contact": [
+  {
+   "gender": "male",
+   "telecom": [
+    {
+     "system": "phone"
+    }
+   ]
+  }
+ ]
+}

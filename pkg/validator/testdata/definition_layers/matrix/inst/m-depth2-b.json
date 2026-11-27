@@ -1,0 +1,33 @@
+{
+ "resourceType": "Patient",
+ "id": "m-depth2-b",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/depth-2"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "extension": [
+  {
+   "url": "http://example.org/dl/dep-2",
+   "extension": [
+    {
+     "url": "http://example.org/dl/e0",
+     "valueIdentifier": {
+      "system": "urn:mrn",
+      "value": "b",
+      "period": {
+       "start": "2000-01-01"
+      },
+      "assigner": {
+       "display": "d"
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

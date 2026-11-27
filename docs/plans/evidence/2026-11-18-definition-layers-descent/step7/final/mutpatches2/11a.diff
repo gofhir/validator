@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -567,7 +567,7 @@
+ 
+ 	definitions := v.nestedDefinitions(opts.ctx, res, fhirPath, result)
+ 	// Los perfiles que declara toda la cadena SliceOf del elemento, cada nivel por separado (punto 6).
+-	for h := holder; h != nil; h = h.SliceOf {
++	for h := holder; h != nil; h = nil {
+ 		for _, sd := range v.holderDefinitions(h, res, fhirPath, &opts, result) {
+ 			if !slices.Contains(definitions, sd) {
+ 				definitions = append(definitions, sd)

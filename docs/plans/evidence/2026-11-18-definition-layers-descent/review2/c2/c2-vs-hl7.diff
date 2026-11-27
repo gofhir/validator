@@ -1,0 +1,28 @@
+1a2
+>    W Patient.name[0].family | Constraint failed: k: 'k warning $this.startsWith('a')' (Bes
+3d3
+<    E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2' (defined 
+5c5
+<    E Patient.contact[0] | Constraint failed: pat-1: 'SHALL at least contain a contact's de
+---
+>    W Patient.contact[0] | Constraint failed: pat-1: 'pat-1 warning name.exists()' (Best Pr
+8c8
+<    E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2' (defined 
+---
+>    E Patient.name[0].family | Constraint failed: k: 'k error $this.startsWith('a')'
+9a10
+>    E Patient.name[0].family | Constraint failed: k: 'k error $this.startsWith('a')'
+11d11
+<    E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2' (defined 
+13c13
+<    E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2' (defined 
+---
+>    W Patient.name[0].family | Constraint failed: k: 'k warning $this.length() < 2' (Best P
+15c15
+<    W Patient.name[0].family | Constraint failed: k: 'k warning $this.length() < 2' (define
+---
+>    E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2'
+17d16
+<    E Patient.identifier[0].value | Constraint failed: k: 'k error $this.length() < 2'
+20d18
+<    E Patient.identifier[0].value | Constraint failed: k: 'k error $this.length() < 2'

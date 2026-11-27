@@ -1,0 +1,24 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-g3c",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/c1"
+  ]
+ },
+ "contained": [
+  {
+   "resourceType": "Patient",
+   "id": "c1",
+   "birthDate": "1999-01-01"
+  }
+ ],
+ "link": [
+  {
+   "type": "seealso",
+   "other": {
+    "reference": "#c1"
+   }
+  }
+ ]
+}

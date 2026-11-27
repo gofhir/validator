@@ -1,0 +1,12 @@
+--- a/pkg/constraint/report_scope.go
++++ b/pkg/constraint/report_scope.go
+@@ -171,6 +171,9 @@
+ // ubicación). No se aplica a los informes de capas de perfiles de tipo, que HL7 distingue por el perfil de la capa.
+ // El ctx es el de la validación, con su scope de informe (WithReportScope).
+ func CollapseSeverities(ctx context.Context, in []issue.Issue) []issue.Issue {
++if true {
++		return in
++	}
+ 	var layered map[string]bool
+ 	if s, _ := ctx.Value(reportScopeKey{}).(*reportScope); s != nil {
+ 		s.mu.Lock()

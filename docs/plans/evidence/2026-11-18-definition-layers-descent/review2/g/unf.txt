@@ -1,0 +1,7 @@
+## bad-g1
+   E Patient.identifier[0].value | Constraint failed: gk: 'gk'
+## bad-g3
+## bad-g3c
+## bad-g4
+   E Patient.identifier[0].value | Constraint failed: gs: 'gs' (defined in urn:a)
+## ok-g3

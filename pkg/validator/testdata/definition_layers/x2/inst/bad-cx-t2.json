@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-cx-t2",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/cx-t2"
+  ]
+ },
+ "identifier": [
+  {
+   "value": "v"
+  }
+ ]
+}

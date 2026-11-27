@@ -1,0 +1,31 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "own-fixed",
+ "url": "http://example.org/dl/own-fixed",
+ "name": "DlOwnFixed",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension.value[x].value",
+    "path": "Patient.extension.value[x].value",
+    "fixedString": "fa"
+   }
+  ]
+ }
+}

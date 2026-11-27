@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "b0",
+ "url": "http://example.org/ax/b0",
+ "name": "AxB0",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "fullUrl"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Bundle.entry:a",
+    "path": "Bundle.entry",
+    "sliceName": "a"
+   },
+   {
+    "id": "Bundle.entry:a.id",
+    "path": "Bundle.entry.id",
+    "short": "i"
+   },
+   {
+    "id": "Bundle.entry:a.fullUrl",
+    "path": "Bundle.entry.fullUrl",
+    "fixedUri": "urn:uuid:11111111-1111-4111-8111-111111111111"
+   }
+  ]
+ }
+}

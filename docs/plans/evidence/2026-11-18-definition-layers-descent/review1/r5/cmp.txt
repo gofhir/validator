@@ -1,0 +1,49 @@
+caso               hl7E  base protoE filtE | W: hl7 base proto filt
+bad-c-pdesc           2     2     2     2 | 0 0 0 0 
+bad-c-pmin            1     1     1     1 | 0 0 0 0 
+bad-c-tdeep           2     1     1     1 | 1 1 1 1 
+bad-c-tdeep2          2     1     1     1 | 1 1 1 1 
+bad-cx-nest           4     4     4     4 | 0 0 0 0 
+bad-cx-pd             1     1     1     1 | 0 0 0 0 
+bad-cx-pown           2     2     2     2 | 0 0 0 0 
+bad-cx-sltp           1     0     0     0 | 0 0 0 0  BASE≠ PROTO≠ FILT≠
+bad-cx-t2             1     0     0     0 | 0 0 0 0  BASE≠ PROTO≠ FILT≠
+bad-cx-t3             1     0     0     0 | 1 1 1 1  BASE≠ PROTO≠ FILT≠
+bad-d-fix             1     0     1     1 | 0 0 0 0  BASE≠
+bad-d-inv             1     0     1     1 | 0 0 0 0  BASE≠
+bad-d-low-fix         1     0     1     0 | 1 1 1 1  BASE≠ FILT≠ filtro-cambia
+bad-d-low-inv         1     0     1     0 | 1 1 1 1  BASE≠ FILT≠ filtro-cambia
+bad-d-max             1     1     1     1 | 1 1 1 1 
+bad-d-min             1     1     1     1 | 0 0 0 0 
+bad-d-sl              1     0     1     0 | 1 1 1 1  BASE≠ FILT≠ filtro-cambia
+bad-d-tp-f            1     0     1     1 | 0 0 0 0  BASE≠
+bad-d-tp-m            1     1     1     1 | 0 0 0 0 
+bad-d-type            1     0     1     0 | 0 0 0 0  BASE≠ FILT≠ filtro-cambia
+bad-f-low-fix         1     1     1     1 | 1 1 1 1 
+bad-f-low-inv         1     1     1     1 | 1 1 1 1 
+bad-f-slice           2     1     1     1 | 1 1 1 1 
+bad-f-type            3     1     2     1 | 0 0 0 0  filtro-cambia
+bad-h-ch              1     1     1     1 | 0 0 0 0 
+bad-l-none            2     1     3     3 | 0 0 0 0 
+bad-m-min             3     3     3     3 | 0 0 0 0 
+bad-m-nod             1     1     1     1 | 0 0 0 0 
+bad-n-nest            3     0     3     3 | 0 0 0 0  BASE≠
+bad-o-alt             0     1     1     1 | 0 0 0 0  BASE≠ PROTO≠ FILT≠
+bad-o-fix             1     0     1     1 | 0 0 0 0  BASE≠
+bad-o-inv             2     0     2     2 | 0 0 0 0  BASE≠
+bad-o-min             2     2     2     2 | 0 0 0 0 
+bad-p-einv            1     0     1     1 | 0 0 0 0  BASE≠
+bad-p-id              1     0     1     1 | 0 0 0 0  BASE≠
+bad-p-own-fix         1     1     1     1 | 0 0 0 0 
+bad-q-cr              1     1     2     2 | 1 1 1 1 
+bad-r-fix             1     0     2     2 | 0 0 0 0  BASE≠
+bad-s-arr             2     1     2     2 | 0 0 0 0 
+bad-v-d-ew            1     0     1     0 | 1 1 1 1  BASE≠ FILT≠ filtro-cambia
+bad-v-d-we            1     1     1     1 | 1 0 1 0  filtro-cambia
+bad-v-s-ew            1     1     1     1 | 0 0 0 0 
+bad-v-s-we            1     0     0     0 | 0 1 1 1  BASE≠ PROTO≠ FILT≠
+bad-v-t-ew            1     1     1     1 | 0 0 0 0 
+bad-v-t-we            0     0     0     0 | 1 1 1 1 
+ok-l-a                0     0     0     0 | 0 0 0 0 
+ok-l-sp               0     0     0     0 | 1 2 1 1 
+ok-o                  0     0     0     0 | 0 0 0 0 

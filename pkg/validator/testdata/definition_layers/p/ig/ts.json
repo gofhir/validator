@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ts",
+ "url": "http://example.org/p5/ts",
+ "name": "AxTs",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Period",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Period",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Period",
+    "path": "Period",
+    "constraint": [
+     {
+      "key": "kw",
+      "severity": "error",
+      "human": "kw",
+      "expression": "$this.length() < 9"
+     }
+    ]
+   }
+  ]
+ }
+}

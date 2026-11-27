@@ -1,0 +1,44 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-min",
+ "url": "http://example.org/dl/p-min",
+ "name": "DlPmin",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate.extension",
+    "path": "Patient.birthDate.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.birthDate.extension:e",
+    "path": "Patient.birthDate.extension",
+    "sliceName": "e",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/ext"
+      ]
+     }
+    ],
+    "min": 1
+   }
+  ]
+ }
+}

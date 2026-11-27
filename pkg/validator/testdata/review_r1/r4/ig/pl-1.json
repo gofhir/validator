@@ -1,0 +1,79 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pl-1",
+ "url": "http://example.org/rv8/pl-1",
+ "name": "pl1",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "plb-1",
+      "severity": "error",
+      "human": "plb base",
+      "expression": "startsWith('B')"
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:s",
+    "path": "Patient.identifier",
+    "sliceName": "s",
+    "min": 0,
+    "max": "*",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/rv8/pl-idpa",
+       "http://example.org/rv8/pl-idpb"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:s.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:s"
+   },
+   {
+    "id": "Patient.identifier:s.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "plb-1",
+      "severity": "error",
+      "human": "plb slice",
+      "expression": "startsWith('C')"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,12 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/15b.orig	2026-11-25 15:56:16
++++ pkg/constraint/report_scope.go	2026-11-25 15:56:16
+@@ -171,6 +171,9 @@
+ // ubicación). No se aplica a los informes de capas de perfiles de tipo, que HL7 distingue por el perfil de la capa.
+ // El ctx es el de la validación, con su scope de informe (WithReportScope).
+ func CollapseSeverities(ctx context.Context, in []issue.Issue) []issue.Issue {
++	if true {
++		return in
++	}
+ 	var layered map[string]bool
+ 	if s, _ := ctx.Value(reportScopeKey{}).(*reportScope); s != nil {
+ 		s.mu.Lock()

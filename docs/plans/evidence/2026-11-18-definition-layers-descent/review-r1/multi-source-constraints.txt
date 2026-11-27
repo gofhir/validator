@@ -1,0 +1,6 @@
+=== RUN   TestZZMultiSource
+== 4.0.1: 214 definiciones, 2 (definicion, constraint) con varios source
+   Element ele-1|hasValue() or (chi ['' 'http://hl7.org/fhir/StructureDefinition/Element']
+   Extension ext-1|extension.exists() ['' 'http://hl7.org/fhir/StructureDefinition/Extension']
+== 4.3.0: 210 definiciones, 0 (definicion, constraint) con varios source
+== 5.0.0: 241 definiciones, 0 (definicion, constraint) con varios source

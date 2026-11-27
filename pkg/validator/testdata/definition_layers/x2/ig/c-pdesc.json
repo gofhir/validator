@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "c-pdesc",
+ "url": "http://example.org/ax/c-pdesc",
+ "name": "AxCpdesc",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate.extension",
+    "path": "Patient.birthDate.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.birthDate.extension:e",
+    "path": "Patient.birthDate.extension",
+    "sliceName": "e"
+   },
+   {
+    "id": "Patient.birthDate.extension:e.url",
+    "path": "Patient.birthDate.extension.url",
+    "fixedUri": "http://example.org/ax/e0"
+   },
+   {
+    "id": "Patient.birthDate.extension:e.value[x]",
+    "path": "Patient.birthDate.extension.value[x]",
+    "min": 1
+   }
+  ]
+ }
+}

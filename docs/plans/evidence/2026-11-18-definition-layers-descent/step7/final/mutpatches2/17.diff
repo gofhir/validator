@@ -1,0 +1,12 @@
+--- a/pkg/constraint/constraint.go
++++ b/pkg/constraint/constraint.go
+@@ -581,6 +581,9 @@
+ // definition of the type the one before it has ("Identifier.value" is a string), or from the path itself
+ // where an element has children of its own (a backbone element). "" if a step has no type.
+ func typeBelow(model *registry.FHIRPathModel, defPath string) string {
++if true {
++		return model.TypeOf(model.ResolvePath(defPath))
++	}
+ 	segments := strings.Split(defPath, ".")
+ 	if len(segments) < 3 || !model.HasType(segments[0]) {
+ 		return ""

@@ -1,0 +1,52 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tpi-cslice",
+ "url": "http://example.org/dl/tpi-cslice",
+ "name": "DlTpiCslice",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.extension",
+    "path": "Identifier.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Identifier.extension:ea",
+    "path": "Identifier.extension",
+    "sliceName": "ea",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/ea"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Identifier.extension:ea.value[x]",
+    "path": "Identifier.extension.value[x]",
+    "fixedString": "ea"
+   }
+  ]
+ }
+}

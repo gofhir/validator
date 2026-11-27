@@ -1,0 +1,12 @@
+--- a/pkg/registry/snapshot.go
++++ b/pkg/registry/snapshot.go
+@@ -1335,6 +1335,9 @@
+ // o severidad y la copia no debe taparlas (HL7 las toma del diferencial). No cede las claves que el hijo original
+ // trae de la base (`mergeArrayField` las hereda entre perfiles): esas siguen como están.
+ func (b *snapshotBuilder) yieldCloned(idx int, id string, diff *ElementDefinition) error {
++if true {
++		return nil
++	}
+ 	src, ok := b.cloned[id]
+ 	if !ok || len(diff.Constraint) == 0 {
+ 		return nil

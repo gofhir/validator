@@ -1,0 +1,59 @@
+01	s7-2	pkg/constraint/tree.go:155	otherDefinitions chain walk n = n.SliceOf -> n = nil	KILLED	TestDescentSlicedElementAndSlice	2
+02	s7-2	pkg/constraint/tree.go:161	otherDefinitions type-profile branch false &&	KILLED	TestDescentNamedProbes	2
+03	s7-2	pkg/constraint/tree.go:164	otherDefinitions own definition false &&	KILLED	TestDescentOwnDefinition	2
+04	s7-2	pkg/constraint/tree.go:397	walkPrimitiveExtensions children loop false &&	KILLED	TestDescentPrimitiveExtensionSlice	2
+05	s7-2	pkg/constraint/tree.go:317	walkLayers layer walk guard !own restored	KILLED	TestDescentNamedProbes	2
+06	s7-2	pkg/constraint/layers.go:102	firstDescent done never true	KILLED	TestDescentEachPairIsWalkedOnce	2
+07	s7-2	pkg/constraint/tree.go:129	walk opens scope always	KILLED	TestDescentSingleDefinitionOpensNoScope	2
+08	s7-2	pkg/constraint/tree.go:129	walk never opens scope	KILLED	TestDescentEachPairIsWalkedOnce	2
+09a	s7-2	pkg/constraint/layers.go:34	layers note(): identity drops severity	KILLED	TestMutationProbeSeveritiesAcrossLayersAreKept	2
+09a2	s7-2	pkg/constraint/report_scope.go:109	firstReport reportKey sev dropped	KILLED	TestDescentDerivedProfile	2
+09a3	s7-2	pkg/constraint/tree.go:1120	pendingConstraints memoKey sev dropped	KILLED	TestDescentDerivedProfile	2
+09b	s7-2	pkg/constraint/tree.go:1120	pendingConstraints memoKey location dropped	KILLED	TestDescentArraysAndDepth	2
+10	r3	-	walkLayers own children walked BEFORE the layers (reverse order, must die by TestReviewR2LayersChildrenAreWalkedBeforeTheOwnChildren)	ANCHOR pkg/constraint/tree.go count=3: '\truns := make([]layerRun, 0, len(defs))'	-	-
+10r	r3	-	walkLayers: other definitions (walkSets) walked BEFORE the layers (extra order mutation)	ANCHOR pkg/constraint/tree.go count=3: '\truns := make([]layerRun, 0, len(defs))'	-	-
+S	r3	pkg/registry/snapshot.go:228;pkg/registry/snapshot.go:224	stampConstraintSources runs BEFORE correctSnapshot	KILLED	TestReviewR2ErrataConstraintsKeepTheirBaseSourceWithAnExplicitProfile	2
+11a	s7-2	pkg/constraint/tree.go:596	validateNested holder chain h = nil	KILLED	TestDescentHeldResource	2
+11b	s7-2	pkg/constraint/tree.go:606	validateNested nested pair dedup disabled	KILLED	TestHeldResourceIsValidatedOncePerProfile	2
+12a	s7-2	pkg/constraint/tree.go:881	checkType no dedup	KILLED	TestDescentNamedProbes	2
+12b	s7-2	pkg/constraint/tree.go:881	checkType dedup key includes sd.URL	KILLED	TestDescentNamedProbes	2
+13a	s7-2	pkg/registry/snapshot.go:1347	yieldCloned no-op	KILLED	TestDescentSlicedElementAndSlice	2
+13b	s7-2	pkg/registry/snapshot.go:1361	yieldCloned also yields inherited keys	KILLED	TestDescentSeverities	2
+14	s7-2	pkg/registry/snapshot.go:1414	stampConstraintSources no-op	KILLED	TestDescentDerivedProfile	2
+15a	s7-2	pkg/constraint/report_scope.go:199;pkg/constraint/report_scope.go:181	CollapseSeverities collapses layered too	KILLED	TestMutationProbeSeveritiesAcrossLayersAreKept	2
+15b	s7-2	pkg/constraint/report_scope.go:174	CollapseSeverities returns input	KILLED	TestDescentSlicedElementAndSlice	2
+16	s7-2	pkg/validator/testdata/definition_layers/expected.json:3	expected.json first detail gk -> gX	KILLED	TestDescentTypeProfileInvariantFocus	2
+17	s7-2	pkg/constraint/constraint.go:586	typeOf uses full path TypeOf(ResolvePath) instead of typeBelow	KILLED	TestDescentTypeProfileInvariantFocus	2
+18	s7-2 (adapted: discriminatorsOf removed by F3; ownValue ignored in findValueSource/valueWithin)	pkg/slicematch/path.go:769;pkg/slicematch/path.go:777;pkg/slicematch/path.go:848	ownValue ignored at all three discriminator value sources	KILLED	TestDecisions	1
+18b	s7-2 (adapted)	pkg/slicematch/path.go:777;pkg/slicematch/path.go:848	ownValue ignored on ancestors/descendants only	KILLED	TestPatternSources	1
+19	s7-2	pkg/slicematch/path.go:576	children() overlayFixed only first type profile	KILLED	TestExtensionURLThroughSeveralProfilesWithOwnChildren	1
+20	s7-2	pkg/registry/snapshot.go:856	carryDeclaredValues no-op	KILLED	TestDescentSlicedElementAndSlice	2
+21	s7-2,s7-3	pkg/constraint/constraint.go:676	reportedSource returns c.Source always	KILLED	TestConstraintDefinedIn	2
+22	s7-2,s7-3	pkg/constraint/constraint.go:680	reportedSource without publishedSource rule	KILLED	TestConstraintDefinedIn	2
+23	s7-2,s7-3	pkg/constraint/constraint.go:686	reportedSource without owner.URL rule	KILLED	TestDescentSlicedElementAndSlice	2
+24	s7-2	pkg/registry/snapshot.go:228;pkg/registry/snapshot.go:1414;pkg/registry/snapshot.go:1433	stampConstraintSources stamps own constraints with profile URL	KILLED	TestConstraintDefinedIn	2
+25	s7-2	pkg/constraint/tree.go:590	validateNested without divided check	KILLED	TestConstraintDefinedIn	2
+26	s7-2	pkg/constraint/tree.go:609	walkprobe.Nested never emitted	KILLED	TestHeldResourceIsValidatedOncePerProfile	2
+27	s7-3	pkg/constraint/constraint.go:686	owner.URL rule without SnapshotGenerated	KILLED	TestConstraintDefinedIn	2
+28	s7-3	pkg/constraint/constraint.go:686	owner.URL rule without derivation constraint	SURVIVED	-	-
+29	s7-3 (adapted: publishedSource lookup by element is now atPath/byPath)	pkg/constraint/constraint.go:726	publishedSource never indexes by element path	KILLED	TestConstraintDefinedIn	2
+A	r8	pkg/constraint/tree.go:632	divided without base guard	KILLED	TestDescentHeldResource	2
+B	r8,r1	pkg/registry/snapshot.go:890	carry no pattern	KILLED	TestReviewR1SlicePatternOfItsTypeProfileDiscriminates	2
+C	r8	pkg/registry/snapshot.go:1433	stamp without slice fallback	KILLED	TestDescentSeverities	2
+D	r8	-	OBSOLETE: published root branch removed as dead code (D equivalent; atPath no longer searches the root apart)	OBSOLETE	-	-
+E2	r8:E,r1:E2	pkg/constraint/tree.go:393	primitive ext never scoped (r8 E: scoped() removed; same edit)	KILLED	TestDescentEachPairIsWalkedOnce	2
+E	r1	pkg/constraint/tree.go:393	primitive ext always scoped	KILLED	TestReviewR1PrimitiveWithOneDefinitionOpensNoScope	2
+F	r8,r1	pkg/constraint/tree.go:396	prim-ext no SliceOf chain	KILLED	TestReviewR1PrimitiveExtensionOfASliceTakesTheBaseElementsChildren	2
+G	r8	pkg/constraint/tree.go:251	alt-self ignored	KILLED	TestDescentOwnDefinition	2
+H	r8	pkg/constraint/constraint.go:586	typeBelow off	KILLED	TestDescentTypeProfileInvariantFocus	2
+I	r8	-	OBSOLETE: discriminator kindOfValue (pattern-as-value) removed by F3 (discriminatorsOf/kindOfValue removed; sliceMatches returns false without discriminator)	OBSOLETE	-	-
+J	r8	pkg/constraint/report_scope.go:148	collapse no trim best-practice suffix	KILLED	TestDescentSlicedElementAndSlice	2
+K	r8,r1	pkg/constraint/constraint.go:723	published last not first	SURVIVED	-	-
+L	r8,r1	pkg/constraint/tree.go:327	walkLayers no walkSets	KILLED	TestReviewR1SeveralTypeProfilesKeepTheOtherDefinitions	2
+P	r1	pkg/constraint/constraint.go:758	atPath no suffix-by-segment walk	KILLED	TestReviewR1ExtensionConstraintBelowTheTypesDepth	2
+R1	r1	pkg/constraint/constraint.go:686	owner.URL rule for any element	KILLED	TestMutationProbeOwnChildBeforeLayers	2
+R2	r1	pkg/constraint/tree.go:98	self type-profile case dropped	KILLED	TestReviewR1ExtensionOwnDefinitionHasNoSuffix	2
+R3	r1	pkg/slicematch/slicematch.go:203	no-discriminator early return removed	KILLED	TestDescentNamedProbes	2
+R4	r1	pkg/constraint/constraint.go:680	explicit flag ignored	KILLED	TestReviewR1ExplicitProfileReportsTheSnapshotSource	2
+10	r3	pkg/constraint/tree.go:310;pkg/constraint/tree.go:325	walkLayers own children walked BEFORE the layers (reverse order, must die by TestReviewR2LayersChildrenAreWalkedBeforeTheOwnChildren)	KILLED	TestReviewR2LayersChildrenAreWalkedBeforeTheOwnChildren	2
+10r	r3	pkg/constraint/tree.go:310;pkg/constraint/tree.go:329	walkLayers: other definitions (walkSets) walked BEFORE the layers (extra order mutation)	SURVIVED	-	-

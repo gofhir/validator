@@ -1,0 +1,26 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tp-ann",
+ "url": "http://example.org/ax/tp-ann",
+ "name": "AxTpann",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Annotation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Annotation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Annotation.author[x]",
+    "path": "Annotation.author[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ }
+}

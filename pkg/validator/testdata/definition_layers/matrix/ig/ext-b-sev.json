@@ -1,0 +1,58 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-b-sev",
+ "url": "http://example.org/dl/ext-b-sev",
+ "name": "DlExtBSev",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/dl/ext-b-sev"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Extension.value[x].value",
+    "path": "Extension.value[x].value",
+    "constraint": [
+     {
+      "key": "dl-s",
+      "severity": "error",
+      "human": "no s",
+      "expression": "$this.contains('s').not()"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

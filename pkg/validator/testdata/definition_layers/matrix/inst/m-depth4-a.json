@@ -1,0 +1,43 @@
+{
+ "resourceType": "Patient",
+ "id": "m-depth4-a",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/depth-4"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "extension": [
+  {
+   "url": "http://example.org/dl/dep-4",
+   "extension": [
+    {
+     "url": "http://example.org/dl/dep-3",
+     "extension": [
+      {
+       "url": "http://example.org/dl/dep-2",
+       "extension": [
+        {
+         "url": "http://example.org/dl/e0",
+         "valueIdentifier": {
+          "system": "urn:mrn",
+          "value": "a",
+          "period": {
+           "start": "2000-01-01"
+          },
+          "assigner": {
+           "display": "d"
+          }
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

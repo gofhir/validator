@@ -1,0 +1,12 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/20.orig	2026-11-25 16:01:36
++++ pkg/registry/snapshot.go	2026-11-25 16:01:36
+@@ -844,6 +844,9 @@
+ // su discriminador). Solo vale con un único perfil de tipo declarado; el resto de lo que la copia trae (lo que el
+ // elemento restringe para todos sus slices) queda como está.
+ func (b *snapshotBuilder) carryDeclaredValues(idx int, children []ElementDefinition) error {
++	if true {
++		return nil
++	}
+ 	slice := &b.elements[idx]
+ 	if len(slice.Type) != 1 || len(slice.Type[0].Profile) != 1 {
+ 		return nil

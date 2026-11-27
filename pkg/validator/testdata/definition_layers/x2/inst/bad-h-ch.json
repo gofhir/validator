@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "bad-h-ch",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/h-ch"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "component": [
+  {
+   "code": {
+    "text": "A"
+   },
+   "valueString": "A"
+  }
+ ]
+}

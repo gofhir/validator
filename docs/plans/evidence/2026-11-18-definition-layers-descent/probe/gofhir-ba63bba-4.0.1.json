@@ -1,0 +1,92 @@
+{
+ "bad-p-binding.json": [
+  [
+   "Patient.birthDate.extension[0].valueCode",
+   "The value provided ('B') is not in the value set 'http://example.org/dl/vs-A' (required)"
+  ]
+ ],
+ "bad-p-fixed.json": [],
+ "bad-p-inv.json": [],
+ "bad-p-max.json": [
+  [
+   "Patient.birthDate.extension:e",
+   "Maximum cardinality of 'Patient.birthDate.extension:e' is 0, but found 1"
+  ]
+ ],
+ "bad-p-min.json": [
+  [
+   "Patient.birthDate.extension:e",
+   "Minimum cardinality of 'Patient.birthDate.extension:e' is 1, but found 0"
+  ]
+ ],
+ "bad-s-binding.json": [],
+ "bad-s-deep.json": [
+  [
+   "Patient.identifier[0].period.start",
+   "Minimum cardinality of 'Patient.identifier[0].period.start' is 1, but found 0"
+  ]
+ ],
+ "bad-s-fixed.json": [],
+ "bad-s-inv.json": [
+  [
+   "Patient.identifier[0].value",
+   "Constraint failed: dl-b: 'dl-b'"
+  ]
+ ],
+ "bad-s-max.json": [
+  [
+   "Patient.identifier[0].assigner",
+   "Maximum cardinality of 'Patient.identifier[0].assigner' is 0, but found 1"
+  ]
+ ],
+ "bad-s-min.json": [
+  [
+   "Patient.identifier[0].period",
+   "Minimum cardinality of 'Patient.identifier[0].period' is 1, but found 0"
+  ]
+ ],
+ "bad-t-binding.json": [
+  [
+   "Patient.identifier[0].type",
+   "None of the codings provided are in the value set 'http://example.org/dl/vs-A', and a coding from this value set is required (codes = http://example.org/dl/cs#B)"
+  ]
+ ],
+ "bad-t-fixed.json": [
+  [
+   "Patient.identifier[0].value",
+   "Value is \"G\", but the profile requires \"F\""
+  ]
+ ],
+ "bad-t-inv.json": [
+  [
+   "Patient.identifier[0].value",
+   "Constraint failed: dl-t: 'dl-t'"
+  ]
+ ],
+ "bad-t-max.json": [
+  [
+   "Patient.identifier[0].assigner",
+   "Maximum cardinality of 'Patient.identifier[0].assigner' is 0, but found 1"
+  ]
+ ],
+ "bad-t-min.json": [
+  [
+   "Patient.identifier[0].period",
+   "Minimum cardinality of 'Patient.identifier[0].period' is 1, but found 0"
+  ]
+ ],
+ "ok-p-binding.json": [],
+ "ok-p-fixed.json": [],
+ "ok-p-inv.json": [],
+ "ok-p-max.json": [],
+ "ok-p-min.json": [],
+ "ok-s-deep.json": [],
+ "ok-s-inv.json": [],
+ "ok-s-max.json": [],
+ "ok-s-min.json": [],
+ "ok-t-binding.json": [],
+ "ok-t-fixed.json": [],
+ "ok-t-inv.json": [],
+ "ok-t-max.json": [],
+ "ok-t-min.json": []
+}

@@ -1,0 +1,8 @@
+## bad-g1
+## bad-g3
+   E Bundle.entry[0].resource/*Patient/p1*/.birthDate | Value is '1999-01-01' but is fixed to '2000-01-01' in the profile http://example.org/ax/q-pat#Patient.birthDate
+## bad-g3c
+   E Patient.contained[0] | Slicing cannot be evaluated: Could not match discriminator (id) for slice Patient.contained:a in profile http://example.org/ax/c1 - the discriminator 
+   E Patient.contained[0]/*Patient/c1*/.birthDate | Value is '1999-01-01' but is fixed to '2000-01-01' in the profile http://example.org/ax/q-pat#Patient.birthDate
+## bad-g4
+## ok-g3

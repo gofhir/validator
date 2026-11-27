@@ -1,0 +1,37 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "w2",
+ "url": "http://example.org/p5/w2",
+ "name": "AxW2",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.period",
+    "path": "Patient.identifier.period",
+    "type": [
+     {
+      "code": "Period",
+      "profile": [
+       "http://example.org/p5/ts"
+      ]
+     }
+    ],
+    "constraint": [
+     {
+      "key": "kw",
+      "severity": "error",
+      "human": "kw",
+      "expression": "start.empty()"
+     }
+    ]
+   }
+  ]
+ }
+}

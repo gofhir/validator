@@ -1,0 +1,67 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pb-pat",
+ "url": "http://example.org/rv8/pb-pat",
+ "name": "pbpat",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "type"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier.type",
+    "path": "Patient.identifier.type",
+    "short": "t"
+   },
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn",
+    "min": 0,
+    "max": "*",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/rv8/pb-idp"
+      ]
+     }
+    ],
+    "constraint": [
+     {
+      "key": "pbm-1",
+      "severity": "error",
+      "human": "pbm-1",
+      "expression": "value.startsWith('A')"
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:mrn.value",
+    "path": "Patient.identifier.value",
+    "short": "v"
+   }
+  ]
+ }
+}

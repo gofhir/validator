@@ -1,0 +1,32 @@
+{
+ "resourceType": "Bundle",
+ "id": "m-held-inv-ab",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/held-inv"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:00000001-0000-4000-8000-000000000000",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "h",
+    "text": {
+     "status": "generated",
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+    },
+    "name": [
+     {
+      "family": "ab",
+      "text": "t",
+      "period": {
+       "start": "2000-01-01"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

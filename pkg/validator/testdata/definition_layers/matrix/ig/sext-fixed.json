@@ -1,0 +1,71 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "sext-fixed",
+ "url": "http://example.org/dl/sext-fixed",
+ "name": "DlSextFixed",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension.value[x].value",
+    "path": "Patient.extension.value[x].value",
+    "fixedString": "fa"
+   },
+   {
+    "id": "Patient.extension:x",
+    "path": "Patient.extension",
+    "sliceName": "x",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/e0"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x.value[x].assigner.display",
+    "path": "Patient.extension.value[x].assigner.display",
+    "fixedString": "fb"
+   }
+  ]
+ }
+}

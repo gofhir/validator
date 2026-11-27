@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tid-fixed",
+ "url": "http://example.org/dl/tid-fixed",
+ "name": "DlTidfixed",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "fixedString": "F"
+   }
+  ]
+ }
+}

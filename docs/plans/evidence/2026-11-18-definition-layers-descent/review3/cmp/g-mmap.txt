@@ -1,0 +1,9 @@
+## bad-g1
+   E Patient.identifier[0].value | Constraint failed: gk: 'gk'
+## bad-g3
+   E Bundle.entry[0].resource.birthDate | Value is "1999-01-01", but the profile requires "2000-01-01"
+## bad-g3c
+   E Patient.contained[0].birthDate | Value is "1999-01-01", but the profile requires "2000-01-01"
+## bad-g4
+   E Patient.identifier[0].value | Constraint failed: gs: 'gs' (defined in urn:a)
+## ok-g3

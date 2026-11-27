@@ -1,0 +1,20 @@
+## chain-viol-new
+## chain-viol-old
+   E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2'
+## core-pat1
+   E Patient.contact[0] | Constraint failed: pat-1: 'SHALL at least contain a contact's details or a reference to an organization'
+## exp-ok
+## exp-viol-both
+   E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2'
+## exp-viol-new
+## exp-viol-old
+   E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2'
+## sev-ew
+   E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2'
+## sev-we
+   W Patient.name[0].family | Constraint failed: k: 'k warning $this.length() < 2' (Best Practice Recommendation)
+## sl-viol-base
+   E Patient.identifier[0].value | Constraint failed: k: 'k error $this.length() < 2'
+## sl-viol-both
+   E Patient.identifier[0].value | Constraint failed: k: 'k error $this.length() < 2'
+## sl-viol-slice

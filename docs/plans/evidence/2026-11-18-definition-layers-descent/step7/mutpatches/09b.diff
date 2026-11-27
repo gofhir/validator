@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/09b.orig	2026-11-25 15:45:53
++++ pkg/constraint/tree.go	2026-11-25 15:45:53
+@@ -1054,7 +1054,7 @@
+ 		seen[k] = true
+ 		if opts.memo != nil {
+ 			// Dentro de un ámbito, una invariante ya evaluada en esta ubicación no se evalúa otra vez (punto 4).
+-			mk := memoKey{at: fhirPath, id: k, sev: c.Severity}
++			mk := memoKey{at: "", id: k, sev: c.Severity}
+ 			if _, done := opts.memo[mk]; done {
+ 				continue
+ 			}

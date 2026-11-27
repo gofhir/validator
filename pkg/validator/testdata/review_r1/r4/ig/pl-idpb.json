@@ -1,0 +1,21 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pl-idpb",
+ "url": "http://example.org/rv8/pl-idpb",
+ "name": "plidpb",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   }
+  ]
+ }
+}

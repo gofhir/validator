@@ -1,0 +1,43 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "depth-2",
+ "url": "http://example.org/dl/depth-2",
+ "name": "DlDepth2",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension:x",
+    "path": "Patient.extension",
+    "sliceName": "x",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/dep-2"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

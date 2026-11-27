@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p6-z",
+ "url": "http://example.org/rv8/p6-z",
+ "name": "p6z",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient",
+    "constraint": [
+     {
+      "key": "pz-1",
+      "severity": "error",
+      "human": "pz-1",
+      "expression": "birthDate.exists()"
+     }
+    ]
+   }
+  ]
+ }
+}

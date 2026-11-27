@@ -1,0 +1,807 @@
+diff --color -ruN -x *_test.go -x testdata pkg/constraint/constraint.go rv6/src/pkg/constraint/constraint.go
+--- pkg/constraint/constraint.go	2026-11-18 12:59:25
++++ rv6/src/pkg/constraint/constraint.go	2026-11-18 13:50:42
+@@ -101,6 +101,8 @@
+ 	// descended recuerda qué valores se recorrieron ya bajo qué hijos, dentro de las capas de un tipo
+ 	// (firstDescent); nil fuera de ellas.
+ 	descended map[descent]struct{}
++	memo      map[memoKey]struct{}
++	nested    map[nestedKey]struct{}
+ }
+ 
+ // Validator validates constraints defined in ElementDefinitions.
+@@ -320,6 +322,7 @@
+ 		resourceCol:     resourceCol,
+ 		rootResourceCol: rootResourceCol,
+ 		timeout:         5 * time.Second,
++		nested:          map[nestedKey]struct{}{},
+ 	}
+ 
+ 	// Wire terminology service if available.
+diff --color -ruN -x *_test.go -x testdata pkg/constraint/layers.go rv6/src/pkg/constraint/layers.go
+--- pkg/constraint/layers.go	2026-11-18 12:59:25
++++ rv6/src/pkg/constraint/layers.go	2026-11-18 13:54:48
+@@ -33,22 +33,25 @@
+ 	}
+ }
+ 
+-// descent es el recorrido de los hijos children de un valor: el valor y los hijos, por identidad.
+ type descent struct {
+-	value    uintptr
+-	sd       *registry.StructureDefinition
+-	firstOne *registry.ElementNode
++	value uintptr
++	owner *registry.ElementNode
+ }
+ 
+-// firstDescent dice si es la primera vez que se recorren, dentro de las capas de un tipo, los hijos
+-// children (de sd) del valor obj, y lo anota. Dos capas de un padre que declaran el mismo hijo llevan
+-// a los mismos hijos: el valor se camina una vez bajo la unión de lo que las capas le dan, no una vez
+-// por capa en cada nivel (2^D en la profundidad D). Fuera de las capas siempre es verdadero.
+-func (o *constraintEvalOpts) firstDescent(obj map[string]any, sd *registry.StructureDefinition, children []*registry.ElementNode) bool {
+-	if o.descended == nil || len(children) == 0 {
++func (o *constraintEvalOpts) firstDescent(obj map[string]any, children []*registry.ElementNode) bool {
++	if len(children) == 0 {
++		return false
++	}
++	if o.descended == nil {
+ 		return true
+ 	}
+-	key := descent{value: reflect.ValueOf(obj).Pointer(), sd: sd, firstOne: children[0]}
++	key := descent{value: reflect.ValueOf(obj).Pointer(), owner: children[0].Parent}
++	if rv5Mut == "firstchild" {
++		key.owner = children[0]
++	}
++	if rv5Mut == "alwaysdescend" {
++		return true
++	}
+ 	if _, done := o.descended[key]; done {
+ 		return false
+ 	}
+@@ -86,6 +89,7 @@
+ 				continue
+ 			}
+ 			seen[id] = true
++			noteLayered(parent.ctx, &is)
+ 			result.AddIssue(is)
+ 			if parent.layer != nil {
+ 				parent.layer.ids[len(result.Issues)-1] = id
+@@ -103,4 +107,16 @@
+ 		out[k] = v
+ 	}
+ 	return out
++}
++
++// scoped abre, si no hay uno, el ámbito en que se recuerdan descensos e invariantes evaluadas.
++func (o *constraintEvalOpts) scoped() *constraintEvalOpts {
++	if o.descended != nil {
++		return o
++	}
++	c := *o
++	c.descended = map[descent]struct{}{}
++	c.memo = map[memoKey]struct{}{}
++	rv6Scopes.Add(1)
++	return &c
+ }
+diff --color -ruN -x *_test.go -x testdata pkg/constraint/report_scope.go rv6/src/pkg/constraint/report_scope.go
+--- pkg/constraint/report_scope.go	2026-11-17 06:17:49
++++ rv6/src/pkg/constraint/report_scope.go	2026-11-18 13:54:48
+@@ -2,8 +2,10 @@
+ 
+ import (
+ 	"context"
++	"strings"
+ 	"sync"
+ 
++	"github.com/gofhir/validator/v2/pkg/issue"
+ 	"github.com/gofhir/validator/v2/pkg/registry"
+ )
+ 
+@@ -22,9 +24,10 @@
+ // reportScope is the set of constraint failures already reported in one validation. A scope made
+ // by withChildReportScope also sees what its parent reported, but records only its own.
+ type reportScope struct {
+-	mu     sync.Mutex
+-	seen   map[reportKey]bool
+-	parent *reportScope
++	mu      sync.Mutex
++	seen    map[reportKey]bool
++	parent  *reportScope
++	layered map[string]bool // informes de capas: HL7 los distingue por el perfil de la capa
+ }
+ 
+ // reported dice si k se informó en este scope o en el de un ancestro. Quien llama tiene s.mu.
+@@ -129,4 +132,75 @@
+ 	}
+ 	scope.seen[k] = true
+ 	return true
++}
++
++const bpSuffix = " (Best Practice Recommendation)"
++
++func severityKey(is *issue.Issue) string {
++	if is.MessageID != string(issue.DiagConstraintFailed) || len(is.Expression) == 0 {
++		return ""
++	}
++	return is.Expression[0] + "\x00" + strings.TrimSuffix(is.Diagnostics, bpSuffix)
++}
++
++// noteLayered recuerda que is salió de una capa.
++func noteLayered(ctx context.Context, is *issue.Issue) {
++	k := severityKey(is)
++	s, _ := ctx.Value(reportScopeKey{}).(*reportScope)
++	if k == "" || s == nil {
++		return
++	}
++	for s.parent != nil {
++		s = s.parent
++	}
++	s.mu.Lock()
++	if s.layered == nil {
++		s.layered = map[string]bool{}
++	}
++	s.layered[k] = true
++	s.mu.Unlock()
++}
++
++// CollapseSeverities deja el error cuando la misma invariante, con el mismo texto, falla en un lugar
++// como error y como advertencia, salvo que venga de capas de perfiles de tipo.
++func CollapseSeverities(ctx context.Context, in []issue.Issue) []issue.Issue {
++	var layered map[string]bool
++	if s, _ := ctx.Value(reportScopeKey{}).(*reportScope); s != nil {
++		layered = s.layered
++	}
++	var warned map[string]int
++	for i := range in {
++		if in[i].Severity == issue.SeverityWarning {
++			if k := severityKey(&in[i]); k != "" && !layered[k] {
++				if warned == nil {
++					warned = map[string]int{}
++				}
++				warned[k] = i
++			}
++		}
++	}
++	if warned == nil {
++		return in
++	}
++	var drop map[int]bool
++	for i := range in {
++		if in[i].Severity == issue.SeverityError {
++			if w, ok := warned[severityKey(&in[i])]; ok {
++				if drop == nil {
++					drop = map[int]bool{}
++				}
++				drop[w] = true
++			}
++		}
++	}
++	if drop == nil {
++		return in
++	}
++	out := in[:0]
++	for i := range in {
++		if !drop[i] {
++			out = append(out, in[i])
++		}
++	}
++	return out
+ }
+diff --color -ruN -x *_test.go -x testdata pkg/constraint/rv5_proto.go rv6/src/pkg/constraint/rv5_proto.go
+--- pkg/constraint/rv5_proto.go	1969-12-31 21:00:00
++++ rv6/src/pkg/constraint/rv5_proto.go	2026-11-18 13:50:42
+@@ -0,0 +1,120 @@
++package constraint
++
++import (
++	"fmt"
++	"os"
++	"sort"
++	"sync"
++	"sync/atomic"
++
++	"github.com/gofhir/validator/v2/pkg/registry"
++)
++
++type memoKey struct {
++	at  string
++	id  constraintID
++	sev string
++}
++type nestedKey struct {
++	res uintptr
++	sd  *registry.StructureDefinition
++}
++
++var (
++	rv5NoMemo     = os.Getenv("RV5_MEMO") == "off"
++	rv5MapOnly    = os.Getenv("RV5_MEMO") == "map"
++	rv5Log        = os.Getenv("RV5_LOG") != ""
++	rv5OwnFirst   = os.Getenv("RV5_OWNFIRST") != ""
++	rv5ShadowMemo = os.Getenv("RV5_SHADOW") != ""
++	rv5Mu         sync.Mutex
++	rv5V          = map[string]int{}
++	rv5D          = map[string]map[*registry.ElementNode]bool{}
++	rv5Local      = map[string]int{}
++)
++
++func memoAt(value any, at string) string {
++	if rv5MapOnly {
++		if _, ok := value.(map[string]any); !ok {
++			return ""
++		}
++	}
++	return at
++}
++func rv5Run(o *constraintEvalOpts, at string) string {
++	return fmt.Sprintf("%p|%s", o.memo, at)
++}
++func rv5Visit(at string, _ any) {
++	if !rv5Log {
++		return
++	}
++	rv5Mu.Lock()
++	rv5V[at]++
++	rv5Mu.Unlock()
++}
++func rv5Defs(at string, owners []*registry.ElementNode, typeRoot *registry.ElementNode, defs []typeDef, self *registry.StructureDefinition) {
++	if !rv5Log {
++		return
++	}
++	rv5Mu.Lock()
++	defer rv5Mu.Unlock()
++	m := rv5D[at]
++	if m == nil {
++		m = map[*registry.ElementNode]bool{}
++		rv5D[at] = m
++	}
++	local := map[*registry.ElementNode]bool{}
++	add := func(n *registry.ElementNode) {
++		if n != nil {
++			m[n] = true
++			local[n] = true
++		}
++	}
++	for _, o := range owners {
++		add(o)
++	}
++	add(typeRoot)
++	for _, d := range defs {
++		add(d.root)
++	}
++	if self != nil {
++		add(self.Tree().Root())
++	}
++	if len(local) > rv5Local[at] {
++		rv5Local[at] = len(local)
++	}
++}
++
++// RV5Report imprime visitas totales y los valores que superan la cota, con dos lecturas de «definiciones».
++func RV5Report() {
++	if os.Getenv("RV6_LOG") != "" {
++		fmt.Fprintf(os.Stderr, "RV6 scopes=%d\n", rv6Scopes.Load())
++	}
++	if !rv5Log {
++		return
++	}
++	t, overU, overL, mx := 0, 0, 0, 0
++	var ex []string
++	for k, n := range rv5V {
++		t += n
++		if n > mx {
++			mx = n
++		}
++		if n > 1+len(rv5D[k]) {
++			overU++
++		}
++		if n > 1+rv5Local[k] {
++			overL++
++			ex = append(ex, fmt.Sprintf("%s v=%d unionDefs=%d localDefs=%d", k, n, len(rv5D[k]), rv5Local[k]))
++		}
++	}
++	sort.Strings(ex)
++	if len(ex) > 5 {
++		ex = ex[:5]
++	}
++	fmt.Fprintf(os.Stderr, "RV5 values=%d visits=%d maxPerValue=%d over(1+union)=%d over(1+local)=%d %v\n", len(rv5V), t, mx, overU, overL, ex)
++}
++var rv5Mut = os.Getenv("RV5_MUT")
++var rv5LayerOwn = os.Getenv("RV5_LAYEROWN") != ""
++var rv5TypeKey = os.Getenv("RV5_TYPEKEY") != ""
++
++var rv6Scopes atomic.Int64
+diff --color -ruN -x *_test.go -x testdata pkg/constraint/tree.go rv6/src/pkg/constraint/tree.go
+--- pkg/constraint/tree.go	2026-11-18 12:59:25
++++ rv6/src/pkg/constraint/tree.go	2026-11-18 13:50:42
+@@ -4,6 +4,7 @@
+ 	"context"
+ 	"encoding/json"
+ 	"fmt"
++	"reflect"
+ 	"slices"
+ 	"strings"
+ 
+@@ -55,6 +56,9 @@
+ // o la del tipo base), con el primitivo y su `_x` (element) por foco.
+ func (v *Validator) walk(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, value any, prim registry.PrimitiveValue, raw, element json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
+ 	seen := seenSet{}
++	if rv5Log {
++		rv5Visit(rv5Run(opts, fhirPath), value)
++	}
+ 	// Primero se resuelven las definiciones del valor (sin evaluar nada) para saber qué claves redeclara
+ 	// el perfil de su tipo: el dueño no las evalúa (shadowedByType).
+ 	owners, nSlices, layerSD, layer := v.ownersOf(sd, node)
+@@ -77,6 +81,18 @@
+ 		}
+ 	}
+ 	shadowed := shadowedByType(owners, tps.Alternatives.DeclaredCount(), layers, seen)
++	if rv5ShadowMemo {
++		for _, n := range owners {
++			for _, c := range n.Def.Constraint {
++				if id := identityOf(c); seen[id] && slices.Contains(shadowed, id) {
++					opts.memo[memoKey{fhirPath, id, c.Severity}] = struct{}{}
++				}
++			}
++		}
++	}
++	if rv5Log {
++		rv5Defs(rv5Run(opts, fhirPath), owners, typeRoot, defs, self)
++	}
+ 
+ 	for i, n := range owners {
+ 		if i < nSlices {
+@@ -93,6 +109,13 @@
+ 	}
+ 	if typeRoot != nil {
+ 		releaseShadowed(seen, shadowed, typeRoot)
++		if rv5ShadowMemo {
++			for _, c := range typeRoot.Def.Constraint {
++				if id := identityOf(c); slices.Contains(shadowed, id) {
++					delete(opts.memo, memoKey{fhirPath, id, c.Severity})
++				}
++			}
++		}
+ 		v.typeRoot(typeSD, typeRoot, value, &raw, element, fhirPath, seen, opts, result)
+ 	}
+ 	if self != nil && self != typeSD {
+@@ -114,17 +137,62 @@
+ 		}
+ 		// Los hijos que son los de la definición propia del valor (self) no se comparan por tipo: esa
+ 		// definición la juzga la fase que la conoce (extensibility.html), no el perfil.
++		var sets []defSet
++		if !v.wrongType(node, typeCode) {
++			add := func(s *registry.StructureDefinition, kids []*registry.ElementNode) {
++				if len(kids) > 0 && (len(children) == 0 || kids[0].Parent != children[0].Parent) {
++					sets = append(sets, defSet{s, kids})
++				}
++			}
++			for n := node; n != nil; n = n.SliceOf {
++				add(sd, n.Children)
++			}
++			for o := nSlices; o < len(owners); o++ {
++				add(layerSD, owners[o].Children)
++			}
++			if typeRoot != nil && typeSD.Derivation == registry.DerivationConstraint && typeSD != self {
++				add(typeSD, typeRoot.Children)
++			}
++			if self != nil {
++				if r := self.Tree().Root(); r != nil {
++					add(self, r.Children)
++				}
++			}
++		}
++		if len(sets) > 0 {
++			opts = opts.scoped()
++		}
+ 		prevOwn := opts.own
+ 		if self != nil && childSD == self {
+ 			opts.own = self
+ 		}
+-		if opts.firstDescent(obj, childSD, children) {
++		if opts.firstDescent(obj, children) {
+ 			v.walkChildren(childSD, children, obj, raw, fhirPath, opts, result)
+ 		}
+ 		opts.own = prevOwn
++		v.walkSets(obj, raw, fhirPath, sets, self, opts, result)
+ 	}
+ }
+ 
++type defSet struct {
++	sd   *registry.StructureDefinition
++	kids []*registry.ElementNode
++}
++
++func (v *Validator) walkSets(obj map[string]any, raw json.RawMessage, fhirPath string, sets []defSet, self *registry.StructureDefinition, opts *constraintEvalOpts, result *issue.Result) {
++	for _, s := range sets {
++		if !opts.firstDescent(obj, s.kids) {
++			continue
++		}
++		prev := opts.own
++		if self != nil && s.sd == self {
++			opts.own = self
++		}
++		v.walkChildren(s.sd, s.kids, obj, raw, fhirPath, opts, result)
++		opts.own = prev
++	}
++}
++
+ // ownersOf da las definiciones del elemento que gobiernan un valor de node: node y los slices que divide
+ // (nSlices de ellas, la más específica primero), y los elementos a que apunta su contentReference; layerSD y layer
+ // son la última de ellas y su definición.
+@@ -207,6 +275,7 @@
+ 			v.layer(root, root.Def.Path, value, &raw, element, fhirPath, seen, opts, result)
+ 		}
+ 	}
++	opts = opts.scoped()
+ 	obj, isObject := value.(map[string]any)
+ 	childSD, children := sd, governedChildren(node)
+ 	if len(children) == 0 {
+@@ -214,32 +283,47 @@
+ 	}
+ 	own := len(children) > 0 && !v.wrongType(node, typeCode)
+ 
+-	if opts.descended == nil && isObject {
+-		// Desde aquí, un valor que dos capas llevan a los mismos hijos se camina una vez.
+-		shared := *opts
+-		shared.descended = map[descent]struct{}{}
+-		opts = &shared
++	ownWalk := func() {
++		if isObject && own && opts.firstDescent(obj, children) {
++			prevOwn := opts.own
++			if self != nil && childSD == self {
++				opts.own = self
++			}
++			v.walkChildren(childSD, children, obj, raw, fhirPath, opts, result)
++			opts.own = prevOwn
++		}
+ 	}
++	if rv5OwnFirst {
++		ownWalk()
++	}
+ 	runs := make([]layerRun, 0, len(defs))
+ 	for _, td := range defs {
+ 		run := beginLayer(opts)
+ 		lseen := cloneSeen(seen)
+ 		lraw := raw
+ 		v.typeRoot(td.sd, td.root, value, &lraw, element, fhirPath, lseen, run.opts, run.result)
+-		if isObject && !own && run.opts.firstDescent(obj, td.sd, td.root.Children) {
++		if isObject && run.opts.firstDescent(obj, td.root.Children) {
++			if rv5LayerOwn && self != nil && td.sd == self {
++				run.opts.own = self
++			}
+ 			v.walkChildren(td.sd, td.root.Children, obj, lraw, fhirPath, run.opts, run.result)
+ 		}
+ 		runs = append(runs, run)
+ 	}
+ 	mergeLayers(opts, runs, result)
+ 
+-	if isObject && own && opts.firstDescent(obj, childSD, children) {
+-		prevOwn := opts.own
+-		if self != nil && childSD == self {
+-			opts.own = self
++	if isObject && own {
++		ownWalk()
++		var sets []defSet
++		for n := node; n != nil; n = n.SliceOf {
++			sets = append(sets, defSet{sd, n.Children})
+ 		}
+-		v.walkChildren(childSD, children, obj, raw, fhirPath, opts, result)
+-		opts.own = prevOwn
++		if self != nil {
++			if r := self.Tree().Root(); r != nil {
++				sets = append(sets, defSet{self, r.Children})
++			}
++		}
++		v.walkSets(obj, raw, fhirPath, sets, self, opts, result)
+ 	}
+ }
+ 
+@@ -283,26 +367,38 @@
+ // raw, against the children of the definitions that govern the primitive by its type: the profile its
+ // type declares, each of those it conforms to when it declares several (one layer each, what two
+ // report the same is reported once), else the type's own.
+-func (v *Validator) walkPrimitiveExtensions(node *registry.ElementNode, typeCode string, ext map[string]any, prim registry.PrimitiveValue, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
++func (v *Validator) walkPrimitiveExtensions(sd *registry.StructureDefinition, node *registry.ElementNode, typeCode string, ext map[string]any, prim registry.PrimitiveValue, raw json.RawMessage, fhirPath string, opts *constraintEvalOpts, result *issue.Result) {
++	opts = opts.scoped()
++	for n := node; n != nil; n = n.SliceOf {
++		if opts.firstDescent(ext, n.Children) {
++			v.walkChildren(sd, n.Children, ext, raw, fhirPath, opts, result)
++		}
++	}
+ 	tps := v.registry.TypeProfilesOf(opts.ctx, node, typeCode)
+ 	if defs := v.alternativeTypes(tps, fhirPath, prim.Value, prim, opts, result); len(defs) > 1 {
+ 		runs := make([]layerRun, 0, len(defs))
+ 		for _, td := range defs {
+ 			run := beginLayer(opts)
+-			v.walkChildren(td.sd, td.root.Children, ext, raw, fhirPath, run.opts, run.result)
++			if run.opts.firstDescent(ext, td.root.Children) {
++				v.walkChildren(td.sd, td.root.Children, ext, raw, fhirPath, run.opts, run.result)
++			}
+ 			runs = append(runs, run)
+ 		}
+ 		mergeLayers(opts, runs, result)
+ 		return
+ 	} else if len(defs) == 1 {
+-		v.walkChildren(defs[0].sd, defs[0].root.Children, ext, raw, fhirPath, opts, result)
++		if opts.firstDescent(ext, defs[0].root.Children) {
++			v.walkChildren(defs[0].sd, defs[0].root.Children, ext, raw, fhirPath, opts, result)
++		}
+ 		return
+ 	}
+ 	typeSD, typeRoot := v.typeLayerOf(tps, node, node, typeCode, nil, opts)
+ 	if typeRoot == nil || typeSD.Kind != kindPrimitive {
+ 		return
+ 	}
+-	v.walkChildren(typeSD, typeRoot.Children, ext, raw, fhirPath, opts, result)
++	if opts.firstDescent(ext, typeRoot.Children) {
++		v.walkChildren(typeSD, typeRoot.Children, ext, raw, fhirPath, opts, result)
++	}
+ }
+ 
+ // typeRoot evalúa las constraints de la raíz de typeRoot, la definición de tipo typeSD que gobierna un
+@@ -316,7 +412,7 @@
+ 	if _, isObject := value.(map[string]any); isObject {
+ 		return
+ 	}
+-	pending := pendingConstraints(typeRoot, seen)
++	pending := pendingConstraints(typeRoot, seen, memoAt(value, fhirPath), opts)
+ 	if len(pending) == 0 {
+ 		return
+ 	}
+@@ -387,7 +483,7 @@
+ 				v.checkValueless(sd, node, cv.TypeCode, prim, extRaw, path, opts, result)
+ 			}
+ 			if cv.Ext != nil {
+-				v.walkPrimitiveExtensions(node, cv.TypeCode, cv.Ext, prim, extRaw, path, opts, result)
++				v.walkPrimitiveExtensions(sd, node, cv.TypeCode, cv.Ext, prim, extRaw, path, opts, result)
+ 			}
+ 		}
+ 	}
+@@ -473,12 +569,19 @@
+ 	opts.own = nil // un recurso contenido tiene sus propias definiciones
+ 
+ 	definitions := v.nestedDefinitions(opts.ctx, res, fhirPath, result)
+-	for _, sd := range v.holderDefinitions(holder, res, fhirPath, &opts, result) {
+-		if !slices.Contains(definitions, sd) {
+-			definitions = append(definitions, sd)
++	for h := holder; h != nil; h = h.SliceOf {
++		for _, sd := range v.holderDefinitions(h, res, fhirPath, &opts, result) {
++			if !slices.Contains(definitions, sd) {
++				definitions = append(definitions, sd)
++			}
+ 		}
+ 	}
+ 	for _, sd := range definitions {
++		nk := nestedKey{reflect.ValueOf(res).Pointer(), sd}
++		if _, done := opts.nested[nk]; done && rv5Mut != "nopair" {
++			continue
++		}
++		opts.nested[nk] = struct{}{}
+ 		if root := sd.Tree().Root(); root != nil {
+ 			v.walk(sd, root, "", res, registry.PrimitiveValue{}, raw, nil, fhirPath, &opts, result)
+ 		}
+@@ -651,7 +754,7 @@
+ // evaluate checks the constraints of one definition on a value, skipping those already evaluated
+ // on it (seen). The value's JSON is built once, on the first constraint that needs it.
+ func (v *Validator) evaluate(def *registry.ElementNode, defPath string, value any, raw *json.RawMessage, fhirPath string, seen seenSet, opts *constraintEvalOpts, result *issue.Result) {
+-	pending := pendingConstraints(def, seen)
++	pending := pendingConstraints(def, seen, memoAt(value, fhirPath), opts)
+ 	if m, ok := value.(map[string]any); ok && opts.contentJudged != nil && opts.contentJudged(m) {
+ 		// An element whose content was judged on the source (an empty object, reported; one whose
+ 		// misshapen values were dropped, which had content): the invariant that an element have
+@@ -718,11 +821,13 @@
+ 	for i, t := range def.Def.Type {
+ 		codes[i] = t.Code
+ 	}
+-	key := constraintID{key: typeNotAllowedKey(fhirPath)}
+-	if seen[key] {
++	typeKey := sd.URL
++	if rv5TypeKey {
++		typeKey = strings.Join(codes, ",")
++	}
++	if !firstReportKey(opts.ctx, typeNotAllowedKey(fhirPath)+"\x00"+typeKey) {
+ 		return
+ 	}
+-	seen[key] = true
+ 	result.AddErrorWithID(issue.DiagStructureTypeNotAllowed, map[string]any{
+ 		"profile": sd.URL,
+ 		"types":   strings.Join(codes, ", "),
+@@ -830,7 +935,7 @@
+ // type the model gives defPath, or else of typeCode, the element's type, carrying its id and
+ // extensions. A profile's path below a data type ("Patient.name.family") is no path of the model.
+ func (v *Validator) evaluateValueless(def *registry.ElementNode, defPath, typeCode string, element json.RawMessage, fhirPath string, seen seenSet, opts *constraintEvalOpts, result *issue.Result) {
+-	pending := pendingConstraints(def, seen)
++	pending := pendingConstraints(def, seen, memoAt(nil, fhirPath), opts)
+ 	if len(pending) == 0 {
+ 		return
+ 	}
+@@ -946,7 +1051,7 @@
+ 
+ // pendingConstraints are def's constraints with an expression that no definition of the value
+ // has had evaluated yet (seen, by identity), which it records.
+-func pendingConstraints(def *registry.ElementNode, seen seenSet) []registry.Constraint {
++func pendingConstraints(def *registry.ElementNode, seen seenSet, at string, opts *constraintEvalOpts) []registry.Constraint {
+ 	var pending []registry.Constraint
+ 	for _, c := range def.Def.Constraint {
+ 		k := identityOf(c)
+@@ -954,6 +1059,13 @@
+ 			continue
+ 		}
+ 		seen[k] = true
++		if at != "" && !rv5NoMemo && opts.memo != nil {
++			mk := memoKey{at, k, c.Severity}
++			if _, done := opts.memo[mk]; done {
++				continue
++			}
++			opts.memo[mk] = struct{}{}
++		}
+ 		pending = append(pending, c)
+ 	}
+ 	return pending
+diff --color -ruN -x *_test.go -x testdata pkg/registry/snapshot.go rv6/src/pkg/registry/snapshot.go
+--- pkg/registry/snapshot.go	2026-11-18 12:59:25
++++ rv6/src/pkg/registry/snapshot.go	2026-11-18 13:52:27
+@@ -1,6 +1,7 @@
+ package registry
+ 
+ import (
++	"os"
+ 	"cmp"
+ 	"context"
+ 	"encoding/json"
+@@ -210,6 +211,7 @@
+ 	if err != nil {
+ 		return nil, nil, fmt.Errorf("cannot generate snapshot for %s: %w", sd.URL, err)
+ 	}
++	stampConstraintSources(snapshot, baseSnapshot, baseSD.URL)
+ 	// The merge rebuilds the elements from their base's published JSON, so the corrections are
+ 	// applied again, for the version the profile was corrected for (its own, or the version
+ 	// validated when it declares none), or else its base's.
+@@ -239,6 +241,8 @@
+ 	// renamed holds the ids of the type slices the differential named as renamed choices
+ 	// ("Observation.valueQuantity").
+ 	renamed map[string]bool
++	cloned  map[string]string // id del clon -> id del hijo clonado
++	baseKeys map[string]map[string]bool
+ }
+ 
+ // applyDifferential merges differential elements onto a deep copy of the base snapshot, as
+@@ -259,9 +263,14 @@
+ 		return nil, nil, fmt.Errorf("deep copy failed: %w", err)
+ 	}
+ 	b := &snapshotBuilder{r: r, ctx: ctx, elements: elements, inBase: map[string]bool{},
+-		diffKeys: map[string]map[string]bool{}, floor: map[string]uint32{}, renamed: map[string]bool{}}
++		diffKeys: map[string]map[string]bool{}, floor: map[string]uint32{}, renamed: map[string]bool{}, cloned: map[string]string{}, baseKeys: map[string]map[string]bool{}}
+ 	for i := range elements {
+ 		b.inBase[elements[i].ID] = true
++		ks := map[string]bool{}
++		for _, c := range elements[i].Constraint {
++			ks[c.Key] = true
++		}
++		b.baseKeys[elements[i].ID] = ks
+ 		b.floor[elements[i].ID] = elements[i].Min
+ 	}
+ 
+@@ -287,6 +296,9 @@
+ 			return nil, nil, err
+ 		}
+ 		before := typeCodesOf(&b.elements[idx])
++		if err := b.yieldCloned(idx, id, placed); err != nil {
++			return nil, nil, err
++		}
+ 		merged, left, err := mergeElements(&b.elements[idx], placed, choices)
+ 		if err != nil {
+ 			return nil, nil, fmt.Errorf("merge failed for %s: %w", id, err)
+@@ -811,6 +823,7 @@
+ 		if f, ok := b.floor[b.elements[i].ID]; ok {
+ 			b.floor[child.ID] = f
+ 		}
++		b.cloned[child.ID] = b.elements[i].ID
+ 		children = append(children, *child)
+ 	}
+ 	if len(children) == 0 {
+@@ -1245,4 +1258,74 @@
+ 		return ""
+ 	}
+ 	return s
++}
++
++var rv5Snap = os.Getenv("RV5_SNAP") // "", "lit" (todo lo clonado cede), "strict" (cede solo lo que no viene de la base)
++
++func (b *snapshotBuilder) yieldCloned(idx int, id string, diff *ElementDefinition) error {
++	src, ok := b.cloned[id]
++	if !ok || rv5Snap == "" || len(diff.Constraint) == 0 {
++		return nil
++	}
++	for {
++		next, ok := b.cloned[src]
++		if !ok {
++			break
++		}
++		src = next
++	}
++	keys := map[string]bool{}
++	for _, c := range diff.Constraint {
++		if !(rv5Snap == "strict" && b.baseKeys[src][c.Key]) {
++			keys[c.Key] = true
++		}
++	}
++	m, err := rawToMap(b.elements[idx].raw)
++	if err != nil {
++		return err
++	}
++	var arr []json.RawMessage
++	if json.Unmarshal(m["constraint"], &arr) != nil {
++		return nil
++	}
++	out := arr[:0:0]
++	for _, it := range arr {
++		if !keys[extractJSONStringField(it, "key")] {
++			out = append(out, it)
++		}
++	}
++	nb, _ := json.Marshal(out)
++	m["constraint"] = nb
++	raw, _ := json.Marshal(m)
++	var e ElementDefinition
++	if err := json.Unmarshal(raw, &e); err != nil {
++		return err
++	}
++	e.raw = raw
++	b.elements[idx] = e
++	return nil
++}
++
++// stampConstraintSources anota en cada constraint heredada sin source el perfil base que la trae.
++func stampConstraintSources(snapshot, base *Snapshot, baseURL string) {
++	inBase := map[string]map[string]string{}
++	for i := range base.Element {
++		e := &base.Element[i]
++		m := map[string]string{}
++		for _, c := range e.Constraint {
++			m[c.Key+"\x00"+c.Expression] = cmp.Or(c.Source, baseURL)
++		}
++		inBase[e.ID] = m
++	}
++	for i := range snapshot.Element {
++		e := &snapshot.Element[i]
++		for j := range e.Constraint {
++			c := &e.Constraint[j]
++			if c.Source == "" {
++				if src, ok := inBase[e.ID][c.Key+"\x00"+c.Expression]; ok {
++					c.Source = src
++				}
++			}
++		}
++	}
+ }
+diff --color -ruN -x *_test.go -x testdata pkg/validator/validator.go rv6/src/pkg/validator/validator.go
+--- pkg/validator/validator.go	2026-11-17 06:17:49
++++ rv6/src/pkg/validator/validator.go	2026-11-18 13:54:48
+@@ -801,6 +801,7 @@
+ 		result.Issues = dropReported(result.Issues, from, reported, nested)
+ 	}
+ 
++	result.Issues = constraint.CollapseSeverities(ctx, result.Issues)
+ 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
+ 
+ 	// Located in the source as written: the issues of the shape check name its paths, the others
+--- cmd/gofhir-validator/main.go	2026-11-18 12:59:25
++++ rv6/src/cmd/gofhir-validator/main.go	2026-11-18 13:50:42
+@@ -3,6 +3,7 @@
+ package main
+ 
+ import (
++	"github.com/gofhir/validator/v2/pkg/constraint"
+ 	"context"
+ 	"encoding/json"
+ 	"errors"
+@@ -111,6 +112,7 @@
+ 	}
+ 
+ 	exitCode := run(config)
++	constraint.RV5Report()
+ 	os.Exit(exitCode)
+ }
+ 
