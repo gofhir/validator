@@ -1,0 +1,22 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Reference",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Reference",
+    "path": "Reference",
+    "short": "x"
+   }
+  ]
+ },
+ "fhirVersion": "4.3.0",
+ "id": "ref1-inh-v430-ref",
+ "kind": "complex-type",
+ "name": "EcvRef1InhV430Ref",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Reference",
+ "url": "http://example.org/ecv/ref1-inh-v430-ref"
+}

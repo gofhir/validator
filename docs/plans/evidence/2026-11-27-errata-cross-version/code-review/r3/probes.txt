@@ -1,0 +1,38 @@
+=== RUN   TestErrataCrossVersionReviewRound2MixedBrokenAncestry
+=== RUN   TestErrataCrossVersionReviewRound2MixedBrokenAncestry/missing
+=== RUN   TestErrataCrossVersionReviewRound2MixedBrokenAncestry/cycle
+--- PASS: TestErrataCrossVersionReviewRound2MixedBrokenAncestry (0.72s)
+    --- PASS: TestErrataCrossVersionReviewRound2MixedBrokenAncestry/missing (0.71s)
+    --- PASS: TestErrataCrossVersionReviewRound2MixedBrokenAncestry/cycle (0.00s)
+=== RUN   TestErrataCrossVersionReviewRound2NonStringMember
+=== RUN   TestErrataCrossVersionReviewRound2NonStringMember/123
+    review_round3_test.go:38: rejected: json: cannot unmarshal number into Go struct field ElementDefinition.constraint.1.expression of type string
+=== RUN   TestErrataCrossVersionReviewRound2NonStringMember/true
+    review_round3_test.go:38: rejected: json: cannot unmarshal bool into Go struct field ElementDefinition.constraint.1.expression of type string
+=== RUN   TestErrataCrossVersionReviewRound2NonStringMember/{}
+    review_round3_test.go:38: rejected: json: cannot unmarshal object into Go struct field ElementDefinition.constraint.1.expression of type string
+=== RUN   TestErrataCrossVersionReviewRound2NonStringMember/[]
+    review_round3_test.go:38: rejected: json: cannot unmarshal array into Go struct field ElementDefinition.constraint.1.expression of type string
+=== RUN   TestErrataCrossVersionReviewRound2NonStringMember/null
+--- PASS: TestErrataCrossVersionReviewRound2NonStringMember (0.00s)
+    --- PASS: TestErrataCrossVersionReviewRound2NonStringMember/123 (0.00s)
+    --- PASS: TestErrataCrossVersionReviewRound2NonStringMember/true (0.00s)
+    --- PASS: TestErrataCrossVersionReviewRound2NonStringMember/{} (0.00s)
+    --- PASS: TestErrataCrossVersionReviewRound2NonStringMember/[] (0.00s)
+    --- PASS: TestErrataCrossVersionReviewRound2NonStringMember/null (0.00s)
+=== RUN   TestErrataCrossVersionReviewRound3RemovedReplaced
+--- PASS: TestErrataCrossVersionReviewRound3RemovedReplaced (0.87s)
+=== RUN   TestErrataCrossVersionReviewRound3ConcurrentRepeat
+--- PASS: TestErrataCrossVersionReviewRound3ConcurrentRepeat (0.00s)
+=== RUN   TestErrataCrossVersionReviewRound3SyntheticPaths
+    review_round3_test.go:106: synthetic external contentReference invariant present=false
+    review_round3_test.go:108: synthetic unrolled invariant present=false (no counterpart in Dosage base)
+    review_round3_test.go:114: synthetic reslice invariant present=false
+--- PASS: TestErrataCrossVersionReviewRound3SyntheticPaths (0.00s)
+=== RUN   TestErrataCrossVersionReviewRound3MutationDomain
+    review_round3_test.go:131: own="": missing Bundle/bdl-15 expr="type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')"
+    review_round3_test.go:146: own="": production, mutation20 and mutation22 outputs equal
+    review_round3_test.go:146: own="false": production, mutation20 and mutation22 outputs equal
+--- PASS: TestErrataCrossVersionReviewRound3MutationDomain (0.00s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	2.143s

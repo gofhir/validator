@@ -1,0 +1,25 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry"
+   }
+  ]
+ },
+ "fhirVersion": "4.3.0",
+ "id": "bdl8-inh-v430",
+ "kind": "resource",
+ "name": "EcvBdl8InhV430",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Bundle",
+ "url": "http://example.org/ecv/bdl8-inh-v430"
+}

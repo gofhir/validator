@@ -1,0 +1,33 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/vitalsigns",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "constraint": [
+     {
+      "expression": "($this as dateTime).toString().length() >= 8",
+      "human": "if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day",
+      "key": "vs-1",
+      "severity": "error"
+     }
+    ],
+    "id": "Observation.effective[x]",
+    "path": "Observation.effective[x]"
+   }
+  ]
+ },
+ "fhirVersion": "4.0.1",
+ "id": "vs1-copy-v401",
+ "kind": "resource",
+ "name": "EcvVs1CopyV401",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Observation",
+ "url": "http://example.org/ecv/vs1-copy-v401"
+}

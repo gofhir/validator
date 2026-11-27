@@ -1,0 +1,1533 @@
+{
+ "cases": {
+  "explicit/bdl8-copy-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-copy-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-copy-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "explicit/bdl8-copy-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "explicit/bdl8-copy-v430/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-copy-v430/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-copy-v500/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-copy-v500/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/bdl8-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-copy-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-copy-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-copy-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-copy-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-copy-v430/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-copy-v430/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-copy-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-copy-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/csd0-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/id-copy-none/applies": {
+   "expected": {
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "explicit/id-copy-none/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/id-copy-v401/applies": {
+   "expected": {}
+  },
+  "explicit/id-copy-v401/not": {
+   "expected": {}
+  },
+  "explicit/id-copy-v430/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "explicit/id-copy-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/id-copy-v500/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "explicit/id-copy-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/id-inh-none/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "explicit/id-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/id-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "explicit/id-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/id-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "explicit/id-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/id-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "explicit/id-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-copy-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-copy-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-copy-v401/applies": {
+   "expected": {
+    "4.0.1": []
+   }
+  },
+  "explicit/ref1-copy-v401/not": {
+   "expected": {
+    "4.0.1": []
+   }
+  },
+  "explicit/ref1-copy-v430/applies": {
+   "expected": {
+    "4.3.0": []
+   }
+  },
+  "explicit/ref1-copy-v430/not": {
+   "expected": {
+    "4.3.0": []
+   }
+  },
+  "explicit/ref1-copy-v500/applies": {
+   "expected": {
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-copy-v500/not": {
+   "expected": {
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/ref1-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-copy-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-copy-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-copy-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "explicit/tim9-copy-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "explicit/tim9-copy-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "explicit/tim9-copy-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "explicit/tim9-copy-v500/applies": {
+   "expected": {
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-copy-v500/not": {
+   "expected": {
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/tim9-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-copy-none/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-copy-none/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-copy-v401/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-copy-v401/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-copy-v430/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-copy-v430/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-copy-v500/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-copy-v500/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "explicit/vs1-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-copy-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-copy-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-copy-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "meta/bdl8-copy-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "meta/bdl8-copy-v430/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-copy-v430/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-copy-v500/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-copy-v500/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/bdl8-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-copy-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-copy-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-copy-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-copy-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-copy-v430/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-copy-v430/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-copy-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-copy-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/csd0-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/id-copy-none/applies": {
+   "expected": {
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "meta/id-copy-none/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/id-copy-v401/applies": {
+   "expected": {}
+  },
+  "meta/id-copy-v401/not": {
+   "expected": {}
+  },
+  "meta/id-copy-v430/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "meta/id-copy-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/id-copy-v500/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "meta/id-copy-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/id-inh-none/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "meta/id-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/id-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "meta/id-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/id-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "meta/id-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/id-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "4.3.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ],
+    "5.0.0": [
+     {
+      "kind": "id-malformed",
+      "location": "Patient.id",
+      "severity": "error"
+     }
+    ]
+   }
+  },
+  "meta/id-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-copy-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-copy-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-copy-v401/applies": {
+   "expected": {
+    "4.0.1": []
+   }
+  },
+  "meta/ref1-copy-v401/not": {
+   "expected": {
+    "4.0.1": []
+   }
+  },
+  "meta/ref1-copy-v430/applies": {
+   "expected": {
+    "4.3.0": []
+   }
+  },
+  "meta/ref1-copy-v430/not": {
+   "expected": {
+    "4.3.0": []
+   }
+  },
+  "meta/ref1-copy-v500/applies": {
+   "expected": {
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-copy-v500/not": {
+   "expected": {
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/ref1-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-copy-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-copy-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-copy-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "meta/tim9-copy-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "meta/tim9-copy-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "meta/tim9-copy-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": []
+   }
+  },
+  "meta/tim9-copy-v500/applies": {
+   "expected": {
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-copy-v500/not": {
+   "expected": {
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/tim9-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-copy-none/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-copy-none/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-copy-v401/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-copy-v401/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-copy-v430/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-copy-v430/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-copy-v500/applies": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-copy-v500/not": {
+   "expected": {
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-inh-none/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-inh-none/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-inh-v401/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-inh-v401/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-inh-v430/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-inh-v430/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-inh-v500/applies": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "meta/vs1-inh-v500/not": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  },
+  "x/disp": {
+   "expected": {
+    "4.0.1": [],
+    "4.3.0": [],
+    "5.0.0": []
+   }
+  }
+ },
+ "excluded": {
+  "4.0.1": {
+   "bdl8-copy-v430": "snapshot-command: Exception generating snapshot for http://example.org/ecv/bdl8-copy-v430: The constraint 'bdl-8' at Bundle.entry has a different expression to the constraint 'bdl-8' it inherits ('fullUrl.exists() implies fullUrl.contains('/_history/').not()' vs 'fullUrl.contains('/_history/').not()'). A constraint with the same key must be the same constraint",
+   "bdl8-copy-v500": "snapshot-command: Exception generating snapshot for http://example.org/ecv/bdl8-copy-v500: The constraint 'bdl-8' at Bundle.entry has a different expression to the constraint 'bdl-8' it inherits ('fullUrl.exists() implies fullUrl.contains('/_history/').not()' vs 'fullUrl.contains('/_history/').not()'). A constraint with the same key must be the same constraint",
+   "csd0-copy-v430": "snapshot-command: Exception generating snapshot for http://example.org/ecv/csd0-copy-v430: The constraint 'csd-0' at CodeSystem has a different expression to the constraint 'csd-0' it inherits ('name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')' vs 'name.matches('[A-Z]([A-Za-z0-9_]){0,254}')'). A constraint with the same key must be the same constraint",
+   "id-copy-none": "validation: Exception generating snapshot for http://example.org/ecv/id-copy-none: StructureDefinition http://example.org/ecv/id-copy-none at Patient.id: invalid constrained type http://hl7.org/fhirpath/System.String from http://hl7.org/fhirpath/System.String in http://hl7.org/fhir/StructureDefinition/Patient",
+   "id-copy-v401": "validation: Exception generating snapshot for http://example.org/ecv/id-copy-v401: StructureDefinition http://example.org/ecv/id-copy-v401 at Patient.id: invalid constrained type http://hl7.org/fhirpath/System.String from http://hl7.org/fhirpath/System.String in http://hl7.org/fhir/StructureDefinition/Patient",
+   "ref1-copy-v430": "validation: Unable to generate snapshot @3 for http://example.org/ecv/ref1-copy-v430-ref: Profile EcvRef1CopyV430Ref (http://example.org/ecv/ref1-copy-v430-ref), element EcvRef1CopyV430Ref.Reference. Error generating snapshot: The constraint 'ref-1' at Reference has a different expression to the constraint 'ref-1' it inherits ('reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootRe",
+   "ref1-copy-v500": "snapshot-command: Exception generating snapshot for http://example.org/ecv/ref1-copy-v500-ref: The constraint 'ref-1' at Reference has a different expression to the constraint 'ref-1' it inherits ('reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))' vs 'reference.startsWith(",
+   "tim9-copy-v500": "validation: Unable to generate snapshot @3 for http://example.org/ecv/tim9-copy-v500-tp: Profile EcvTim9CopyV500Tp (http://example.org/ecv/tim9-copy-v500-tp), element EcvTim9CopyV500Tp.Timing.repeat. Error generating snapshot: The constraint 'tim-9' at Timing.repeat has a different expression to the constraint 'tim-9' it inherits ('offset.empty() or (when.exists() and when.select($this in ('C' | 'CM' | 'CD' |",
+   "vs1-copy-none": "snapshot-command: Exception generating snapshot for http://example.org/ecv/vs1-copy-none: The constraint 'vs-1' at Observation.effective[x] has a different expression to the constraint 'vs-1' it inherits ('($this as dateTime).toString().length() >= 8' vs '$this is dateTime implies $this.toString().length() >= 10'). A constraint with the same key must be the same constraint",
+   "vs1-copy-v401": "snapshot-command: Exception generating snapshot for http://example.org/ecv/vs1-copy-v401: The constraint 'vs-1' at Observation.effective[x] has a different expression to the constraint 'vs-1' it inherits ('($this as dateTime).toString().length() >= 8' vs '$this is dateTime implies $this.toString().length() >= 10'). A constraint with the same key must be the same constraint",
+   "vs1-copy-v430": "snapshot-command: Exception generating snapshot for http://example.org/ecv/vs1-copy-v430: The constraint 'vs-1' at Observation.effective[x] has a different expression to the constraint 'vs-1' it inherits ('($this as dateTime).toString().length() >= 8' vs '$this is dateTime implies $this.toString().length() >= 10'). A constraint with the same key must be the same constraint",
+   "vs1-copy-v500": "snapshot-command: Exception generating snapshot for http://example.org/ecv/vs1-copy-v500: The constraint 'vs-1' at Observation.effective[x] has a different expression to the constraint 'vs-1' it inherits ('($this as dateTime).toString().length() >= 8' vs '$this is dateTime implies $this.toString().length() >= 10'). A constraint with the same key must be the same constraint"
+  },
+  "4.3.0": {
+   "id-copy-v401": "validation: Exception generating snapshot for http://example.org/ecv/id-copy-v401: StructureDefinition http://example.org/ecv/id-copy-v401 at Patient.id: invalid constrained type http://hl7.org/fhirpath/System.String from http://hl7.org/fhirpath/System.String in http://hl7.org/fhir/StructureDefinition/Patient",
+   "ref1-copy-v401": "validation: Unable to generate snapshot @3 for http://example.org/ecv/ref1-copy-v401-ref: Profile EcvRef1CopyV401Ref (http://example.org/ecv/ref1-copy-v401-ref), element EcvRef1CopyV401Ref.Reference. Error generating snapshot: The constraint 'ref-1' at Reference has a different expression to the constraint 'ref-1' it inherits ('reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootRe",
+   "ref1-copy-v500": "validation: Unable to generate snapshot @3 for http://example.org/ecv/ref1-copy-v500-ref: Profile EcvRef1CopyV500Ref (http://example.org/ecv/ref1-copy-v500-ref), element EcvRef1CopyV500Ref.Reference. Error generating snapshot: The constraint 'ref-1' at Reference has a different expression to the constraint 'ref-1' it inherits ('reference.exists()  implies (reference.startsWith('#').not() or (reference.substri",
+   "tim9-copy-v500": "validation: Unable to generate snapshot @3 for http://example.org/ecv/tim9-copy-v500-tp: Profile EcvTim9CopyV500Tp (http://example.org/ecv/tim9-copy-v500-tp), element EcvTim9CopyV500Tp.Timing.repeat. Error generating snapshot: The constraint 'tim-9' at Timing.repeat has a different expression to the constraint 'tim-9' it inherits ('offset.empty() or (when.exists() and when.select($this in ('C' | 'CM' | 'CD' |"
+  },
+  "5.0.0": {
+   "bdl8-copy-v401": "snapshot-command: Exception generating snapshot for http://example.org/ecv/bdl8-copy-v401: The constraint 'bdl-8' at Bundle.entry has a different expression to the constraint 'bdl-8' it inherits ('fullUrl.contains('/_history/').not()' vs 'fullUrl.exists() implies fullUrl.contains('/_history/').not()'). A constraint with the same key must be the same constraint",
+   "id-copy-v401": "validation: Exception generating snapshot for http://example.org/ecv/id-copy-v401: StructureDefinition http://example.org/ecv/id-copy-v401 at Patient.id: invalid constrained type http://hl7.org/fhirpath/System.String from http://hl7.org/fhirpath/System.String in http://hl7.org/fhir/StructureDefinition/Patient",
+   "ref1-copy-v401": "snapshot-command: Exception generating snapshot for http://example.org/ecv/ref1-copy-v401-ref: The constraint 'ref-1' at Reference has a different expression to the constraint 'ref-1' it inherits ('reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))' vs 'reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url'",
+   "ref1-copy-v430": "snapshot-command: Unable to generate snapshot @3 for http://example.org/ecv/ref1-copy-v430-ref: Profile EcvRef1CopyV430Ref (http://example.org/ecv/ref1-copy-v430-ref), element EcvRef1CopyV430Ref.Reference. Error generating snapshot: The constraint 'ref-1' at Reference has a different expression to the constraint 'ref-1' it inherits ('reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootRe",
+   "tim9-copy-v401": "validation: Unable to generate snapshot @3 for http://example.org/ecv/tim9-copy-v401-tp: Profile EcvTim9CopyV401Tp (http://example.org/ecv/tim9-copy-v401-tp), element EcvTim9CopyV401Tp.Timing.repeat. Error generating snapshot: The constraint 'tim-9' at Timing.repeat has a different expression to the constraint 'tim-9' it inherits ('offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not",
+   "tim9-copy-v430": "validation: Unable to generate snapshot @3 for http://example.org/ecv/tim9-copy-v430-tp: Profile EcvTim9CopyV430Tp (http://example.org/ecv/tim9-copy-v430-tp), element EcvTim9CopyV430Tp.Timing.repeat. Error generating snapshot: The constraint 'tim-9' at Timing.repeat has a different expression to the constraint 'tim-9' it inherits ('offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not"
+  }
+ }
+}

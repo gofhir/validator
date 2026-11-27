@@ -1,0 +1,6 @@
+=== RUN   TestV4LeafAndClone
+    v4_adversarial_probe_test.go:301: lost raw values
+--- FAIL: TestV4LeafAndClone (0.00s)
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/registry	0.502s
+FAIL

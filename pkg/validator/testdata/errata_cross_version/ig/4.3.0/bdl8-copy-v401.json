@@ -1,0 +1,33 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "constraint": [
+     {
+      "expression": "fullUrl.contains('/_history/').not()",
+      "human": "fullUrl cannot be a version specific reference",
+      "key": "bdl-8",
+      "severity": "error"
+     }
+    ],
+    "id": "Bundle.entry",
+    "path": "Bundle.entry"
+   }
+  ]
+ },
+ "fhirVersion": "4.0.1",
+ "id": "bdl8-copy-v401",
+ "kind": "resource",
+ "name": "EcvBdl8CopyV401",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Bundle",
+ "url": "http://example.org/ecv/bdl8-copy-v401"
+}

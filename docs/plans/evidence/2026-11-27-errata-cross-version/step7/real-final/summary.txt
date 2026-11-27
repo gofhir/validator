@@ -1,0 +1,8 @@
+ips archivos 44 issues base 57 head 57 nuevos 0 perdidos 0 veredictos cambiados 0
+mcode archivos 179 issues base 349 head 349 nuevos 0 perdidos 0 veredictos cambiados 0
+usc610 archivos 183 issues base 257 head 257 nuevos 0 perdidos 0 veredictos cambiados 0
+core-r4 archivos 5306 issues base 61086 head 61086 nuevos 0 perdidos 0 veredictos cambiados 0
+core-r4b archivos 2840 issues base 27858 head 27858 nuevos 0 perdidos 0 veredictos cambiados 0
+core-r5 archivos 2822 issues base 29385 head 29385 nuevos 0 perdidos 0 veredictos cambiados 0
+
+[exited with code 0]

@@ -1,0 +1,33 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Timing",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Timing",
+    "path": "Timing",
+    "short": "x"
+   },
+   {
+    "constraint": [
+     {
+      "expression": "offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))",
+      "human": "If there's an offset, there must be a when (and not C, CM, CD, CV)",
+      "key": "tim-9",
+      "severity": "error"
+     }
+    ],
+    "id": "Timing.repeat",
+    "path": "Timing.repeat"
+   }
+  ]
+ },
+ "id": "tim9-copy-none-tp",
+ "kind": "complex-type",
+ "name": "EcvTim9CopyNoneTp",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Timing",
+ "url": "http://example.org/ecv/tim9-copy-none-tp"
+}

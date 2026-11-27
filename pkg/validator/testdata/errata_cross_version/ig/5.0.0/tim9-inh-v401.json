@@ -1,0 +1,33 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.effective[x]",
+    "path": "Observation.effective[x]",
+    "type": [
+     {
+      "code": "Timing",
+      "profile": [
+       "http://example.org/ecv/tim9-inh-v401-tp"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "fhirVersion": "4.0.1",
+ "id": "tim9-inh-v401",
+ "kind": "resource",
+ "name": "EcvTim9InhV401",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Observation",
+ "url": "http://example.org/ecv/tim9-inh-v401"
+}

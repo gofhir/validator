@@ -1,0 +1,26 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.id",
+    "min": 1,
+    "path": "Patient.id"
+   }
+  ]
+ },
+ "fhirVersion": "5.0.0",
+ "id": "id-inh-v500",
+ "kind": "resource",
+ "name": "EcvIdInhV500",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Patient",
+ "url": "http://example.org/ecv/id-inh-v500"
+}

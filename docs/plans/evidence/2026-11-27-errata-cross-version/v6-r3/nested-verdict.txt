@@ -1,0 +1,10 @@
+=== RUN   TestV6UnrolledNestedBundleAddition
+=== RUN   TestV6UnrolledNestedBundleAddition/Bundle
+    v6_review_probe_test.go:31: Constraint failed: bdl-15: 'Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated' (defined in http://hl7.org/fhir/StructureDefinition/Bundle) at [Bundle.entry[0].resource]
+=== RUN   TestV6UnrolledNestedBundleAddition/Parameters
+    v6_review_probe_test.go:31: Constraint failed: bdl-15: 'Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated' (defined in http://hl7.org/fhir/StructureDefinition/Bundle) at [Parameters.parameter[0].resource]
+--- PASS: TestV6UnrolledNestedBundleAddition (0.98s)
+    --- PASS: TestV6UnrolledNestedBundleAddition/Bundle (0.97s)
+    --- PASS: TestV6UnrolledNestedBundleAddition/Parameters (0.01s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/validator	1.525s

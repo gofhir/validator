@@ -1,0 +1,21 @@
+{
+ "entry": [
+  {
+   "request": {
+    "method": "POST",
+    "url": "Patient"
+   },
+   "resource": {
+    "id": "p1",
+    "resourceType": "Patient",
+    "text": {
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>",
+     "status": "generated"
+    }
+   }
+  }
+ ],
+ "id": "ba",
+ "resourceType": "Bundle",
+ "type": "transaction"
+}

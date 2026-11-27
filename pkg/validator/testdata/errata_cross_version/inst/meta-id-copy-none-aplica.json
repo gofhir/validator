@@ -1,0 +1,13 @@
+{
+ "id": "a_b",
+ "meta": {
+  "profile": [
+   "http://example.org/ecv/id-copy-none"
+  ]
+ },
+ "resourceType": "Patient",
+ "text": {
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>",
+  "status": "generated"
+ }
+}

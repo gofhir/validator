@@ -1,0 +1,43 @@
+package registry
+
+import (
+ "context"
+ "encoding/json"
+ "testing"
+)
+
+func TestReviewRound2MixedBrokenAncestry(t *testing.T) {
+ for _, ending := range []string{"missing", "cycle"} {
+  t.Run(ending, func(t *testing.T) {
+   r := ecvRegistry(t, "4.0.1")
+   base, parent := "http://example.org/r2/r4-base", "http://example.org/r2/r5-parent"
+   end := "http://example.org/r2/missing"
+   if ending == "cycle" { end = base }
+   var published map[string]json.RawMessage
+   if err := json.Unmarshal(ecvOfficialSDs(t,"4.0.1")[ecvCore+"Bundle"], &published); err != nil {t.Fatal(err)}
+   published["url"] = json.RawMessage(ecvJSON(base))
+   published["derivation"] = json.RawMessage(`"constraint"`)
+   published["baseDefinition"] = json.RawMessage(ecvJSON(parent))
+   delete(published,"differential")
+   ecvLoad(t,r,ecvSD(parent,"5.0.0","resource","Bundle",end,`{"id":"Bundle","path":"Bundle"}`),ecvJSON(published),ecvSD(base+"-leaf","4.0.1","resource","Bundle",base,`{"id":"Bundle","path":"Bundle","short":"leaf"}`))
+   if !constraintKeys(ecvElement(t,r.GetByURL(base),"Bundle"))["bdl-15"] {t.Fatal("base lacks bdl-15")}
+   sd := ecvSnapshot(t,r,base+"-leaf")
+   if !constraintKeys(ecvElement(t,sd,"Bundle"))["bdl-15"] {t.Errorf("R4 published base has bdl-15 but leaf loses it; fallback=%s",r.rootVersion(context.Background(),sd))}
+  })
+ }
+}
+
+func TestReviewRound2NonStringMember(t *testing.T) {
+ for _, value := range []string{`123`,`true`,`{}`,`[]`,`null`} {
+  t.Run(value,func(t *testing.T){
+   raw := `{"element":[{"id":"Reference","path":"Reference","constraint":[`+ecvConstraintJSON("ref-1", ecvExpression(t,"4.0.1","Reference","ref-1"))+`,{"key":"own","expression":`+value+`}]}]}`
+   var s Snapshot
+   err := json.Unmarshal([]byte(raw), &s)
+   if value != "null" {if err == nil {t.Fatal("non-string accepted")}; t.Logf("rejected: %v",err);return}
+   if err != nil {t.Fatal(err)}
+   correctElements("4.0.1",s.Element)
+   c := ecvRawConstraint(t,&s.Element[0],"own")
+   if string(c["expression"]) != "null" {t.Errorf("null changed: %s",c["expression"])}
+  })
+ }
+}

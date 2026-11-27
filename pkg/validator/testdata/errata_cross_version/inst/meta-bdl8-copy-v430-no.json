@@ -1,0 +1,27 @@
+{
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:12345678-1234-4234-8234-123456789012",
+   "request": {
+    "method": "POST",
+    "url": "Patient"
+   },
+   "resource": {
+    "id": "p1",
+    "resourceType": "Patient",
+    "text": {
+     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>",
+     "status": "generated"
+    }
+   }
+  }
+ ],
+ "id": "bn",
+ "meta": {
+  "profile": [
+   "http://example.org/ecv/bdl8-copy-v430"
+  ]
+ },
+ "resourceType": "Bundle",
+ "type": "transaction"
+}

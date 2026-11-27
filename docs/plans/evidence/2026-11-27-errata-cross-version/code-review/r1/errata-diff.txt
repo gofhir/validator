@@ -1,0 +1,191 @@
+diff --git a/pkg/registry/errata.go b/pkg/registry/errata.go
+index 0e461d5..786233f 100644
+--- a/pkg/registry/errata.go
++++ b/pkg/registry/errata.go
+@@ -1,6 +1,7 @@
+ package registry
+ 
+ import (
++	"encoding/json"
+ 	"slices"
+ 
+ 	"github.com/gofhir/validator/v2/internal/versionorder"
+@@ -291,12 +292,109 @@ func applyErrata(sd *StructureDefinition, fallback string) {
+ }
+ 
+ // correctSnapshot corrects the elements of a snapshot written for fhirVersion: the constraints the
+-// errata add, and those they correct. A generated snapshot is corrected the same way.
++// errata add, and those they correct.
+ func correctSnapshot(fhirVersion string, elems []ElementDefinition) {
+ 	addConstraints(fhirVersion, elems)
+ 	correctElements(fhirVersion, elems)
+ }
+ 
++// correctPlaced corrects, with the version of the profile that wrote it, the differential element
++// placed at base, before it is merged: the elements generated from it (slices, reslices, children
++// unrolled) are built from its raw JSON, so they inherit the corrected text. The erratum is
++// identified by the element of the base at that position (its path and base.path), as the
++// differential may declare no base.path. Only what the profile wrote is corrected: the merge
++// takes what it inherits from the raw JSON of the base, already corrected for its own definition.
++func correctPlaced(fhirVersion string, placed, base *ElementDefinition) {
++	selected := *placed
++	selected.Path, selected.Base = base.Path, base.Base
++	// Se corrige una copia: los slices del placed son los del diferencial del perfil.
++	selected.Constraint = slices.Clone(placed.Constraint)
++	selected.Type = slices.Clone(placed.Type)
++	for i := range selected.Type {
++		selected.Type[i].Extension = slices.Clone(selected.Type[i].Extension)
++	}
++	if !correctElement(fhirVersion, &selected) {
++		return
++	}
++	selected.patchRaw()
++	placed.Constraint, placed.Type, placed.raw = selected.Constraint, selected.Type, selected.raw
++	placed.keepPrefixedValues()
++}
++
++// patchRaw writes into e's raw JSON the leaves an erratum corrected in its fields: the expression of
++// each constraint and the valueUrl of the fhir-type extension of each type, and nothing else, so
++// every member the model does not know keeps its value. The elements copied from e (merge, unroll,
++// clone) are built from its raw JSON and so inherit the correction. The constraints an erratum adds
++// are not written: they live in the fields only (see addConstraints).
++func (e *ElementDefinition) patchRaw() {
++	m, err := rawToMap(e.raw)
++	if err != nil || len(m) == 0 {
++		return
++	}
++	var constraints []map[string]json.RawMessage
++	if err := unmarshalMember(m, "constraint", &constraints); err != nil {
++		return
++	}
++	var types []map[string]json.RawMessage
++	if err := unmarshalMember(m, "type", &types); err != nil {
++		return
++	}
++	changed := false
++	for i := range min(len(e.Constraint), len(constraints)) {
++		if setString(constraints[i], "expression", e.Constraint[i].Expression) {
++			changed = true
++		}
++	}
++	if changed {
++		m["constraint"], _ = json.Marshal(constraints)
++	}
++	for i := range min(len(e.Type), len(types)) {
++		var exts []map[string]json.RawMessage
++		if unmarshalMember(types[i], "extension", &exts) != nil {
++			return
++		}
++		patched := false
++		for k := range min(len(e.Type[i].Extension), len(exts)) {
++			if x := e.Type[i].Extension[k]; x.URL == fhirTypeExtension && setString(exts[k], "valueUrl", x.ValueURL) {
++				patched = true
++			}
++		}
++		if patched {
++			changed = true
++			types[i]["extension"], _ = json.Marshal(exts)
++			m["type"], _ = json.Marshal(types)
++		}
++	}
++	if !changed {
++		return
++	}
++	raw, err := json.Marshal(m)
++	if err != nil {
++		return
++	}
++	e.raw = raw
++	e.keepPrefixedValues() // la caché de fixed[x] y pattern[x] vale solo para el raw que la produjo
++}
++
++// unmarshalMember decodes member of m into v; a missing member leaves v as it is.
++func unmarshalMember(m map[string]json.RawMessage, member string, v any) error {
++	data, ok := m[member]
++	if !ok {
++		return nil
++	}
++	return json.Unmarshal(data, v)
++}
++
++// setString sets the string member of obj to value, and reports whether that changed it.
++func setString(obj map[string]json.RawMessage, member, value string) bool {
++	var current string
++	if data, ok := obj[member]; ok && json.Unmarshal(data, &current) == nil && current == value {
++		return false
++	}
++	obj[member], _ = json.Marshal(value)
++	return true
++}
++
+ // inRelease reports whether a definition written for fhirVersion is of the release an erratum names:
+ // the defect is published in every version of it (4.0.0 and 4.0.1).
+ func inRelease(erratum, fhirVersion string) bool {
+@@ -339,18 +437,22 @@ func correctContexts(fhirVersion string, sd *StructureDefinition) {
+ 	}
+ }
+ 
+-// correctElements corrects elements of a definition written for fhirVersion.
++// correctElements corrects elements of a definition written for fhirVersion, in their fields and in
++// their raw JSON.
+ func correctElements(fhirVersion string, elems []ElementDefinition) {
+ 	if fhirVersion == "" {
+ 		return
+ 	}
+ 	for i := range elems {
+-		correctElement(fhirVersion, &elems[i])
++		if correctElement(fhirVersion, &elems[i]) {
++			elems[i].patchRaw()
++		}
+ 	}
+ }
+ 
+-func correctElement(fhirVersion string, e *ElementDefinition) {
+-	correctConstraints(fhirVersion, e)
++// correctElement corrects e's fields, and reports whether it changed any.
++func correctElement(fhirVersion string, e *ElementDefinition) bool {
++	changed := correctConstraints(fhirVersion, e)
+ 	for _, er := range typeErrata {
+ 		if !inRelease(er.fhirVersion, fhirVersion) || !elementAt(e, er.path) {
+ 			continue
+@@ -360,15 +462,18 @@ func correctElement(fhirVersion string, e *ElementDefinition) {
+ 				ext := &e.Type[t].Extension[x]
+ 				if ext.URL == fhirTypeExtension && ext.ValueURL == er.published {
+ 					ext.ValueURL = er.corrected
++					changed = true
+ 				}
+ 			}
+ 		}
+ 	}
++	return changed
+ }
+ 
+ // correctConstraints corrects e's constraints that an erratum of fhirVersion names, by key and
+-// element, or by expression alone.
+-func correctConstraints(fhirVersion string, e *ElementDefinition) {
++// element, or by expression alone, and reports whether it corrected any.
++func correctConstraints(fhirVersion string, e *ElementDefinition) bool {
++	changed := false
+ 	for _, er := range constraintErrata {
+ 		if !inRelease(er.fhirVersion, fhirVersion) {
+ 			continue
+@@ -376,6 +481,7 @@ func correctConstraints(fhirVersion string, e *ElementDefinition) {
+ 		for c := range e.Constraint {
+ 			if cn := &e.Constraint[c]; cn.Key == er.key && er.names(e, cn) && cn.Expression == er.published {
+ 				cn.Expression = er.corrected
++				changed = true
+ 			}
+ 		}
+ 	}
+@@ -386,9 +492,11 @@ func correctConstraints(fhirVersion string, e *ElementDefinition) {
+ 		for c := range e.Constraint {
+ 			if cn := &e.Constraint[c]; cn.Expression == er.published {
+ 				cn.Expression = er.corrected
++				changed = true
+ 			}
+ 		}
+ 	}
++	return changed
+ }
+ 
+ // names reports whether c, a constraint of e, is the one the erratum corrects.

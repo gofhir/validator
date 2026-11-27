@@ -1,0 +1,22 @@
+# Mutations (oracle, targeted run: go test -count=1 -failfast -run 'ErrataCrossVersion|Errata' ./pkg/registry ./pkg/validator)
+
+| # | Mutation | Result (first failing test) | Duration |
+|---|---|---|---|
+| 1 | patchRaw does nothing | KILLED: TestErrataCrossVersionA1Chains | 11s |
+| 2 | patchRaw rewrites whole raw via json.Marshal(struct) | KILLED: TestErrataCrossVersionB4LeafPatch | 10s |
+| 3 | post-merge correctSnapshot(profileVersion) | KILLED: TestErrataCrossVersionD2InheritedFromAGuide | 10s |
+| 4 | post-merge correctSnapshot(profile) + correctSnapshot(root) | KILLED: TestErrataCrossVersionA2OwnConstraintKeepsItsVersion | 13s |
+| 5 | correctPlaced disabled | KILLED: TestErrataCrossVersionB1DifferentialRedeclaresTheType | 29s |
+| 6 | correctPlaced identifies by placed's own path/base | KILLED: TestErrataCrossVersionB1DifferentialRedeclaresTheType | 14s |
+| 7 | addConstraints also writes added constraint into raw | KILLED: TestErrataCrossVersionA1Chains | 12s |
+| 8 | addConstraints post-merge with profileVersion | KILLED: TestErrataCrossVersionA1Chains | 11s |
+| 9 | rootVersion returns immediate base's version | KILLED: TestErrataCrossVersionA1Chains | 10s |
+| 10 | inRelease always true | KILLED: TestErrataCrossVersionA2OwnConstraintKeepsItsVersion | 11s |
+| 11 | remove R4 ref-1 erratum (key renamed) | KILLED: TestErrataCrossVersionA1Chains | 11s |
+| 12 | remove R4 tim-9 erratum (key renamed) | KILLED: TestErrataCrossVersionA1Chains | 10s |
+| 13 | R4B ref-1 corrected text 1 char ('#' -> '##') | KILLED: TestErrataCrossVersionA1Chains | 10s |
+| 14 | patchRaw skips keepPrefixedValues | KILLED: TestErrataCrossVersionB4LeafPatch | 10s |
+| 15 | correctPlaced skips Type correction | KILLED: TestErrataCrossVersionB1DifferentialRedeclaresTheType | 11s |
+| 16 | correctPlaced uses validated version (r.fhirVersion) | KILLED: TestErrataCrossVersionA2OwnConstraintKeepsItsVersion | 10s |
+
+All 16 killed; no survivors. Per-run output: scratchpad/mutwork/outN.txt

@@ -1,0 +1,59 @@
+package registry
+
+import (
+ "context"
+ "testing"
+)
+
+// Solo sonda del plan; no modifica la implementación.
+func TestAdversarialPlanProbe(t *testing.T) {
+ planned := func(base, profile string, elems []ElementDefinition) {
+  addConstraints(base, elems)
+  correctElements(base, elems)
+  if profile != base { correctElements(profile, elems) }
+ }
+ merge := func(base *Snapshot, path string) *Snapshot {
+  out, _, err := New().applyDifferential(context.Background(), base, &Differential{Element: []ElementDefinition{makeDiffElement(t, map[string]any{"id":path,"path":path})}}, &choiceIndex{})
+  if err != nil { t.Fatal(err) }; return out
+ }
+ ref := makeDiffElement(t, map[string]any{"id":"Reference","path":"Reference","constraint": []any{map[string]any{"key":"ref-1","expression":constraintErrata[2].published}}})
+ base := &Snapshot{Element: []ElementDefinition{ref}}
+ correctSnapshot(fhirR4, base.Element)
+ mid := merge(base, "Reference")
+ planned(fhirR4, fhirR4B, mid.Element)
+ stampConstraintSources(mid, base, "http://example.org/core-r4")
+ leaf := merge(mid, "Reference")
+ planned(fhirR4B, fhirR4B, leaf.Element)
+ stampConstraintSources(leaf, mid, "http://example.org/mid-r4b")
+ t.Logf("chain R4->R4B->R4B: mid corrected=%v source=%q; leaf corrected=%v source=%q",mid.Element[0].Constraint[0].Expression==refOneCorrected, mid.Element[0].Constraint[0].Source,leaf.Element[0].Constraint[0].Expression==refOneCorrected,leaf.Element[0].Constraint[0].Source)
+
+ bundle := &Snapshot{Element: []ElementDefinition{makeDiffElement(t,map[string]any{"id":"Bundle","path":"Bundle"})}}
+ correctSnapshot(fhirR4,bundle.Element)
+ bm := merge(bundle,"Bundle"); planned(fhirR4,fhirR5,bm.Element)
+ bl := merge(bm,"Bundle"); planned(fhirR5,fhirR5,bl.Element)
+ t.Logf("Bundle R4->R5->R5: base constraints=%d mid=%d leaf=%d",len(bundle.Element[0].Constraint),len(bm.Element[0].Constraint),len(bl.Element[0].Constraint))
+
+ own := []ElementDefinition{{ID:"CodeSystem",Path:"CodeSystem",Constraint: []Constraint{{Key:"custom-required-name",Expression:expressionErrata[0].published,Source:"http://example.org/r4b-profile"}}}}
+ correctElements(fhirR4B, own)
+ before := own[0].Constraint[0].Expression
+ planned(fhirR4,fhirR4B,own)
+ t.Logf("R4B custom required-name on R4 base: before=%q after=%q",before,own[0].Constraint[0].Expression)
+
+ id := []ElementDefinition{{ID:"Resource.id",Path:"Resource.id",Type: []Type{{Extension:[]Extension{{URL:fhirTypeExtension,ValueURL:"string"}}}}}}
+ correctElements(fhirR5,id)
+ planned(fhirR4,fhirR5,id)
+ t.Logf("R5 explicit Resource.id string on R4 base: after=%q",id[0].Type[0].Extension[0].ValueURL)
+
+ collisions := 0
+ for _,a := range constraintErrata { for _,b := range constraintErrata { if a.fhirVersion!=b.fhirVersion && a.corrected==b.published { collisions++ } } }
+ t.Logf("cross-release corrected/published constraint expression collisions=%d",collisions)
+ for _,v := range []string{fhirR4,fhirR4B,fhirR5} { for _,p := range []string{fhirR4,fhirR4B,fhirR5} {
+  core := sharedVersion(t,v).GetByURL("http://hl7.org/fhir/StructureDefinition/Bundle")
+  es,err := deepCopyElements(core.Snapshot.Element[:1]); if err!=nil { t.Fatal(err) }
+  correctSnapshot(v,es)
+  planned(v,p,es)
+  before:=len(es[0].Constraint)
+  addConstraints(p,es)
+  t.Logf("addConstraints-both mutation core=%s profile=%s before=%d after=%d",v,p,before,len(es[0].Constraint))
+ } }
+}

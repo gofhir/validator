@@ -1,0 +1,2 @@
+ok  	github.com/gofhir/validator/v2/pkg/registry	89.660s
+ok  	github.com/gofhir/validator/v2/pkg/validator	55.533s

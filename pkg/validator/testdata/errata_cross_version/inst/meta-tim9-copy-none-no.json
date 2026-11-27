@@ -1,0 +1,25 @@
+{
+ "code": {
+  "text": "x"
+ },
+ "effectiveTiming": {
+  "repeat": {
+   "offset": 1,
+   "when": [
+    "MORN"
+   ]
+  }
+ },
+ "id": "on",
+ "meta": {
+  "profile": [
+   "http://example.org/ecv/tim9-copy-none"
+  ]
+ },
+ "resourceType": "Observation",
+ "status": "final",
+ "text": {
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>",
+  "status": "generated"
+ }
+}

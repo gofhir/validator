@@ -1,0 +1,28 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeSystem",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "constraint": [
+     {
+      "expression": "name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
+      "human": "Name should be usable as an identifier for the module by machine processing applications such as code generation",
+      "key": "csd-0",
+      "severity": "warning"
+     }
+    ],
+    "id": "CodeSystem",
+    "path": "CodeSystem"
+   }
+  ]
+ },
+ "id": "csd0-copy-none",
+ "kind": "resource",
+ "name": "EcvCsd0CopyNone",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "CodeSystem",
+ "url": "http://example.org/ecv/csd0-copy-none"
+}

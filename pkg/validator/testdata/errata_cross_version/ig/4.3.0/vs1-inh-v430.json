@@ -1,0 +1,25 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/vitalsigns",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation",
+    "path": "Observation"
+   },
+   {
+    "id": "Observation.effective[x]",
+    "path": "Observation.effective[x]"
+   }
+  ]
+ },
+ "fhirVersion": "4.3.0",
+ "id": "vs1-inh-v430",
+ "kind": "resource",
+ "name": "EcvVs1InhV430",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Observation",
+ "url": "http://example.org/ecv/vs1-inh-v430"
+}

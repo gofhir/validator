@@ -1,0 +1,61 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p10r3",
+ "url": "http://example.org/hm/p10r3",
+ "name": "P10r3",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier:s1",
+    "path": "Patient.identifier",
+    "sliceName": "s1",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/hm/tz-10b",
+       "http://example.org/hm/tk-10b"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:s1.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:s1"
+   },
+   {
+    "id": "Patient.identifier:s1.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "gk3",
+      "severity": "error",
+      "human": "own only",
+      "expression": "$this.startsWith('zz')"
+     }
+    ]
+   }
+  ]
+ }
+}

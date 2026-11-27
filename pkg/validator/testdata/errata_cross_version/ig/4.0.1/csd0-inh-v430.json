@@ -1,0 +1,21 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CodeSystem",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "CodeSystem",
+    "path": "CodeSystem"
+   }
+  ]
+ },
+ "fhirVersion": "4.3.0",
+ "id": "csd0-inh-v430",
+ "kind": "resource",
+ "name": "EcvCsd0InhV430",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "CodeSystem",
+ "url": "http://example.org/ecv/csd0-inh-v430"
+}

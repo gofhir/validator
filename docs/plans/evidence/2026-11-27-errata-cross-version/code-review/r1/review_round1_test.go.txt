@@ -1,0 +1,87 @@
+package registry
+
+import (
+	"context"
+	"encoding/json"
+	"sync"
+	"testing"
+)
+
+// La expresión de una constraint es opcional en R4; una errata ajena no debe agregarla.
+func TestReviewRound1PatchPreservesAbsentExpression(t *testing.T) {
+	raw := `{"id":"Reference","path":"Reference","constraint":[` +
+		ecvConstraintJSON("ref-1", ecvExpression(t, "4.0.1", "Reference", "ref-1")) +
+		`,{"key":"own-1","severity":"error","human":"XPath only","xpath":"true()"}]}`
+	var e ElementDefinition
+	if err := json.Unmarshal([]byte(raw), &e); err != nil {
+		t.Fatal(err)
+	}
+	e.raw = []byte(raw)
+	elems := []ElementDefinition{e}
+	correctElements("4.0.1", elems)
+	var m struct {
+		Constraint []map[string]json.RawMessage `json:"constraint"`
+	}
+	if err := json.Unmarshal(elems[0].raw, &m); err != nil {
+		t.Fatal(err)
+	}
+	if v, exists := m.Constraint[1]["expression"]; exists {
+		t.Errorf("unrelated XPath-only constraint gained expression=%s; raw=%s", v, elems[0].raw)
+	}
+}
+
+// Generaciones concurrentes comparten el diferencial publicado, pero no deben escribirlo.
+func TestReviewRound1ConcurrentPlaced(t *testing.T) {
+	r := ecvRegistry(t, "4.0.1")
+	url := "http://example.org/review/concurrent"
+	ecvLoad(t, r, ecvSD(url, "4.0.1", "resource", "Patient", ecvCore+"Patient",
+		`{"id":"Patient.id","path":"Patient.id","type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":`+ecvJSON(fhirTypeExtension)+`,"valueUrl":"string"}]}]}`))
+	sd := r.GetByURL(url)
+	before := string(sd.Differential.Element[0].raw)
+	var wg sync.WaitGroup
+	for range 8 {
+		wg.Go(func() {
+			if err := r.EnsureSnapshot(context.Background(), sd); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	wg.Wait()
+	if got := string(sd.Differential.Element[0].raw); got != before {
+		t.Errorf("shared differential changed: %s", got)
+	}
+	if got := ecvFHIRType(t, ecvElement(t, sd, "Patient.id")); got != "id" {
+		t.Errorf("generated type=%q, want id", got)
+	}
+}
+
+// Un snapshot publicado permite derivar sin resolver otra vez toda su ascendencia.
+func TestReviewRound1PublishedBaseAncestry(t *testing.T) {
+	for _, ancestry := range []string{"missing", "cycle"} {
+		t.Run(ancestry, func(t *testing.T) {
+			r := ecvRegistry(t, "4.0.1")
+			base := "http://example.org/review/base"
+			parent := "http://example.org/review/missing"
+			if ancestry == "cycle" {
+				parent = base
+			}
+			var publishedSD map[string]json.RawMessage
+			if err := json.Unmarshal(ecvOfficialSDs(t, "4.0.1")[ecvCore+"Bundle"], &publishedSD); err != nil {
+				t.Fatal(err)
+			}
+			publishedSD["url"] = json.RawMessage(ecvJSON(base))
+			publishedSD["derivation"] = json.RawMessage(`"constraint"`)
+			publishedSD["baseDefinition"] = json.RawMessage(ecvJSON(parent))
+			delete(publishedSD, "differential")
+			published := ecvJSON(publishedSD)
+			ecvLoad(t, r, published, ecvSD(base+"-leaf", "4.0.1", "resource", "Bundle", base, `{"id":"Bundle","path":"Bundle","short":"leaf"}`))
+			if !constraintKeys(ecvElement(t, r.GetByURL(base), "Bundle"))["bdl-15"] {
+				t.Fatal("base lacks bdl-15")
+			}
+			sd := ecvSnapshot(t, r, base+"-leaf")
+			if !constraintKeys(ecvElement(t, sd, "Bundle"))["bdl-15"] {
+				t.Errorf("published R4 base has bdl-15, derived R4 snapshot loses it; rootVersion=%q", r.rootVersion(context.Background(), sd))
+			}
+		})
+	}
+}

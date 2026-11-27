@@ -1,0 +1,9 @@
+=== RUN   TestV5RenamedChoiceReslice
+    v5_review_probe_test.go:394: Observation.effective[x]:effectiveDateTime path=Observation.effective[x] corrected=true expression=$this is dateTime implies $this.toString().length() >= 10
+    v5_review_probe_test.go:394: Observation.effective[x]:effectiveDateTime/extra path=Observation.effective[x] corrected=false expression=($this as dateTime).toString().length() >= 8
+--- PASS: TestV5RenamedChoiceReslice (0.00s)
+=== RUN   TestV5SameKeyInheritedOwnership
+    v5_review_probe_test.go:402: base=name.matches('[A-Z]([A-Za-z0-9_]){0,254}') differential=name.exists() merged=name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+--- PASS: TestV5SameKeyInheritedOwnership (0.00s)
+PASS
+ok  	github.com/gofhir/validator/v2/pkg/registry	0.540s

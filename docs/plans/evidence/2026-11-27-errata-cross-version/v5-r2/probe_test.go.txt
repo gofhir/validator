@@ -1,0 +1,463 @@
+package registry
+
+import (
+	"context"
+	"encoding/json"
+	"github.com/gofhir/fhirpath"
+	"testing"
+ 
+)
+
+func r2Merge(t *testing.T, r *Registry, base *Snapshot, ds ...string) *Snapshot {
+	t.Helper()
+	d := &Differential{}
+	for _, s := range ds {
+		var e ElementDefinition
+		if err := json.Unmarshal([]byte(s), &e); err != nil {
+			t.Fatal(err)
+		}
+		e.SetRaw([]byte(s))
+		d.Element = append(d.Element, e)
+	}
+	v5Placed = map[string][]ElementDefinition{}
+ out, notes, err := r.applyDifferential(context.Background(), base, d, &choiceIndex{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(notes) > 0 {
+		t.Fatal(notes)
+	}
+	return out
+}
+func r2SD(t *testing.T, s string) *StructureDefinition {
+	t.Helper()
+	var sd StructureDefinition
+	if err := json.Unmarshal([]byte(s), &sd); err != nil {
+		t.Fatal(err)
+	}
+	sd.raw = []byte(s)
+	return &sd
+}
+func jsonString(s string) string { b, _ := json.Marshal(s); return string(b) }
+
+// Modelo v4: parchear exclusivamente las hojas que cambió la errata.
+func v4Patch(t *testing.T, elems []ElementDefinition) {
+	t.Helper()
+	for i := range elems {
+		e := &elems[i]
+		if e.raw == nil {
+			continue
+		}
+		m, err := rawToMap(e.raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var cs []map[string]json.RawMessage
+		if m["constraint"] != nil {
+			if err := json.Unmarshal(m["constraint"], &cs); err != nil {
+				t.Fatal(err)
+			}
+		}
+		changed := false
+		for j, c := range e.Constraint {
+			if j >= len(cs) {
+ continue // v5: additions stay struct-only
+ /*
+				b, _ := json.Marshal(c)
+				var cm map[string]json.RawMessage
+				_ = json.Unmarshal(b, &cm)
+				cs = append(cs, cm)
+				changed = true
+			*/ } else if extractJSONStringField(v4JSON(cs[j]), "expression") != c.Expression {
+				cs[j]["expression"] = v4JSON(c.Expression)
+				changed = true
+			}
+		}
+		if changed {
+			m["constraint"] = v4JSON(cs)
+		}
+		var ts []map[string]json.RawMessage
+		if m["type"] != nil {
+			if err := json.Unmarshal(m["type"], &ts); err != nil {
+				t.Fatal(err)
+			}
+		}
+		for j, ty := range e.Type {
+			if j >= len(ts) {
+				t.Fatal("unexpected type length")
+			}
+			var xs []map[string]json.RawMessage
+			if ts[j]["extension"] != nil {
+				_ = json.Unmarshal(ts[j]["extension"], &xs)
+			}
+			tc := false
+			for k, x := range ty.Extension {
+				if x.URL == fhirTypeExtension && extractJSONStringField(v4JSON(xs[k]), "valueUrl") != x.ValueURL {
+					xs[k]["valueUrl"] = v4JSON(x.ValueURL)
+					tc = true
+				}
+			}
+			if tc {
+				ts[j]["extension"] = v4JSON(xs)
+				m["type"] = v4JSON(ts)
+				changed = true
+			}
+		}
+		if changed {
+			e.raw = v4JSON(m)
+		}
+	}
+}
+func v4JSON(v any) json.RawMessage {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+func v4Apply(t *testing.T, sd *StructureDefinition, fallback string) {
+	applyErrata(sd, fallback)
+	v4Patch(t, snapshotElements(sd))
+	v4Patch(t, differentialElements(sd))
+}
+var v5Placed map[string][]ElementDefinition
+var v5RootVersion = fhirR4
+func v4Snapshot(t *testing.T, version string, out *Snapshot) {
+ addConstraints(v5RootVersion, out.Element)
+}
+func r3Correct(t *testing.T, out, base *Snapshot, diff *Differential, version string) {
+ for i := range out.Element {
+  e := &out.Element[i]
+  for _, d := range v5Placed[e.ID] {
+   selected := *e
+   selected.Constraint = nil
+   for _, c := range e.Constraint { for _, dc := range d.Constraint { if c.Key == dc.Key { selected.Constraint = append(selected.Constraint,c); break } } }
+   if len(d.Type) == 0 { selected.Type = nil }
+   correctElement(version, &selected)
+   for j := range e.Constraint { for _, c := range selected.Constraint { if e.Constraint[j].Key == c.Key { e.Constraint[j] = c } } }
+   if len(d.Type)>0 { e.Type = selected.Type }
+  }
+ }
+ v4Patch(t,out.Element)
+ addConstraints(v5RootVersion,out.Element)
+}
+func r3Merge(t *testing.T, r *Registry, base *Snapshot, version string, ds ...string) *Snapshot {
+	d := &Differential{}
+	for _, s := range ds {
+		var e ElementDefinition
+		_ = json.Unmarshal([]byte(s), &e)
+		e.SetRaw([]byte(s))
+		d.Element = append(d.Element, e)
+	}
+correctElements(version, d.Element)
+ v4Patch(t,d.Element)
+ for i := range ds { ds[i] = string(d.Element[i].raw) }
+ out := r2Merge(t,r,base,ds...)
+	r3Correct(t, out, base, d, version)
+	return out
+}
+func TestV5EarlierScenarios(t *testing.T) {
+	t.Run("B1 renamed constraint", func(t *testing.T) {
+		b := r2SD(t, `{"snapshot":{"element":[{"id":"Observation","path":"Observation"},{"id":"Observation.effective[x]","path":"Observation.effective[x]","max":"1","type":[{"code":"dateTime"},{"code":"Period"}]}]}}`)
+		out := r3Merge(t, New(), b.Snapshot, fhirR4, `{"id":"Observation.effectiveDateTime","path":"Observation.effectiveDateTime","type":[{"code":"dateTime"}],"constraint":[{"key":"vs-1","expression":`+jsonString(vsOnePublished)+`}]}`)
+		found := false
+		for _, e := range out.Element {
+			for _, c := range e.Constraint {
+				if c.Key == "vs-1" {
+					found = true
+					if c.Expression != vsOneCorrected {
+						t.Fatal("B1 remains")
+					}
+					t.Logf("B1 path=%s corrected=true", e.Path)
+				}
+			}
+		}
+		if !found {
+			t.Fatal("missing constraint")
+		}
+	})
+	t.Run("tim-9 verdict", func(t *testing.T) {
+		data := []byte(`{"offset":1,"when":["MORN","EVE"]}`)
+		pub, pe := fhirpath.Evaluate(data, timNinePublished)
+		fixed, fe := fhirpath.Evaluate(data, timNineCorrected)
+		t.Logf("published result=%v error=%v; corrected result=%v error=%v", pub, pe, fixed, fe)
+	})
+	t.Run("controls A1 A2 B4", func(t *testing.T) {
+		b := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Bundle","path":"Bundle","fixedString":"keep"}]}}`)
+		v4Apply(t, b, "")
+		mid := r3Merge(t, New(), b.Snapshot, fhirR5, `{"id":"Bundle","path":"Bundle"}`)
+		leaf := r3Merge(t, New(), mid, fhirR5, `{"id":"Bundle","path":"Bundle"}`)
+		if len(leaf.Element[0].Constraint) != 1 || leaf.Element[0].Constraint[0].Key != "bdl-15" {
+			t.Fatal("A1 fails")
+		}
+		if !json.Valid(leaf.Element[0].raw) {
+			t.Fatal("invalid raw")
+		}
+		m, _ := rawToMap(leaf.Element[0].raw)
+		if string(m["fixedString"]) != `"keep"` {
+			t.Fatal("raw member lost")
+		}
+		t.Log("A1: bdl-15 survives two merges; raw fixedString survives")
+		base := r2SD(t, `{"snapshot":{"element":[{"id":"CodeSystem","path":"CodeSystem"}]}}`)
+		own := r3Merge(t, New(), base.Snapshot, fhirR4B, `{"id":"CodeSystem","path":"CodeSystem","constraint":[{"key":"custom","expression":`+jsonString(expressionErrata[0].published)+`}]}`)
+		if own.Element[0].Constraint[0].Expression != expressionErrata[0].published {
+			t.Fatal("A2 fails")
+		}
+		t.Log("A2: custom R4B expression unchanged")
+	})
+	t.Run("inherited type versus B1 explicit type", func(t *testing.T) {
+		b := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Patient.id","path":"Patient.id","base":{"path":"Resource.id"},"type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":"`+fhirTypeExtension+`","valueUrl":"string"}]}]}]}}`)
+		v4Apply(t, b, "")
+		inherited := r3Merge(t, New(), b.Snapshot, fhirR5, `{"id":"Patient.id","path":"Patient.id","min":1}`)
+		explicit := r3Merge(t, New(), b.Snapshot, fhirR4, `{"id":"Patient.id","path":"Patient.id","type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":"`+fhirTypeExtension+`","valueUrl":"string"}]}]}`)
+		if inherited.Element[0].Type[0].Extension[0].ValueURL != "id" || explicit.Element[0].Type[0].Extension[0].ValueURL != "id" {
+			t.Fatal("C1/B1 type not corrected")
+		}
+		t.Logf("corrected base=%s; v4 inherited=%s; B1 explicit=%s", b.Snapshot.Element[0].Type[0].Extension[0].ValueURL, inherited.Element[0].Type[0].Extension[0].ValueURL, explicit.Element[0].Type[0].Extension[0].ValueURL)
+	})
+	t.Run("cross version unrolled child", func(t *testing.T) {
+		b := r2SD(t, `{"url":"http://example.org/timing","type":"Timing","fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Timing","path":"Timing"},{"id":"Timing.repeat","path":"Timing.repeat","base":{"path":"Timing.repeat"},"constraint":[{"key":"tim-9","severity":"error","expression":`+jsonString(timNinePublished)+`}]}]}}`)
+		v4Apply(t, b, "")
+		r := New()
+		r.indexUnlocked(b)
+		p := r2SD(t, `{"snapshot":{"element":[{"id":"Patient","path":"Patient"},{"id":"Patient.timing","path":"Patient.timing","type":[{"code":"Timing","profile":["http://example.org/timing"]}]}]}}`)
+		out := r3Merge(t, r, p.Snapshot, fhirR5, `{"id":"Patient.timing.repeat","path":"Patient.timing.repeat","min":1}`)
+		for _, e := range out.Element {
+			if e.ID == "Patient.timing.repeat" {
+				if e.Constraint[0].Expression != timNineCorrected {
+					t.Fatal("C2 unrolled child not corrected")
+				}
+				t.Logf("base corrected=%v; v4 unrolled corrected=%v; expression=%s", b.Snapshot.Element[1].Constraint[0].Expression == timNineCorrected, e.Constraint[0].Expression == timNineCorrected, e.Constraint[0].Expression)
+			}
+		}
+	})
+}
+
+func TestV5InverseGuard(t *testing.T) {
+	for _, v := range []string{fhirR4, fhirR4B, fhirR5} {
+		r := sharedVersion(t, v)
+		for _, y := range []string{fhirR4, fhirR4B, fhirR5} {
+			if y == v {
+				continue
+			}
+			n, types := 0, 0
+			for _, sd := range r.all {
+				for _, e := range snapshotElements(sd) {
+					var c ElementDefinition
+					_ = json.Unmarshal(v4JSON(e), &c)
+					correctElement(y, &c)
+					for i, k := range c.Constraint {
+						if k.Expression != e.Constraint[i].Expression {
+							n++
+							if n <= 3 {
+								t.Logf("inverse core source=%s target=%s sd=%s element=%s key=%s", v, y, sd.URL, e.ID, k.Key)
+							}
+						}
+					}
+					if string(v4JSON(c.Type)) != string(v4JSON(e.Type)) {
+						types++
+						if types <= 3 {
+							t.Logf("inverse TYPE source=%s target=%s sd=%s element=%s", v, y, sd.URL, e.ID)
+						}
+					}
+				}
+			}
+			t.Logf("guard source=%s target=%s expression collisions=%d type collisions=%d", v, y, n, types)
+		}
+	}
+	b := r2SD(t, `{"fhirVersion":"4.3.0","snapshot":{"element":[{"id":"CodeSystem","path":"CodeSystem","constraint":[{"key":"required-name","expression":`+jsonString(expressionErrata[0].published)+`}]}]}}`)
+	v4Apply(t, b, "")
+	out := r3Merge(t, New(), b.Snapshot, fhirR4, `{"id":"CodeSystem","path":"CodeSystem","min":1}`)
+	before, be := fhirpath.Evaluate([]byte(`{}`), b.Snapshot.Element[0].Constraint[0].Expression)
+	after, ae := fhirpath.Evaluate([]byte(`{}`), out.Element[0].Constraint[0].Expression)
+	t.Logf("IG inverse: before=%s after=%s; evaluate {} before=%v/%v after=%v/%v", b.Snapshot.Element[0].Constraint[0].Expression, out.Element[0].Constraint[0].Expression, before, be, after, ae)
+	if out.Element[0].Constraint[0].Expression != expressionErrata[0].published {
+		t.Fatal("D2 remains")
+	}
+}
+
+func TestV5AddedConstraintOverride(t *testing.T) {
+	run := func(patched bool) string {
+		original := sharedVersion(t, fhirR4).GetByURL("http://hl7.org/fhir/StructureDefinition/Bundle")
+		b := r2SD(t, string(original.raw))
+		if patched {
+			v4Apply(t, b, "")
+		} else {
+			applyErrata(b, "")
+		}
+		out := r2Merge(t, New(), b.Snapshot, `{"id":"Bundle","path":"Bundle","constraint":[{"key":"bdl-15","severity":"error","expression":"false"}]}`)
+		if patched {
+			v4Snapshot(t, fhirR4, out)
+		} else {
+			correctSnapshot(fhirR4, out.Element)
+		}
+		for _, c := range out.Element[0].Constraint {
+			if c.Key == "bdl-15" {
+				return c.Expression
+			}
+		}
+		t.Fatal("missing bdl-15")
+		return ""
+	}
+	old, new := run(false), run(true)
+	t.Logf("differential bdl-15 override before=%q v4=%q", old, new)
+	if old != "false" || new != "false" {
+		t.Fatal("counterexample changed")
+	}
+}
+
+func TestV5LeafAndClone(t *testing.T) {
+	sd := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Reference","path":"Reference","fixedDecimal":1.50,"_fixedDecimal":{"extension":[{"url":"x","valueString":"keep"}]},"constraint":[{"key":"ref-1","expression":`+jsonString(constraintErrata[2].published)+`,"xpath":"keep","_expression":{"id":"keep"},"extension":[{"url":"x","valueBoolean":true}]}]}]}}`)
+	v4Apply(t, sd, "")
+	first := string(sd.Snapshot.Element[0].raw)
+	v4Apply(t, sd, "")
+	if first != string(sd.Snapshot.Element[0].raw) {
+		t.Fatal("not idempotent")
+	}
+	m, _ := rawToMap(sd.Snapshot.Element[0].raw)
+	var cs []map[string]json.RawMessage
+	_ = json.Unmarshal(m["constraint"], &cs)
+	if string(m["fixedDecimal"]) != "1.50" || string(cs[0]["xpath"]) != `"keep"` || cs[0]["_expression"] == nil || cs[0]["extension"] == nil {
+		t.Fatal("lost raw values")
+	}
+	p := r2SD(t, `{"fhirVersion":"4.0.1","differential":{"element":[{"id":"CodeSystem","path":"CodeSystem","constraint":[{"key":"custom","expression":`+jsonString(expressionErrata[0].published)+`}]}]}}`)
+	v4Apply(t, p, "")
+	c := p.unpublishedCopy()
+	v4Patch(t, differentialElements(c))
+	if c.Differential.Element[0].Constraint[0].Expression != expressionErrata[0].corrected {
+		t.Fatal("clone correction missing")
+	}
+	if string(p.raw) != string(c.raw) {
+		t.Fatal("parent raw altered")
+	}
+	if string(c.Differential.Element[0].raw) != string(p.Differential.Element[0].raw) {
+		t.Fatal("clone raw differs")
+	}
+	t.Log("leaf metadata and decimal preserved; double application and unpublished clone equivalent")
+}
+
+func TestV5ReferenceChainAndTypes(t *testing.T) {
+	b := r2SD(t, `{"fhirVersion":"4.0.1","url":"http://example.org/core","snapshot":{"element":[{"id":"Reference","path":"Reference","constraint":[{"key":"ref-1","expression":`+jsonString(constraintErrata[2].published)+`}]}]}}`)
+	v4Apply(t, b, "")
+	mid := r3Merge(t, New(), b.Snapshot, fhirR4B, `{"id":"Reference","path":"Reference"}`)
+	stampConstraintSources(mid, b.Snapshot, b.URL)
+	leaf := r3Merge(t, New(), mid, fhirR4B, `{"id":"Reference","path":"Reference"}`)
+	stampConstraintSources(leaf, mid, "http://example.org/mid")
+	if leaf.Element[0].Constraint[0].Expression != refOneCorrected || leaf.Element[0].Constraint[0].Source != b.URL {
+		t.Fatalf("A1: %+v", leaf.Element[0].Constraint)
+	}
+	d := r2SD(t, `{"fhirVersion":"4.0.1","differential":{"element":[{"id":"Resource.id","path":"Resource.id","type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":"`+fhirTypeExtension+`","valueUrl":"string","_valueUrl":{"id":"keep"}},{"url":"other","valueString":"keep"}]}]}]}}`)
+	v4Apply(t, d, "")
+	m, _ := rawToMap(d.Differential.Element[0].raw)
+	var ts []map[string]json.RawMessage
+	_ = json.Unmarshal(m["type"], &ts)
+	var xs []map[string]json.RawMessage
+	_ = json.Unmarshal(ts[0]["extension"], &xs)
+	if string(xs[0]["valueUrl"]) != `"id"` || xs[0]["_valueUrl"] == nil || string(xs[1]["valueString"]) != `"keep"` {
+		t.Fatal("type leaf/differential metadata failure")
+	}
+	t.Log("A1 reference chain keeps expression/source; type differential keeps raw metadata")
+}
+
+func TestV5KeyOrderAndNilRaw(t *testing.T) {
+	// Sin raw, cloneElement cae al struct; mergeElements ya descartaba esos campos antes de v4.
+	e := ElementDefinition{ID: "Reference", Path: "Reference", Constraint: []Constraint{{Key: "ref-1", Expression: constraintErrata[2].published}}}
+	correctSnapshot(fhirR4, []ElementDefinition{e})
+	v4Patch(t, []ElementDefinition{e})
+	c, err := cloneElement(&e, map[string]any{"id": "Other"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Constraint[0].Expression != refOneCorrected {
+		t.Fatal("nil raw clone lost correction")
+	}
+	text := `{"path":"Reference","fixedDecimal":1.50,"id":"Reference","constraint":[{"expression":` + jsonString(constraintErrata[2].published) + `,"key":"ref-1"}]}`
+	a := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[`+text+`]}}`)
+	var obj map[string]json.RawMessage
+	_ = json.Unmarshal([]byte(text), &obj)
+	z := r2SD(t, `{"fhirVersion":"4.0.1","snapshot":{"element":[`+string(v4JSON(obj))+`]}}`)
+	v4Apply(t, a, "")
+	v4Apply(t, z, "")
+	if string(a.Snapshot.Element[0].raw) != string(z.Snapshot.Element[0].raw) {
+		t.Fatal("key ordering changed patched result")
+	}
+	av, as, ao := a.Snapshot.Element[0].GetFixed()
+	zv, zs, zo := z.Snapshot.Element[0].GetFixed()
+	if string(av) != string(zv) || as != zs || ao != zo || string(av) != "1.50" {
+		t.Fatal("fixed cache changed")
+	}
+	t.Log("key order and prefixed-value cache equivalent; nil raw clone preserves corrected struct")
+}
+
+func TestV5RenamedChoiceReslice(t *testing.T) {
+ b:=r2SD(t, `{"snapshot":{"element":[{"id":"Observation","path":"Observation"},{"id":"Observation.effective[x]","path":"Observation.effective[x]","max":"1","type":[{"code":"dateTime"},{"code":"Period"}]}]}}`)
+ out:=r3Merge(t,New(),b.Snapshot,fhirR4,
+ `{"id":"Observation.effectiveDateTime","path":"Observation.effectiveDateTime","type":[{"code":"dateTime"}],"constraint":[{"key":"vs-1","expression":`+jsonString(vsOnePublished)+`}]}`,
+ `{"id":"Observation.effective[x]:effectiveDateTime/extra","path":"Observation.effective[x]","sliceName":"effectiveDateTime/extra","min":0}`)
+ for _,e:=range out.Element { for _,c:=range e.Constraint { if c.Key=="vs-1" {t.Logf("%s path=%s corrected=%v expression=%s",e.ID,e.Path,c.Expression==vsOneCorrected,c.Expression) } } }
+ for _,e:=range out.Element { if e.ID=="Observation.effective[x]:effectiveDateTime/extra" && e.Constraint[0].Expression!=vsOnePublished {t.Fatal("expected counterexample changed")} }
+}
+
+func TestV5SameKeyInheritedOwnership(t *testing.T) {
+ b:=r2SD(t,`{"fhirVersion":"4.3.0","snapshot":{"element":[{"id":"CodeSystem","path":"CodeSystem","constraint":[{"key":"required-name","expression":`+jsonString(expressionErrata[0].published)+`}]}]}}`)
+ v4Apply(t,b,"")
+ out:=r3Merge(t,New(),b.Snapshot,fhirR4,`{"id":"CodeSystem","path":"CodeSystem","constraint":[{"key":"required-name","expression":"name.exists()"}]}`)
+ t.Logf("base=%s differential=name.exists() merged=%s",b.Snapshot.Element[0].Constraint[0].Expression,out.Element[0].Constraint[0].Expression)
+ if out.Element[0].Constraint[0].Expression!=expressionErrata[0].corrected {t.Fatal("counterexample changed")}
+}
+
+// Correction must reach copies made in the SAME merge, before post-merge repair.
+func TestV5RenamedChoiceResliceLoadedDifferential(t *testing.T) {
+ p:=r2SD(t, `{"fhirVersion":"4.0.1","differential":{"element":[{"id":"Observation.effectiveDateTime","path":"Observation.effectiveDateTime","type":[{"code":"dateTime"}],"constraint":[{"key":"vs-1","expression":`+jsonString(vsOnePublished)+`}]},{"id":"Observation.effective[x]:effectiveDateTime/extra","path":"Observation.effective[x]","sliceName":"effectiveDateTime/extra","min":0}]}}`)
+ v4Apply(t,p,"")
+ b:=r2SD(t,`{"snapshot":{"element":[{"id":"Observation","path":"Observation"},{"id":"Observation.effective[x]","path":"Observation.effective[x]","max":"1","type":[{"code":"dateTime"},{"code":"Period"}]}]}}`)
+ if p.Differential.Element[0].Constraint[0].Expression!=vsOnePublished {t.Fatal("fixture must need normalized path")}
+ out:=r3Merge(t,New(),b.Snapshot,fhirR4,string(p.Differential.Element[0].raw),string(p.Differential.Element[1].raw))
+ found:=false
+ for _,e:=range out.Element {if e.ID=="Observation.effective[x]:effectiveDateTime/extra" {found=true; if e.Constraint[0].Expression!=vsOnePublished {t.Fatal("counterexample changed")}; t.Logf("loaded differential: reslice retains published vs-1; %s",e.ID)}}
+ if !found {t.Fatal("reslice missing")}
+}
+
+func TestV5MappingContexts(t *testing.T) {
+ for _,root:=range []string{"LogicalEnvelope","Extension","Timing"} {t.Run(root,func(t *testing.T){
+  source:=r2SD(t,`{"url":"http://example.org/source","type":"Timing","fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Timing","path":"Timing"},{"id":"Timing.repeat","path":"Timing.repeat","base":{"path":"Timing.repeat"},"constraint":[{"key":"tim-9","expression":`+jsonString(timNinePublished)+`}]}]}}`)
+  v4Apply(t,source,"");r:=New();r.indexUnlocked(source)
+  b:=r2SD(t,`{"snapshot":{"element":[{"id":"`+root+`","path":"`+root+`"},{"id":"`+root+`.timing","path":"`+root+`.timing","type":[{"code":"Timing","profile":["http://example.org/source"]}]}]}}`)
+  out:=r3Merge(t,r,b.Snapshot,fhirR5,`{"id":"`+root+`.timing.repeat","path":"`+root+`.timing.repeat","min":1,"constraint":[{"key":"own","expression":"true"}]}`)
+  found:=false;for _,e:=range out.Element {if e.ID==root+".timing.repeat" {found=true;if e.Constraint[0].Expression!=timNineCorrected {t.Fatal("inherited tim-9 changed")};t.Logf("%s unrolled child with differential constraint keeps corrected tim-9",root)}};if !found {t.Fatal("missing child")}
+ })}
+ t.Run("contentReference",func(t *testing.T){
+ b:=r2SD(t,`{"fhirVersion":"4.0.1","snapshot":{"element":[{"id":"X","path":"X"},{"id":"X.item","path":"X.item","type":[{"code":"BackboneElement"}]},{"id":"X.item.repeat","path":"X.item.repeat","base":{"path":"Timing.repeat"},"constraint":[{"key":"tim-9","expression":`+jsonString(timNinePublished)+`}]},{"id":"X.part","path":"X.part","contentReference":"#X.item"}]}}`)
+ v4Apply(t,b,"")
+ out:=r3Merge(t,New(),b.Snapshot,fhirR5,`{"id":"X.part.repeat","path":"X.part.repeat","min":1,"constraint":[{"key":"own","expression":"true"}]}`)
+ for _,e:=range out.Element {if e.ID=="X.part.repeat" {if e.Constraint[0].Expression!=timNineCorrected {t.Fatal("contentReference regressed")};t.Log("contentReference copied corrected raw and placed own constraint")}}
+ })
+ t.Run("path slice fallback and reslice",func(t *testing.T){
+ b:=r2SD(t,`{"snapshot":{"element":[{"id":"X","path":"X"},{"id":"X.part","path":"X.part","max":"*","type":[{"code":"string"}]}]}}`)
+ out:=r3Merge(t,New(),b.Snapshot,fhirR4,`{"id":"unconventional","path":"X.part","sliceName":"a","constraint":[{"key":"own","expression":`+jsonString(expressionErrata[0].published)+`}]}`,`{"path":"X.part","sliceName":"a/b","constraint":[{"key":"reslice","expression":`+jsonString(expressionErrata[0].published)+`}]}`)
+ for _,e:=range out.Element {for _,c:=range e.Constraint {t.Logf("%s key=%s corrected=%v",e.ID,c.Key,c.Expression==expressionErrata[0].corrected)}}
+ })
+}
+
+func TestV5AddedConstraintForeignRootCopy(t *testing.T) {
+ // Logical model carrying an element derived from Bundle. The outer root has no R4 addition.
+ source:=r2SD(t,`{"url":"http://example.org/envelope","type":"Envelope","kind":"logical","derivation":"specialization","fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Envelope","path":"Envelope"},{"id":"Envelope.bundle","path":"Envelope.bundle","base":{"path":"Bundle"},"type":[{"code":"Bundle"}]}]}}`)
+ v4Apply(t,source,"")
+ if len(source.Snapshot.Element[1].Constraint)!=1 {t.Fatal("fixture addition absent")}
+ r:=New();r.indexUnlocked(source)
+ b:=r2SD(t,`{"snapshot":{"element":[{"id":"Host","path":"Host"},{"id":"Host.envelope","path":"Host.envelope","type":[{"code":"Envelope","profile":["http://example.org/envelope"]}]}]}}`)
+ prior:=v5RootVersion;v5RootVersion=fhirR5;defer func(){v5RootVersion=prior}()
+ out:=r3Merge(t,r,b.Snapshot,fhirR5,`{"id":"Host.envelope.bundle","path":"Host.envelope.bundle","min":1}`)
+ found:=false;for _,e:=range out.Element {if e.ID=="Host.envelope.bundle" {found=true;t.Logf("source root=R4 outer root=R5; source constraints=%d copied constraints=%d base.path=%s",len(source.Snapshot.Element[1].Constraint),len(e.Constraint),e.Base.Path);if len(e.Constraint)!=0 {t.Fatal("counterexample changed")}}};if !found {t.Fatal("copied element missing")}
+ clone,err:=cloneElement(&source.Snapshot.Element[1],map[string]any{"id":"Elsewhere.bundle"});if err!=nil {t.Fatal(err)};t.Logf("standalone cloneElement constraints=%d",len(clone.Constraint))
+}
+
+func TestV5RedeclaredTypeCopiedToSliceChild(t *testing.T) {
+ source:=r2SD(t,`{"url":"http://example.org/resource","type":"Resource","fhirVersion":"4.0.1","snapshot":{"element":[{"id":"Resource","path":"Resource"},{"id":"Resource.id","path":"Resource.id","base":{"path":"Resource.id"},"type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":"`+fhirTypeExtension+`","valueUrl":"string"}]}]}]}}`)
+ v4Apply(t,source,"");r:=New();r.indexUnlocked(source)
+ b:=r2SD(t,`{"snapshot":{"element":[{"id":"Patient","path":"Patient"},{"id":"Patient.contained","path":"Patient.contained","max":"*","type":[{"code":"Resource","profile":["http://example.org/resource"]}]}]}}`)
+ p:=r2SD(t,`{"fhirVersion":"4.0.1","differential":{"element":[{"id":"Patient.contained.id","path":"Patient.contained.id","type":[{"code":"http://hl7.org/fhirpath/System.String","extension":[{"url":"`+fhirTypeExtension+`","valueUrl":"string"}]}]},{"id":"Patient.contained:mine","path":"Patient.contained","sliceName":"mine"},{"id":"Patient.contained:mine.id","path":"Patient.contained.id","min":0}]}}`)
+ v4Apply(t,p,"")
+ out:=r3Merge(t,r,b.Snapshot,fhirR4,string(p.Differential.Element[0].raw),string(p.Differential.Element[1].raw),string(p.Differential.Element[2].raw))
+ found:=false;for _,e:=range out.Element {if e.ID=="Patient.contained.id" || e.ID=="Patient.contained:mine.id" {t.Logf("%s type=%s",e.ID,e.Type[0].Extension[0].ValueURL)};if e.ID=="Patient.contained:mine.id" {found=true;if e.Type[0].Extension[0].ValueURL!="string" {t.Fatal("counterexample changed")}}};if !found {t.Fatal("missing slice child")}
+}

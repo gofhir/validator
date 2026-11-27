@@ -1,0 +1,37 @@
+{
+ "abstract": false,
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.generalPractitioner",
+    "path": "Patient.generalPractitioner",
+    "type": [
+     {
+      "code": "Reference",
+      "profile": [
+       "http://example.org/ecv/ref1-copy-v500-ref"
+      ],
+      "targetProfile": [
+       "http://hl7.org/fhir/StructureDefinition/Organization",
+       "http://hl7.org/fhir/StructureDefinition/Practitioner"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "fhirVersion": "5.0.0",
+ "id": "ref1-copy-v500",
+ "kind": "resource",
+ "name": "EcvRef1CopyV500",
+ "resourceType": "StructureDefinition",
+ "status": "active",
+ "type": "Patient",
+ "url": "http://example.org/ecv/ref1-copy-v500"
+}

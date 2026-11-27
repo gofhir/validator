@@ -1,0 +1,11 @@
+{
+ "content": "not-present",
+ "id": "cn",
+ "name": "Good",
+ "resourceType": "CodeSystem",
+ "status": "active",
+ "text": {
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">x</div>",
+  "status": "generated"
+ }
+}

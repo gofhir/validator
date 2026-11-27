@@ -36,6 +36,8 @@ Algunos invariantes publicados son vacíos donde no deberían aplicar. Cada uno 
 
 Otros tres invariantes de R4 están mal publicados y se corrigen igual: `que-12` exige `enableBehavior` desde tres `enableWhen` (R4B: desde dos), `tim-9` no puede evaluarse con varios `when` (R4 y R4B, corregido desde R5) y `con-3` compara un CodeableConcept con un string (R4B, que exige clinicalStatus solo donde hay verificationStatus).
 
+Cada definición se corrige para su propia versión de FHIR, así que un perfil de otra versión que la validada conserva el texto correcto: lo que hereda viene de su base, ya corregido para la versión de la base, y lo que escribe su diferencial se corrige para la versión del perfil. Un perfil R4 validado como R4B toma la `ref-1` corregida de R4B, y una constraint que el perfil copia con el texto publicado de `ref-1` en R4 se corrige con la errata de R4.
+
 **Ejemplo -- recurso inválido:**
 
 El constraint `ele-1` está definido en el tipo base `Element` con la expresión `hasValue() or (children().count() > id.count())` y la descripción humana "All FHIR elements must have a @value or children". Si un elemento no tiene ni valor ni hijos, este constraint falla:

@@ -1,0 +1,53 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (24 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7work/snap/4.3.0, Package Cache = /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7work/home/.fhir/packages
+  Params: snapshot bdl8-copy-none.json -ig /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7work/gen/ig/4.3.0 -version 4.3.0 -tx n/a -no-http-access -outputSuffix snap.json
+Loading
+  Loading FHIR v4.3.0 from hl7.fhir.r4b.core#4.3.0
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:02.151)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.475)
+  Loaded FHIR - 8372 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.016)
+Error fetching https://packages2.fhir.org/packages/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.terminology from server: build.fhir.org
+Latest version of package hl7.terminology found locally is 7.5.0 - using that
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.110)
+Error fetching https://packages2.fhir.org/packages/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: build.fhir.org
+Latest version of package hl7.fhir.uv.extensions found locally is 5.4.0 - using that
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.096)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.260)
+  Load /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/hl7work/gen/ig/4.3.0 - 64 resources (00:00.035)
+  Package Summary: [hl7.fhir.r4b.core#4.3.0, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+Unable to generate snapshot @3 for http://example.org/ecv/ref1-copy-v500-ref: Profile EcvRef1CopyV500Ref (http://example.org/ecv/ref1-copy-v500-ref), element EcvRef1CopyV500Ref.Reference. Error generating snapshot: The constraint 'ref-1' at Reference has a different expression to the constraint 'ref-1' it inherits ('reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))' vs 'reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)'). A constraint with the same key must be the same constraint
+Exception generating snapshot for http://example.org/ecv/id-copy-v401: StructureDefinition http://example.org/ecv/id-copy-v401 at Patient.id: invalid constrained type http://hl7.org/fhirpath/System.String from http://hl7.org/fhirpath/System.String in http://hl7.org/fhir/StructureDefinition/Patient
+Exception generating snapshot for http://example.org/ecv/id-copy-v401: StructureDefinition http://example.org/ecv/id-copy-v401 at Patient.id: invalid constrained type http://hl7.org/fhirpath/System.String from http://hl7.org/fhirpath/System.String in http://hl7.org/fhir/StructureDefinition/Patient
+Process Note: Unable to generate snapshot for EcvIdCopyV401: StructureDefinition http://example.org/ecv/id-copy-v401 at Patient.id: invalid constrained type http://hl7.org/fhirpath/System.String from http://hl7.org/fhirpath/System.String in http://hl7.org/fhir/StructureDefinition/Patient
+  ...go! (00:00.465)
+Cached new session. Cache size = 1
+Error generating snapshot
+org.hl7.fhir.exceptions.FHIRException: Encountered unsupported configured version 4.3.0 loading bdl8-copy-none.json.snap.json
+	at org.hl7.fhir.validation.ValidationEngine.handleOutputToStream(ValidationEngine.java:1316)
+	at org.hl7.fhir.validation.ValidationEngine.handleOutput(ValidationEngine.java:1265)
+	at org.hl7.fhir.validation.service.ValidationService.generateSnapshot(ValidationService.java:449)
+	at org.hl7.fhir.validation.cli.picocli.commands.SnapshotCommand.call(SnapshotCommand.java:84)
+	at org.hl7.fhir.validation.cli.picocli.commands.ValidationEngineCommand.call(ValidationEngineCommand.java:61)
+	at org.hl7.fhir.validation.cli.picocli.commands.ValidationEngineCommand.call(ValidationEngineCommand.java:19)
+	at picocli.CommandLine.executeUserObject(CommandLine.java:2031)
+	at picocli.CommandLine.access$1500(CommandLine.java:148)
+	at picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2469)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2461)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2423)
+	at picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)
+	at picocli.CommandLine$RunLast.execute(CommandLine.java:2425)
+	at org.hl7.fhir.validation.cli.picocli.CLI.parseArgsAndExecuteCommand(CLI.java:68)
+	at org.hl7.fhir.validation.cli.ValidatorCli.main(ValidatorCli.java:98)
+Done. Times: Loading: 00:04.628. Max Memory = 6Gb
