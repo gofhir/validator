@@ -1,0 +1,83 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "t2ext-cslice",
+ "url": "http://example.org/dl/t2ext-cslice",
+ "name": "DlT2ExtCslice",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension:x",
+    "path": "Patient.extension",
+    "sliceName": "x",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/ext-a-cslice"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x.value[x].extension",
+    "path": "Patient.extension.value[x].extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension:x.value[x].extension:eb",
+    "path": "Patient.extension.value[x].extension",
+    "sliceName": "eb",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/eb"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x.value[x].extension:eb.value[x]",
+    "path": "Patient.extension.value[x].extension.value[x]",
+    "fixedString": "eb"
+   }
+  ]
+ }
+}

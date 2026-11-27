@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "hb-inv",
+ "url": "http://example.org/dl/hb-inv",
+ "name": "DlHbInv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.family",
+    "path": "Patient.name.family",
+    "constraint": [
+     {
+      "key": "dl-b",
+      "severity": "error",
+      "human": "no b",
+      "expression": "$this.contains('b').not()"
+     }
+    ]
+   }
+  ]
+ }
+}

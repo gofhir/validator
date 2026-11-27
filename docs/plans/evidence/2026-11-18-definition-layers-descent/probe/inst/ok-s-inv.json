@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "s-inv",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/s-inv"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "a"
+  }
+ ]
+}

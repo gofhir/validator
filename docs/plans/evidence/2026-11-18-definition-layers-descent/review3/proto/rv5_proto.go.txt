@@ -1,0 +1,114 @@
+package constraint
+
+import (
+	"fmt"
+	"os"
+	"sort"
+	"sync"
+
+	"github.com/gofhir/validator/v2/pkg/registry"
+)
+
+type memoKey struct {
+	at  string
+	id  constraintID
+	sev string
+}
+type nestedKey struct {
+	res uintptr
+	sd  *registry.StructureDefinition
+}
+
+var (
+	rv5NoMemo     = os.Getenv("RV5_MEMO") == "off"
+	rv5MapOnly    = os.Getenv("RV5_MEMO") == "map"
+	rv5Log        = os.Getenv("RV5_LOG") != ""
+	rv5OwnFirst   = os.Getenv("RV5_OWNFIRST") != ""
+	rv5ShadowMemo = os.Getenv("RV5_SHADOW") != ""
+	rv5Mu         sync.Mutex
+	rv5V          = map[string]int{}
+	rv5D          = map[string]map[*registry.ElementNode]bool{}
+	rv5Local      = map[string]int{}
+)
+
+func memoAt(value any, at string) string {
+	if rv5MapOnly {
+		if _, ok := value.(map[string]any); !ok {
+			return ""
+		}
+	}
+	return at
+}
+func rv5Run(o *constraintEvalOpts, at string) string {
+	return fmt.Sprintf("%p|%s", o.memo, at)
+}
+func rv5Visit(at string, _ any) {
+	if !rv5Log {
+		return
+	}
+	rv5Mu.Lock()
+	rv5V[at]++
+	rv5Mu.Unlock()
+}
+func rv5Defs(at string, owners []*registry.ElementNode, typeRoot *registry.ElementNode, defs []typeDef, self *registry.StructureDefinition) {
+	if !rv5Log {
+		return
+	}
+	rv5Mu.Lock()
+	defer rv5Mu.Unlock()
+	m := rv5D[at]
+	if m == nil {
+		m = map[*registry.ElementNode]bool{}
+		rv5D[at] = m
+	}
+	local := map[*registry.ElementNode]bool{}
+	add := func(n *registry.ElementNode) {
+		if n != nil {
+			m[n] = true
+			local[n] = true
+		}
+	}
+	for _, o := range owners {
+		add(o)
+	}
+	add(typeRoot)
+	for _, d := range defs {
+		add(d.root)
+	}
+	if self != nil {
+		add(self.Tree().Root())
+	}
+	if len(local) > rv5Local[at] {
+		rv5Local[at] = len(local)
+	}
+}
+
+// RV5Report imprime visitas totales y los valores que superan la cota, con dos lecturas de «definiciones».
+func RV5Report() {
+	if !rv5Log {
+		return
+	}
+	t, overU, overL, mx := 0, 0, 0, 0
+	var ex []string
+	for k, n := range rv5V {
+		t += n
+		if n > mx {
+			mx = n
+		}
+		if n > 1+len(rv5D[k]) {
+			overU++
+		}
+		if n > 1+rv5Local[k] {
+			overL++
+			ex = append(ex, fmt.Sprintf("%s v=%d unionDefs=%d localDefs=%d", k, n, len(rv5D[k]), rv5Local[k]))
+		}
+	}
+	sort.Strings(ex)
+	if len(ex) > 5 {
+		ex = ex[:5]
+	}
+	fmt.Fprintf(os.Stderr, "RV5 values=%d visits=%d maxPerValue=%d over(1+union)=%d over(1+local)=%d %v\n", len(rv5V), t, mx, overU, overL, ex)
+}
+var rv5Mut = os.Getenv("RV5_MUT")
+var rv5LayerOwn = os.Getenv("RV5_LAYEROWN") != ""
+var rv5TypeKey = os.Getenv("RV5_TYPEKEY") != ""

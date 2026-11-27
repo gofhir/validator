@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p-base",
+ "url": "http://example.org/ax/p-base",
+ "name": "AxPbase",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate.id",
+    "path": "Patient.birthDate.id",
+    "fixedString": "zz"
+   }
+  ]
+ }
+}

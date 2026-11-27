@@ -1,0 +1,23 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-s-arr",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/s-arr"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "MRN"
+  },
+  {
+   "system": "urn:o",
+   "value": "BASE"
+  },
+  {
+   "system": "urn:mrn",
+   "value": "BASE"
+  }
+ ]
+}

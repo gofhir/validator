@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "isew",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/s-ew"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "xy"
+  }
+ ]
+}

@@ -1,0 +1,8 @@
+HL7 validator_cli 7.0.4 (-tx n/a -no-http-access), constraint issues only.
+
+wx_r20_cplx_sub_nested.json (package acme.extwalk-0.1.0, R4):
+error   Patient.extension[0].extension[0]: Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+warning Patient: Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)
+
+t2_choice_quantity_comparator.json (package acme.typeprofiles-0.1.0, R4):
+error   Observation.value.ofType(Quantity): Constraint failed: sqty-1: 'The comparator is not used on a SimpleQuantity'

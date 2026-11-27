@@ -1,0 +1,28 @@
+{
+ "resourceType": "Patient",
+ "id": "m-own-pattern-none",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/own-pattern"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "extension": [
+  {
+   "url": "http://example.org/dl/ext-b-pattern",
+   "valueIdentifier": {
+    "system": "urn:mrn",
+    "value": "z",
+    "period": {
+     "start": "2000-01-01"
+    },
+    "assigner": {
+     "display": "pa"
+    }
+   }
+  }
+ ]
+}

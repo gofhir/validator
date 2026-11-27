@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "q1",
+ "url": "http://example.org/p5/q1",
+ "name": "AxQ1",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/p5/tq"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "kp",
+      "severity": "error",
+      "human": "kp",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ }
+}

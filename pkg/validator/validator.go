@@ -786,6 +786,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	ctx = withExtensionScope(ctx)
 	ctx = slicerecord.With(ctx)
 	ctx = walker.WithHeldDefinitions(withHolderGroups(ctx), v.heldDefinitions)
+	ctx = withExplicitProfiles(ctx, v.explicitProfiles(&vc))
 	reported := map[string]int{}
 	var nested map[string]bool
 	if len(profilesToValidate) > 1 {
@@ -801,6 +802,9 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 		result.Issues = dropReported(result.Issues, from, reported, nested)
 	}
 
+	// La misma invariante que falla con el mismo texto en una ubicación, como error y como advertencia, queda como error
+	// (entre todos los perfiles validados).
+	result.Issues = constraint.CollapseSeverities(ctx, result.Issues)
 	result.Stats.Duration = time.Since(startTime).Nanoseconds()
 
 	// Located in the source as written: the issues of the shape check name its paths, the others
@@ -948,6 +952,7 @@ func (v *Validator) validateAgainstProfile(ctx context.Context, data map[string]
 	constraintOpts.Exact = exactIn(ctx)
 	constraintOpts.Resolver, constraintOpts.Containment = referenceResolver{ctx: ctx}, constraint.IsContainedIn
 	constraintOpts.ContentJudged = contentJudged(ctx, vs)
+	constraintOpts.ExplicitProfile = vs == nil && isExplicitProfile(ctx, sd.URL)
 	v.constraintValidator.Validate(ctx, rawJSON, sd, constraintOpts, result)
 	result.Stats.PhasesRun++
 

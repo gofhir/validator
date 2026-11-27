@@ -1,0 +1,3 @@
+ok  	github.com/gofhir/validator/v2/pkg/constraint	4.107s
+ok  	github.com/gofhir/validator/v2/pkg/registry	34.458s
+ok  	github.com/gofhir/validator/v2/pkg/validator	40.896s

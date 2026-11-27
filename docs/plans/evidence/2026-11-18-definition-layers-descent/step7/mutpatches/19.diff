@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/19.orig	2026-11-25 15:59:59
++++ pkg/slicematch/path.go	2026-11-25 15:59:59
+@@ -571,7 +571,7 @@
+ 		// Con varios perfiles de tipo el elemento puede cumplir cualquiera: cada uno es una alternativa, con lo
+ 		// que el propio elemento fija (un valor fijo gana al del perfil).
+ 		if profiled, err := m.typeChildren(c, typeCode); err == nil && len(profiled) > 1 {
+-			return overlayFixed(profiled, b.children), nil
++			return overlayFixed(profiled[:1], b.children), nil
+ 		}
+ 		return []branch{b}, nil
+ 	}

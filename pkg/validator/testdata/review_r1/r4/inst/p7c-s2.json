@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "a",
+ "meta": {
+  "profile": [
+   "http://example.org/rv8/p7c-pat"
+  ]
+ },
+ "identifier": [
+  {
+   "use": "official",
+   "system": "urn:z",
+   "value": "1"
+  }
+ ]
+}

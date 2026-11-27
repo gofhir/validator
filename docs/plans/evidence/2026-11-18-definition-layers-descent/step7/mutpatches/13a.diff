@@ -1,0 +1,12 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/13a.orig	2026-11-25 15:53:26
++++ pkg/registry/snapshot.go	2026-11-25 15:53:26
+@@ -1335,6 +1335,9 @@
+ // o severidad y la copia no debe taparlas (HL7 las toma del diferencial). No cede las claves que el hijo original
+ // trae de la base (`mergeArrayField` las hereda entre perfiles): esas siguen como están.
+ func (b *snapshotBuilder) yieldCloned(idx int, id string, diff *ElementDefinition) error {
++	if true {
++		return nil
++	}
+ 	src, ok := b.cloned[id]
+ 	if !ok || len(diff.Constraint) == 0 {
+ 		return nil

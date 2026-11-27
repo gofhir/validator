@@ -1,0 +1,26 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d-type2",
+ "url": "http://example.org/ax/d-type2",
+ "name": "AxDtype2",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://example.org/ax/g1",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.component.value[x]",
+    "path": "Observation.component.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ]
+   }
+  ]
+ }
+}

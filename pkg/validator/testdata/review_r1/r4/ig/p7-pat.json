@@ -1,0 +1,49 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p7-pat",
+ "url": "http://example.org/rv8/p7-pat",
+ "name": "p7pat",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "rules": "open",
+     "ordered": false
+    }
+   },
+   {
+    "id": "Patient.identifier:s1",
+    "path": "Patient.identifier",
+    "sliceName": "s1",
+    "min": 0,
+    "max": "1",
+    "constraint": [
+     {
+      "key": "s1-1",
+      "severity": "error",
+      "human": "s1-1",
+      "expression": "value.startsWith('A')"
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier:s1.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:a"
+   }
+  ]
+ }
+}

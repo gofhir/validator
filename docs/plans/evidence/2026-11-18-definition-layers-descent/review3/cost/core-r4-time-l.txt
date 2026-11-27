@@ -1,0 +1,8 @@
+base.1        22.84 real        26.02 user         0.50 sys
+base.1            546291712  maximum resident set size
+base.2        22.96 real        26.21 user         0.48 sys
+base.2            481935360  maximum resident set size
+proto.1        24.03 real        27.68 user         0.57 sys
+proto.1            787185664  maximum resident set size
+proto.2        24.08 real        27.73 user         0.59 sys
+proto.2            811941888  maximum resident set size

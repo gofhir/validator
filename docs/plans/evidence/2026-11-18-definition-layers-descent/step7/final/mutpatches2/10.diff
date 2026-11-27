@@ -1,0 +1,22 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -298,9 +298,6 @@
+ 
+ 	// Desde aquí, un valor que dos capas llevan a los mismos hijos se camina una vez.
+ 	opts = opts.scoped()
+-	if isObject && own {
+-		v.walkOwn(obj, raw, fhirPath, childSD, children, self, opts, result)
+-	}
+ 	runs := make([]layerRun, 0, len(defs))
+ 	for _, td := range defs {
+ 		run := beginLayer(opts)
+@@ -313,6 +310,9 @@
+ 		runs = append(runs, run)
+ 	}
+ 	mergeLayers(opts, runs, result)
++	if isObject && own {
++		v.walkOwn(obj, raw, fhirPath, childSD, children, self, opts, result)
++	}
+ 
+ 	if isObject && !wrongType {
+ 		v.walkSets(obj, raw, fhirPath, otherDefinitions(sd, node, owners, nSlices, layerSD, nil, nil, self, children), self, opts, result)

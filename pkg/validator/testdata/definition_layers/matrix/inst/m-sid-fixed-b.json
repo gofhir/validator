@@ -1,0 +1,25 @@
+{
+ "resourceType": "Patient",
+ "id": "m-sid-fixed-b",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/sid-fixed"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "fa",
+   "period": {
+    "start": "2000-01-01"
+   },
+   "assigner": {
+    "display": "zz"
+   }
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "a0-we",
+ "url": "http://example.org/p5/a0-we",
+ "name": "AxA0We",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "k5",
+      "severity": "warning",
+      "human": "k5",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ }
+}

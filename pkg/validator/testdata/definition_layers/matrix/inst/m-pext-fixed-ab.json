@@ -1,0 +1,31 @@
+{
+ "resourceType": "Patient",
+ "id": "m-pext-fixed-ab",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/pext-fixed"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "http://example.org/dl/e0",
+    "valueIdentifier": {
+     "system": "urn:mrn",
+     "value": "zz",
+     "period": {
+      "start": "2000-01-01"
+     },
+     "assigner": {
+      "display": "zz"
+     }
+    }
+   }
+  ]
+ }
+}

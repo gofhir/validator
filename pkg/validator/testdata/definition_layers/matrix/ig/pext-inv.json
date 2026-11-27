@@ -1,0 +1,85 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pext-inv",
+ "url": "http://example.org/dl/pext-inv",
+ "name": "DlPextInv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate.extension",
+    "path": "Patient.birthDate.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.birthDate.extension.value[x]",
+    "path": "Patient.birthDate.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.birthDate.extension.value[x].value",
+    "path": "Patient.birthDate.extension.value[x].value",
+    "constraint": [
+     {
+      "key": "dl-a",
+      "severity": "error",
+      "human": "no a",
+      "expression": "$this.contains('a').not()"
+     }
+    ]
+   },
+   {
+    "id": "Patient.birthDate.extension:x",
+    "path": "Patient.birthDate.extension",
+    "sliceName": "x",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/e0"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.birthDate.extension:x.value[x]",
+    "path": "Patient.birthDate.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.birthDate.extension:x.value[x].value",
+    "path": "Patient.birthDate.extension.value[x].value",
+    "constraint": [
+     {
+      "key": "dl-b",
+      "severity": "error",
+      "human": "no b",
+      "expression": "$this.contains('b').not()"
+     }
+    ]
+   }
+  ]
+ }
+}

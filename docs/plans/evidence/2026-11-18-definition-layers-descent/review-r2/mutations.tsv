@@ -1,0 +1,10 @@
+10	s7-2	pkg/constraint/tree.go:310;pkg/constraint/tree.go:321	walkLayers own-children walk moved after mergeLayers	SURVIVED	-	-
+14	s7-2	pkg/registry/snapshot.go:1414	stampConstraintSources no-op	KILLED	TestDescentDerivedProfile	2
+21	s7-2,s7-3	pkg/constraint/constraint.go:676	reportedSource returns c.Source always	KILLED	TestConstraintDefinedIn	2
+22	s7-2,s7-3	pkg/constraint/constraint.go:680	reportedSource without publishedSource rule	KILLED	TestConstraintDefinedIn	2
+23	s7-2,s7-3	pkg/constraint/constraint.go:686	reportedSource without owner.URL rule	KILLED	TestDescentSlicedElementAndSlice	2
+24	s7-2	pkg/registry/snapshot.go:228;pkg/registry/snapshot.go:1414;pkg/registry/snapshot.go:1433	stampConstraintSources stamps own constraints with profile URL	KILLED	TestConstraintDefinedIn	2
+27	s7-3	pkg/constraint/constraint.go:686	owner.URL rule without SnapshotGenerated	KILLED	TestConstraintDefinedIn	2
+29	s7-3 (adapted: publishedSource lookup by element is now atPath/byPath)	pkg/constraint/constraint.go:726	publishedSource never indexes by element path	KILLED	TestConstraintDefinedIn	2
+R4	r1	pkg/constraint/constraint.go:680	explicit flag ignored	KILLED	TestReviewR1ExplicitProfileReportsTheSnapshotSource	2
+S	r2	pkg/registry/snapshot.go:224;pkg/registry/snapshot.go:229	stamp before correctSnapshot (R2-F1 reverted)	KILLED	TestReviewR2ErrataConstraintsKeepTheirBaseSourceWithAnExplicitProfile	2

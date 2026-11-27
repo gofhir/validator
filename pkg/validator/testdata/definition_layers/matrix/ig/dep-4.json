@@ -1,0 +1,64 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "dep-4",
+ "url": "http://example.org/dl/dep-4",
+ "name": "DlDep4",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Extension.extension:n",
+    "path": "Extension.extension",
+    "sliceName": "n",
+    "min": 1,
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/dep-3"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/dl/dep-4"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "max": "0"
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

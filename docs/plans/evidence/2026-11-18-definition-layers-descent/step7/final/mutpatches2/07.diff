@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -117,7 +117,7 @@
+ 		if !wrongType {
+ 			sets = otherDefinitions(sd, node, owners, nSlices, layerSD, typeSD, typeRoot, self, children)
+ 		}
+-		if len(sets) > 0 {
++		if true {
+ 			// Más de una definición con hijos distintos: el ámbito cubre el subárbol del valor.
+ 			opts = opts.scoped()
+ 		}

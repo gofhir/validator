@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qr",
+ "url": "http://example.org/p5/qr",
+ "name": "AxQr",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient",
+    "constraint": [
+     {
+      "key": "rr",
+      "severity": "error",
+      "human": "rr",
+      "expression": "%resource.id = 'c1' and %rootResource.id = 'root'"
+     }
+    ]
+   }
+  ]
+ }
+}

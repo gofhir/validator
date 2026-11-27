@@ -1,0 +1,16 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-r-fix",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/r-fix"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:a",
+   "use": "usual",
+   "value": "B"
+  }
+ ]
+}

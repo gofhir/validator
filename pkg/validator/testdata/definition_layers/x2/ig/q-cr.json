@@ -1,0 +1,50 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "q-cr",
+ "url": "http://example.org/ax/q-cr",
+ "name": "AxQcr",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Questionnaire",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Questionnaire.item",
+    "path": "Questionnaire.item",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "type"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Questionnaire.item.text",
+    "path": "Questionnaire.item.text",
+    "fixedString": "T"
+   },
+   {
+    "id": "Questionnaire.item:g",
+    "path": "Questionnaire.item",
+    "sliceName": "g"
+   },
+   {
+    "id": "Questionnaire.item:g.text",
+    "path": "Questionnaire.item.text",
+    "fixedString": "G"
+   },
+   {
+    "id": "Questionnaire.item:g.type",
+    "path": "Questionnaire.item.type",
+    "fixedCode": "group"
+   }
+  ]
+ }
+}

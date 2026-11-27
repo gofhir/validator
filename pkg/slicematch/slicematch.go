@@ -195,6 +195,14 @@ func (m *Matcher) Resolve(ctx context.Context, req Request) Match {
 // sliceMatches reports whether the instance matches every discriminator of the slicing, for one
 // slice.
 func (m *Matcher) sliceMatches(ctx context.Context, req Request, slice *registry.ElementNode) (bool, []Note) {
+	// Un slicing sin discriminador no asigna ningún slice, como el validador HL7 (InstanceValidator.sliceMatches:
+	// «if (!slicer.getSlicing().hasDiscriminator()) return false; // cannot validate in this case»): el elemento es
+	// una repetición sin slice (informativa si el slicing es open, error si es closed). Un discriminador es lo que
+	// ElementDefinition.slicing.discriminator da para decidirlo; sin él, la especificación admite el slicing pero no
+	// dice cómo asignar (el contenido «es difícil de procesar»).
+	if len(req.Node.Def.Slicing.Discriminator) == 0 {
+		return false, nil
+	}
 	var notes []Note
 	constrained := false
 	for _, d := range req.Node.Def.Slicing.Discriminator {

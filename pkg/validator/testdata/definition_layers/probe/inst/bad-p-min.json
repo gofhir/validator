@@ -1,0 +1,10 @@
+{
+ "resourceType": "Patient",
+ "id": "p-min",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/p-min"
+  ]
+ },
+ "birthDate": "2000-01-01"
+}

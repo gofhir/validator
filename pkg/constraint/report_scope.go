@@ -2,8 +2,10 @@ package constraint
 
 import (
 	"context"
+	"strings"
 	"sync"
 
+	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 )
 
@@ -25,6 +27,9 @@ type reportScope struct {
 	mu     sync.Mutex
 	seen   map[reportKey]bool
 	parent *reportScope
+	// layered son los informes (ubicación y texto, sin la severidad) que salieron de capas de perfiles de tipo,
+	// que HL7 distingue por el perfil de la capa; solo en el scope raíz.
+	layered map[string]bool
 }
 
 // reported dice si k se informó en este scope o en el de un ancestro. Quien llama tiene s.mu.
@@ -129,4 +134,73 @@ func firstReportKey(ctx context.Context, key string) bool {
 	}
 	scope.seen[k] = true
 	return true
+}
+
+// bestPracticeSuffix es lo que addConstraintViolation agrega al texto de una advertencia.
+const bestPracticeSuffix = " (Best Practice Recommendation)"
+
+// failureKey identifica el fallo de una invariante sin su severidad: la ubicación y el texto. Vacío si is no es
+// el fallo de una invariante.
+func failureKey(is *issue.Issue) string {
+	if is.MessageID != string(issue.DiagConstraintFailed) || len(is.Expression) == 0 {
+		return ""
+	}
+	return is.Expression[0] + "\x00" + strings.TrimSuffix(is.Diagnostics, bestPracticeSuffix)
+}
+
+// noteLayered recuerda en el scope raíz de ctx que is salió de una capa de perfiles de tipo.
+func noteLayered(ctx context.Context, is *issue.Issue) {
+	k := failureKey(is)
+	s, _ := ctx.Value(reportScopeKey{}).(*reportScope)
+	if k == "" || s == nil {
+		return
+	}
+	for s.parent != nil {
+		s = s.parent
+	}
+	s.mu.Lock()
+	if s.layered == nil {
+		s.layered = map[string]bool{}
+	}
+	s.layered[k] = true
+	s.mu.Unlock()
+}
+
+// CollapseSeverities aplica, a los informes de toda una validación, que la misma invariante con el mismo texto en
+// la misma ubicación, informada como error y como advertencia, queda como error (HL7 la deduplica por mensaje y
+// ubicación). No se aplica a los informes de capas de perfiles de tipo, que HL7 distingue por el perfil de la capa.
+// El ctx es el de la validación, con su scope de informe (WithReportScope). Es interna al pipeline: solo la llama
+// pkg/validator al final de la validación, y está exportada porque es otro paquete.
+func CollapseSeverities(ctx context.Context, in []issue.Issue) []issue.Issue {
+	var layered map[string]bool
+	if s, _ := ctx.Value(reportScopeKey{}).(*reportScope); s != nil {
+		s.mu.Lock()
+		layered = s.layered
+		s.mu.Unlock()
+	}
+	var failed map[string]bool
+	for i := range in {
+		if in[i].Severity != issue.SeverityError {
+			continue
+		}
+		if k := failureKey(&in[i]); k != "" {
+			if failed == nil {
+				failed = map[string]bool{}
+			}
+			failed[k] = true
+		}
+	}
+	if failed == nil {
+		return in
+	}
+	out := in[:0]
+	for i := range in {
+		if in[i].Severity == issue.SeverityWarning {
+			if k := failureKey(&in[i]); failed[k] && !layered[k] {
+				continue
+			}
+		}
+		out = append(out, in[i])
+	}
+	return out
 }

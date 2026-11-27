@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "s5a-ew",
+ "meta": {
+  "profile": [
+   "http://example.org/p5/a1-ew"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "xy"
+  }
+ ]
+}

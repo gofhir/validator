@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "k2-n",
+ "url": "http://example.org/p5/k2-n",
+ "name": "AxK2N",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/p5/tk-n"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

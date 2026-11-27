@@ -1,0 +1,8 @@
+b08 base 11.115ms
+b08 v6 12.129ms
+b12 base 132.813ms
+b12 v6 148.707ms
+e64 base 16.852ms
+e64 v6 17.323ms
+t64 base 17.874ms
+t64 v6 17.665ms

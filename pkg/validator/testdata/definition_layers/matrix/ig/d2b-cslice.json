@@ -1,0 +1,71 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d2b-cslice",
+ "url": "http://example.org/dl/d2b-cslice",
+ "name": "DlD2BCslice",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier.extension",
+    "path": "Patient.identifier.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier.extension:ea",
+    "path": "Patient.identifier.extension",
+    "sliceName": "ea",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/ea"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier.extension:ea.value[x]",
+    "path": "Patient.identifier.extension.value[x]",
+    "fixedString": "ea"
+   },
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:mrn"
+   }
+  ]
+ }
+}

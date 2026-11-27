@@ -23,6 +23,8 @@ A FHIRPath constraint did not evaluate to `true`. The severity of this issue is 
 
 An invariant "must evaluate to true when run on the element" (conformance-rules.html#constraints): a single boolean is its value, an empty result fails, and any other result holds. So `resolve().code.text = 'target'` fails where the reference does not resolve, as the HL7 validator evaluates it. Invariants are evaluated on every element, a primitive with only an id or extensions (`"_status": {...}` with no `status`) included.
 
+When the constraint names the definition that declares it (`ElementDefinition.constraint.source`), the message ends with `(defined in {source})`, as the HL7 validator's does. A snapshot the validator generates gives that source to the constraints it inherits from the base definition, and to those a type profile with a generated snapshot declares on its root; the constraints a profile adds in its own differential have none. A published snapshot is read as published: the R4 core definitions carry no source on most of their constraints, R4B and R5 carry one. A resource validated against the profiles in its `meta.profile` is first validated against the definition of its type, so a constraint the profile repeats from that definition is reported with the source that definition publishes.
+
 A few published invariants are empty where they should not apply. Each is corrected, in the version it is published in and only where its expression is the published one, to the expression a later official publication gives, of the same definition or of the same constraint (`Constraint.source`):
 
 | Key | Published in | Corrected from |

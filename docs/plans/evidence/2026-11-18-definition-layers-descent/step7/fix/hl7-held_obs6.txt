@@ -1,0 +1,77 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (23 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7fix/held, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: held_obs6.json -version 4.0.1 -ig /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/testdata/m12-slice-scoping/packages/acme.holder-0.1.0.tgz -tx n/a -no-http-access
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:02.925)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.457)
+  Loaded FHIR - 8265 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.016)
+Error fetching https://packages2.fhir.org/packages/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.terminology from server: build.fhir.org
+Latest version of package hl7.terminology found locally is 7.5.0 - using that
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.079)
+Error fetching https://packages2.fhir.org/packages/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: build.fhir.org
+Latest version of package hl7.fhir.uv.extensions found locally is 5.4.0 - using that
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.085)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.373)
+  Load /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry/testdata/m12-slice-scoping/packages/acme.holder-0.1.0.tgz#0.1.0 - 58 resources (00:00.077)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0, acme.holder#0.1.0]
+  Get set... 
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-obsw|0.1.0: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Unable to generate snapshot @3 for https://example.org/fhir/xr/StructureDefinition/xobs-bad: Profile xobsbad (https://example.org/fhir/xr/StructureDefinition/xobs-bad) base http://example.org/missing/Base could not be resolved
+Exception generating snapshot for https://example.org/fhir/xr/StructureDefinition/xb-snap|0.1.0: Type mismatch processing profile https://example.org/fhir/xr/StructureDefinition/xobs-bad at path Bundle.entry.resource: The element type is Observation, but the profile https://example.org/fhir/xr/StructureDefinition/xobs-bad is for a different type Observation
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-obsw|0.1.0: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Unable to generate snapshot @3 for https://example.org/fhir/hd/StructureDefinition/hd-obsw: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-obsw|0.1.0: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-slpw|0.1.0: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Can't find Observation profile https://example.org/fhir/hd/StructureDefinition/nope but trying to go on
+Exception generating snapshot for https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0: Attempt to fetch the profile https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0 while generating the snapshot for it
+Can't find Observation profile https://example.org/fhir/hd/StructureDefinition/hd-obsc|9.9.9 but trying to go on
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-rec|0.1.0: Attempt to fetch the profile https://example.org/fhir/hd/StructureDefinition/hd-rec|0.1.0 while generating the snapshot for it
+Exception generating snapshot for https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0: Attempt to fetch the profile https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0 while generating the snapshot for it
+Unable to generate snapshot in @4 for https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0: Attempt to fetch the profile https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0 while generating the snapshot for it
+Exception generating snapshot for https://example.org/fhir/rv/StructureDefinition/rv-rb|0.1.0: The snapshot for the profile 'https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0' is empty. This is usually due to a processing error logged elsewhere
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-obsw|0.1.0: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Process Note: Unable to generate snapshot for hdobsw: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Unable to generate snapshot @3 for https://example.org/fhir/xr/StructureDefinition/xobs-bad: Profile xobsbad (https://example.org/fhir/xr/StructureDefinition/xobs-bad) base http://example.org/missing/Base could not be resolved
+Exception generating snapshot for https://example.org/fhir/xr/StructureDefinition/xb-snap|0.1.0: Type mismatch processing profile https://example.org/fhir/xr/StructureDefinition/xobs-bad at path Bundle.entry.resource: The element type is Observation, but the profile https://example.org/fhir/xr/StructureDefinition/xobs-bad is for a different type Observation
+Process Note: Unable to generate snapshot for xbsnap: Type mismatch processing profile https://example.org/fhir/xr/StructureDefinition/xobs-bad at path Bundle.entry.resource: The element type is Observation, but the profile https://example.org/fhir/xr/StructureDefinition/xobs-bad is for a different type Observation
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-obsw|0.1.0: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Unable to generate snapshot @3 for https://example.org/fhir/hd/StructureDefinition/hd-obsw: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-obsw|0.1.0: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-slpw|0.1.0: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Process Note: Unable to generate snapshot for hdslpw: Differential in profile https://example.org/fhir/hd/StructureDefinition/hd-obsw does not have a slice at Observation (on Observation, position 0 of 49 / 0 / 1)
+Exception generating snapshot for https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0: Attempt to fetch the profile https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0 while generating the snapshot for it
+Process Note: Unable to generate snapshot for Rvra: Attempt to fetch the profile https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0 while generating the snapshot for it
+Exception generating snapshot for https://example.org/fhir/hd/StructureDefinition/hd-rec|0.1.0: Attempt to fetch the profile https://example.org/fhir/hd/StructureDefinition/hd-rec|0.1.0 while generating the snapshot for it
+Process Note: Unable to generate snapshot for hdrec: Attempt to fetch the profile https://example.org/fhir/hd/StructureDefinition/hd-rec|0.1.0 while generating the snapshot for it
+Exception generating snapshot for https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0: Attempt to fetch the profile https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0 while generating the snapshot for it
+Unable to generate snapshot in @4 for https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0: Attempt to fetch the profile https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0 while generating the snapshot for it
+Exception generating snapshot for https://example.org/fhir/rv/StructureDefinition/rv-rb|0.1.0: The snapshot for the profile 'https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0' is empty. This is usually due to a processing error logged elsewhere
+Process Note: Unable to generate snapshot for Rvrb: The snapshot for the profile 'https://example.org/fhir/rv/StructureDefinition/rv-ra|0.1.0' is empty. This is usually due to a processing error logged elsewhere
+  ...go! (00:00.811)
+Cached new session. Cache size = 1
+Sources to validate: held_obs6.json
+Validating
+  Validate held_obs6.json
+ 00:00.133
+Done. Times: Loading: 00:05.857, validation: 00:00.133. Memory = 482Mb
+
+*FAILURE*: 1 errors, 3 warnings, 0 notes
+  Warning @ Bundle.entry[0].resource/*Observation/o*/ (line 1, col485): Best Practice Recommendation: In general, all observations should have a performer
+  Warning @ Bundle.entry[0].resource/*Observation/o*/ (line 1, col485): Best Practice Recommendation: In general, all observations should have an effective[x] ()
+  Warning @ Bundle.entry[0].resource/*Observation/o*/.dataAbsentReason (line 1, col429): No code provided, and a code should be provided from the value set 'DataAbsentReason' (http://hl7.org/fhir/ValueSet/data-absent-reason|4.0.1), validating against Base FHIR Standard
+  Error @ Bundle.entry[0].resource/*Observation/o*/ (line 1, col485): Constraint failed: obs-6: 'dataAbsentReason SHALL only be present if Observation.value[x] is not present', validating against Base FHIR Standard
+Done. Times: Loading: 00:05.857, validation: 00:00.133. Max Memory = 6Gb

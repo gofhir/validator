@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qa",
+ "url": "http://example.org/p5/qa",
+ "name": "AxQa",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.birthDate",
+    "path": "Patient.birthDate",
+    "fixedDate": "2000-01-01"
+   }
+  ]
+ }
+}

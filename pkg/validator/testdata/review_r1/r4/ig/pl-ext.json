@@ -1,0 +1,49 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pl-ext",
+ "url": "http://example.org/rv8/pl-ext",
+ "name": "plext",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/rv8/pl-ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ],
+    "constraint": [
+     {
+      "key": "plx-1",
+      "severity": "error",
+      "human": "plx-1",
+      "expression": "startsWith('Z')"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  }
+ ]
+}

@@ -1,0 +1,58 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-b-tprof",
+ "url": "http://example.org/dl/ext-b-tprof",
+ "name": "DlExtBTprof",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/dl/ext-b-tprof"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Extension.value[x].assigner",
+    "path": "Extension.value[x].assigner",
+    "type": [
+     {
+      "code": "Reference",
+      "profile": [
+       "http://example.org/dl/tp-ref"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

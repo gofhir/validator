@@ -1,0 +1,13 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-c-pmin",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/c-pmin"
+  ]
+ },
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "id": "q"
+ }
+}

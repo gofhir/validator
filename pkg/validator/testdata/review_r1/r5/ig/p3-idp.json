@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p3-idp",
+ "url": "http://example.org/rv8/p3-idp",
+ "name": "p3idp",
+ "status": "active",
+ "fhirVersion": "5.0.0",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "constraint": [
+     {
+      "key": "idp-1",
+      "severity": "error",
+      "human": "idp-1",
+      "expression": "startsWith('A')"
+     }
+    ]
+   }
+  ]
+ }
+}

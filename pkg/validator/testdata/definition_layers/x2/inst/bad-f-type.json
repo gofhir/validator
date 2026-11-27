@@ -1,0 +1,21 @@
+{
+ "resourceType": "Observation",
+ "id": "bad-f-type",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/f-type"
+  ]
+ },
+ "status": "final",
+ "code": {
+  "text": "x"
+ },
+ "note": [
+  {
+   "text": "t",
+   "authorReference": {
+    "display": "d"
+   }
+  }
+ ]
+}

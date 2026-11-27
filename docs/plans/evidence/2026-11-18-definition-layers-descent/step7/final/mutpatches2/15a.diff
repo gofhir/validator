@@ -1,0 +1,15 @@
+--- a/pkg/constraint/report_scope.go
++++ b/pkg/constraint/report_scope.go
+@@ -192,10 +192,11 @@
+ 	if failed == nil {
+ 		return in
+ 	}
++	_ = layered
+ 	out := in[:0]
+ 	for i := range in {
+ 		if in[i].Severity == issue.SeverityWarning {
+-			if k := failureKey(&in[i]); failed[k] && !layered[k] {
++			if k := failureKey(&in[i]); failed[k] {
+ 				continue
+ 			}
+ 		}

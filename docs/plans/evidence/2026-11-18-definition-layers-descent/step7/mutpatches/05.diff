@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/05.orig	2026-11-25 15:38:11
++++ pkg/constraint/tree.go	2026-11-25 15:38:11
+@@ -306,7 +306,7 @@
+ 		lseen := cloneSeen(seen)
+ 		lraw := raw
+ 		v.typeRoot(td.sd, td.root, value, &lraw, element, fhirPath, lseen, run.opts, run.result)
+-		if isObject && run.opts.firstDescent(obj, fhirPath, td.root.Children) {
++		if isObject && !own && run.opts.firstDescent(obj, fhirPath, td.root.Children) {
+ 			v.walkChildren(td.sd, td.root.Children, obj, lraw, fhirPath, run.opts, run.result)
+ 		}
+ 		runs = append(runs, run)

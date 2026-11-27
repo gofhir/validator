@@ -1,0 +1,41 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "k3-p",
+ "url": "http://example.org/p5/k3-p",
+ "name": "AxK3P",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/p5/tk-p"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "gk",
+      "severity": "error",
+      "human": "gk",
+      "expression": "$this is FHIR.string"
+     }
+    ]
+   }
+  ]
+ }
+}

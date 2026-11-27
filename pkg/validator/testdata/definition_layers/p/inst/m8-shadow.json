@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "id": "m8-shadow",
+ "meta": {
+  "profile": [
+   "http://example.org/p5/w1"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "period": {
+    "start": "2001"
+   }
+  }
+ ]
+}

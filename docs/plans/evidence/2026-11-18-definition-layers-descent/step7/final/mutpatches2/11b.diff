@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -577,7 +577,7 @@
+ 	for _, sd := range definitions {
+ 		// Cada par (recurso, perfil) se valida una vez.
+ 		key := nestedKey{res: reflect.ValueOf(res).Pointer(), sd: sd}
+-		if _, done := opts.nested[key]; done {
++		if _, done := opts.nested[key]; done && false {
+ 			continue
+ 		}
+ 		opts.nested[key] = struct{}{}

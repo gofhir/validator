@@ -1,0 +1,19 @@
+{
+ "resourceType": "Bundle",
+ "id": "b",
+ "meta": {
+  "profile": [
+   "http://example.org/rv8/p6-bundle"
+  ]
+ },
+ "type": "collection",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:1d5b3c2e-0000-4000-8000-000000000001",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "p"
+   }
+  }
+ ]
+}

@@ -1,0 +1,34 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pl-3",
+ "url": "http://example.org/rv8/pl-3",
+ "name": "pl3",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/rv8/pl-xa",
+       "http://example.org/rv8/pl-xb"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

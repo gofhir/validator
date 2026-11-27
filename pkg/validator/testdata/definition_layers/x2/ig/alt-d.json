@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "alt-d",
+ "url": "http://example.org/ax/alt-d",
+ "name": "AxAltd",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.use",
+    "path": "Identifier.use",
+    "short": "u"
+   }
+  ]
+ }
+}

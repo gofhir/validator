@@ -1,0 +1,106 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "cx-nest",
+ "url": "http://example.org/ax/cx-nest",
+ "name": "AxCxnest",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.contact",
+    "path": "Patient.contact",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "gender"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.contact.telecom",
+    "path": "Patient.contact.telecom",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.contact.telecom.use",
+    "path": "Patient.contact.telecom.use",
+    "min": 1
+   },
+   {
+    "id": "Patient.contact.telecom:p",
+    "path": "Patient.contact.telecom",
+    "sliceName": "p"
+   },
+   {
+    "id": "Patient.contact.telecom:p.system",
+    "path": "Patient.contact.telecom.system",
+    "fixedCode": "phone"
+   },
+   {
+    "id": "Patient.contact.telecom:p.rank",
+    "path": "Patient.contact.telecom.rank",
+    "min": 1
+   },
+   {
+    "id": "Patient.contact:m",
+    "path": "Patient.contact",
+    "sliceName": "m"
+   },
+   {
+    "id": "Patient.contact:m.gender",
+    "path": "Patient.contact.gender",
+    "fixedCode": "male"
+   },
+   {
+    "id": "Patient.contact:m.telecom",
+    "path": "Patient.contact.telecom",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.contact:m.telecom.period",
+    "path": "Patient.contact.telecom.period",
+    "min": 1
+   },
+   {
+    "id": "Patient.contact:m.telecom:p",
+    "path": "Patient.contact.telecom",
+    "sliceName": "p"
+   },
+   {
+    "id": "Patient.contact:m.telecom:p.system",
+    "path": "Patient.contact.telecom.system",
+    "fixedCode": "phone"
+   },
+   {
+    "id": "Patient.contact:m.telecom:p.value",
+    "path": "Patient.contact.telecom.value",
+    "min": 1
+   }
+  ]
+ }
+}

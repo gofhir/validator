@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-c-tdeep",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/c-tdeep"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:x",
+   "period": {
+    "end": "2001"
+   }
+  }
+ ]
+}

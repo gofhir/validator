@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "a",
+ "meta": {
+  "profile": [
+   "http://example.org/rv8/p3-pat-unroll"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:x",
+   "value": "B"
+  }
+ ]
+}

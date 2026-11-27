@@ -1,0 +1,6 @@
+21 reportedSource devuelve siempre c.Source KILLED ['--- FAIL: TestConstraintDefinedIn (2.41s)', '--- FAIL: TestConstraintDefinedIn/r4_core_constraint_without_a_source,_held_resource (1.27s)'] 33s
+22 sin la regla publishedSource KILLED ['--- FAIL: TestConstraintDefinedIn (1.66s)', '--- FAIL: TestConstraintDefinedIn/r4_core_constraint_without_a_source,_held_resource (0.75s)'] 14s
+23 sin la regla owner.URL KILLED ['--- FAIL: TestDescentSlicedElementAndSlice (1.03s)', '--- FAIL: TestDescentSlicedElementAndSlice/4.0.1/matrix/m-sext-tprof-a (0.00s)'] 10s
+27 owner.URL sin exigir snapshot generado KILLED ['--- FAIL: TestConstraintDefinedIn (1.72s)', "--- FAIL: TestConstraintDefinedIn/published_type_profile's_constraint_without_a_source (0.01s)"] 11s
+28 owner.URL sin exigir derivation constraint SURVIVED [] 12s
+29 publishedSource sin buscar por elemento KILLED ['--- FAIL: TestConstraintDefinedIn (1.67s)', "--- FAIL: TestConstraintDefinedIn/extension's_own_element_publishes_the_source (0.01s)"] 9s

@@ -1,0 +1,1 @@
+{"resourceType":"Bundle","id":"a","type":"collection","entry":[{"fullUrl":"http://example.org/Patient/1/_history/1","resource":{"resourceType":"Patient","id":"1"}}]}

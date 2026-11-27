@@ -1,0 +1,33 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tpi-tprof",
+ "url": "http://example.org/dl/tpi-tprof",
+ "name": "DlTpiTprof",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.period",
+    "path": "Identifier.period",
+    "type": [
+     {
+      "code": "Period",
+      "profile": [
+       "http://example.org/dl/tp-period"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

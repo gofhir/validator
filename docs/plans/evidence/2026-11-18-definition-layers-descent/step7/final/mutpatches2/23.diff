@@ -1,0 +1,11 @@
+--- a/pkg/constraint/constraint.go
++++ b/pkg/constraint/constraint.go
+@@ -669,7 +669,7 @@
+ 			return published
+ 		}
+ 	}
+-	if c.Source == "" && owner.URL != opts.profile {
++	if false && c.Source == "" && owner.URL != opts.profile {
+ 		return owner.URL
+ 	}
+ 	return c.Source

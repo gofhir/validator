@@ -1,0 +1,77 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-b-cslice",
+ "url": "http://example.org/dl/ext-b-cslice",
+ "name": "DlExtBCslice",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/dl/ext-b-cslice"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Extension.value[x].extension",
+    "path": "Extension.value[x].extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Extension.value[x].extension:eb",
+    "path": "Extension.value[x].extension",
+    "sliceName": "eb",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/eb"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Extension.value[x].extension:eb.value[x]",
+    "path": "Extension.value[x].extension.value[x]",
+    "fixedString": "eb"
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

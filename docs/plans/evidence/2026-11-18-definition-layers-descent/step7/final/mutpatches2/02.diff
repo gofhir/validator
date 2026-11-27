@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -149,7 +149,7 @@
+ 	for _, o := range owners[nSlices:] {
+ 		add(layerSD, o.Children)
+ 	}
+-	if typeRoot != nil && typeSD.Derivation == registry.DerivationConstraint && typeSD != self {
++	if false && typeRoot != nil && typeSD.Derivation == registry.DerivationConstraint && typeSD != self {
+ 		add(typeSD, typeRoot.Children)
+ 	}
+ 	if self != nil {

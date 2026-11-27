@@ -1,0 +1,12 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/17.orig	2026-11-25 15:57:19
++++ pkg/constraint/constraint.go	2026-11-25 15:57:19
+@@ -574,6 +574,9 @@
+ 	if len(segments) < 3 || !model.HasType(segments[0]) {
+ 		return ""
+ 	}
++	if true {
++		return model.TypeOf(model.ResolvePath(defPath))
++	}
+ 	at, typ := segments[0], segments[0]
+ 	for _, segment := range segments[1:] {
+ 		at = model.ResolvePath(at + "." + segment)

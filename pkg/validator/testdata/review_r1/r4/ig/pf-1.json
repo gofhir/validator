@@ -1,0 +1,66 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pf-1",
+ "url": "http://example.org/rv8/pf-1",
+ "name": "pf1",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.name.given",
+    "path": "Patient.name.given",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.name.given.extension",
+    "path": "Patient.name.given.extension",
+    "constraint": [
+     {
+      "key": "pfe-1",
+      "severity": "error",
+      "human": "pfe base",
+      "expression": "url = 'urn:base'"
+     }
+    ]
+   },
+   {
+    "id": "Patient.name.given:a",
+    "path": "Patient.name.given",
+    "sliceName": "a",
+    "min": 0,
+    "max": "*",
+    "fixedString": "A"
+   },
+   {
+    "id": "Patient.name.given:a.extension",
+    "path": "Patient.name.given.extension",
+    "constraint": [
+     {
+      "key": "pfe-1",
+      "severity": "error",
+      "human": "pfe slice",
+      "expression": "url = 'urn:slice'"
+     }
+    ]
+   }
+  ]
+ }
+}

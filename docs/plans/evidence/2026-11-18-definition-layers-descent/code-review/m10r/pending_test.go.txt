@@ -1,0 +1,15 @@
+
+// Mutación 10r (code review r3): los hijos de las capas se caminan también antes que los de las demás definiciones del
+// valor (la cadena SliceOf y la definición propia). Una constraint con la misma clave y texto distinto en el hijo del
+// perfil de tipo (tb-10b, «gk text»), en el hijo propio del slice («slice text») y en el de su cadena SliceOf («chain
+// text») se informa una vez, con el texto y el source de la capa, también cuando el slice no despliega hijos propios.
+// HL7 7.0.4: hl7-m10r.txt de code-review/m10r.
+func TestReviewR2LayersChildrenAreWalkedBeforeTheOtherDefinitions(t *testing.T) {
+	const want = "error @ Patient.identifier[0].value: Constraint failed: gk: 'gk text' (defined in http://example.org/hm/tb-10b)"
+	t.Run("r4/m10r1 slice with its own child", func(t *testing.T) {
+		checkReviewR2(t, "r4", "m10r1", "p10r1", want)
+	})
+	t.Run("r4/m10r2 slice without children", func(t *testing.T) {
+		checkReviewR2(t, "r4", "m10r2", "p10r2", want)
+	})
+}

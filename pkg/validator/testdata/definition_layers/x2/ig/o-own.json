@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "o-own",
+ "url": "http://example.org/ax/o-own",
+ "name": "AxOown",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension:e",
+    "path": "Patient.extension",
+    "sliceName": "e"
+   },
+   {
+    "id": "Patient.extension:e.id",
+    "path": "Patient.extension.id",
+    "short": "i"
+   },
+   {
+    "id": "Patient.extension:e.url",
+    "path": "Patient.extension.url",
+    "fixedUri": "http://example.org/ax/e1"
+   }
+  ]
+ }
+}

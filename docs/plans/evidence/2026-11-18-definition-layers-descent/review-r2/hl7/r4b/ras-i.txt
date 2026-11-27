@@ -1,0 +1,44 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (23 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/r2fix/probes/g2/r4b, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: inst/ras-i.json -profile http://example.org/r2/ras-pat -version 4.3.0 -ig ig -tx n/a -no-http-access
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.3.0 from hl7.fhir.r4b.core#4.3.0
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:01.550)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.406)
+  Loaded FHIR - 8372 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.013)
+Error fetching https://packages2.fhir.org/packages/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.terminology from server: build.fhir.org
+Latest version of package hl7.terminology found locally is 7.5.0 - using that
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.116)
+Error fetching https://packages2.fhir.org/packages/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: build.fhir.org
+Latest version of package hl7.fhir.uv.extensions found locally is 5.4.0 - using that
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.074)
+  Load hl7.fhir.uv.extensions#5.4.0 - 885 resources (00:00.226)
+  Load ig - 10 resources (00:00.003)
+  Package Summary: [hl7.fhir.r4b.core#4.3.0, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.0]
+  Get set... 
+  ...go! (00:00.271)
+Cached new session. Cache size = 1
+Sources to validate: inst/ras-i.json
+Validating
+  Profiles: [http://example.org/r2/ras-pat]
+  Validate inst/ras-i.json
+ 00:00.072
+Done. Times: Loading: 00:03.699, validation: 00:00.072. Memory = 587Mb
+
+*FAILURE*: 1 errors, 1 warnings, 0 notes
+  Error @ RiskAssessment.prediction[0] (line 1, col126): Constraint failed: ras-2: 'Must be <= 100' (defined in http://hl7.org/fhir/StructureDefinition/RiskAssessment), validating against http://example.org/r2/ras-pat
+  Warning @ RiskAssessment (line 1, col128): Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation), validating against http://example.org/r2/ras-pat
+Done. Times: Loading: 00:03.699, validation: 00:00.072. Max Memory = 6Gb

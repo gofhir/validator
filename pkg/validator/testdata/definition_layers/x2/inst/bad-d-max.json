@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-d-max",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/d-max"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "assigner": {
+    "display": "x"
+   }
+  }
+ ]
+}

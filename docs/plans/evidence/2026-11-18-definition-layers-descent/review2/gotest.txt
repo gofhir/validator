@@ -1,0 +1,17 @@
+ok  	github.com/gofhir/validator/v2/pkg/constraint	0.477s
+--- FAIL: TestSliceChoiceTypes (0.21s)
+    --- FAIL: TestSliceChoiceTypes/4.0.1/t13_two_profiles (0.00s)
+        extension_value_test.go:411: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "The profile 'http://example.org/fhir/StructureDefinition/p-hb' allows the type(s) code, boolean but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_TYPE_NOT_ALLOWED | The profile 'http://example.org/fhir/StructureDefinition/p-ha' allows the type(s) code, string but found type integer | Parameters.parameter[0].valueInteger
+    --- FAIL: TestSliceChoiceTypes/4.3.0/t13_two_profiles (0.00s)
+        extension_value_test.go:411: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "The profile 'http://example.org/fhir/StructureDefinition/p-hb' allows the type(s) code, boolean but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_TYPE_NOT_ALLOWED | The profile 'http://example.org/fhir/StructureDefinition/p-ha' allows the type(s) code, string but found type integer | Parameters.parameter[0].valueInteger
+    --- FAIL: TestSliceChoiceTypes/5.0.0/t13_two_profiles (0.00s)
+        extension_value_test.go:411: no STRUCTURE_TYPE_NOT_ALLOWED at Parameters.parameter[0].valueInteger "The profile 'http://example.org/fhir/StructureDefinition/p-hb' allows the type(s) code, boolean but found type integer"
+            information |  | Validating against 2 profiles: [http://example.org/fhir/StructureDefinition/p-ha http://example.org/fhir/StructureDefinition/p-hb] | 
+            error | STRUCTURE_TYPE_NOT_ALLOWED | The profile 'http://example.org/fhir/StructureDefinition/p-ha' allows the type(s) code, string but found type integer | Parameters.parameter[0].valueInteger
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	11.964s
+FAIL

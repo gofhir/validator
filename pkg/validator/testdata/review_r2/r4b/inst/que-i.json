@@ -1,0 +1,1 @@
+{"resourceType":"Questionnaire","id":"a","status":"draft","item":[{"linkId":"1","type":"string","enableWhen":[{"question":"2","operator":"exists","answerString":"x"},{"question":"3","operator":"=","answerString":"y"}]},{"linkId":"2","type":"string"},{"linkId":"3","type":"string"}]}

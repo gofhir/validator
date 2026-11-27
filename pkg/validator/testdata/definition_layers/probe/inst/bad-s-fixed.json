@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "s-fixed",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/s-fixed"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "MRN"
+  }
+ ]
+}

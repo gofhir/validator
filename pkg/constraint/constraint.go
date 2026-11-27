@@ -16,6 +16,7 @@ import (
 
 	"github.com/gofhir/validator/v2/internal/bundleref"
 	"github.com/gofhir/validator/v2/internal/scopeindex"
+	"github.com/gofhir/validator/v2/internal/walkprobe"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 	"github.com/gofhir/validator/v2/pkg/slicematch"
@@ -62,6 +63,11 @@ type ValidateOptions struct {
 	// content is not judged again on it. Nil means none was.
 	ContentJudged func(map[string]any) bool
 
+	// ExplicitProfile dice que el perfil se pidió expresamente (ValidateWithProfile, WithProfile, el perfil de un IG), no
+	// que viene de meta.profile ni de un titular: el validador HL7 valida entonces solo contra él, sin la pasada
+	// previa contra la definición del tipo, y informa el source de su snapshot (reportedSource).
+	ExplicitProfile bool
+
 	// Primitive, when valid, makes the value a primitive checked against a profile of its type: Data is
 	// its "_key" sibling (an empty object when it has none), resourceData that sibling's JSON, and sd the
 	// profile. The constraints of the profile's root are evaluated on the scalar with its sibling (json.html#primitive,
@@ -101,6 +107,31 @@ type constraintEvalOpts struct {
 	// descended recuerda qué valores se recorrieron ya bajo qué hijos, dentro de las capas de un tipo
 	// (firstDescent); nil fuera de ellas.
 	descended map[descent]struct{}
+
+	// memo recuerda, dentro de un ámbito (scoped), las invariantes ya evaluadas por ubicación; nil fuera de él.
+	memo map[memoKey]struct{}
+
+	// held recuerda lo que se validó de los recursos sostenidos en este recorrido; lo usan todas las copias de opts y
+	// sus mapas se crean al usarlos: la mayoría de las validaciones no tiene recursos sostenidos.
+	held *heldState
+
+	// profile es la URL de la definición contra la que se valida el recurso (la del recorrido, o la de cada perfil
+	// de un recurso sostenido).
+	profile string
+
+	// explicit es ValidateOptions.ExplicitProfile, para el recurso de la raíz: un recurso sostenido tiene su propia
+	// pasada contra el tipo.
+	explicit bool
+
+	// owner es la definición de la que sale el elemento cuyas invariantes se evalúan: la del perfil, la de un perfil
+	// de tipo o la de un tipo.
+	owner *registry.StructureDefinition
+
+	// ownerElement es el elemento de owner cuyas invariantes se evalúan.
+	ownerElement *registry.ElementNode
+
+	// probe es el oyente de internal/walkprobe, leído una vez por recorrido; nil si nadie escucha.
+	probe walkprobe.Func
 }
 
 // Validator validates constraints defined in ElementDefinitions.
@@ -131,6 +162,9 @@ type Validator struct {
 	holderProfiles HolderProfiles
 	// html checks a narrative's XHTML for htmlChecks().
 	html eval.HTMLChecker
+
+	// published guarda, por la definición de un tipo, el source que publica para cada constraint (publishedSource).
+	published sync.Map
 }
 
 // HolderProfiles chooses, among the profiles a holder element's type.profile names for a resource
@@ -242,6 +276,11 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 	if root == nil || sd.RootName(resource) == "" {
 		return
 	}
+	probe := walkprobe.From(ctx)
+	if probe != nil {
+		probe(walkprobe.Begin, "")
+		defer probe(walkprobe.End, "")
+	}
 	ctx = scopeindex.Ensure(ctx, resource, nil, nil)
 
 	// A value that is not a resource takes %resource and %rootResource from the resources it sits
@@ -255,6 +294,9 @@ func (v *Validator) Validate(ctx context.Context, resourceData json.RawMessage, 
 		rootVar = opts.RootResource
 	}
 	evalOpts := v.buildEvalOpts(ctx, resourceVar, rootVar, opts)
+	evalOpts.probe = probe
+	evalOpts.profile = sd.URL
+	evalOpts.explicit = opts != nil && opts.ExplicitProfile
 	if evalOpts.scope.Resource == nil {
 		evalOpts.scope = slicematch.Scope{Resource: resource, RootResource: resource, Container: resource}
 	}
@@ -320,6 +362,7 @@ func (v *Validator) buildEvalOpts(ctx context.Context, resourceCol, rootResource
 		resourceCol:     resourceCol,
 		rootResourceCol: rootResourceCol,
 		timeout:         5 * time.Second,
+		held:            &heldState{},
 	}
 
 	// Wire terminology service if available.
@@ -391,7 +434,7 @@ func (v *Validator) evaluateConstraintsOn(on func() fhirpath.Collection, constra
 			// the FHIRPath engine as a failed invariant.
 			if firstReport(opts.ctx, c, fhirPath) {
 				before := len(result.Issues)
-				v.addConstraintViolation(c, fhirPath, err, result)
+				v.addConstraintViolation(c, fhirPath, err, opts, result)
 				opts.note(result, before, c, fhirPath)
 			}
 			continue
@@ -400,7 +443,7 @@ func (v *Validator) evaluateConstraintsOn(on func() fhirpath.Collection, constra
 		if !toBoolean(evalResult) {
 			if firstReport(opts.ctx, c, fhirPath) {
 				before := len(result.Issues)
-				v.addConstraintViolation(c, fhirPath, nil, result)
+				v.addConstraintViolation(c, fhirPath, nil, opts, result)
 				opts.note(result, before, c, fhirPath)
 			}
 		}
@@ -528,8 +571,8 @@ func focus(model *registry.FHIRPathModel, data json.RawMessage, defPath string) 
 	return col
 }
 
-// typeOf is the type the model assigns defPath: a resource or a data type by its own name, an
-// element by the type of its definition; "" without a model.
+// typeOf es el tipo que el modelo le asigna a defPath: un recurso o un tipo de dato por su propio nombre, un
+// elemento por el tipo de su definición; "" sin modelo.
 func typeOf(model *registry.FHIRPathModel, defPath string) string {
 	if model == nil || defPath == "" {
 		return ""
@@ -540,7 +583,30 @@ func typeOf(model *registry.FHIRPathModel, defPath string) string {
 	if model.HasType(defPath) {
 		return defPath
 	}
-	return ""
+	return typeBelow(model, defPath)
+}
+
+// typeBelow es el tipo del elemento en defPath, un path de un perfil que baja por un tipo de dato
+// ("Patient.identifier.value"), que el modelo no indexa como tal: cada paso se lee de la definición del tipo
+// que tiene el anterior ("Identifier.value" es un string), o del path mismo cuando un elemento tiene hijos propios
+// (un elemento de respaldo). "" si un paso no tiene tipo.
+func typeBelow(model *registry.FHIRPathModel, defPath string) string {
+	segments := strings.Split(defPath, ".")
+	if len(segments) < 3 || !model.HasType(segments[0]) {
+		return ""
+	}
+	at, typ := segments[0], segments[0]
+	for _, segment := range segments[1:] {
+		at = model.ResolvePath(at + "." + segment)
+		typ = model.TypeOf(at)
+		if typ == "" {
+			return ""
+		}
+		if len(model.ChildElements(at)) == 0 {
+			at = typ // los hijos del elemento son los de su tipo
+		}
+	}
+	return typ
 }
 
 // getCompiledExpression returns a cached compiled expression or compiles a new one.
@@ -569,11 +635,12 @@ type compiledExpr struct {
 }
 
 // addConstraintViolation adds an issue for a failed constraint. When evalErr is not nil, it is
-// why the constraint could not be evaluated.
-func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath string, evalErr error, result *issue.Result) {
+// why the constraint could not be evaluated. El texto nombra la definición que declara la constraint ("defined in")
+// si tiene source, como lo hace el validador HL7 (reportedSource).
+func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath string, evalErr error, opts *constraintEvalOpts, result *issue.Result) {
 	diag := fmt.Sprintf("Constraint failed: %s: '%s'", c.Key, c.Human)
-	if c.Source != "" {
-		diag += fmt.Sprintf(" (defined in %s)", c.Source)
+	if source := v.reportedSource(c, opts); source != "" {
+		diag += fmt.Sprintf(" (defined in %s)", source)
 	}
 	if evalErr != nil {
 		diag += fmt.Sprintf(" (could not be evaluated: %s)", evalErr)
@@ -593,6 +660,104 @@ func (v *Validator) addConstraintViolation(c registry.Constraint, fhirPath strin
 	} else {
 		result.AddWarningWithID(issue.DiagConstraintFailed, params, fhirPath)
 	}
+}
+
+// reportedSource es el source con que el validador HL7 nombra c, una invariante de opts.owner. HL7 valida un recurso
+// con meta.profile (o uno sostenido) primero contra la definición de su tipo, y lo que un perfil repite (la misma
+// invariante) no se informa otra vez: de una constraint que está en la definición del tipo del perfil queda el informe
+// de esa pasada, con el source que esa definición publica, que puede no tener (pat-1 de Patient) o nombrar la de la
+// que el tipo la hereda (dom-6, de DomainResource). Con un perfil explícito (opts.explicit) no hay esa pasada: HL7
+// valida solo contra él e informa el source de su snapshot. Una constraint que no está en la definición del tipo lleva
+// el suyo; y la propia de la raíz de una definición que no es aquella contra la que se valida (el perfil de un tipo),
+// sin source, lleva su URL, como la pone el generador de snapshots de HL7 al fundir esa raíz en el elemento (sus hijos
+// no: salen sin sufijo). Solo un perfil (derivation constraint): un tipo base se valida como se publicó, y la txt-2
+// de Narrative no lleva sufijo.
+func (v *Validator) reportedSource(c registry.Constraint, opts *constraintEvalOpts) string {
+	owner := opts.owner
+	if owner == nil {
+		return c.Source
+	}
+	if owner.Derivation == registry.DerivationConstraint && !opts.explicit {
+		if published, ok := v.publishedSource(owner.Type, opts.ownerElement, c); ok {
+			return published
+		}
+	}
+	isRoot := opts.ownerElement != nil && opts.ownerElement.Parent == nil
+	if c.Source == "" && isRoot && owner.Derivation == registry.DerivationConstraint && owner.URL != opts.profile && owner.SnapshotGenerated() {
+		return owner.URL
+	}
+	return c.Source
+}
+
+// constraintRef identifica una constraint de una definición por su clave y su expresión.
+type constraintRef struct{ key, expr string }
+
+// publishedIndex son los source que publica la definición de un tipo: por el path del elemento que declara la
+// constraint, y por la constraint sola (la primera de su snapshot).
+type publishedIndex struct {
+	byPath map[pathRef]string
+	any    map[constraintRef]string
+}
+
+// pathRef identifica una constraint en un elemento de la definición de un tipo, por su path.
+type pathRef struct {
+	path string
+	constraintRef
+}
+
+// publishedSource es el source que la definición del tipo typeCode publica para c, y si la tiene (ok): la de
+// su elemento que corresponde a element (el mismo path bajo la raíz del tipo, sin nombres de slice), o, si ahí no
+// está, la constraint con su clave y su expresión en algún elemento de su snapshot.
+func (v *Validator) publishedSource(typeCode string, element *registry.ElementNode, c registry.Constraint) (string, bool) {
+	sd := v.registry.GetByType(typeCode)
+	if sd == nil || sd.Snapshot == nil {
+		return "", false
+	}
+	loaded, ok := v.published.Load(sd)
+	if !ok {
+		idx := &publishedIndex{byPath: map[pathRef]string{}, any: map[constraintRef]string{}}
+		for i := range sd.Snapshot.Element {
+			el := &sd.Snapshot.Element[i]
+			for _, pc := range el.Constraint {
+				ref := constraintRef{pc.Key, pc.Expression}
+				if _, dup := idx.any[ref]; !dup {
+					idx.any[ref] = pc.Source
+				}
+				if _, dup := idx.byPath[pathRef{el.Path, ref}]; !dup {
+					idx.byPath[pathRef{el.Path, ref}] = pc.Source
+				}
+			}
+		}
+		loaded, _ = v.published.LoadOrStore(sd, idx)
+	}
+	idx, _ := loaded.(*publishedIndex)
+	if idx == nil {
+		return "", false
+	}
+	ref := constraintRef{c.Key, c.Expression}
+	if element != nil && element.Def != nil {
+		if published, ok := idx.atPath(typeCode, element.Def.Path, ref); ok {
+			return published, true
+		}
+	}
+	published, ok := idx.any[ref]
+	return published, ok
+}
+
+// atPath es el source que el tipo typeCode publica para ref en el elemento de path elementPath, cambiada su raíz por la
+// del tipo; si el elemento está más hondo que lo que el tipo despliega (Extension.extension.extension, en un perfil de
+// una extensión compleja), en el último tramo de su path que el tipo sí tiene: HL7 entra a cada nivel por el elemento
+// recursivo del tipo (Extension.extension). La raíz no se busca aparte: es el primer elemento del snapshot, el que el
+// índice por constraint conserva.
+func (idx *publishedIndex) atPath(typeCode, elementPath string, ref constraintRef) (string, bool) {
+	_, rest, found := strings.Cut(elementPath, ".")
+	for found {
+		if published, ok := idx.byPath[pathRef{typeCode + "." + rest, ref}]; ok {
+			return published, true
+		}
+		_, rest, found = strings.Cut(rest, ".")
+	}
+	return "", false
 }
 
 // IsBestPractice returns true if the constraint is a best-practice recommendation.

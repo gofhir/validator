@@ -1,0 +1,77 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-a-cslice",
+ "url": "http://example.org/dl/ext-a-cslice",
+ "name": "DlExtACslice",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/dl/ext-a-cslice"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Extension.value[x].extension",
+    "path": "Extension.value[x].extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Extension.value[x].extension:ea",
+    "path": "Extension.value[x].extension",
+    "sliceName": "ea",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/ea"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Extension.value[x].extension:ea.value[x]",
+    "path": "Extension.value[x].extension.value[x]",
+    "fixedString": "ea"
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "id": "t-min",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/t-min"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:x"
+  }
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "resourceType": "Patient",
+ "id": "t-fixed",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/t-fixed"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:x",
+   "value": "G"
+  }
+ ]
+}

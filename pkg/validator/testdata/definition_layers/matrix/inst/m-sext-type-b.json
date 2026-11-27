@@ -1,0 +1,19 @@
+{
+ "resourceType": "Patient",
+ "id": "m-sext-type-b",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/sext-type"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "extension": [
+  {
+   "url": "http://example.org/dl/eany",
+   "valueInteger": 1
+  }
+ ]
+}

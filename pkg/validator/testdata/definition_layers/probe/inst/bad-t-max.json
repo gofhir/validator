@@ -1,0 +1,17 @@
+{
+ "resourceType": "Patient",
+ "id": "t-max",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/t-max"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:x",
+   "assigner": {
+    "display": "x"
+   }
+  }
+ ]
+}

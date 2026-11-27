@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/06.orig	2026-11-25 15:39:08
++++ pkg/constraint/layers.go	2026-11-25 15:39:08
+@@ -79,7 +79,7 @@
+ 	}
+ 	if o.descended != nil {
+ 		key := descent{value: reflect.ValueOf(obj).Pointer(), owner: children[0].Parent}
+-		if _, done := o.descended[key]; done {
++		if _, done := o.descended[key]; done && false {
+ 			return false
+ 		}
+ 		o.descended[key] = struct{}{}

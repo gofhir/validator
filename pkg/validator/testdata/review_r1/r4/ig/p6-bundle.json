@@ -1,0 +1,65 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "p6-bundle",
+ "url": "http://example.org/rv8/p6-bundle",
+ "name": "p6bundle",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Bundle",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Bundle",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Bundle",
+    "path": "Bundle"
+   },
+   {
+    "id": "Bundle.entry",
+    "path": "Bundle.entry",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "type",
+       "path": "resource"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Bundle.entry.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Patient",
+      "profile": [
+       "http://example.org/rv8/p6-x"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Bundle.entry:a",
+    "path": "Bundle.entry",
+    "sliceName": "a",
+    "min": 0,
+    "max": "*"
+   },
+   {
+    "id": "Bundle.entry:a.resource",
+    "path": "Bundle.entry.resource",
+    "type": [
+     {
+      "code": "Patient",
+      "profile": [
+       "http://example.org/rv8/p6-y"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

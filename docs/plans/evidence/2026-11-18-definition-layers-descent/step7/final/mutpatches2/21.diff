@@ -1,0 +1,12 @@
+--- a/pkg/constraint/constraint.go
++++ b/pkg/constraint/constraint.go
+@@ -660,6 +660,9 @@
+ // aquella contra la que se valida (el perfil de un tipo), sin source, lleva su URL, como la pone HL7 al desplegar el
+ // perfil en el elemento.
+ func (v *Validator) reportedSource(c registry.Constraint, opts *constraintEvalOpts) string {
++	if true {
++		return c.Source
++	}
+ 	owner := opts.owner
+ 	if owner == nil {
+ 		return c.Source

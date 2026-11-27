@@ -1,0 +1,5 @@
+bad-g3c 
+   soloHL7 E Patient.contained[0] ['Slicing cannot be evaluated: Could not match discriminator (id) for slice Patient.contained:a i']
+bad-g4 VEREDICTO
+   soloGo  E Patient.identifier[0].value ["Constraint failed: gs: 'gs' (defined in urn:a)"]
+difieren 2 de 5

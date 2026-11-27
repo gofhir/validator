@@ -1,0 +1,85 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "sext-inv",
+ "url": "http://example.org/dl/sext-inv",
+ "name": "DlSextInv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension.value[x].value",
+    "path": "Patient.extension.value[x].value",
+    "constraint": [
+     {
+      "key": "dl-a",
+      "severity": "error",
+      "human": "no a",
+      "expression": "$this.contains('a').not()"
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x",
+    "path": "Patient.extension",
+    "sliceName": "x",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/dl/e0"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x.value[x]",
+    "path": "Patient.extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:x.value[x].value",
+    "path": "Patient.extension.value[x].value",
+    "constraint": [
+     {
+      "key": "dl-b",
+      "severity": "error",
+      "human": "no b",
+      "expression": "$this.contains('b').not()"
+     }
+    ]
+   }
+  ]
+ }
+}

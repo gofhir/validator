@@ -1,0 +1,3 @@
+hl7.fhir.r4.core#4.0.1 fixed/pattern bajo slices: 163 | fixed/pattern distinto de la base: 0 | binding distinto: 1 [('provenance-relevant-history', 'Provenance.agent:Author.type', 'binding')]
+hl7.fhir.r4b.core#4.3.0 fixed/pattern bajo slices: 166 | fixed/pattern distinto de la base: 0 | binding distinto: 1 [('provenance-relevant-history', 'Provenance.agent:Author.type', 'binding')]
+hl7.fhir.r5.core#5.0.0 fixed/pattern bajo slices: 96 | fixed/pattern distinto de la base: 0 | binding distinto: 1 [('provenance-relevant-history', 'Provenance.agent:Author.type', 'binding')]

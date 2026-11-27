@@ -1,0 +1,118 @@
+## bad-c-pdesc
+   E Patient.birthDate.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+   E Patient.birthDate.extension[0].value[x] | Minimum cardinality of 'Patient.birthDate.extension:e.value[x]' is 1, but found 0
+## bad-c-pmin
+   E Patient.birthDate.extension | Minimum cardinality of 'Patient.birthDate.extension' is 1, but found 0
+## bad-c-tdeep
+   E Patient.identifier[0].period.start | Minimum cardinality of 'Patient.identifier[0].period.start' is 1, but found 0
+## bad-c-tdeep2
+   E Patient.identifier[0].period.start | Minimum cardinality of 'Patient.identifier[0].period.start' is 1, but found 0
+## bad-cx-nest
+   E Patient.contact[0].telecom[0].use | Minimum cardinality of 'Patient.contact[0].telecom[0].use' is 1, but found 0
+   E Patient.contact[0].telecom[0].period | Minimum cardinality of 'Patient.contact:m.telecom.period' is 1, but found 0
+   E Patient.contact[0].telecom[0].value | Minimum cardinality of 'Patient.contact:m.telecom:p.value' is 1, but found 0
+   E Patient.contact[0].telecom[0].rank | Minimum cardinality of 'Patient.contact:m.telecom:p.rank' is 1, but found 0
+## bad-cx-pd
+   E Patient.birthDate.extension | Maximum cardinality of 'Patient.birthDate.extension' is 0, but found 1
+## bad-cx-pown
+   E Patient.birthDate.extension[0].value[x] | Minimum cardinality of 'Patient.birthDate.extension[0].value[x]' is 1, but found 0
+   E Patient.birthDate.extension[0] | Extension 'http://example.org/ax/e1' requires a value
+   E Patient.birthDate.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+## bad-cx-sltp
+## bad-cx-t2
+## bad-cx-t3
+## bad-d-fix
+   E Patient.identifier[0].value | Value is "x", but the profile requires "BASE"
+## bad-d-inv
+   E Patient.identifier[0].value | Constraint failed: ax-d: 'ax-d'
+## bad-d-low-fix
+   E Patient.identifier[0].period.start | Value is "2001", but the profile requires "2000"
+## bad-d-low-inv
+   E Patient.identifier[0].period | Constraint failed: ax-pp: 'ax-pp'
+## bad-d-max
+   E Patient.identifier[0].assigner | Maximum cardinality of 'Patient.identifier[0].assigner' is 0, but found 1
+## bad-d-min
+   E Patient.identifier[0].period | Minimum cardinality of 'Patient.identifier[0].period' is 1, but found 0
+## bad-d-sl
+   E Patient.identifier[0].extension[0].valueString | Value is "G", but the profile requires "F"
+## bad-d-tp-f
+   E Patient.identifier[0].value | Value is "G", but the profile requires "F"
+## bad-d-tp-m
+   E Patient.identifier[0].period | Minimum cardinality of 'Patient.identifier[0].period' is 1, but found 0
+## bad-d-type
+   E Observation.component[0].valueInteger | The profile 'http://example.org/ax/d-type' allows the type(s) string but found type integer
+## bad-d-type2
+   E Observation.component[0].valueInteger | The profile 'http://example.org/ax/d-type2' allows the type(s) string but found type integer
+   E Observation.component[0].valueInteger | The profile 'http://example.org/ax/d-type2' allows the type(s) string but found type integer
+## bad-f-low-fix
+   E Patient.identifier[0].period.start | Value is "2001", but the profile requires "2000"
+## bad-f-low-inv
+   E Patient.identifier[0].period | Constraint failed: ax-pp: 'ax-pp'
+## bad-f-slice
+   E Patient.identifier[0].extension[0].valueString | Value is "G", but the profile requires "F"
+## bad-f-type
+   E Observation.note[0].authorReference | The profile 'http://example.org/ax/f-type' allows the type(s) string but found type Reference
+   E Observation.note[0].authorReference | The profile 'http://example.org/ax/tp-ann' allows the type(s) string but found type Reference
+## bad-h-ch
+   E Observation.component[0].valueString | Value is "A", but the profile requires "BASE"
+## bad-l-none
+   E Patient.identifier[0] | The value conforms to none of the profiles its element's type allows (http://example.org/ax/alt-a, http://example.org/ax/alt-b)
+   E Patient.identifier[0].value | Value is "G", but the profile requires "F"
+   E Patient.identifier[0].value | Value is "G", but the profile requires "H"
+## bad-m-min
+   E Patient.identifier[0].value | Value is "MRN", but the profile requires "BASE"
+   E Patient.identifier[0] | Slicing cannot be evaluated: Patient.identifier:m: no discriminator constrains this slice
+   E Patient.identifier[0] | Element does not match any defined slice (slicing rules are 'closed')
+   E Patient.identifier:m | Minimum cardinality of 'Patient.identifier:m' is 1, but found 0
+## bad-m-nod
+   E Patient.identifier[0].value | Value is "MRN", but the profile requires "BASE"
+   E Patient.identifier[0] | Slicing cannot be evaluated: Patient.identifier:m: no discriminator constrains this slice
+## bad-n-nest
+   E Patient.contact[0].telecom[0].value | Value is "MP", but the profile requires "M"
+   E Patient.contact[0].telecom[0].value | Value is "MP", but the profile requires "CP"
+   E Patient.contact[0].telecom[0].value | Value is "MP", but the profile requires "C"
+## bad-o-alt
+   E Patient.extension[0].valueInteger | The profile 'http://example.org/ax/e2' allows the type(s) string but found type integer
+   E Patient.extension[0] | Slicing cannot be evaluated: Patient.extension:e: no discriminator constrains this slice
+## bad-o-fix
+   E Patient.extension[0].valueString | Value is "G", but the profile requires "F"
+## bad-o-inv
+   E Patient.extension[0].valueString | Constraint failed: ax-e: 'ax-e'
+   E Patient.extension[0].valueString | Value is "FF", but the profile requires "F"
+## bad-o-min
+   E Patient.extension[0].value[x] | Minimum cardinality of 'Patient.extension[0].value[x]' is 1, but found 0
+   E Patient.extension[0] | Extension 'http://example.org/ax/e1' requires a value
+   E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+## bad-p-einv
+   E Patient.birthDate.extension[0] | Constraint failed: ax-pe: 'ax-pe'
+## bad-p-id
+   E Patient.birthDate.id | Value is "q", but the profile requires "zz"
+## bad-p-own-fix
+   E Patient.birthDate.extension[0].valueString | Value is "G", but the profile requires "F"
+## bad-q-cr
+   E Questionnaire.item[0].item[0] | Constraint failed: que-1: 'Group items must have nested items, display items cannot have nested items'
+   E Questionnaire.item[0].item[0].text | Value is "X", but the profile requires "T"
+   E Questionnaire.item[0].text | Value is "G", but the profile requires "T"
+## bad-r-fix
+   E Patient.identifier[0].value | Value is "B", but the profile requires "A"
+   E Patient.identifier[0].value | Value is "B", but the profile requires "BASE"
+## bad-s-arr
+   E Patient.identifier[0].value | Value is "MRN", but the profile requires "BASE"
+   E Patient.identifier[2].value | Value is "BASE", but the profile requires "MRN"
+## bad-v-d-ew
+   W Patient.identifier[0].value | Constraint failed: ax-w: 'ax-w' (Best Practice Recommendation)
+   E Patient.identifier[0].value | Constraint failed: ax-w: 'ax-w'
+## bad-v-d-we
+   E Patient.identifier[0].value | Constraint failed: ax-w: 'ax-w'
+   W Patient.identifier[0].value | Constraint failed: ax-w: 'ax-w' (Best Practice Recommendation)
+## bad-v-s-ew
+   E Patient.identifier[0].value | Constraint failed: ax-v: 'ax-v'
+## bad-v-s-we
+   W Patient.identifier[0].value | Constraint failed: ax-v: 'ax-v' (Best Practice Recommendation)
+## bad-v-t-ew
+   E Patient.identifier[0].value | Constraint failed: ax-v: 'ax-v'
+## bad-v-t-we
+   W Patient.identifier[0].value | Constraint failed: ax-v: 'ax-v' (Best Practice Recommendation)
+## ok-l-a
+## ok-l-sp
+## ok-o

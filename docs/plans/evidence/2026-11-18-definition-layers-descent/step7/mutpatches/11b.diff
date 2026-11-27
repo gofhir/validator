@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/11b.orig	2026-11-25 15:49:52
++++ pkg/constraint/tree.go	2026-11-25 15:49:52
+@@ -572,7 +572,7 @@
+ 	for _, sd := range definitions {
+ 		// Cada par (recurso, perfil) se valida una vez.
+ 		key := nestedKey{res: reflect.ValueOf(res).Pointer(), sd: sd}
+-		if _, done := opts.nested[key]; done {
++		if _, done := opts.nested[key]; done && false {
+ 			continue
+ 		}
+ 		opts.nested[key] = struct{}{}

@@ -1,0 +1,38 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "b0-ew",
+ "url": "http://example.org/p5/b0-ew",
+ "name": "AxB0Ew",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "pattern",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn",
+    "patternIdentifier": {
+     "system": "urn:mrn"
+    }
+   }
+  ]
+ }
+}

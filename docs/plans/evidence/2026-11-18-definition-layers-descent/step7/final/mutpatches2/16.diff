@@ -1,0 +1,11 @@
+--- a/pkg/validator/testdata/definition_layers/expected.json
++++ b/pkg/validator/testdata/definition_layers/expected.json
+@@ -4,7 +4,7 @@
+   "expected": {
+    "4.0.1": [
+     {
+-     "detail": "gk",
++     "detail": "gX",
+      "kind": "constraint",
+      "location": "Patient.identifier[0].value",
+      "severity": "error",

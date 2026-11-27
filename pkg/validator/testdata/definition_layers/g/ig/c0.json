@@ -1,0 +1,40 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "c0",
+ "url": "http://example.org/ax/c0",
+ "name": "AxC0",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.contained",
+    "path": "Patient.contained",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "type",
+       "path": "$this"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.contained:a",
+    "path": "Patient.contained",
+    "sliceName": "a",
+    "type": [
+     {
+      "code": "Patient"
+     }
+    ]
+   }
+  ]
+ }
+}

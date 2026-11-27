@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/18b.orig	2026-11-25 15:59:03
++++ pkg/slicematch/slicematch.go	2026-11-25 15:59:03
+@@ -233,7 +233,7 @@
+ 	var visit func(n *registry.ElementNode)
+ 	visit = func(n *registry.ElementNode) {
+ 		for _, c := range n.Children {
+-			if exp := ownValue(c); exp != nil {
++			if exp := ownValue(c); false && exp != nil {
+ 				rel := c.Def.Path[len(slice.Def.Path)+1:] // el hijo extiende el path del slice con un separador
+ 				out = append(out, registry.Discriminator{Type: kindOfValue(exp), Path: strings.ReplaceAll(rel, "[x]", "")})
+ 			}

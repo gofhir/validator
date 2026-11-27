@@ -1,0 +1,25 @@
+{
+ "resourceType": "Patient",
+ "id": "m-d1-tprof-none",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/d1-tprof"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "z",
+   "period": {
+    "start": "2000-01-01"
+   },
+   "assigner": {
+    "display": "d"
+   }
+  }
+ ]
+}

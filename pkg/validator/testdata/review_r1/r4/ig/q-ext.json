@@ -1,0 +1,61 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "q-ext",
+ "url": "http://example.org/rv8/q-ext",
+ "name": "qext",
+ "status": "active",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension",
+    "path": "Extension",
+    "constraint": [
+     {
+      "key": "er-1",
+      "severity": "error",
+      "human": "er-1",
+      "expression": "extension.exists() or value.exists().not() or value.startsWith('A')"
+     }
+    ]
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/rv8/q-ext"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ],
+    "constraint": [
+     {
+      "key": "ec-1",
+      "severity": "error",
+      "human": "ec-1",
+      "expression": "startsWith('Z')"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Patient"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

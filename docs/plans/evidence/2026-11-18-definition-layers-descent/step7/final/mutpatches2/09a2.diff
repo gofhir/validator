@@ -1,0 +1,11 @@
+--- a/pkg/constraint/report_scope.go
++++ b/pkg/constraint/report_scope.go
+@@ -106,7 +106,7 @@
+ 	if scope == nil {
+ 		return true
+ 	}
+-	k := reportKey{at: fhirPath, id: identityOf(c), sev: c.Severity}
++	k := reportKey{at: fhirPath, id: identityOf(c)}
+ 	scope.mu.Lock()
+ 	defer scope.mu.Unlock()
+ 	if scope.reported(k) {

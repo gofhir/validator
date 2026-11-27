@@ -1,0 +1,1 @@
+{"resourceType":"StructureDefinition","id":"con-pat","url":"http://example.org/r2/con-pat","name":"conpat","status":"active","fhirVersion":"4.3.0","kind":"resource","abstract":false,"type":"Condition","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Condition","derivation":"constraint","differential":{"element":[{"id":"Condition","path":"Condition"}]}}

@@ -1,0 +1,55 @@
+{
+ "resourceType": "Patient",
+ "id": "m-arr-sid",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/sid-inv"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "identifier": [
+  {
+   "system": "urn:mrn",
+   "value": "b",
+   "period": {
+    "start": "2000-01-01"
+   },
+   "assigner": {
+    "display": "d"
+   }
+  },
+  {
+   "system": "urn:o",
+   "value": "a",
+   "period": {
+    "start": "2000-01-01"
+   },
+   "assigner": {
+    "display": "d"
+   }
+  },
+  {
+   "system": "urn:mrn",
+   "value": "ab",
+   "period": {
+    "start": "2000-01-01"
+   },
+   "assigner": {
+    "display": "d"
+   }
+  },
+  {
+   "system": "urn:o",
+   "value": "b",
+   "period": {
+    "start": "2000-01-01"
+   },
+   "assigner": {
+    "display": "d"
+   }
+  }
+ ]
+}

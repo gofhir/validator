@@ -1,0 +1,58 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ext-b-inv",
+ "url": "http://example.org/dl/ext-b-inv",
+ "name": "DlExtBInv",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Extension",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Extension.extension",
+    "path": "Extension.extension",
+    "max": "0"
+   },
+   {
+    "id": "Extension.url",
+    "path": "Extension.url",
+    "fixedUri": "http://example.org/dl/ext-b-inv"
+   },
+   {
+    "id": "Extension.value[x]",
+    "path": "Extension.value[x]",
+    "type": [
+     {
+      "code": "Identifier"
+     }
+    ]
+   },
+   {
+    "id": "Extension.value[x].value",
+    "path": "Extension.value[x].value",
+    "constraint": [
+     {
+      "key": "dl-b",
+      "severity": "error",
+      "human": "no b",
+      "expression": "$this.contains('b').not()"
+     }
+    ]
+   }
+  ]
+ },
+ "context": [
+  {
+   "type": "element",
+   "expression": "Element"
+  },
+  {
+   "type": "element",
+   "expression": "Resource"
+  }
+ ]
+}

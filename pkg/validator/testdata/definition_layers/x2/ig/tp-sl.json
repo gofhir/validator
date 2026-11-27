@@ -1,0 +1,50 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tp-sl",
+ "url": "http://example.org/ax/tp-sl",
+ "name": "AxTpsl",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier.extension",
+    "path": "Identifier.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Identifier.extension:x",
+    "path": "Identifier.extension",
+    "sliceName": "x"
+   },
+   {
+    "id": "Identifier.extension:x.url",
+    "path": "Identifier.extension.url",
+    "fixedUri": "http://example.org/ax/e0"
+   },
+   {
+    "id": "Identifier.extension:x.value[x]",
+    "path": "Identifier.extension.value[x]",
+    "type": [
+     {
+      "code": "string"
+     }
+    ],
+    "fixedString": "F"
+   }
+  ]
+ }
+}

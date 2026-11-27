@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "ha-fixed",
+ "url": "http://example.org/dl/ha-fixed",
+ "name": "DlHaFixed",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.name.family",
+    "path": "Patient.name.family",
+    "fixedString": "fa"
+   }
+  ]
+ }
+}

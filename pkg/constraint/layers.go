@@ -1,8 +1,10 @@
 package constraint
 
 import (
+	"fmt"
 	"reflect"
 
+	"github.com/gofhir/validator/v2/internal/walkprobe"
 	"github.com/gofhir/validator/v2/pkg/issue"
 	"github.com/gofhir/validator/v2/pkg/registry"
 )
@@ -33,26 +35,78 @@ func (o *constraintEvalOpts) note(result *issue.Result, before int, c registry.C
 	}
 }
 
-// descent es el recorrido de los hijos children de un valor: el valor y los hijos, por identidad.
+// descent es el recorrido de los hijos de un valor bajo un dueño: el valor y el elemento que da los hijos
+// (children[0].Parent), por identidad.
 type descent struct {
-	value    uintptr
-	sd       *registry.StructureDefinition
-	firstOne *registry.ElementNode
+	value uintptr
+	owner *registry.ElementNode
 }
 
-// firstDescent dice si es la primera vez que se recorren, dentro de las capas de un tipo, los hijos
-// children (de sd) del valor obj, y lo anota. Dos capas de un padre que declaran el mismo hijo llevan
-// a los mismos hijos: el valor se camina una vez bajo la unión de lo que las capas le dan, no una vez
-// por capa en cada nivel (2^D en la profundidad D). Fuera de las capas siempre es verdadero.
-func (o *constraintEvalOpts) firstDescent(obj map[string]any, sd *registry.StructureDefinition, children []*registry.ElementNode) bool {
-	if o.descended == nil || len(children) == 0 {
-		return true
-	}
-	key := descent{value: reflect.ValueOf(obj).Pointer(), sd: sd, firstOne: children[0]}
-	if _, done := o.descended[key]; done {
+// memoKey identifica una invariante evaluada en una ubicación: por identidad y severidad (plan, punto 4).
+type memoKey struct {
+	at  string
+	id  constraintID
+	sev string
+}
+
+// nestedKey identifica un par (recurso sostenido, perfil) ya validado (plan, punto 6).
+type nestedKey struct {
+	res uintptr
+	sd  *registry.StructureDefinition
+}
+
+// heldState es lo que se recuerda de los recursos sostenidos de un recorrido.
+type heldState struct {
+	// nested son los pares (recurso sostenido, perfil) ya validados.
+	nested map[nestedKey]struct{}
+	// holders es el elemento con que se validó cada recurso sostenido por primera vez (validateNested).
+	holders map[uintptr]*registry.ElementNode
+}
+
+// firstNested anota el par key y dice si es la primera vez que se valida.
+func (h *heldState) firstNested(key nestedKey) bool {
+	if _, done := h.nested[key]; done {
 		return false
 	}
-	o.descended[key] = struct{}{}
+	if h.nested == nil {
+		h.nested = map[nestedKey]struct{}{}
+	}
+	h.nested[key] = struct{}{}
+	return true
+}
+
+// scoped abre, si no hay uno, el ámbito en que se recuerdan los descensos y las invariantes evaluadas: cubre el
+// subárbol del valor y se libera al salir. Un valor con una sola definición no lo abre (plan, punto 2).
+func (o *constraintEvalOpts) scoped() *constraintEvalOpts {
+	if o.descended != nil {
+		return o
+	}
+	c := *o
+	c.descended = map[descent]struct{}{}
+	c.memo = map[memoKey]struct{}{}
+	if o.probe != nil {
+		o.probe(walkprobe.Scope, "")
+	}
+	return &c
+}
+
+// firstDescent dice si se deben recorrer los hijos children (con dueño children[0].Parent) del valor obj, ubicado
+// en fhirPath, y lo anota. Dentro de un ámbito, el par (valor, dueño) se camina una vez: dos definiciones que
+// llevan a los mismos hijos no los repiten (2^D en la profundidad D). Fuera de un ámbito siempre es verdadero.
+func (o *constraintEvalOpts) firstDescent(obj map[string]any, fhirPath string, children []*registry.ElementNode) bool {
+	if len(children) == 0 {
+		return false
+	}
+	if o.descended != nil {
+		key := descent{value: reflect.ValueOf(obj).Pointer(), owner: children[0].Parent}
+		if _, done := o.descended[key]; done {
+			return false
+		}
+		o.descended[key] = struct{}{}
+	}
+	if o.probe != nil {
+		o.probe(walkprobe.Descent, fmt.Sprintf("%s|%p", fhirPath, children[0].Parent))
+	}
 	return true
 }
 
@@ -86,6 +140,7 @@ func mergeLayers(parent *constraintEvalOpts, runs []layerRun, result *issue.Resu
 				continue
 			}
 			seen[id] = true
+			noteLayered(parent.ctx, &is)
 			result.AddIssue(is)
 			if parent.layer != nil {
 				parent.layer.ids[len(result.Issues)-1] = id

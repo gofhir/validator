@@ -1,0 +1,34 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "f-type",
+ "url": "http://example.org/ax/f-type",
+ "name": "AxFtype",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Observation",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Observation.note",
+    "path": "Observation.note",
+    "type": [
+     {
+      "code": "Annotation",
+      "profile": [
+       "http://example.org/ax/tp-ann"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Observation.note.time",
+    "path": "Observation.note.time",
+    "short": "t"
+   }
+  ]
+ }
+}

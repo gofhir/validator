@@ -1,0 +1,42 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "k5-p",
+ "url": "http://example.org/p5/k5-p",
+ "name": "AxK5P",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/p5/tk-p",
+       "http://example.org/p5/tz-p"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "gk",
+      "severity": "error",
+      "human": "gk",
+      "expression": "$this is FHIR.string"
+     }
+    ]
+   }
+  ]
+ }
+}

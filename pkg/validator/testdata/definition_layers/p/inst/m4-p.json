@@ -1,0 +1,14 @@
+{
+ "resourceType": "Patient",
+ "id": "m4-p",
+ "meta": {
+  "profile": [
+   "http://example.org/p5/k4-p"
+  ]
+ },
+ "identifier": [
+  {
+   "value": "x"
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d1-tprof",
+ "url": "http://example.org/dl/d1-tprof",
+ "name": "DlD1Tprof",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/dl/d1b-tprof",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.period",
+    "path": "Patient.identifier.period",
+    "type": [
+     {
+      "code": "Period",
+      "profile": [
+       "http://example.org/dl/tp-period"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

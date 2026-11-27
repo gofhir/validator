@@ -1,0 +1,32 @@
+--- a/pkg/registry/snapshot.go
++++ b/pkg/registry/snapshot.go
+@@ -211,7 +211,7 @@
+ 	if err != nil {
+ 		return nil, nil, fmt.Errorf("cannot generate snapshot for %s: %w", sd.URL, err)
+ 	}
+-	stampConstraintSources(snapshot, baseSnapshot, baseSD.URL)
++	stampConstraintSources(snapshot, baseSnapshot, baseSD.URL, sd.URL)
+ 	// The merge rebuilds the elements from their base's published JSON, so the corrections are
+ 	// applied again, for the version the profile was corrected for (its own, or the version
+ 	// validated when it declares none), or else its base's.
+@@ -1401,7 +1401,7 @@
+ // en «(defined in …)» (ProfileUtilities.updateFromDefinition): la heredada (misma clave y expresión en la base)
+ // recibe el source que la base le da o, si no tiene, la URL de la base. La que agrega el diferencial queda sin source,
+ // como en HL7: el validador le pone el de la definición que la declara cuando es una capa de perfil de tipo.
+-func stampConstraintSources(snapshot, base *Snapshot, baseURL string) {
++func stampConstraintSources(snapshot, base *Snapshot, baseURL, profileURL string) {
+ 	inBase := map[string]map[string]string{}
+ 	for i := range base.Element {
+ 		e := &base.Element[i]
+@@ -1420,7 +1420,7 @@
+ 			}
+ 			k := c.Key + "\x00" + c.Expression
+ 			// Un hijo de un slice es copia del hijo del elemento que divide: trae lo que ese trae de la base.
+-			c.Source = cmp.Or(inBase[e.ID][k], inBase[sliceName.ReplaceAllString(e.ID, "")][k])
+-		}
+-	}
+-}
++			c.Source = cmp.Or(inBase[e.ID][k], inBase[sliceName.ReplaceAllString(e.ID, "")][k], profileURL)
++		}
++	}
++}

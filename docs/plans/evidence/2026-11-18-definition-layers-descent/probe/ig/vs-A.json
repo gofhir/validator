@@ -1,0 +1,18 @@
+{
+ "resourceType": "ValueSet",
+ "id": "vs-A",
+ "url": "http://example.org/dl/vs-A",
+ "status": "active",
+ "compose": {
+  "include": [
+   {
+    "system": "http://example.org/dl/cs",
+    "concept": [
+     {
+      "code": "A"
+     }
+    ]
+   }
+  ]
+ }
+}

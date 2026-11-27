@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "pp-fix",
+ "url": "http://example.org/ax/pp-fix",
+ "name": "AxPpfix",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Period",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Period",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Period.start",
+    "path": "Period.start",
+    "fixedDateTime": "2000"
+   }
+  ]
+ }
+}

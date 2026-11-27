@@ -1,0 +1,9 @@
+{
+ "resourceType": "Patient",
+ "id": "a",
+ "extension": [
+  {
+   "url": "http://example.org/rv8/pk-ext"
+  }
+ ]
+}

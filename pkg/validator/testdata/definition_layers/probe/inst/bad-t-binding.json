@@ -1,0 +1,22 @@
+{
+ "resourceType": "Patient",
+ "id": "t-binding",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/t-binding"
+  ]
+ },
+ "identifier": [
+  {
+   "system": "urn:x",
+   "type": {
+    "coding": [
+     {
+      "system": "http://example.org/dl/cs",
+      "code": "B"
+     }
+    ]
+   }
+  }
+ ]
+}

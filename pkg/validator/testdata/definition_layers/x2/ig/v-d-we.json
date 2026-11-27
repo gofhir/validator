@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "v-d-we",
+ "url": "http://example.org/ax/v-d-we",
+ "name": "AxVdwe",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/ax/v-d0-we",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier.value",
+    "path": "Patient.identifier.value",
+    "constraint": [
+     {
+      "key": "ax-w",
+      "severity": "warning",
+      "human": "ax-w",
+      "expression": "$this.length() < 2"
+     }
+    ]
+   }
+  ]
+ }
+}

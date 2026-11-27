@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-cx-pown",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/cx-pown"
+  ]
+ },
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "http://example.org/ax/e1",
+    "id": "z"
+   }
+  ]
+ }
+}

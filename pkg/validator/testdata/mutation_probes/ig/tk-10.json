@@ -1,0 +1,38 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tk-10",
+ "url": "http://example.org/hm/tk-10",
+ "name": "HmTk10",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.system",
+    "path": "Identifier.system",
+    "min": 1
+   },
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "constraint": [
+     {
+      "key": "gk",
+      "severity": "error",
+      "human": "gk text",
+      "expression": "$this.length() < 1"
+     }
+    ]
+   }
+  ]
+ }
+}

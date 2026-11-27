@@ -1,0 +1,39 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "sb-we",
+ "url": "http://example.org/hm/sb-we",
+ "name": "HmSbwe",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Identifier",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Identifier",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Identifier",
+    "path": "Identifier"
+   },
+   {
+    "id": "Identifier.system",
+    "path": "Identifier.system",
+    "min": 1
+   },
+   {
+    "id": "Identifier.value",
+    "path": "Identifier.value",
+    "constraint": [
+     {
+      "key": "k15",
+      "severity": "error",
+      "human": "k15 text",
+      "expression": "$this.length() < 2",
+      "source": "http://example.org/hm/common"
+     }
+    ]
+   }
+  ]
+ }
+}

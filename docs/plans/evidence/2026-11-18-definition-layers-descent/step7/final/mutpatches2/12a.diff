@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -850,7 +850,7 @@
+ 	}
+ 	// Una vez por ubicación y tipos permitidos en el scope de informe: dos definiciones que permiten los mismos
+ 	// tipos informan lo mismo una vez, y las que permiten otros, cada una (punto 10).
+-	if !firstReportKey(opts.ctx, typeNotAllowedKey(fhirPath)+"\x00"+strings.Join(codes, ",")) {
++	if false && !firstReportKey(opts.ctx, typeNotAllowedKey(fhirPath)+"\x00"+strings.Join(codes, ",")) {
+ 		return
+ 	}
+ 	result.AddErrorWithID(issue.DiagStructureTypeNotAllowed, map[string]any{

@@ -1,0 +1,136 @@
+## bad-c-pdesc
+   E Patient.birthDate.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+   E Patient.birthDate.extension[0] | The Extension 'http://example.org/ax/e0' definition is for a simple extension, so it must contain a value
+   E Patient.birthDate.extension[0] | Patient.birthDate.extension:e.value[x]: minimum required = 1, but only found 0 (from http://example.org/ax/c-pdesc)
+## bad-c-pmin
+   E Patient.birthDate | Patient.birthDate.extension: minimum required = 1, but only found 0 (from http://example.org/ax/c-pmin)
+## bad-c-tdeep
+   E Patient.identifier[0].period | Identifier.period.start: minimum required = 1, but only found 0 (from http://example.org/ax/tp-sd)
+   E Patient.identifier[0].period | Patient.identifier.period.start: minimum required = 1, but only found 0 (from http://example.org/ax/c-tdeep)
+## bad-c-tdeep2
+   E Patient.identifier[0].period | Identifier.period.start: minimum required = 1, but only found 0 (from http://example.org/ax/tp-sd)
+   E Patient.identifier[0].period | Patient.identifier.period.start: minimum required = 1, but only found 0 (from http://example.org/ax/c-tdeep2)
+## bad-cx-nest
+   E Patient.contact[0].telecom[0] | Patient.contact:m.telecom:p.value: minimum required = 1, but only found 0 (from http://example.org/ax/cx-nest)
+   E Patient.contact[0].telecom[0] | Patient.contact:m.telecom.period: minimum required = 1, but only found 0 (from http://example.org/ax/cx-nest)
+   E Patient.contact[0].telecom[0] | Patient.contact.telecom:p.rank: minimum required = 1, but only found 0 (from http://example.org/ax/cx-nest)
+   E Patient.contact[0].telecom[0] | Patient.contact.telecom.use: minimum required = 1, but only found 0 (from http://example.org/ax/cx-nest)
+## bad-cx-pd
+   E Patient.birthDate | Patient.birthDate.extension: max allowed = 0, but found 1 (from http://example.org/ax/cx-pd)
+## bad-cx-pown
+   E Patient.birthDate.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+   E Patient.birthDate.extension[0] | The Extension 'http://example.org/ax/e1' definition is for a simple extension, so it must contain a value
+   E Patient.birthDate.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from http://example.org/ax/e1)
+   E Patient.birthDate.extension[0] | Slicing cannot be evaluated: Could not match discriminator (url) for slice Patient.birthDate.extension:e in profile http://example.org/ax/cx-pown - th
+## bad-cx-sltp
+   E Patient.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/ax/tp-m)
+## bad-cx-t2
+   E Patient.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/ax/tp-m)
+## bad-cx-t3
+   E Patient.identifier[0] | Identifier.assigner: max allowed = 0, but found 1 (from http://example.org/ax/tp-mx)
+## bad-d-fix
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-fix - the disc
+   E Patient.identifier[0].value | Value is 'x' but is fixed to 'BASE' in the profile http://example.org/ax/d-fix#Patient.identifier.value
+## bad-d-inv
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-inv - the disc
+   E Patient.identifier[0].value | Constraint failed: ax-d: 'ax-d'
+## bad-d-low-fix
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-low-fix - the 
+   E Patient.identifier[0].period.start | Value is '2001' but is fixed to '2000' in the profile http://example.org/ax/pp-fix#Period.start
+## bad-d-low-inv
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-low-inv - the 
+   E Patient.identifier[0].period | Constraint failed: ax-pp: 'ax-pp' (defined in http://example.org/ax/pp-inv)
+## bad-d-max
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-max - the disc
+   E Patient.identifier[0] | Patient.identifier.assigner: max allowed = 0, but found 1 (from http://example.org/ax/d-max)
+## bad-d-min
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-min - the disc
+   E Patient.identifier[0] | Patient.identifier.period: minimum required = 1, but only found 0 (from http://example.org/ax/d-min)
+## bad-d-sl
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-sl - the discr
+   E Patient.identifier[0].extension[0].value.ofType(string) | Value is 'G' but is fixed to 'F' in the profile http://example.org/ax/d-sl#Patient.identifier.extension:x.value[x]
+## bad-d-tp-f
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-tp-f - the dis
+   E Patient.identifier[0].value | Value is 'G' but is fixed to 'F' in the profile http://example.org/ax/tp-f#Identifier.value
+## bad-d-tp-m
+   E Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifier:mrn in profile http://example.org/ax/d-tp-m - the dis
+   E Patient.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/ax/tp-m)
+## bad-d-type
+   E Observation.component[0] | Slicing cannot be evaluated: Could not match discriminator (code.text) for slice Observation.component:a in profile http://example.org/ax/d-type - the
+   E Observation.component[0].value.ofType(integer) | The Profile 'http://example.org/ax/d-type' definition allows for the type string but found type integer
+## bad-d-type2
+   E Observation.component[0].code | Profile http://example.org/ax/d-type2, Element matches more than one slice - , 
+   E Observation.component[0].value.ofType(integer) | The Profile 'http://example.org/ax/d-type2' definition allows for the type string but found type integer
+## bad-f-low-fix
+   E Patient.identifier[0].period.start | Value is '2001' but is fixed to '2000' in the profile http://example.org/ax/pp-fix#Period.start
+## bad-f-low-inv
+   E Patient.identifier[0].period | Constraint failed: ax-pp: 'ax-pp' (defined in http://example.org/ax/pp-inv)
+## bad-f-slice
+   E Patient.identifier[0].extension[0].value.ofType(string) | Value is 'G' but is fixed to 'F' in the profile http://example.org/ax/tp-sl#Identifier.extension:x.value[x]
+   E Patient.identifier[0].extension[0].value.ofType(string) | Value is 'G' but is fixed to 'F' in the profile http://example.org/ax/f-slice#Patient.identifier.extension:x.value[x]
+## bad-f-type
+   E Observation.note[0].author.ofType(Reference) | The Profile 'http://example.org/ax/tp-ann' definition allows for the type string but found type Reference
+   E Observation.note[0].author.ofType(Reference).display | This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/string|4.0.1
+   E Observation.note[0].author.ofType(Reference) | The Profile 'http://example.org/ax/f-type' definition allows for the type string but found type Reference
+## bad-h-ch
+   E Observation.component[0].value.ofType(string) | Value is 'A' but is fixed to 'BASE' in the profile http://example.org/ax/h-ch#Observation.component.value[x]:valueString
+## bad-l-none
+   E Patient.identifier[0].value | Value is 'G' but is fixed to 'F' in the profile http://example.org/ax/alt-a#Identifier.value (validating against http://example.org/ax/alt-a [AxAlta])
+   E Patient.identifier[0].value | Value is 'G' but is fixed to 'H' in the profile http://example.org/ax/alt-b#Identifier.value (validating against http://example.org/ax/alt-b [AxAltb])
+## bad-m-min
+   E Patient.identifier[0] | This element does not match any known slice defined in the profile http://example.org/ax/m-min and slicing is CLOSED: 
+   E Patient | Slice 'Patient.identifier:m': a matching slice is required, but not found (from http://example.org/ax/m-min). Note that other slices are allowed in ad
+   E Patient.identifier[0].value | Value is 'MRN' but is fixed to 'BASE' in the profile http://example.org/ax/m-min#Patient.identifier.value
+## bad-m-nod
+   E Patient.identifier[0].value | Value is 'MRN' but is fixed to 'BASE' in the profile http://example.org/ax/m-nod#Patient.identifier.value
+## bad-n-nest
+   E Patient.contact[0].telecom[0].value | Value is 'MP' but is fixed to 'M' in the profile http://example.org/ax/n-nest#Patient.contact:m.telecom.value
+   E Patient.contact[0].telecom[0].value | Value is 'MP' but is fixed to 'CP' in the profile http://example.org/ax/n-nest#Patient.contact.telecom:p.value
+   E Patient.contact[0].telecom[0].value | Value is 'MP' but is fixed to 'C' in the profile http://example.org/ax/n-nest#Patient.contact.telecom.value
+## bad-o-alt
+   E Patient.extension[0] | The Extension 'http://example.org/ax/e2' definition allows for the types [string] but found type integer
+## bad-o-fix
+   E Patient.extension[0].value.ofType(string) | Value is 'G' but is fixed to 'F' in the profile http://example.org/ax/e1#Extension.value[x]
+   E Patient.extension[0] | Slicing cannot be evaluated: Could not match discriminator (url) for slice Patient.extension:e in profile http://example.org/ax/o-own - the discrimina
+## bad-o-inv
+   E Patient.extension[0].value.ofType(string) | Constraint failed: ax-e: 'ax-e'
+   E Patient.extension[0].value.ofType(string) | Value is 'FF' but is fixed to 'F' in the profile http://example.org/ax/e1#Extension.value[x]
+   E Patient.extension[0] | Slicing cannot be evaluated: Could not match discriminator (url) for slice Patient.extension:e in profile http://example.org/ax/o-own - the discrimina
+## bad-o-min
+   E Patient.extension[0] | Constraint failed: ext-1: 'Must have either extensions or value[x], not both' (defined in http://hl7.org/fhir/StructureDefinition/Extension)
+   E Patient.extension[0] | The Extension 'http://example.org/ax/e1' definition is for a simple extension, so it must contain a value
+   E Patient.extension[0] | Extension.value[x]: minimum required = 1, but only found 0 (from http://example.org/ax/e1)
+   E Patient.extension[0] | Slicing cannot be evaluated: Could not match discriminator (url) for slice Patient.extension:e in profile http://example.org/ax/o-own - the discrimina
+## bad-p-einv
+   E Patient.birthDate.extension[0] | Constraint failed: ax-pe: 'ax-pe'
+## bad-p-id
+   E Patient.birthDate.id | Value is 'q' but is fixed to 'zz' in the profile http://example.org/ax/p-base#Patient.birthDate.id
+## bad-p-own-fix
+   E Patient.birthDate.extension[0].value.ofType(string) | Value is 'G' but is fixed to 'F' in the profile http://example.org/ax/e1#Extension.value[x]
+   E Patient.birthDate.extension[0] | Slicing cannot be evaluated: Could not match discriminator (url) for slice Patient.birthDate.extension:e in profile http://example.org/ax/p-own - the 
+## bad-q-cr
+   E Questionnaire.item[0].item[0] | Constraint failed: que-1: 'Group items must have nested items, display items cannot have nested items'
+   E Questionnaire.item[0].text | Value is 'G' but is fixed to 'T' in the profile http://example.org/ax/q-cr#Questionnaire.item.text
+## bad-r-fix
+   E Patient.identifier[0].value | Value is 'B' but is fixed to 'BASE' in the profile http://example.org/ax/r-fix#Patient.identifier.value
+## bad-s-arr
+   E Patient.identifier[0].value | Value is 'MRN' but is fixed to 'BASE' in the profile http://example.org/ax/s-arr#Patient.identifier.value
+   E Patient.identifier[2].value | Value is 'BASE' but is fixed to 'MRN' in the profile http://example.org/ax/s-arr#Patient.identifier:mrn.value
+## bad-v-d-ew
+   W Patient.identifier[0].value | Constraint failed: ax-w: 'ax-w' (defined in http://example.org/ax/v-d0-ew)
+   E Patient.identifier[0].value | Constraint failed: ax-w: 'ax-w'
+## bad-v-d-we
+   E Patient.identifier[0].value | Constraint failed: ax-w: 'ax-w' (defined in http://example.org/ax/v-d0-we)
+   W Patient.identifier[0].value | Constraint failed: ax-w: 'ax-w'
+## bad-v-s-ew
+   E Patient.identifier[0].value | Constraint failed: ax-v: 'ax-v'
+## bad-v-s-we
+   E Patient.identifier[0].value | Constraint failed: ax-v: 'ax-v'
+## bad-v-t-ew
+   E Patient.identifier[0].value | Constraint failed: ax-v: 'ax-v'
+## bad-v-t-we
+   W Patient.identifier[0].value | Constraint failed: ax-v: 'ax-v'
+## ok-l-a
+## ok-l-sp
+## ok-o
+   E Patient.extension[0] | Slicing cannot be evaluated: Could not match discriminator (url) for slice Patient.extension:e in profile http://example.org/ax/o-own - the discrimina

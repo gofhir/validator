@@ -1,0 +1,11 @@
+--- a/pkg/slicematch/path.go
++++ b/pkg/slicematch/path.go
+@@ -571,7 +571,7 @@
+ 		// Con varios perfiles de tipo el elemento puede cumplir cualquiera: cada uno es una alternativa, con lo
+ 		// que el propio elemento fija (un valor fijo gana al del perfil).
+ 		if profiled, err := m.typeChildren(c, typeCode); err == nil && len(profiled) > 1 {
+-			return overlayFixed(profiled, b.children), nil
++			return overlayFixed(profiled[:1], b.children), nil
+ 		}
+ 		return []branch{b}, nil
+ 	}

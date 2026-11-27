@@ -1,0 +1,19 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/15a.orig	2026-11-25 16:03:40
++++ pkg/constraint/report_scope.go	2026-11-25 16:03:40
+@@ -177,6 +177,7 @@
+ 		layered = s.layered
+ 		s.mu.Unlock()
+ 	}
++	_ = layered
+ 	var failed map[string]bool
+ 	for i := range in {
+ 		if in[i].Severity != issue.SeverityError {
+@@ -195,7 +196,7 @@
+ 	out := in[:0]
+ 	for i := range in {
+ 		if in[i].Severity == issue.SeverityWarning {
+-			if k := failureKey(&in[i]); failed[k] && !layered[k] {
++			if k := failureKey(&in[i]); failed[k] {
+ 				continue
+ 			}
+ 		}

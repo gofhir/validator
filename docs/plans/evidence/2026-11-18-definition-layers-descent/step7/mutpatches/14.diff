@@ -1,0 +1,12 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/14.orig	2026-11-25 15:55:17
++++ pkg/registry/snapshot.go	2026-11-25 15:55:17
+@@ -1401,6 +1401,9 @@
+ // en «(defined in …)»: la heredada (misma clave y expresión en la base) recibe el perfil base que la trae, y la propia
+ // del perfil, su URL. Distingue dos constraints iguales de perfiles distintos.
+ func stampConstraintSources(snapshot, base *Snapshot, url, baseURL string) {
++	if true {
++		return
++	}
+ 	inBase := map[string]map[string]string{}
+ 	for i := range base.Element {
+ 		e := &base.Element[i]

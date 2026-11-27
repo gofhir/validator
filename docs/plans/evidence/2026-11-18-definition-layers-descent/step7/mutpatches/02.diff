@@ -1,0 +1,11 @@
+--- /Volumes/dev/tmp/claude/claude-501/-Users-robertoaraneda-projects-personal-opensource-go-validator/11d0cc65-98da-4af5-bcc8-65c4743d06bd/scratchpad/step7/bk/02.orig	2026-11-25 15:34:52
++++ pkg/constraint/tree.go	2026-11-25 15:34:52
+@@ -148,7 +148,7 @@
+ 	for _, o := range owners[nSlices:] {
+ 		add(layerSD, o.Children)
+ 	}
+-	if typeRoot != nil && typeSD.Derivation == registry.DerivationConstraint && typeSD != self {
++	if false && typeRoot != nil && typeSD.Derivation == registry.DerivationConstraint && typeSD != self {
+ 		add(typeSD, typeRoot.Children)
+ 	}
+ 	if self != nil {

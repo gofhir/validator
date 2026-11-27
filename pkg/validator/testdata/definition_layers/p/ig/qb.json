@@ -1,0 +1,22 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "qb",
+ "url": "http://example.org/p5/qb",
+ "name": "AxQb",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.gender",
+    "path": "Patient.gender",
+    "fixedCode": "male"
+   }
+  ]
+ }
+}

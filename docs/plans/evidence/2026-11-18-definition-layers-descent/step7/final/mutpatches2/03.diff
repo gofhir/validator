@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -152,7 +152,7 @@
+ 	if typeRoot != nil && typeSD.Derivation == registry.DerivationConstraint && typeSD != self {
+ 		add(typeSD, typeRoot.Children)
+ 	}
+-	if self != nil {
++	if false && self != nil {
+ 		if root := self.Tree().Root(); root != nil {
+ 			add(self, root.Children)
+ 		}

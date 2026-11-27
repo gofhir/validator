@@ -1,0 +1,38 @@
+{
+ "resourceType": "Patient",
+ "id": "m-sext-cslice-a",
+ "meta": {
+  "profile": [
+   "http://example.org/dl/sext-cslice"
+  ]
+ },
+ "text": {
+  "status": "generated",
+  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">probe</div>"
+ },
+ "extension": [
+  {
+   "url": "http://example.org/dl/e0",
+   "valueIdentifier": {
+    "system": "urn:mrn",
+    "value": "z",
+    "period": {
+     "start": "2000-01-01"
+    },
+    "assigner": {
+     "display": "d"
+    },
+    "extension": [
+     {
+      "url": "http://example.org/dl/ea",
+      "valueString": "zz"
+     },
+     {
+      "url": "http://example.org/dl/eb",
+      "valueString": "eb"
+     }
+    ]
+   }
+  }
+ ]
+}

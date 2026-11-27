@@ -1,0 +1,18 @@
+{
+ "resourceType": "Patient",
+ "id": "bad-p-einv",
+ "meta": {
+  "profile": [
+   "http://example.org/ax/p-inv"
+  ]
+ },
+ "birthDate": "2000-01-01",
+ "_birthDate": {
+  "extension": [
+   {
+    "url": "http://example.org/ax/e0",
+    "valueString": "x"
+   }
+  ]
+ }
+}

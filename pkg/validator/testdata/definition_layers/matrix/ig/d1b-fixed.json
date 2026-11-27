@@ -1,0 +1,45 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d1b-fixed",
+ "url": "http://example.org/dl/d1b-fixed",
+ "name": "DlD1BFixed",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "system"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.system",
+    "path": "Patient.identifier.system",
+    "fixedUri": "urn:mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.assigner.display",
+    "path": "Patient.identifier.assigner.display",
+    "fixedString": "fb"
+   }
+  ]
+ }
+}

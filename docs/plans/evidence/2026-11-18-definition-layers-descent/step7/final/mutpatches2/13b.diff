@@ -1,0 +1,11 @@
+--- a/pkg/registry/snapshot.go
++++ b/pkg/registry/snapshot.go
+@@ -1348,7 +1348,7 @@
+ 	}
+ 	yield := map[string]bool{}
+ 	for _, c := range diff.Constraint {
+-		if !b.baseKeys[src][c.Key] {
++		if true {
+ 			yield[c.Key] = true
+ 		}
+ 	}

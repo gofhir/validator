@@ -1,0 +1,36 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "t2-pattern",
+ "url": "http://example.org/dl/t2-pattern",
+ "name": "DlT2Pattern",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier",
+    "path": "Patient.identifier",
+    "type": [
+     {
+      "code": "Identifier",
+      "profile": [
+       "http://example.org/dl/tpi-pattern"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.identifier.period",
+    "path": "Patient.identifier.period",
+    "patternPeriod": {
+     "start": "2000-01-01"
+    }
+   }
+  ]
+ }
+}

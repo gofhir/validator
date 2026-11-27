@@ -1,0 +1,49 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "o-alt",
+ "url": "http://example.org/ax/o-alt",
+ "name": "AxOalt",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension:e",
+    "path": "Patient.extension",
+    "sliceName": "e",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/ax/e2",
+       "http://example.org/ax/e1"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "Patient.extension:e.url",
+    "path": "Patient.extension.url",
+    "short": "u"
+   }
+  ]
+ }
+}

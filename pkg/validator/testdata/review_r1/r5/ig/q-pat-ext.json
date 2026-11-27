@@ -1,0 +1,49 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "q-pat-ext",
+ "url": "http://example.org/rv8/q-pat-ext",
+ "name": "qpatext",
+ "status": "active",
+ "fhirVersion": "5.0.0",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient",
+    "path": "Patient"
+   },
+   {
+    "id": "Patient.extension",
+    "path": "Patient.extension",
+    "slicing": {
+     "discriminator": [
+      {
+       "type": "value",
+       "path": "url"
+      }
+     ],
+     "rules": "open"
+    }
+   },
+   {
+    "id": "Patient.extension:e",
+    "path": "Patient.extension",
+    "sliceName": "e",
+    "min": 0,
+    "max": "1",
+    "type": [
+     {
+      "code": "Extension",
+      "profile": [
+       "http://example.org/rv8/q-ext"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

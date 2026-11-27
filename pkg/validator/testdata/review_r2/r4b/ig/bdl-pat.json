@@ -1,0 +1,1 @@
+{"resourceType":"StructureDefinition","id":"bdl-pat","url":"http://example.org/r2/bdl-pat","name":"bdlpat","status":"active","fhirVersion":"4.3.0","kind":"resource","abstract":false,"type":"Bundle","baseDefinition":"http://hl7.org/fhir/StructureDefinition/Bundle","derivation":"constraint","differential":{"element":[{"id":"Bundle","path":"Bundle"}]}}

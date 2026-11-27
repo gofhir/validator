@@ -1,0 +1,19 @@
+{
+ "resourceType": "ValueSet",
+ "id": "vs-B",
+ "url": "http://example.org/dl/vs-B",
+ "status": "active",
+ "compose": {
+  "include": [
+   {
+    "system": "http://example.org/dl/cs",
+    "concept": [
+     {
+      "code": "B"
+     }
+    ]
+   }
+  ]
+ },
+ "fhirVersion": "4.0.1"
+}

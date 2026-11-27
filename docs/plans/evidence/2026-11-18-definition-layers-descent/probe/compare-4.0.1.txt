@@ -1,0 +1,47 @@
+FALTA bad-p-binding    hl7=2 go=1
+     H Patient.birthDate.extension[0].value.ofType(code) | The System URI could not be determined for the code 'B' in the ValueSet 'http://example.org/dl/
+     H Patient.birthDate.extension[0].value.ofType(code) | The value provided ('B') was not found in the value set 'ValueSet[http://example.org/dl/vs-A]' 
+     G Patient.birthDate.extension[0].valueCode | The value provided ('B') is not in the value set 'http://example.org/dl/vs-A' (required)
+FALTA bad-p-fixed      hl7=1 go=0
+     H Patient.birthDate.extension[0].value.ofType(string) | Value is 'G' but is fixed to 'F' in the profile http://example.org/dl/p-fixed#Patient.birthDate
+FALTA bad-p-inv        hl7=1 go=0
+     H Patient.birthDate.extension[0].value.ofType(string) | Constraint failed: dl-p: 'dl-p'
+IGUAL bad-p-max        hl7=1 go=1
+IGUAL bad-p-min        hl7=1 go=1
+FALTA bad-s-binding    hl7=2 go=0
+     H Patient.identifier[0] | Slicing cannot be evaluated: Could not match discriminator (system) for slice Patient.identifie
+     H Patient.identifier[0].type | None of the codings provided are in the value set 'ValueSet[http://example.org/dl/vs-A]' (http:
+IGUAL bad-s-deep       hl7=1 go=1
+FALTA bad-s-fixed      hl7=1 go=0
+     H Patient.identifier[0].value | Value is 'MRN' but is fixed to 'BASE' in the profile http://example.org/dl/s-fixed#Patient.iden
+IGUAL bad-s-inv        hl7=1 go=1
+IGUAL bad-s-max        hl7=1 go=1
+IGUAL bad-s-min        hl7=1 go=1
+IGUAL bad-t-binding    hl7=1 go=1
+FALTA bad-t-fixed      hl7=2 go=1
+     H Patient.identifier[0].value | Value is 'G' but is fixed to 'F' in the profile http://example.org/dl/tid-fixed#Identifier.valu
+     H Patient.identifier[0].value | Value is 'G' but is fixed to 'F' in the profile http://example.org/dl/t-fixed#Patient.identifie
+     G Patient.identifier[0].value | Value is "G", but the profile requires "F"
+IGUAL bad-t-inv        hl7=1 go=1
+FALTA bad-t-max        hl7=2 go=1
+     H Patient.identifier[0] | Identifier.assigner: max allowed = 0, but found 1 (from http://example.org/dl/tid-max)
+     H Patient.identifier[0] | Patient.identifier.assigner: max allowed = 0, but found 1 (from http://example.org/dl/t-max)
+     G Patient.identifier[0].assigner | Maximum cardinality of 'Patient.identifier[0].assigner' is 0, but found 1
+FALTA bad-t-min        hl7=2 go=1
+     H Patient.identifier[0] | Identifier.period: minimum required = 1, but only found 0 (from http://example.org/dl/tid-min)
+     H Patient.identifier[0] | Patient.identifier.period: minimum required = 1, but only found 0 (from http://example.org/dl/t
+     G Patient.identifier[0].period | Minimum cardinality of 'Patient.identifier[0].period' is 1, but found 0
+IGUAL ok-p-binding     hl7=0 go=0
+IGUAL ok-p-fixed       hl7=0 go=0
+IGUAL ok-p-inv         hl7=0 go=0
+IGUAL ok-p-max         hl7=0 go=0
+IGUAL ok-p-min         hl7=0 go=0
+IGUAL ok-s-deep        hl7=0 go=0
+IGUAL ok-s-inv         hl7=0 go=0
+IGUAL ok-s-max         hl7=0 go=0
+IGUAL ok-s-min         hl7=0 go=0
+IGUAL ok-t-binding     hl7=0 go=0
+IGUAL ok-t-fixed       hl7=0 go=0
+IGUAL ok-t-inv         hl7=0 go=0
+IGUAL ok-t-max         hl7=0 go=0
+IGUAL ok-t-min         hl7=0 go=0

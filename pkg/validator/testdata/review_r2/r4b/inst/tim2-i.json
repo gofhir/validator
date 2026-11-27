@@ -1,0 +1,1 @@
+{"resourceType":"Observation","id":"a","status":"final","code":{"text":"x"},"effectiveTiming":{"repeat":{"offset":5,"when":["C"]}}}

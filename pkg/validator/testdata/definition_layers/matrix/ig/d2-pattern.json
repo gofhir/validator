@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "d2-pattern",
+ "url": "http://example.org/dl/d2-pattern",
+ "name": "DlD2Pattern",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "resource",
+ "abstract": false,
+ "type": "Patient",
+ "baseDefinition": "http://example.org/dl/d2b-pattern",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Patient.identifier:mrn",
+    "path": "Patient.identifier",
+    "sliceName": "mrn"
+   },
+   {
+    "id": "Patient.identifier:mrn.period",
+    "path": "Patient.identifier.period",
+    "patternPeriod": {
+     "start": "2000-01-01"
+    }
+   }
+  ]
+ }
+}

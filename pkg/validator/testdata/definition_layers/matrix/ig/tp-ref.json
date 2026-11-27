@@ -1,0 +1,29 @@
+{
+ "resourceType": "StructureDefinition",
+ "id": "tp-ref",
+ "url": "http://example.org/dl/tp-ref",
+ "name": "DlTpRef",
+ "status": "draft",
+ "fhirVersion": "4.0.1",
+ "kind": "complex-type",
+ "abstract": false,
+ "type": "Reference",
+ "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Reference",
+ "derivation": "constraint",
+ "differential": {
+  "element": [
+   {
+    "id": "Reference",
+    "path": "Reference",
+    "constraint": [
+     {
+      "key": "dl-tpb",
+      "severity": "error",
+      "human": "display",
+      "expression": "display.exists()"
+     }
+    ]
+   }
+  ]
+ }
+}

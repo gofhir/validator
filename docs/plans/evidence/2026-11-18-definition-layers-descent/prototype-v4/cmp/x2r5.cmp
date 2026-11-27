@@ -1,0 +1,15 @@
+bad-d-type 
+   soloHL7 E Observation.component[0].code ['Profile http://example.org/ax/d-type, Element matches more than one slice - ,']
+bad-d-type2 
+   soloHL7 E Observation.component[0].code ['Profile http://example.org/ax/d-type2, Element matches more than one slice - ,']
+bad-f-type 
+   soloHL7 E Observation.note[0].author.display ['This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/string|5.0.0']
+bad-l-none 
+   soloGo  E Patient.identifier[0] ["The value conforms to none of the profiles its element's type allows (http://example.org/ax/alt"]
+bad-m-nod 
+   soloGo  E Patient.identifier[0] ['Slicing cannot be evaluated: Patient.identifier:m: no discriminator constrains this slice']
+bad-o-alt 
+   soloGo  E Patient.extension[0].value ["The profile 'http://example.org/ax/e2' allows the type(s) string but found type integer"]
+bad-q-cr 
+   soloGo  E Questionnaire.item[0].item[0].text ['Value is "X", but the profile requires "T"']
+difieren 7 de 49

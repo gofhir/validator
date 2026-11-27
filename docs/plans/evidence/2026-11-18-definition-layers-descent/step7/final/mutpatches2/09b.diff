@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -1089,7 +1089,7 @@
+ 		seen[k] = true
+ 		if opts.memo != nil {
+ 			// Dentro de un ámbito, una invariante ya evaluada en esta ubicación no se evalúa otra vez (punto 4).
+-			mk := memoKey{at: fhirPath, id: k, sev: c.Severity}
++			mk := memoKey{at: "", id: k, sev: c.Severity}
+ 			if _, done := opts.memo[mk]; done {
+ 				continue
+ 			}

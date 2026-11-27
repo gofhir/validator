@@ -224,6 +224,31 @@ func TestExtensionURLThroughTypeProfile(t *testing.T) {
 	}
 }
 
+// Un slice con hijos propios y varios perfiles de extensión (type.profile: «el contenido debe cumplir al menos uno») toma su
+// url de cualquiera de los perfiles, como uno sin hijos; lo que el slice fija él mismo gana al perfil. La instancia de abajo
+// entra solo por el segundo perfil, porque la url del primero es otra. (El validador HL7 despliega solo el primer perfil en
+// un slice así: su snapshot del slice nombra esa url sola, de modo que informa una url del segundo como ajena;
+// docs/plans/evidence/2026-11-18-definition-layers-descent/step7/fix/hl7-mut-m19-b.txt. Aquí decide la regla de alternativas
+// de la especificación.)
+func TestExtensionURLThroughSeveralProfilesWithOwnChildren(t *testing.T) {
+	reg := newRegistry(t, nil, ext(extA), ext(extB), profileWith(
+		`{"id":"Patient.extension","path":"Patient.extension","slicing":{"discriminator":[{"type":"value","path":"url"}],"rules":"open"},"type":[{"code":"Extension"}]}`,
+		`{"id":"Patient.extension:either","path":"Patient.extension","sliceName":"either","min":0,"max":"1","type":[{"code":"Extension","profile":["`+extA+`","`+extB+`"]}]}`,
+		`{"id":"Patient.extension:either.value[x]","path":"Patient.extension.value[x]","min":0,"max":"1","type":[{"code":"code"}],"fixedCode":"x"}`,
+	))
+	m := New(reg)
+	for _, tt := range []struct{ url, want string }{
+		{extA, "Patient.extension:either"},
+		{extB, "Patient.extension:either"},
+		{"https://example.org/other", ""},
+	} {
+		got := resolveAt(t, m, reg, prof, "Patient.extension", obj(t, `{"url":"`+tt.url+`","valueCode":"x"}`), nil)
+		if id, _ := sliceIDs(got); id != tt.want {
+			t.Errorf("url %s: matched %q, want %q", tt.url, id, tt.want)
+		}
+	}
+}
+
 // A value discriminator reads a pattern on the discriminated element (NombreSocial: use is
 // "usual"), and one on an ancestor that contains it (code.coding.code inside patternCodeableConcept).
 func TestPatternSources(t *testing.T) {

@@ -1,0 +1,11 @@
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -561,7 +561,7 @@
+ 	opts.resolver = resolverWithin(opts.resolver, opts.scope.RootResource, nil)
+ 	opts.own = nil // un recurso contenido tiene sus propias definiciones
+ 
+-	if opts.divided(reflect.ValueOf(res).Pointer(), holder) {
++	if false && opts.divided(reflect.ValueOf(res).Pointer(), holder) {
+ 		return
+ 	}
+ 

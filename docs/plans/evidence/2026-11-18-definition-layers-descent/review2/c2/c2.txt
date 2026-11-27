@@ -1,0 +1,20 @@
+## chain-viol-new
+   W Patient.name[0].family | Constraint failed: k: 'k warning $this.startsWith('a')' (Best Practice Recommendation)
+## chain-viol-old
+## core-pat1
+   W Patient.contact[0] | Constraint failed: pat-1: 'pat-1 warning name.exists()' (Best Practice Recommendation)
+## exp-ok
+## exp-viol-both
+   E Patient.name[0].family | Constraint failed: k: 'k error $this.startsWith('a')'
+## exp-viol-new
+   E Patient.name[0].family | Constraint failed: k: 'k error $this.startsWith('a')'
+## exp-viol-old
+## sev-ew
+   W Patient.name[0].family | Constraint failed: k: 'k warning $this.length() < 2' (Best Practice Recommendation)
+## sev-we
+   E Patient.name[0].family | Constraint failed: k: 'k error $this.length() < 2'
+## sl-viol-base
+## sl-viol-both
+   E Patient.identifier[0].value | Constraint failed: k: 'k error $this.startsWith('a')'
+## sl-viol-slice
+   E Patient.identifier[0].value | Constraint failed: k: 'k error $this.startsWith('a')'
