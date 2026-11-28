@@ -1,0 +1,7 @@
+r4.core#4.0.1: 653 snapshots
+  StructureDefinition-ExampleScenario.json ExampleScenario.instance.resourceType types=['code'] resource descendants=[]
+r4b.core#4.3.0: 649 snapshots
+  StructureDefinition-ExampleScenario.json ExampleScenario.instance.resourceType types=['code'] resource descendants=[]
+r5.core#5.0.0: 305 snapshots
+  StructureDefinition-Subscription.json Subscription.filterBy.resourceType types=['uri'] resource descendants=[]
+  StructureDefinition-Consent.json Consent.provision.resourceType types=['Coding'] resource descendants=[]

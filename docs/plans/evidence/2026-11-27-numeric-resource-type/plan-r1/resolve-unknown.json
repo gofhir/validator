@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "contained": [{"id": "bad", "resourceType": "NoSuchType"}], "generalPractitioner": [{"reference": "#bad"}]}

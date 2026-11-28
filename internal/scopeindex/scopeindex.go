@@ -109,7 +109,7 @@ func containedSet(holder map[string]any) map[uintptr]struct{} {
 func (x *Index) holdIn(v any, scope slicematch.Scope, holder map[string]any, contained map[uintptr]struct{}) {
 	switch v := v.(type) {
 	case map[string]any:
-		if _, isResource := v[resourceTypeKey].(string); isResource && !sameMap(v, holder) {
+		if slicematch.IsResource(v) && !sameMap(v, holder) {
 			if _, done := x.scopes[key(v)]; !done {
 				_, isContained := contained[key(v)]
 				x.add(v, childScope(scope, v, isContained))
@@ -258,7 +258,9 @@ func Ensure(ctx context.Context, root map[string]any, external *External, holder
 }
 
 // Resolve devuelve el Scope de res, un recurso, según el índice de ctx; site nombra dónde se pide.
-// Es false cuando el índice no tiene res, lo que registra (Err), y para todo pedido posterior: nada
+// Es false sin más cuando res no es un recurso (slicematch.IsResource: su resourceType no es un string),
+// que el índice no tiene ni debe tener. Es false también cuando el índice no tiene un res que sí lo es, lo
+// que registra (Err), y para todo pedido posterior: nada
 // se evalúa entonces con un Scope que no fuera el del recurso. Sin índice en ctx (una comprobación
 // que corre sola) devuelve fallback, el Scope que tiene quien llama.
 func Resolve(ctx context.Context, res map[string]any, site string, fallback slicematch.Scope) (slicematch.Scope, bool) {
@@ -266,7 +268,7 @@ func Resolve(ctx context.Context, res map[string]any, site string, fallback slic
 	if x == nil {
 		return fallback, true
 	}
-	if x.Err() != nil {
+	if x.Err() != nil || !slicematch.IsResource(res) {
 		return slicematch.Scope{}, false
 	}
 	s, ok := x.Scope(res)

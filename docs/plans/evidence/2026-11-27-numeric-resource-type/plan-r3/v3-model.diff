@@ -1,0 +1,145 @@
+--- a/internal/scopeindex/scopeindex.go
++++ b/internal/scopeindex/scopeindex.go
+@@ -262,6 +262,9 @@
+ // se evalúa entonces con un Scope que no fuera el del recurso. Sin índice en ctx (una comprobación
+ // que corre sola) devuelve fallback, el Scope que tiene quien llama.
+ func Resolve(ctx context.Context, res map[string]any, site string, fallback slicematch.Scope) (slicematch.Scope, bool) {
++	if !slicematch.IsResource(res) {
++		return slicematch.Scope{}, false
++	}
+ 	x := From(ctx)
+ 	if x == nil {
+ 		return fallback, true
+--- a/pkg/slicematch/resource_review.go
++++ b/pkg/slicematch/resource_review.go
+@@ -0,0 +1,14 @@
++package slicematch
++
++import "github.com/gofhir/validator/v2/pkg/registry"
++
++func IsResource(value map[string]any) bool { _, ok := value["resourceType"].(string); return ok }
++func ResourceAt(reg *registry.Registry, sd *registry.StructureDefinition, def *registry.ElementDefinition, value map[string]any) bool {
++	if !IsResource(value) || def == nil {
++		return false
++	}
++	if reg.HoldsResource(def) {
++		return true
++	}
++	return sd != nil && sd.Kind == registry.KindResource && sd.Tree() != nil && sd.Tree().Root().Def == def
++}
+--- a/pkg/slicematch/slicematch.go
++++ b/pkg/slicematch/slicematch.go
+@@ -484,7 +484,7 @@
+ 		scope = *e.in
+ 	}
+ 	res, _ := e.value.(map[string]any)
+-	if _, isResource := res[resourceTypeKey]; !isResource {
++	if e.def == nil || !ResourceAt(m.reg, e.sd, e.def.Def, res) {
+ 		return scope
+ 	}
+ 	if sr, scoped := req.Resolver.(ScopedResolver); scoped {
+@@ -493,7 +493,7 @@
+ 		// siguientes de la ruta, no al perfil que se comprueba.
+ 		return sr.ScopeOf(scope, res)
+ 	}
+-	if e.def == nil || !m.reg.HoldsResource(e.def.Def) {
++	if e.def == nil || !ResourceAt(m.reg, e.sd, e.def.Def, res) {
+ 		return scope
+ 	}
+ 	root := res
+--- a/pkg/slicematch/path.go
++++ b/pkg/slicematch/path.go
+@@ -133,6 +133,7 @@
+ // value there).
+ type end struct {
+ 	branch   string // which alternative, when a type declares several profiles
++	sd       *registry.StructureDefinition
+ 	def      *registry.ElementNode
+ 	allowed  []registry.Type
+ 	value    any                     // nil when the instance has no value at the path
+@@ -188,7 +189,7 @@
+ 	}
+ 	ends := make([]end, 0, len(states))
+ 	for _, st := range states {
+-		e := end{branch: st.branch, def: st.cur.node, allowed: st.cur.allowed(), value: st.value, present: st.present, typeCode: st.typeCode, prim: st.prim, frames: st.frames, in: st.in}
++		e := end{sd: st.cur.sd, branch: st.branch, def: st.cur.node, allowed: st.cur.allowed(), value: st.value, present: st.present, typeCode: st.typeCode, prim: st.prim, frames: st.frames, in: st.in}
+ 		if st.resolved {
+ 			e.profiles = st.targets
+ 		} else {
+@@ -410,7 +411,7 @@
+ func (w walker) within(st state, child *registry.ElementNode, v any) *Scope {
+ 	res, _ := v.(map[string]any)
+ 	sr, scoped := w.resolver.(ScopedResolver)
+-	if _, isResource := res[resourceTypeKey]; !isResource || !scoped || !w.m.reg.HoldsResource(child.Def) {
++	if !scoped || !ResourceAt(w.m.reg, nil, child.Def, res) {
+ 		return st.in
+ 	}
+ 	from := w.scope
+--- a/pkg/validator/slicematch.go
++++ b/pkg/validator/slicematch.go
+@@ -245,6 +245,12 @@
+ func (c conformer) Conforms(ctx context.Context, value any, profile *registry.StructureDefinition, scope slicematch.Scope) bool {
+ 	if profile == nil {
+ 		return false
++	}
++	if profile.Kind == registry.KindResource {
++		data, _ := value.(map[string]any)
++		if !slicematch.IsResource(data) {
++			return false
++		}
+ 	}
+ 	key := conformKey{profile: profile.URL + "|" + profile.Version, assume: c.assume, profileOnly: c.profileOnly}
+ 	data, prim, ok := identify(ctx, value, scope, &key)
+@@ -325,7 +331,7 @@
+ 		// (scopeindex), y el memo se apoya en eso; el que llega lo confirma el test del invariante. Un valor
+ 		// que no es recurso está en el Scope de su recurso, el que da quien llama. Un recurso que el índice no tiene aborta la validación
+ 		// (Validate): nada se comprueba ni se guarda para él.
+-		if _, isResource := x[resourceTypeKey].(string); isResource {
++		if slicematch.IsResource(x) {
+ 			indexed, found := scopeindex.Resolve(ctx, x, "Conforms", scope)
+ 			if !found {
+ 				return nil, prim, false
+@@ -515,6 +521,9 @@
+ 	for i, bundle := range bundles {
+ 		res, ok, ambiguous := bundleref.IndexOf(r.ctx, bundle).Find(ref, from)
+ 		if ok {
++			if !slicematch.IsResource(res) {
++				return nil, slicematch.Scope{}, false
++			}
+ 			// Es una entry de bundle. Los pasos siguientes de la ruta de FHIRPath siguen resolviendo en el
+ 			// Bundle donde la encontró, no en el que ella misma sea: así lo hace HL7 (sonda r1b). Este Scope
+ 			// es solo el de la cadena; al comprobar un perfil, valueScope lo canoniza con ScopeOf.
+@@ -532,7 +541,10 @@
+ 	if scopeindex.From(r.ctx) == nil {
+ 		return constraint.ScopeOf(scope, resource) // una comprobación suelta, sin índice
+ 	}
+-	in, _ := scopeindex.Resolve(r.ctx, resource, "ScopeOf", slicematch.Scope{})
++	in, ok := scopeindex.Resolve(r.ctx, resource, "ScopeOf", scope)
++	if !ok {
++		return scope
++	}
+ 	return in
+ }
+ 
+--- a/pkg/validator/validator.go
++++ b/pkg/validator/validator.go
+@@ -980,7 +980,7 @@
+ 		}
+ 		refCtx = reference.WithContainer(ctx, container, vs.scope.Outer...)
+ 		refCtx = reference.WithHoldingResource(reference.WithContainingResource(refCtx, nil), nil)
+-		_, isResource := data[resourceTypeKey]
++		isResource := slicematch.ResourceAt(v.registry, sd, sd.Tree().Root().Def, data)
+ 		switch {
+ 		case vs.scope.RootResource != nil && constraint.IsContainedIn(vs.scope.RootResource, data):
+ 			// A contained resource resolves "#id" among its container's contained resources
+--- a/pkg/constraint/tree.go
++++ b/pkg/constraint/tree.go
+@@ -485,7 +485,7 @@
+ 			if m, ok := cv.Value.(map[string]any); ok && v.registry.HoldsResource(child.Def) {
+ 				// A resource held in the element, validated as a resource of its own, against the
+ 				// profiles of the slice it matched, or of the element.
+-				if _, isResource := m[resourceTypeKey]; isResource {
++				if slicematch.ResourceAt(v.registry, sd, child.Def, m) {
+ 					v.validateNested(node, m, valueRaw, path, opts, result)
+ 				}
+ 				continue

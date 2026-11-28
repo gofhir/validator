@@ -1,0 +1,3 @@
+package main
+import("fmt"; "github.com/gofhir/validator/v2/internal/scopeindex")
+func main(){b:=map[string]any{"resourceType":"Patient","resourceId":"p"};r:=map[string]any{"resourceType":"ExampleScenario","instance":[]any{b}};x:=scopeindex.Build(r,nil);s,ok:=x.Scope(b);fmt.Printf("backbone indexed=%v ownResource=%v indexLen=%v\n",ok,s.Resource["resourceId"]=="p",x.Len())}

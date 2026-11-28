@@ -17,6 +17,37 @@ import (
 // resourceTypeKey es la propiedad JSON de FHIR que nombra el tipo de un recurso (json.html#resources).
 const resourceTypeKey = "resourceType"
 
+// typeParam es el parámetro «type» de los diagnósticos que nombran un tipo.
+const typeParam = "type"
+
+// ReportNoResourceType informa que res, un objeto que debería ser un recurso, no tiene un resourceType que
+// nombre un tipo. Si la propiedad existe pero no es un string (un número, un objeto, un arreglo, un booleano o
+// null), el error dice el tipo JSON que tiene, como HL7 (json.html#resources); si falta, dice que falta.
+func ReportNoResourceType(result *issue.Result, res map[string]any, expression ...string) {
+	v, present := res[resourceTypeKey]
+	if _, isString := v.(string); !present || isString {
+		result.AddErrorWithID(issue.DiagStructureNoResourceType, nil, expression...)
+		return
+	}
+	result.AddErrorWithID(issue.DiagStructureResourceTypeWrongJSONType, map[string]any{typeParam: jsonTypeName(v)}, expression...)
+}
+
+// jsonTypeName es el nombre que HL7 da al tipo JSON de v, un valor decodificado de JSON.
+func jsonTypeName(v any) string {
+	switch v.(type) {
+	case nil:
+		return "Null"
+	case bool:
+		return "Boolean"
+	case map[string]any:
+		return "Object"
+	case []any:
+		return "Array"
+	default: // float64, json.Number o cualquier otro número que decodifique el llamador
+		return "Number"
+	}
+}
+
 // Validator performs structural validation of FHIR resources.
 type Validator struct {
 	registry *registry.Registry
@@ -461,11 +492,7 @@ func (v *Validator) validateContainedResources(contained []any, baseFhirPath str
 
 		resourceType, _ := resourceMap[resourceTypeKey].(string)
 		if resourceType == "" {
-			result.AddErrorWithID(
-				issue.DiagStructureNoResourceType,
-				nil,
-				fmt.Sprintf("%s[%d]", baseFhirPath, i),
-			)
+			ReportNoResourceType(result, resourceMap, fmt.Sprintf("%s[%d]", baseFhirPath, i))
 			continue
 		}
 
@@ -474,7 +501,7 @@ func (v *Validator) validateContainedResources(contained []any, baseFhirPath str
 		if containedSD == nil {
 			result.AddErrorWithID(
 				issue.DiagStructureUnknownResource,
-				map[string]any{"type": resourceType},
+				map[string]any{typeParam: resourceType},
 				fmt.Sprintf("%s[%d]", baseFhirPath, i),
 			)
 			continue
@@ -499,11 +526,7 @@ func (v *Validator) validateContainedResources(contained []any, baseFhirPath str
 func (v *Validator) validateResourceElement(data map[string]any, fhirPath string, ctx *validationContext, result *issue.Result) {
 	resourceType, _ := data[resourceTypeKey].(string)
 	if resourceType == "" {
-		result.AddErrorWithID(
-			issue.DiagStructureNoResourceType,
-			nil,
-			fhirPath,
-		)
+		ReportNoResourceType(result, data, fhirPath)
 		return
 	}
 
@@ -512,7 +535,7 @@ func (v *Validator) validateResourceElement(data map[string]any, fhirPath string
 	if resourceSD == nil {
 		result.AddErrorWithID(
 			issue.DiagStructureUnknownResource,
-			map[string]any{"type": resourceType},
+			map[string]any{typeParam: resourceType},
 			fhirPath,
 		)
 		return

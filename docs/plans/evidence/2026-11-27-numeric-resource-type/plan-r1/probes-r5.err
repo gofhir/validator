@@ -1,0 +1,20 @@
+Initializing FHIR Validator (version 5.0.0)...
+[17:52:24] gofhir-validator [INFO] Initializing FHIR Validator v5.0.0
+[17:52:24] gofhir-validator [INFO]   Memory at start: 610.0 KB
+[17:52:24] gofhir-validator [INFO] Loading FHIR packages...
+[17:52:24] gofhir-validator [INFO]   Using embedded specs for 5.0.0
+[17:52:25] gofhir-validator [INFO]   Loaded hl7.fhir.r5.core#5.0.0 (3088 resources, 0 read when needed)
+[17:52:25] gofhir-validator [INFO]   Loaded hl7.terminology.r5#7.0.1 (7487 resources, 0 read when needed)
+[17:52:25] gofhir-validator [INFO]   Loaded hl7.fhir.uv.extensions.r5#5.2.0 (1478 resources, 0 read when needed)
+[17:52:25] gofhir-validator [INFO]   Total: 12053 resources from 3 packages in 298ms
+[17:52:25] gofhir-validator [INFO]   Memory after load: 124.4 MB (+123.8 MB)
+[17:52:25] gofhir-validator [INFO] Building StructureDefinition registry...
+[17:52:25] gofhir-validator [INFO]   Indexed 948 StructureDefinitions, 241 types in 315ms
+[17:52:25] gofhir-validator [INFO]   Memory after registry: 147.1 MB (+22.7 MB)
+[17:52:25] gofhir-validator [INFO] Validator ready in 796ms (total memory: 178.1 MB)
+Validator ready. Processing 2 file(s)...
+
+[17:52:25] gofhir-validator [INFO] Validating HumanName (42 B, 42 bytes) against 1 profile(s)
+[17:52:25] gofhir-validator [INFO] Validated HumanName in 3.493ms: 2 errors, 0 warnings
+[17:52:25] gofhir-validator [INFO] Validating Bundle (177 B, 177 bytes) against 1 profile(s)
+[17:52:25] gofhir-validator [INFO] Validated Bundle in 0.785ms: 2 errors, 0 warnings

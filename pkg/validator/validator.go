@@ -675,7 +675,7 @@ func (v *Validator) Validate(ctx context.Context, resource []byte, opts ...Valid
 	result.Stats.ResourceType = resourceType
 
 	if resourceType == "" {
-		result.AddError(issue.CodeStructure, "Missing 'resourceType' property")
+		structural.ReportNoResourceType(result, data)
 		result.Stats.Duration = time.Since(startTime).Nanoseconds()
 		return result, nil
 	}

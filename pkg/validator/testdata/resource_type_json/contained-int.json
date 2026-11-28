@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "p", "contained": [{"resourceType": 42, "id": "bad"}], "text": {"status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">p</div>"}}

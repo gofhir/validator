@@ -507,13 +507,20 @@ func (r referenceResolver) ResolveScoped(ref string, scope slicematch.Scope) (ma
 		}
 		// El contenido está donde está, no donde se hace la referencia.
 		in, ok := scopeindex.Resolve(r.ctx, res, "ResolveScoped #id", slicematch.Scope{})
-		return res, in, ok
+		if !ok {
+			return nil, slicematch.Scope{}, false // lo contenido no es un recurso: la referencia no tiene destino
+		}
+		return res, in, true
 	}
 	bundles := append([]map[string]any{scope.Container}, scope.Outer...)
 	// Se parte de la entry que contiene al recurso donde está la referencia.
 	from := bundleref.IndexOf(r.ctx, scope.Container).FullURLOf(scope.Resource)
 	for i, bundle := range bundles {
 		res, ok, ambiguous := bundleref.IndexOf(r.ctx, bundle).Find(ref, from)
+		if ok && !slicematch.IsResource(res) {
+			// La entry no tiene un recurso (su resourceType no es un string): no hay destino.
+			return nil, slicematch.Scope{}, false
+		}
 		if ok {
 			// Es una entry de bundle. Los pasos siguientes de la ruta de FHIRPath siguen resolviendo en el
 			// Bundle donde la encontró, no en el que ella misma sea: así lo hace HL7 (sonda r1b). Este Scope
@@ -532,7 +539,10 @@ func (r referenceResolver) ScopeOf(scope slicematch.Scope, resource map[string]a
 	if scopeindex.From(r.ctx) == nil {
 		return constraint.ScopeOf(scope, resource) // una comprobación suelta, sin índice
 	}
-	in, _ := scopeindex.Resolve(r.ctx, resource, "ScopeOf", slicematch.Scope{})
+	in, ok := scopeindex.Resolve(r.ctx, resource, "ScopeOf", slicematch.Scope{})
+	if !ok && !scopeindex.Aborted(r.ctx) {
+		return scope // lo que no es un recurso está en el Scope de quien preguntó
+	}
 	return in
 }
 

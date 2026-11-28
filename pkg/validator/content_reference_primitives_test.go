@@ -2,6 +2,8 @@ package validator
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -36,7 +38,13 @@ func crValidator(t testing.TB, version string, defs ...[]byte) *Validator {
 	defer crMu.Unlock()
 	key := version
 	if len(defs) > 0 {
-		key += "+defs"
+		// La clave depende del contenido de los defs: dos pruebas con defs distintos no comparten validador.
+		h := sha256.New()
+		for _, d := range defs {
+			fmt.Fprintf(h, "%d:", len(d))
+			h.Write(d)
+		}
+		key += "+defs:" + hex.EncodeToString(h.Sum(nil))
 	}
 	if v := crValidators[key]; v != nil {
 		return v

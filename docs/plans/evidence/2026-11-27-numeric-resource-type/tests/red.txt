@@ -1,0 +1,233 @@
+--- FAIL: TestResolveOfANonResourceIsNotAFailure (0.00s)
+    --- FAIL: TestResolveOfANonResourceIsNotAFailure/null (0.00s)
+        scopeindex_test.go:362: the index failed for a map that is not a resource: internal error: the position index holds no scope for resource /n (asked at site)
+        scopeindex_test.go:366: the index stopped answering
+    --- FAIL: TestResolveOfANonResourceIsNotAFailure/object (0.00s)
+        scopeindex_test.go:362: the index failed for a map that is not a resource: internal error: the position index holds no scope for resource /n (asked at site)
+        scopeindex_test.go:366: the index stopped answering
+    --- FAIL: TestResolveOfANonResourceIsNotAFailure/array (0.00s)
+        scopeindex_test.go:362: the index failed for a map that is not a resource: internal error: the position index holds no scope for resource /n (asked at site)
+        scopeindex_test.go:366: the index stopped answering
+    --- FAIL: TestResolveOfANonResourceIsNotAFailure/bool (0.00s)
+        scopeindex_test.go:362: the index failed for a map that is not a resource: internal error: the position index holds no scope for resource /n (asked at site)
+        scopeindex_test.go:366: the index stopped answering
+    --- FAIL: TestResolveOfANonResourceIsNotAFailure/absent (0.00s)
+        scopeindex_test.go:362: the index failed for a map that is not a resource: internal error: the position index holds no scope for resource /n (asked at site)
+        scopeindex_test.go:366: the index stopped answering
+    --- FAIL: TestResolveOfANonResourceIsNotAFailure/number (0.00s)
+        scopeindex_test.go:362: the index failed for a map that is not a resource: internal error: the position index holds no scope for resource /n (asked at site)
+        scopeindex_test.go:366: the index stopped answering
+FAIL
+FAIL	github.com/gofhir/validator/v2/internal/scopeindex	0.266s
+--- FAIL: TestResourceTypeJSONType (2.41s)
+    --- FAIL: TestResourceTypeJSONType/4.0.1/contained-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4b59ad2c0  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4b59ad2d0  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/contained-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4b59adee0  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4b59adef0  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/contained-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4b59f8c50  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4b59f8c60  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/contained-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4b5a0e530  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4b5a0e540  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/contained-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4b5a0fc50  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4b5a0fc60  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/contained-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4b5a38930  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4b5a38940  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/entry-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4b5a80ff0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/entry-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4b5a819c0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/entry-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4b5ade400  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/entry-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4b5adf780  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/entry-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4b5b0ab60  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/entry-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4b5b0b520  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/parameter-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4b5b384c0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/parameter-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4b5b38880  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/parameter-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4b5b38c70  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/parameter-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4b5b39410  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/parameter-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4b5b39b80  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/parameter-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4b5b39f70  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/root-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/root-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/root-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/root-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/root-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.0.1/root-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/contained-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4bf83f380  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4bf83f390  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/contained-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4bf8f60e0  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4bf8f60f0  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/contained-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4bf8f6e90  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4bf8f6ea0  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/contained-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4bf9068f0  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4bf906900  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/contained-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4bf94e210  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4bf94e220  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/contained-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4bf94ef30  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4bf94ef40  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/entry-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4bf9bd520  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/entry-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4bf9bdf10  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/entry-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4bfa5a970  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/entry-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4bfa5bd30  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/entry-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4bfaa7150  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/entry-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4bfaa7b30  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/parameter-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4bfb2caf0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/parameter-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4bfb2ceb0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/parameter-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4bfb2d2a0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/parameter-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4bfb2da40  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/parameter-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4c04d6230  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/parameter-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4c04d6620  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/root-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/root-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/root-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/root-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/root-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/4.3.0/root-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/contained-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4ce4b3b90  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4ce4b3ba0  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/contained-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4ce6e4830  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4ce6e4840  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/contained-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4ce6e5520  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4ce6e5530  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/contained-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4ce30ae00  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4ce30ae10  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/contained-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4ce7185a0  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4ce7185b0  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/contained-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Patient.contained[0]] 0x2cc4ce719200  STRUCTURE_NO_RESOURCE_TYPE} {error invariant Constraint failed: dom-3: 'If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) [Patient] 0x2cc4ce719210  CONSTRAINT_FAILED}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/entry-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4ce7b2160  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/entry-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4ce7b2c70  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/entry-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4ce7b3770  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/entry-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4ce7e6df0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/entry-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4ce810450  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/entry-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Bundle.entry[0].resource] 0x2cc4ce810f50  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/parameter-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4ce852010  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/parameter-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4ce8523d0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/parameter-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4ce8527c0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/parameter-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4ce852f60  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/parameter-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4ce8536d0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/parameter-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [Parameters.parameter[0].resource] 0x2cc4ce853ac0  STRUCTURE_NO_RESOURCE_TYPE}]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/root-array (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/root-bool (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/root-decimal (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/root-int (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/root-null (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+    --- FAIL: TestResourceTypeJSONType/5.0.0/root-object (0.00s)
+        resource_type_json_test.go:122: wrong-type messages = 0 (want 1), "Missing 'resourceType'" = 1 (want 0): [{error structure Missing 'resourceType' property [] <nil>  }]
+--- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery (0.02s)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.0.1/entry_sliced_by_the_profile_of_its_resource/null (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ScopeOf)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.0.1/entry_sliced_by_the_profile_of_its_resource/number (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ScopeOf)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.0.1/resolve()_to_a_contained_resource/number (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.0.1/resolve()_to_a_contained_resource/null (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.0.1/resolve()_to_a_contained_resource/missing (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.3.0/entry_sliced_by_the_profile_of_its_resource/number (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ScopeOf)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.3.0/entry_sliced_by_the_profile_of_its_resource/null (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ScopeOf)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.3.0/resolve()_to_a_contained_resource/number (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.3.0/resolve()_to_a_contained_resource/null (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/4.3.0/resolve()_to_a_contained_resource/missing (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/5.0.0/resolve()_to_a_contained_resource/number (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/5.0.0/resolve()_to_a_contained_resource/null (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/5.0.0/resolve()_to_a_contained_resource/missing (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/5.0.0/entry_sliced_by_the_profile_of_its_resource/number (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ScopeOf)
+    --- FAIL: TestBrokenResourceTypeNeverAbortsAScopeQuery/5.0.0/entry_sliced_by_the_profile_of_its_resource/null (0.00s)
+        resource_type_scope_test.go:64: internal error: the position index holds no scope for resource /bad (asked at ScopeOf)
+--- FAIL: TestResolveScopedBrokenTarget (0.00s)
+    --- FAIL: TestResolveScopedBrokenTarget/null/#id (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("#bad") = map[id:bad resourceType:<nil>], ok=false; a target that is not a resource has no destination
+        resource_type_scope_test.go:108: the index failed: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestResolveScopedBrokenTarget/null/urn:uuid (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("urn:uuid:bad") = map[id:bad resourceType:<nil>], ok=true; a target that is not a resource has no destination
+    --- FAIL: TestResolveScopedBrokenTarget/null/absolute_fullUrl (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("http://example.org/Organization/bad") = map[id:bad resourceType:<nil>], ok=true; a target that is not a resource has no destination
+    --- FAIL: TestResolveScopedBrokenTarget/number/#id (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("#bad") = map[id:bad resourceType:42], ok=false; a target that is not a resource has no destination
+        resource_type_scope_test.go:108: the index failed: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestResolveScopedBrokenTarget/number/urn:uuid (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("urn:uuid:bad") = map[id:bad resourceType:42], ok=true; a target that is not a resource has no destination
+    --- FAIL: TestResolveScopedBrokenTarget/number/absolute_fullUrl (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("http://example.org/Organization/bad") = map[id:bad resourceType:42], ok=true; a target that is not a resource has no destination
+    --- FAIL: TestResolveScopedBrokenTarget/missing/#id (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("#bad") = map[id:bad], ok=false; a target that is not a resource has no destination
+        resource_type_scope_test.go:108: the index failed: internal error: the position index holds no scope for resource /bad (asked at ResolveScoped #id)
+    --- FAIL: TestResolveScopedBrokenTarget/missing/urn:uuid (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("urn:uuid:bad") = map[id:bad], ok=true; a target that is not a resource has no destination
+    --- FAIL: TestResolveScopedBrokenTarget/missing/absolute_fullUrl (0.00s)
+        resource_type_scope_test.go:105: ResolveScoped("http://example.org/Organization/bad") = map[id:bad], ok=true; a target that is not a resource has no destination
+--- FAIL: TestScopeOfNonResourceKeepsTheCallersScope (0.00s)
+    --- FAIL: TestScopeOfNonResourceKeepsTheCallersScope/number (0.00s)
+        resource_type_scope_test.go:126: ScopeOf = {resource nil, root nil, container nil, outer []}, want the caller's {resource Patient/p, root Patient/p, container Patient/p, outer []}
+        resource_type_scope_test.go:129: the index failed: internal error: the position index holds no scope for resource / (asked at ScopeOf)
+    --- FAIL: TestScopeOfNonResourceKeepsTheCallersScope/null (0.00s)
+        resource_type_scope_test.go:126: ScopeOf = {resource nil, root nil, container nil, outer []}, want the caller's {resource Patient/p, root Patient/p, container Patient/p, outer []}
+        resource_type_scope_test.go:129: the index failed: internal error: the position index holds no scope for resource / (asked at ScopeOf)
+    --- FAIL: TestScopeOfNonResourceKeepsTheCallersScope/missing (0.00s)
+        resource_type_scope_test.go:126: ScopeOf = {resource nil, root nil, container nil, outer []}, want the caller's {resource Patient/p, root Patient/p, container Patient/p, outer []}
+        resource_type_scope_test.go:129: the index failed: internal error: the position index holds no scope for resource / (asked at ScopeOf)
+FAIL
+FAIL	github.com/gofhir/validator/v2/pkg/validator	2.950s
+ok  	github.com/gofhir/validator/v2/pkg/registry	2.795s
+FAIL

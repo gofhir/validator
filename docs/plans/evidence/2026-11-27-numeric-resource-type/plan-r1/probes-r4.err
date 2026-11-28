@@ -1,0 +1,56 @@
+Initializing FHIR Validator (version 4.0.1)...
+[17:52:08] gofhir-validator [INFO] Initializing FHIR Validator v4.0.1
+[17:52:08] gofhir-validator [INFO]   Memory at start: 611.7 KB
+[17:52:08] gofhir-validator [INFO] Loading FHIR packages...
+[17:52:08] gofhir-validator [INFO]   Using embedded specs for 4.0.1
+[17:52:08] gofhir-validator [INFO]   Loaded hl7.fhir.r4.core#4.0.1 (6073 resources, 0 read when needed)
+[17:52:08] gofhir-validator [INFO]   Loaded hl7.terminology.r4#7.0.1 (7149 resources, 0 read when needed)
+[17:52:08] gofhir-validator [INFO]   Loaded hl7.fhir.uv.extensions.r4#5.2.0 (1478 resources, 0 read when needed)
+[17:52:08] gofhir-validator [INFO]   Total: 14700 resources from 3 packages in 251ms
+[17:52:08] gofhir-validator [INFO]   Memory after load: 73.6 MB (+73.0 MB)
+[17:52:08] gofhir-validator [INFO] Building StructureDefinition registry...
+[17:52:08] gofhir-validator [INFO]   Indexed 1299 StructureDefinitions, 214 types in 245ms
+[17:52:08] gofhir-validator [INFO]   Memory after registry: 120.2 MB (+46.6 MB)
+[17:52:08] gofhir-validator [INFO] Validator ready in 662ms (total memory: 147.2 MB)
+Validator ready. Processing 25 file(s)...
+
+[17:52:08] gofhir-validator [INFO] Validating Patient (77 B, 77 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Patient in 3.339ms: 2 errors, 1 warnings
+[17:52:08] gofhir-validator [INFO] Validating Patient (79 B, 79 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Patient in 0.069ms: 2 errors, 1 warnings
+[17:52:08] gofhir-validator [INFO] Validating Patient (86 B, 86 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Patient in 0.113ms: 3 errors, 1 warnings
+[17:52:08] gofhir-validator [INFO] Validating Patient (77 B, 77 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Patient in 0.046ms: 2 errors, 1 warnings
+[17:52:08] gofhir-validator [INFO] Validating Patient (79 B, 79 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Patient in 0.046ms: 2 errors, 1 warnings
+[17:52:08] gofhir-validator [INFO] Validating Patient (89 B, 89 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Patient in 0.037ms: 2 errors, 1 warnings
+[17:52:08] gofhir-validator [INFO] Validating Bundle (168 B, 168 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Bundle in 0.400ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Bundle (170 B, 170 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Bundle in 0.055ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Bundle (177 B, 177 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Bundle in 0.068ms: 2 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Bundle (168 B, 168 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Bundle in 0.047ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Bundle (170 B, 170 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Bundle in 0.045ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Bundle (180 B, 180 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Bundle in 0.044ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Parameters (107 B, 107 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Parameters in 0.068ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Parameters (109 B, 109 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Parameters in 0.029ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Parameters (116 B, 116 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Parameters in 0.041ms: 2 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Parameters (107 B, 107 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Parameters in 0.025ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Parameters (109 B, 109 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Parameters in 0.033ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating Parameters (119 B, 119 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Parameters in 0.024ms: 1 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating HumanName (42 B, 42 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated HumanName in 0.018ms: 2 errors, 0 warnings
+[17:52:08] gofhir-validator [INFO] Validating ExampleScenario (135 B, 135 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated ExampleScenario in 0.113ms: 0 errors, 1 warnings
