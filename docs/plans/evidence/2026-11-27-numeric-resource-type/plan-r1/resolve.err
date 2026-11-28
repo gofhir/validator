@@ -1,0 +1,26 @@
+Initializing FHIR Validator (version 4.0.1)...
+[17:52:41] gofhir-validator [INFO] Initializing FHIR Validator v4.0.1
+[17:52:41] gofhir-validator [INFO]   Memory at start: 610.4 KB
+[17:52:41] gofhir-validator [INFO] Loading FHIR packages...
+[17:52:41] gofhir-validator [INFO]   Using embedded specs for 4.0.1
+[17:52:41] gofhir-validator [INFO]   Loaded package from tgz: review.nrt#1.0.0
+[17:52:41] gofhir-validator [INFO]   Loaded hl7.fhir.r4.core#4.0.1 (6073 resources, 0 read when needed)
+[17:52:41] gofhir-validator [INFO]   Loaded hl7.terminology.r4#7.0.1 (7149 resources, 0 read when needed)
+[17:52:41] gofhir-validator [INFO]   Loaded hl7.fhir.uv.extensions.r4#5.2.0 (1478 resources, 0 read when needed)
+[17:52:41] gofhir-validator [INFO]   Loaded review.nrt#1.0.0 (1 resources, 0 read when needed)
+[17:52:41] gofhir-validator [INFO]   Total: 14701 resources from 4 packages in 253ms
+[17:52:41] gofhir-validator [INFO]   Memory after load: 97.2 MB (+96.6 MB)
+[17:52:41] gofhir-validator [INFO] Building StructureDefinition registry...
+[17:52:41] gofhir-validator [INFO]   Indexed 1300 StructureDefinitions, 214 types in 247ms
+[17:52:41] gofhir-validator [INFO]   Memory after registry: 116.6 MB (+19.4 MB)
+[17:52:41] gofhir-validator [INFO] Validator ready in 666ms (total memory: 142.2 MB)
+Validator ready. Processing 4 file(s)...
+
+[17:52:41] gofhir-validator [INFO] Validating Patient (125 B, 125 bytes) against 1 profile(s)
+[17:52:41] gofhir-validator [INFO] Validated Patient in 3.714ms: 3 errors, 1 warnings
+[17:52:41] gofhir-validator [INFO] Validating Patient (105 B, 105 bytes) against 1 profile(s)
+[17:52:41] gofhir-validator [INFO] Validated Patient in 0.074ms: 2 errors, 1 warnings
+[17:52:41] gofhir-validator [INFO] Validating Patient (125 B, 125 bytes) against 1 profile(s)
+[17:52:41] gofhir-validator [INFO] Validated Patient in 0.067ms: 2 errors, 1 warnings
+[17:52:41] gofhir-validator [INFO] Validating Patient (135 B, 135 bytes) against 1 profile(s)
+[17:52:41] gofhir-validator [INFO] Validated Patient in 0.062ms: 4 errors, 1 warnings

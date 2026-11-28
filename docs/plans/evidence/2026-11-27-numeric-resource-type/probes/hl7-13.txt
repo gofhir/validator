@@ -1,0 +1,56 @@
+FHIR Validation tool Version 7.0.4 (Git# 26ac5363b325). Built 2026-11-02T14:29:19.518Z (25 days old)
+  Java:   24 from /Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home on aarch64 (64bit). 6144MB available
+  Paths:  Current = /Users/robertoaraneda/projects/personal/opensource/go-validator-wt-registry, Package Cache = /Users/robertoaraneda/.fhir/packages
+  Params: docs/plans/evidence/2026-11-24-mhd-gate-divergences/examples/13-mut-type-007.json -version 4.0.1 -ig ihe.iti.mhd#4.2.5 -tx n/a -no-http-access
+  Locale: Chile/CL
+  Jurisdiction: Chile
+Loading
+  Loading FHIR v4.0.1 from hl7.fhir.r4.core#4.0.1
+  Load hl7.terminology.r4#6.2.0 - 4288 resources (00:02.621)
+  Load hl7.fhir.uv.extensions.r4#5.2.0 - 759 resources (00:00.410)
+  Loaded FHIR - 8265 resources (00:00.000)
+  Terminology Cache at /var/folders/vn/vm1c7h_15klg57rqv7zft7300000gn/T/default-tx-cache/r4
+  Terminology server null - Version n/a: No Terminology Server (00:00.014)
+Error fetching https://packages2.fhir.org/packages/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.terminology: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.terminology from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.terminology from server: build.fhir.org
+Latest version of package hl7.terminology found locally is 7.5.0 - using that
+  Load hl7.terminology#7.5.0 - 4190 resources (00:01.159)
+Error fetching https://packages2.fhir.org/packages/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages2.fhir.org/packages
+Error fetching https://packages.fhir.org/hl7.fhir.uv.extensions: Access to the internet is not allowed by local security policy
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: https://packages.fhir.org
+Failed to determine latest version of package hl7.fhir.uv.extensions from server: build.fhir.org
+Latest version of package hl7.fhir.uv.extensions found locally is 5.4.1 - using that
+  Load hl7.terminology.r5#7.5.0 - 4190 resources (00:00.238)
+  Load hl7.fhir.uv.extensions#5.4.1 - 885 resources (00:00.271)
+  Load hl7.terminology.r4#7.4.0 - 4181 resources (00:00.118)
+  Load hl7.terminology.r4#7.1.0 - 4072 resources (00:00.165)
+  Load hl7.fhir.uv.extensions.r4#5.3.0 - 885 resources (00:00.182)
+  Load hl7.terminology.r4#6.5.0 - 4357 resources (00:00.182)
+  Load ihe.iti.balp#1.1.4 - 38 resources (00:00.000)
+  Load hl7.terminology.r4#7.3.0 - 4146 resources (00:00.174)
+  Load ihe.formatcode.fhir#1.6.0 - 3 resources (00:00.000)
+  Load ihe.iti.mhd#4.2.5 - 76 resources (00:00.000)
+  Package Summary: [hl7.fhir.r4.core#4.0.1, hl7.fhir.xver-extensions#0.1.0, hl7.terminology.r4#6.2.0, hl7.fhir.uv.extensions.r4#5.2.0, hl7.terminology#7.5.0, hl7.terminology.r5#7.5.0, hl7.fhir.uv.extensions#5.4.1, hl7.terminology.r4#7.4.0, hl7.terminology.r4#7.1.0, hl7.fhir.uv.extensions.r4#5.3.0, hl7.terminology.r4#6.5.0, ihe.iti.balp#1.1.4, hl7.terminology.r4#7.3.0, ihe.formatcode.fhir#1.6.0, ihe.iti.mhd#4.2.5]
+  Get set... 
+  ...go! (00:00.492)
+Cached new session. Cache size = 1
+Sources to validate: docs/plans/evidence/2026-11-24-mhd-gate-divergences/examples/13-mut-type-007.json
+Validating
+  Validate docs/plans/evidence/2026-11-24-mhd-gate-divergences/examples/13-mut-type-007.json
+ 00:00.156
+Done. Times: Loading: 00:06.077, validation: 00:00.156. Memory = 640Mb
+
+*FAILURE*: 5 errors, 3 warnings, 0 notes
+  Fatal @ Bundle.entry[1].resource (line 1, col3969): The JSON element 'resourceType' has the wrong JSON type: Number
+  Warning @ Bundle.entry[0].resource/*List/null*/.extension[0].value.ofType(CodeableConcept).coding[0].system (line 1, col748): A definition for CodeSystem 'urn:mhd:node' could not be found, so the code cannot be validated, validating against Base FHIR Standard
+  Warning @ Bundle.entry[0].resource/*List/null*/.identifier[0].type (line 1, col1102): None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = https://profiles.ihe.net/ITI/MHD/CodeSystem/IHE.MHD.MHDIdentifierType#uniqueId), validating against Base FHIR Standard
+  Warning @ Bundle.entry[0].resource/*List/null*/ (line 1, col1450): Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation), validating against Base FHIR Standard
+  Error @ Bundle.entry[0].resource/*List/null*/.entry[0].item (line 1, col534): Invalid Resource target type. Found Resource, but expected one of ([List, DocumentReference]), validating against Base FHIR Standard
+  Error @ Bundle.entry[0] (line 1, col1451): This element does not match any known slice defined in the profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle|4.2.5 and slicing is CLOSED: Bundle.entry[0]: Does not match slice 'SubmissionSet' (discriminator: resource.conformsTo('https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.SubmissionSet') and request.method.where(value = 'POST').exists()), Bundle.entry[0]: Details for Bundle matching against profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.SubmissionSet|4.2.5, Bundle.entry[0]: Does not match slice 'DocumentRefs' (discriminator: resource.conformsTo('https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.DocumentReference') and request.method.where(value = 'POST').exists()), Bundle.entry[0]: Details for Bundle matching against profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.DocumentReference|4.2.5, Bundle.entry[0]: Does not match slice 'UpdateDocumentRefs' (discriminator: resource.conformsTo('https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Patch.Parameters') and request.method.where(value = 'PATCH').exists()), Bundle.entry[0]: Details for Bundle matching against profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Patch.Parameters|4.2.5, Bundle.entry[0]: Does not match slice 'Documents' (discriminator: resource.conformsTo('http://hl7.org/fhir/StructureDefinition/Binary') and (request.method memberOf 'http://hl7.org/fhir/ValueSet/http-verb|4.0.1')), Bundle.entry[0]: Details for Bundle matching against profile http://hl7.org/fhir/StructureDefinition/Binary|4.0.1, Bundle.entry[0]: Does not match slice 'FhirDocuments' (discriminator: resource.conformsTo('http://hl7.org/fhir/StructureDefinition/Bundle') and request.method.where(value = 'POST').exists()), Bundle.entry[0]: Details for Bundle matching against profile http://hl7.org/fhir/StructureDefinition/Bundle|4.0.1, Bundle.entry[0]: Does not match slice 'Folders' (discriminator: resource.conformsTo('https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.Folder') and (request.method memberOf 'https://profiles.ihe.net/ITI/MHD/ValueSet/MHDprovideFolderActions')), Bundle.entry[0]: Details for Bundle matching against profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.Folder|4.2.5, Bundle.entry[0]: Does not match slice 'Patient' (discriminator: resource.conformsTo('http://hl7.org/fhir/StructureDefinition/Patient') and (request.method memberOf 'https://profiles.ihe.net/ITI/MHD/ValueSet/MHDprovidePatientActions')), Bundle.entry[0]: Details for Bundle matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1, validating against Mobile access to Health Documents (MHD) v4.2.5
+  Error @ Bundle.entry[1] (line 1, col3970): This element does not match any known slice defined in the profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle|4.2.5 and slicing is CLOSED: Bundle.entry[1]: Does not match slice 'SubmissionSet' (discriminator: resource.conformsTo('https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.SubmissionSet') and request.method.where(value = 'POST').exists()), Bundle.entry[1]: Details for Bundle matching against profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.SubmissionSet|4.2.5, Bundle.entry[1]: Does not match slice 'DocumentRefs' (discriminator: resource.conformsTo('https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.DocumentReference') and request.method.where(value = 'POST').exists()), Bundle.entry[1]: Details for Bundle matching against profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.DocumentReference|4.2.5, Bundle.entry[1]: Does not match slice 'UpdateDocumentRefs' (discriminator: resource.conformsTo('https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Patch.Parameters') and request.method.where(value = 'PATCH').exists()), Bundle.entry[1]: Details for Bundle matching against profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Patch.Parameters|4.2.5, Bundle.entry[1]: Does not match slice 'Documents' (discriminator: resource.conformsTo('http://hl7.org/fhir/StructureDefinition/Binary') and (request.method memberOf 'http://hl7.org/fhir/ValueSet/http-verb|4.0.1')), Bundle.entry[1]: Details for Bundle matching against profile http://hl7.org/fhir/StructureDefinition/Binary|4.0.1, Bundle.entry[1]: Does not match slice 'FhirDocuments' (discriminator: resource.conformsTo('http://hl7.org/fhir/StructureDefinition/Bundle') and request.method.where(value = 'POST').exists()), Bundle.entry[1]: Details for Bundle matching against profile http://hl7.org/fhir/StructureDefinition/Bundle|4.0.1, Bundle.entry[1]: Does not match slice 'Folders' (discriminator: resource.conformsTo('https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.Folder') and (request.method memberOf 'https://profiles.ihe.net/ITI/MHD/ValueSet/MHDprovideFolderActions')), Bundle.entry[1]: Details for Bundle matching against profile https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.Folder|4.2.5, Bundle.entry[1]: Does not match slice 'Patient' (discriminator: resource.conformsTo('http://hl7.org/fhir/StructureDefinition/Patient') and (request.method memberOf 'https://profiles.ihe.net/ITI/MHD/ValueSet/MHDprovidePatientActions')), Bundle.entry[1]: Details for Bundle matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1, validating against Mobile access to Health Documents (MHD) v4.2.5
+  Error @ Bundle (line 1, col4129): Slice 'Bundle.entry:SubmissionSet': a matching slice is required, but not found (from https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle|4.2.5). Note that other slices are allowed in addition to this required slice, validating against Mobile access to Health Documents (MHD) v4.2.5
+Done. Times: Loading: 00:06.077, validation: 00:00.156. Max Memory = 6Gb

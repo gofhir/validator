@@ -1,0 +1,33 @@
+Initializing FHIR Validator (version 4.0.1)...
+[17:52:06] gofhir-validator [INFO] Initializing FHIR Validator v4.0.1
+[17:52:06] gofhir-validator [INFO]   Memory at start: 610.6 KB
+[17:52:06] gofhir-validator [INFO] Loading FHIR packages...
+[17:52:06] gofhir-validator [INFO]   Using embedded specs for 4.0.1
+[17:52:07] gofhir-validator [INFO]   Loaded dependency hl7.fhir.uv.extensions.r4#5.3.0 of ihe.iti.mhd#4.2.5
+[17:52:07] gofhir-validator [INFO]   Loaded dependency hl7.terminology.r4#7.4.0 of ihe.iti.mhd#4.2.5
+[17:52:07] gofhir-validator [INFO]   Loaded dependency ihe.formatcode.fhir#1.6.0 of ihe.iti.mhd#4.2.5
+[17:52:07] gofhir-validator [INFO]   Loaded dependency ihe.iti.balp#1.1.4 of ihe.iti.mhd#4.2.5
+[17:52:07] gofhir-validator [INFO]   Loaded dependency hl7.terminology.r4#7.1.0 of hl7.fhir.uv.extensions.r4#5.3.0
+[17:52:07] gofhir-validator [INFO]   Loaded dependency hl7.terminology.r4#7.3.0 of ihe.formatcode.fhir#1.6.0
+[17:52:07] gofhir-validator [INFO]   Loaded dependency hl7.terminology.r4#6.5.0 of ihe.iti.balp#1.1.4
+[17:52:07] gofhir-validator [INFO]   Loaded hl7.fhir.r4.core#4.0.1 (6073 resources, 0 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded hl7.terminology.r4#7.0.1 (7149 resources, 0 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded hl7.fhir.uv.extensions.r4#5.2.0 (1478 resources, 0 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded ihe.iti.mhd#4.2.5 (42 resources, 7 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded hl7.fhir.uv.extensions.r4#5.3.0 (701 resources, 163 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded hl7.terminology.r4#7.4.0 (9 resources, 4171 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded ihe.formatcode.fhir#1.6.0 (0 resources, 2 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded ihe.iti.balp#1.1.4 (21 resources, 13 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded hl7.terminology.r4#7.1.0 (9 resources, 4062 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded hl7.terminology.r4#7.3.0 (9 resources, 4136 read when needed)
+[17:52:07] gofhir-validator [INFO]   Loaded hl7.terminology.r4#6.5.0 (9 resources, 4347 read when needed)
+[17:52:07] gofhir-validator [INFO]   Total: 32401 resources from 11 packages in 386ms
+[17:52:07] gofhir-validator [INFO]   Memory after load: 115.8 MB (+115.2 MB)
+[17:52:07] gofhir-validator [INFO] Building StructureDefinition registry...
+[17:52:07] gofhir-validator [INFO]   Indexed 2099 StructureDefinitions, 214 types in 375ms
+[17:52:07] gofhir-validator [INFO]   Memory after registry: 172.9 MB (+57.1 MB)
+[17:52:07] gofhir-validator [INFO] Validator ready in 962ms (total memory: 199.1 MB)
+Validator ready. Processing 1 file(s)...
+
+[17:52:07] gofhir-validator [INFO] Validating Bundle (4.0 KB, 4129 bytes) against 1 profile(s)
+[17:52:08] gofhir-validator [INFO] Validated Bundle in 191.290ms: 4 errors, 8 warnings

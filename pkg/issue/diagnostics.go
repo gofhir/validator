@@ -14,14 +14,16 @@ const (
 	DiagStructureUnknownElement DiagnosticID = "STRUCTURE_UNKNOWN_ELEMENT"
 	// DiagStructureTypeNotAllowed: a value of a choice element is of a type that a definition
 	// governing it does not allow (ElementDefinition.type).
-	DiagStructureTypeNotAllowed        DiagnosticID = "STRUCTURE_TYPE_NOT_ALLOWED"
-	DiagStructureInvalidJSON           DiagnosticID = "STRUCTURE_INVALID_JSON"
-	DiagStructureNoResourceType        DiagnosticID = "STRUCTURE_NO_RESOURCE_TYPE"
-	DiagStructureUnknownResource       DiagnosticID = "STRUCTURE_UNKNOWN_RESOURCE"
-	DiagStructureInvalidChoiceType     DiagnosticID = "STRUCTURE_INVALID_CHOICE_TYPE"
-	DiagStructureChoiceMutualExclusion DiagnosticID = "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
-	DiagStructureNoType                DiagnosticID = "STRUCTURE_NO_TYPE"
-	DiagContainedDuplicateID           DiagnosticID = "CONTAINED_DUPLICATE_ID"
+	DiagStructureTypeNotAllowed DiagnosticID = "STRUCTURE_TYPE_NOT_ALLOWED"
+	DiagStructureInvalidJSON    DiagnosticID = "STRUCTURE_INVALID_JSON"
+	DiagStructureNoResourceType DiagnosticID = "STRUCTURE_NO_RESOURCE_TYPE"
+	// DiagStructureResourceTypeWrongJSONType: resourceType is present but is not a string (json.html#resources).
+	DiagStructureResourceTypeWrongJSONType DiagnosticID = "STRUCTURE_RESOURCE_TYPE_WRONG_JSON_TYPE"
+	DiagStructureUnknownResource           DiagnosticID = "STRUCTURE_UNKNOWN_RESOURCE"
+	DiagStructureInvalidChoiceType         DiagnosticID = "STRUCTURE_INVALID_CHOICE_TYPE"
+	DiagStructureChoiceMutualExclusion     DiagnosticID = "STRUCTURE_CHOICE_MUTUAL_EXCLUSION"
+	DiagStructureNoType                    DiagnosticID = "STRUCTURE_NO_TYPE"
+	DiagContainedDuplicateID               DiagnosticID = "CONTAINED_DUPLICATE_ID"
 	// A value written otherwise than its element says (json.html): an array for an element that
 	// repeats, an object for a complex type or a resource, a simple value for a primitive.
 	DiagStructureArrayExpected  DiagnosticID = "STRUCTURE_ARRAY_EXPECTED"
@@ -268,6 +270,11 @@ var diagnosticTemplates = map[DiagnosticID]DiagnosticTemplate{
 		Severity: SeverityError,
 		Code:     CodeStructure,
 		Template: "Missing 'resourceType' property",
+	},
+	DiagStructureResourceTypeWrongJSONType: {
+		Severity: SeverityError,
+		Code:     CodeStructure,
+		Template: "The JSON element 'resourceType' has the wrong JSON type: {type}",
 	},
 	DiagContainedDuplicateID: {
 		Severity: SeverityError,

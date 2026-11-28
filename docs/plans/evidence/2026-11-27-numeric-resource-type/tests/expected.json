@@ -1,0 +1,1640 @@
+{
+ "contained-array": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "contained-bool": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "contained-decimal": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "contained-empty": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "contained-int": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "contained-missing": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "contained-null": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "contained-object": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "contained-unknown": {
+  "4.0.1": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Patient.contained[0]",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Patient.contained[0]/*Resource/null*/",
+    "id": "Resource_RES_ID_Missing",
+    "severity": "error",
+    "text": "Resource requires an id, but none is present"
+   },
+   {
+    "expression": "Patient.contained[0]",
+    "id": "CONTAINED_ORPHAN_DOM3",
+    "severity": "error",
+    "text": "The contained resource 'null' is not referenced to from elsewhere in the containing resource nor does it refer to the containing resource (dom-3)"
+   }
+  ]
+ },
+ "entry-array": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "entry-bool": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "entry-decimal": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "entry-empty": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "entry-int": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "entry-missing": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "entry-null": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "entry-object": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "entry-unknown": {
+  "4.0.1": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Bundle.entry[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Bundle.entry[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-5",
+    "severity": "error",
+    "text": "Constraint failed: bdl-5: 'must be a resource unless there's a request or response' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   },
+   {
+    "expression": "Bundle",
+    "id": "http://hl7.org/fhir/StructureDefinition/Bundle#bdl-3a",
+    "severity": "error",
+    "text": "Constraint failed: bdl-3a: 'For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements' (defined in http://hl7.org/fhir/StructureDefinition/Bundle)"
+   }
+  ]
+ },
+ "parameter-array": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "parameter-bool": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "parameter-decimal": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "parameter-empty": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name '')"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "parameter-int": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "parameter-missing": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "parameter-null": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "parameter-object": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "parameter-unknown": {
+  "4.0.1": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)'"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Parameters.parameter[0].resource",
+    "id": "",
+    "severity": "fatal",
+    "text": "Contained resource does not appear to be a FHIR resource (unknown name 'Foo')"
+   },
+   {
+    "expression": "Parameters.parameter[0]",
+    "id": "http://hl7.org/fhir/StructureDefinition/Parameters#inv-1",
+    "severity": "error",
+    "text": "Constraint failed: inv-1: 'A parameter must have one and only one of (value, resource, part)' (defined in http://hl7.org/fhir/StructureDefinition/Parameters)"
+   }
+  ]
+ },
+ "root-array": {
+  "4.0.1": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Array"
+   }
+  ]
+ },
+ "root-bool": {
+  "4.0.1": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Boolean"
+   }
+  ]
+ },
+ "root-decimal": {
+  "4.0.1": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   }
+  ]
+ },
+ "root-empty": {
+  "4.0.1": [
+   {
+    "expression": "",
+    "id": "",
+    "severity": "fatal",
+    "text": "This content cannot be parsed (unknown or unrecognized resource name '')"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "",
+    "id": "",
+    "severity": "fatal",
+    "text": "This content cannot be parsed (unknown or unrecognized resource name '')"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "",
+    "id": "",
+    "severity": "fatal",
+    "text": "This content cannot be parsed (unknown or unrecognized resource name '')"
+   }
+  ]
+ },
+ "root-int": {
+  "4.0.1": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Number"
+   }
+  ]
+ },
+ "root-missing": {
+  "4.0.1": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "Unable to find resourceType property"
+   }
+  ]
+ },
+ "root-null": {
+  "4.0.1": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Null"
+   }
+  ]
+ },
+ "root-object": {
+  "4.0.1": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "$",
+    "id": "",
+    "severity": "fatal",
+    "text": "The JSON element 'resourceType' has the wrong JSON type: Object"
+   }
+  ]
+ },
+ "root-unknown": {
+  "4.0.1": [
+   {
+    "expression": "Foo",
+    "id": "",
+    "severity": "fatal",
+    "text": "This content cannot be parsed (unknown or unrecognized resource name 'Foo')"
+   }
+  ],
+  "4.3.0": [
+   {
+    "expression": "Foo",
+    "id": "",
+    "severity": "fatal",
+    "text": "This content cannot be parsed (unknown or unrecognized resource name 'Foo')"
+   }
+  ],
+  "5.0.0": [
+   {
+    "expression": "Foo",
+    "id": "",
+    "severity": "fatal",
+    "text": "This content cannot be parsed (unknown or unrecognized resource name 'Foo')"
+   }
+  ]
+ }
+}

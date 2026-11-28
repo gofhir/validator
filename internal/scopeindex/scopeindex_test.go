@@ -339,3 +339,48 @@ func TestEnsureIndexesTheHolder(t *testing.T) {
 		t.Error("el recurso fuera del árbol del que lo tiene no está en el índice")
 	}
 }
+
+// Un mapa cuyo resourceType no es un string no es un recurso (json.html#resources): el índice no lo tiene, y
+// preguntarle su Scope no es un fallo del índice. Uno con resourceType string que el índice no tiene sí lo es.
+func TestResolveOfANonResourceIsNotAFailure(t *testing.T) {
+	p := res("Patient", "p")
+	for name, broken := range map[string]m{
+		"number": {"resourceType": float64(42), "id": "n"},
+		"null":   {"resourceType": nil, "id": "n"},
+		"object": {"resourceType": m{"a": "b"}, "id": "n"},
+		"array":  {"resourceType": []any{"Patient"}, "id": "n"},
+		"bool":   {"resourceType": true, "id": "n"},
+		"absent": {"id": "n"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			ctx := With(context.Background(), Build(p, nil))
+			got, ok := Resolve(ctx, broken, "site", sc(p, p, p))
+			if ok || !Equal(got, slicematch.Scope{}) {
+				t.Errorf("Resolve = %s, %v; want no scope", describe(got), ok)
+			}
+			if err := From(ctx).Err(); err != nil || Aborted(ctx) {
+				t.Errorf("the index failed for a map that is not a resource: %v", err)
+			}
+			// El índice sigue sirviendo.
+			if _, ok := Resolve(ctx, p, "later", slicematch.Scope{}); !ok {
+				t.Error("the index stopped answering")
+			}
+		})
+	}
+	t.Run("string resourceType absent from the index", func(t *testing.T) {
+		ctx := With(context.Background(), Build(p, nil))
+		if _, ok := Resolve(ctx, res("Observation", "stray"), "site", slicematch.Scope{}); ok {
+			t.Fatal("found a scope for a resource the index lacks")
+		}
+		var missing *MissingError
+		if !errors.As(From(ctx).Err(), &missing) {
+			t.Errorf("Err = %v, want a *MissingError", From(ctx).Err())
+		}
+	})
+	t.Run("a held map that is not a resource is not indexed", func(t *testing.T) {
+		b := res("Bundle", "b", "entry", entries(entry(m{"resourceType": float64(42)}, "urn:uuid:x")))
+		if x := Build(b, nil); x.Len() != 1 {
+			t.Errorf("index holds %d scopes, want only the Bundle's", x.Len())
+		}
+	})
+}

@@ -1,0 +1,11 @@
+Round 3: production files never modified; all modeling under .review-nrt/v3-copy.
+v3-model.diff extends the v2 model with IsResource, a shared ResourceAt, root SD provenance carried in walker ends, Conforms non-resource rejection, ResolveScoped Bundle target rejection, and position gates in remaining modeled consumers. The new JSON diagnostic is not modeled.
+Commands use GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local, GOTMPDIR/GOCACHE under .review-nrt. No Java or network access used.
+Requested exact four-package -failfast command: v3-suite.out/err. Failed on sandbox denial when TestMissingPackagesAreDownloaded tried to bind a loopback httptest server. Offline rerun excludes that test and TestDependenciesOnLoadedPackages, the only two validator tests using httptest.NewServer.
+Final probes: v3-final-probes.out/err (v2 probe, added adversarial probes, and TestScopeInvariantSeesTheResolveChainQueries).
+Final suite with the two listener exclusions: v3-final-suite-offline.out/err.
+MHD: mhd-v3.out/err (binary validator-v3).
+Findings: empty-string resourceType passes IsResource and Conforms and matches an Organization profile slice (B1 resolution incomplete). Type discriminator independently matches numeric/null resourceType via walker.typeOf's fallback to the sole declared Organization type; this route never calls Conforms (runtime confirmed; exact HL7 type-discriminator parity not independently executed, so SUSPECTED divergence).
+identify receives an ExampleScenario.instance datatype from typeChooser: ResourceAt=false, but a resource scope lookup/check occurs and asked!=indexed. The claim of already gated callers is false; no production verdict regression established by this callback-only observation.
+Resource root test: resource SD root accepted; HumanName root and logical root named Organization excluded by actual SD.kind; element holder remains accepted through HoldsResource. Requires SD provenance; empty Type or dotless path alone is insufficient.
+Profile positive control Organization with name matches; malformed number/null reject. Existing resource.resourceType value/pattern paths produce NoteCannotEvaluate for valid and invalid data alike; they do not call Conforms, so 3b cannot establish parity on those routes. Stored hl7-13.txt supports the malformed MHD profile-discriminator case only. No wider HL7 parity claim is made.

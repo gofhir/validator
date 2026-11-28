@@ -1,0 +1,84 @@
+[
+  {
+    "resource": "docs/plans/evidence/2026-11-24-mhd-gate-divergences/examples/13-mut-type-007.json",
+    "valid": false,
+    "errors": 1,
+    "warnings": 8,
+    "info": 0,
+    "issues": [
+      {
+        "severity": "error",
+        "code": "structure",
+        "diagnostics": "The JSON element 'resourceType' has the wrong JSON type: Number",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[0].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource.contained[0]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource.contained[1]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "invariant",
+        "diagnostics": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)",
+        "expression": [
+          "Bundle.entry[1].resource.contained[2]"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "CodeSystem is unknown and can't be validated: urn:mhd:node for 'node-publication'",
+        "expression": [
+          "Bundle.entry[0].resource.extension[0].valueCodeableConcept.coding[0].system"
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "processing",
+        "diagnostics": "None of the codings provided are in the value set 'http://hl7.org/fhir/ValueSet/identifier-type|4.0.1', and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = https://profiles.ihe.net/ITI/MHD/CodeSystem/IHE.MHD.MHDIdentifierType#uniqueId)",
+        "expression": [
+          "Bundle.entry[0].resource.identifier[0].type"
+        ]
+      }
+    ],
+    "duration": "223.791ms"
+  }
+]

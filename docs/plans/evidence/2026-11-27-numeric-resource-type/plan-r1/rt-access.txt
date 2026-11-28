@@ -1,0 +1,185 @@
+internal/bundleref/bundleref.go:24:	resourceTypeKey = "resourceType"
+internal/bundleref/bundleref.go:91:		rt, isResource := v[resourceTypeKey].(string)
+pkg/constraint/resolver_adapter.go:156:	if rt, _ := s.Container[resourceTypeKey].(string); rt == bundleType {
+pkg/constraint/resolver_adapter.go:170:	if rt, _ := s.Resource[resourceTypeKey].(string); rt == bundleType {
+pkg/constraint/resolver_adapter.go:174:	if rt, _ := res[resourceTypeKey].(string); rt == bundleType {
+pkg/constraint/constraint.go:805:	if rt, _ := root.Resource[resourceTypeKey].(string); rt == bundleType && root.Bundle == nil {
+pkg/constraint/constraint.go:840:	if rt, _ := resource[resourceTypeKey].(string); rt == bundleType {
+pkg/constraint/constraint.go:952:	res, err := s.v.evaluateOn(expr, s.in.resource, s.in.resourceType, s.in.opts)
+pkg/constraint/constraint.go:995:	s.in = evaluation{resourceType: node.Type(), resource: resource, opts: opts}
+pkg/constraint/constraint.go:1017:		nodes, err := s.v.evaluateOn(expr, s.in.resource, s.in.resourceType, s.in.opts)
+pkg/constraint/constraint.go:1063:	resourceType string
+pkg/constraint/constraint.go:1078:	rt, _ := root[resourceTypeKey].(string)
+pkg/constraint/constraint.go:1082:	return evaluation{resourceType: rt, resource: col, opts: opts}, nil
+pkg/constraint/tree.go:42:// resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
+pkg/constraint/tree.go:43:const resourceTypeKey = "resourceType"
+pkg/constraint/tree.go:488:				if _, isResource := m[resourceTypeKey]; isResource {
+pkg/constraint/tree.go:583:	if rt, _ := res[resourceTypeKey].(string); rt == bundleType {
+pkg/constraint/tree.go:649:	rt, _ := res[resourceTypeKey].(string)
+pkg/constraint/tree.go:687:	rt, _ := res[resourceTypeKey].(string)
+pkg/registry/registry.go:34:	ResourceType   string `json:"resourceType"`
+pkg/registry/registry.go:87:// path reported on it: the value's resourceType, or, for a value that has none validated against a
+pkg/registry/registry.go:89:// model), sd.Type. It is "" for a resource without resourceType, which is an error to report, not
+pkg/registry/registry.go:92:	if rt, _ := value["resourceType"].(string); rt != "" {
+pkg/registry/registry.go:457:		ResourceType string `json:"resourceType"`
+pkg/registry/registry.go:965:func GetSDForResource(resourceType string) string {
+pkg/registry/registry.go:966:	return fmt.Sprintf("http://hl7.org/fhir/StructureDefinition/%s", resourceType)
+pkg/registry/registry.go:981:// Parameters.parameter.resource are. An element named resourceType is not one
+pkg/registry/registry.go:982:// (ExampleScenario.instance.resourceType is a code).
+pkg/walker/walker.go:243:// definitions are the definitions a resource of resourceType declaring profiles is checked
+pkg/walker/walker.go:247:func (w *Walker) definitions(ctx context.Context, profiles []string, resourceType string) []*registry.StructureDefinition {
+pkg/walker/walker.go:253:			ofType = ofType || sd.Type == resourceType
+pkg/walker/walker.go:257:		if sd := w.registry.GetByType(resourceType); sd != nil && sd.Snapshot != nil {
+pkg/walker/discover.go:153:	rt, _ := res["resourceType"].(string)
+pkg/registry/instance_children.go:72:	if _, ok := data["resourceType"].(string); ok {
+pkg/reference/reference.go:25:	resourceTypeKey   = "resourceType"
+pkg/reference/reference.go:65:		resourceType, _ := resourceMap["resourceType"].(string)
+pkg/reference/reference.go:66:		ctx.FullURLIndex[fullURL] = resourceType
+pkg/reference/reference.go:107:		rt, _ := m["resourceType"].(string)
+pkg/reference/reference.go:312:	if t, _ := rc.container[resourceTypeKey].(string); t == bundleType {
+pkg/reference/reference.go:369:	if rt, _ := resource["resourceType"].(string); rt == "Bundle" {
+pkg/reference/reference.go:372:			if t, _ := in.container["resourceType"].(string); t == "Bundle" {
+pkg/reference/reference.go:399:	t, _ := matches[0]["resourceType"].(string)
+pkg/reference/reference.go:482:	resourceType := sd.RootName(resource)
+pkg/reference/reference.go:483:	if resourceType == "" {
+pkg/reference/reference.go:510:	v.walk(ctx, registry.ResourceOwner(resource), sd, root, "", registry.PrimitiveValue{}, resource, resourceType, rc, nil, result)
+pkg/reference/reference.go:519:	contexts := map[string]*refContext{resourceType: rc}
+pkg/reference/reference.go:520:	v.walker.WalkAllWithProfilesContext(ctx, resource, resourceType, resourceType, func(w *walker.ResourceContext) bool {
+pkg/reference/reference.go:521:		if w.FHIRPath == resourceType {
+pkg/reference/reference.go:798:	if t, _ := target["resourceType"].(string); resolved && t != "" {
+pkg/reference/reference.go:906:func (v *Validator) typeMatchesProfiles(resourceType string, profiles []string) bool {
+pkg/reference/reference.go:910:		if profileType == resourceType {
+pkg/issue/diagnostics.go:270:		Template: "Missing 'resourceType' property",
+pkg/issue/diagnostics.go:280:		Template: "Unknown resourceType '{type}'",
+pkg/issue/diagnostics.go:726:		Template: "Resource id is required in 'update' mode for {resourceType}",
+pkg/issue/diagnostics.go:731:		Template: "Resource id is required in 'delete' mode for {resourceType}",
+pkg/slicing/slicing.go:122:	resourceType := sd.RootName(resource)
+pkg/slicing/slicing.go:123:	if resourceType == "" {
+pkg/slicing/slicing.go:136:		v.walk(run, run.scope, sd, root, "", registry.PrimitiveValue{}, resource, resourceType, nil, result)
+pkg/slicing/slicing.go:140:	v.validateNested(run, resource, resourceType, result)
+pkg/slicing/slicing.go:321:	if rt, _ := w.Data[resourceTypeKey].(string); rt == bundleType {
+pkg/slicing/tree.go:110:// resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
+pkg/slicing/tree.go:111:const resourceTypeKey = "resourceType"
+pkg/loader/loader.go:52:	Resources    map[string]json.RawMessage // URL or resourceType/id, or example/resourceType/id for the example folder's -> raw JSON (see EachResource)
+pkg/loader/loader.go:183:		// Extract resourceType and id for indexing
+pkg/loader/loader.go:185:			ResourceType string `json:"resourceType"`
+pkg/loader/loader.go:197:		// Also index by resourceType/id
+pkg/loader/loader.go:404:		ResourceType string `json:"resourceType"`
+pkg/loader/loader.go:411:	// Index by URL for StructureDefinitions and other conformance resources, and by resourceType/id
+pkg/loader/loader.go:463:			ResourceType string `json:"resourceType"`
+pkg/loader/open.go:23:// and by "resourceType/id", and an example folder's by "example/resourceType/id"; the package
+pkg/loader/open.go:68:		ResourceType string `json:"resourceType"`
+pkg/loader/open.go:187:		ResourceType string `json:"resourceType"`
+pkg/ucumvalidator/ucumvalidator.go:50:	resourceType := sd.RootName(data)
+pkg/ucumvalidator/ucumvalidator.go:51:	if resourceType == "" {
+pkg/ucumvalidator/ucumvalidator.go:55:	v.walkResource(ctx, data, sd, resourceType, result)
+pkg/ucumvalidator/ucumvalidator.go:58:	v.walker.WalkAllContext(ctx, data, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
+pkg/ucumvalidator/ucumvalidator.go:59:		if rc.FHIRPath == resourceType {
+internal/tools/hl7diff/issues.go:84:	ResourceType string                          `json:"resourceType"`
+internal/tools/hl7diff/issues.go:90:	ResourceType string   `json:"resourceType"`
+internal/tools/hl7diff/issues.go:145:		return HL7Run{}, fmt.Errorf("%s: unexpected resourceType %q", path, doc.ResourceType)
+pkg/binding/binding.go:128:	resourceType := sd.RootName(resource)
+pkg/binding/binding.go:130:	if resourceType == "" || root == nil {
+pkg/binding/binding.go:138:	v.walk(ctx, registry.ResourceOwner(resource), sd, root, "", registry.PrimitiveValue{}, resource, nil, resourceType, nil, checked)
+pkg/binding/binding.go:139:	languages := reslang.NewWalk(ctx, resourceType)
+pkg/binding/binding.go:145:	v.walker.WalkAllWithProfilesContext(ctx, resource, resourceType, resourceType, func(rc *walker.ResourceContext) bool {
+pkg/binding/binding.go:146:		if rc.FHIRPath == resourceType {
+pkg/slicematch/path.go:413:	if _, isResource := res[resourceTypeKey]; !isResource || !scoped || !w.m.reg.HoldsResource(child.Def) {
+pkg/slicematch/path.go:456:	rt, _ := res[resourceTypeKey].(string)
+pkg/slicematch/path.go:518:// typeOf returns the type of an instance value of an element of types: the resourceType of a
+pkg/slicematch/path.go:523:		if rt, _ := m[resourceTypeKey].(string); rt != "" {
+pkg/slicematch/path.go:716:func (m *Matcher) resourceDefinition(resourceType string, targets []string) *registry.StructureDefinition {
+pkg/slicematch/path.go:718:		if sd, _ := m.reg.ResolveCanonical(t); sd != nil && sd.Type == resourceType {
+pkg/slicematch/path.go:722:	return m.reg.GetByType(resourceType)
+pkg/slicematch/slicematch.go:10:// resourceType.
+pkg/slicematch/slicematch.go:487:	if _, isResource := res[resourceTypeKey]; !isResource {
+pkg/slicematch/slicematch.go:554:// resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
+pkg/slicematch/slicematch.go:555:const resourceTypeKey = "resourceType"
+pkg/primitive/primitive.go:224:		if key == "resourceType" && v.registry.IsResourceType(sdPath) {
+pkg/structural/structural.go:17:// resourceTypeKey es la propiedad JSON de FHIR que nombra el tipo de un recurso (json.html#resources).
+pkg/structural/structural.go:18:const resourceTypeKey = "resourceType"
+pkg/structural/structural.go:235:		if key == resourceTypeKey && v.registry.IsResourceType(sdPath) {
+pkg/structural/structural.go:462:		resourceType, _ := resourceMap[resourceTypeKey].(string)
+pkg/structural/structural.go:463:		if resourceType == "" {
+pkg/structural/structural.go:473:		containedSD := v.registry.GetByType(resourceType)
+pkg/structural/structural.go:477:				map[string]any{"type": resourceType},
+pkg/structural/structural.go:493:		v.validateElement(resourceMap, resourceType, containedFhirPath, containedIdx, containedCtx, result)
+pkg/structural/structural.go:500:	resourceType, _ := data[resourceTypeKey].(string)
+pkg/structural/structural.go:501:	if resourceType == "" {
+pkg/structural/structural.go:511:	resourceSD := v.registry.GetByType(resourceType)
+pkg/structural/structural.go:515:			map[string]any{"type": resourceType},
+pkg/structural/structural.go:530:	v.validateElement(data, resourceType, fhirPath, resourceIdx, resourceCtx, result)
+pkg/structural/structural.go:563:	// validated as a resource of its own, against its resourceType, whatever types the element has.
+internal/scopeindex/scopeindex.go:27:	resourceTypeKey = "resourceType"
+internal/scopeindex/scopeindex.go:107:// mapa con resourceType, a cualquier profundidad bajo holder y sin pasar por otro recurso. El
+internal/scopeindex/scopeindex.go:112:		if _, isResource := v[resourceTypeKey].(string); isResource && !sameMap(v, holder) {
+internal/scopeindex/scopeindex.go:169:	rt, _ := m[resourceTypeKey].(string)
+internal/scopeindex/scopeindex.go:203:	rt, _ := res[resourceTypeKey].(string)
+pkg/extension/context.go:128:	rt, _ := resource[resourceTypeKey].(string)
+pkg/extension/context.go:146:	rt, _ := resource[resourceTypeKey].(string)
+pkg/extension/context.go:176:	rt, _ := d.Resource[resourceTypeKey].(string)
+pkg/extension/context.go:292:				if _, isResource := m[resourceTypeKey]; isResource {
+pkg/extension/extension.go:28:	resourceTypeKey = "resourceType"
+pkg/extension/extension.go:94:func (v *Validator) checkResourceContexts(ctx context.Context, d Data, resourceType string, result *issue.Result) {
+pkg/extension/extension.go:100:	v.checkContexts(ctx, d.Resource, resourceType, in, result)
+pkg/extension/extension.go:142:	resourceType := sd.RootName(resource)
+pkg/extension/extension.go:143:	if resourceType == "" {
+pkg/extension/extension.go:148:	v.checkResourceContexts(ctx, d, resourceType, result)
+pkg/extension/extension.go:153:	v.validateResource(ctx, v.registry.GetByType(resourceType), resource, resourceType, result)
+pkg/extension/extension.go:154:	languages := reslang.NewWalk(ctx, resourceType)
+pkg/extension/extension.go:158:	v.walker.WalkAllContext(ctx, resource, resourceType, resourceType, func(wctx *walker.ResourceContext) bool {
+pkg/extension/extension.go:160:		if wctx.FHIRPath == resourceType {
+pkg/terminology/terminology.go:19:	ResourceType string  `json:"resourceType"`
+pkg/terminology/terminology.go:89:	ResourceType string `json:"resourceType"`
+pkg/terminology/terminology.go:409:				ResourceType string `json:"resourceType"`
+pkg/validator/holder.go:29:	rt, _ := res[resourceTypeKey].(string)
+pkg/validator/holder.go:213:	rt, _ := res[resourceTypeKey].(string)
+pkg/validator/slicematch.go:328:		if _, isResource := x[resourceTypeKey].(string); isResource {
+pkg/validator/slicematch.go:401:	if rt, _ := data["resourceType"].(string); rt != "" && rt != profile.Type {
+pkg/fixedpattern/fixedpattern.go:55:	resourceType := sd.RootName(resource)
+pkg/fixedpattern/fixedpattern.go:56:	if resourceType == "" {
+pkg/fixedpattern/fixedpattern.go:76:	v.validateElement(resource, resourceType, resourceType, elemIndex, sd.Tree(), result)
+pkg/fixedpattern/fixedpattern.go:79:	v.validateContained(resource, resourceType, result)
+pkg/fixedpattern/fixedpattern.go:100:		resourceType, _ := resourceMap["resourceType"].(string)
+pkg/fixedpattern/fixedpattern.go:101:		if resourceType == "" {
+pkg/fixedpattern/fixedpattern.go:106:		containedSD := v.registry.GetByType(resourceType)
+pkg/fixedpattern/fixedpattern.go:121:		v.validateElement(resourceMap, resourceType, containedFhirPath, elemIndex, containedSD.Tree(), result)
+pkg/fixedpattern/fixedpattern.go:139:		// Skip resourceType and shadow elements
+pkg/fixedpattern/fixedpattern.go:140:		if key == "resourceType" || strings.HasPrefix(key, "_") {
+pkg/validator/validator.go:321:	// Only minimal validation is performed (resourceType and id must be present).
+pkg/validator/validator.go:673:	// Extract resourceType and meta from parsed data
+pkg/validator/validator.go:674:	resourceType, _ := data["resourceType"].(string)
+pkg/validator/validator.go:675:	result.Stats.ResourceType = resourceType
+pkg/validator/validator.go:677:	if resourceType == "" {
+pkg/validator/validator.go:678:		result.AddError(issue.CodeStructure, "Missing 'resourceType' property")
+pkg/validator/validator.go:684:	if earlyReturn := v.validateMode(vc.mode, data, resourceType, result); earlyReturn {
+pkg/validator/validator.go:690:	coreURL := registry.GetSDForResource(resourceType)
+pkg/validator/validator.go:694:		result.AddError(issue.CodeStructure, fmt.Sprintf("Unknown resourceType '%s'", resourceType))
+pkg/validator/validator.go:712:		vc.profiles = v.resolveIGProfiles(vc.ig, resourceType, vc.profiles, result)
+pkg/validator/validator.go:719:	v.reportProfilesNotFound(resourceType, data, profilesNotFound, result)
+pkg/validator/validator.go:724:		result.AddErrorWithID(issue.DiagProfileSnapshotFailed, map[string]any{"url": u.url, "reason": u.reason}, resourceType)
+pkg/validator/validator.go:728:			result.AddWarningWithID(issue.DiagProfileDifferentialIgnored, map[string]any{"url": profileURLs[i], "detail": note}, resourceType)
+pkg/validator/validator.go:753:		resourceType,
+pkg/validator/validator.go:793:		nested = v.nestedPaths(ctx, data, resourceType)
+pkg/validator/validator.go:815:		resourceType,
+pkg/validator/validator.go:942:	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
+pkg/validator/validator.go:969:	if resourceType, _ := data["resourceType"].(string); resourceType == "Bundle" {
+pkg/validator/validator.go:978:		if rt, _ := vs.scope.Container[resourceTypeKey].(string); rt == bundleType {
+pkg/validator/validator.go:983:		_, isResource := data[resourceTypeKey]
+pkg/validator/validator.go:1038:// nestedPaths are the paths of the resources data, a resource of resourceType, holds, at any depth:
+pkg/validator/validator.go:1040:func (v *Validator) nestedPaths(ctx context.Context, data map[string]any, resourceType string) map[string]bool {
+pkg/validator/validator.go:1042:	walker.New(v.registry).WalkAllWithProfilesContext(ctx, data, resourceType, resourceType, func(w *walker.ResourceContext) bool {
+pkg/validator/validator.go:1043:		if w.FHIRPath != resourceType {
+pkg/validator/validator.go:1101:func (v *Validator) validateMode(mode ValidateMode, data map[string]any, resourceType string, result *issue.Result) bool {
+pkg/validator/validator.go:1107:				map[string]any{"resourceType": resourceType},
+pkg/validator/validator.go:1108:				resourceType+".id",
+pkg/validator/validator.go:1116:				map[string]any{"resourceType": resourceType},
+pkg/validator/validator.go:1117:				resourceType+".id",
+pkg/validator/validator.go:1144:func (v *Validator) resolveIGProfiles(ig, resourceType string, profiles []string, result *issue.Result) []string {
+pkg/validator/validator.go:1155:		if sd.Type == resourceType {
+pkg/validator/validator.go:1251:func (v *Validator) reportProfilesNotFound(resourceType string, data map[string]any, notFound []string, result *issue.Result) {
+pkg/validator/validator.go:1258:		at := resourceType
+pkg/validator/validator.go:1262:				at = fmt.Sprintf("%s.meta.profile[%d]", resourceType, i)
+pkg/validator/extension_scope.go:69:	resourceTypeKey = "resourceType"
+pkg/validator/extension_scope.go:84:	if rt, _ := vs.scope.Container[resourceTypeKey].(string); rt == bundleType {
+pkg/validator/extension_scope.go:91:	rt, _ := root[resourceTypeKey].(string)

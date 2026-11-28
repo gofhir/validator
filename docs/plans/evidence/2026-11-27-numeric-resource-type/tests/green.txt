@@ -1,0 +1,6 @@
+ok  	github.com/gofhir/validator/v2/internal/scopeindex	0.343s
+ok  	github.com/gofhir/validator/v2/pkg/slicematch	2.822s
+ok  	github.com/gofhir/validator/v2/pkg/validator	40.472s
+ok  	github.com/gofhir/validator/v2/pkg/structural	2.579s
+ok  	github.com/gofhir/validator/v2/pkg/issue	0.314s
+ok  	github.com/gofhir/validator/v2/pkg/registry	30.392s

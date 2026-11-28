@@ -1,0 +1,39 @@
+diff --git a/internal/scopeindex/scopeindex.go b/internal/scopeindex/scopeindex.go
+index 82dcf70..3309f1c 100644
+--- a/internal/scopeindex/scopeindex.go
++++ b/internal/scopeindex/scopeindex.go
+@@ -262,6 +262,7 @@ func Ensure(ctx context.Context, root map[string]any, external *External, holder
+ // se evalúa entonces con un Scope que no fuera el del recurso. Sin índice en ctx (una comprobación
+ // que corre sola) devuelve fallback, el Scope que tiene quien llama.
+ func Resolve(ctx context.Context, res map[string]any, site string, fallback slicematch.Scope) (slicematch.Scope, bool) {
++	if _, ok := res[resourceTypeKey].(string); !ok { return slicematch.Scope{}, false }
+ 	x := From(ctx)
+ 	if x == nil {
+ 		return fallback, true
+diff --git a/pkg/slicematch/slicematch.go b/pkg/slicematch/slicematch.go
+index 47e61e8..db37d24 100644
+--- a/pkg/slicematch/slicematch.go
++++ b/pkg/slicematch/slicematch.go
+@@ -484,7 +484,7 @@ func (m *Matcher) valueScope(req Request, e end) Scope {
+ 		scope = *e.in
+ 	}
+ 	res, _ := e.value.(map[string]any)
+-	if _, isResource := res[resourceTypeKey]; !isResource {
++	if _, isResource := res[resourceTypeKey].(string); !isResource || e.def == nil || !m.reg.HoldsResource(e.def.Def) {
+ 		return scope
+ 	}
+ 	if sr, scoped := req.Resolver.(ScopedResolver); scoped {
+diff --git a/pkg/validator/slicematch.go b/pkg/validator/slicematch.go
+index ec131df..50b9a46 100644
+--- a/pkg/validator/slicematch.go
++++ b/pkg/validator/slicematch.go
+@@ -532,7 +532,8 @@ func (r referenceResolver) ScopeOf(scope slicematch.Scope, resource map[string]a
+ 	if scopeindex.From(r.ctx) == nil {
+ 		return constraint.ScopeOf(scope, resource) // una comprobación suelta, sin índice
+ 	}
+-	in, _ := scopeindex.Resolve(r.ctx, resource, "ScopeOf", slicematch.Scope{})
++	in, ok := scopeindex.Resolve(r.ctx, resource, "ScopeOf", scope)
++	if !ok { return scope }
+ 	return in
+ }
+ 

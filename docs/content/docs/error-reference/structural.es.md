@@ -15,6 +15,7 @@ Los errores estructurales se detectan durante la fase de validación más tempra
 | `STRUCTURE_INVALID_JSON` | error | Invalid JSON: {error} |
 | `STRUCTURE_NOT_OBJECT` | error | Resource must be a JSON object |
 | `STRUCTURE_NO_RESOURCE_TYPE` | error | Missing 'resourceType' property |
+| `STRUCTURE_RESOURCE_TYPE_WRONG_JSON_TYPE` | error | The JSON element 'resourceType' has the wrong JSON type: {type} |
 | `STRUCTURE_UNKNOWN_RESOURCE` | error | Unknown resourceType '{type}' |
 | `STRUCTURE_CHOICE_MUTUAL_EXCLUSION` | error | Only one variant of choice type '{basePath}[x]' is allowed, but found: {variants} |
 
@@ -131,6 +132,28 @@ El objeto JSON no contiene una propiedad `resourceType`. Todo recurso FHIR debe 
       "family": "Smith"
     }
   ]
+}
+```
+
+---
+
+## STRUCTURE_RESOURCE_TYPE_WRONG_JSON_TYPE
+
+La propiedad `resourceType` existe pero su valor no es un string (json.html#resources): un recurso nombra su tipo con un string. `{type}` es el tipo JSON encontrado: `Number`, `Object`, `Array`, `Boolean` o `Null`. El mensaje es el del validador de HL7.
+
+**Ejemplo -- recurso inválido:**
+
+```json
+{
+  "resourceType": 42
+}
+```
+
+**Corrección:** Usar el nombre del tipo de recurso como string:
+
+```json
+{
+  "resourceType": "Patient"
 }
 ```
 

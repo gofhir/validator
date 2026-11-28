@@ -568,6 +568,7 @@
     "STRUCTURE_INVALID_JSON": "input failure; HL7 aborts the whole run instead",
     "STRUCTURE_NO_RESOURCE_TYPE": "input failure",
     "STRUCTURE_NO_TYPE": "input failure",
+    "STRUCTURE_RESOURCE_TYPE_WRONG_JSON_TYPE": "input failure",
     "STRUCTURE_UNKNOWN_RESOURCE": "input failure",
     "UCUM_INVALID_CODE": "HL7 reports it only with a terminology server (Unknown code ... in the CodeSystem http://unitsofmeasure.org); under -tx n/a it warns it cannot validate the code (B-D22)",
     "CODING_NO_CODE": "deprecated, no longer reported (Coding.code 0..1)",

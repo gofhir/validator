@@ -554,6 +554,15 @@ func (m *Matcher) keyType(node *registry.ElementNode, key string) string {
 // resourceTypeKey is the FHIR JSON property that names a resource's type (json.html#resources).
 const resourceTypeKey = "resourceType"
 
+// IsResource dice si m es un recurso según el formato JSON (json.html#resources): un objeto cuya propiedad
+// resourceType es un string. Un valor de otro tipo (un número, null, un objeto) no nombra un tipo, así que
+// m no es un recurso; si el nombre existe o no como tipo es otra pregunta. Es la única definición de «es un
+// recurso» por sintaxis: el índice de posiciones y quien le pide un Scope la comparten (ADR-005).
+func IsResource(m map[string]any) bool {
+	_, ok := m[resourceTypeKey].(string)
+	return ok
+}
+
 // anyPresent reports whether the instance has an element where any of ends stopped.
 func anyPresent(ends []end) bool {
 	for _, e := range ends {

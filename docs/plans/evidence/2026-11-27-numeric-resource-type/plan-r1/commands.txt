@@ -1,0 +1,6 @@
+GOTMPDIR="$PWD/.review-nrt" GOCACHE="$PWD/.review-nrt/go-cache" GOPROXY=off go build -o .review-nrt/validator ./cmd/gofhir-validator
+.review-nrt/validator -no-download -package-file .review-nrt/probe.tgz -ig http://example.org/probe -output json .review-nrt/resolve-*.json
+.review-nrt/validator -no-download -package 'ihe.iti.mhd#4.2.5' -output json docs/plans/evidence/2026-11-24-mhd-gate-divergences/examples/13-mut-type-007.json
+GOTMPDIR="$PWD/.review-nrt" GOCACHE="$PWD/.review-nrt/go-cache" GOPROXY=off go run .review-nrt/scopeprobe.go
+# scopeprobe output: backbone indexed=true ownResource=true indexLen=2
+# No Java or network used. Build cache and executable removed after probes.
